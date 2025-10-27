@@ -1,20 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Essedum Pipeline Cards</title>
     <link rel="stylesheet" type="text/css" href="{{CSS_URI}}">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <div class="details-title">Pipelines</div>
+            <!-- <div class="header-buttons">
+                <button type="button" class="btn btn-primary" id="btn-refresh" aria-describedby="refresh-tooltip"
+                    title="Refresh pipeline cards">
+                    <span class="btn-icon" aria-hidden="true">↻</span>
+                    <span class="btn-text">Refresh</span>
+                </button>
+            </div> -->
+
             <div class="header-buttons">
-                <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+                <div class="action-button">
+                    <span id="btn-refresh" class="refresh-icon" title="Refresh pipeline cards"
+                        aria-label="Refresh data">
+                        ↻
+                    </span>
+                </div>
             </div>
+
         </div>
-        
+
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="Search pipelines...">
             <button class="btn" id="searchBtn">Search</button>
@@ -72,21 +88,21 @@
                             <!-- Pipeline info will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="info-section">
                         <h4>Available Scripts</h4>
                         <div id="scriptsContainer" class="scripts-container">
                             <!-- Scripts will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="info-section">
                         <h4>Run Types</h4>
                         <div id="runTypesContainer" class="run-types-container">
                             <!-- Run types will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="actions-section">
                         <h4>Actions</h4>
                         <div class="action-buttons">
@@ -102,4 +118,5 @@
 
     <script src="{{JS_URI}}"></script>
 </body>
+
 </html>

@@ -1,52 +1,183 @@
-// Pipeline Cards Component for displaying Essedum pipeline data
+/**
+ * Pipeline Cards Provider for Essedum AI Platform
+ * 
+ * This component provides a webview-based interface for managing and interacting
+ * with pipeline data from the Essedum AI Platform. It handles:
+ * - Pipeline listing and filtering
+ * - Detailed pipeline views with scripts and run types
+ * - Script editing and file management
+ * - Pipeline execution and monitoring
+ * - Authentication and authorization
+ * 
+ * @fileoverview Main pipeline cards webview provider
+ * @author Essedum AI Platform Team
+ * @version 1.0.0
+ */
+
+// ================================
+// IMPORTS
+// ================================
+
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
+
+// Service and provider imports
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 import { JobLogsViewer } from '../job-logs/job-logs-viewer';
 import { HttpParams, PipelineCard, PipelineScript, ScriptFile } from '../../interfaces/pipeline.interfaces';
 import { PipelineService } from '../../services/pipeline.service';
 
-export class PipelineCardsProvider implements vscode.WebviewViewProvider {
-    private _view?: vscode.WebviewView;
-    private _extensionUri: vscode.Uri;
-    private _token: string = '';
-    private _isAuthenticated: boolean = false;
-    private _authService?: any; // Will be injected from extension
-    private _fileProvider?: EssedumFileSystemProvider; // File provider for upload operations
-    private _currentPipelineName?: string; // Track current pipeline for file system operations
+// Constants and utility imports
+import {
+    PIPELINE_CONFIG,
+    UI_TEXT,
+    WEBVIEW_COMMANDS,
+    CSS_CLASSES,
+    FILE_TYPES,
+    SCRIPT_TEMPLATES,
+    FORM_DATA_HEADERS,
+    getLanguageFromExtension,
+    isLocalRuntime
+} from '../../constants/pipeline-constants';
 
-    // Configuration
-    private pageNumber: number = 1;
-    private pageSize: number = 4;
+import {
+    formatDate,
+    formatFullDate,
+    toTitleCase,
+    truncateText,
+    sanitizeHtml,
+    getUserAvatarLetter,
+    postToWebview,
+    showWebviewLoading,
+    updateWebviewCards,
+    getUserFriendlyErrorMessage,
+    logError,
+    handleAsyncOperation,
+    getFileInfo,
+    createEssedumFileUri,
+    validateScriptContent,
+    calculatePagination,
+    createExecutionParams,
+    debounce,
+    getStoredValue,
+    setStoredValue,
+    normalizeRuntime
+} from '../../constants/pipeline-utils';
+
+// ================================
+// TYPES AND INTERFACES
+// ================================
+
+interface PaginationInfo {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    pageSize: number;
+}
+
+interface WebviewMessage {
+    command: string;
+    [key: string]: any;
+}
+
+// ================================
+// MAIN CLASS DEFINITION
+// ================================
+
+/**
+ * Pipeline Cards Provider - Main webview provider for pipeline management
+ */
+export class PipelineCardsProvider implements vscode.WebviewViewProvider {
+    // ================================
+    // PRIVATE PROPERTIES
+    // ================================
+
+    /** VS Code webview instance */
+    private _view?: vscode.WebviewView;
+    
+    /** Extension URI for resource loading */
+    private _extensionUri: vscode.Uri;
+    
+    /** Authentication token */
+    private _token: string = '';
+    
+    /** Authentication state */
+    private _isAuthenticated: boolean = false;
+    
+    /** Authentication service reference */
+    private _authService?: any;
+    
+    /** File provider for virtual file operations */
+    private _fileProvider?: EssedumFileSystemProvider;
+    
+    /** Current pipeline name for file system operations */
+    private _currentPipelineName?: string;
+
+    // Pagination and filtering configuration
+    private pageNumber: number = PIPELINE_CONFIG.INITIAL_PAGE;
+    private pageSize: number = PIPELINE_CONFIG.DEFAULT_PAGE_SIZE;
     private totalCount: number = 0;
     private totalPages: number = 0;
-    private allCards: PipelineCard[] = []; // Store all cards for client-side pagination
-    private organization: string = 'leo1311';
+    private allCards: PipelineCard[] = [];
+    private organization: string = PIPELINE_CONFIG.DEFAULT_ORGANIZATION;
     private filter: string = '';
     private selectedAdapterType: string[] = [];
-    private script: string[] = []; // Track script lines for editing
-    private scriptContent: string = ''; // Store current script content
+    private script: string[] = [];
+    private scriptContent: string = '';
     private selectedTag: string[] = [];
     private loading: boolean = false;
     private cards: PipelineCard[] = [];
     private filteredCards: PipelineCard[] = [];
+
+    /** Pipeline service instance */
     private _pipelineService: PipelineService;
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: EssedumFileSystemProvider, pipelineService?: PipelineService) {
+    /** Component logger prefix */
+    private readonly logPrefix = '[PipelineCards]';
+
+    // ================================
+    // CONSTRUCTOR
+    // ================================
+
+    /**
+     * Creates a new Pipeline Cards Provider instance
+     * @param _context - VS Code extension context
+     * @param token - Authentication token
+     * @param authService - Authentication service instance
+     * @param fileProvider - File system provider instance
+     * @param pipelineService - Pipeline service instance
+     */
+    constructor(
+        private readonly _context: vscode.ExtensionContext,
+        token: string,
+        authService?: any,
+        fileProvider?: EssedumFileSystemProvider,
+        pipelineService?: PipelineService
+    ) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
         this._authService = authService;
         this._fileProvider = fileProvider;
-        this._pipelineService = pipelineService || new PipelineService(token, 'leo1311'); // Create default if not provided
+        this._pipelineService = pipelineService || new PipelineService(token, this.organization);
+        
+        console.log(`${this.logPrefix} Pipeline Cards Provider initialized`);
     }
 
-    public updateToken(token: string) {
+    // ================================
+    // PUBLIC METHODS
+    // ================================
+
+    /**
+     * Updates the authentication token and related services
+     * @param token - New authentication token
+     */
+    public updateToken(token: string): void {
         this._token = token;
         this._isAuthenticated = !!token && token.trim().length > 0;
-        console.log('Token updated, authenticated:', this._isAuthenticated);
+        console.log(`${this.logPrefix} Token updated, authenticated:`, this._isAuthenticated);
 
         // Update the authentication context when token changes
         vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', this._isAuthenticated);
@@ -64,8 +195,9 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
     /**
      * Set the authentication service reference
+     * @param authService - Authentication service instance
      */
-    public setAuthService(authService: any) {
+    public setAuthService(authService: any): void {
         this._authService = authService;
     }
 
@@ -1004,26 +1136,23 @@ if __name__ == "__main__":
         }
     }
 
+    /**
+     * Gets the programming language identifier from file extension
+     * @param extension - File extension
+     * @returns Language identifier
+     */
     private getLanguageByExtension(extension: string): string {
-        const languageMap: { [key: string]: string } = {
-            'py': 'python',
-            'js': 'javascript',
-            'ts': 'typescript',
-            'json': 'json',
-            'sql': 'sql',
-            'sh': 'shellscript',
-            'bat': 'bat',
-            'yml': 'yaml',
-            'yaml': 'yaml',
-            'xml': 'xml',
-            'txt': 'plaintext'
-        };
-        return languageMap[extension.toLowerCase()] || 'plaintext';
+        return getLanguageFromExtension(extension);
     }
 
+    /**
+     * Updates query parameters for filtering and pagination
+     * @param pageNumber - Current page number
+     * @param filter - Search filter
+     * @param adapterType - Adapter type filter
+     */
     private updateQueryParam(pageNumber: number, filter: string, adapterType: string): void {
-        // This would typically update URL query parameters in a web app
-        console.log(`Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
+        console.log(`${this.logPrefix} Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
     }
 
     public goToPage(page: number): void {

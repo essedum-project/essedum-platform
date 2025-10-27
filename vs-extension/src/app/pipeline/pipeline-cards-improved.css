@@ -29,51 +29,51 @@
     --spacing-xl: 20px;
     --spacing-xxl: 24px;
     --spacing-xxxl: 32px;
-
+    
     /* Border radius */
     --radius-sm: 2px;
     --radius-md: 4px;
     --radius-lg: 8px;
     --radius-xl: 16px;
-
+    
     /* Typography */
     --font-size-xs: 10px;
     --font-size-sm: 11px;
-    --font-size-md: 13px;
+    --font-size-md: 14px;
     --font-size-lg: 16px;
     --font-size-xl: 18px;
     --font-size-xxl: 20px;
-
+    
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
-
+    
     --line-height-tight: 1.2;
     --line-height-normal: 1.4;
     --line-height-relaxed: 1.6;
-
+    
     /* Shadows */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-
+    
     /* Transitions */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.2s ease;
     --transition-slow: 0.3s ease;
-
+    
     /* Z-index layers */
     --z-index-dropdown: 100;
     --z-index-modal: 200;
     --z-index-tooltip: 300;
-
+    
     /* Component specific */
-    --card-min-height: 100px;
+    --card-min-height: 120px;
     --button-height: 28px;
     --input-height: 28px;
     --pagination-button-size: 24px;
     --avatar-size: 32px;
-
+    
     /* Scrollbar */
     --scrollbar-width: 4px;
     --scrollbar-width-hover: 8px;
@@ -123,18 +123,15 @@ body {
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     border-bottom: 1px solid var(--vscode-panel-border);
     padding-bottom: var(--spacing-lg);
     flex-shrink: 0;
-    min-height: 20px;
-    width: 100%;
-    /* Ensure full width */
+    min-height: 40px;
 }
 
 .header h2,
 .details-title {
-    flex-shrink: 1;
     margin: 0;
     color: var(--vscode-editor-foreground);
     font-size: var(--font-size-xxl);
@@ -148,10 +145,8 @@ body {
 .header-buttons {
     display: flex;
     gap: var(--spacing-sm);
-    align-items: flex-end;
-    flex: 0 0 auto;
-    margin-top: -30px;
-    cursor: pointer;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 /* ================================
@@ -160,10 +155,8 @@ body {
 
 .search-container {
     display: flex;
-    flex-direction: row;
     gap: var(--spacing-sm);
-    justify-items: center;
-    /* align-items: center; */
+    align-items: center;
     flex-shrink: 0;
 }
 
@@ -324,6 +317,7 @@ body {
     min-height: 0;
     scrollbar-width: thin;
     scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+    margin-top: 20px;
 }
 
 /* ================================
@@ -344,7 +338,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    margin-top: 12px;
 }
 
 .pipeline-card:hover {
@@ -392,6 +385,14 @@ body {
     flex-shrink: 0;
 }
 
+/* Pipeline Card Body */
+.pipeline-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
 .pipeline-metadata {
     display: flex;
     flex-direction: column;
@@ -426,7 +427,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-sm);
-    margin-top: 8px;
+    margin-top: auto;
 }
 
 .pipeline-action-btn {
@@ -676,13 +677,6 @@ body {
     gap: var(--spacing-sm);
 }
 
-.info-section {
-    background-color: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 4px;
-    padding: 8px;
-}
-
 .detail-item {
     display: flex;
     align-items: flex-start;
@@ -725,7 +719,6 @@ body {
     border-radius: var(--radius-md);
     background-color: var(--vscode-input-background);
     gap: var(--spacing-md);
-    flex-wrap: wrap;
 }
 
 .script-info {
@@ -782,20 +775,12 @@ body {
     border-color: var(--vscode-button-background);
 }
 
-.actions-section {
-    background-color: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 4px;
-    padding: 8px;
-}
-
 /* Action Buttons */
 .action-buttons {
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 4px 0;
-    overflow-x: auto;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 /* ================================
@@ -823,7 +808,7 @@ body {
     color: var(--vscode-input-foreground);
     font-size: var(--font-size-md);
     font-family: var(--vscode-font-family);
-    /* height: var(--input-height); */
+    height: var(--input-height);
     outline: none;
     cursor: pointer;
 }
@@ -920,42 +905,39 @@ body::-webkit-scrollbar {
         --font-size-xl: 16px;
         --font-size-xxl: 18px;
     }
-
+    
     .header {
         flex-direction: column;
         align-items: stretch;
         gap: var(--spacing-md);
     }
-
+    
     .header-buttons {
-        flex-direction: column;
+        justify-content: center;
     }
-
+    
     .search-container {
+        flex-direction: column;
         gap: var(--spacing-sm);
     }
-
+    
     .pipeline-card {
         padding: var(--spacing-md);
     }
-
+    
     .pipeline-card-header {
+        flex-direction: column;
         align-items: stretch;
         gap: var(--spacing-sm);
     }
-
+    
     .pipeline-avatar-section {
         align-self: flex-end;
     }
-
+    
     .action-buttons {
-        /* flex-direction: column;
-        align-items: stretch; */
-        flex-direction: row;
-        /* Keep buttons in one line */
-        flex-wrap: wrap;
-        /* Allow wrapping if needed */
-        justify-content: flex-start;
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 
@@ -964,98 +946,83 @@ body::-webkit-scrollbar {
     body {
         padding: var(--spacing-md);
     }
-
+    
     .container {
         gap: var(--spacing-md);
     }
-
+    
     .cards-container {
         gap: var(--spacing-sm);
     }
-
+    
     .header h2,
     .details-title {
         font-size: var(--font-size-xl);
     }
-
+    
     .header-buttons {
         flex-direction: column;
         gap: var(--spacing-xs);
     }
-
+    
     .search-container {
         gap: var(--spacing-xs);
     }
-
+    
     .search-input {
         font-size: var(--font-size-lg);
         height: var(--spacing-xxxl);
     }
-
+    
     .btn {
         height: var(--spacing-xxxl);
         font-size: var(--font-size-md);
     }
-
+    
     .pipeline-card {
         padding: var(--spacing-sm);
     }
-
+    
     .pipeline-card-header {
         gap: var(--spacing-sm);
     }
-
+    
     .pipeline-type-badge {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs);
     }
-
-    /* .pipeline-avatar {
-        width: var(--spacing-xl);
-        height: var(--spacing-xl);
-    } */
-
+    
     .metadata-item {
         font-size: var(--font-size-xs);
     }
-
+    
     .metadata-label {
         min-width: auto;
     }
-
+    
     .pipeline-action-btn {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs);
     }
-
+    
     .pagination-container {
         padding: var(--spacing-sm);
         gap: var(--spacing-sm);
     }
-
+    
     .pagination-info {
         font-size: var(--font-size-xs);
     }
-
+    
     .btn-pagination,
     .page-number {
         min-width: var(--spacing-xl);
         height: var(--spacing-xl);
         font-size: var(--font-size-xs);
     }
-
+    
     .pagination-controls {
         gap: var(--spacing-xs);
-    }
-
-    .action-buttons {
-        /* flex-direction: column;
-        align-items: stretch; */
-        flex-direction: row;
-        /* Keep buttons in one line */
-        flex-wrap: wrap;
-        /* Allow wrapping if needed */
-        justify-content: flex-start;
     }
 }
 
@@ -1065,88 +1032,82 @@ body::-webkit-scrollbar {
         padding: var(--spacing-sm);
         font-size: var(--font-size-sm);
     }
-
+    
     .container {
         gap: var(--spacing-sm);
     }
-
+    
     .header {
         padding-bottom: var(--spacing-sm);
         gap: var(--spacing-sm);
     }
-
+    
     .header h2,
     .details-title {
         font-size: var(--font-size-lg);
     }
-
+    
     .header-buttons {
         gap: var(--spacing-xs);
     }
-
+    
     .search-container {
         gap: var(--spacing-xs);
     }
-
+    
     .search-input {
         font-size: var(--font-size-md);
         padding: var(--spacing-xs);
     }
-
+    
     .btn {
         font-size: var(--font-size-sm);
         padding: var(--spacing-xs);
     }
-
+    
     .pipeline-card {
         padding: var(--spacing-sm);
         gap: var(--spacing-xs);
     }
-
+    
     .pipeline-card-header {
-        /* flex-direction: column; */
+        flex-direction: column;
         gap: var(--spacing-xs);
     }
-
+    
     .pipeline-type-badge {
         font-size: var(--font-size-xs);
         align-self: flex-start;
     }
-
-    /* .pipeline-avatar {
-        width: var(--spacing-lg);
-        height: var(--spacing-lg);
-        font-size: var(--font-size-sm);
-    } */
-
+      
     .metadata-item {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-xs);
     }
-
+    
     .metadata-label {
         font-size: var(--font-size-xs);
     }
-
+    
     .pipeline-action-btn {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs);
     }
-
+    
     .action-icon {
         display: none;
     }
-
+    
     .pagination-container {
         padding: var(--spacing-xs);
         gap: var(--spacing-xs);
     }
-
+    
     .pagination-info {
         font-size: var(--font-size-xs);
     }
-
+    
     .btn-pagination,
     .page-number {
         min-width: var(--spacing-lg);
@@ -1154,7 +1115,7 @@ body::-webkit-scrollbar {
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs);
     }
-
+    
     .pagination-controls {
         gap: var(--spacing-xs);
     }
@@ -1168,7 +1129,7 @@ body::-webkit-scrollbar {
     .pipeline-card {
         box-shadow: var(--shadow-sm);
     }
-
+    
     .pipeline-card:hover {
         box-shadow: var(--shadow-lg);
     }
@@ -1182,11 +1143,11 @@ body::-webkit-scrollbar {
     .pipeline-card {
         border-width: 2px;
     }
-
+    
     .btn {
         border-width: 2px;
     }
-
+    
     .search-input,
     .form-select {
         border-width: 2px;
@@ -1198,7 +1159,6 @@ body::-webkit-scrollbar {
    ================================ */
 
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -1207,7 +1167,7 @@ body::-webkit-scrollbar {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
-
+    
     .pipeline-card:hover,
     .btn:hover,
     .pipeline-action-btn:hover,

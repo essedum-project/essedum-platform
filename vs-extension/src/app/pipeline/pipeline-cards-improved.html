@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'none'; 
+                   style-src vscode-resource: 'unsafe-inline'; 
+                   script-src vscode-resource: 'unsafe-inline' 'unsafe-eval'; 
+                   font-src vscode-resource:;">
+    <title>Pipeline Cards Management - Essedum AI Platform</title>
+    <meta name="description" content="Manage and monitor AI pipeline execution cards in VS Code">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="pipeline-cards-improved.css" as="style">
+    
+    <!-- Critical CSS -->
+    <style>
+        /* Immediate layout to prevent CLS */
+        body { 
+            margin: 0; 
+            padding: 16px; 
+            font-family: var(--vscode-font-family), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        .container { 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .loading { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100%; 
+        }
+    </style>
+    
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="pipeline-cards-improved.css">
+</head>
+
+<body role="application" aria-label="Pipeline Cards Management Interface">
+    <!-- Skip to main content for screen readers -->
+    <a href="#main-content" class="visually-hidden skip-link">Skip to main content</a>
+    
+    <!-- Main application container -->
+    <div class="container" id="app-container">
+        <!-- Application header -->
+        <header class="header" role="banner" aria-label="Application header">
+            <div class="header-content">
+                <h1 class="app-title" id="app-title">Pipeline Cards</h1>
+                <p class="app-subtitle visually-hidden" id="app-description">
+                    Manage and monitor AI pipeline execution cards
+                </p>
+            </div>
+            
+            <!-- Header actions -->
+            <div class="header-buttons" role="toolbar" aria-label="Header actions">
+                <button type="button" 
+                        class="btn btn-primary" 
+                        id="btn-refresh" 
+                        aria-describedby="refresh-tooltip"
+                        title="Refresh pipeline cards">
+                    <span class="btn-icon" aria-hidden="true">↻</span>
+                    <span class="btn-text">Refresh</span>
+                </button>
+                
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        id="btn-new-pipeline" 
+                        aria-describedby="new-pipeline-tooltip"
+                        title="Create new pipeline">
+                    <span class="btn-icon" aria-hidden="true">+</span>
+                    <span class="btn-text">New Pipeline</span>
+                </button>
+                
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        id="btn-settings" 
+                        aria-describedby="settings-tooltip"
+                        title="Open settings">
+                    <span class="btn-icon" aria-hidden="true">⚙</span>
+                    <span class="btn-text visually-hidden">Settings</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search and filters section -->
+        <section class="search-section" role="search" aria-label="Search and filter pipelines">
+            <div class="search-container">
+                <div class="search-input-container">
+                    <label for="search-input" class="visually-hidden">Search pipelines</label>
+                    <input type="search" 
+                           id="search-input" 
+                           class="search-input" 
+                           placeholder="Search pipelines..." 
+                           autocomplete="off"
+                           spellcheck="false"
+                           aria-describedby="search-help">
+                    <span id="search-help" class="visually-hidden">
+                        Search by pipeline name, type, or description
+                    </span>
+                </div>
+                
+                <div class="filter-container">
+                    <label for="type-filter" class="form-label visually-hidden">Filter by type</label>
+                    <select id="type-filter" 
+                            class="form-select" 
+                            aria-describedby="type-filter-help">
+                        <option value="">All Types</option>
+                        <option value="training">Training</option>
+                        <option value="inference">Inference</option>
+                        <option value="preprocessing">Preprocessing</option>
+                        <option value="evaluation">Evaluation</option>
+                    </select>
+                    <span id="type-filter-help" class="visually-hidden">
+                        Filter pipelines by their type
+                    </span>
+                    
+                    <label for="status-filter" class="form-label visually-hidden">Filter by status</label>
+                    <select id="status-filter" 
+                            class="form-select" 
+                            aria-describedby="status-filter-help">
+                        <option value="">All Statuses</option>
+                        <option value="running">Running</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                    <span id="status-filter-help" class="visually-hidden">
+                        Filter pipelines by their current status
+                    </span>
+                </div>
+                
+                <button type="button" 
+                        class="btn btn-secondary btn-small" 
+                        id="btn-clear-filters"
+                        title="Clear all filters">
+                    <span class="btn-icon" aria-hidden="true">✕</span>
+                    <span class="btn-text">Clear</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Main content area -->
+        <main id="main-content" class="main-content" role="main">
+            <!-- Loading state -->
+            <div id="loading-container" class="loading" role="status" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
+                <p class="loading-text">Loading pipeline cards...</p>
+                <span class="visually-hidden">Please wait while pipeline data is being loaded</span>
+            </div>
+
+            <!-- Cards view -->
+            <section id="cards-view" 
+                     class="cards-view hidden" 
+                     role="region" 
+                     aria-label="Pipeline cards grid"
+                     aria-describedby="cards-count">
+                
+                <!-- Results summary -->
+                <div class="results-summary" role="status" aria-live="polite">
+                    <p id="cards-count" class="results-count">
+                        <!-- Will be populated by JavaScript -->
+                    </p>
+                </div>
+                
+                <!-- Pipeline cards container -->
+                <div id="cards-container" 
+                     class="cards-container" 
+                     role="grid" 
+                     aria-label="Pipeline cards"
+                     aria-describedby="cards-count">
+                    <!-- Pipeline cards will be dynamically inserted here -->
+                </div>
+
+                <!-- Empty state -->
+                <div id="empty-state" class="empty-state hidden" role="status">
+                    <div class="empty-icon" aria-hidden="true">📋</div>
+                    <h3 class="empty-title">No pipelines found</h3>
+                    <p class="empty-message">
+                        There are no pipeline cards to display. 
+                        Try adjusting your search criteria or create a new pipeline.
+                    </p>
+                    <button type="button" class="btn btn-primary" id="btn-create-first">
+                        Create Your First Pipeline
+                    </button>
+                </div>
+
+                <!-- Pagination -->
+                <nav class="pagination-container" 
+                     role="navigation" 
+                     aria-label="Pipeline cards pagination">
+                    <p id="pagination-info" class="pagination-info" aria-live="polite">
+                        <!-- Will be populated by JavaScript -->
+                    </p>
+                    <div id="pagination-controls" class="pagination-controls">
+                        <!-- Pagination buttons will be dynamically inserted here -->
+                    </div>
+                </nav>
+            </section>
+
+            <!-- Details view -->
+            <section id="details-view" 
+                     class="details-view hidden" 
+                     role="region" 
+                     aria-label="Pipeline details"
+                     aria-describedby="details-title">
+                
+                <!-- Details header -->
+                <header class="details-header">
+                    <button type="button" 
+                            class="btn-back" 
+                            id="btn-back"
+                            aria-describedby="back-help">
+                        <span class="back-icon" aria-hidden="true">←</span>
+                        <span class="btn-text">Back to Cards</span>
+                    </button>
+                    <span id="back-help" class="visually-hidden">
+                        Return to the pipeline cards grid view
+                    </span>
+                    
+                    <h2 id="details-title" class="details-title">
+                        <!-- Will be populated by JavaScript -->
+                    </h2>
+                </header>
+
+                <!-- Details content -->
+                <div class="details-content" role="tabpanel" aria-labelledby="details-title">
+                    <!-- Pipeline information -->
+                    <section class="info-section" aria-labelledby="info-section-title">
+                        <h3 id="info-section-title" class="section-title">Pipeline Information</h3>
+                        <dl class="pipeline-details-info" role="list">
+                            <!-- Details will be dynamically inserted here -->
+                        </dl>
+                    </section>
+
+                    <!-- Scripts section -->
+                    <section class="scripts-section" aria-labelledby="scripts-section-title">
+                        <h3 id="scripts-section-title" class="section-title">Scripts</h3>
+                        <div id="scripts-container" class="scripts-container" role="list">
+                            <!-- Scripts will be dynamically inserted here -->
+                        </div>
+                        
+                        <div id="empty-scripts" class="empty-scripts hidden" role="status">
+                            <div class="empty-icon" aria-hidden="true">📄</div>
+                            <p class="empty-message">No scripts available for this pipeline.</p>
+                        </div>
+                    </section>
+
+                    <!-- Run types section -->
+                    <section class="run-types-section" aria-labelledby="run-types-section-title">
+                        <h3 id="run-types-section-title" class="section-title">Available Run Types</h3>
+                        <div id="run-types-container" class="run-types-container" role="radiogroup">
+                            <!-- Run types will be dynamically inserted here -->
+                        </div>
+                        
+                        <div id="empty-run-types" class="empty-run-types hidden" role="status">
+                            <div class="empty-icon" aria-hidden="true">⚡</div>
+                            <p class="empty-message">No run types configured for this pipeline.</p>
+                        </div>
+                    </section>
+
+                    <!-- Actions section -->
+                    <section class="actions-section" aria-labelledby="actions-section-title">
+                        <h3 id="actions-section-title" class="section-title">Actions</h3>
+                        <div class="action-buttons" role="group" aria-labelledby="actions-section-title">
+                            <button type="button" 
+                                    class="btn btn-primary" 
+                                    id="btn-run-pipeline"
+                                    aria-describedby="run-help">
+                                <span class="btn-icon" aria-hidden="true">▶</span>
+                                <span class="btn-text">Run Pipeline</span>
+                            </button>
+                            <span id="run-help" class="visually-hidden">
+                                Execute the pipeline with the selected run type
+                            </span>
+                            
+                            <button type="button" 
+                                    class="btn btn-secondary" 
+                                    id="btn-edit-pipeline"
+                                    aria-describedby="edit-help">
+                                <span class="btn-icon" aria-hidden="true">✏</span>
+                                <span class="btn-text">Edit Pipeline</span>
+                            </button>
+                            <span id="edit-help" class="visually-hidden">
+                                Open the pipeline configuration for editing
+                            </span>
+                            
+                            <button type="button" 
+                                    class="btn btn-secondary" 
+                                    id="btn-clone-pipeline"
+                                    aria-describedby="clone-help">
+                                <span class="btn-icon" aria-hidden="true">⎘</span>
+                                <span class="btn-text">Clone Pipeline</span>
+                            </button>
+                            <span id="clone-help" class="visually-hidden">
+                                Create a copy of this pipeline with the same configuration
+                            </span>
+                            
+                            <button type="button" 
+                                    class="btn btn-secondary btn-danger" 
+                                    id="btn-delete-pipeline"
+                                    aria-describedby="delete-help">
+                                <span class="btn-icon" aria-hidden="true">🗑</span>
+                                <span class="btn-text">Delete Pipeline</span>
+                            </button>
+                            <span id="delete-help" class="visually-hidden">
+                                Permanently delete this pipeline (this action cannot be undone)
+                            </span>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Error dialog -->
+    <div id="error-dialog" 
+         class="error-dialog hidden" 
+         role="alertdialog" 
+         aria-labelledby="error-dialog-title"
+         aria-describedby="error-dialog-message">
+        <div class="error-dialog-content">
+            <header class="error-dialog-header">
+                <h2 id="error-dialog-title" class="error-dialog-title">Error</h2>
+                <button type="button" 
+                        class="btn-close" 
+                        id="btn-close-error"
+                        aria-label="Close error dialog">
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </header>
+            <div class="error-dialog-body">
+                <p id="error-dialog-message" class="error-message">
+                    <!-- Error message will be populated by JavaScript -->
+                </p>
+            </div>
+            <footer class="error-dialog-footer">
+                <button type="button" class="btn btn-primary" id="btn-error-ok">
+                    OK
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Confirmation dialog -->
+    <div id="confirm-dialog" 
+         class="confirm-dialog hidden" 
+         role="alertdialog" 
+         aria-labelledby="confirm-dialog-title"
+         aria-describedby="confirm-dialog-message">
+        <div class="confirm-dialog-content">
+            <header class="confirm-dialog-header">
+                <h2 id="confirm-dialog-title" class="confirm-dialog-title">Confirm Action</h2>
+            </header>
+            <div class="confirm-dialog-body">
+                <p id="confirm-dialog-message" class="confirm-message">
+                    <!-- Confirmation message will be populated by JavaScript -->
+                </p>
+            </div>
+            <footer class="confirm-dialog-footer">
+                <button type="button" class="btn btn-secondary" id="btn-confirm-cancel">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-ok">
+                    Confirm
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" 
+         class="toast-container" 
+         role="region" 
+         aria-label="Notifications"
+         aria-live="polite">
+        <!-- Toast notifications will be dynamically inserted here -->
+    </div>
+
+    <!-- Tooltips for hidden descriptions -->
+    <div id="tooltip-refresh" class="tooltip hidden">Refresh the pipeline cards data</div>
+    <div id="tooltip-new-pipeline" class="tooltip hidden">Create a new pipeline configuration</div>
+    <div id="tooltip-settings" class="tooltip hidden">Open application settings</div>
+
+    <!-- Screen reader announcements -->
+    <div id="sr-announcements" 
+         class="visually-hidden" 
+         role="status" 
+         aria-live="assertive" 
+         aria-atomic="true">
+        <!-- Screen reader announcements will be populated by JavaScript -->
+    </div>
+
+    <!-- Load main application script -->
+    <script src="pipeline-cards-client-improved.js" defer></script>
+    
+    <!-- Initialize application -->
+    <script>
+        // Critical path initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the application only after DOM is ready
+            if (typeof PipelineCardsClient !== 'undefined') {
+                window.pipelineClient = new PipelineCardsClient();
+            } else {
+                console.error('PipelineCardsClient not loaded');
+                // Fallback error handling
+                const loading = document.getElementById('loading-container');
+                if (loading) {
+                    loading.innerHTML = '<p>Failed to load application. Please refresh the page.</p>';
+                }
+            }
+        });
+
+        // Handle CSP errors
+        window.addEventListener('securitypolicyviolation', function(e) {
+            console.error('CSP violation:', e.violatedDirective, e.blockedURI);
+        });
+
+        // Handle global errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            const announcements = document.getElementById('sr-announcements');
+            if (announcements) {
+                announcements.textContent = 'An error occurred. Please try refreshing the page.';
+            }
+        });
+        
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            e.preventDefault(); // Prevent console spam
+        });
+    </script>
+
+    <!-- Accessibility improvements -->
+    <style>
+        /* Screen reader only content */
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+        
+        /* Skip link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            padding: 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            z-index: 1000;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        /* Dialog styles */
+        .error-dialog,
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-index-modal);
+        }
+        
+        .error-dialog-content,
+        .confirm-dialog-content {
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow: auto;
+        }
+        
+        .error-dialog-header,
+        .confirm-dialog-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--vscode-panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .error-dialog-body,
+        .confirm-dialog-body {
+            padding: var(--spacing-lg);
+        }
+        
+        .error-dialog-footer,
+        .confirm-dialog-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--vscode-panel-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-md);
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            color: var(--vscode-foreground);
+            padding: var(--spacing-xs);
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            z-index: var(--z-index-tooltip);
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: var(--vscode-notifications-background);
+            border: 1px solid var(--vscode-notifications-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Focus management */
+        *:focus {
+            outline: 2px solid var(--vscode-focusBorder);
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (forced-colors: active) {
+            .pipeline-card {
+                border: 2px solid ButtonBorder;
+            }
+            
+            .btn {
+                border: 2px solid ButtonBorder;
+            }
+        }
+    </style>
+</body>
+</html>

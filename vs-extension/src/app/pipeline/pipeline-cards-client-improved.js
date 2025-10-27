@@ -24,20 +24,20 @@
 const CONFIG = {
     /** Maximum visible pages in pagination */
     MAX_VISIBLE_PAGES: 5,
-
+    
     /** Default pagination page size */
     DEFAULT_PAGE_SIZE: 4,
-
+    
     /** Search debounce delay in milliseconds */
     SEARCH_DEBOUNCE_DELAY: 300,
-
+    
     /** Animation durations */
     ANIMATION: {
         FAST: 200,
         NORMAL: 300,
         SLOW: 500
     },
-
+    
     /** Loading state timeouts */
     TIMEOUTS: {
         LOADING_MIN: 500,
@@ -54,25 +54,25 @@ const COMMANDS = {
     LOAD_CARDS: 'loadCards',
     REFRESH: 'refresh',
     FILTER: 'filter',
-
+    
     // Navigation
     NEXT_PAGE: 'nextPage',
     PREVIOUS_PAGE: 'previousPage',
     FIRST_PAGE: 'firstPage',
     LAST_PAGE: 'lastPage',
     GO_TO_PAGE: 'goToPage',
-
+    
     // Pipeline actions
     VIEW_DETAILS: 'viewDetails',
     RUN_PIPELINE: 'runPipeline',
     VIEW_LOGS: 'viewLogs',
     REFRESH_SCRIPTS: 'refreshScripts',
-
+    
     // Script actions
     OPEN_SCRIPT: 'openScript',
     COPY_SCRIPT: 'copyScript',
     GENERATE_SCRIPTS: 'generateScripts',
-
+    
     // UI updates
     UPDATE_CARDS: 'updateCards',
     SHOW_DETAILS: 'showDetails',
@@ -88,13 +88,13 @@ const SELECTORS = {
     SEARCH_INPUT: '#searchInput',
     SEARCH_BTN: '#searchBtn',
     REFRESH_BTN: '#refreshBtn',
-
+    
     // Content containers
     LOADING_STATE: '#loadingState',
     CARDS_CONTAINER: '#cardsContainer',
     EMPTY_STATE: '#emptyState',
     DETAILS_VIEW: '#detailsView',
-
+    
     // Pagination elements
     PAGINATION_CONTAINER: '#paginationContainer',
     PAGINATION_INFO: '#paginationInfo',
@@ -103,7 +103,7 @@ const SELECTORS = {
     PREV_PAGE_BTN: '#prevPageBtn',
     NEXT_PAGE_BTN: '#nextPageBtn',
     LAST_PAGE_BTN: '#lastPageBtn',
-
+    
     // Details view elements
     BACK_BTN: '#backBtn',
     DETAILS_TITLE: '#detailsTitle',
@@ -113,7 +113,7 @@ const SELECTORS = {
     RUN_PIPELINE_BTN: '#runPipelineBtn',
     VIEW_LOGS_BTN: '#viewLogsBtn',
     REFRESH_SCRIPTS_BTN: '#refreshScriptsBtn',
-
+    
     // Login elements
     LOGIN_BUTTON: '.login-button',
     LOGIN_MESSAGE: '.logout-message p'
@@ -128,12 +128,12 @@ const UI_TEXT = {
         SCRIPTS: 'Loading scripts...',
         AUTHENTICATING: 'Authenticating...'
     },
-
+    
     EMPTY_STATES: {
         NO_PIPELINES: 'No pipelines found.',
         NO_SCRIPTS: 'No scripts available for this pipeline.'
     },
-
+    
     BUTTONS: {
         VIEW_DETAILS: 'View Details',
         RUN_PIPELINE: '▶ Run Pipeline',
@@ -144,7 +144,7 @@ const UI_TEXT = {
         AUTHENTICATING: 'Authenticating...',
         LOGIN: 'Login to Essedum'
     },
-
+    
     TOOLTIPS: {
         FIRST_PAGE: 'First Page',
         PREVIOUS_PAGE: 'Previous Page',
@@ -152,7 +152,7 @@ const UI_TEXT = {
         LAST_PAGE: 'Last Page',
         BACK_TO_PIPELINES: 'Back to Pipelines'
     },
-
+    
     MESSAGES: {
         AUTHENTICATION_ERROR: 'Authentication failed. Please try again.',
         NETWORK_ERROR: 'Network error. Please check your connection.',
@@ -170,19 +170,19 @@ const CSS_CLASSES = {
     ACTIVE: 'active',
     DISABLED: 'disabled',
     SELECTED: 'selected',
-
+    
     // Button classes
     BTN: 'btn',
     BTN_PRIMARY: 'btn-primary',
     BTN_SECONDARY: 'btn-secondary',
     BTN_SMALL: 'btn-small',
-
+    
     // Card classes
     PIPELINE_CARD: 'pipeline-card',
     CARD_HEADER: 'pipeline-card-header',
     CARD_BODY: 'pipeline-card-body',
     CARD_ACTIONS: 'pipeline-card-actions',
-
+    
     // Pagination classes
     PAGE_NUMBER: 'page-number',
     PAGE_ELLIPSIS: 'page-ellipsis'
@@ -267,7 +267,7 @@ const Utils = {
         if (!element) {
             return;
         }
-
+        
         if (show) {
             element.style.display = displayType;
             element.classList.remove(CSS_CLASSES.HIDDEN);
@@ -291,238 +291,259 @@ const Utils = {
 // MAIN CLASS DEFINITION
 // ================================
 
+/**
+ * Pipeline Cards Client - Manages client-side interactions
+ */
 class PipelineCardsClient {
+    /**
+     * Creates a new Pipeline Cards Client instance
+     */
     constructor() {
         this.vscode = acquireVsCodeApi();
+        this.currentView = 'list'; // 'list' or 'details'
+        this.currentPipelineId = null;
+        this.currentPipelineData = null;
+        this.selectedRunType = null;
+        
+        // Initialize the client
         this.initializeElements();
         this.attachEventListeners();
         this.requestInitialLoad();
 
         // Make available globally for onclick handlers
         window.pipelineClient = this;
+        
+        console.log('[PipelineClient] Initialized successfully');
     }
 
+    // ================================
+    // INITIALIZATION METHODS
+    // ================================
+
+    /**
+     * Initializes all DOM element references
+     */
     initializeElements() {
-        this.searchInput = document.getElementById('searchInput');
-        this.searchBtn = document.getElementById('searchBtn');
-        this.refreshBtn = document.getElementById('refreshBtn');
-        this.loadingState = document.getElementById('loadingState');
-        this.cardsContainer = document.getElementById('cardsContainer');
-        this.emptyState = document.getElementById('emptyState');
-        this.paginationContainer = document.getElementById('paginationContainer');
-        this.paginationInfo = document.getElementById('paginationInfo');
-        this.paginationPages = document.getElementById('paginationPages');
-        this.firstPageBtn = document.getElementById('firstPageBtn');
-        this.prevPageBtn = document.getElementById('prevPageBtn');
-        this.nextPageBtn = document.getElementById('nextPageBtn');
-        this.lastPageBtn = document.getElementById('lastPageBtn');
+        console.log('[PipelineClient] Initializing DOM elements...');
+        
+        // Input elements
+        this.searchInput = document.querySelector(SELECTORS.SEARCH_INPUT);
+        this.searchBtn = document.querySelector(SELECTORS.SEARCH_BTN);
+        this.refreshBtn = document.querySelector(SELECTORS.REFRESH_BTN);
+
+        // Content containers
+        this.loadingState = document.querySelector(SELECTORS.LOADING_STATE);
+        this.cardsContainer = document.querySelector(SELECTORS.CARDS_CONTAINER);
+        this.emptyState = document.querySelector(SELECTORS.EMPTY_STATE);
+        this.detailsView = document.querySelector(SELECTORS.DETAILS_VIEW);
+
+        // Pagination elements
+        this.paginationContainer = document.querySelector(SELECTORS.PAGINATION_CONTAINER);
+        this.paginationInfo = document.querySelector(SELECTORS.PAGINATION_INFO);
+        this.paginationPages = document.querySelector(SELECTORS.PAGINATION_PAGES);
+        this.firstPageBtn = document.querySelector(SELECTORS.FIRST_PAGE_BTN);
+        this.prevPageBtn = document.querySelector(SELECTORS.PREV_PAGE_BTN);
+        this.nextPageBtn = document.querySelector(SELECTORS.NEXT_PAGE_BTN);
+        this.lastPageBtn = document.querySelector(SELECTORS.LAST_PAGE_BTN);
 
         // Details view elements
-        this.detailsView = document.getElementById('detailsView');
-        this.backBtn = document.getElementById('backBtn');
-        this.detailsTitle = document.getElementById('detailsTitle');
-        this.pipelineInfo = document.getElementById('pipelineInfo');
-        this.scriptsContainer = document.getElementById('scriptsContainer');
-        this.runTypesContainer = document.getElementById('runTypesContainer');
-        this.runPipelineBtn = document.getElementById('runPipelineBtn');
-        this.viewLogsBtn = document.getElementById('viewLogsBtn');
-        this.refreshScriptsBtn = document.getElementById('refreshScriptsBtn');
-
-        // Track current view state
-        this.currentView = 'list'; // 'list' or 'details'
-        this.currentPipelineId = null;
-        this.currentPipelineData = null;
+        this.backBtn = document.querySelector(SELECTORS.BACK_BTN);
+        this.detailsTitle = document.querySelector(SELECTORS.DETAILS_TITLE);
+        this.pipelineInfo = document.querySelector(SELECTORS.PIPELINE_INFO);
+        this.scriptsContainer = document.querySelector(SELECTORS.SCRIPTS_CONTAINER);
+        this.runTypesContainer = document.querySelector(SELECTORS.RUN_TYPES_CONTAINER);
+        this.runPipelineBtn = document.querySelector(SELECTORS.RUN_PIPELINE_BTN);
+        this.viewLogsBtn = document.querySelector(SELECTORS.VIEW_LOGS_BTN);
+        this.refreshScriptsBtn = document.querySelector(SELECTORS.REFRESH_SCRIPTS_BTN);
+        
+        console.log('[PipelineClient] DOM elements initialized');
     }
 
+    /**
+     * Attaches event listeners to interactive elements
+     */
     attachEventListeners() {
-        // Search functionality
-        this.searchBtn?.addEventListener('click', () => {
-            const filter = this.searchInput.value.trim();
-            this.vscode.postMessage({
-                command: 'filter',
-                filter: filter
-            });
-        });
-
-        this.searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.searchBtn.click();
-            }
-        });
-
-        // Refresh functionality
-        this.refreshBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({
-                command: 'refresh'
-            });
-        });
-
-        // Back button functionality
-        this.backBtn?.addEventListener('click', () => {
-            this.showListView();
-        });
-
-        // Pagination functionality
-        this.firstPageBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({ command: 'firstPage' });
-        });
-
-        this.prevPageBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({ command: 'previousPage' });
-        });
-
-        this.nextPageBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({ command: 'nextPage' });
-        });
-
-        this.lastPageBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({ command: 'lastPage' });
-        });
-
-        // Listen for messages from extension
-        window.addEventListener('message', event => {
-            const message = event.data;
-
-            switch (message.command) {
-                case 'updateCards':
-                    this.updateCardsDisplay(message.cards, message.loading, message.pagination);
-                    break;
-                case 'showPipelineDetails':
-                    this.showPipelineDetails(message.pipeline, message.scripts, message.runTypes);
-                    break;
-                case 'showLoginProgress':
-                    this.showLoginProgress(message.message);
-                    break;
-                case 'showLoginError':
-                    this.showLoginError(message.message);
-                    break;
-            }
-        });
-    }
-
-    updateCardsDisplay(cards, loading, pagination) {
-        // Show/hide loading state
-        if (this.loadingState) {
-            this.loadingState.style.display = loading ? 'block' : 'none';
+        console.log('[PipelineClient] Attaching event listeners...');
+        
+        // Search functionality with debouncing
+        if (this.searchBtn) {
+            this.searchBtn.addEventListener('click', () => this.handleSearch());
         }
 
+        if (this.searchInput) {
+            const debouncedSearch = Utils.debounce(() => this.handleSearch(), CONFIG.SEARCH_DEBOUNCE_DELAY);
+            this.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch();
+                }
+            });
+            this.searchInput.addEventListener('input', debouncedSearch);
+        }
+
+        // Refresh functionality
+        if (this.refreshBtn) {
+            this.refreshBtn.addEventListener('click', () => this.handleRefresh());
+        }
+
+        // Navigation functionality
+        if (this.backBtn) {
+            this.backBtn.addEventListener('click', () => this.showListView());
+        }
+
+        // Pagination functionality
+        this.attachPaginationListeners();
+
+        // Listen for messages from extension
+        window.addEventListener('message', (event) => this.handleExtensionMessage(event));
+        
+        console.log('[PipelineClient] Event listeners attached');
+    }
+
+    /**
+     * Attaches pagination event listeners
+     */
+    attachPaginationListeners() {
+        if (this.firstPageBtn) {
+            this.firstPageBtn.addEventListener('click', () => this.sendCommand(COMMANDS.FIRST_PAGE));
+        }
+
+        if (this.prevPageBtn) {
+            this.prevPageBtn.addEventListener('click', () => this.sendCommand(COMMANDS.PREVIOUS_PAGE));
+        }
+
+        if (this.nextPageBtn) {
+            this.nextPageBtn.addEventListener('click', () => this.sendCommand(COMMANDS.NEXT_PAGE));
+        }
+
+        if (this.lastPageBtn) {
+            this.lastPageBtn.addEventListener('click', () => this.sendCommand(COMMANDS.LAST_PAGE));
+        }
+    }
+
+    // ================================
+    // EVENT HANDLERS
+    // ================================
+
+    /**
+     * Handles search input and button clicks
+     */
+    handleSearch() {
+        const filter = this.searchInput ? this.searchInput.value.trim() : '';
+        console.log('[PipelineClient] Searching with filter:', filter);
+        
+        this.sendCommand(COMMANDS.FILTER, { filter });
+    }
+
+    /**
+     * Handles refresh button clicks
+     */
+    handleRefresh() {
+        console.log('[PipelineClient] Refreshing data...');
+        this.sendCommand(COMMANDS.REFRESH);
+    }
+
+    /**
+     * Handles messages from the VS Code extension
+     * @param {MessageEvent} event - Message event from extension
+     */
+    handleExtensionMessage(event) {
+        const message = event.data;
+        console.log('[PipelineClient] Received message:', message.command);
+
+        try {
+            switch (message.command) {
+                case COMMANDS.UPDATE_CARDS:
+                    this.updateCardsDisplay(message.cards, message.loading, message.pagination);
+                    break;
+                    
+                case COMMANDS.SHOW_DETAILS:
+                    this.showPipelineDetails(message.pipeline, message.scripts, message.runTypes);
+                    break;
+                    
+                case COMMANDS.SHOW_LOGIN_PROGRESS:
+                    this.showLoginProgress(message.message);
+                    break;
+                    
+                case COMMANDS.SHOW_LOGIN_ERROR:
+                    this.showLoginError(message.message);
+                    break;
+                    
+                default:
+                    console.warn('[PipelineClient] Unknown command:', message.command);
+            }
+        } catch (error) {
+            console.error('[PipelineClient] Error handling message:', error);
+        }
+    }
+
+    // ================================
+    // DISPLAY UPDATE METHODS
+    // ================================
+
+    /**
+     * Updates the cards display with new data
+     * @param {Array} cards - Array of pipeline cards
+     * @param {boolean} loading - Loading state
+     * @param {Object} pagination - Pagination information
+     */
+    updateCardsDisplay(cards, loading, pagination) {
+        console.log('[PipelineClient] Updating cards display:', { 
+            cardsCount: cards?.length || 0, 
+            loading, 
+            pagination 
+        });
+
+        // Show/hide loading state
+        Utils.toggleElement(this.loadingState, loading);
+
         if (loading) {
-            if (this.cardsContainer) { this.cardsContainer.style.display = 'none'; }
-            if (this.emptyState) { this.emptyState.style.display = 'none'; }
-            if (this.paginationContainer) { this.paginationContainer.style.display = 'none'; }
+            Utils.toggleElement(this.cardsContainer, false);
+            Utils.toggleElement(this.emptyState, false);
+            Utils.toggleElement(this.paginationContainer, false);
             return;
         }
 
         // Show/hide empty state
         if (!cards || cards.length === 0) {
-            if (this.cardsContainer) { this.cardsContainer.style.display = 'none'; }
-            if (this.emptyState) { this.emptyState.style.display = 'block'; }
-            if (this.paginationContainer) { this.paginationContainer.style.display = 'none'; }
+            Utils.toggleElement(this.cardsContainer, false);
+            Utils.toggleElement(this.emptyState, true);
+            Utils.toggleElement(this.paginationContainer, false);
             return;
         }
 
         // Show cards
-        if (this.cardsContainer) { this.cardsContainer.style.display = 'block'; }
-        if (this.emptyState) { this.emptyState.style.display = 'none'; }
+        Utils.toggleElement(this.cardsContainer, true);
+        Utils.toggleElement(this.emptyState, false);
 
         // Render pipeline cards
-        if (this.cardsContainer) {
-            this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join('');
-
-            // Add event listeners to view details buttons
-            document.querySelectorAll('.pipeline-action-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const button = e.target.closest('.pipeline-action-btn');
-                    const pipelineId = button?.dataset.pipelineId;
-                    if (pipelineId) {
-                        this.vscode.postMessage({
-                            command: 'viewDetails',
-                            cardId: pipelineId
-                        });
-                    }
-                });
-            });
-
-            // Add keyboard navigation for cards
-            document.querySelectorAll('.pipeline-card').forEach(card => {
-                card.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        const button = card.querySelector('.pipeline-action-btn');
-                        if (button) {
-                            button.click();
-                        }
-                    }
-                });
-            });
-        }
+        this.renderPipelineCards(cards);
 
         // Update pagination
         this.updatePagination(pagination);
     }
 
     /**
-     * Format date as "Tuesday, October 7, 2025"
-     * @param {string} dateStr - Date string to format
-     * @returns {string} Formatted date string
+     * Renders pipeline cards HTML
+     * @param {Array} cards - Array of pipeline cards
      */
-    formatFullDate(dateStr) {
-        if (!dateStr) { return 'Unknown'; }
-        const date = new Date(dateStr);
-        return date.toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    renderPipelineCards(cards) {
+        if (!this.cardsContainer) {
+            console.warn('[PipelineClient] Cards container not found');
+            return;
+        }
+
+        const cardsHtml = cards.map(pipeline => this.createCardHTML(pipeline)).join('');
+        this.cardsContainer.innerHTML = cardsHtml;
+
+        // Attach click listeners to cards
+        this.attachCardListeners();
     }
 
     /**
-     * Convert string to title case
-     * @param {string} str - String to convert
-     * @returns {string} Title case string
+     * Creates HTML for a single pipeline card
+     * @param {Object} pipeline - Pipeline data
+     * @returns {string} HTML string for the card
      */
-    toTitleCase(str) {
-        if (!str) { return ''; }
-        return str.replace(/\w\S*/g, (txt) => {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        });
-    }
-
-    // createCardHTML(pipeline) {
-    //     const createdDate = new Date(pipeline.createdDate).toLocaleDateString();
-
-    //     return `
-    //         <div class="pipeline-card" tabindex="0" role="article" aria-label="Pipeline: ${this.toTitleCase(pipeline.alias)}">
-    //             <div class="pipeline-card-header">                   
-    //                     <span class="pipeline-title">${this.toTitleCase(pipeline.alias)}</span>
-    //                      <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
-    //             </div>
-
-    //             <div class="pipeline-card-body">                                              
-    //                         <span class="metadata-value">${this.formatFullDate(pipeline.createdDate)}</span>                       
-    //             </div>
-
-    //             <div class="pipeline-card-actions">
-    //             <button class="pipeline-action-btn primary" data-pipeline-id="${pipeline.id}" aria-label="View details for ${this.toTitleCase(pipeline.alias)}">
-    //                     <span class="action-icon">👁</span>
-    //                     <span class="action-text">View Details</span>
-    //                 </button>
-    //             <div class="pipeline-avatar-section">
-    //                     <div class="pipeline-avatar" title="${pipeline.target?.created_by || 'Unknown User'}">
-    //                         ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'U'}
-    //                     </div>
-    //                 </div>
-
-    //             </div>
-    //         </div>
-    //     `;
-    // }
-    /**
-        * Creates HTML for a single pipeline card
-        * @param {Object} pipeline - Pipeline data
-        * @returns {string} HTML string for the card
-        */
     createCardHTML(pipeline) {
         const createdDate = Utils.formatDate(pipeline.createdDate);
         const title = Utils.toTitleCase(pipeline.alias);
@@ -559,6 +580,22 @@ class PipelineCardsClient {
         `;
     }
 
+    /**
+     * Attaches click listeners to pipeline cards
+     */
+    attachCardListeners() {
+        const actionButtons = this.cardsContainer.querySelectorAll('.pipeline-action-btn');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const pipelineId = button.getAttribute('data-pipeline-id');
+                if (pipelineId) {
+                    this.sendCommand(COMMANDS.VIEW_DETAILS, { cardId: pipelineId });
+                }
+            });
+        });
+    }
+
     // ================================
     // PAGINATION METHODS
     // ================================
@@ -569,21 +606,16 @@ class PipelineCardsClient {
      */
     updatePagination(pagination) {
         if (!pagination || pagination.totalPages <= 1) {
-            if (this.paginationContainer) {
-                Utils.toggleElement(this.paginationContainer, false);
-            }
+            Utils.toggleElement(this.paginationContainer, false);
             return;
         }
 
-        if (this.paginationContainer) {
-            Utils.toggleElement(this.paginationContainer, true);
-        }
+        Utils.toggleElement(this.paginationContainer, true);
 
         // Update pagination info
         if (this.paginationInfo) {
-            const startItem = (pagination.currentPage - 1) * pagination.pageSize + 1;
-            const endItem = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount);
-            this.paginationInfo.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages} (${startItem}-${endItem} of ${pagination.totalCount} items)`;
+            const { currentPage, totalPages, totalItems } = pagination;
+            this.paginationInfo.textContent = `Page ${currentPage} of ${totalPages} (${totalItems} items)`;
         }
 
         // Update button states
@@ -594,9 +626,9 @@ class PipelineCardsClient {
     }
 
     /**
-   * Updates pagination button states
-   * @param {Object} pagination - Pagination data
-   */
+     * Updates pagination button states
+     * @param {Object} pagination - Pagination data
+     */
     updatePaginationButtons(pagination) {
         const { currentPage, totalPages } = pagination;
 
@@ -615,31 +647,28 @@ class PipelineCardsClient {
     }
 
     /**
-      * Updates page number display
-      * @param {Object} pagination - Pagination data
-      */
+     * Updates page number display
+     * @param {Object} pagination - Pagination data
+     */
     updatePageNumbers(pagination) {
-        if (!this.paginationPages) { return; }
+        if (!this.paginationPages) {
+            return;
+        }
 
         const { currentPage, totalPages } = pagination;
-        const maxVisiblePages = 5;
+        const maxVisiblePages = CONFIG.MAX_VISIBLE_PAGES;
         let startPage, endPage;
 
         if (totalPages <= maxVisiblePages) {
             startPage = 1;
             endPage = totalPages;
         } else {
-            const halfVisible = Math.floor(maxVisiblePages / 2);
-
-            if (currentPage <= halfVisible) {
-                startPage = 1;
-                endPage = maxVisiblePages;
-            } else if (currentPage + halfVisible >= totalPages) {
-                startPage = totalPages - maxVisiblePages + 1;
-                endPage = totalPages;
-            } else {
-                startPage = currentPage - halfVisible;
-                endPage = currentPage + halfVisible;
+            const half = Math.floor(maxVisiblePages / 2);
+            startPage = Math.max(1, currentPage - half);
+            endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
         }
 
@@ -647,36 +676,35 @@ class PipelineCardsClient {
 
         // Add first page and ellipsis if needed
         if (startPage > 1) {
-            pagesHtml += `<button class="page-number" data-page="1">1</button>`;
+            pagesHtml += `<button class="${CSS_CLASSES.PAGE_NUMBER}" data-page="1">1</button>`;
             if (startPage > 2) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
+                pagesHtml += `<span class="${CSS_CLASSES.PAGE_ELLIPSIS}">...</span>`;
             }
         }
 
         // Add visible page numbers
         for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="page-number ${isActive}" data-page="${i}">${i}</button>`;
+            const activeClass = i === currentPage ? ` ${CSS_CLASSES.ACTIVE}` : '';
+            pagesHtml += `<button class="${CSS_CLASSES.PAGE_NUMBER}${activeClass}" data-page="${i}">${i}</button>`;
         }
 
         // Add ellipsis and last page if needed
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
+                pagesHtml += `<span class="${CSS_CLASSES.PAGE_ELLIPSIS}">...</span>`;
             }
-            pagesHtml += `<button class="page-number" data-page="${totalPages}">${totalPages}</button>`;
+            pagesHtml += `<button class="${CSS_CLASSES.PAGE_NUMBER}" data-page="${totalPages}">${totalPages}</button>`;
         }
 
         this.paginationPages.innerHTML = pagesHtml;
 
         // Add click listeners to page numbers
-        this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const page = parseInt(e.target.dataset.page);
-                this.vscode.postMessage({
-                    command: 'goToPage',
-                    page: page
-                });
+        this.paginationPages.querySelectorAll(`.${CSS_CLASSES.PAGE_NUMBER}`).forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.getAttribute('data-page'));
+                if (page && page !== currentPage) {
+                    this.sendCommand(COMMANDS.GO_TO_PAGE, { page });
+                }
             });
         });
     }
@@ -693,7 +721,7 @@ class PipelineCardsClient {
      */
     showPipelineDetails(pipeline, scripts, runTypes) {
         console.log('[PipelineClient] Showing pipeline details:', pipeline.alias);
-
+        
         this.currentView = 'details';
         this.currentPipelineId = pipeline.id;
         this.currentPipelineData = { pipeline, scripts, runTypes };
@@ -708,166 +736,80 @@ class PipelineCardsClient {
         this.updateDetailsContent(pipeline, scripts, runTypes);
     }
 
-    // /**
-    //  * Shows list view (hides details)
-    //  */
-    // showListView() {
-    //     console.log('[PipelineClient] Showing list view');
-
-    //     this.currentView = 'list';
-    //     this.currentPipelineId = null;
-    //     this.currentPipelineData = null;
-
-    //     // Hide details view
-    //     Utils.toggleElement(this.detailsView, false);
-
-    //     // Show list view elements
-    //     this.showListViewElements();
-
-    //     // Request refresh of cards list
-    //      this.vscode.postMessage({
-    //         command: 'loadCards'
-    //     });
-    // }
-
-    // /**
-    //  * Hides list view elements
-    //  */
-    // hideListView() {
-    //     Utils.toggleElement(this.cardsContainer, false);
-    //     Utils.toggleElement(this.emptyState, false);
-    //     Utils.toggleElement(this.paginationContainer, false);
-    //     Utils.toggleElement(this.loadingState, false);
-
-    //     // Hide header elements
-    //     const header = document.querySelector('.header');
-    //     const searchContainer = document.querySelector('.search-container');
-    //     const headerButtons = document.querySelector('.header-buttons');
-
-    //     Utils.toggleElement(header, false);
-    //     Utils.toggleElement(searchContainer, false);
-    //     Utils.toggleElement(headerButtons, false);
-    // }
-
-    // /**
-    // * Shows list view elements
-    // */
-    // showListViewElements() {
-    //     // Show appropriate elements based on current state
-    //     if (this.cardsContainer && this.cardsContainer.innerHTML.trim()) {
-    //         Utils.toggleElement(this.cardsContainer, true);
-    //     }
-
-    //     // Show header elements
-    //     const header = document.querySelector('.header');
-    //     const searchContainer = document.querySelector('.search-container');
-    //     const headerButtons = document.querySelector('.header-buttons');
-
-    //     Utils.toggleElement(header, true);
-    //     Utils.toggleElement(searchContainer, true);
-    //     Utils.toggleElement(headerButtons, true);
-    // }
-
-    // /**
-    //  * Updates details view content
-    //  * @param {Object} pipeline - Pipeline data
-    //  * @param {Object} scripts - Scripts data
-    //  * @param {Array} runTypes - Run types data
-    //  */
-    // updateDetailsContent(pipeline, scripts, runTypes) {
-    //     // Update title
-    //     if (this.detailsTitle) {
-    //         this.detailsTitle.textContent = `Pipeline: ${Utils.toTitleCase(pipeline.alias)}`;
-    //     }
-
-    //     // Update sections
-    //     this.updatePipelineInfo(pipeline);
-    //     this.updateScriptsContent(scripts);
-    //     this.updateRunTypesContent(runTypes);
-    //     this.setupActionButtons(pipeline);
-    // }
-
-
+    /**
+     * Shows list view (hides details)
+     */
     showListView() {
+        console.log('[PipelineClient] Showing list view');
+        
         this.currentView = 'list';
         this.currentPipelineId = null;
         this.currentPipelineData = null;
 
         // Hide details view
-        if (this.detailsView) {
-            this.detailsView.style.display = 'none';
-        }
+        Utils.toggleElement(this.detailsView, false);
 
         // Show list view elements
         this.showListViewElements();
 
         // Request refresh of cards list
-        this.vscode.postMessage({
-            command: 'loadCards'
-        });
+        this.sendCommand(COMMANDS.LOAD_CARDS);
     }
 
+    /**
+     * Hides list view elements
+     */
     hideListView() {
-        if (this.cardsContainer) {
-            this.cardsContainer.style.display = 'none';
-        }
-        if (this.emptyState) {
-            this.emptyState.style.display = 'none';
-        }
-        if (this.paginationContainer) {
-            this.paginationContainer.style.display = 'none';
-        }
-        if (this.loadingState) {
-            this.loadingState.style.display = 'none';
-        }
+        Utils.toggleElement(this.cardsContainer, false);
+        Utils.toggleElement(this.emptyState, false);
+        Utils.toggleElement(this.paginationContainer, false);
+        Utils.toggleElement(this.loadingState, false);
 
-        // Hide search container and header buttons when in details view
+        // Hide header elements
+        const header = document.querySelector('.header');
         const searchContainer = document.querySelector('.search-container');
-        if (searchContainer) {
-            searchContainer.style.display = 'none';
-        }
-
         const headerButtons = document.querySelector('.header-buttons');
-        if (headerButtons) {
-            headerButtons.style.display = 'none';
-        }
+        
+        Utils.toggleElement(header, false);
+        Utils.toggleElement(searchContainer, false);
+        Utils.toggleElement(headerButtons, false);
     }
 
+    /**
+     * Shows list view elements
+     */
     showListViewElements() {
         // Show appropriate elements based on current state
-        // This will be called when returning from details view
         if (this.cardsContainer && this.cardsContainer.innerHTML.trim()) {
-            this.cardsContainer.style.display = 'block';
+            Utils.toggleElement(this.cardsContainer, true);
         }
 
-        // Show search container and header buttons when returning to list view
+        // Show header elements
+        const header = document.querySelector('.header');
         const searchContainer = document.querySelector('.search-container');
-        if (searchContainer) {
-            searchContainer.style.display = 'flex';
-        }
-
         const headerButtons = document.querySelector('.header-buttons');
-        if (headerButtons) {
-            headerButtons.style.display = 'flex';
-        }
+        
+        Utils.toggleElement(header, true);
+        Utils.toggleElement(searchContainer, true);
+        Utils.toggleElement(headerButtons, true);
     }
 
+    /**
+     * Updates details view content
+     * @param {Object} pipeline - Pipeline data
+     * @param {Object} scripts - Scripts data
+     * @param {Array} runTypes - Run types data
+     */
     updateDetailsContent(pipeline, scripts, runTypes) {
         // Update title
         if (this.detailsTitle) {
-            this.detailsTitle.textContent = `Pipeline: ${pipeline.alias || pipeline.name || 'Unnamed Pipeline'}`;
+            this.detailsTitle.textContent = Utils.toTitleCase(pipeline.alias);
         }
 
-        // Update pipeline info
+        // Update sections
         this.updatePipelineInfo(pipeline);
-
-        // Update scripts
         this.updateScriptsContent(scripts);
-
-        // Update run types
         this.updateRunTypesContent(runTypes);
-
-        // Setup action buttons
         this.setupActionButtons(pipeline);
     }
 
@@ -904,9 +846,9 @@ class PipelineCardsClient {
     }
 
     /**
-        * Updates scripts content section
-        * @param {Object} scripts - Scripts data
-        */
+     * Updates scripts content section
+     * @param {Object} scripts - Scripts data
+     */
     updateScriptsContent(scripts) {
         if (!this.scriptsContainer) {
             return;
@@ -982,28 +924,21 @@ class PipelineCardsClient {
         this.selectedRunType = runTypes[0] || null;
     }
 
-
-
-    // Helper methods for script actions
     /**
-    * Sets up action buttons for details view
-    * @param {Object} pipeline - Pipeline data
-    */
+     * Sets up action buttons for details view
+     * @param {Object} pipeline - Pipeline data
+     */
     setupActionButtons(pipeline) {
         // Run Pipeline button
         if (this.runPipelineBtn) {
             this.runPipelineBtn.onclick = () => {
                 if (this.selectedRunType) {
-                    this.vscode.postMessage({
-                        command: 'runScript',
-                        cardId: pipeline.id,
+                    this.sendCommand(COMMANDS.RUN_PIPELINE, {
+                        cardId: this.currentPipelineId,
                         runType: this.selectedRunType
                     });
                 } else {
-                    this.vscode.postMessage({
-                        command: 'showError',
-                        message: 'Please select a run type first.'
-                    });
+                    console.warn('[PipelineClient] No run type selected');
                 }
             };
         }
@@ -1011,129 +946,166 @@ class PipelineCardsClient {
         // View Logs button
         if (this.viewLogsBtn) {
             this.viewLogsBtn.onclick = () => {
-                this.vscode.postMessage({
-                    command: 'viewLogs',
-                    cardId: pipeline.id
-                });
+                this.sendCommand(COMMANDS.VIEW_LOGS, { cardId: this.currentPipelineId });
             };
         }
 
         // Refresh Scripts button
         if (this.refreshScriptsBtn) {
             this.refreshScriptsBtn.onclick = () => {
-                this.vscode.postMessage({
-                    command: 'refreshScript',
-                    cardId: pipeline.id
-                });
+                this.sendCommand(COMMANDS.REFRESH_SCRIPTS, { cardId: this.currentPipelineId });
             };
         }
     }
 
+    // ================================
+    // SCRIPT ACTION METHODS
+    // ================================
+
+    /**
+     * Opens a script file
+     * @param {number} fileIndex - Index of file in scripts array
+     */
     openScript(fileIndex) {
         if (this.currentPipelineData && this.currentPipelineData.scripts && this.currentPipelineData.scripts.files) {
             const file = this.currentPipelineData.scripts.files[fileIndex];
             if (file) {
-                this.vscode.postMessage({
-                    command: 'openScript',
+                this.sendCommand(COMMANDS.OPEN_SCRIPT, {
                     cardId: this.currentPipelineId,
-                    fileName: file.fileName,
-                    fileIndex: fileIndex
+                    fileIndex: fileIndex,
+                    fileName: file.fileName
                 });
             }
         }
     }
 
+    /**
+     * Copies a script to clipboard
+     * @param {string} fileName - Name of file to copy
+     */
     copyScript(fileName) {
-        this.vscode.postMessage({
-            command: 'copyScript',
+        this.sendCommand(COMMANDS.COPY_SCRIPT, {
             cardId: this.currentPipelineId,
             fileName: fileName
         });
     }
 
+    /**
+     * Selects a run type
+     * @param {string} index - Index of selected run type
+     */
     selectRunType(index) {
         if (this.currentPipelineData && this.currentPipelineData.runTypes) {
-            const selectedIndex = parseInt(index);
-            if (selectedIndex >= 0 && selectedIndex < this.currentPipelineData.runTypes.length) {
-                // Update selected run type
-                this.selectedRunType = this.currentPipelineData.runTypes[selectedIndex];
-                console.log('Selected run type:', this.selectedRunType);
+            const runType = this.currentPipelineData.runTypes[parseInt(index)];
+            if (runType) {
+                this.selectedRunType = runType;
+                console.log('[PipelineClient] Selected run type:', runType);
             }
         }
     }
 
+    /**
+     * Generates scripts for current pipeline
+     */
     generateScripts() {
         if (this.currentPipelineId) {
-            this.vscode.postMessage({
-                command: 'generateScripts',
-                cardId: this.currentPipelineId
-            });
+            this.sendCommand(COMMANDS.GENERATE_SCRIPTS, { cardId: this.currentPipelineId });
         }
     }
 
-    requestInitialLoad() {
-        // Request initial data load
-        this.vscode.postMessage({
-            command: 'loadCards'
-        });
-    }
+    // ================================
+    // AUTHENTICATION METHODS
+    // ================================
 
+    /**
+     * Shows login progress state
+     * @param {string} message - Progress message
+     */
     showLoginProgress(message) {
-        // Find the login button and show progress
-        const loginButton = document.querySelector('.login-button');
+        console.log('[PipelineClient] Login progress:', message);
+        
+        const loginButton = document.querySelector(SELECTORS.LOGIN_BUTTON);
         if (loginButton) {
-            loginButton.textContent = message || 'Authenticating...';
+            loginButton.textContent = UI_TEXT.BUTTONS.AUTHENTICATING;
             loginButton.disabled = true;
-            loginButton.style.opacity = '0.7';
         }
 
-        // Also update any status messages
-        const loginMessage = document.querySelector('.logout-message p');
+        const loginMessage = document.querySelector(SELECTORS.LOGIN_MESSAGE);
         if (loginMessage) {
-            loginMessage.textContent = message || 'Authenticating with Keycloak...';
+            loginMessage.textContent = message || UI_TEXT.LOADING.AUTHENTICATING;
         }
     }
 
+    /**
+     * Shows login error state
+     * @param {string} message - Error message
+     */
     showLoginError(message) {
-        // Reset the login button
-        const loginButton = document.querySelector('.login-button');
+        console.error('[PipelineClient] Login error:', message);
+        
+        const loginButton = document.querySelector(SELECTORS.LOGIN_BUTTON);
         if (loginButton) {
-            loginButton.textContent = 'Login Again';
+            loginButton.textContent = UI_TEXT.BUTTONS.LOGIN;
             loginButton.disabled = false;
-            loginButton.style.opacity = '1';
-            loginButton.style.backgroundColor = '#dc3545';
         }
 
-        // Show error message
-        const loginMessage = document.querySelector('.logout-message p');
+        const loginMessage = document.querySelector(SELECTORS.LOGIN_MESSAGE);
         if (loginMessage) {
-            loginMessage.textContent = `Login failed: ${message}. Please try again.`;
+            loginMessage.textContent = message || UI_TEXT.MESSAGES.AUTHENTICATION_ERROR;
             loginMessage.style.color = 'var(--vscode-errorForeground)';
         }
 
-        // Reset error state after a few seconds
+        // Reset error state after timeout
         setTimeout(() => {
-            if (loginButton) {
-                loginButton.style.backgroundColor = '#007acc';
-            }
             if (loginMessage) {
+                loginMessage.textContent = '';
                 loginMessage.style.color = '';
-                loginMessage.textContent = 'Please run the "Login to Essedum" command to authenticate again.';
             }
-        }, 5000);
+        }, CONFIG.TIMEOUTS.ERROR_DISPLAY);
+    }
+
+    // ================================
+    // COMMUNICATION METHODS
+    // ================================
+
+    /**
+     * Sends a command to the VS Code extension
+     * @param {string} command - Command to send
+     * @param {Object} data - Additional data
+     */
+    sendCommand(command, data = {}) {
+        console.log('[PipelineClient] Sending command:', command, data);
+        this.vscode.postMessage({ command, ...data });
+    }
+
+    /**
+     * Requests initial data load
+     */
+    requestInitialLoad() {
+        console.log('[PipelineClient] Requesting initial load...');
+        this.sendCommand(COMMANDS.LOAD_CARDS);
+    }
+}
+
+// ================================
+// INITIALIZATION
+// ================================
+
+/**
+ * Initialize the Pipeline Cards Client when DOM is ready
+ */
+function initializePipelineClient() {
+    console.log('[PipelineClient] Initializing...');
+    try {
+        new PipelineCardsClient();
+    } catch (error) {
+        console.error('[PipelineClient] Initialization failed:', error);
     }
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new PipelineCardsClient();
-});
-
-// Also initialize immediately if DOM is already loaded
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        new PipelineCardsClient();
-    });
+    document.addEventListener('DOMContentLoaded', initializePipelineClient);
 } else {
-    new PipelineCardsClient();
+    initializePipelineClient();
 }
