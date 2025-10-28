@@ -25,21 +25,6 @@ export const API_BASE_PATH = '/api/aip/service/v1';
 // Full API Base URL
 export const API_BASE_URL = `${BASE_URL}${API_BASE_PATH}`;
 
-// Configuration Constants
-export const SERVICE_CONFIG = {
-    DEFAULT_TIMEOUT: 30000,
-    UPLOAD_TIMEOUT: 60000,
-    DEFAULT_PROJECT_ID: '2',
-    DEFAULT_ROLE_ID: '1',
-    DEFAULT_ROLE_NAME: 'IT Portfolio Manager',
-    USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-    REQUEST_WITH: 'Leap',
-    ACCEPT_HEADER: 'application/json, text/plain, */*',
-    ACCEPT_LANGUAGE: 'en-US,en;q=0.9',
-    CONTENT_TYPE_JSON: 'application/json',
-    CONTENT_TYPE_MULTIPART: 'multipart/form-data',
-    CONTENT_TYPE_JSON_UTF8: 'application/json; charset=UTF-8'
-};
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -103,25 +88,25 @@ export const HTTPS_AGENT = new https.Agent({
 });
 
 // Create authenticated headers
-export function createAuthHeaders(token: string, projectId: string = '2', projectName: string = 'leo1311'): Record<string, string> {
+export function createAuthHeaders(token: string, role: any, projectId: string = '2', projectName: string = 'leo1311'): Record<string, string> {
     return {
         ...DEFAULT_REQUEST_CONFIG.headers,
         'Authorization': `Bearer ${token}`,
         'Project': projectId,
         'ProjectName': projectName,
-        'roleId': '1',
-        'roleName': 'IT Portfolio Manager'
+        'roleId': role.id,
+        'roleName': role.name
     };
 }
 
 // Create axios config with SSL bypass
-export function createSecureAxiosConfig(token: string, additionalConfig: any = {}): any {
+export function createSecureAxiosConfig(token: string, role: any, additionalConfig: any = {}): any {
     // Ensure Node.js SSL bypass is set
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
     
     const baseConfig = {
         ...DEFAULT_REQUEST_CONFIG,
-        headers: createAuthHeaders(token),
+        headers: createAuthHeaders(token, role),
         httpsAgent: HTTPS_AGENT,
         // Additional SSL bypass settings for axios
         rejectUnauthorized: false,
@@ -174,7 +159,7 @@ export async function makeSecureRequest(method: string, url: string, config: any
                   config.headers?.Authorization || 
                   config.headers?.authorization || 
                   '';
-    
+
     // Build comprehensive headers based on working curl command
     const defaultHeaders: { [key: string]: string } = {
         'accept': 'application/json, text/plain, */*',
@@ -184,8 +169,8 @@ export async function makeSecureRequest(method: string, url: string, config: any
         'project': '2',
         'projectname': 'leo1311',
         'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-        'roleid': '1',
-        'rolename': 'IT Portfolio Manager',
+        'roleid': '',
+        'rolename': 'IT Port',
         'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',

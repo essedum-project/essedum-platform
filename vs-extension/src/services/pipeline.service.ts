@@ -6,17 +6,20 @@
  * and separation of concerns.
  */
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import * as https from "https";
 import { HttpParams } from "../interfaces/pipeline.interfaces";
 import { API_ENDPOINTS, BASE_URL, createSecureAxiosConfig, HTTPS_AGENT, createHTTPSAgent } from "../constants/api-config";
 
 export class PipelineService {
   private _token: string;
+  private _project: any;
+  private _role:any;
   private organization: string;
 
-  constructor(token: string = "", organization: string = "your-org-name") {
+  constructor(token: string = "", role: any = "", project: any = "") {
     this._token = token;
-    this.organization = organization;
+    this._project = project;
+    this._role = role;
+    this.organization = project.name;
     // Ensure SSL bypass is active when service is created
     this.ensureSSLBypass();
   }
@@ -39,11 +42,11 @@ export class PipelineService {
       "accept-language": "en-US,en;q=0.9",
       "content-type": "application/json",
       priority: "u=1, i",
-      project: "2",
-      projectname: this.organization,
+      project: this._project?.id,
+      projectname: this._project?.name,
       referer: BASE_URL,
-      roleid: "1",
-      rolename: "IT Portfolio Manager",
+      roleid: this._role?.id,
+      rolename: this._role?.name,
       "user-agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
       "x-requested-with": "Leap",
@@ -130,7 +133,7 @@ export class PipelineService {
     urlParams.append("org", this.organization);
 
     return axios.get(API_ENDPOINTS.PIPELINES_BY_NAME, {
-      ...createSecureAxiosConfig(this._token),
+      ...createSecureAxiosConfig(this._token, this._role),
       params: urlParams,
       timeout: 30000,
     });
@@ -140,7 +143,7 @@ export class PipelineService {
     return axios.get(
       `${API_ENDPOINTS.FILE_READ}/${pipelineName}/${this.organization}`,
       {
-        ...createSecureAxiosConfig(this._token),
+        ...createSecureAxiosConfig(this._token, this._role),
         params: { file: fileName },
         responseType: "arraybuffer",
         timeout: 30000,

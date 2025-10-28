@@ -97,22 +97,24 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
     /** VS Code webview instance */
     private _view?: vscode.WebviewView;
-    
+
     /** Extension URI for resource loading */
     private _extensionUri: vscode.Uri;
-    
+
     /** Authentication token */
     private _token: string = '';
-    
+
+    private project: any;
+    private role:any;
     /** Authentication state */
     private _isAuthenticated: boolean = false;
-    
+
     /** Authentication service reference */
     private _authService?: any;
-    
+
     /** File provider for virtual file operations */
     private _fileProvider?: EssedumFileSystemProvider;
-    
+
     /** Current pipeline name for file system operations */
     private _currentPipelineName?: string;
 
@@ -122,7 +124,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private totalCount: number = 0;
     private totalPages: number = 0;
     private allCards: PipelineCard[] = [];
-    private organization: string = PIPELINE_CONFIG.DEFAULT_ORGANIZATION;
+    private organization: string;
     private filter: string = '';
     private selectedAdapterType: string[] = [];
     private script: string[] = [];
@@ -159,10 +161,13 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     ) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
+        this.project = _context.globalState.get('project');
+        this.organization = this.project?.name;
+        this.role = _context.globalState.get('role');
         this._authService = authService;
         this._fileProvider = fileProvider;
         this._pipelineService = pipelineService || new PipelineService(token, this.organization);
-        
+
         console.log(`${this.logPrefix} Pipeline Cards Provider initialized`);
     }
 
@@ -2384,7 +2389,7 @@ print(f"The model got uploaded {uploaded_path} here")
             });
 
             console.log('✅ FormData created successfully');
-
+           
 
             // Headers matching the exact working curl command
             const headers = {
@@ -2393,11 +2398,11 @@ print(f"The model got uploaded {uploaded_path} here")
                 'authorization': `Bearer ${this._token}`,
                 'origin': 'https://essedum.az.ad.idemo-ppc.com',
                 'priority': 'u=1, i',
-                'project': '2',
-                'projectname': this.organization,
+                'project': this.project.id,
+                'projectname': this.project.name,
                 'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                'roleid': '1',
-                'rolename': 'IT Portfolio Manager',
+                'roleid': this.role.id,
+                'rolename': this.role.name,
                 'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
@@ -2487,11 +2492,11 @@ print(f"The model got uploaded {uploaded_path} here")
                 'authorization': `Bearer ${this._token}`,
                 'origin': 'https://essedum.az.ad.idemo-ppc.com',
                 'priority': 'u=1, i',
-                'project': '2',
-                'projectname': this.organization,
+                'project': this.project.id,
+                'projectname': this.project.name,
                 'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                'roleid': '1',
-                'rolename': 'IT Portfolio Manager',
+                'roleid': this.role.id,
+                'rolename': this.role.name,
                 'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
@@ -2566,11 +2571,11 @@ print(f"The model got uploaded {uploaded_path} here")
             'authorization': `Bearer ${this._token}`,
             'content-type': 'application/json',
             'priority': 'u=1, i',
-            'project': '2',
-            'projectname': org,
+            'project': this.project.id,
+            'projectname': this.project.name,
             'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-            'roleid': '1',
-            'rolename': 'IT Portfolio Manager',
+            'roleid': this.role.id,
+            'rolename': this.role.name,
             'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',

@@ -48,19 +48,6 @@ export const AUTH_CONFIG = {
  * Default project and organization configuration
  * These values are used across the application for API calls
  */
-export const PROJECT_CONFIG = {
-    /** Default organization name */
-    DEFAULT_ORGANIZATION: 'leo1311',
-    
-    /** Default project ID */
-    DEFAULT_PROJECT_ID: '2',
-    
-    /** Default role ID for API calls */
-    DEFAULT_ROLE_ID: '1',
-    
-    /** Default role name for API calls */
-    DEFAULT_ROLE_NAME: 'IT Portfolio Manager'
-} as const;
 
 // ================================
 // VS CODE EXTENSION CONFIGURATION
@@ -118,6 +105,18 @@ export const COMMANDS = {
     
     /** Debug upload endpoints */
     DEBUG_UPLOAD: 'essedum.debugUpload',
+    
+    /** Get current configuration */
+    GET_CONFIGURATION: 'essedum.getConfiguration',
+    
+    /** Refresh configuration from server */
+    REFRESH_CONFIGURATION: 'essedum.refreshConfiguration',
+    
+    /** Get user information */
+    GET_USER_INFO: 'essedum.getUserInfo',
+    
+    /** Refresh user information */
+    REFRESH_USER_INFO: 'essedum.refreshUserInfo',
     
     /** VS Code built-in commands */
     VSCODE: {
