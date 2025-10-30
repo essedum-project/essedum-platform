@@ -89,7 +89,6 @@ public class ICIPMlOpsRestAdapterService {
                 params != null ? params.size() : 0);
 
         String host = getHostFromHeader(headers);
-        host = "https://essedum.az.ad.idemo-ppc.com/";
         logger.info("Host : {}", host);
 
         if (host == null || host.isEmpty()) {
@@ -147,7 +146,6 @@ public class ICIPMlOpsRestAdapterService {
 			Map<String, String> params, String body) throws ClientProtocolException, IOException, URISyntaxException,
 			NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		String host = getHostFromHeader(headers);
-        host = "https://essedum.az.ad.idemo-ppc.com/";
 		if (host == null || host.isEmpty()) {
 			/* Taking LEAP URL Path as host if referer is not present in the headers */
 			host = referer;
