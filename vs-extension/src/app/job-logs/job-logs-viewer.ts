@@ -272,7 +272,7 @@ export class JobLogsViewer {
     private async showConsole(jobId: string, runtime: string, status: string, job: any, panel: vscode.WebviewPanel): Promise<void> {
         try {
             // Use the new console API to fetch job logs
-            await this.fetchConsoleJobLogs(jobId, status, panel);
+            await this.fetchConsoleJobLogs(jobId,job, status, panel);
         } catch (error: any) {
             console.error('Error showing console:', error);
             vscode.window.showErrorMessage(`Failed to show logs: ${error.message}`);
@@ -294,12 +294,12 @@ export class JobLogsViewer {
     /**
      * Fetch console job logs using the new console API
      */
-    private async fetchConsoleJobLogs(jobId: string, status: string, panel: vscode.WebviewPanel): Promise<void> {
+    private async fetchConsoleJobLogs(jobId: string, job: any, status: string, panel: vscode.WebviewPanel): Promise<void> {
         try {
             const response = await this.fetchConsoleJob(jobId, 0, 0, status, false);
             if (response) {
                 this.currentJob = response;
-                await this.processJobData(jobId, 'console', status, panel);
+                await this.processJobData(job.id, 'console', status, panel);
 
                 // Start polling if job is running
                 if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {
@@ -307,7 +307,7 @@ export class JobLogsViewer {
                 }
 
                 // Display the console logs in a new webview
-                await this.displayConsoleLogs(jobId, response);
+                await this.displayConsoleLogs(job.id, response);
             }
         } catch (error: any) {
             console.error('Error fetching console job logs:', error);
@@ -434,7 +434,7 @@ export class JobLogsViewer {
             const response = await this.fetchSparkJob(jobId, 0, runtime, 0, status, false);
             if (response) {
                 this.currentJob = response;
-                await this.processJobData(jobId, 'pipeline', this.currentJob.jobStatus, panel);
+                await this.processJobData(this.currentJob.id, 'pipeline', this.currentJob.jobStatus, panel);
 
                 // Start polling if job is running
                 if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {

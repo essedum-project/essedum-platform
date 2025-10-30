@@ -263,7 +263,7 @@ body {
 }
 
 .btn-icon {
-    background-color: transparent;
+    background-color: var(--vscode-button-hoverBackground);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -372,7 +372,7 @@ body {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--vscode-editor-foreground);
-    line-height: var(--line-height-tight);
+    line-height: 1.6;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -613,7 +613,7 @@ body {
     align-items: center;
     gap: var(--spacing-md);
     border-bottom: 1px solid var(--vscode-panel-border);
-    padding-bottom: var(--spacing-md);
+    padding-bottom: 8px;
     flex-shrink: 0;
 }
 
@@ -650,7 +650,7 @@ body {
 .details-info {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xl);
+    gap: 8px;
 }
 
 .info-section,
@@ -966,7 +966,7 @@ body::-webkit-scrollbar {
     }
 
     .container {
-        gap: var(--spacing-md);
+        gap: 8px;
     }
 
     .cards-container {
@@ -998,7 +998,7 @@ body::-webkit-scrollbar {
     }
 
     .pipeline-card {
-        padding: var(--spacing-sm);
+        padding: 12px;
     }
 
     .pipeline-card-header {

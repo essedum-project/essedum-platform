@@ -35,7 +35,6 @@ import {
     AUTH_CONFIG,
     EXTENSION_CONFIG,
     COMMANDS,
-    CONTEXT_KEYS,
     MESSAGES,
     UI_CONFIG,
     EXTERNAL_LINKS,
@@ -57,6 +56,155 @@ import {
     validateServices,
     safeExecuteCommand
 } from './constants/extension-utils';
+
+// ================================
+// TYPES AND INTERFACES
+// ================================
+
+interface PortfolioId {
+    id: number;
+    portfolioName: string;
+    description: string | null;
+    lastUpdated: number | null;
+}
+
+interface ProjectId {
+    id: number;
+    name: string;
+    description: string | null;
+    lastUpdated: number | null;
+    logoName: string | null;
+    logo: string | null;
+    defaultrole: boolean;
+    portfolioId: PortfolioId;
+    projectdisplayname: string;
+    theme: string | null;
+    domainName: string | null;
+    productDetails: string | null;
+    timeZone: string;
+    azureOrgId: string | null;
+    provisioneddate: number | null;
+    disableExcel: boolean;
+    createdDate: number;
+    projectAutologin: string | null;
+    autologinRole: string | null;
+}
+
+interface RoleId {
+    id: number;
+    projectId: any | null;
+    name: string;
+    description: string;
+    permission: boolean;
+    roleadmin: any | null;
+    projectadmin: any | null;
+    portfolioId: any | null;
+    projectAdminId: any | null;
+}
+
+interface ProjectWithRoles {
+    projectId: ProjectId;
+    roleId: RoleId[];
+}
+
+interface Portfolio {
+    projectWithRoles: ProjectWithRoles[];
+    porfolioId: PortfolioId;
+}
+
+interface UserInfo {
+    userId: any;
+    porfolios?: Portfolio[];
+}
+
+interface ServerConfig {
+    data_limit?: number;
+    autoUserCreation?: boolean;
+    autoUserProject?: any;
+    activeProfiles?: string;
+    logoLocation?: string;
+    theme?: string;
+    font?: string;
+    telemetryUrl?: string;
+    telemetry?: boolean;
+    telemetryPdataId?: string;
+    capBaseUrl?: string;
+    appVersion?: string;
+    leapAppYear?: string;
+    showPortfolioHeader?: boolean;
+    showProfileIcon?: boolean;
+    encDefault?: string;
+    expireTokenTime?: number;
+    issuerUri?: string;
+    clientId?: string;
+    scope?: string;
+    silentRefreshTimeoutFactor?: number;
+    baseUrl?: string;
+}
+
+interface OAuthConfig {
+    issuerUri: string;
+    clientId: string;
+    scope: string;
+    responseType: string;
+    useSilentRefresh: boolean;
+    timeoutFactor: number;
+    sessionChecksEnabled: boolean;
+    showDebugInformation: boolean;
+    clearHashAfterLogin: boolean;
+    strictDiscoveryDocumentValidation: boolean;
+}
+
+interface DashConstantQuery {
+    keys: string;
+}
+
+// ================================
+// CONSTANTS
+// ================================
+
+const CONFIG_API_URL = 'https://essedum.az.ad.idemo-ppc.com/api/getConfigDetails';
+const USER_INFO_API_URL = 'https://essedum.az.ad.idemo-ppc.com/api/userInfo';
+const CONFIG_TIMEOUT = 10000;
+const FALLBACK_TIMEOUT = 15000;
+
+const STORAGE_KEYS = {
+    // Authentication
+    JWT_TOKEN: 'jwtToken',
+    ACCESS_TOKEN: 'accessToken',
+
+    // User data
+    USER: 'user',
+    ROLE: 'role',
+    PROJECT: 'project',
+    ORGANIZATION: 'organization',
+    CURRENT_USER_INFO: 'currentUserInfo',
+    USER_INFO_DATA: 'userInfoData',
+    USER_PORTFOLIOS: 'userPortfolios',
+    UPDATED_USER: 'UpdatedUser',
+
+    // Configuration
+    OAUTH_CONFIG: 'oauthConfig',
+    BASE_URL: 'baseUrl',
+    THEME: 'theme',
+    DEFAULT_THEME: 'defaultTheme',
+    ACTIVE_PROFILES: 'activeProfiles',
+    AUTO_USER_CREATION: 'autoUserCreation',
+    AUTO_USER_PROJECT: 'autoUserProject',
+    ENC_DEFAULT: 'encDefault',
+
+    // Navigation
+    RETURN_URL: 'returnUrl',
+    CURRENT_PROJECT: 'currentProject',
+    CURRENT_PORTFOLIO: 'currentPortfolio'
+} as const;
+
+const REQUEST_HEADERS = {
+    ACCEPT: 'application/json, text/plain, */*',
+    CONTENT_TYPE: 'application/json',
+    USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    X_REQUESTED_WITH: 'Leap'
+} as const;
 
 // ================================
 // GLOBAL VARIABLES
@@ -132,10 +280,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         logger.info('Extension activation completed successfully');
 
     } catch (error) {
-        logger.error('Failed to activate extension:', error);
-        await vscode.window.showErrorMessage(
-            `Failed to activate Essedum AI Platform extension: ${error}`
-        );
+        await handleActivationError(error);
     }
 }
 
@@ -151,154 +296,158 @@ async function initializeConfiguration(context: vscode.ExtensionContext): Promis
     logger.info('Initializing configuration from server...');
 
     try {
-        // Fetch configuration from server using the secure request wrapper that handles SSL bypass
-        const response = await makeSecureRequest('GET', 'https://essedum.az.ad.idemo-ppc.com/api/getConfigDetails', {
-            timeout: 10000, // 10 second timeout
-            withCredentials: true, // Include cookies for session management
+        const config = await fetchServerConfiguration();
+        await storeServerConfiguration(context, config);
+        logger.info('Configuration initialization completed successfully');
+    } catch (error) {
+        logger.warn('Failed to fetch configuration from server:', error);
+        await handleConfigurationError(context, error);
+    }
+}
+
+async function fetchServerConfiguration(): Promise<ServerConfig> {
+    const response = await makeSecureRequest('GET', CONFIG_API_URL, {
+        timeout: CONFIG_TIMEOUT,
+        withCredentials: true,
+        headers: {
+            'accept': REQUEST_HEADERS.ACCEPT,
+            'content-type': REQUEST_HEADERS.CONTENT_TYPE,
+            'user-agent': REQUEST_HEADERS.USER_AGENT,
+            'x-requested-with': REQUEST_HEADERS.X_REQUESTED_WITH
+        }
+    });
+
+    return response.data;
+}
+
+async function storeServerConfiguration(context: vscode.ExtensionContext, config: ServerConfig): Promise<void> {
+    const updates = [
+        { key: 'dataLimit', value: config.data_limit },
+        { key: STORAGE_KEYS.AUTO_USER_CREATION, value: config.autoUserCreation },
+        { key: STORAGE_KEYS.AUTO_USER_PROJECT, value: config.autoUserProject },
+        { key: STORAGE_KEYS.ACTIVE_PROFILES, value: config.activeProfiles?.split(',') || [] },
+        { key: 'logoLocation', value: config.logoLocation },
+        { key: STORAGE_KEYS.THEME, value: config.theme },
+        { key: STORAGE_KEYS.DEFAULT_THEME, value: config.theme },
+        { key: 'font', value: config.font },
+        { key: 'telemetryUrl', value: config.telemetryUrl },
+        { key: 'telemetry', value: config.telemetry },
+        { key: 'telemetryPdataId', value: config.telemetryPdataId },
+        { key: 'capBaseUrl', value: config.capBaseUrl },
+        { key: 'appVersion', value: config.appVersion },
+        { key: 'leapAppYear', value: config.leapAppYear },
+        { key: 'showPortfolioHeader', value: config.showPortfolioHeader },
+        { key: 'showProfileIcon', value: config.showProfileIcon },
+        { key: STORAGE_KEYS.ENC_DEFAULT, value: config.encDefault },
+        { key: STORAGE_KEYS.BASE_URL, value: config.baseUrl || '' }
+    ];
+
+    // Handle JWT token expiration for specific profiles
+    const activeProfiles = config.activeProfiles?.split(',') || [];
+    if (activeProfiles.includes('dbjwt')) {
+        updates.push({ key: 'expireTokenTime', value: config.expireTokenTime });
+    }
+
+    // Store OAuth configuration
+    const oauthConfig = createOAuthConfig(config);
+    updates.push({ key: STORAGE_KEYS.OAUTH_CONFIG, value: oauthConfig });
+
+    await Promise.all(updates.map(({ key, value }) => context.globalState.update(key, value)));
+}
+
+function createOAuthConfig(config: ServerConfig): any {
+    return {
+        issuerUri: config.issuerUri || AUTH_CONFIG.ISSUER_URI,
+        clientId: config.clientId || AUTH_CONFIG.CLIENT_ID,
+        scope: config.scope || AUTH_CONFIG.SCOPE,
+        responseType: 'code',
+        useSilentRefresh: true,
+        timeoutFactor: validateTimeoutFactor(config.silentRefreshTimeoutFactor),
+        sessionChecksEnabled: true,
+        showDebugInformation: DEBUG_CONFIG.VERBOSE_LOGGING,
+        clearHashAfterLogin: false,
+        strictDiscoveryDocumentValidation: false
+    };
+}
+
+function validateTimeoutFactor(factor?: number): number {
+    return (typeof factor === 'number' && factor > 0 && factor <= 1) ? factor : 0.9;
+}
+
+async function handleConfigurationError(context: vscode.ExtensionContext, error: unknown): Promise<void> {
+    if (isSSLError(error)) {
+        logger.error('SSL Certificate Error detected');
+        await attemptFallbackConfiguration(context);
+    } else {
+        await storeDefaultConfiguration(context);
+    }
+}
+
+
+function isSSLError(error: unknown): boolean {
+    if (!(error instanceof Error)) { return false; }
+
+    const sslKeywords = ['certificate', 'CERT_', 'unable to get local issuer certificate', 'self signed certificate'];
+    return sslKeywords.some(keyword => error.message.includes(keyword));
+}
+
+async function attemptFallbackConfiguration(context: vscode.ExtensionContext): Promise<void> {
+    try {
+        logger.info('Attempting configuration fetch with additional SSL bypass...');
+
+        const axios = require('axios');
+        const https = require('https');
+
+        const agent = new https.Agent({
+            rejectUnauthorized: false,
+            checkServerIdentity: () => undefined,
+            requestCert: false,
+            agent: false
+        });
+
+        const response = await axios.get(CONFIG_API_URL, {
+            httpsAgent: agent,
+            timeout: FALLBACK_TIMEOUT,
             headers: {
-                'accept': 'application/json, text/plain, */*',
-                'accept-language': 'en-US,en;q=0.9',
-                'content-type': 'application/json',
-                'priority': 'u=1, i',
-                'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"Windows"',
-                'sec-fetch-dest': 'empty',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
-                'x-requested-with': 'Leap'
+                'accept': REQUEST_HEADERS.ACCEPT,
+                'user-agent': REQUEST_HEADERS.USER_AGENT,
+                'x-requested-with': REQUEST_HEADERS.X_REQUESTED_WITH
             }
         });
 
-        const config = response.data;
-        logger.info('Configuration fetched successfully');
-
-        // Store configuration in extension context globalState
-
-        await context.globalState.update('dataLimit', config.data_limit);
-        await context.globalState.update('autoUserCreation', config.autoUserCreation);
-        await context.globalState.update('autoUserProject', config.autoUserProject);
-        await context.globalState.update('activeProfiles', config.activeProfiles?.split(',') || []);
-        await context.globalState.update('logoLocation', config.logoLocation);
-        await context.globalState.update('theme', config.theme);
-        await context.globalState.update('defaultTheme', config.theme);
-        await context.globalState.update('font', config.font);
-        await context.globalState.update('telemetryUrl', config.telemetryUrl);
-        await context.globalState.update('telemetry', config.telemetry);
-        await context.globalState.update('telemetryPdataId', config.telemetryPdataId);
-        await context.globalState.update('capBaseUrl', config.capBaseUrl);
-        await context.globalState.update('appVersion', config.appVersion);
-        await context.globalState.update('leapAppYear', config.leapAppYear);
-        await context.globalState.update('showPortfolioHeader', config.showPortfolioHeader);
-        await context.globalState.update('showProfileIcon', config.showProfileIcon);
-        await context.globalState.update('encDefault', config.encDefault);
-
-        // Handle JWT token expiration for specific profiles
-        const activeProfiles = config.activeProfiles?.split(',') || [];
-        if (activeProfiles.includes('dbjwt')) {
-            await context.globalState.update('expireTokenTime', config.expireTokenTime);
-        }
-
-        // Store OAuth configuration for authentication service
-        const oauthConfig = {
-            issuerUri: config.issuerUri || AUTH_CONFIG.ISSUER_URI,
-            clientId: config.clientId || AUTH_CONFIG.CLIENT_ID,
-            scope: config.scope || AUTH_CONFIG.SCOPE,
-            responseType: 'code',
-            useSilentRefresh: true,
-            timeoutFactor: (typeof config.silentRefreshTimeoutFactor === 'number' &&
-                config.silentRefreshTimeoutFactor > 0 &&
-                config.silentRefreshTimeoutFactor <= 1)
-                ? config.silentRefreshTimeoutFactor : 0.9,
-            sessionChecksEnabled: true,
-            showDebugInformation: DEBUG_CONFIG.VERBOSE_LOGGING,
-            clearHashAfterLogin: false,
-            strictDiscoveryDocumentValidation: false
-        };
-
-        await context.globalState.update('oauthConfig', oauthConfig);
-        await context.globalState.update('baseUrl', config.baseUrl || '');
-
-        logger.info('Configuration initialization completed successfully');
-
-    } catch (error) {
-        logger.warn('Failed to fetch configuration from server:', error);
-
-        // Check if it's an SSL certificate error
-        if (error instanceof Error &&
-            (error.message.includes('certificate') ||
-                error.message.includes('CERT_') ||
-                error.message.includes('unable to get local issuer certificate') ||
-                error.message.includes('self signed certificate'))) {
-            logger.error('SSL Certificate Error detected. The server appears to be using a self-signed or untrusted certificate.');
-            logger.error('SSL bypass should handle this, but the certificate validation is still failing.');
-
-            // Try one more time with additional SSL bypass
-            try {
-                logger.info('Attempting configuration fetch with additional SSL bypass...');
-                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-
-                const axios = require('axios');
-                const https = require('https');
-
-                // Create a more aggressive HTTPS agent
-                const agent = new https.Agent({
-                    rejectUnauthorized: false,
-                    checkServerIdentity: () => undefined,
-                    requestCert: false,
-                    agent: false
-                });
-
-                const fallbackResponse = await axios.get('https://essedum.az.ad.idemo-ppc.com/api/getConfigDetails', {
-                    httpsAgent: agent,
-                    timeout: 15000,
-                    headers: {
-                        'accept': 'application/json, text/plain, */*',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'x-requested-with': 'Leap'
-                    }
-                });
-
-                const config = fallbackResponse.data;
-                logger.info('Configuration fetched successfully with fallback method');
-
-                // Store the configuration as before...
-                await context.globalState.update('dataLimit', config.data_limit);
-                await context.globalState.update('autoUserCreation', config.autoUserCreation);
-                // ... (rest of the storage logic would go here)
-
-                return; // Exit early if fallback worked
-
-            } catch (fallbackError) {
-                logger.error('Fallback configuration fetch also failed:', fallbackError);
-            }
-        }
-
-        // Use default configuration if server fetch fails
-        await context.globalState.update('theme', 'default');
-        await context.globalState.update('defaultTheme', 'default');
-        await context.globalState.update('activeProfiles', []);
-
-        // Store default OAuth configuration
-        const defaultOAuthConfig = {
-            issuerUri: AUTH_CONFIG.ISSUER_URI,
-            clientId: AUTH_CONFIG.CLIENT_ID,
-            scope: AUTH_CONFIG.SCOPE,
-            responseType: 'code',
-            useSilentRefresh: true,
-            timeoutFactor: 0.9,
-            sessionChecksEnabled: true,
-            showDebugInformation: DEBUG_CONFIG.VERBOSE_LOGGING,
-            clearHashAfterLogin: false,
-            strictDiscoveryDocumentValidation: false
-        };
-
-        await context.globalState.update('oauthConfig', defaultOAuthConfig);
-
-        // Don't throw error to allow extension to continue with defaults
-        logger.info('Using default configuration due to server fetch failure');
+        await storeServerConfiguration(context, response.data);
+        logger.info('Configuration fetched successfully with fallback method');
+    } catch (fallbackError) {
+        logger.error('Fallback configuration fetch failed:', fallbackError);
+        await storeDefaultConfiguration(context);
     }
+}
+
+async function storeDefaultConfiguration(context: vscode.ExtensionContext): Promise<void> {
+    const defaultUpdates = [
+        { key: STORAGE_KEYS.THEME, value: 'default' },
+        { key: STORAGE_KEYS.DEFAULT_THEME, value: 'default' },
+        { key: STORAGE_KEYS.ACTIVE_PROFILES, value: [] },
+        { key: STORAGE_KEYS.OAUTH_CONFIG, value: createDefaultOAuthConfig() }
+    ];
+
+    await Promise.all(defaultUpdates.map(({ key, value }) => context.globalState.update(key, value)));
+    logger.info('Using default configuration due to server fetch failure');
+}
+
+function createDefaultOAuthConfig(): OAuthConfig {
+    return {
+        issuerUri: AUTH_CONFIG.ISSUER_URI,
+        clientId: AUTH_CONFIG.CLIENT_ID,
+        scope: AUTH_CONFIG.SCOPE,
+        responseType: 'code',
+        useSilentRefresh: true,
+        timeoutFactor: 0.9,
+        sessionChecksEnabled: true,
+        showDebugInformation: DEBUG_CONFIG.VERBOSE_LOGGING,
+        clearHashAfterLogin: false,
+        strictDiscoveryDocumentValidation: false
+    };
 }
 
 /**
@@ -327,7 +476,7 @@ function createAuthenticationService(context: vscode.ExtensionContext): Keycloak
     logger.info('Creating authentication service...');
 
     // Get OAuth configuration from stored config (fetched from server) or use defaults
-    const storedOAuthConfig = context.globalState.get('oauthConfig') as any;
+    const storedOAuthConfig = context.globalState.get<OAuthConfig>(STORAGE_KEYS.OAUTH_CONFIG);
 
     // Create Keycloak configuration using server config if available, otherwise defaults
     const keycloakConfig: KeycloakConfig = {
@@ -351,7 +500,7 @@ function createFileSystemProvider(): EssedumFileSystemProvider {
     logger.info('Creating file system provider...');
 
     // Create Essedum file system provider with empty initial token
-    return new EssedumFileSystemProvider('',null,null);
+    return new EssedumFileSystemProvider('', null, null);
 }
 
 /**
@@ -364,11 +513,11 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
     try {
         // Attempt to get access token for initialization
         const accessToken = await authService.getAccessToken();
-
         await getUserAtLogin(extensionContext, accessToken);
 
-        const project: any = context.globalState.get('project');
-        const role: any = context.globalState.get('role');
+        const project = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
+        const role = context.globalState.get<any>(STORAGE_KEYS.ROLE);
+
         // Create pipeline service with token
         pipelineService = new PipelineService(accessToken, role, project);
 
@@ -387,20 +536,7 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
         logger.info('Pipeline services initialized with valid token');
 
     } catch (error) {
-        logger.warn('Failed to initialize pipeline services with token, creating with empty tokens:', error);
-        const project: any = context.globalState.get('project');
-        // Create services with empty tokens (will be updated when user logs in)
-        pipelineService = new PipelineService('', project.name);
-        pipelineCardsProvider = new PipelineCardsProvider(
-            context,
-            '',
-            authService,
-            essedumFileProvider,
-            pipelineService
-        );
-
-        // Set authentication context to false since initialization failed
-        await updateAuthenticationContext(false);
+        await handlePipelineServiceInitializationError(context, error);
     }
 
     // Register the pipeline cards provider as the main webview
@@ -411,6 +547,23 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
     );
 
     logger.info('Pipeline services registration completed');
+}
+
+async function handlePipelineServiceInitializationError(context: vscode.ExtensionContext, error: unknown): Promise<void> {
+    logger.warn('Failed to initialize pipeline services with token, creating with empty tokens:', error);
+
+    const project = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
+
+    pipelineService = new PipelineService('', project?.name);
+    pipelineCardsProvider = new PipelineCardsProvider(
+        context,
+        '',
+        authService,
+        essedumFileProvider,
+        pipelineService
+    );
+
+    await updateAuthenticationContext(false);
 }
 
 // ================================
@@ -424,25 +577,22 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
 function registerExtensionCommands(context: vscode.ExtensionContext): void {
     logger.info('Registering extension commands...');
 
-    // Register main sidebar command
-    registerCommand(context, COMMANDS.OPEN_SIDEBAR, handleOpenSidebar);
+    const commandMappings = [
+        { command: COMMANDS.OPEN_SIDEBAR, handler: handleOpenSidebar },
+        { command: COMMANDS.LOGIN, handler: handleLogin },
+        { command: COMMANDS.LOGOUT, handler: handleLogout },
+        { command: COMMANDS.CHECK_AUTH, handler: handleCheckAuth },
+        { command: COMMANDS.RUN_PIPELINE, handler: handleRunPipeline },
+        { command: COMMANDS.GET_USER_INFO, handler: handleGetUserInfo },
+        { command: COMMANDS.REFRESH_USER_INFO, handler: handleRefreshUserInfo },
+        { command: 'essedum.clearUserData', handler: handleClearUserData },
+        { command: 'essedum.debugUserData', handler: handleDebugUserData }
+    ];
 
-    // Register authentication commands
-    registerCommand(context, COMMANDS.LOGIN, handleLogin);
-    registerCommand(context, COMMANDS.LOGOUT, handleLogout);
-    registerCommand(context, COMMANDS.CHECK_AUTH, handleCheckAuth);
+    commandMappings.forEach(({ command, handler }) => {
+        registerCommand(context, command, handler);
+    });
 
-    // Register pipeline commands
-    registerCommand(context, COMMANDS.RUN_PIPELINE, handleRunPipeline);
-
-    // Register user info commands
-    // Register user info commands
-    registerCommand(context, COMMANDS.GET_USER_INFO, () => handleGetUserInfo());
-    registerCommand(context, COMMANDS.REFRESH_USER_INFO, () => handleRefreshUserInfo());
-
-    // Add debug and clear commands
-    registerCommand(context, 'essedum.clearUserData', handleClearUserData);
-    registerCommand(context, 'essedum.debugUserData', handleDebugUserData);
     logger.info('All extension commands registered successfully');
 }
 
@@ -493,49 +643,48 @@ async function handleLogin(): Promise<void> {
             true // Allow cancellation
         );
 
-        const accessToken = authResult.access_token;
-        logger.info('Authentication successful, token length:', accessToken?.length || 0);
-
-        // Store tokens in extension context for consistency with web app
-        await extensionContext.globalState.update('jwtToken', accessToken);
-        await extensionContext.globalState.update('accessToken', accessToken);
-
-        // Update services with new token
-        await updateServicesWithToken(accessToken);
-
-        // Fetch and process user information after successful authentication
-        await getUserAtLogin(extensionContext, accessToken);
-
-        // Update authentication context
-        await updateAuthenticationContext(true);
-
-        // Open the sidebar to show updated view
-        await safeExecuteCommand(COMMANDS.VSCODE.OPEN_EXTENSION_VIEW);
-
-        // Show success message
-        const selection = await showSuccessMessage(
-            MESSAGES.SUCCESS.LOGIN_SUCCESS,
-            UI_CONFIG.BUTTONS.VIEW_PIPELINES
-        );
-
-        if (selection === UI_CONFIG.BUTTONS.VIEW_PIPELINES) {
-            await safeExecuteCommand(COMMANDS.VSCODE.OPEN_EXTENSION_VIEW);
-        }
-
+        await processSuccessfulLogin(authResult.access_token);
         logger.info('Login process completed successfully');
 
     } catch (error) {
-        logger.error('Authentication failed:', error);
+        await handleLoginError(error);
+}
+}
 
-        const userMessage = getAuthErrorMessage(error);
-        await showErrorWithOptions(
-            userMessage,
-            COMMANDS.LOGIN,
-            EXTERNAL_LINKS.KEYCLOAK_DOCS
-        );
+async function processSuccessfulLogin(accessToken: string): Promise<void> {
+    logger.info('Authentication successful, token length:', accessToken?.length || 0);
 
-        throw error; // Re-throw for any additional error handling
+    await Promise.all([
+        extensionContext.globalState.update(STORAGE_KEYS.JWT_TOKEN, accessToken),
+        extensionContext.globalState.update(STORAGE_KEYS.ACCESS_TOKEN, accessToken)
+    ]);
+
+    await updateServicesWithToken(accessToken);
+    await getUserAtLogin(extensionContext, accessToken);
+    await updateAuthenticationContext(true);
+    await safeExecuteCommand(COMMANDS.VSCODE.OPEN_EXTENSION_VIEW);
+
+    const selection = await showSuccessMessage(
+        MESSAGES.SUCCESS.LOGIN_SUCCESS,
+        UI_CONFIG.BUTTONS.VIEW_PIPELINES
+    );
+
+    if (selection === UI_CONFIG.BUTTONS.VIEW_PIPELINES) {
+        await safeExecuteCommand(COMMANDS.VSCODE.OPEN_EXTENSION_VIEW);
     }
+}
+
+async function handleLoginError(error: unknown): Promise<void> {
+    logger.error('Authentication failed:', error);
+    
+    const userMessage = getAuthErrorMessage(error);
+    await showErrorWithOptions(
+        userMessage,
+        COMMANDS.LOGIN,
+        EXTERNAL_LINKS.KEYCLOAK_DOCS
+    );
+    
+    throw error;
 }
 
 /**
@@ -683,31 +832,7 @@ async function handleDebugUserData(): Promise<void> {
 /**
  * Clears all cached user data from globalState
  */
-async function clearAllUserData(context: vscode.ExtensionContext): Promise<void> {
-    logger.info('Clearing all cached user data...');
 
-    const keysToCllear = [
-        // User authentication data
-        'user', 'role', 'project', 'organization',
-        'currentUserInfo', 'userInfoData', 'userPortfolios',
-        'jwtToken', 'accessToken', 'currentProject',
-        'currentPortfolio', 'UpdatedUser', 'returnUrl',
-
-        // Configuration data that might contain user-specific info
-        'theme', 'defaultTheme', 'font',
-
-        // Additional cached data
-        'dashConstants', 'userPreferences', 'selectedRole',
-        'selectedProject', 'selectedPortfolio'
-    ];
-
-    for (const key of keysToCllear) {
-        await context.globalState.update(key, undefined);
-        logger.debug(`Cleared key: ${key}`);
-    }
-
-    logger.info('All user data cleared from cache');
-}
 
 /**
  * Handles the get user info command
@@ -800,6 +925,43 @@ async function handleRefreshUserInfo(): Promise<void> {
 // UTILITY FUNCTIONS
 // ================================
 
+async function clearAllUserData(context: vscode.ExtensionContext): Promise<void> {
+    logger.info('Clearing all cached user data...');
+
+    const keysToCllear = [
+        STORAGE_KEYS.USER,
+        STORAGE_KEYS.ROLE,
+        STORAGE_KEYS.PROJECT,
+        STORAGE_KEYS.ORGANIZATION,
+        STORAGE_KEYS.CURRENT_USER_INFO,
+        STORAGE_KEYS.USER_INFO_DATA,
+        STORAGE_KEYS.USER_PORTFOLIOS,
+        STORAGE_KEYS.JWT_TOKEN,
+        STORAGE_KEYS.ACCESS_TOKEN,
+        STORAGE_KEYS.CURRENT_PROJECT,
+        STORAGE_KEYS.CURRENT_PORTFOLIO,
+        STORAGE_KEYS.UPDATED_USER,
+        STORAGE_KEYS.RETURN_URL,
+        STORAGE_KEYS.THEME,
+        STORAGE_KEYS.DEFAULT_THEME,
+        'font',
+        'dashConstants',
+        'userPreferences',
+        'selectedRole',
+        'selectedProject',
+        'selectedPortfolio'
+    ];
+
+    await Promise.all(
+        keysToCllear.map(key => {
+            logger.debug(`Clearing key: ${key}`);
+            return context.globalState.update(key, undefined);
+        })
+    );
+
+    logger.info('All user data cleared from cache');
+}
+
 /**
  * Gets a configuration value from the stored server configuration
  * @param context - VS Code extension context
@@ -877,27 +1039,15 @@ async function getUserAtLogin(context: vscode.ExtensionContext, accessToken: str
     logger.info('Processing user information after login...');
 
     try {
-        // Store token information
-        await context.globalState.update('jwtToken', accessToken);
+        await context.globalState.update(STORAGE_KEYS.JWT_TOKEN, accessToken);
 
-        // Parse return URL if exists (VS Code equivalent of localStorage.getItem("returnUrl"))
-        const returnUrl = context.globalState.get('returnUrl', '') as string;
-        let pfolio: any, prjct: any, prole: any;
+        const returnUrl = context.globalState.get<string>(STORAGE_KEYS.RETURN_URL, '');
         let userAccess = false;
 
-        // Parse portfolio, project, and role from return URL if available
-        if (returnUrl && returnUrl.includes('pfolio') && returnUrl.includes('&prjct') && returnUrl.includes('&prole')) {
-            const autoportfolio = extractUrlParameter(returnUrl, 'pfolio', '&prjct');
-            const autoproject = extractUrlParameter(returnUrl, 'prjct', '&prole');
-            const autorole = extractUrlParameter(returnUrl, 'prole', '');
-
-            logger.info('Extracted URL parameters:', { autoportfolio, autoproject, autorole });
-
-            // In VS Code extension, we might not need these specific calls but log for reference
-            logger.info('Would fetch portfolio, project, and role data in web app');
+        if (returnUrl?.includes('pfolio') && returnUrl.includes('&prjct') && returnUrl.includes('&prole')) {
+            logger.info('Return URL contains portfolio, project, and role parameters');
         }
 
-        // Fetch user information
         const userInfo = await getUserInfoData(context, accessToken);
 
         if (!userInfo) {
@@ -906,71 +1056,57 @@ async function getUserAtLogin(context: vscode.ExtensionContext, accessToken: str
         }
 
         if (!userInfo.porfolios || userInfo.porfolios.length === 0) {
-            logger.info('User has no portfolios');
-
-            // Check active profiles for auto user creation
-            const activeProfiles = getConfigurationValue(context, 'activeProfiles', []) as string[];
-            const autoUserCreation = getConfigurationValue(context, 'autoUserCreation', false);
-
-            if (activeProfiles.includes('keycloak') ||
-                activeProfiles.includes('msal') ||
-                activeProfiles.includes('aicloud')) {
-
-                if (!autoUserCreation) {
-                    logger.info('Auto user creation disabled, user needs permissions');
-                    await vscode.window.showWarningMessage(
-                        'You do not have access to any portfolios. Please contact your administrator for access.'
-                    );
-                } else {
-                    logger.info('Auto user creation enabled');
-                    await vscode.window.showInformationMessage(
-                        'Setting up your account automatically...'
-                    );
-                }
-            }
+            await handleNoPortfolios(context);
         } else {
             logger.info('User has portfolios, initializing user access');
-
-            // Initialize user access (VS Code equivalent of initUserAccess)
             await initUserAccess(context, userInfo, accessToken);
 
-            const role = context.globalState.get('role');
-            // Get dashboard constants (VS Code equivalent of getDashConsts)
+            const role = context.globalState.get(STORAGE_KEYS.ROLE);
             await getDashboardConstants(context, role, accessToken);
 
-            // Check user access if return URL and entities are available
-            if (returnUrl && pfolio && prjct && prole) {
-                userAccess = checkUserAccess(userInfo, pfolio, prjct, prole);
-                if (userAccess) {
-                    logger.info('User has access, would navigate to return URL in web app');
-                    await vscode.window.showInformationMessage('Access verified successfully!');
-                }
-            }
-
             if (!userAccess) {
-                logger.info('No specific access or no return URL, showing default view');
-                // In VS Code, open the main extension view instead of navigating to landing page
                 await safeExecuteCommand(COMMANDS.VSCODE.OPEN_EXTENSION_VIEW);
             }
         }
-
     } catch (error) {
-        logger.error('Error processing user information:', error);
+        await handleGetUserAtLoginError(context, error);
+    }
+}
 
-        // Handle error case similar to Angular catch block
-        const activeProfiles = getConfigurationValue(context, 'activeProfiles', []) as string[];
-        const autoUserCreation = getConfigurationValue(context, 'autoUserCreation', false);
+async function handleNoPortfolios(context: vscode.ExtensionContext): Promise<void> {
+    logger.info('User has no portfolios');
 
-        if (activeProfiles.includes('keycloak') || activeProfiles.includes('msal')) {
-            if (!autoUserCreation) {
-                logger.info('Error getting user info and auto user creation disabled');
-                await vscode.window.showErrorMessage(
-                    'Unable to retrieve user information. Please contact your administrator.'
-                );
-            }
+    const activeProfiles = context.globalState.get<string[]>(STORAGE_KEYS.ACTIVE_PROFILES, []);
+    const autoUserCreation = context.globalState.get<boolean>(STORAGE_KEYS.AUTO_USER_CREATION, false);
+
+    const requiresPermission = ['keycloak', 'msal', 'aicloud'].some(profile => 
+        activeProfiles.includes(profile)
+    );
+
+    if (requiresPermission) {
+        if (!autoUserCreation) {
+            await vscode.window.showWarningMessage(
+                'You do not have access to any portfolios. Please contact your administrator for access.'
+            );
+        } else {
+            await vscode.window.showInformationMessage('Setting up your account automatically...');
         }
     }
 }
+
+async function handleGetUserAtLoginError(context: vscode.ExtensionContext, error: unknown): Promise<void> {
+    logger.error('Error processing user information:', error);
+
+    const activeProfiles = context.globalState.get<string[]>(STORAGE_KEYS.ACTIVE_PROFILES, []);
+    const autoUserCreation = context.globalState.get<boolean>(STORAGE_KEYS.AUTO_USER_CREATION, false);
+
+    if ((activeProfiles.includes('keycloak') || activeProfiles.includes('msal')) && !autoUserCreation) {
+        await vscode.window.showErrorMessage(
+            'Unable to retrieve user information. Please contact your administrator.'
+        );
+    }
+}
+
 
 /**
  * Fetches user information from the server
@@ -978,22 +1114,11 @@ async function getUserAtLogin(context: vscode.ExtensionContext, accessToken: str
  * @param accessToken - JWT access token
  * @returns User information or null if error
  */
-async function getUserInfoData(context: vscode.ExtensionContext, accessToken: string): Promise<any> {
+async function getUserInfoData(context: vscode.ExtensionContext, accessToken: string): Promise<UserInfo | null> {
     logger.info('Fetching user information...');
 
     try {
-        // Check if we have cached user info (VS Code equivalent of sessionStorage.getItem("UpdatedUser"))
-        // const updatedUser = context.globalState.get('UpdatedUser', false);
-        // const cachedUserInfo = context.globalState.get('userInfoData');
-
-        // if (!updatedUser && cachedUserInfo) {
-        //     logger.info('Using cached user information');
-        //     return cachedUserInfo;
-        // }
-
-        // Fetch fresh user info from server
         return await getUserInfo(context, accessToken);
-
     } catch (error) {
         logger.error('Error fetching user info data:', error);
         return null;
@@ -1006,46 +1131,38 @@ async function getUserInfoData(context: vscode.ExtensionContext, accessToken: st
  * @param accessToken - JWT access token
  * @returns User information
  */
-async function getUserInfo(context: vscode.ExtensionContext, accessToken: string): Promise<any> {
+async function getUserInfo(context: vscode.ExtensionContext, accessToken: string): Promise<UserInfo> {
     logger.info('Fetching user info from API...');
 
     try {
-        const salt = getConfigurationValue(context, 'encDefault', '');
+        const salt = context.globalState.get<string>(STORAGE_KEYS.ENC_DEFAULT, '');
 
-        const response = await makeSecureRequest('GET', 'https://essedum.az.ad.idemo-ppc.com/api/userInfo', {
+        const response = await makeSecureRequest('GET', USER_INFO_API_URL, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'accept': 'application/json, text/plain, */*',
-                'content-type': 'application/json',
-                'x-requested-with': 'Leap'
+                'accept': REQUEST_HEADERS.ACCEPT,
+                'content-type': REQUEST_HEADERS.CONTENT_TYPE,
+                'x-requested-with': REQUEST_HEADERS.X_REQUESTED_WITH
             },
             responseType: 'text'
         });
 
-        let result: any;
-        if (salt) {
-            // Decrypt the response if encryption is enabled
-            result = JSON.parse(await decryptUsingAES256(response.data, salt));
-        } else {
-            // Parse as regular JSON if no encryption
-            result = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-        }
+        const result = salt
+            ? JSON.parse(await decryptUsingAES256(response.data, salt))
+            : (typeof response.data === 'string' ? JSON.parse(response.data) : response.data);
 
-        // Cache the user info
-        await context.globalState.update('userInfoData', result);
-        await context.globalState.update('UpdatedUser', false);
+        await Promise.all([
+            context.globalState.update(STORAGE_KEYS.USER_INFO_DATA, result),
+            context.globalState.update(STORAGE_KEYS.UPDATED_USER, false)
+        ]);
 
         logger.info('User information fetched and cached successfully');
         return result;
-
     } catch (error) {
         logger.error('Error fetching user info from API:', error);
-
-        // VS Code equivalent of redirecting to unauthorized page
         await vscode.window.showErrorMessage(
             'You are not authorized to access this application. Please contact the administrator.'
         );
-
         throw new Error('You are not authorized to access this application. Please contact the admin');
     }
 }
@@ -1056,234 +1173,243 @@ async function getUserInfo(context: vscode.ExtensionContext, accessToken: string
  * @param userInfo - User information object
  * @param accessToken - JWT access token
  */
-async function initUserAccess(context: vscode.ExtensionContext, userInfo: any, accessToken: string): Promise<void> {
+async function initUserAccess(context: vscode.ExtensionContext, userInfo: UserInfo, accessToken: string): Promise<void> {
     logger.info('Initializing user access settings...');
 
     try {
-        // Store user information in context
-        await context.globalState.update('currentUserInfo', userInfo);
-        await context.globalState.update('userPortfolios', userInfo.porfolios || []);
+        await Promise.all([
+            context.globalState.update(STORAGE_KEYS.CURRENT_USER_INFO, userInfo),
+            context.globalState.update(STORAGE_KEYS.USER_PORTFOLIOS, userInfo.porfolios || [])
+        ]);
 
         if (!userInfo.porfolios || userInfo.porfolios.length === 0) {
             logger.warn('No portfolios available for user');
             return;
         }
 
-        // Initialize dashboard constants query object
-        const dashconstant1: any = {
-            keys: userInfo.porfolios[0].porfolioId.portfolioName + "default"
+        const portfolio = userInfo.porfolios[0];
+        const dashconstant: DashConstantQuery = {
+            keys: portfolio.porfolioId.portfolioName + "default"
         };
 
-        let flag1 = 0;
-        let projectindex = 0;
-        const currentProject = context.globalState.get('project') as any;
-        const currentRole = context.globalState.get('role') as any;
-        let projectCheck = false;
+        const currentProject = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
+        const currentRole = context.globalState.get<any>(STORAGE_KEYS.ROLE);
 
         try {
-            // Fetch dashboard constants (equivalent to findAllDashConstant)
-            const dashConstants = await findAllDashConstant(context, userInfo.porfolios[0].projectWithRoles[0].projectId, currentRole, dashconstant1, accessToken);
+            const dashConstants = await findAllDashConstant(
+                context,
+                portfolio.projectWithRoles[0].projectId,
+                currentRole,
+                dashconstant,
+                accessToken
+            );
 
-            // Filter constants for current portfolio
-            let res = dashConstants.content || [];
-            res = res.filter((item: any) => item.keys === userInfo.porfolios[0].porfolioId.portfolioName + "default");
-
-            // Check if current project exists in dashboard constants
-            res.forEach((item: any) => {
-                if (currentProject && currentProject.id === item.project_id.id) {
-                    projectCheck = true;
-                    return;
-                }
-            });
-
-            // Process dashboard constants if available and project check passes
-            if (res && res.length > 0 && projectCheck) {
-                let temp: any;
-                try {
-                    temp = JSON.parse(res[0].value);
-                } catch (e: any) {
-                    logger.error("JSON.parse error - ", e);
-                }
-
-                const value = temp;
-                const defaultproject = value.defaultproject;
-
-                if (defaultproject) {
-                    userInfo.porfolios[0].projectWithRoles.forEach((element: any, index: number) => {
-                        if (element.projectId.id === defaultproject) {
-                            projectindex = index;
-                            flag1 = 1;
-                            try {
-                                const porfolios = JSON.stringify(userInfo.porfolios[0].projectWithRoles[projectindex].projectId);
-                                context.globalState.update('project', JSON.parse(porfolios));
-                            } catch (e: any) {
-                                logger.error("JSON.parse error - ", e);
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Determine project index
-            let index = 0;
-            if (userInfo.porfolios[0].projectWithRoles.length > 1) {
-                const autoUserProject = getConfigurationValue(context, 'autoUserProject', null) as any;
-                if (autoUserProject && userInfo.porfolios[0].projectWithRoles[index].projectId.id === autoUserProject.id) {
-                    index++;
-                }
-            }
-
-            if (flag1 === 1) {
-                index = projectindex;
-            }
-
-            // Set project in storage
-            if (flag1 === 0) {
-                if (currentProject) {
-                    await context.globalState.update('project', currentProject);
-                } else {
-                    await context.globalState.update('project', userInfo.porfolios[0].projectWithRoles[index].projectId);
-                }
-            }
-
-            // Process role selection
-            let flag = 0;
-            if (res && res.length > 0) {
-                const project = context.globalState.get('project') as any;
-                let value: any[] = [];
-
-                try {
-                    const parsedValue = JSON.parse(res[0].value);
-                    value = parsedValue.defaultprojectroles.filter((item: any) => item.project === project.id);
-                } catch (e: any) {
-                    logger.error("JSON.parse error processing default project roles - ", e);
-                }
-
-                if (value.length > 0) {
-                    const defaultrole = value[0].role;
-                    let clientDetailsDefaultRole: string | null = null;
-
-                    // Check for client details default role
-                    if (userInfo.userId.clientDetails) {
-                        try {
-                            const temp = JSON.parse(userInfo.userId.clientDetails);
-                            temp.forEach((item: any) => {
-                                if (item.pointer.trim() === "defaultRole" && !clientDetailsDefaultRole) {
-                                    clientDetailsDefaultRole = item.value;
-                                    return;
-                                }
-                            });
-                        } catch (e: any) {
-                            logger.error("Error parsing client details - ", e);
-                        }
-                    }
-
-                    let clientFlag = false;
-
-                    // Try to set role from client details
-                    if (clientDetailsDefaultRole) {
-                        let roleIndex = flag1 === 1 ? projectindex : index;
-                        userInfo.porfolios[0].projectWithRoles[roleIndex].roleId.forEach((element: any) => {
-                            if (element.name.trim() === clientDetailsDefaultRole!.trim()) {
-                                clientFlag = true;
-                                try {
-                                    const roleValue = JSON.stringify(element);
-                                    context.globalState.update('role', JSON.parse(roleValue));
-
-                                } catch (e: any) {
-                                    logger.error("JSON.stringify error - ", e);
-                                }
-                                flag = 1;
-                            }
-                        });
-                    }
-
-                    // Use default role if client role not found or not specified
-                    if (defaultrole && (!clientDetailsDefaultRole || !clientFlag)) {
-                        let roleIndex = flag1 === 1 ? projectindex : index;
-                        userInfo.porfolios[0].projectWithRoles[roleIndex].roleId.forEach((element: any) => {
-                            if (element.id === defaultrole) {
-                                try {
-                                    const roleValue = JSON.stringify(element);
-                                    context.globalState.update('role', JSON.parse(roleValue));
-
-                                } catch (e: any) {
-                                    logger.error("JSON.stringify error - ", e);
-                                }
-                                flag = 1;
-                            }
-                        });
-                    }
-                }
-            }
-
-            // Store user information
-            await context.globalState.update('user', userInfo.userId);
-
-            // Set organization
-            const finalProject = context.globalState.get('project') as any;
-            if (currentProject) {
-                await context.globalState.update('organization', currentProject.name);
-            } else {
-                await context.globalState.update('organization', userInfo.porfolios[0].projectWithRoles[index].projectId.name);
-            }
-
-            // Set role if not already set
-            if (flag === 0) {
-                if (currentRole) {
-                    await context.globalState.update('role', currentRole);
-                } else {
-                    await context.globalState.update('role', userInfo.porfolios[0].projectWithRoles[index].roleId[0]);
-                }
-
-            }
-
-            // Log final project selection
-            const finalProjectSelection = context.globalState.get('project') as any;
-            logger.info('User access initialization completed with project:', finalProjectSelection?.name || 'Unknown');
-
+            await processUserAccessWithConstants(context, userInfo, dashConstants, currentProject, currentRole);
         } catch (error) {
             logger.error('Error fetching dashboard constants, using fallback initialization:', error);
-
-            // Fallback initialization if dashboard constants fail
-            await context.globalState.update('user', userInfo.userId);
-            await context.globalState.update('project', userInfo.porfolios[0].projectWithRoles[0].projectId);
-            await context.globalState.update('role', userInfo.porfolios[0].projectWithRoles[0].roleId[0]);
-            await context.globalState.update('organization', userInfo.porfolios[0].projectWithRoles[0].projectId.name);
-
+            await fallbackUserAccessInitialization(context, userInfo);
         }
 
-        // Set default project and organization if available (keeping original logic as backup)
-        if (userInfo.porfolios && userInfo.porfolios.length > 0) {
-            const defaultPortfolio = userInfo.porfolios[0];
-            await context.globalState.update('currentPortfolio', defaultPortfolio);
+        //   if (userInfo.porfolios && userInfo.porfolios.length > 0) {
+        //     const defaultPortfolio = userInfo.porfolios[0];
+        //     await context.globalState.update('currentPortfolio', defaultPortfolio);
 
-            if (defaultPortfolio.projects && defaultPortfolio.projects.length > 0) {
-                const defaultProject = defaultPortfolio.projects[0];
-                await context.globalState.update('currentProject', defaultProject);
-            }
+        //     if (defaultPortfolio.projects && defaultPortfolio.projects.length > 0) {
+        //         const defaultProject = defaultPortfolio.projects[0];
+        //         await context.globalState.update('currentProject', defaultProject);
+        //     }
+        // }
+        if (portfolio.projectWithRoles && portfolio.projectWithRoles.length > 0) {
+            await context.globalState.update(STORAGE_KEYS.CURRENT_PROJECT, portfolio.projectWithRoles[0]);
         }
 
         logger.info('User access initialization completed successfully');
-
     } catch (error) {
         logger.error('Error initializing user access:', error);
-
-        // Minimal fallback if everything fails
-        try {
-            await context.globalState.update('user', userInfo.userId);
-            if (userInfo.porfolios && userInfo.porfolios.length > 0 &&
-                userInfo.porfolios[0].projectWithRoles && userInfo.porfolios[0].projectWithRoles.length > 0) {
-                await context.globalState.update('project', userInfo.porfolios[0].projectWithRoles[0].projectId);
-                await context.globalState.update('role', userInfo.porfolios[0].projectWithRoles[0].roleId[0]);
-                await context.globalState.update('organization', userInfo.porfolios[0].projectWithRoles[0].projectId.name);
-
-            }
-        } catch (fallbackError) {
-            logger.error('Fallback initialization also failed:', fallbackError);
-        }
+        await fallbackUserAccessInitialization(context, userInfo);
     }
 }
+
+
+async function processUserAccessWithConstants(
+    context: vscode.ExtensionContext,
+    userInfo: UserInfo,
+    dashConstants: any,
+    currentProject: any,
+    currentRole: any
+): Promise<void> {
+    const portfolio = userInfo.porfolios![0];
+    let res = (dashConstants.content || []).filter((item: any) => 
+        item.keys === portfolio.porfolioId.portfolioName + "default"
+    );
+
+    const projectCheck = res.some((item: any) => 
+        currentProject && currentProject.id === item.project_id.id
+    );
+
+    let projectindex = 0;
+    let flag1 = 0;
+
+    if (res.length > 0 && projectCheck) {
+        const value = tryParseJSON(res[0].value);
+        if (value?.defaultproject) {
+            portfolio.projectWithRoles.forEach((element: any, index: number) => {
+                if (element.projectId.id === value.defaultproject) {
+                    projectindex = index;
+                    flag1 = 1;
+                    const porfolios = tryStringifyJSON(element.projectId);
+                    if (porfolios) {
+                        context.globalState.update(STORAGE_KEYS.PROJECT, JSON.parse(porfolios));
+                    }
+                }
+            });
+        }
+    }
+
+    let index = determineProjectIndex(portfolio, context, flag1, projectindex);
+
+    if (flag1 === 0) {
+        await context.globalState.update(
+            STORAGE_KEYS.PROJECT,
+            currentProject || portfolio.projectWithRoles[index].projectId
+        );
+    }
+
+    await processRoleSelection(context, userInfo, res, currentRole, flag1, projectindex, index);
+    await context.globalState.update(STORAGE_KEYS.USER, userInfo.userId);
+    
+    const finalProject = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
+    await context.globalState.update(
+        STORAGE_KEYS.ORGANIZATION,
+        currentProject?.name || portfolio.projectWithRoles[index].projectId.name
+    );
+
+    logger.info('User access initialization completed with project:', finalProject?.name || 'Unknown');
+}
+
+function determineProjectIndex(portfolio: any, context: vscode.ExtensionContext, flag1: number, projectindex: number): number {
+    if (flag1 === 1) {return projectindex;}
+    
+    let index = 0;
+    if (portfolio.projectWithRoles.length > 1) {
+        const autoUserProject = context.globalState.get<any>(STORAGE_KEYS.AUTO_USER_PROJECT);
+        if (autoUserProject && portfolio.projectWithRoles[index].projectId.id === autoUserProject.id) {
+            index++;
+        }
+    }
+    return index;
+}
+
+async function processRoleSelection(
+    context: vscode.ExtensionContext,
+    userInfo: UserInfo,
+    res: any[],
+    currentRole: any,
+    flag1: number,
+    projectindex: number,
+    index: number
+): Promise<void> {
+    let flag = 0;
+    const portfolio = userInfo.porfolios![0];
+
+    if (res.length > 0) {
+        const project = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
+        const value = tryParseJSON(res[0].value);
+        
+        if (value) {
+            const projectRoles = value.defaultprojectroles?.filter((item: any) => item.project === project.id) || [];
+            
+            if (projectRoles.length > 0) {
+                const defaultrole = projectRoles[0].role;
+                const clientDetailsDefaultRole = extractClientDetailsDefaultRole(userInfo.userId.clientDetails);
+                const roleIndex = flag1 === 1 ? projectindex : index;
+
+                if (clientDetailsDefaultRole) {
+                    flag = trySetRoleFromClientDetails(
+                        context,
+                        portfolio.projectWithRoles[roleIndex].roleId,
+                        clientDetailsDefaultRole
+                    );
+                }
+
+                if (defaultrole && (!clientDetailsDefaultRole || flag === 0)) {
+                    flag = trySetRoleFromDefault(
+                        context,
+                        portfolio.projectWithRoles[roleIndex].roleId,
+                        defaultrole
+                    );
+                }
+            }
+        }
+    }
+
+    if (flag === 0) {
+        const roleIndex = flag1 === 1 ? projectindex : index;
+        await context.globalState.update(
+            STORAGE_KEYS.ROLE,
+            currentRole || portfolio.projectWithRoles[roleIndex].roleId[0]
+        );
+    }
+}
+
+function extractClientDetailsDefaultRole(clientDetails: string | undefined): string | null {
+    if (!clientDetails) {return null;}
+
+    const details = tryParseJSON(clientDetails);
+    if (!Array.isArray(details)) {return null;}
+
+    const defaultRoleItem = details.find((item: any) => item.pointer?.trim() === "defaultRole");
+    return defaultRoleItem?.value || null;
+}
+
+function trySetRoleFromClientDetails(context: vscode.ExtensionContext, roles: any[], clientRole: string): number {
+    const matchingRole = roles.find((element: any) => element.name.trim() === clientRole.trim());
+    
+    if (matchingRole) {
+        const roleValue = tryStringifyJSON(matchingRole);
+        if (roleValue) {
+            context.globalState.update(STORAGE_KEYS.ROLE, JSON.parse(roleValue));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+function trySetRoleFromDefault(context: vscode.ExtensionContext, roles: any[], defaultRoleId: string): number {
+    const matchingRole = roles.find((element: any) => element.id === defaultRoleId);
+    
+    if (matchingRole) {
+        const roleValue = tryStringifyJSON(matchingRole);
+        if (roleValue) {
+            context.globalState.update(STORAGE_KEYS.ROLE, JSON.parse(roleValue));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+async function fallbackUserAccessInitialization(context: vscode.ExtensionContext, userInfo: UserInfo): Promise<void> {
+    try {
+        if (!userInfo.porfolios || userInfo.porfolios.length === 0 ||
+            !userInfo.porfolios[0].projectWithRoles || userInfo.porfolios[0].projectWithRoles.length === 0) {
+            logger.warn('Cannot perform fallback initialization - missing required data');
+            return;
+        }
+
+        const portfolio = userInfo.porfolios[0];
+        const firstProject = portfolio.projectWithRoles[0];
+
+        await Promise.all([
+            context.globalState.update(STORAGE_KEYS.USER, userInfo.userId),
+            context.globalState.update(STORAGE_KEYS.PROJECT, firstProject.projectId),
+            context.globalState.update(STORAGE_KEYS.ROLE, firstProject.roleId[0]),
+            context.globalState.update(STORAGE_KEYS.ORGANIZATION, firstProject.projectId.name)
+        ]);
+    } catch (fallbackError) {
+        logger.error('Fallback initialization also failed:', fallbackError);
+    }
+}
+
 
 /**
  * Fetches dashboard constants (equivalent to Angular findAllDashConstant)
@@ -1292,44 +1418,38 @@ async function initUserAccess(context: vscode.ExtensionContext, userInfo: any, a
  * @param accessToken - JWT access token
  * @returns Dashboard constants response
  */
-async function findAllDashConstant(context: vscode.ExtensionContext, project: any, role: any, dashConstant: any, accessToken: string): Promise<any> {
+async function findAllDashConstant(
+    context: vscode.ExtensionContext,
+    project: any,
+    role: any,
+    dashConstant: DashConstantQuery,
+    accessToken: string
+): Promise<any> {
     logger.info('Fetching dashboard constants...');
 
     try {
-        // Build the API endpoint for dashboard constants
-        const baseUrl = getConfigurationValue<string>(context, 'baseUrl', 'https://essedum.az.ad.idemo-ppc.com');
+        const baseUrl = context.globalState.get<string>(STORAGE_KEYS.BASE_URL, 'https://essedum.az.ad.idemo-ppc.com');
         const apiUrl = `${baseUrl}/api/aip/service/v1/dashconstants/search`;
-
-        // Prepare request payload
-        const payload = {
-            keys: dashConstant.keys,
-            // Add other necessary parameters based on your API requirements
-        };
 
         const response = await makeSecureRequest('POST', apiUrl, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'accept': 'application/json, text/plain, */*',
-                'content-type': 'application/json',
-                'x-requested-with': 'Leap',
-                'project': project.id, // Default project ID
-                'projectname': project.name, // Default project name
+                'accept': REQUEST_HEADERS.ACCEPT,
+                'content-type': REQUEST_HEADERS.CONTENT_TYPE,
+                'x-requested-with': REQUEST_HEADERS.X_REQUESTED_WITH,
+                'project': project.id,
+                'projectname': project.name,
                 'roleid': role.id,
                 'rolename': role.name
             },
-            data: payload
+            data: { keys: dashConstant.keys }
         });
 
         logger.info('Dashboard constants fetched successfully');
         return response.data;
-
     } catch (error) {
         logger.error('Error fetching dashboard constants:', error);
-
-        // Return empty response structure to allow graceful fallback
-        return {
-            content: []
-        };
+        return { content: [] };
     }
 }
 
@@ -1340,14 +1460,31 @@ async function findAllDashConstant(context: vscode.ExtensionContext, project: an
  */
 async function getDashboardConstants(context: vscode.ExtensionContext, role: any, accessToken: string): Promise<void> {
     logger.info('Fetching dashboard constants...');
-
+    
     try {
-        // This would be equivalent to getDashConsts() in Angular
-        // For now, we'll just log that this step would occur
         logger.info('Dashboard constants fetch completed (placeholder)');
-
     } catch (error) {
         logger.error('Error fetching dashboard constants:', error);
+    }
+}
+
+function tryParseJSON(jsonString: string | undefined): any {
+    if (!jsonString) {return null;}
+    
+    try {
+        return JSON.parse(jsonString);
+    } catch (e) {
+        logger.error("JSON.parse error:", e);
+        return null;
+    }
+}
+
+function tryStringifyJSON(obj: any): string | null {
+    try {
+        return JSON.stringify(obj);
+    } catch (e) {
+        logger.error("JSON.stringify error:", e);
+        return null;
     }
 }
 
@@ -1402,27 +1539,20 @@ function extractUrlParameter(url: string, param: string, endDelimiter: string): 
  * @returns Decrypted string
  */
 async function decryptUsingAES256(encryptedData: string, salt: string): Promise<string> {
-    // Placeholder for AES decryption - would need actual crypto implementation
-    logger.info('AES decryption requested (placeholder implementation)');
-    let cipherJson = JSON.parse(encryptedData);
-    let output = await decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], salt);
-    return output;
-    // For now, return the data as-is assuming it's not encrypted
-    // In a real implementation, you would use Node.js crypto module
+    logger.info('AES decryption requested');
+    const cipherJson = JSON.parse(encryptedData);
+    return await decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], salt);
 }
 
 async function decryptgcm(ciphertext: string, iv: string, password: string): Promise<string> {
-    // Decode the ciphertext and IV from Base64 strings
     const decodedCiphertext = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
     const decodedIV = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
 
-    // Prepare the decryption parameters 
     const algorithm = {
         name: 'AES-GCM',
         iv: decodedIV
     };
 
-    // Import the key from password
     const importedKey = await crypto.subtle.importKey(
         'raw',
         new TextEncoder().encode(password),
@@ -1432,10 +1562,14 @@ async function decryptgcm(ciphertext: string, iv: string, password: string): Pro
     );
 
     const decryptedData = await crypto.subtle.decrypt(algorithm, importedKey, decodedCiphertext);
-    const decryptedText = new TextDecoder().decode(decryptedData);
+    return new TextDecoder().decode(decryptedData);
+}
 
-    return decryptedText;
-
+async function handleActivationError(error: unknown): Promise<void> {
+    logger.error('Failed to activate extension:', error);
+    await vscode.window.showErrorMessage(
+        `Failed to activate Essedum AI Platform extension: ${error}`
+    );
 }
 
 // ================================
@@ -1454,19 +1588,16 @@ export async function deactivate(): Promise<void> {
     logger.info('Essedum AI Platform extension is being deactivated');
 
     try {
-        // Clear authentication state if available
         if (authService) {
             await authService.clearStoredTokens();
         }
 
-        // Clear service references
         authService = undefined as any;
         pipelineService = undefined as any;
         pipelineCardsProvider = undefined as any;
         essedumFileProvider = undefined as any;
 
         logger.info('Extension deactivation completed successfully');
-
     } catch (error) {
         logger.error('Error during extension deactivation:', error);
     }
