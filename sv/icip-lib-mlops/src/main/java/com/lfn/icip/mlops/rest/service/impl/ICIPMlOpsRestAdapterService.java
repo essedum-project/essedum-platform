@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -87,13 +88,14 @@ public class ICIPMlOpsRestAdapterService {
                 params != null ? params.size() : 0);
 
         String host = getHostFromHeader(headers);
+//        host = "https://essedum.az.ad.idemo-ppc.com/";
         logger.info("Host : {}", host);
 
         if (host == null || host.isEmpty()) {
             host = referer;
             logger.info("Using referer fallback host={}", host);
         } else {
-            logger.debug("Host from headers host={}", host);
+            logger.info("Host from headers host={}", host);
         }
 
         SSLContextBuilder builder = new SSLContextBuilder();
@@ -113,7 +115,16 @@ public class ICIPMlOpsRestAdapterService {
 
         if (!host.contains("localhost")) {
             httpGet.addHeader("access-token", "aec127c2-c984-33f6-9a3a-355xd1dof097");
-            logger.info("Remote host detected: {}. Added mandatory access-token header.", host);
+            Header authHeader = httpGet.getFirstHeader("authorization");
+            Header hostHeader = httpGet.getFirstHeader("host");
+            if (authHeader != null) {
+                httpGet.removeHeaders("authorization");
+                httpGet.removeHeader(hostHeader);
+                httpGet.addHeader("host", URI.create(host).getHost());
+                logger.info("Removed authorization header for remote host: {}", host);
+            }
+
+            logger.info("Remote host detected: {}. Added mandatory access-token header.{}", host, httpGet.getAllHeaders());
         }
 
         List<NameValuePair> nvpList = new ArrayList<>(params != null ? params.size() : 0);
@@ -147,6 +158,8 @@ public class ICIPMlOpsRestAdapterService {
 			Map<String, String> params, String body) throws ClientProtocolException, IOException, URISyntaxException,
 			NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		String host = getHostFromHeader(headers);
+        host = "https://essedum.az.ad.idemo-ppc.com/";
+
 		if (host == null || host.isEmpty()) {
 			/* Taking LEAP URL Path as host if referer is not present in the headers */
 			host = referer;
@@ -170,6 +183,21 @@ public class ICIPMlOpsRestAdapterService {
 			if (!"Content-Length".equalsIgnoreCase(header.getKey()))
 				httpPost.addHeader(header.getKey(), header.getValue());
 		}
+
+        if (!host.contains("localhost")) {
+            httpPost.addHeader("access-token", "aec127c2-c984-33f6-9a3a-355xd1dof097");
+            Header authHeader = httpPost.getFirstHeader("authorization");
+            Header hostHeader = httpPost.getFirstHeader("host");
+            if (authHeader != null) {
+                httpPost.removeHeaders("authorization");
+                httpPost.removeHeader(hostHeader);
+                httpPost.addHeader("host", URI.create(host).getHost());
+                logger.info("Removed authorization header for remote host: {}", host);
+            }
+
+            logger.info("Remote host detected: {}. Added mandatory access-token header.{}", host, httpPost.getAllHeaders());
+        }
+
 		List<NameValuePair> nvpList = new ArrayList<>(params.size());
 		for (Map.Entry<String, String> param : params.entrySet()) {
 			nvpList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
@@ -205,9 +233,23 @@ public class ICIPMlOpsRestAdapterService {
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 		HttpDelete httpDelete = new HttpDelete(
 				host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
-		for (Map.Entry<String, String> header : headers.entrySet()) {
+        for (Map.Entry<String, String> header : headers.entrySet()) {
 			httpDelete.addHeader(header.getKey(), header.getValue());
 		}
+
+        if (!host.contains("localhost")) {
+            httpDelete.addHeader("access-token", "aec127c2-c984-33f6-9a3a-355xd1dof097");
+            Header authHeader = httpDelete.getFirstHeader("authorization");
+            Header hostHeader = httpDelete.getFirstHeader("host");
+            if (authHeader != null) {
+                httpDelete.removeHeaders("authorization");
+                httpDelete.removeHeader(hostHeader);
+                httpDelete.addHeader("host", URI.create(host).getHost());
+                logger.info("Removed authorization header for remote host: {}", host);
+            }
+            logger.info("Remote host detected: {}. Added mandatory access-token header.{}", host, httpGet.getAllHeaders());
+        }
+
 		List<NameValuePair> nvpList = new ArrayList<>(params.size());
 		for (Map.Entry<String, String> param : params.entrySet()) {
 			nvpList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
