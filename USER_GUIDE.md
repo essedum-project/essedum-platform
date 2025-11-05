@@ -1,4 +1,4 @@
-# User Guide: Creating AI Applications with Essedum
+<img width="1506" height="223" alt="image" src="https://github.com/user-attachments/assets/d47a44b5-75fd-42c9-81fe-5335f77ed833" /># User Guide: Creating AI Applications with Essedum
 
 This guide provides a step-by-step walkthrough of how to use the Essedum framework to create, train, and deploy AI-powered applications.
 
@@ -53,4 +53,11 @@ This framework can also be used to build Retrieval-Augmented Generation (RAG) ap
 ### RAG Application with UI
 
 [![RAG Application with UI](https://img.youtube.com/vi/q3H1N9WACwA/0.jpg)](https://www.youtube.com/watch?v=q3H1N9WACwA)
+
+## 7. ADMIN Functionalities with UI
+
+[![ADMIN Functionalities with UI](https://i9.ytimg.com/vi/mwxFhrGg13M/mqdefault.jpg?sqp=CKTHrMgG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGBMgMyh_MA8=&rs=AOn4CLCnqUGgGy7-XuJh94iNkSW45wnhpw)](https://youtu.be/mwxFhrGg13M)
+
+
+
 
