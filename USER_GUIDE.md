@@ -56,6 +56,8 @@ This framework can also be used to build Retrieval-Augmented Generation (RAG) ap
 
 ## 7. ADMIN Functionalities with UI
 
+The Admin Functionalities with UI module provides a comprehensive interface for administrators to manage and control system operations efficiently. It includes features such as user management, role-based access control.
+
 [![ADMIN Functionalities with UI](https://i9.ytimg.com/vi/mwxFhrGg13M/mqdefault.jpg?sqp=CKTHrMgG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGBMgMyh_MA8=&rs=AOn4CLCnqUGgGy7-XuJh94iNkSW45wnhpw)](https://youtu.be/mwxFhrGg13M)
 
 
