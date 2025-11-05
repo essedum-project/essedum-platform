@@ -1,4 +1,4 @@
-<img width="1506" height="223" alt="image" src="https://github.com/user-attachments/assets/d47a44b5-75fd-42c9-81fe-5335f77ed833" /># User Guide: Creating AI Applications with Essedum
+# User Guide: Creating AI Applications with Essedum
 
 This guide provides a step-by-step walkthrough of how to use the Essedum framework to create, train, and deploy AI-powered applications.
 
