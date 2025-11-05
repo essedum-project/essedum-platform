@@ -1221,7 +1221,7 @@ if __name__ == "__main__":
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
         // Read HTML template from external file
-        const htmlPath = path.join(this._context.extensionPath, 'src', 'app', 'pipeline', 'pipeline-cards.html');
+        const htmlPath = path.join(this._context.extensionPath, 'dist', 'app', 'pipeline', 'pipeline-cards.html');
         let htmlTemplate = '';
 
         try {
@@ -1232,11 +1232,11 @@ if __name__ == "__main__":
         }
 
         // Get CSS file URI
-        const cssPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'app', 'pipeline', 'pipeline-cards.css');
+        const cssPath = vscode.Uri.joinPath(this._extensionUri, 'dist', 'app', 'pipeline', 'pipeline-cards.css');
         const cssUri = webview.asWebviewUri(cssPath);
 
         // Get JavaScript file URI
-        const jsPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'app', 'pipeline', 'pipeline-cards-client.js');
+        const jsPath = vscode.Uri.joinPath(this._extensionUri, 'dist', 'app', 'pipeline', 'pipeline-cards-client.js');
         const jsUri = webview.asWebviewUri(jsPath);
 
         // Replace placeholders with actual URIs

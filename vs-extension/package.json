@@ -1,14 +1,34 @@
 {
   "name": "essedum",
-  "displayName": "Essedum AI Platform",
-  "description": "VS Code extension for Essedum AI Platform with Keycloak authentication and pipeline execution",
-  "version": "0.0.1",
+  "displayName": "Essedum",
+  "description": "VS Code extension for Essedum AI Platform",
+  "version": "0.0.6",
+  "publisher": "essedum",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.103.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "ai",
+    "platform",
+    "authentication",
+    "keycloak",
+    "pipeline",
+    "job-logs",
+    "oauth",
+    "essedum"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform.git"
+  },
+  "homepage": "https://github.com/Infosys-MWC-GENAI/ai-platform#readme",
+  "bugs": {
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform/issues"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -145,7 +165,9 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "publish": "vsce publish",
+    "package-extension": "vsce package"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
@@ -157,6 +179,7 @@
     "@typescript-eslint/parser": "^8.42.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.34.0",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.2",
