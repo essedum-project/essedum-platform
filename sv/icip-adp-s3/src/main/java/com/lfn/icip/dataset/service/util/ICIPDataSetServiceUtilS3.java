@@ -37,6 +37,9 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.*;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -88,6 +91,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -331,15 +335,43 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     private Storage buildGcsClient(ICIPDataset dataset) throws Exception {
         JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
-        ServiceAccountCredentials credentials = null;
-        if (inputStream != null) {
+        if (inputStream == null) {
+            throw new FileNotFoundException("service-account.json not found in resources");
+        }
+        // Get private key from environment
+        String privateKey = System.getenv("GCP_PRIVATE_KEY");
+        String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
+
+        ServiceAccountCredentials credentials;
+
+        if (privateKey != null && !privateKey.isEmpty()) {
+            // Replace escaped newlines with actual newlines
+            privateKey = privateKey.replace("\\n", "\n");
+
+            // Read the original JSON
+            String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            inputStream.close();
+
+            // Use Gson to parse and modify JSON
+            Gson gson = new Gson();
+            JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+            jsonObject.addProperty("private_key", privateKey);
+            jsonObject.addProperty("private_key_id", privateKeyId);
+
+            // Convert back to InputStream
+            String modifiedJson = jsonObject.toString().replace("\\\"", "");
+            byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
+            InputStream modifiedInputStream = new ByteArrayInputStream(modifiedJsonBytes);
+
+            credentials = ServiceAccountCredentials.fromStream(modifiedInputStream);
+            modifiedInputStream.close();
+        } else {
             credentials = ServiceAccountCredentials.fromStream(inputStream);
             inputStream.close();
         }
-        JSONObject jsonObject;
         String projectId = null;
         if (credentials != null) {
-            jsonObject = new JSONObject(credentials);
+            JSONObject jsonObject = new JSONObject(credentials);
             projectId = jsonObject.optString("projectId");
         }
 

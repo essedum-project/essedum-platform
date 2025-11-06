@@ -15,19 +15,19 @@
 
 package com.lfn.icip.dataset.service.util;
 
-import java.io.File;
+import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +36,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,8 +87,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
-import java.io.FileInputStream;
-import java.io.InputStream;
+
 import java.security.*;
 import javax.net.ssl.*;
 import com.amazonaws.services.s3.model.*;
@@ -186,8 +188,37 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 
             } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
 				InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
-				ServiceAccountCredentials credentials = null;
-				if (inputStream != null) {
+				if (inputStream == null) {
+					throw new FileNotFoundException("service-account.json not found in resources");
+				}
+				// Get private key from environment
+				String privateKey = System.getenv("GCP_PRIVATE_KEY");
+				String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
+
+				ServiceAccountCredentials credentials;
+
+				if (privateKey != null && !privateKey.isEmpty()) {
+					// Replace escaped newlines with actual newlines
+					privateKey = privateKey.replace("\\n", "\n");
+
+					// Read the original JSON
+					String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+					inputStream.close();
+
+					// Use Gson to parse and modify JSON
+					Gson gson = new Gson();
+					JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+					jsonObject.addProperty("private_key", privateKey);
+					jsonObject.addProperty("private_key_id", privateKeyId);
+
+					// Convert back to InputStream
+					String modifiedJson = jsonObject.toString().replace("\\\"", "");
+					byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
+					InputStream modifiedInputStream = new ByteArrayInputStream(modifiedJsonBytes);
+
+					credentials = ServiceAccountCredentials.fromStream(modifiedInputStream);
+					modifiedInputStream.close();
+				} else {
 					credentials = ServiceAccountCredentials.fromStream(inputStream);
 					inputStream.close();
 				}
