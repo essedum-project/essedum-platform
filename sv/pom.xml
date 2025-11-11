@@ -86,7 +86,7 @@
 		<org.mockito.mockito-all.version>2.0.2-beta</org.mockito.mockito-all.version>
 		<org.springframework.spring-webmvc.version>6.1.14</org.springframework.spring-webmvc.version>
 		<org.springframework.spring-web.version>6.1.14</org.springframework.spring-web.version>
-		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.40</org.apache.tomcat.embed.tomcat-embed-core.version>
+		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.31</org.apache.tomcat.embed.tomcat-embed-core.version>
 		<com.lfn.ai.comm-lib-util.version>${project.version}</com.lfn.ai.comm-lib-util.version>
 		<com.lfn.iamp-lib-usm.version>${project.version}</com.lfn.iamp-lib-usm.version>
 		<com.lfn.icip.icip-lib-evt.version>${project.version}</com.lfn.icip.icip-lib-evt.version>

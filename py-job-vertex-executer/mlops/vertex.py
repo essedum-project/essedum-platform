@@ -53,16 +53,29 @@ def get_access_token(connection):
             'auth_provider_x509_cert_url': connection.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': connection.get("client_x509_cert_url")
         }
+    
 
     scopes = [
         'https://www.googleapis.com/auth/cloud-platform',
         'https://www.googleapis.com/auth/cloud-platform.read-only'
     ]
+    
 
+
+    
+    os.environ.pop('http_proxy', None)
+    os.environ.pop('https_proxy', None)
+    os.environ.pop('HTTP_PROXY', None)
+    os.environ.pop('HTTPS_PROXY', None)
+
+
+    logger.info(f"Creating credentials from service account info...")
     credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
+    logger.info(f"Credentials created successfully: {credentials}")
     auth_req = google.auth.transport.requests.Request()
+    logger.info(f"auth_req: {auth_req}")
     credentials.refresh(auth_req)
-
+    logger.info(f"token: {credentials.token}")
     return credentials.token
 
 #cloud connect part
@@ -80,7 +93,7 @@ def cloudconnect(payload):
             'auth_provider_x509_cert_url': payload.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': payload.get("client_x509_cert_url")
         }
-
+         
         credentials = service_account.Credentials.from_service_account_info(credentials_info)
         storage_client = storage.Client(project=payload.get("project_id"), credentials=credentials)
         buckets = list(storage_client.list_buckets())
@@ -89,6 +102,203 @@ def cloudconnect(payload):
         logger.error(f"Unable to connect: {str(err)}")
         return False
 
+
+'''----------------------------------------DATASETS-------------------------------------------------------------------------------------------'''
+def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connection):
+    logger.info(f"Inside projects_datasets {str(adapter_instance)}, {str(connection)}")
+    logger.info("get access token...")
+    logger.info("calling get access token function ...")
+    token = get_access_token(connection)
+    logger.info("Access token generated.")
+    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets"
+    logger.info(f"printing url :{str(url)}")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers)
+    logger.info(f"printing response :{response.text}")
+    try:
+        if response.status_code == 200:
+            logger.info("entering into  if block after checking the statuscode =200....")
+            response_json = response.json()
+            values = response_json.get("datasets")
+            formatted = []
+            logger.info("entering into the response format code..")
+            for dataset in values:
+                combined=f""
+                response_format = {
+                    "container": dataset.get('containerSpec', None),
+                "adapter": adapter_instance,
+                "rawPayload": dataset,
+                "description": dataset.get("description", 'List Datset Operation'),
+                "organization": project,
+                "type": dataset.get('metadata',{}).get('dataItemSchemaUri', None),
+                "createdOn": dataset.get("createTime", None),
+                "sourceOrg": dataset.get('sourceOrg',None),
+                "createdBy": dataset.get('createdBy', "user"),
+                "metaData": dataset.get('metadata',None),
+                "Id": dataset.get("name", 'None').split("/")[5],
+                "SourceID": dataset.get("SourceID", None),
+                "sourceName": dataset.get("displayName", None),
+                "adapterId": connection['adapter_id'],
+                "status": dataset.get("status", 'Listed'),
+                "likes": dataset.get("likes", None),
+                "modifiedOn": dataset.get("updateTime",None),
+                "syncDate": dataset.get("createTime", None),
+                "artifacts": dataset.get("metadataArtifact", None).split("/")[-1],
+                "deployment": dataset.get("deployment", None)
+            }
+                response_format['rawPayload'] = json.dumps(json.dumps(response_format, default=str))
+                formatted.append(response_format)
+                logger.info(formatted)
+            return formatted, 200
+        else:
+            return f"Request failed with status code:{response.status_code}", response.status_code
+    except json.decoder.JSONDecodeError:
+        logger.error("Error: JSON Decode Error")
+        return "Error: JSON Decode Error", 500
+    except Exception as e:
+        logger.error(f"an error occured:{str(e)}")
+        return str(e), 500
+
+def projects_datasets_get(adapter_instance, project, isCached, isInstance, connection, dataset_id):
+    logger.info(f"Inside projects_datasets {str(adapter_instance)}, {str(connection)}")
+    logger.info("get access token...")
+    logger.info("calling get access token function ...")
+    token = get_access_token(connection)
+    logger.info("Access token generated.")
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets/5380615731417186304"
+    logger.info(f"printing url :{str(url)}")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get(url, headers=headers)
+    logger.info(f"print response :{response.text}")
+
+    try:
+        if response.status_code == 200:
+            logger.info("entering into  if block after checking the statuscode =200....")
+            dataset = json.loads(response.text)
+            logger.info("entering into the response format code..")
+            response_format = {
+                "container": dataset.get('containerSpec', None),
+                "adapter": adapter_instance,
+                "rawPayload": dataset,
+                "description": dataset.get("description", 'Get Datset Operation'),
+                "organization": project,
+                "type": dataset.get('metadata',{}).get('dataItemSchemaUri', None),
+                "createdOn": dataset.get("createTime", None),
+                "sourceOrg": dataset.get('sourceOrg',None),
+                "createdBy": dataset.get('createdBy', "user"),
+                "metaData": dataset.get('metadata',None),
+                "Id": dataset.get("name", 'None').split("/")[5],
+                "SourceID": dataset.get("SourceID", None),
+                "sourceName": dataset.get("displayName", None),
+                "adapterId": connection['adapter_id'],
+                "status": dataset.get("status", 'Fetched'),
+                "likes": dataset.get("likes", None),
+                "modifiedOn": dataset.get("updateTime",None),
+                "syncDate": dataset.get("createTime", None),
+                "artifacts": dataset.get("metadataArtifact", None).split("/")[-1],
+                "deployment": dataset.get("deployment", None)
+            }
+            response_format['rawPayload'] = json.dumps(json.dumps(response_format, default=str))
+            logger.info(f"response format: {response_format}")
+            return response_format, 200
+        else:
+            return f"Request failed with status code:{response.status_code}", response.status_code
+    except json.decoder.JSONDecodeError:
+        logger.error("Error: JSON Decode Error")
+        return "Error: JSON Decode Error", 500
+    except Exception as e:
+        logger.error(f"an error occured:{str(e)}")
+        return str(e), 500
+
+def projects_datasets_delete(adapter_instance, project, isCached, isInstance, connection, dataset_id):
+    logger.info(f"Inside projects_datasets_delete {str(connection)}")
+    logger.info("get access token...")
+    logger.info("calling get access token function ...")
+    token = get_access_token(connection)
+    logger.info("Access token generated.")
+    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets/{dataset_id}"
+    logger.info(f"printing url :{str(url)}")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.delete(url, headers=headers)
+    logger.info(f"printing response :{response.text}")
+    try:
+        if response.status_code == 200 or 201 or 202:
+            logger.info("entering into  if block after checking the statuscode =200....")
+            dataset_details = json.loads(response.text)
+            logger.info("entering into the response format code..")
+            response_format = {
+                    "container": dataset_details.get('Container', None),
+                    "adapter": adapter_instance,
+                    "rawPayload": dataset_details,
+                    "description": dataset_details.get("description",'Delete Dataset Operation'),
+                    "organization": project,
+                    "type": dataset_details.get('metadata', {}).get('@type', None),
+                    "createdOn": dataset_details.get('metadata', {}).get('genericMetadata', {}).get('createTime', None),
+                    "sourceOrg": dataset_details.get('sourceOrg', None),
+                    "createdBy": dataset_details.get('createdBy', 'user'),
+                    "metaData": dataset_details.get('metadata', None),
+                    "Id": dataset_id,
+                    "SourceID": dataset_details.get("name", None).split("/")[5],
+                    "sourceName": dataset_details.get('name', None),
+                    "adapterId": connection['adapter_id'],
+                    "status": dataset_details.get("done", 'Deleted'),
+                    "likes": dataset_details.get('likes', None),
+                    "syncDate":dataset_details.get('metadata', {}).get('genericMetadata', {}).get('createTime', None),
+                    "modifiedOn": dataset_details.get('metadata', {}).get('genericMetadata', {}).get('updateTime', None),
+                    "artifacts": dataset_details.get('metadataArtifact', None),
+                    "deployment": dataset_details.get('deployment', None)
+                }
+            response_format['rawPayload'] = json.dumps(json.dumps(response_format, default=str))
+            logger.info(f"response format: {response_format}")
+            return response_format, 200
+        else:
+                return f"Request failed with status code:{response.status_code}", response.status_code
+    except json.decoder.JSONDecodeError:
+        logger.error("Error: JSON Decode Error")
+        return "Error: JSON Decode Error", 500
+    except Exception as e:
+        logger.error(f"an error occured:{str(e)}")
+        return str(e), 500
+
+def projects_datasets_create(adapter_instance, project, isCached, isInstance, connection, request_body):
+    logger.info(f"Inside projects_datasets {str(adapter_instance)}, {str(connection)}")
+    logger.info("get access token...")
+    logger.info("calling get access token function ...")
+    token = get_access_token(connection)
+    logger.info("Access token generated.")
+    # url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(url, headers=headers, json=request_body)
+    print("response",response.text)
+    try:
+        if response.status_code == 200:
+            dataset=json.loads(response.text)
+            #formatted=responseFormat(adapter_instance,project,dataset)
+            return dataset,200
+        # elif response.status_code == 400:
+        #     return "Error: Bad Parameters(HTTP 400)",400
+        # elif response.status_code ==500:
+        #     return "Internal Server Error(HTTP 500)",500
+        # else:
+        #     return f"Request failed with status code:{response.status_code}",response.status_code
+    except Exception as e:
+        logger.error(f"an error occured:{str(e)}")  
+        return e,500
+    
+'''----------------------------------------MODELS-------------------------------------------------------------------------------------------'''
 
 '''----------------------------------------DATASETS-------------------------------------------------------------------------------------------'''
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connection):

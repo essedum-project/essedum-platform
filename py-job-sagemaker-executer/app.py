@@ -356,6 +356,17 @@ def projects_datasets_create():
         project = request.args.get("project", None)
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
+        
+        headers = {
+        "Authorization": request.headers.get("Authorization", ""),
+        "Project": request.headers.get("Project", ""),
+        'Projectname': request.headers.get("Projectname", ""),
+        'Rolename': request.headers.get("Rolename", ""),
+        'Roleid': request.headers.get("Roleid", ""),
+        'Referer': request.headers.get("Referer", "")
+        }
+        
+		
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
         if referer is None:
@@ -365,7 +376,7 @@ def projects_datasets_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -392,6 +403,7 @@ def projects_datasets_list_list():
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -399,7 +411,7 @@ def projects_datasets_list_list():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -423,6 +435,7 @@ def projects_datasets_get(dataset_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -430,7 +443,7 @@ def projects_datasets_get(dataset_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -455,6 +468,7 @@ def projects_datasets_delete(dataset_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -462,7 +476,7 @@ def projects_datasets_delete(dataset_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -486,7 +500,16 @@ def projects_datasets_export_create(dataset_id):
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+        "Authorization": request.headers.get("Authorization", ""),
+        "Project": request.headers.get("Project", ""),
+        'Projectname': request.headers.get("Projectname", ""),
+        'Rolename': request.headers.get("Rolename", ""),
+        'Roleid': request.headers.get("Roleid", ""),
+        'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -494,7 +517,7 @@ def projects_datasets_export_create(dataset_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -521,22 +544,31 @@ def projects_endpoints_create():
         isInstance = request.args.get("isInstance", None)
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
+        headers = {
+        "Authorization": request.headers.get("Authorization", ""),
+        "Project": request.headers.get("Project", ""),
+        'Projectname': request.headers.get("Projectname", ""),
+        'Rolename': request.headers.get("Rolename", ""),
+        'Roleid': request.headers.get("Roleid", ""),
+        'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
+        
         if referer is None:
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
         logger.info(f"Request body is: {str(request_body)}")
-        result, status_code = aws.projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, request_body, isOnline)
+        result, status_code = aws.projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
@@ -557,6 +589,7 @@ def projects_endpoints_list_list():
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -564,7 +597,7 @@ def projects_endpoints_list_list():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -591,6 +624,7 @@ def projects_endpoints_get(endpoint_id):
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -598,12 +632,12 @@ def projects_endpoints_get(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
-        result, status_code = aws.projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_id, isOnline)
+        result, status_code = aws.projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_id)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
@@ -624,6 +658,7 @@ def projects_endpoints_delete(endpoint_id):
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -631,7 +666,7 @@ def projects_endpoints_delete(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -656,7 +691,19 @@ def projects_endpoints_deploy_model_create(endpoint_id):
         isInstance = request.args.get("isInstance", None)
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
+        
+        
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        
+                
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -664,14 +711,14 @@ def projects_endpoints_deploy_model_create(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
         logger.info(f"Request body is: {str(request_body)}")
-        result, status_code = aws.projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body, isOnline)
+        result, status_code = aws.projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
@@ -692,7 +739,17 @@ def projects_endpoints_explain_create(endpoint_id):
         isInstance = request.args.get("isInstance", None)
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
+        
         referer = request.headers.get('referer', None)
+        
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -700,7 +757,7 @@ def projects_endpoints_explain_create(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -728,7 +785,16 @@ def projects_endpoints_infer_create(endpoint_id):
         isInstance = request.args.get("isInstance", None)
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -736,14 +802,14 @@ def projects_endpoints_infer_create(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
         logger.info(f"Request body is: {str(request_body)}")
-        result, status_code = aws.projects_endpoints_infer_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body, isOnline)
+        result, status_code = aws.projects_endpoints_infer_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
@@ -764,10 +830,19 @@ def projects_endpoints_undeploy_models_create(endpoint_id):
         isInstance = request.args.get("isInstance", None)
         isOnline = request.args.get("isOnline", False)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}, isOnline: {isOnline}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
+        headers=request.headers
         if referer is None:
             result = 'referer is missing in header'
             return jsonify(result), 400
@@ -802,14 +877,15 @@ def projects_models_list():
         print(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
         if referer is None:
             result = 'referer is missing in header'
             return jsonify(result), 400
-        
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -837,6 +913,7 @@ def projects_models_get(model_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -844,7 +921,7 @@ def projects_models_get(model_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -869,7 +946,16 @@ def projects_models_register_create():
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+        "Authorization": request.headers.get("Authorization", ""),
+        "Project": request.headers.get("Project", ""),
+        'Projectname': request.headers.get("Projectname", ""),
+        'Rolename': request.headers.get("Rolename", ""),
+        'Roleid': request.headers.get("Roleid", ""),
+        'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -877,7 +963,7 @@ def projects_models_register_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -905,6 +991,7 @@ def projects_models_delete(model_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -912,7 +999,7 @@ def projects_models_delete(model_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -936,6 +1023,14 @@ def projects_models_export_create(model_id):
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
         if referer is None:
             referer = request.headers.get('Referer', None)
@@ -944,7 +1039,7 @@ def projects_models_export_create(model_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -971,6 +1066,14 @@ def training_automl_simplified_create():
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
         if referer is None:
             referer = request.headers.get('Referer', None)
@@ -979,7 +1082,7 @@ def training_automl_simplified_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1006,7 +1109,16 @@ def training_custom_script_create():
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1014,7 +1126,7 @@ def training_custom_script_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1039,6 +1151,7 @@ def training_istlist():
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1046,7 +1159,7 @@ def training_istlist():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1070,7 +1183,16 @@ def training_train_create():
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
+        
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1078,7 +1200,7 @@ def training_train_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1105,6 +1227,7 @@ def training_cancel_list(training_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1138,6 +1261,7 @@ def training_delete(training_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1145,7 +1269,7 @@ def training_delete(training_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1172,6 +1296,7 @@ def training_get_list(training_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1179,7 +1304,7 @@ def training_get_list(training_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1204,7 +1329,19 @@ def projects_inferencePipelines_create():
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        
         referer = request.headers.get('referer', None)
+        
+        headers = {
+        "Authorization": request.headers.get("Authorization", ""),
+        "Project": request.headers.get("Project", ""),
+        'Projectname': request.headers.get("Projectname", ""),
+        'Rolename': request.headers.get("Rolename", ""),
+        'Roleid': request.headers.get("Roleid", ""),
+        'Referer': request.headers.get("Referer", "")
+        }
+
+		
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1212,7 +1349,7 @@ def projects_inferencePipelines_create():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1240,6 +1377,7 @@ def projects_inferencePipelines_list_list():
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1247,7 +1385,7 @@ def projects_inferencePipelines_list_list():
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1273,6 +1411,7 @@ def projects_inferencePipelines_delete(inference_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1280,7 +1419,7 @@ def projects_inferencePipelines_delete(inference_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1306,6 +1445,14 @@ def projects_inferencePipelines_cancel(inference_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1313,7 +1460,7 @@ def projects_inferencePipelines_cancel(inference_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -1340,6 +1487,14 @@ def projects_inferencePipelines_get(inference_job_id):
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
         referer = request.headers.get('referer', None)
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1347,7 +1502,7 @@ def projects_inferencePipelines_get(inference_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
