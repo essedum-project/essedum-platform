@@ -1,0 +1,217 @@
+.aip-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.agent-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.agent-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #eee;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.card-content {
+  padding: 16px;
+  
+  p {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #555;
+    font-size: 14px;
+  }
+}
+
+.card-metadata {
+  margin-bottom: 16px;
+}
+
+.metadata-item {
+  display: flex;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.metadata-label {
+  width: 70px;
+  color: #666;
+}
+
+.metadata-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background-color: #e0f2f1;
+  color: #00897b;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #666;
+    margin-bottom: 20px;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  
+  span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 4px;
+    border-radius: 50%;
+    cursor: pointer;
+    
+    &.active-page {
+      background-color: #f0f0f0;
+      font-weight: 500;
+    }
+    
+    &:hover:not(.active-page) {
+      background-color: #f8f8f8;
+    }
+  }
+}
+
+// Langflow close button styles
+.langflow-close-btn {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+  
+  .close-button {
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+// Ensure iframe has scrollbars
+mat-card iframe {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  
+  // Enable scrollbars for Firefox
+  scrollbar-width: auto;
+  scrollbar-color: #888 #f1f1f1;
+  
+  // Enable scrollbars for Chrome, Safari, Edge
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+  
+  &::-webkit-scrollbar-corner {
+    background: #f1f1f1;
+  }
+}

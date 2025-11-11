@@ -1,0 +1,65 @@
+<div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
+
+  <!-- Header Section -->
+  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+    (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
+  </app-aip-header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" role="status" aria-label="Loading cards">
+    <app-aip-loading></app-aip-loading>
+  </div>
+
+  <!-- Content Area (only shown when not loading) -->
+  <ng-container *ngIf="!loading">
+    <!-- Langflow Interface -->
+    <mat-card *ngIf="showLangflowInterface" class="lfx-u-pad-16">
+      <div class="langflow-close-btn">
+        <button class="close-button" (click)="closeLangflowInterface()" mat-icon-button>
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <iframe 
+        [src]="currentIframeUrl" 
+        width="100%" 
+        height="100%"
+        style="height: 70vh;"
+        frameborder="0"
+        loading="lazy"
+        allow="fullscreen; microphone; camera">
+      </iframe>
+    </mat-card>
+
+    <!-- Regular content when not showing Langflow -->
+    <ng-container *ngIf="!showLangflowInterface">
+      <!-- Cards container -->
+      <div *ngIf="paginatedCards.length > 0" class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll"
+        aria-label="Agent cards">
+        <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
+
+          <!-- Cards  -->
+          <app-aip-card [servicev1]="'agent'" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+            [deleteAuth]="deleteAuth" (viewDetails)="viewAgentDetails(card)" (edit)="editAgent(card.cid)"
+            (delete)="deleteAgent(card.cid)">
+          </app-aip-card>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
+
+      <!-- Pagination -->
+      <app-aip-pagination *ngIf="shouldShowPagination" 
+        [pageNumber]="pageNumber" 
+        [noOfPages]="noOfPages"
+        [pageArr]="pageArr" 
+        [startIndex]="0" 
+        [endIndex]="pageArr.length" 
+        [hoverStates]="hoverStates"
+        (prevPage)="onPrevPage()" 
+        (nextPage)="onNextPage()" 
+        (changePage)="onChangePage($event)">
+      </app-aip-pagination>
+    </ng-container>
+  </ng-container>
+</div>

@@ -1,11 +1,11 @@
 # Use official Node image
-FROM node:18-alpine AS build
+FROM node:24.1.0-alpine AS build
 
 WORKDIR /aip-app-ui
 
 COPY aip-app-ui/ ./
 
-RUN yarn config set registry https://registry.npmjs.org && yarn install --network-timeout 100000
+RUN npm install --legacy-peer-deps --verbose
 
 RUN npm run build-prod
 
@@ -13,7 +13,7 @@ WORKDIR /shell-app-ui
 
 COPY shell-app-ui/ ./
 
-RUN yarn config set registry https://registry.npmjs.org && yarn install --network-timeout 100000
+RUN npm install --legacy-peer-deps --verbose
 
 RUN npm run build-prod
 
