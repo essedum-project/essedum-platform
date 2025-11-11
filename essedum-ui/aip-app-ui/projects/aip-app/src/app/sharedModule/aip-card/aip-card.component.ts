@@ -11,6 +11,7 @@ const SERVICE_TYPES = {
   PIPELINE: 'pipeline',
   CONNECTIONS: 'connections',
   DATASETS: 'Datasets',
+  AGENT: 'agent',
 };
 
 // Background colors
@@ -118,6 +119,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.PIPELINE]: this.card?.type,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
       [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
+      [SERVICE_TYPES.AGENT]: this.card?.type,
     };
     return categoryMap[this.servicev1];
   }
@@ -132,6 +134,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
       [SERVICE_TYPES.MODEL]: this.card?.modelName,
       [SERVICE_TYPES.DATASETS]: this.card?.alias,
+      [SERVICE_TYPES.AGENT]: this.card?.name,
     };
     return titleMap[this.servicev1];
   }
@@ -146,6 +149,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.DATASETS]: this.card?.lastmodifieddate,
       [SERVICE_TYPES.MODEL]: this.card?.createdOn,
       [SERVICE_TYPES.PIPELINE]: this.card?.createdDate,
+      [SERVICE_TYPES.AGENT]: this.card?.createdon,
     };
     return dateMap[this.servicev1];
   }
@@ -162,6 +166,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
         this.card?.target?.created_by || 'Name Not Available',
+      [SERVICE_TYPES.AGENT]: this.card?.name || 'Agent',
     };
     return avatarMap[this.servicev1];
   }

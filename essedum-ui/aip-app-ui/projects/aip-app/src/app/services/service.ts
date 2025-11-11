@@ -11,6 +11,8 @@ import { StreamingServices } from '../streaming-services/streaming-service';
 import { DashConstant } from '../DTO/dash-constant';
 import { App } from '../apps/app';
 import { AipSnackbarCustomService } from '../sharedModule/services/aip-snackbar-custom.service';
+import { LangflowApiService } from './langflow-api.service';
+
 
 @Injectable()
 export class Services {
@@ -25,7 +27,10 @@ export class Services {
     @Inject('dataSets') private dataUrl: string,
     @Inject('envi') private baseUrl: string,
     private encKey: encKey,
-    private customSnackbar: AipSnackbarCustomService
+    private customSnackbar: AipSnackbarCustomService,
+    private langflowApiService: LangflowApiService
+
+
   ) {}
 
 
@@ -3822,7 +3827,278 @@ export class Services {
         return this.handleError(err);
       }));
   }
+ /**
+  * Get all agent flows from Langflow API with additional parameters
+  * @param getAllFlows Whether to get all flows or only the ones in the current project
+  * @param headerFlows Whether to include header flows
+  * @returns Observable with all agent flows
+  */
+  getAllAgentFlows(getAllFlows: boolean = true, headerFlows: boolean = true): Observable<any> {
+    console.log('🔍 Fetching all agent flows from Langflow...');
 
+    // Construct query parameters based on curl command
+    const queryParams = `?get_all=${getAllFlows}&header_flows=${headerFlows}`;
+
+    // Use direct Langflow fetch to bypass interceptors, with the exact same headers as the curl
+    return this.directLangflowFetch(`/api/v1/flows/${queryParams}`)
+      .pipe(
+        map(response => {
+          console.log('📊 All agent flows response:', response);
+          return response;
+        }),
+        catchError(error => {
+          console.error('❌ Error fetching all agent flows:', error);
+          // Provide helpful error message
+          return throwError(() => ({
+            error: 'Failed to fetch all agent flows',
+            message: 'Could not retrieve all agent flows from Langflow. Please check if Langflow is running correctly.',
+            originalError: error
+          }));
+        })
+      );
+  }
+  /**
+ * Make a direct fetch request to Langflow API to completely bypass Angular HTTP interceptor
+ */
+  private directLangflowFetch(endpoint: string, options: any = {}): Observable<any> {
+    const cleanBaseUrl = this.getCleanLangflowUrl();
+    const url = `${cleanBaseUrl}${endpoint}`;
+
+    console.log(`🚀 Direct Langflow fetch to: ${url} with method ${options.method || 'GET'}`);
+
+    return new Observable(observer => {
+      // Get valid token (using cached if still valid, otherwise fetch fresh)
+      this.langflowApiService.getValidToken().then(token => {
+        console.log(`🔄 Fetching with method: ${options.method || 'GET'}`);
+        console.log(`🔑 Using fresh dynamic token for authentication`);
+        if (options.body && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
+          console.log(`📦 Request body for ${options.method}:`, JSON.stringify(options.body, null, 2));
+        }
+
+        fetch(url, {
+          method: options.method || 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9,nb;q=0.8,pl;q=0.7,nl;q=0.6,fi;q=0.5,id;q=0.4',
+            'Authorization': `Bearer ${token}`,
+            'Connection': 'keep-alive',
+            'Referer': 'https://langflow.az.ad.idemo-ppc.com/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+            // Add cookies as header since we can't set them cross-domain
+            'Cookie': `apikey_tkn_lflw=""; auto_login_lf=auto; sidebar:section=search; sidebar:state=true; access_token_lf=${token}`,
+            ...options.headers
+          },
+          body: options.body ? JSON.stringify(options.body) : undefined
+        })
+          .then(response => {
+            console.log(`📊 Response status: ${response.status} ${response.statusText}`);
+            console.log(`📊 Response content-type: ${response.headers.get('content-type')}`);
+            console.log(`📊 Response content-length: ${response.headers.get('content-length')}`);
+
+            if (!response.ok) {
+              // Special handling for 403 errors - try to refresh token and retry once
+              if (response.status === 403) {
+                return response.text().then(text => {
+                  console.warn('🔄 Got 403 Forbidden, attempting to fetch fresh token and retry...');
+
+                  // Try to force refresh token and retry the request once
+                  return this.langflowApiService.forceRefreshToken().then(newToken => {
+                    console.log('🔄 Retrying request with fresh token...');
+
+                    return fetch(url, {
+                      method: options.method || 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json, text/plain, */*',
+                        'Accept-Language': 'en-US,en;q=0.9,nb;q=0.8,pl;q=0.7,nl;q=0.6,fi;q=0.5,id;q=0.4',
+                        'Authorization': `Bearer ${newToken}`,
+                        'Connection': 'keep-alive',
+                        'Referer': 'https://langflow.az.ad.idemo-ppc.com/',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                        'Cookie': `apikey_tkn_lflw=""; auto_login_lf=auto; sidebar:section=search; sidebar:state=true; access_token_lf=${newToken}`,
+                        ...options.headers
+                      },
+                      body: options.body ? JSON.stringify(options.body) : undefined
+                    }).then(retryResponse => {
+                      if (!retryResponse.ok) {
+                        return retryResponse.text().then(retryText => {
+                          let errorMessage = `HTTP ${retryResponse.status}: ${retryResponse.statusText}`;
+                          try {
+                            const errorJson = JSON.parse(retryText);
+                            errorMessage = `HTTP ${retryResponse.status}: ${errorJson.detail || errorJson.message || retryResponse.statusText}`;
+                            console.error('Retry API Error Response:', errorJson);
+                          } catch (e) {
+                            console.error('Retry API Error Response (text):', retryText);
+                          }
+                          throw new Error(errorMessage);
+                        });
+                      }
+                      return retryResponse;
+                    });
+                  }).catch(tokenError => {
+                    console.error('❌ Failed to fetch fresh token for retry:', tokenError);
+                    // Fall back to original error
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                      const errorJson = JSON.parse(text);
+                      errorMessage = `HTTP ${response.status}: ${errorJson.detail || errorJson.message || response.statusText}`;
+                      console.error('Original API Error Response:', errorJson);
+                    } catch (e) {
+                      console.error('Original API Error Response (text):', text);
+                    }
+                    throw new Error(errorMessage);
+                  });
+                });
+              }
+
+              // For non-403 errors, handle normally
+              return response.text().then(text => {
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+                try {
+                  // Try to parse as JSON to get more detailed error info
+                  const errorJson = JSON.parse(text);
+                  errorMessage = `HTTP ${response.status}: ${errorJson.detail || errorJson.message || response.statusText}`;
+                  console.error('API Error Response:', errorJson);
+                } catch (e) {
+                  // If it's not JSON, just log the text
+                  console.error('API Error Response (text):', text);
+                }
+
+                throw new Error(errorMessage);
+              });
+            }
+
+            // First, let's get the raw text to see what we're actually receiving
+            return response.text().then(text => {
+              console.log(`📦 Raw response text (length: ${text.length}):`, text.substring(0, 500));
+
+              // Check if response is empty
+              if (!text || text.trim().length === 0) {
+                console.warn('⚠️ Empty response received from API');
+                return { flows: [], message: 'Empty response from server', success: true };
+              }
+
+              // Try to parse as JSON
+              try {
+                const data = JSON.parse(text);
+                console.log(`✅ Successfully parsed JSON response:`, data);
+                return data;
+              } catch (parseError) {
+                console.error('❌ Failed to parse response as JSON:', parseError);
+                console.error('❌ Raw text that failed to parse:', text);
+
+                // Return a structured error response
+                return {
+                  error: 'Invalid JSON response',
+                  rawResponse: text,
+                  message: 'Server returned non-JSON data'
+                };
+              }
+            });
+          })
+          .then(data => {
+            console.log(`📦 Direct fetch response received from ${url}:`);
+            console.log(`📊 Response type: ${typeof data}`);
+            console.log(`📊 Response data:`, data);
+
+            // Enhanced response analysis
+            if (data === null || data === undefined) {
+              console.warn(`⚠️ API returned null/undefined response`);
+              observer.next({ message: 'No data received', flows: [], success: false });
+            } else if (typeof data === 'object' && Object.keys(data).length === 0) {
+              console.warn(`⚠️ API returned empty object`);
+              observer.next({ message: 'Empty response object', flows: [], success: true });
+            } else if (Array.isArray(data) && data.length === 0) {
+              console.warn(`⚠️ API returned empty array - this might be normal if no flows exist`);
+              observer.next({ message: 'No flows found', flows: [], success: true });
+            } else if (Array.isArray(data)) {
+              console.log(`✅ API returned ${data.length} flows`);
+              observer.next({ flows: data, count: data.length, success: true });
+            } else if (typeof data === 'object' && data.flows) {
+              console.log(`✅ API returned flows object with ${Array.isArray(data.flows) ? data.flows.length : 'unknown'} flows`);
+              observer.next(data);
+            } else {
+              console.log(`✅ API returned data:`, data);
+              observer.next(data);
+            }
+            observer.complete();
+          })
+          .catch(error => {
+            console.error(`❌ Direct fetch error from ${url}:`, error);
+            observer.error(error);
+          });
+      }).catch(tokenError => {
+        console.error('❌ Failed to fetch fresh token:', tokenError);
+        observer.error(tokenError);
+      });
+    });
+  }
+
+  /**
+   * Get clean base URL without any proxy prefixes or double protocols
+   */
+  private getCleanLangflowUrl(): string {
+    // Use the live Langflow instance URL
+    return 'https://langflow.az.ad.idemo-ppc.com';
+  }
+
+  /**
+   * Get list of all agents/flows from Langflow
+   * @param page Page number for pagination
+   * @param size Number of items per page
+   * @param search Optional search term
+   * @returns Observable with list of agents
+   */
+  getAllAgents(page: number = 1, size: number = 12, search: string = ''): Observable<any> {
+    // Project ID for Langflow
+    const projectId = '9bddb96b-72c6-47db-9b94-669a2c70b3df';
+
+    // Using the exact URL structure from the working curl command
+    const queryParams = `?id=${projectId}&page=${page}&size=${size}&is_component=false&is_flow=true&search=${encodeURIComponent(search || '')}`;
+
+    console.log('🔍 Fetching agents from Langflow with URL:', `/api/v1/projects/${projectId}${queryParams}`);
+
+    // Use direct Langflow fetch to bypass interceptors
+    return this.directLangflowFetch(`/api/v1/projects/${projectId}${queryParams}`)
+      .pipe(
+        map(response => {
+          console.log('📊 API Response data:', response);
+          return response;
+        }),
+        catchError((error) => {
+          console.error('Failed to fetch agents:', error);
+          // Don't use fallback to avoid double issues
+          return throwError(() => error);
+        })
+      );
+  }
+  /**
+* Delete agent by ID - uses the direct Langflow API
+* @param id Agent ID to delete
+* @returns Observable with the deletion result
+*/
+  deleteAgent(id: string): Observable<any> {
+    console.log(`🗑️ Deleting agent with ID: ${id}`);
+
+    // Use directLangflowFetch with DELETE method to delete the agent
+    return this.directLangflowFetch(`/api/v1/flows/`, {
+      method: 'DELETE',
+      body: [id] // The API expects an array of IDs
+    })
+      .pipe(
+        catchError(error => {
+          console.error(`❌ Error deleting agent with ID ${id}:`, error);
+          // Provide helpful error message
+          return throwError(() => ({
+            error: 'Failed to delete agent',
+            details: error,
+            message: `Could not delete agent with ID ${id}`
+          }));
+        })
+      );
+  }
   fetchModelDetails(id: any): Observable<any> {
     let param = new HttpParams()
       .set('modelid', id)
