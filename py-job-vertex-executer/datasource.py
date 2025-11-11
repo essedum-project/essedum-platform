@@ -89,25 +89,46 @@ def get_connection_details(referer, adapter_instance, project, isInstance=None):
 	return connection_details
 
 
-def get_connection_details_with_token(referer, adapter_instance, project, isInstance=None):
+def get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance=None,):
 	os.environ['no_proxy'] = "localhost,0.0.0.0,10.*,*.ad.infosys.com,10.82.53.110,victlpast02,infyaiplat-tst.ad.infosys.com,infyaiplat.ad.infosys.com"
 	logger.info(f"Inside datasource.py file...")
 	connection_details = {}
+	
 	try:
-		url = f"{referer}api/services/fetchConnectionDetailsByAdapterInstance?project={project}&adapter_instance={adapter_instance}"
+		url = f"{referer}api/aip/services/fetchConnectionDetailsByAdapterInstance?project={project}&adapter_instance={adapter_instance}"
 		if isInstance is not None:
 			url += f"&isInstance={isInstance}"
 
 		logger.info(f"The url is: {str(url)}")
 
 		payload = {}
-		headers = {
-		'access-token': DB_CONNECTIONS[referer].get('TOKEN', '')
-		}
+		# headers = {
+		# 'access-token': DB_CONNECTIONS[referer].get('TOKEN', '')
+		# }
+		
+		if referer != "http://localhost:8087/":
+			headers = dict(headers)
+			if 'Authorization' in headers:
+				del headers['Authorization']
+				
+			headers['access-token'] = DB_CONNECTIONS[referer].get('TOKEN', '')
+			headers['Host']="essedum.az.ad.idemo-ppc.com"
+			logger.info("Using external referer - removed Authorization and added access-token")
+		logger.info(f"Final headers: {headers}")
 
-		logger.info(f"The headers are: {str(headers)}")
+		headers = headers
+		print(headers)
+		proxies = {
+            'http': None,
+            'https': None
+        }
 
-		response = requests.request("GET", url, headers=headers, data=payload,verify=False)
+
+		response = requests.request("GET", url, headers=headers, data=payload, proxies=proxies,verify=False)
+		logger.info(f"Response status code: {response.status_code}")
+		
+
+
 		response = json.loads(response.text)
 
 		logger.info(f"The response from url: {str(url)} is: {str(response)}")
