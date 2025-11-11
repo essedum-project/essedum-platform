@@ -32,7 +32,7 @@ RUN cp -r /sv/app/lib /app
 RUN cp /sv/common-app/target/common-app-3.3-SNAPSHOT.jar /app
 
 # Use an official OpenJDK 21 base image
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk 
 
 USER root
 
@@ -42,9 +42,9 @@ RUN apt-get update && apt-get install -y nginx &&  apt-get clean
 COPY nginx_backend.conf /etc/nginx/nginx.conf
 
 # Set the Java path
-ENV JAVA_HOME=/usr/local/openjdk-21
+ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
-COPY wildcard.lfn.crt /usr/local/openjdk-21/bin/
+COPY wildcard.lfn.crt $JAVA_HOME/bin/
 RUN keytool -importcert -trustcacerts -file $JAVA_HOME/bin/wildcard.lfn.crt \
         -alias "lfn-keycloak" \
         -keystore $JAVA_HOME/lib/security/cacerts \

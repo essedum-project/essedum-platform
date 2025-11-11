@@ -1,5 +1,5 @@
 # Use official Node image
-FROM node:18-alpine AS build
+FROM node:24.1.0-alpine AS build
 
 WORKDIR /aip-app-ui
 
