@@ -462,29 +462,37 @@ public class ICIPMlopsController {
 			ICIPMLFederatedEndpoint results;
 			logger.info("Request for CreateEndpoint: " + request.toString());
 			try {
+                if (isCached) {
+                    if (adapterInstance.equals("local")) {
+                        results = modelPluginService.getModelService(adapterInstance).createEndpoint(request);
 
-				if (adapterInstance.equals("local")) {
-					results = modelPluginService.getModelService(adapterInstance).createEndpoint(request);
+                    } else {
+                        results = modelPluginService.getModelService(getDatasource(adapterInstance, project).getType())
+                                .createEndpoint(request);
+                    }
 
-				} else {
-					results = modelPluginService.getModelService(getDatasource(adapterInstance, project).getType())
-							.createEndpoint(request);
-				}
-				logger.info("Response for CreateEndpoint: " + results.toString());
-				if (results != null && results.getName() != null) {
-					fedEndpointService.saveEndpoint(results);
-					ICIPMLFederatedEndpoint endpointId = fedEndpointRepo
-							.findBySourceId(results.getSourceEndpointId().getSourceId());
-					results.setId(endpointId.getId());
-				} else {
-					if (results.getStatus() != null) {
-						if ("Endpoint Registered".equalsIgnoreCase(results.getStatus()))
-							return ResponseEntity.status(200).body(new JSONObject(results).toString());
-						else
-							return ResponseEntity.status(500).body(results.getStatus());
-					}
-				}
-				return ResponseEntity.status(200).body(new JSONObject(results).toString());
+                    logger.info("Response for CreateEndpoint: " + results.toString());
+                    if (results != null && results.getName() != null) {
+                        fedEndpointService.saveEndpoint(results);
+                        ICIPMLFederatedEndpoint endpointId = fedEndpointRepo
+                                .findBySourceId(results.getSourceEndpointId().getSourceId());
+                        results.setId(endpointId.getId());
+                    } else {
+                        if (results.getStatus() != null) {
+                            if ("Endpoint Registered".equalsIgnoreCase(results.getStatus()))
+                                return ResponseEntity.status(200).body(new JSONObject(results).toString());
+                            else
+                                return ResponseEntity.status(500).body(results.getStatus());
+                        }
+                    }
+                    return ResponseEntity.status(200).body(new JSONObject(results).toString());
+                } else {
+                    params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
+                    String response = iCIPMlOpsRestAdapterService.callPostMethod(adapterInstance,
+                            ICIPMlOpsConstants.PROJECTS_ENDPOINTS_CREATE, project, headers, params,
+                            endpointstbody);
+                    return ResponseEntity.status(200).body(response);
+                }
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 				return ResponseEntity.status(500).body(e.getMessage());
@@ -750,6 +758,38 @@ public class ICIPMlopsController {
 		}
 	}
 
+    @PostMapping("/models/register")
+    public ResponseEntity<String> modelRegister(@RequestBody String endpointsdeploybody,
+                                                       @RequestParam(name = "adapter_instance", required = true) String adapterInstance,
+                                                       @RequestParam(name = "project", required = true) String project,
+                                                       @RequestParam(name = "isCached", required = true) Boolean isCached,
+                                                       @RequestParam(name = "isInstance", required = false) String isInstance,
+                                                       @RequestHeader Map<String, String> headers) throws Exception {
+        Map<String, String> params = new HashMap<String, String>();
+        if (isCached) {
+            ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
+            request.setHeader(headers);
+            request.setOrganization(project);
+            request.setName(adapterInstance);
+            request.setParams(params);
+            request.setBody(endpointsdeploybody);
+            ICIPMLFederatedModel results = modelPluginService.getModelService(getDatasource(adapterInstance, project).getType())
+                    .registerModel(request);
+
+            return ResponseEntity.status(200).body(results.toString());
+        } else {
+            try {
+                params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
+                String results = iCIPMlOpsRestAdapterService.callPostMethod(adapterInstance,
+                        ICIPMlOpsConstants.PROJECTS_MODELS_REGISTER_CREATE, project, headers, params,
+                        endpointsdeploybody);
+                return ResponseEntity.status(200).body(results);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body(e.getMessage());
+            }
+        }
+    }
+
 	@GetMapping("/endpoints/listAdapterEndpoints")
 
 	public ResponseEntity<String> getEndpointsList(@RequestParam(name = "app_org", required = true) String appOrg,
@@ -986,42 +1026,6 @@ public class ICIPMlopsController {
 			}
 		}
 		return ResponseEntity.status(200).body(results.toString());
-	}
-
-	@PostMapping("/models/register")
-	public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
-			@RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
-		if (fedModeldto.getId() != null) {
-			fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
-			fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
-
-		} else {
-			fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
-			fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
-		}
-		fedModeldto.setOrganisation(project);
-		ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
-		logger.info("Request for RegisterModel: ");
-		try {
-			List<ICIPMLFederatedModelDTO> fedModels = fedModelService
-					.getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
-			if (fedModels != null && fedModels.size() > 0) {
-				if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
-					return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
-							HttpStatus.BAD_REQUEST);
-				else if (fedModeldto.getId() != null && fedModels.size() == 1
-						&& !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
-					return new ResponseEntity<>(
-							"Another Model with name '" + fedModeldto.getName() + "' already exists",
-							HttpStatus.BAD_REQUEST);
-				}
-			}
-			ICIPMLFederatedModel response = fedModelService.savemodel(federatedModetToAdd);
-			return ResponseEntity.status(201).body(new JSONObject(response).toString());
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return ResponseEntity.status(500).body(e.getMessage());
-		}
 	}
 
 	@GetMapping("/models/{model_id}")
