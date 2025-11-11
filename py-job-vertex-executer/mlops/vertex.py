@@ -53,16 +53,29 @@ def get_access_token(connection):
             'auth_provider_x509_cert_url': connection.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': connection.get("client_x509_cert_url")
         }
+    
 
     scopes = [
         'https://www.googleapis.com/auth/cloud-platform',
         'https://www.googleapis.com/auth/cloud-platform.read-only'
     ]
+    
 
+
+    
+    os.environ.pop('http_proxy', None)
+    os.environ.pop('https_proxy', None)
+    os.environ.pop('HTTP_PROXY', None)
+    os.environ.pop('HTTPS_PROXY', None)
+
+
+    logger.info(f"Creating credentials from service account info...")
     credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
+    logger.info(f"Credentials created successfully: {credentials}")
     auth_req = google.auth.transport.requests.Request()
+    logger.info(f"auth_req: {auth_req}")
     credentials.refresh(auth_req)
-
+    logger.info(f"token: {credentials.token}")
     return credentials.token
 
 #cloud connect part
@@ -80,7 +93,7 @@ def cloudconnect(payload):
             'auth_provider_x509_cert_url': payload.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': payload.get("client_x509_cert_url")
         }
-
+         
         credentials = service_account.Credentials.from_service_account_info(credentials_info)
         storage_client = storage.Client(project=payload.get("project_id"), credentials=credentials)
         buckets = list(storage_client.list_buckets())
@@ -155,7 +168,7 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets/{dataset_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets/5380615731417186304"
     logger.info(f"printing url :{str(url)}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -262,23 +275,25 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets"
+    # url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print("response",response.text)
     try:
         if response.status_code == 200:
             dataset=json.loads(response.text)
             #formatted=responseFormat(adapter_instance,project,dataset)
             return dataset,200
-        elif response.status_code == 400:
-            return "Error: Bad Parameters(HTTP 400)",400
-        elif response.status_code ==500:
-            return "Internal Server Error(HTTP 500)",500
-        else:
-            return f"Request failed with status code:{response.status_code}",response.status_code
+        # elif response.status_code == 400:
+        #     return "Error: Bad Parameters(HTTP 400)",400
+        # elif response.status_code ==500:
+        #     return "Internal Server Error(HTTP 500)",500
+        # else:
+        #     return f"Request failed with status code:{response.status_code}",response.status_code
     except Exception as e:
         logger.error(f"an error occured:{str(e)}")  
         return e,500
@@ -291,7 +306,9 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/models"
+
     logger.info(f"printing url :{str(url)}") 
     headers = {
         "Authorization": f"Bearer {token}",
@@ -391,7 +408,9 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models/{model_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models/{model_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/models/5717120715342217216"
+
     logger.info(f"printing url:{str(url)}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -403,6 +422,7 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
         if response.status_code == 200:
             logger.info("entering into  if block after checking the statuscode =200....")
             models = json.loads(response.text)
+            print("models", models)
             if models.get("trainingPipeline"):
                 training_id = models['trainingPipeline'].split('/')[-1]
                 url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_id}"
@@ -486,15 +506,17 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
     logger.info("get access token...")
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
+    
     logger.info("Access token generated.")
     request_body = json.dumps(request_body)
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models:upload"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/models:upload"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, data=request_body)
+    print("response",response.text)
     logger.info(f"printing response:{response.text}")
     try:
         if response.status_code == 200:
@@ -543,7 +565,9 @@ def projects_models_delete(adapter_instance, project, isCached, isInstance, conn
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models/{model_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/models/{model_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/models/5717120715342217216"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -597,7 +621,9 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -707,7 +733,7 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints"
     logger.info(f"printing Url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -760,7 +786,9 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints/4046170904378474496"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -772,7 +800,7 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
         if response.status_code == 200:
             logger.info("entering into  if block after checking the statuscode =200....")
             endpoint_details = json.loads(response.text)
-            url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}"
+            url1 = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints/4046170904378474496"
             logger.info(f"printing url :{url}")
             response1 = requests.delete(url1, headers=headers)
             logger.info(f"printing getting response:{response1.text}")
@@ -820,7 +848,9 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -832,6 +862,7 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
         if response.status_code == 200:
             logger.info("entering into  if block after checking the statuscode =200....")
             response_json = response.json()
+            print("response json", response_json)
             values = response_json.get("trainingPipelines")
             formatted = []
             logger.info("entering into the response format code..")
@@ -882,6 +913,8 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
     token = get_access_token(connection)
     logger.info("Access token generated.")
     url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{pipeline_id}"
+    
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -939,6 +972,8 @@ def training_cancel_list(adapter_instance, project, isCached, isInstance, connec
     token = get_access_token(connection)
     logger.info("Access token generated.")
     url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}"
+    
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -949,7 +984,9 @@ def training_cancel_list(adapter_instance, project, isCached, isInstance, connec
     try:
         if response.status_code==200:
             logger.info("entering into  if block after checking the statuscode =200....")
-            url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}:cancel"
+            # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}:cancel"
+            url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines/3846696216377163776:cancel"
+
             response1 = requests.post(url, headers=headers,)
             tp=json.loads(response.text)
             combined_details = f"dataset_id: {tp.get('inputDataConfig', {}).get('datasetId',None)}, model_Name:{tp.get('modelToUpload', {}).get('displayName',None)}"
@@ -995,13 +1032,14 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print(response.text)
     logger.info(f"printing response:{response.text}")
     try:
         if response.status_code == 200:
@@ -1053,7 +1091,9 @@ def training_delete(adapter_instance, project, isCached, isInstance, connection,
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines/3846696216377163776"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1065,8 +1105,10 @@ def training_delete(adapter_instance, project, isCached, isInstance, connection,
         if response.status_code==200:
             logger.info("entering into  if block after checking the statuscode =200....")
             tp=json.loads(response.text)
-            url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}"
+            # url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines/{training_job_id}"
+            url1 = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines/3846696216377163776"
             response1 = requests.delete(url1, headers=headers)
+            print("response1", response1.text)
             tp_delete_details=json.loads(response1.text)
             logger.info("entering into the response format code..")
             response_format = {
@@ -1114,7 +1156,9 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1177,7 +1221,9 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{pipeline_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{pipeline_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs/"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1237,13 +1283,14 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print(response.text)
     logger.info(f"printing response:{response.text}")
     try:
         if response.status_code == 200:
@@ -1296,7 +1343,9 @@ def projects_inferencePipelines_delete(adapter_instance, project, isCached, isIn
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs/"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1308,7 +1357,9 @@ def projects_inferencePipelines_delete(adapter_instance, project, isCached, isIn
         if response.status_code == 200:
             logger.info("entering into  if block after checking the statuscode =200....")
             ip = json.loads(response.text)
-            url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+            # url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+            url1 = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs/"
+
             response1 = requests.delete(url1, headers=headers)
             ip_delete= json.loads(response1.text)
             logger.info("entering into the response format code..")
@@ -1347,13 +1398,15 @@ def projects_inferencePipelines_delete(adapter_instance, project, isCached, isIn
         return str(e), 500
 
     
-def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isInstance, connection, inference_job_id, request_body):
+def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isInstance, connection, inference_job_id):
     logger.info(f"Inside projects_training {str(adapter_instance)}, {str(connection)}")
     logger.info("get access token...")
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs/"
+
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
@@ -1364,7 +1417,9 @@ def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isIn
     try:
         if response.status_code==200:
             logger.info("entering into  if block after checking the statuscode =200....")
-            url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}:cancel"
+            # url1 = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/batchPredictionJobs/{inference_job_id}:cancel"
+            url1 = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/batchPredictionJobs/id:cancel"
+
             response1 = requests.post(url1, headers=headers)
             logger.info("entering into the response format code..")
             ip=json.loads(response.text)
@@ -1416,6 +1471,7 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
+    
     url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}:deployModel"
     logger.info(f"printing url:{url}")
     headers = {
@@ -1423,6 +1479,7 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print("respone",response.text)
     logger.info(f"printing response: {response.text}")
     try:
         if response.status_code == 200:
@@ -1463,7 +1520,9 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
     except Exception as e:
         logger.error(f"an error occured:{str(e)}")
         return str(e), 500
-
+    
+from google.cloud import aiplatform
+from google.oauth2 import service_account
 def projects_endpoints_undeploy_models_create(adapter_instance, project, isCached, isInstance, connection, endpoint_id, request_body):
     logger.info(f"Inside projects_endpoints {str(adapter_instance)}, {str(connection)}")
     aiplatform.init(project=connection['project_id'])
@@ -1523,13 +1582,14 @@ def training_automl_simplified_create(adapter_instance, project, isCached, isIns
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/trainingPipelines"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/trainingPipelines"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print(response.text)
     logger.info(f"printing response: {response.text}")
     try:
         if response.status_code == 200:
@@ -1583,13 +1643,14 @@ def projects_endpoints_infer_create(adapter_instance, project, isCached, isInsta
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}:predict"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints/5593632365403439104:predict"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print(response.text)
     logger.info(f"printing response: {response.text}")
     try:
         if response.status_code == 200:
@@ -1638,13 +1699,14 @@ def projects_endpoints_explain_create(adapter_instance, project, isCached, isIns
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/endpoints/{endpoint_id}:explain"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/endpoints/1042832902875774976:explain"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     response = requests.post(url, headers=headers, json=request_body)
+    print(response.text)
     logger.info(f"printing response: {response.text}")
     try:
         if response.status_code == 200:
@@ -1791,7 +1853,8 @@ def projects_datasets_export_create(adapter_instance, project, isCached, isInsta
     logger.info("calling get access token function ...")
     token = get_access_token(connection)
     logger.info("Access token generated.")
-    url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets/{dataset_id}"
+    # url = f"https://{connection['regionName']}-aiplatform.googleapis.com/v1/projects/{connection['project_id']}/locations/{connection['regionName']}/datasets/{dataset_id}"
+    url = f"https://us-central1-aiplatform.googleapis.com/v1/projects/cs-ppcgcp127-prj-essedum/locations/us-central1/datasets/5380615731417186304"
     logger.info(f"printing url:{url}")
     headers = {
         "Authorization": f"Bearer {token}",
