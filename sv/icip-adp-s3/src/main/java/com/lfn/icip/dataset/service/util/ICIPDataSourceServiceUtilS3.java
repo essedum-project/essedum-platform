@@ -82,6 +82,7 @@ import io.minio.MinioClient;
 import io.minio.Result;
 import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
+import org.yaml.snakeyaml.Yaml;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -222,20 +223,10 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
             logger.error("service-account.json not found in resources.");
             throw new FileNotFoundException("service-account.json not found in resources");
         }
-        logger.info("service-account.json found and loaded successfully: {}",inputStream.toString());
+        logger.info("service-account.json found and loaded successfully: ");
 
-        // Get private key from environment
-
-//        Load environment variables from .env file
-
-        Dotenv dotenv = Dotenv.configure()
-                .directory("icip-adp-s3")
-                .load();
-
-        String privateKey = dotenv.get("GCP_PRIVATE_KEY");
-        String privateKeyId = dotenv.get("GCP_PRIVATE_KEY_ID");
-
-        logger.info("private key : {}",privateKeyId);
+        String privateKey = getGcpPrivateKey();
+        logger.info("private key : {}", privateKey);
         ServiceAccountCredentials credentials;
 
         if (privateKey != null && !privateKey.isEmpty()) {
@@ -249,7 +240,6 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
             Gson gson = new Gson();
             JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
             jsonObject.addProperty("private_key", privateKey);
-            jsonObject.addProperty("private_key_id", privateKeyId);
 
             String modifiedJson = jsonObject.toString().replace("\\\"", "");
             byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
@@ -269,6 +259,25 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
         return credentials;
     }
 
+    public static String getGcpPrivateKey() throws IOException {
+
+        String filePath = "/home/user/sarit/deployments/gcp-secrets.yml"; // Update if needed
+        Yaml yaml = new Yaml();
+
+        try (FileInputStream fis = new FileInputStream(filePath)) {
+            Map<String, Object> yamlMap = yaml.load(fis);
+
+            // Extract 'data' section
+            Map<String, Object> dataMap = (Map<String, Object>) yamlMap.get("data");
+            String encodedKey = (String) dataMap.get("GCP_PRIVATE_KEY");
+
+            // Decode Base64
+            byte[] decodedBytes = Base64.getDecoder().decode(encodedKey);
+            String privateKey = new String(decodedBytes, StandardCharsets.UTF_8);
+            logger.info("Decoded Private Key:\n" + privateKey);
+            return  privateKey;
+        }
+    }
 
     public static boolean verifyGCSConnection(ServiceAccountCredentials credentials, String bucketName) {
 		try {
