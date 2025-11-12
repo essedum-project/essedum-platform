@@ -261,7 +261,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 
     public static String getGcpPrivateKey() throws IOException {
 
-        String filePath = "/home/user/sarit/deployments/gcp-secrets.yml"; // Update if needed
+        String filePath = "/home/useradmin/sarit/deployments/gcp-secrets.yaml"; // Update if needed
         Yaml yaml = new Yaml();
 
         try (FileInputStream fis = new FileInputStream(filePath)) {
