@@ -224,8 +224,11 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
             throw new FileNotFoundException("service-account.json not found in resources");
         }
         logger.info("service-account.json found and loaded successfully: ");
+        logger.info("GCP_PRIVATE_KEY : {}", System.getenv("GCP_PRIVATE_KEY"));
+        logger.info("GCP_PRIVATE_KEY_ID : {}", System.getenv("GCP_PRIVATE_KEY_ID"));
 
-        String privateKey = getGcpPrivateKey();
+        String privateKey = System.getenv("GCP_PRIVATE_KEY");
+        String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
         logger.info("private key : {}", privateKey);
         ServiceAccountCredentials credentials;
 
@@ -240,6 +243,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
             Gson gson = new Gson();
             JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
             jsonObject.addProperty("private_key", privateKey);
+            jsonObject.addProperty("private_key_id",privateKeyId);
 
             String modifiedJson = jsonObject.toString().replace("\\\"", "");
             byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
@@ -259,29 +263,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
         return credentials;
     }
 
-    public static String getGcpPrivateKey() {
-        // Fetch the environment variable
-        logger.info("GCP_PRIVATE_KEY : {}", System.getenv("GCP_PRIVATE_KEY"));
-        logger.info("GCP_PRIVATE_KEY_ID : {}", System.getenv("GCP_PRIVATE_KEY_ID"));
-        logger.info("Type of : {}",System.getenv("GCP_PRIVATE_KEY").getClass());
-
-        String encodedKey = System.getenv("GCP_PRIVATE_KEY").toString();
-        String encodedKeyId = System.getenv("GCP_PRIVATE_KEY_ID").toString();
-
-        if (encodedKey == null || encodedKey.isEmpty()) {
-            logger.error("GCP_PRIVATE_KEY environment variable is not set.");
-            throw new IllegalStateException("Missing GCP_PRIVATE_KEY environment variable");
-        }
-
-        // Decode Base64
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedKey.trim());
-        String privateKey = new String(decodedBytes, StandardCharsets.UTF_8);
-
-        logger.info("Decoded Private Key:\n" + privateKey);
-        return privateKey;
-    }
-
-        public static boolean verifyGCSConnection(ServiceAccountCredentials credentials, String bucketName) {
+    public static boolean verifyGCSConnection(ServiceAccountCredentials credentials, String bucketName) {
 		try {
 			TrustManager[] trustAllCerts = new TrustManager[]{
 					new X509TrustManager() {
