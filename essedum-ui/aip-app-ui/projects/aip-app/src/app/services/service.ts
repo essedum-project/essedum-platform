@@ -12,6 +12,7 @@ import { DashConstant } from '../DTO/dash-constant';
 import { App } from '../apps/app';
 import { AipSnackbarCustomService } from '../sharedModule/services/aip-snackbar-custom.service';
 
+
 @Injectable()
 export class Services {
   datasetsFetched: any;
@@ -25,7 +26,9 @@ export class Services {
     @Inject('dataSets') private dataUrl: string,
     @Inject('envi') private baseUrl: string,
     private encKey: encKey,
-    private customSnackbar: AipSnackbarCustomService
+    private customSnackbar: AipSnackbarCustomService,
+
+
   ) {}
 
 
@@ -3822,7 +3825,7 @@ export class Services {
         return this.handleError(err);
       }));
   }
-
+ 
   fetchModelDetails(id: any): Observable<any> {
     let param = new HttpParams()
       .set('modelid', id)

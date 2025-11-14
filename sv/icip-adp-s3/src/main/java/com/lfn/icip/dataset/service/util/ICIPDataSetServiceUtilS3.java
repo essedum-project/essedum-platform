@@ -37,6 +37,9 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.*;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -88,6 +91,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,6 +109,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.net.ssl.*;
+
+import com.google.api.gax.paging.Page;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.*;
+import java.security.*;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+
 
 @Component("s3ds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -165,6 +180,8 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             if (uploadFile != null && !uploadFile.isBlank()) {
                 if (url.contains("aws")) {
                     uploadFileToS3(dataset, uploadFile, buildS3Client(dataset));
+                } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
+                    uploadFileToGCP(dataset,uploadFile, buildGcsClient(dataset));
                 } else {
                     upload(dataset, uploadFile);
                 }
@@ -175,6 +192,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             } else if (url.contains("aws")) {
                 logger.info("Detected AWS S3 connection.");
                 response = connectAWS(dataset);
+            } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
+                logger.info("Detected GCP connection.");
+                response = connectGCP(dataset);
             } else {
                 response = connectMinio(dataset);
             }
@@ -276,6 +296,228 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             logger.error("AWS S3 connection failed: {}", e.getMessage(), e);
             return false;
         }
+    }
+
+    private boolean connectGCP(ICIPDataset dataset) throws EssedumException {
+        try {
+            Storage storage = buildGcsClient(dataset);
+            JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
+            String bucketName = connectionDetails.optString("StorageContainerName");
+            logger.info("Attempting to list GCS buckets to verify connection...");
+            try {
+                JSONArray blobsList = new JSONArray();
+                Page<Blob> blobs = storage.list(bucketName);
+                for (Blob blob : blobs.iterateAll()) {
+                    blobsList.put(blob.getName());
+                }
+                logger.info("Bucket found {}",blobsList);
+                logger.info("GCS connection successful. Buckets found: {}", blobsList.length());
+            } catch (Exception ex) {
+                logger.error("Error listing GCS buckets: {}", ex.getMessage(), ex);
+                throw new EssedumException("Failed to list GCS buckets: " + ex.getMessage(), ex);
+            }
+            // If uploadFile attribute present, perform upload
+            JSONObject attributes = new JSONObject(dataset.getAttributes());
+            String uploadFile = attributes.optString(UPLOAD_FILE_KEY);
+            if (uploadFile != null && !uploadFile.isBlank()) {
+                uploadFileToGCP(dataset, uploadFile, storage);
+            }
+            return true;
+        } catch (EssedumException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("GCP Storage connection failed: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    // Google Cloud Storage client for the given dataset, with the class SSL bypass helpers
+    private Storage buildGcsClient(ICIPDataset dataset) throws Exception {
+        JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
+        if (inputStream == null) {
+            throw new FileNotFoundException("service-account.json not found in resources");
+        }
+        // Get private key from environment
+        String privateKey = System.getenv("GCP_PRIVATE_KEY");
+        String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
+
+        ServiceAccountCredentials credentials;
+
+        if (privateKey != null && !privateKey.isEmpty()) {
+            // Replace escaped newlines with actual newlines
+            privateKey = privateKey.replace("\\n", "\n");
+
+            // Read the original JSON
+            String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            inputStream.close();
+
+            // Use Gson to parse and modify JSON
+            Gson gson = new Gson();
+            JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+            jsonObject.addProperty("private_key", privateKey);
+            jsonObject.addProperty("private_key_id", privateKeyId);
+
+            // Convert back to InputStream
+            String modifiedJson = jsonObject.toString().replace("\\\"", "");
+            byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
+            InputStream modifiedInputStream = new ByteArrayInputStream(modifiedJsonBytes);
+
+            credentials = ServiceAccountCredentials.fromStream(modifiedInputStream);
+            modifiedInputStream.close();
+        } else {
+            credentials = ServiceAccountCredentials.fromStream(inputStream);
+            inputStream.close();
+        }
+        String projectId = null;
+        if (credentials != null) {
+            JSONObject jsonObject = new JSONObject(credentials);
+            projectId = jsonObject.optString("projectId");
+        }
+
+        // Use the existing trust manager / SSL context helpers to optionally bypass certificate checks
+        TrustManager[] trustAllCerts = getTrustAllCerts();
+        SSLContext sslContext = getSslContext(trustAllCerts);
+        if (sslContext != null) {
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        }
+
+        return StorageOptions.newBuilder()
+                .setProjectId(projectId)
+                .setCredentials(credentials)
+                .build()
+                .getService();
+
+    }
+
+    public boolean uploadFileToGCP(ICIPDataset dataset, String uploadFile, Storage storage) throws Exception {
+
+        JSONObject attr = new JSONObject(dataset.getAttributes());
+        String bucketName = attr.optString("bucket");
+        String uploadFilePath = attr.optString("path");
+        String objectKey = (uploadFilePath != null && !uploadFilePath.isEmpty())
+                ? uploadFilePath + "/" + attr.optString(OBJECT_KEY)
+                : attr.optString(OBJECT_KEY);
+
+        File localFile = new File(uploadFile);
+        if (!localFile.exists()) {
+            logger.error("Local file does not exist: {}", uploadFile);
+            throw new FileNotFoundException("File not found: " + uploadFile);
+        }
+
+        try {
+            // Use existing trust manager / SSL context logic to allow bypass when configured
+            TrustManager[] trustAllCerts = getTrustAllCerts();
+            SSLContext sslContext = getSslContext(trustAllCerts);
+            if (sslContext != null) {
+                HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+                HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+            }
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, objectKey).build();
+
+            // Use createFrom to avoid loading entire file into memory
+            storage.createFrom(blobInfo, localFile.toPath());
+
+            logger.info("File uploaded successfully to gs://{}/{}", bucketName, objectKey);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to upload file to GCP: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    // Download a file from GCS similar to the S3 downloadFile method
+    public String downloadGCP(ICIPDataset dataset) {
+        try {
+            JSONObject attr = new JSONObject(dataset.getAttributes());
+            String bucket = attr.optString(BUCKET_KEY);
+            String remotePrefix = attr.optString("path");
+            String objectName = attr.optString(OBJECT_KEY);
+
+            String downloadTo = attr.optString("downloadPath",
+                    attr.optString("localFilePath", ""));
+
+            //commented out below for testing purpose
+
+            String objectKey = Stream.of(remotePrefix, objectName)
+                    .filter(s -> s != null && !s.isBlank())
+                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .collect(Collectors.joining("/"));
+
+            Path destination;
+            if (!downloadTo.isEmpty()) {
+                Path p = Paths.get(downloadTo);
+                if (Files.exists(p) && Files.isDirectory(p)) {
+                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                } else {
+                    destination = p;
+                    if (destination.getParent() != null) {
+                        Files.createDirectories(destination.getParent());
+                    }
+                }
+            } else {
+                destination = Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve(Paths.get(objectName).getFileName().toString());
+                if (destination.getParent() != null) {
+                    Files.createDirectories(destination.getParent());
+                }
+            }
+
+            // Ensure unique filename if already exists
+            destination = resolveUniqueFileNameGCP(destination);
+
+            try {
+
+                Storage storage = buildGcsClient(dataset);
+                logger.info("Downloading from gs://{}/{} to '{}'", bucket, objectKey, destination.toAbsolutePath());
+
+                BlobInfo blobInfo = BlobInfo.newBuilder(bucket, objectKey).build();
+                Blob blob = storage.get(blobInfo.getBlobId());
+                if (blob == null || !blob.exists()) {
+                    logger.error("GCS object not found: gs://{}/{}", bucket, objectKey);
+                    return null;
+                }
+
+                blob.downloadTo(destination);
+
+                logger.info("File downloaded successfully to '{}'", destination.toAbsolutePath());
+                return destination.toAbsolutePath().toString();
+
+            } catch (StorageException e) {
+                logger.error("GCS error while downloading: {} (code: {})", e.getMessage(), e.getCode(), e);
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to download file from GCS: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    // Helper to resolve a unique filename by appending _1, _2, etc. if needed
+    private Path resolveUniqueFileNameGCP(Path destination) throws IOException {
+        if (!Files.exists(destination)) {
+            return destination;
+        }
+        Path parent = destination.getParent();
+        String fileName = destination.getFileName().toString();
+        String name;
+        String ext = "";
+        int dot = fileName.lastIndexOf('.');
+        if (dot > 0) {
+            name = fileName.substring(0, dot);
+            ext = fileName.substring(dot);
+        } else {
+            name = fileName;
+        }
+        int counter = 1;
+        Path candidate;
+        do {
+            String newName = String.format("%s_%d%s", name, counter, ext);
+            candidate = (parent != null) ? parent.resolve(newName) : Paths.get(newName);
+            counter++;
+        } while (Files.exists(candidate));
+        return candidate;
     }
 
     private BlobServiceClient blobServiceClient(ICIPDataset dataset) throws EssedumException, Exception {
@@ -913,7 +1155,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         }
 
-        if (!(connectionDetails.optString("url").contains("blob") || (connectionDetails.optString("url").contains("aws")))) {
+        if (!(connectionDetails.optString("url").contains("blob") || (connectionDetails.optString("url").contains("aws")) || (connectionDetails.optString("url").contains("google")))) {
             BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             TrustManager[] trustAllCerts = getTrustAllCerts();
             SSLContext sslContext = getSslContext(trustAllCerts);
@@ -1352,7 +1594,220 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 logger.error("Error occurred during file processing: {}", e.getMessage(), e);
                 return null;
             }
-        }else {
+        } else if (connectionDetails.optString("url").contains("google")) {
+            try {
+                logger.info("Starting file download process for dataset: {}", dataset.getName());
+
+                String downloadedFilePath = downloadGCP(dataset);
+                if (downloadedFilePath == null) {
+                    logger.error("Download failed: downloadFile() returned null");
+                    throw new IOException("Failed to download file from S3");
+                }
+
+                logger.info("File downloaded successfully at path: {}", downloadedFilePath);
+
+                // Determine file extension
+                String extension = "";
+                int dotIndex = objectKey.lastIndexOf('.');
+                if (dotIndex > 0 && dotIndex < objectKey.length() - 1) {
+                    extension = objectKey.substring(dotIndex + 1).toLowerCase();
+                }
+                logger.debug("Detected file extension: {}", extension);
+
+                byteArray = Files.readAllBytes(Paths.get(downloadedFilePath));
+                logger.info("Read {} bytes from downloaded file", byteArray.length);
+
+                switch (extension) {
+                    case "csv":
+                        char csvSeparator = attributes.optString(CSV_SEPARATOR_KEY).isEmpty() ? ','
+                                : attributes.optString(CSV_SEPARATOR_KEY).charAt(0);
+                        getCsvData(limit, records, byteArray, csvSeparator, page);
+                        break;
+
+                    case "txt":
+                        logger.info("OBJECTKEY in txt: " + objectKey);
+                        if (objectKey.contains("/FAQ/")) {
+                            logger.info("OBJECTKEY in if block: " + objectKey);
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line);
+                                }
+                                String[] qa = textBuilder.toString().split("Q\\. ");
+                                List<Map<String, String>> keyVal = new ArrayList<>();
+                                for (String i : qa) {
+                                    String[] values = i.split("A\\.");
+                                    if (values.length == 2) {
+                                        String ques = values[0];
+                                        String ans = values[1];
+                                        Map<String, String> keyValue = new LinkedHashMap<>();
+                                        keyValue.put(ques.trim(), ans.trim());
+                                        records.put(keyValue);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            logger.info("OBJECTKEY in else block: " + objectKey);
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line + '\n');
+                                }
+                                records.put(textBuilder.toString());
+                            }
+                        }
+
+                        break;
+                    case "code":
+
+                        if (objectKey.contains("/FAQ/")) {
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line);
+                                }
+                                String[] qa = textBuilder.toString().split("Q\\. ");
+                                List<Map<String, String>> keyVal = new ArrayList<>();
+                                for (String i : qa) {
+                                    String[] values = i.split("A\\.");
+                                    if (values.length == 2) {
+                                        String ques = values[0];
+                                        String ans = values[1];
+                                        Map<String, String> keyValue = new LinkedHashMap<>();
+                                        keyValue.put(ques.trim(), ans.trim());
+                                        records.put(keyValue);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line + '\n');
+                                }
+                                records.put(textBuilder.toString());
+                            }
+                        }
+
+                        break;
+
+                    case "png":
+                    case "jpeg":
+                    case "jpg":
+                        BufferedImage jpgimage = null;
+                        String outputFormat = "jpg";
+                        if ("png".equals(extension)) {
+                            outputFormat = "png";
+                        } else if ("jpeg".equals(extension)) {
+                            outputFormat = "jpeg";
+                        }
+                        try {
+                            jpgimage = ImageIO.read(new ByteArrayInputStream(byteArray));
+                        } catch (IOException e) {
+                            logger.error("Error reading image: " + e.getMessage(), e);
+                        }
+                        if (jpgimage != null) {
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            ImageIO.write(jpgimage, outputFormat, outputStream);
+                            String base64Image = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+                            records.put(base64Image);
+                        } else {
+                            logger.error("Image data is null or couldn't be read");
+                        }
+                        break;
+
+                    case "doc":
+                    case "docx":
+                        try (InputStream docStream = new ByteArrayInputStream(byteArray)) {
+                            String textContent = "";
+                            if ("docx".equals(extension)) {
+                                XWPFDocument docx = new XWPFDocument(docStream);
+                                XWPFWordExtractor extractor = new XWPFWordExtractor(docx);
+                                textContent = extractor.getText();
+                                extractor.close();
+                            } else if ("doc".equals(extension)) {
+                                HWPFDocument doc = new HWPFDocument(docStream);
+                                WordExtractor extractor = new WordExtractor(doc);
+                                textContent = extractor.getText();
+                                extractor.close();
+                            }
+                            records.put(textContent);
+                        } catch (IOException e) {
+                            logger.error("Error reading Word document: " + e.getMessage(), e);
+                        }
+                        break;
+                    case "pdf":
+                        try (PDDocument pdfDocument = Loader.loadPDF(byteArray)) {
+
+                            ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+                            pdfDocument.setAllSecurityToBeRemoved(true);
+                            pdfDocument.save(pdfOutputStream);
+                            String base64Pdf = Base64.getEncoder().encodeToString(pdfOutputStream.toByteArray());
+                            records.put(base64Pdf);
+
+                        } catch (IOException pdfException) {
+                            logger.error("Error while processing PDF:" + pdfException.getMessage(), pdfException);
+                        }
+                        break;
+
+                    case "jsonl":
+                    case "json":
+
+                        try (Reader targetReaderJson = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                             BufferedReader reader = new BufferedReader(targetReaderJson, 2048)) {
+                            String line;
+                            StringBuilder textBuilder = new StringBuilder(4096);
+                            while ((line = reader.readLine()) != null) {
+                                textBuilder.append(line);
+                            }
+                            String res = textBuilder.toString();
+                            if (res.startsWith("{"))
+                                records.put(new JSONObject(res));
+                            else if (res.startsWith("["))
+                                records = new JSONArray(res);
+                        }
+                        break;
+
+                    case "pkl":
+                    case "joblib":
+                    case "h5":
+                    case "pt":
+                    case "pth":
+                    case "ckpt":
+                    case "model":
+                        // Handle model files - return as base64 encoded data
+                        String base64Model = Base64.getEncoder().encodeToString(byteArray);
+                        JSONObject modelData = new JSONObject();
+                        modelData.put("data", base64Model);
+                        modelData.put("fileName", objectKey.substring(objectKey.lastIndexOf("/") + 1));
+                        modelData.put("fileType", extension);
+                        modelData.put("contentType", getContentTypeForModelFile(extension));
+                        records.put(modelData);
+                        break;
+
+                    default:
+                        throw new UnsupportedMediaTypeStatusException(
+                                String.format(UNSUPPORTED_TYPE_MESSAGE, attributes.optString(OBJECT_KEY)));
+                }
+
+                logger.info("File processing completed successfully");
+                return records;
+
+            } catch (IOException | CsvValidationException | JSONException e) {
+                logger.error("Error occurred during file processing: {}", e.getMessage(), e);
+                return null;
+            }
+        } else {
             try {
                 JSONArray records1 = new JSONArray();
                 if (attributes.optString(OBJECT_KEY).equals("")) {
@@ -1756,8 +2211,8 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 }
 
                 @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new java.security.cert.X509Certificate[]{};
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[] {};
                 }
             }};
             return trustAllCerts;
@@ -1769,7 +2224,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         try {
             sslContext = SSLContext.getInstance("TLSv1.2");
 
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            sslContext.init(null, trustAllCerts, new SecureRandom());
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
             logger.error(e.getMessage(), e);
         }

@@ -23,17 +23,6 @@
             WHERE item ='application.uiconfig.essedumAppYear';
         </sql>
     </changeSet>
-    
-          <changeSet id="3v2-usm-2025-oct-7" author="Essedum">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="3">
-              SELECT count(*) FROM usm_permissions where permission in ('secrets-delete','secrets-create','secrets-update');
-              </sqlCheck>
-        </preConditions>
-        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
-         UPDATE usm_permission_api SET api = REGEXP_REPLACE(api, '^/api/aip/secrets/', '/api/secrets/') WHERE permission_id IN (SELECT id FROM usm_permissions WHERE permission IN ('secrets-create', 'secrets-delete', 'secrets-update') ) AND api LIKE '/api/aip/secrets/%'; 
-           </sql>
-    </changeSet>
 
 	
 		<changeSet author="Essedum (generated)" id="3v1-usm-20241212-1">
@@ -42,5 +31,52 @@
        where item = 'BCC Admin Side' and project_name= 'Core' and item_value like '%{"label":"CI Mgmt"%';	
     </sql>
 	</changeSet>
+	
+	
+	<changeSet id="3v2-usm-2025-15-oct" author="Essedum">
+    <preConditions onFail="MARK_RAN">
+        <sqlCheck expectedResult="0">
+            SELECT COUNT(*) 
+            FROM usm_constant 
+            WHERE item_value LIKE '%AI Agent%' 
+              AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311') 
+              AND item = 'IT Portfolio Manager Side';
+        </sqlCheck>
+    </preConditions>
+    <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+        INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+        ) VALUES (
+            'IT Portfolio Manager Side',
+            'leo1311',
+            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'leo1311'),
+            NULL
+        );
+    </sql>
+</changeSet>
+
+    <changeSet id="3v2-usm-2025-15-oct-core" author="Essedum">
+    <preConditions onFail="MARK_RAN">
+        <sqlCheck expectedResult="0">
+            SELECT COUNT(*) 
+            FROM usm_constant 
+            WHERE item_value LIKE '%AI Agent%' 
+              AND project_id = (SELECT id FROM usm_project WHERE name = 'core') 
+              AND item = 'IT Portfolio Manager Side';
+        </sqlCheck>
+    </preConditions>
+    <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+        INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+        ) VALUES (
+            'IT Portfolio Manager Side',
+            'core',
+            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'core'),
+            NULL
+        );
+    </sql>
+</changeSet>
 	
 </databaseChangeLog>

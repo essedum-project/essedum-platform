@@ -43,6 +43,7 @@ COPY nginx_backend.conf /etc/nginx/nginx.conf
 # Set the Java path
 ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"
+
 COPY lfn-keycloak2.crt /usr/local/openjdk-21/bin/
 RUN keytool -importcert -trustcacerts -file $JAVA_HOME/bin/lfn-keycloak2.crt \
         -alias "lfn-keycloak" \
