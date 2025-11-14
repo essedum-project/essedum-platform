@@ -12,32 +12,84 @@
  * @version 1.0.0
  */
 
+import { get } from "axios";
+import { getBaseUrl } from "./api-config";
+
 // ================================
 // AUTHENTICATION CONFIGURATION
 // ================================
 
 /**
+ * Network Configuration Types
+ */
+export type NetworkType = 'infosys' | 'lfn';
+
+/**
+ * Network Configuration Interface
+ */
+export interface NetworkConfig {
+    id: NetworkType;
+    name: string;
+    displayName: string;
+    issuerUri: string;
+    jwkSetUri: string;
+    clientId: string;
+    scope: string;
+    claim: string;
+    createUserIfNotExist: boolean;
+    silentRefreshTimeoutFactor: number;
+    baseURL: string;
+}
+
+/**
  * Keycloak Authentication Configuration
- * Contains all OAuth/OIDC related settings
+ * Contains all OAuth/OIDC related settings for different networks
  */
 export const AUTH_CONFIG = {
-    /** Keycloak issuer URI for authentication */
-    ISSUER_URI: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
-    
-    /** OAuth Client ID registered in Keycloak */
-    CLIENT_ID: 'essedum-45',
-    
-    /** OAuth scopes requested during authentication */
-    SCOPE: 'email',
-    
-    /** Keycloak realm name */
-    REALM: 'ESSEDUM',
-    
     /** Authentication timeout in milliseconds */
     AUTH_TIMEOUT: 60000,
     
     /** Token refresh threshold in minutes (refresh when token expires within this time) */
-    TOKEN_REFRESH_THRESHOLD_MINUTES: 5
+    TOKEN_REFRESH_THRESHOLD_MINUTES: 5,
+    
+    /** Available authentication networks */
+    NETWORKS: {
+        INFOSYS: {
+            id: 'infosys' as NetworkType,
+            name: 'infosys',
+            displayName: 'Infosys Internal Network',
+            issuerUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
+            jwkSetUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM/protocol/openid-connect/certs',
+            clientId: 'essedum-45',
+            scope: 'email',
+            claim: 'email||admin',
+            createUserIfNotExist: true,
+            silentRefreshTimeoutFactor: 0.85,
+            baseURL: 'https://essedum.az.ad.idemo-ppc.com'
+        } as NetworkConfig,
+        LFN: {
+            id: 'lfn' as NetworkType,
+            name: 'lfn',
+            displayName: 'LFN Network',
+            issuerUri: 'https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM',
+            jwkSetUri: 'https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM/protocol/openid-connect/certs',
+            clientId: 'essedum-45',
+            scope: 'email',
+            claim: 'email||admin',
+            createUserIfNotExist: true,
+            silentRefreshTimeoutFactor: 0.85,
+            baseURL: 'https://lfn.essedum.anuket.iol.unh.edu'
+        } as NetworkConfig
+    },
+    
+    /** Default network (for backwards compatibility) */
+    DEFAULT_NETWORK: 'infosys' as NetworkType,
+    
+    /** Legacy constants for backwards compatibility */
+    ISSUER_URI: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
+    CLIENT_ID: 'essedum-45',
+    SCOPE: 'email',
+    REALM: 'ESSEDUM'
 } as const;
 
 // ================================
@@ -67,6 +119,9 @@ export const EXTENSION_CONFIG = {
     /** Main sidebar view ID */
     SIDEBAR_VIEW_ID: 'essedum-sidebar',
     
+    /** Login screen view ID */
+    LOGIN_VIEW_ID: 'essedum-login',
+    
     /** Explorer view container ID */
     EXPLORER_VIEW_ID: 'essedum-explorer',
     
@@ -82,8 +137,14 @@ export const COMMANDS = {
     /** Open the main sidebar panel */
     OPEN_SIDEBAR: 'essedum.openSidebar',
     
+    /** Show network selection login screen */
+    SHOW_LOGIN_SCREEN: 'essedum.showLoginScreen',
+    
     /** Authenticate user with Keycloak */
     LOGIN: 'essedum.login',
+    
+    /** Authenticate user with specific network */
+    LOGIN_WITH_NETWORK: 'essedum.loginWithNetwork',
     
     /** Logout and clear authentication */
     LOGOUT: 'essedum.logout',
@@ -260,8 +321,8 @@ export const EXTERNAL_LINKS = {
     /** Keycloak documentation URL */
     KEYCLOAK_DOCS: 'https://docs.keycloak.org/',
     
-    /** Essedum platform base URL */
-    PLATFORM_BASE_URL: 'https://essedum.az.ad.idemo-ppc.com'
+    /** Function to get current platform base URL */
+    getPlatformBaseUrl: () => getBaseUrl()
 } as const;
 
 // ================================

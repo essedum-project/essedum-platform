@@ -13,6 +13,9 @@
  * @version 1.0.0
  */
 
+import { get } from "axios";
+import {  getBaseUrl } from "./api-config";
+
 // ================================
 // PIPELINE CONFIGURATION
 // ================================
@@ -231,10 +234,10 @@ export const REQUEST_TIMEOUTS = {
  * HTTP request headers for form data
  */
 export const FORM_DATA_HEADERS = {
-    'origin': 'https://essedum.az.ad.idemo-ppc.com',
+    'origin': getBaseUrl(),
     'accept': 'application/json, text/plain, */*',
     'accept-language': 'en-US,en;q=0.9',
-    'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+    'referer': `${getBaseUrl()}/`,
     'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
@@ -273,7 +276,7 @@ from typing import Any, Dict, List`,
     
     /** Model registration URL template */
     MODEL_CARD_URL: (project: string) => 
-        `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/models/register?project=${project}&isCached=true&adapter_instance=local`
+        `${getBaseUrl()}api/aip/service/v1/models/register?project=${project}&isCached=true&adapter_instance=local`
 } as const;
 
 // ================================
@@ -285,7 +288,7 @@ from typing import Any, Dict, List`,
  */
 export const WEBVIEW_COMMANDS = {
     /** Data loading commands */
-    LOAD_CARDS: 'loadCards',
+    // LOAD_CARDS: 'loadCards',
     REFRESH: 'refresh',
     FILTER: 'filter',
     

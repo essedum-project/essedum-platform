@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "0.0.6",
+  "version": "0.0.16",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -38,8 +38,16 @@
         "title": "Open Essedum Panel"
       },
       {
+        "command": "essedum.showLoginScreen",
+        "title": "Show Login Screen"
+      },
+      {
         "command": "essedum.login",
         "title": "Login to Essedum"
+      },
+      {
+        "command": "essedum.loginWithNetwork",
+        "title": "Login with Network Selection"
       },
       {
         "command": "essedum.logout",
@@ -72,6 +80,14 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "essedum.showLoginScreen",
+          "when": "!essedum.isAuthenticated"
+        },
+        {
+          "command": "essedum.loginWithNetwork",
+          "when": "true"
+        },
         {
           "command": "essedum.openJobLogs",
           "when": "true"
@@ -112,9 +128,17 @@
     "views": {
       "essedum-explorer": [
         {
+          "id": "essedum-login",
+          "name": "Network Selection",
+          "type": "webview",
+          "when": "!essedum.isAuthenticated",
+          "icon": "$(key)"
+        },
+        {
           "id": "essedum-sidebar",
           "name": "Essedum AI Platform",
           "type": "webview",
+          "when": "essedum.isAuthenticated",
           "icon": "$(home)"
         }
       ],
@@ -150,8 +174,8 @@
         },
         "essedum.auth.autoLogin": {
           "type": "boolean",
-          "default": true,
-          "description": "Automatically attempt login when the extension starts"
+          "default": false,
+          "description": "Automatically attempt login when the extension starts (requires network to be pre-selected)"
         }
       }
     }

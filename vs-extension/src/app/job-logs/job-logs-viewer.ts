@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
-import { BASE_URL } from '../../constants/api-config';
+import { getBaseUrl } from '../../constants/api-config';
 
 
 export interface JobData {
@@ -617,7 +617,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobName}/count`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -631,7 +631,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/streamingLen/${serviceName}/${this.project.name}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -645,7 +645,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/jobs/${jobName}/${this.project.name}?page=${page}&size=${size}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -659,7 +659,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal2/${internalJob}?page=${page}&size=${size}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -673,7 +673,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=${lineNumber}&size=${size}&status=${status}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -687,7 +687,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=${lineNumber}&runtime=${runtime}&size=${size}&status=${status}&background=${isBackground}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -704,7 +704,7 @@ export class JobLogsViewer {
         const headers = this.getConsoleHeaders();
 
         const response = await axios.get(`/api/aip/jobs/console/${jobId}?offset=${offset}&org=${this.project.name}&lineno=${lineno}&status=${status}&readconsole=${readconsole}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -715,7 +715,7 @@ export class JobLogsViewer {
 
     private async stopPipeline(jobId: string): Promise<any> {
         console.log('stopPipeline called with jobId:', jobId);
-        console.log('BASE_URL:', BASE_URL);
+        console.log('BASE_URL:', getBaseUrl());
         console.log('Organization:', this.project.name);
 
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -723,11 +723,11 @@ export class JobLogsViewer {
         console.log('Request headers:', headers);
 
         const url = `/api/aip/service/v1/jobs/stopJob/${jobId}`;
-        console.log('Making GET request to:', `${BASE_URL}${url}`);
+        console.log('Making GET request to:', `${getBaseUrl()}${url}`);
 
         try {
             const response = await axios.get(url, {
-                baseURL: BASE_URL,
+                baseURL: getBaseUrl(),
                 headers,
                 httpsAgent,
                 timeout: 10000
@@ -749,7 +749,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/outputArtifacts/${jobId}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -778,7 +778,7 @@ export class JobLogsViewer {
             'priority': 'u=1, i',
             'project': this.project?.id,
             'projectname': this.project?.name,
-            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'referer': `${getBaseUrl()}/`,
             'roleid': this.role?.id || '',
             'rolename': this.role?.name || '',
             'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',

@@ -26,11 +26,12 @@ import * as vscode from 'vscode';
 // Service imports
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
+import { LoginScreenProvider } from './auth/login-screen';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { PipelineService } from './services/pipeline.service';
 
 // Configuration imports
-import { initializeSSLBypass, setupAxiosDefaults, makeSecureRequest } from './constants/api-config';
+import { initializeSSLBypass, setupAxiosDefaults, makeSecureRequest, getBaseUrl, setBaseUrl, isBaseUrlSet } from './constants/api-config';
 import {
     AUTH_CONFIG,
     EXTENSION_CONFIG,
@@ -38,7 +39,9 @@ import {
     MESSAGES,
     UI_CONFIG,
     EXTERNAL_LINKS,
-    DEBUG_CONFIG
+    DEBUG_CONFIG,
+    NetworkConfig,
+    NetworkType
 } from './constants/app-constants';
 
 // Utility imports
@@ -163,8 +166,14 @@ interface DashConstantQuery {
 // CONSTANTS
 // ================================
 
-const CONFIG_API_URL = 'https://essedum.az.ad.idemo-ppc.com/api/getConfigDetails';
-const USER_INFO_API_URL = 'https://essedum.az.ad.idemo-ppc.com/api/userInfo';
+// Dynamic API URLs - these should be constructed when needed, not at module load time
+function getConfigApiUrl(): string {
+    return `${getBaseUrl()}/api/getConfigDetails`;
+}
+
+function getUserInfoApiUrl(): string {
+    return `${getBaseUrl()}/api/userInfo`;
+}
 const CONFIG_TIMEOUT = 10000;
 const FALLBACK_TIMEOUT = 15000;
 
@@ -215,6 +224,7 @@ const logger = createLogger('Extension');
 
 /** Global service instances */
 let authService: KeycloakAuthService;
+let loginScreenProvider: LoginScreenProvider;
 let pipelineService: PipelineService;
 let pipelineCardsProvider: PipelineCardsProvider;
 let essedumFileProvider: EssedumFileSystemProvider;
@@ -245,14 +255,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     extensionContext = context;
 
     try {
+        // IMPORTANT: Set authentication context to false FIRST to ensure login screen is shown
+        await updateAuthenticationContext(false);
+
         // Initialize SSL bypass before any HTTPS requests
         await initializeSSLConfiguration();
 
-        // Initialize configuration from server before creating services
-        await initializeConfiguration(context);
+        // Create login screen provider first
+        loginScreenProvider = createLoginScreenProvider(context);
 
-        // Create and configure authentication service with server config
-        authService = createAuthenticationService(context);
+        // Check if user has already selected a network and is authenticated
+        const hasValidAuth = await initializeAuthenticationService(context);
+
+        // Only initialize configuration if we have a valid base URL
+        if (hasValidAuth || await hasStoredNetworkConfig(context)) {
+            // Initialize configuration from server after network is selected
+            await initializeConfiguration(context);
+        }
 
         // Create file system provider
         essedumFileProvider = createFileSystemProvider();
@@ -268,14 +287,28 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }
         );
 
-        // Initialize pipeline services
-        await initializePipelineServices(context);
+        // Register webview providers BEFORE initializing pipeline services
+        registerWebviewProviders(context);
+
+        // Initialize pipeline services only if we have a network configured
+        if (hasValidAuth || await hasStoredNetworkConfig(context)) {
+            await initializePipelineServices(context);
+        }
 
         // Register all extension commands
         registerExtensionCommands(context);
 
-        // Perform initial authentication check
-        await checkAndUpdateAuthStatus(authService);
+        // Now handle authentication state
+        if (hasValidAuth) {
+            // User is already authenticated and has used login screen before
+            await updateAuthenticationContext(true);
+            await checkAndUpdateAuthStatus(authService);
+        } else {
+            // Always show login screen for network selection first
+            // (even if autoLogin is enabled, we need network selection)
+            await updateAuthenticationContext(false);
+            await showLoginScreen();
+        }
 
         logger.info('Extension activation completed successfully');
 
@@ -295,6 +328,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function initializeConfiguration(context: vscode.ExtensionContext): Promise<void> {
     logger.info('Initializing configuration from server...');
 
+    // Check if base URL is set (network selected)
+    if (!isBaseUrlSet()) {
+        logger.warn('Base URL not set yet - skipping configuration initialization');
+        return;
+    }
+
     try {
         const config = await fetchServerConfiguration();
         await storeServerConfiguration(context, config);
@@ -306,7 +345,7 @@ async function initializeConfiguration(context: vscode.ExtensionContext): Promis
 }
 
 async function fetchServerConfiguration(): Promise<ServerConfig> {
-    const response = await makeSecureRequest('GET', CONFIG_API_URL, {
+    const response = await makeSecureRequest('GET', getConfigApiUrl(), {
         timeout: CONFIG_TIMEOUT,
         withCredentials: true,
         headers: {
@@ -405,7 +444,7 @@ async function attemptFallbackConfiguration(context: vscode.ExtensionContext): P
             agent: false
         });
 
-        const response = await axios.get(CONFIG_API_URL, {
+        const response = await axios.get(getConfigApiUrl(), {
             httpsAgent: agent,
             timeout: FALLBACK_TIMEOUT,
             headers: {
@@ -468,21 +507,23 @@ async function initializeSSLConfiguration(): Promise<void> {
 }
 
 /**
- * Creates and configures the Keycloak authentication service
+ * Creates and configures the Keycloak authentication service (legacy method)
  * @param context - VS Code extension context
  * @returns Configured authentication service
  */
 function createAuthenticationService(context: vscode.ExtensionContext): KeycloakAuthService {
-    logger.info('Creating authentication service...');
+    logger.info('Creating authentication service with default configuration...');
 
     // Get OAuth configuration from stored config (fetched from server) or use defaults
     const storedOAuthConfig = context.globalState.get<OAuthConfig>(STORAGE_KEYS.OAUTH_CONFIG);
 
     // Create Keycloak configuration using server config if available, otherwise defaults
     const keycloakConfig: KeycloakConfig = {
-        issuerUri: storedOAuthConfig?.issuerUri || AUTH_CONFIG.ISSUER_URI,
-        clientId: storedOAuthConfig?.clientId || AUTH_CONFIG.CLIENT_ID,
-        scope: storedOAuthConfig?.scope || AUTH_CONFIG.SCOPE
+        issuerUri: storedOAuthConfig?.issuerUri || AUTH_CONFIG.NETWORKS.INFOSYS.issuerUri,
+        clientId: storedOAuthConfig?.clientId || AUTH_CONFIG.NETWORKS.INFOSYS.clientId,
+        scope: storedOAuthConfig?.scope || AUTH_CONFIG.NETWORKS.INFOSYS.scope,
+        networkType: AUTH_CONFIG.DEFAULT_NETWORK,
+        networkName: AUTH_CONFIG.NETWORKS.INFOSYS.displayName
     };
 
     logger.debug('Keycloak configuration:', keycloakConfig);
@@ -490,6 +531,195 @@ function createAuthenticationService(context: vscode.ExtensionContext): Keycloak
 
     // Create authentication service with improved OAuth flow
     return new KeycloakAuthService(keycloakConfig, context);
+}
+
+/**
+ * Creates the login screen provider
+ * @param context - VS Code extension context
+ * @returns Configured login screen provider
+ */
+function createLoginScreenProvider(context: vscode.ExtensionContext): LoginScreenProvider {
+    logger.info('Creating login screen provider...');
+    return new LoginScreenProvider(context.extensionUri);
+}
+
+/**
+ * Check if we have a stored network configuration
+ * @param context - VS Code extension context
+ * @returns boolean indicating if network is configured
+ */
+async function hasStoredNetworkConfig(context: vscode.ExtensionContext): Promise<boolean> {
+    const storedNetwork = context.globalState.get<NetworkConfig>('selected_network');
+    const hasUsedLoginScreen = context.globalState.get<boolean>('has_used_login_screen', false);
+    
+    if (storedNetwork && hasUsedLoginScreen) {
+        // Set the base URL from stored network configuration
+        setBaseUrl(storedNetwork.baseURL);
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Initialize authentication service based on stored network selection
+ * @param context - VS Code extension context
+ * @returns boolean indicating if valid authentication exists
+ */
+async function initializeAuthenticationService(context: vscode.ExtensionContext): Promise<boolean> {
+    logger.info('Initializing authentication service...');
+
+    try {
+        // Check if we have a stored network selection AND user has been through our login screen
+        const storedNetwork = context.globalState.get<NetworkConfig>('selected_network');
+        const hasUsedLoginScreen = context.globalState.get<boolean>('has_used_login_screen', false);
+        
+        logger.info('Stored network:', storedNetwork?.displayName || 'None');
+        logger.info('Has used login screen:', hasUsedLoginScreen);
+        
+        if (storedNetwork && hasUsedLoginScreen) {
+            logger.info('Found stored network configuration and login screen usage:', storedNetwork.displayName);
+            
+            // Create auth service with stored network
+            authService = KeycloakAuthService.createWithNetwork(storedNetwork, context);
+            
+            // Check if we have valid tokens
+            const isAuthenticated = await authService.isTokenValid();
+            logger.info('Authentication status with stored network:', isAuthenticated);
+            
+            return isAuthenticated;
+        } else {
+            logger.info('No stored network or user has not used login screen, will show login screen');
+            
+            // Create auth service with default network for now
+            authService = createAuthenticationService(context);
+            return false;
+        }
+    } catch (error) {
+        logger.error('Error initializing authentication service:', error);
+        
+        // Fallback to default auth service
+        authService = createAuthenticationService(context);
+        return false;
+    }
+}
+
+/**
+ * Register webview providers
+ * @param context - VS Code extension context
+ */
+function registerWebviewProviders(context: vscode.ExtensionContext): void {
+    logger.info('Registering webview providers...');
+
+    // Register login screen provider
+    registerWebviewViewProvider(
+        context,
+        EXTENSION_CONFIG.LOGIN_VIEW_ID,
+        loginScreenProvider
+    );
+
+    // Set up login screen event handlers
+    setupLoginScreenEventHandlers();
+
+    logger.info('Webview providers registered successfully');
+}
+
+/**
+ * Set up event handlers for the login screen
+ */
+function setupLoginScreenEventHandlers(): void {
+    // Handle network selection
+    loginScreenProvider.onNetworkSelected(async (networkConfig: NetworkConfig) => {
+        logger.info('Network selected:', networkConfig.displayName);
+        
+        try {
+            loginScreenProvider.showLoading('Connecting to ' + networkConfig.displayName + '...');
+            
+            // Mark that user has used the login screen
+            await extensionContext.globalState.update('has_used_login_screen', true);
+            
+            // Update or create auth service with selected network
+            if (authService) {
+                await authService.updateNetworkConfig(networkConfig);
+            } else {
+                authService = KeycloakAuthService.createWithNetwork(networkConfig, extensionContext);
+            }
+            
+            loginScreenProvider.showLoading('Initializing services...');
+            
+            // Now that we have a network selected, initialize configuration and services
+            try {
+                await initializeConfiguration(extensionContext);
+                await initializePipelineServices(extensionContext);
+                logger.info('Services initialized successfully after network selection');
+            } catch (serviceError) {
+                logger.warn('Failed to initialize some services after network selection:', serviceError);
+                // Continue with authentication even if services fail to initialize
+            }
+            
+            loginScreenProvider.showLoading('Authenticating...');
+            
+            // Perform authentication
+            const tokens = await authService.forceAuthentication();
+            
+            // Process successful login
+            await processSuccessfulLogin(tokens.access_token);
+            
+            // Hide login screen and show main interface
+            await vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
+            
+        } catch (error) {
+            logger.error('Authentication failed after network selection:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            loginScreenProvider.showError('Authentication failed: ' + errorMessage);
+        }
+    });
+
+    // Handle login cancellation
+    loginScreenProvider.onLoginCancelled(() => {
+        logger.info('Login cancelled by user');
+        loginScreenProvider.reset();
+    });
+}
+
+/**
+ * Show the login screen
+ */
+async function showLoginScreen(): Promise<void> {
+    logger.info('Showing login screen...');
+    
+    try {
+        // Ensure authentication context is set to false to show login view
+        await updateAuthenticationContext(false);
+        
+        // Force refresh of the view to ensure proper rendering
+        await vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
+        
+        // Small delay to ensure view container is loaded
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Try to focus on the login view specifically
+        try {
+            await vscode.commands.executeCommand('essedum-login.focus');
+        } catch (focusError) {
+            logger.warn('Could not focus login view directly:', focusError);
+        }
+        
+        logger.info('Login screen display process completed');
+    } catch (error) {
+        logger.error('Failed to show login screen:', error);
+        
+        // Fallback: show command palette login
+        const selection = await vscode.window.showInformationMessage(
+            'Welcome to Essedum AI Platform! Please select your authentication network.',
+            'Login with Network Selection',
+            'Cancel'
+        );
+        
+        if (selection === 'Login with Network Selection') {
+            await vscode.commands.executeCommand(COMMANDS.LOGIN_WITH_NETWORK);
+        }
+    }
 }
 
 /**
@@ -511,14 +741,22 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
     logger.info('Initializing pipeline services...');
 
     try {
-        // Attempt to get access token for initialization
-        const accessToken = await authService.getAccessToken();
-        await getUserAtLogin(extensionContext, accessToken);
+        // Check if we have valid tokens WITHOUT triggering authentication
+        const storedTokens = await authService.getStoredTokens();
+        let accessToken = '';
+        
+        if (storedTokens && storedTokens.access_token) {
+            accessToken = storedTokens.access_token;
+            await getUserAtLogin(extensionContext, accessToken);
+            logger.info('Pipeline services initialized with stored token');
+        } else {
+            logger.info('No stored tokens available, initializing with empty token');
+        }
 
         const project = context.globalState.get<any>(STORAGE_KEYS.PROJECT);
         const role = context.globalState.get<any>(STORAGE_KEYS.ROLE);
 
-        // Create pipeline service with token
+        // Create pipeline service with token (empty if not authenticated)
         pipelineService = new PipelineService(accessToken, role, project);
 
         // Create pipeline cards provider with dependencies
@@ -533,7 +771,7 @@ async function initializePipelineServices(context: vscode.ExtensionContext): Pro
         // Update file provider with token
         essedumFileProvider.updateToken(accessToken);
 
-        logger.info('Pipeline services initialized with valid token');
+        logger.info('Pipeline services initialized successfully');
 
     } catch (error) {
         await handlePipelineServiceInitializationError(context, error);
@@ -579,7 +817,9 @@ function registerExtensionCommands(context: vscode.ExtensionContext): void {
 
     const commandMappings = [
         { command: COMMANDS.OPEN_SIDEBAR, handler: handleOpenSidebar },
+        { command: COMMANDS.SHOW_LOGIN_SCREEN, handler: handleShowLoginScreen },
         { command: COMMANDS.LOGIN, handler: handleLogin },
+        { command: COMMANDS.LOGIN_WITH_NETWORK, handler: handleLoginWithNetwork },
         { command: COMMANDS.LOGOUT, handler: handleLogout },
         { command: COMMANDS.CHECK_AUTH, handler: handleCheckAuth },
         { command: COMMANDS.RUN_PIPELINE, handler: handleRunPipeline },
@@ -601,6 +841,106 @@ function registerExtensionCommands(context: vscode.ExtensionContext): void {
 // ================================
 
 /**
+ * Handles the show login screen command
+ */
+async function handleShowLoginScreen(): Promise<void> {
+    logger.info('Showing login screen...');
+    await showLoginScreen();
+}
+
+/**
+ * Handles the login with specific network command
+ * @param networkType - Network type to use for login
+ */
+async function handleLoginWithNetwork(networkType?: NetworkType): Promise<void> {
+    logger.info('Login with network requested:', networkType);
+
+    try {
+        let networkConfig: NetworkConfig;
+
+        if (networkType) {
+            // Use specified network
+            const networkKey = networkType.toUpperCase() as keyof typeof AUTH_CONFIG.NETWORKS;
+            networkConfig = AUTH_CONFIG.NETWORKS[networkKey];
+            
+            if (!networkConfig) {
+                throw new Error(`Unknown network type: ${networkType}`);
+            }
+        } else {
+            // Show quick pick for network selection
+            const networkOptions = [
+                {
+                    label: AUTH_CONFIG.NETWORKS.INFOSYS.displayName,
+                    description: 'For Infosys employees and internal users',
+                    detail: AUTH_CONFIG.NETWORKS.INFOSYS.issuerUri,
+                    network: AUTH_CONFIG.NETWORKS.INFOSYS
+                },
+                {
+                    label: AUTH_CONFIG.NETWORKS.LFN.displayName,
+                    description: 'For Linux Foundation Networking users',
+                    detail: AUTH_CONFIG.NETWORKS.LFN.issuerUri,
+                    network: AUTH_CONFIG.NETWORKS.LFN
+                }
+            ];
+
+            const selection = await vscode.window.showQuickPick(networkOptions, {
+                placeHolder: 'Select authentication network',
+                title: 'Essedum AI Platform - Network Selection'
+            });
+
+            if (!selection) {
+                logger.info('Network selection cancelled');
+                return;
+            }
+
+            networkConfig = selection.network;
+        }
+
+        // Show progress during authentication
+        const authResult = await showProgressNotification(
+            `Authenticating with ${networkConfig.displayName}`,
+            async (progress, token) => {
+                if (token.isCancellationRequested) {
+                    throw new Error(MESSAGES.ERROR.AUTH_CANCELLED);
+                }
+
+                progress.report({ increment: 20, message: 'Configuring network...' });
+
+                // Mark that user has used login screen/network selection
+                await extensionContext.globalState.update('has_used_login_screen', true);
+
+                // Update or create auth service with selected network
+                if (authService) {
+                    await authService.updateNetworkConfig(networkConfig);
+                } else {
+                    authService = KeycloakAuthService.createWithNetwork(networkConfig, extensionContext);
+                }
+
+                if (token.isCancellationRequested) {
+                    throw new Error(MESSAGES.ERROR.AUTH_CANCELLED);
+                }
+
+                progress.report({ increment: 40, message: 'Starting authentication...' });
+
+                // Force fresh authentication
+                const tokens = await authService.forceAuthentication();
+
+                progress.report({ increment: 80, message: 'Authentication successful, updating services...' });
+
+                return tokens;
+            },
+            true // Allow cancellation
+        );
+
+        await processSuccessfulLogin(authResult.access_token);
+        logger.info('Login with network completed successfully');
+
+    } catch (error) {
+        await handleLoginError(error);
+    }
+}
+
+/**
  * Handles the open sidebar command
  */
 async function handleOpenSidebar(): Promise<void> {
@@ -615,6 +955,9 @@ async function handleLogin(): Promise<void> {
     logger.info('Starting login process...');
 
     try {
+        // Mark that user has used login functionality
+        await extensionContext.globalState.update('has_used_login_screen', true);
+
         // Show progress during authentication
         const authResult = await showProgressNotification(
             MESSAGES.PROGRESS.AUTHENTICATING,
@@ -648,7 +991,7 @@ async function handleLogin(): Promise<void> {
 
     } catch (error) {
         await handleLoginError(error);
-}
+    }
 }
 
 async function processSuccessfulLogin(accessToken: string): Promise<void> {
@@ -694,11 +1037,35 @@ async function handleLogout(): Promise<void> {
     logger.info('Starting logout process...');
 
     try {
-        // Clear stored tokens without browser redirect
-        await authService.clearStoredTokens();
+        // Ask user if they want to switch networks or just logout
+        const options = [
+            'Logout (same network)',
+            'Logout and switch network',
+            'Cancel'
+        ];
 
-        // Clear ALL user data from globalState
-        await clearAllUserData(extensionContext);
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: 'Choose logout option',
+            title: 'Logout Options'
+        });
+
+        if (!selection || selection === 'Cancel') {
+            logger.info('Logout cancelled by user');
+            return;
+        }
+
+        const clearNetwork = selection === 'Logout and switch network';
+
+        // Clear stored tokens and optionally network selection
+        await authService.clearStoredTokens(clearNetwork);
+
+        // Clear user data - but keep network selection if not switching networks
+        if (clearNetwork) {
+            await clearAllUserData(extensionContext);
+        } else {
+            // Clear user data but preserve network and login screen flag
+            await clearUserDataExceptNetwork(extensionContext);
+        }
 
         // Clear service tokens
         await updateServicesWithToken('');
@@ -706,14 +1073,22 @@ async function handleLogout(): Promise<void> {
         // Update authentication context
         await updateAuthenticationContext(false);
 
-        // Reload initial content
-        if (pipelineCardsProvider) {
+        // Reload initial content or show login screen
+        if (clearNetwork) {
+            // Show login screen for network re-selection
+            await showLoginScreen();
+        } else if (pipelineCardsProvider) {
+            // Just reload content with same network
             pipelineCardsProvider.loadInitialContent();
         }
 
-        await vscode.window.showInformationMessage(MESSAGES.SUCCESS.LOGOUT_SUCCESS);
+        const message = clearNetwork 
+            ? MESSAGES.SUCCESS.LOGOUT_SUCCESS + ' You can now select a different network.'
+            : MESSAGES.SUCCESS.LOGOUT_SUCCESS;
 
-        logger.info('Logout completed successfully');
+        await vscode.window.showInformationMessage(message);
+
+        logger.info('Logout completed successfully', clearNetwork ? '(with network switch)' : '');
 
     } catch (error) {
         logger.error('Logout failed:', error);
@@ -949,7 +1324,9 @@ async function clearAllUserData(context: vscode.ExtensionContext): Promise<void>
         'userPreferences',
         'selectedRole',
         'selectedProject',
-        'selectedPortfolio'
+        'selectedPortfolio',
+        'has_used_login_screen', // Clear login screen usage flag
+        'selected_network' // Optionally clear network selection based on logout type
     ];
 
     await Promise.all(
@@ -960,6 +1337,47 @@ async function clearAllUserData(context: vscode.ExtensionContext): Promise<void>
     );
 
     logger.info('All user data cleared from cache');
+}
+
+/**
+ * Clears user data but preserves network selection and login screen usage
+ */
+async function clearUserDataExceptNetwork(context: vscode.ExtensionContext): Promise<void> {
+    logger.info('Clearing user data but preserving network selection...');
+
+    const keysToCllear = [
+        STORAGE_KEYS.USER,
+        STORAGE_KEYS.ROLE,
+        STORAGE_KEYS.PROJECT,
+        STORAGE_KEYS.ORGANIZATION,
+        STORAGE_KEYS.CURRENT_USER_INFO,
+        STORAGE_KEYS.USER_INFO_DATA,
+        STORAGE_KEYS.USER_PORTFOLIOS,
+        STORAGE_KEYS.JWT_TOKEN,
+        STORAGE_KEYS.ACCESS_TOKEN,
+        STORAGE_KEYS.CURRENT_PROJECT,
+        STORAGE_KEYS.CURRENT_PORTFOLIO,
+        STORAGE_KEYS.UPDATED_USER,
+        STORAGE_KEYS.RETURN_URL,
+        STORAGE_KEYS.THEME,
+        STORAGE_KEYS.DEFAULT_THEME,
+        'font',
+        'dashConstants',
+        'userPreferences',
+        'selectedRole',
+        'selectedProject',
+        'selectedPortfolio'
+        // Note: NOT clearing 'has_used_login_screen' and 'selected_network'
+    ];
+
+    await Promise.all(
+        keysToCllear.map(key => {
+            logger.debug(`Clearing key: ${key}`);
+            return context.globalState.update(key, undefined);
+        })
+    );
+
+    logger.info('User data cleared, network selection preserved');
 }
 
 /**
@@ -1004,6 +1422,12 @@ async function updateServicesWithToken(accessToken: string): Promise<void> {
         // Update pipeline provider
         if (pipelineCardsProvider) {
             pipelineCardsProvider.updateToken(accessToken);
+            
+            // If we have a valid token, also trigger the onTokenUpdated method
+            // to handle the UI transition from auth screen to main view
+            if (accessToken && accessToken.trim().length > 0) {
+                await pipelineCardsProvider.onTokenUpdated(accessToken);
+            }
         }
 
         // Update file system provider
@@ -1137,7 +1561,7 @@ async function getUserInfo(context: vscode.ExtensionContext, accessToken: string
     try {
         const salt = context.globalState.get<string>(STORAGE_KEYS.ENC_DEFAULT, '');
 
-        const response = await makeSecureRequest('GET', USER_INFO_API_URL, {
+        const response = await makeSecureRequest('GET', getUserInfoApiUrl(), {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'accept': REQUEST_HEADERS.ACCEPT,
@@ -1428,7 +1852,7 @@ async function findAllDashConstant(
     logger.info('Fetching dashboard constants...');
 
     try {
-        const baseUrl = context.globalState.get<string>(STORAGE_KEYS.BASE_URL, 'https://essedum.az.ad.idemo-ppc.com');
+        const baseUrl = context.globalState.get<string>(STORAGE_KEYS.BASE_URL, getBaseUrl());
         const apiUrl = `${baseUrl}/api/aip/service/v1/dashconstants/search`;
 
         const response = await makeSecureRequest('POST', apiUrl, {

@@ -51,7 +51,7 @@ const CONFIG = {
  */
 const COMMANDS = {
     // Data operations
-    LOAD_CARDS: 'loadCards',
+    // LOAD_CARDS: 'loadCards',
     REFRESH: 'refresh',
     FILTER: 'filter',
 
@@ -707,86 +707,6 @@ class PipelineCardsClient {
         // Update details content
         this.updateDetailsContent(pipeline, scripts, runTypes);
     }
-
-    // /**
-    //  * Shows list view (hides details)
-    //  */
-    // showListView() {
-    //     console.log('[PipelineClient] Showing list view');
-
-    //     this.currentView = 'list';
-    //     this.currentPipelineId = null;
-    //     this.currentPipelineData = null;
-
-    //     // Hide details view
-    //     Utils.toggleElement(this.detailsView, false);
-
-    //     // Show list view elements
-    //     this.showListViewElements();
-
-    //     // Request refresh of cards list
-    //      this.vscode.postMessage({
-    //         command: 'loadCards'
-    //     });
-    // }
-
-    // /**
-    //  * Hides list view elements
-    //  */
-    // hideListView() {
-    //     Utils.toggleElement(this.cardsContainer, false);
-    //     Utils.toggleElement(this.emptyState, false);
-    //     Utils.toggleElement(this.paginationContainer, false);
-    //     Utils.toggleElement(this.loadingState, false);
-
-    //     // Hide header elements
-    //     const header = document.querySelector('.header');
-    //     const searchContainer = document.querySelector('.search-container');
-    //     const headerButtons = document.querySelector('.header-buttons');
-
-    //     Utils.toggleElement(header, false);
-    //     Utils.toggleElement(searchContainer, false);
-    //     Utils.toggleElement(headerButtons, false);
-    // }
-
-    // /**
-    // * Shows list view elements
-    // */
-    // showListViewElements() {
-    //     // Show appropriate elements based on current state
-    //     if (this.cardsContainer && this.cardsContainer.innerHTML.trim()) {
-    //         Utils.toggleElement(this.cardsContainer, true);
-    //     }
-
-    //     // Show header elements
-    //     const header = document.querySelector('.header');
-    //     const searchContainer = document.querySelector('.search-container');
-    //     const headerButtons = document.querySelector('.header-buttons');
-
-    //     Utils.toggleElement(header, true);
-    //     Utils.toggleElement(searchContainer, true);
-    //     Utils.toggleElement(headerButtons, true);
-    // }
-
-    // /**
-    //  * Updates details view content
-    //  * @param {Object} pipeline - Pipeline data
-    //  * @param {Object} scripts - Scripts data
-    //  * @param {Array} runTypes - Run types data
-    //  */
-    // updateDetailsContent(pipeline, scripts, runTypes) {
-    //     // Update title
-    //     if (this.detailsTitle) {
-    //         this.detailsTitle.textContent = `Pipeline: ${Utils.toTitleCase(pipeline.alias)}`;
-    //     }
-
-    //     // Update sections
-    //     this.updatePipelineInfo(pipeline);
-    //     this.updateScriptsContent(scripts);
-    //     this.updateRunTypesContent(runTypes);
-    //     this.setupActionButtons(pipeline);
-    // }
-
 
     showListView() {
         this.currentView = 'list';

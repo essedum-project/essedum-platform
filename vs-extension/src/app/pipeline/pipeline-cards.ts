@@ -66,6 +66,7 @@ import {
     setStoredValue,
     normalizeRuntime
 } from '../../constants/pipeline-utils';
+import { getBaseUrl } from '../../constants/api-config';
 
 // ================================
 // TYPES AND INTERFACES
@@ -206,6 +207,21 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         this._authService = authService;
     }
 
+    /**
+     * Handle external token update (called when token is updated outside this component)
+     * @param token - New authentication token
+     */
+    public async onTokenUpdated(token: string): Promise<void> {
+        console.log(`${this.logPrefix} External token update received`);
+        this.updateToken(token);
+        
+        // If we now have a valid token and the view is showing auth required, switch to main view
+        if (this._isAuthenticated && this._view) {
+            console.log(`${this.logPrefix} Token update successful, switching to main view`);
+            await this.returnToMainView();
+        }
+    }
+
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
         context: vscode.WebviewViewResolveContext,
@@ -292,30 +308,56 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                 });
                             }
 
+                            let authSuccessful = false;
+
                             // Force fresh authentication through the auth service
                             if (this._authService) {
                                 console.log('Using auth service for fresh authentication');
                                 const tokens = await this._authService.forceAuthentication();
                                 console.log('Fresh authentication successful, updating token');
                                 this.updateToken(tokens.access_token);
+                                authSuccessful = true;
                             } else {
                                 console.log('No auth service available, using command execution');
                                 // Fallback to command execution if auth service not available
                                 await vscode.commands.executeCommand('essedum.login');
+
+                                // After command execution, we need to wait and check for token updates
+                                // The external command might update the token in the context, so we need to retrieve it
+                                console.log('Waiting for external authentication to complete...');
+                                
+                                // Wait a moment for the command to complete and token to be set
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                
+                                // Try to get the updated token from the context
+                                const updatedToken = this._context.globalState.get('accessToken') as string;
+                                if (updatedToken && updatedToken.trim().length > 0) {
+                                    console.log('Found updated token in context, updating component token');
+                                    this.updateToken(updatedToken);
+                                    authSuccessful = true;
+                                } else {
+                                    console.log('No token found after external authentication');
+                                    throw new Error('Authentication completed but no valid token was found');
+                                }
                             }
 
-                            // Show success feedback
-                            if (this._view) {
-                                this._view.webview.postMessage({
-                                    command: 'authenticationSuccess',
-                                    message: 'Authentication successful!'
-                                });
+                            // Only proceed if authentication was successful
+                            if (authSuccessful && this._isAuthenticated) {
+                                // Show success feedback
+                                if (this._view) {
+                                    this._view.webview.postMessage({
+                                        command: 'authenticationSuccess',
+                                        message: 'Authentication successful!'
+                                    });
+                                }
+
+                                // After successful login, return to main pipeline view
+                                await this.returnToMainView();
+
+                                vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
+                            } else {
+                                throw new Error('Authentication did not complete successfully');
                             }
-
-                            // After successful login, return to main pipeline view
-                            await this.returnToMainView();
-
-                            vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
 
                         } catch (error: any) {
                             console.error('Error executing fresh authentication:', error);
@@ -344,7 +386,20 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
      * Load initial content based on authentication state
      */
     public async loadInitialContent(): Promise<void> {
+        console.log(`${this.logPrefix} Loading initial content, current auth state: ${this._isAuthenticated}`);
+        
+        // Check if we have a valid token, with fallback to context
+        if (!this._isAuthenticated) {
+            console.log('Not authenticated, checking context for token...');
+            const contextToken = this._context.globalState.get('accessToken') as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                console.log('Found valid token in context, updating component state');
+                this.updateToken(contextToken);
+            }
+        }
+
         if (this._isAuthenticated) {
+            console.log('Authenticated, loading main pipeline interface');
             // Load main pipeline interface
             if (this._view) {
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
@@ -352,6 +407,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 setTimeout(() => this.getCards(), 100);
             }
         } else {
+            console.log('Not authenticated, showing authentication required page');
             // Show authentication required page
             this.showAuthenticationRequired();
         }
@@ -555,9 +611,27 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     private async getCards(): Promise<void> {
-        // Check authentication before proceeding
+        console.log(`${this.logPrefix} getCards called, token length: ${this._token ? this._token.length : 0}`);
+        
+        // Check authentication before proceeding - with fallback token check
         if (!this._isAuthenticated) {
-            console.log('Not authenticated, showing authentication required page');
+            console.log('Not authenticated, checking for token in context...');
+            
+            // Try to get token from global state as a fallback
+            const contextToken = this._context.globalState.get('accessToken') as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                console.log('Found valid token in context, updating component state');
+                this.updateToken(contextToken);
+            } else {
+                console.log('No valid token found, showing authentication required page');
+                this.showAuthenticationRequired();
+                return;
+            }
+        }
+
+        // Double-check we're now authenticated
+        if (!this._isAuthenticated) {
+            console.log('Still not authenticated after checking context, showing auth page');
             this.showAuthenticationRequired();
             return;
         }
@@ -744,7 +818,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         let params: HttpParams = {
             page: this.pageNumber.toString(),
             size: this.pageSize.toString(),
-            project: this.organization,
+            project:'leo1311',
             isCached: 'true',  // Enable caching for better performance
             adapter_instance: 'internal',
             interfacetype: 'pipeline',
@@ -2396,11 +2470,11 @@ print(f"The model got uploaded {uploaded_path} here")
                 'accept': 'application/json, text/plain, */*',
                 'accept-language': 'en-US,en;q=0.9',
                 'authorization': `Bearer ${this._token}`,
-                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'origin': getBaseUrl(),
                 'priority': 'u=1, i',
                 'project': this.project.id,
                 'projectname': this.project.name,
-                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                'referer': `${getBaseUrl()}/`,
                 'roleid': this.role.id,
                 'rolename': this.role.name,
                 'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
@@ -2415,7 +2489,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 ...formData.getHeaders()
             };
 
-            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+            const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
             console.log('🌐 API URL:', url);
             console.log('🔑 Authorization token length:', this._token?.length || 0);
@@ -2490,11 +2564,11 @@ print(f"The model got uploaded {uploaded_path} here")
                 'accept': 'application/json, text/plain, */*',
                 'accept-language': 'en-US,en;q=0.9',
                 'authorization': `Bearer ${this._token}`,
-                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'origin': getBaseUrl(),
                 'priority': 'u=1, i',
                 'project': this.project.id,
                 'projectname': this.project.name,
-                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                'referer': `${getBaseUrl()}/`,
                 'roleid': this.role.id,
                 'rolename': this.role.name,
                 'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
@@ -2508,7 +2582,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 ...form.getHeaders()
             };
 
-            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+            const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
             console.log('🌐 API URL:', url);
             console.log('📋 Headers:', JSON.stringify(headers, null, 2));
@@ -2573,7 +2647,7 @@ print(f"The model got uploaded {uploaded_path} here")
             'priority': 'u=1, i',
             'project': this.project.id,
             'projectname': this.project.name,
-            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'referer': `${getBaseUrl()}/`,
             'roleid': this.role.id,
             'rolename': this.role.name,
             'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
@@ -2587,7 +2661,7 @@ print(f"The model got uploaded {uploaded_path} here")
         };
 
         // Build URL exactly matching your curl: run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}
-        const baseUrl = `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
+        const baseUrl = `${getBaseUrl()}/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
 
         // Build query parameters exactly matching your curl
         const queryParams = new URLSearchParams();
@@ -2806,11 +2880,28 @@ print(f"The model got uploaded {uploaded_path} here")
         try {
             console.log('Returning to main pipeline view...');
 
-            // Ensure we have a valid token before proceeding
+            // Double-check authentication state and try to get token from context if needed
             if (!this._isAuthenticated) {
-                console.log('Warning: returnToMainView called but not authenticated');
+                console.log('Warning: returnToMainView called but not authenticated, checking context...');
+                
+                // Try to get token from global state as a fallback
+                const contextToken = this._context.globalState.get('accessToken') as string;
+                if (contextToken && contextToken.trim().length > 0) {
+                    console.log('Found valid token in context, updating component state');
+                    this.updateToken(contextToken);
+                } else {
+                    console.log('No valid token found in context either, cannot proceed');
+                    return;
+                }
+            }
+
+            // Verify we're now authenticated
+            if (!this._isAuthenticated) {
+                console.log('Still not authenticated after checking context, aborting main view load');
                 return;
             }
+
+            console.log('Authentication confirmed, proceeding with main view setup');
 
             // Update authentication context to ensure logout button appears
             await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', true);
@@ -2824,10 +2915,12 @@ print(f"The model got uploaded {uploaded_path} here")
 
             // Update the webview to show the main HTML template
             if (this._view) {
+                console.log('Updating webview HTML to main template');
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
                 // Wait a moment for the webview to load, then get cards
                 setTimeout(async () => {
+                    console.log('Loading cards after HTML update');
                     await this.getCards();
                 }, 500);
             }
