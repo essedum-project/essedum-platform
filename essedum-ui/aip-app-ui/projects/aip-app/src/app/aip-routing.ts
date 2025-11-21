@@ -34,6 +34,7 @@ import { PaginationComponent } from './pagination/pagination.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { AgentComponent } from './agent/agent.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 
 
 const routes: Routes = [
@@ -67,6 +68,12 @@ const routes: Routes = [
         
           { path: 'view/:cname', component: NativeScriptComponent },
     
+        ],
+      },
+      {
+        path: 'agent-pipeline',
+        children: [
+          { path: '', component: AgentPipelineComponent },
         ],
       },
         {
