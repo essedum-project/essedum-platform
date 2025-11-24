@@ -546,7 +546,4 @@ export class PipelineComponent implements OnInit, OnChanges {
     }
   }
 
-  navigateToAgentPipeline(): void {
-    this.router.navigate(['../agent-pipeline'], { relativeTo: this.route });
-  }
 }
