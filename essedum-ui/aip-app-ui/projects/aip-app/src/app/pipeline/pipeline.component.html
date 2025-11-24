@@ -5,14 +5,6 @@
     (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
   </app-aip-header>
 
-  <!-- Agent Pipeline Button -->
-  <div class="agent-pipeline-nav" style="margin-bottom: 16px;">
-    <button mat-raised-button color="primary" (click)="navigateToAgentPipeline()" class="agent-pipeline-button">
-      <mat-icon>smart_toy</mat-icon>
-      Agent Pipeline
-    </button>
-  </div>
-
   <!-- Filter Section -->
   <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPipelineTypeList]="{ 
                         selectedAdapterType: selectedAdapterType
