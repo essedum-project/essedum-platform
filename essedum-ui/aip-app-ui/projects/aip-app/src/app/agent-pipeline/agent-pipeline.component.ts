@@ -741,7 +741,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         // Save authentication data
         localStorage.setItem('github_token', result.token);
         localStorage.setItem('github_username', result.username);
-        
+        this.githubUsername = result.username;
         // Now open the GitHub push dialog
         this.showGitHubPush = true;
         if (this.selectedAgent && !this.githubRepoName) {
