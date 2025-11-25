@@ -1284,3 +1284,29 @@
     color: #666666 !important;
   }
 }
+
+.commit-info-section {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  
+  .commit-from-label {
+    color: #1a1a1a !important;
+    font: normal normal 600 14px/24px "Roboto", sans-serif !important;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-transform: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: "👤";
+      font-size: 16px;
+    }
+  }
+}
+
+

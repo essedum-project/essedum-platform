@@ -1,0 +1,428 @@
+.github-login-container {
+  max-width: 500px;
+  width: 100%;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", sans-serif !important;
+  position: relative;
+}
+
+.sub-header {
+  text-align: center;
+  font: normal normal 600 16px/22px "Open Sans", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+.login-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 2rem;
+
+  .close-button {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+    background: transparent !important;
+    border: none;
+    color: #999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+    &:hover {
+      background: transparent !important;
+      color: #0052cc !important;
+    }
+    
+    &:focus {
+      background: transparent !important;
+      outline: 2px solid #0052cc;
+      outline-offset: 2px;
+    }
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-left: -12px;
+    }
+  }
+
+  .github-logo {
+    margin-bottom: 1rem;
+    
+    img {
+      width: 48px;
+      height: 48px;
+      filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+    }
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #555555;
+    margin: 0;
+  }
+}
+
+.login-form {
+
+
+  .error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: #fff1f0;
+    border: 1px solid #ffa39e;
+    border-radius: 6px;
+    color: #f70f1e;
+    font-size: 0.875rem;
+
+    .error-icon {
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+
+  .form-actions {
+    margin-bottom: 1.5rem;
+
+    .sign-in-button {
+      width: 100%;
+      color: #ffffff !important;
+      background-color: #ebf1f6 !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      font-size: 14px !important;
+      line-height: 2;
+      font-weight: 500;
+      letter-spacing: 0px;
+      font-family: "Roboto", sans-serif !important;
+      border-radius: 16px;
+      background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0%
+        0% no-repeat padding-box !important;
+      position: relative;
+      border: none;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        background: transparent linear-gradient(90deg, #0041a3 0%, #007acc 100%) 0%
+          0% no-repeat padding-box !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 82, 204, 0.2);
+      }
+
+      &:disabled {
+        background: #c7dcf7 !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .loading-spinner {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+
+}
+
+// Angular Material Form Field Customizations
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-outline {
+      border-color: #d1d9e0;
+    }
+
+    &.mat-focused .mat-mdc-form-field-outline {
+      border-color: #0969da;
+    }
+
+    &.mat-form-field-invalid .mat-mdc-form-field-outline {
+      border-color: #f70f1e;
+    }
+
+    .mat-mdc-form-field-input-control {
+      font-size: 0.875rem;
+    }
+
+    .mat-mdc-floating-label {
+      font-size: 0.875rem;
+    }
+  }
+
+  .mat-mdc-button.mat-primary {
+    --mdc-filled-button-container-color: #238636;
+    --mdc-filled-button-label-text-color: white;
+  }
+
+  .mat-mdc-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: white;
+  }
+}
+
+// Add utility classes to match connection-view component
+.lfx-u-mar-b-16 {
+  margin-bottom: 16px !important;
+}
+
+.ml-15m {
+  margin-left: -15px !important;
+}
+
+
+
+
+::ng-deep mat-label {
+  text-align: left;
+  font: normal normal normal 14px/20px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #555555;
+  opacity: 1;
+}
+
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element {
+  text-align: left !important;
+  font: normal normal normal 16px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  opacity: 1;
+  margin-left: 4px !important;
+  padding-left: 8px !important;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element::placeholder {
+  color: #737373 !important;
+  text-align: left !important;
+  font: normal normal normal 16px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+// Global input alignment fix
+::ng-deep .github-login-container .mat-mdc-form-field input {
+  text-align: start !important;
+  direction: ltr !important;
+  padding-left: 12px !important;
+}
+
+::ng-deep .github-login-container .mdc-text-field__input {
+  text-align: start !important;
+  direction: ltr !important;
+}
+
+// Style the Angular Material default required marker
+::ng-deep .mat-mdc-form-field-required-marker {
+  color: #f70f1e !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  margin-left: 4px !important;
+  line-height: 1 !important;
+}
+
+::ng-deep .mdc-floating-label--required .mat-mdc-form-field-required-marker {
+  color: #f70f1e !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  margin-left: 4px !important;
+  line-height: 1 !important;
+}
+
+.password-field-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+
+  .forgot-password {
+    font-size: 12px;
+    color: #0052cc;
+    text-decoration: none;
+    font-family: "Roboto", sans-serif;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.password-field {
+  position: relative;
+  
+  .password-toggle-icon {
+    cursor: pointer;
+    color: #666;
+    font-size: 14px !important;
+    width: 10px !important;
+    height: 16px !important;
+    margin-right: 0px;
+    margin-top: 8px;
+    
+    &:hover {
+      color: #0052cc;
+    }
+    
+    &:focus {
+      outline: 2px solid #0052cc;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+}
+
+// Override Angular Material styles to match connection-view
+::ng-deep {
+  // Fix Angular Material button hover effects for close button
+  .login-header .close-button.mat-mdc-icon-button {
+    background: transparent !important;
+    
+    &:hover {
+      background: transparent !important;
+    }
+    
+    &:focus {
+      background: transparent !important;
+    }
+    
+    .mat-mdc-button-persistent-ripple {
+      display: none !important;
+    }
+    
+    .mat-ripple-element {
+      display: none !important;
+    }
+  }
+
+  .github-login-container {
+    .mat-mdc-input-element {
+      background-color: #f7f7f7ed !important;
+      border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+      padding-right: 40px !important; // Make space for eye icon
+    }
+
+    .mdc-text-field {
+      border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+    }
+
+    .mat-mdc-form-field {
+      width: 100%;
+      
+      .mat-mdc-form-field-outline {
+        border-color: #d1d9e0;
+      }
+
+      &.mat-focused .mat-mdc-form-field-outline {
+        border-color: #0052cc;
+      }
+
+      &.mat-form-field-invalid .mat-mdc-form-field-outline {
+        border-color: #f70f1e;
+      }
+    }
+
+    mat-label {
+      text-align: left;
+      font: normal normal normal 14px/20px "Roboto", sans-serif !important;
+      letter-spacing: 0px;
+      color: #555555 !important;
+      opacity: 1;
+    }
+
+    .mat-mdc-form-field input.mat-mdc-input-element {
+      text-align: left !important;
+      font: normal normal normal 16px/24px "Roboto", sans-serif !important;
+      letter-spacing: 0px;
+      color: #000000 !important;
+      opacity: 1;
+      margin-left: 4px !important;
+      padding-left: 8px !important;
+    }
+
+    .mat-mdc-form-field input.mat-mdc-input-element::placeholder {
+      color: #737373 !important;
+      text-align: left !important;
+      font: normal normal normal 16px/24px "Roboto", sans-serif !important;
+      letter-spacing: 0px;
+      opacity: 1;
+    }
+
+
+    // Fix for password field suffix icon positioning
+    .password-field {
+      .mat-mdc-form-field-icon-suffix {
+        padding-left: 0;
+      }
+      
+      .password-toggle-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+      }
+    }
+
+    // Error message styling
+    .mat-mdc-form-field-error {
+      font-size: 12px;
+      color: #f70f1e;
+      margin-top: 4px;
+    }
+
+    // Fix input alignment in all states with stronger selectors
+    .mat-mdc-form-field input[matInput],
+    .mat-mdc-form-field.mat-focused input[matInput],
+    .mat-mdc-form-field.mat-form-field-has-value input[matInput],
+    .mat-mdc-form-field .mat-mdc-input-element {
+      text-align: left !important;
+      padding-left: 12px !important;
+      margin-left: 0 !important;
+      direction: ltr !important;
+    }
+
+    // Ensure proper text direction for all elements
+    .mat-mdc-text-field-wrapper,
+    .mat-mdc-form-field-input-control,
+    .mat-mdc-form-field-flex,
+    .mat-mdc-form-field-infix {
+      direction: ltr !important;
+      text-align: left !important;
+    }
+
+    // Force left alignment on the input wrapper
+    .mdc-text-field__input {
+      text-align: left !important;
+      direction: ltr !important;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 480px) {
+  .github-login-container {
+    padding: 1.5rem;
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}
+

@@ -142,6 +142,8 @@ import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/
 import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -253,6 +255,7 @@ const dbConfig: DBConfig = {
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
+    GithubLoginComponent,
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
@@ -266,6 +269,7 @@ const dbConfig: DBConfig = {
     MatSliderModule,
     MatSnackBarModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,

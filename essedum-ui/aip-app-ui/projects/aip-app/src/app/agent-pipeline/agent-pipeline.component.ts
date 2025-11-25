@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { GithubLoginComponent } from './github-login/github-login.component';
 
 interface FileNode {
   name: string;
@@ -31,6 +33,8 @@ interface AgentCard {
   styleUrls: ['./agent-pipeline.component.scss'],
 })
 export class AgentPipelineComponent implements OnInit {
+ 
+ githubUsername:string = "";
   // View mode: 'list' shows cards, 'detail' shows script/generate tabs
   viewMode: 'list' | 'detail' = 'list';
   selectedAgent: AgentCard | null = null;
@@ -63,6 +67,14 @@ export class AgentPipelineComponent implements OnInit {
   githubRepoName = '';
   selectedBranch = 'main';
   availableBranches: string[] = ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
+  availableRepositories: Array<{name: string, description?: string}> = [
+    { name: 'customer-support-agent-sdk', description: 'Customer Support Agent SDK' },
+    { name: 'data-analysis-agent-sdk', description: 'Data Analysis Agent SDK' },
+    { name: 'code-review-agent-sdk', description: 'Code Review Agent SDK' },
+    { name: 'marketing-automation-sdk', description: 'Marketing Automation SDK' },
+    { name: 'content-generator-sdk', description: 'Content Generator SDK' },
+    { name: 'chatbot-framework-sdk', description: 'Chatbot Framework SDK' }
+  ];
   useCustomCommit = false;
   commitMessage = '';
   isPushing = false;
@@ -139,7 +151,8 @@ export class AgentPipelineComponent implements OnInit {
   constructor(
     private location: Location,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -692,6 +705,12 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   
   // GitHub Push methods
   openGitHubPush(): void {
+    // First check if user is authenticated with GitHub
+    if (!this.isGitHubAuthenticated()) {
+      this.openGitHubLoginDialog();
+      return;
+    }
+    
     this.showGitHubPush = true;
     // Set default repo name based on selected agent
     if (this.selectedAgent && !this.githubRepoName) {
@@ -699,6 +718,38 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     }
     // Load available branches (in real implementation, this would call an API)
     this.loadAvailableBranches();
+  }
+
+  private isGitHubAuthenticated(): boolean {
+    // Check if user has GitHub authentication token
+    // In a real implementation, check localStorage, sessionStorage, or service
+    const token = localStorage.getItem('github_token');
+    this.githubUsername = localStorage.getItem('github_username') || '';
+    return !!token;
+  }
+
+  private openGitHubLoginDialog(): void {
+    const dialogRef = this.dialog.open(GithubLoginComponent, {
+      width: '450px',
+      maxWidth: '90vw',
+      disableClose: true,
+      panelClass: 'github-login-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.token) {
+        // Save authentication data
+        localStorage.setItem('github_token', result.token);
+        localStorage.setItem('github_username', result.username);
+        
+        // Now open the GitHub push dialog
+        this.showGitHubPush = true;
+        if (this.selectedAgent && !this.githubRepoName) {
+          this.githubRepoName = `${this.selectedAgent.name}-sdk`;
+        }
+        this.loadAvailableBranches();
+      }
+    });
   }
   
   closeGitHubPush(): void {
@@ -711,7 +762,8 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   }
   
   onRepoNameChange(event: any): void {
-    this.githubRepoName = event.target.value;
+    // Handle both input field (event.target.value) and mat-select (event.value) events
+    this.githubRepoName = event.value || event.target?.value || event;
     // Mock: Load branches for the specified repository
     this.loadAvailableBranches();
   }
