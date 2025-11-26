@@ -43,8 +43,8 @@ export class GitHubPushComponent implements OnInit {
     this.githubService.checkAuthStatus().subscribe({
       next: (status) => {
         this.isAuthenticated = status.authenticated;
-        if (status.authenticated && status.username) {
-          this.username = status.username;
+        if (status.authenticated && status.githubUsername) {
+          this.username = status.githubUsername;
           this.loadRepositories();
         }
       },
@@ -93,7 +93,7 @@ export class GitHubPushComponent implements OnInit {
       next: (status) => {
         this.isLoading = false;
         this.isAuthenticated = true;
-        this.username = status.username || '';
+        this.username = status.githubUsername|| '';
         this.showModal = true;
         this.loadRepositories();
       },
