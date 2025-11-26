@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
-import { BASE_URL } from '../../constants/api-config';
+import { getBaseUrl } from '../../constants/api-config';
 
 
 export interface JobData {
@@ -26,7 +26,8 @@ export interface JobLogData {
 export class JobLogsViewer {
     private _extensionUri: vscode.Uri;
     private _token: string = '';
-    private _organization: string = 'leo1311';
+    private role: any;
+    private project: any;
 
     // Pagination
     private page: number = 0;
@@ -48,6 +49,8 @@ export class JobLogsViewer {
     ) {
         this._extensionUri = _context.extensionUri;
         this._token = token;
+        this.project = _context.globalState.get('project');
+        this.role = _context.globalState.get('role');
     }
 
     /**
@@ -125,7 +128,7 @@ export class JobLogsViewer {
      */
     private async handleWebviewMessage(message: any, panel: vscode.WebviewPanel): Promise<void> {
         console.log('Received webview message:', message);
-        
+
         switch (message.command) {
             case 'refresh':
                 console.log('Handling refresh command');
@@ -192,7 +195,7 @@ export class JobLogsViewer {
 
             if (this._pipelineName) {
                 jobs = await this.fetchInternalJobByName(this._pipelineName, this.page, this.row);
-                const filteredJobs = jobs.filter(job => 
+                const filteredJobs = jobs.filter(job =>
                     job.agenttaskname?.toLowerCase() === job.jobmetadata?.taskName?.toLowerCase()
                 );
                 this.sortByLatest(filteredJobs);
@@ -269,11 +272,11 @@ export class JobLogsViewer {
     private async showConsole(jobId: string, runtime: string, status: string, job: any, panel: vscode.WebviewPanel): Promise<void> {
         try {
             // Use the new console API to fetch job logs
-            await this.fetchConsoleJobLogs(jobId, status, panel);
+            await this.fetchConsoleJobLogs(jobId,job, status, panel);
         } catch (error: any) {
             console.error('Error showing console:', error);
             vscode.window.showErrorMessage(`Failed to show logs: ${error.message}`);
-            
+
             // Fallback to original methods if console API fails
             try {
                 if (this._internalJob) {
@@ -291,20 +294,20 @@ export class JobLogsViewer {
     /**
      * Fetch console job logs using the new console API
      */
-    private async fetchConsoleJobLogs(jobId: string, status: string, panel: vscode.WebviewPanel): Promise<void> {
+    private async fetchConsoleJobLogs(jobId: string, job: any, status: string, panel: vscode.WebviewPanel): Promise<void> {
         try {
             const response = await this.fetchConsoleJob(jobId, 0, 0, status, false);
             if (response) {
                 this.currentJob = response;
-                await this.processJobData(jobId, 'console', status, panel);
-                
+                await this.processJobData(job.id, 'console', status, panel);
+
                 // Start polling if job is running
                 if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {
                     this.startConsoleJobPolling(jobId, status);
                 }
 
                 // Display the console logs in a new webview
-                await this.displayConsoleLogs(jobId, response);
+                await this.displayConsoleLogs(job.id, response);
             }
         } catch (error: any) {
             console.error('Error fetching console job logs:', error);
@@ -383,7 +386,7 @@ export class JobLogsViewer {
         try {
             const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
             const fileName = `console-logs-${jobId}-${new Date().getTime()}.txt`;
-            
+
             const uri = await vscode.window.showSaveDialog({
                 defaultUri: vscode.Uri.file(fileName),
                 filters: {
@@ -411,7 +414,7 @@ export class JobLogsViewer {
             if (response) {
                 this.currentJob = response;
                 await this.processJobData(jobId, 'internal jobs', this.currentJob.jobStatus, panel);
-                
+
                 // Start polling if job is running
                 if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {
                     this.startJobPolling(jobId, status, 'internal');
@@ -431,8 +434,8 @@ export class JobLogsViewer {
             const response = await this.fetchSparkJob(jobId, 0, runtime, 0, status, false);
             if (response) {
                 this.currentJob = response;
-                await this.processJobData(jobId, 'pipeline', this.currentJob.jobStatus, panel);
-                
+                await this.processJobData(this.currentJob.id, 'pipeline', this.currentJob.jobStatus, panel);
+
                 // Start polling if job is running
                 if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {
                     this.startJobPolling(jobId, status, 'spark', runtime);
@@ -454,7 +457,7 @@ export class JobLogsViewer {
                 this.logsdata.push({ name: key, value: this.currentJob[key] });
             }
         }
-        
+
         // Open detailed log dialog
         await this.openLogDialog(jobId, jobType, status, this.logsdata);
     }
@@ -526,29 +529,29 @@ export class JobLogsViewer {
      */
     private async stopJob(jobId: string, panel: vscode.WebviewPanel): Promise<void> {
         console.log('stopJob called with jobId:', jobId);
-        
+
         // Show confirmation dialog using VS Code's native dialog
         const confirmResult = await vscode.window.showWarningMessage(
             `Are you sure you want to stop job ${jobId}?`,
             { modal: true },
             'Yes, Stop Job'
         );
-        
+
         if (confirmResult !== 'Yes, Stop Job') {
             console.log('User cancelled stop job operation');
             return;
         }
-        
+
         vscode.window.showInformationMessage(`Attempting to stop job: ${jobId}`);
-        
+
         try {
             console.log('Calling stopPipeline API...');
             const response = await this.stopPipeline(jobId);
             console.log('stopPipeline API response:', response);
-            
+
             vscode.window.showInformationMessage('Stop Event Triggered!');
             console.log(response, 'stopjob response');
-            
+
             console.log('Refreshing job list...');
             await this.onRefresh(panel);
             console.log('Job list refreshed successfully');
@@ -570,7 +573,7 @@ export class JobLogsViewer {
     private async showOutputArtifact(jobId: string): Promise<void> {
         try {
             const response = await this.fetchOutputArtifacts(jobId);
-            
+
             const artifactsPanel = vscode.window.createWebviewPanel(
                 'outputArtifacts',
                 `Output Artifacts: ${jobId}`,
@@ -595,7 +598,7 @@ export class JobLogsViewer {
     private updateJobsInWebview(panel: vscode.WebviewPanel): void {
         console.log('updateJobsInWebview called with jobs:', this.jobList.length);
         console.log('Sample job data:', this.jobList[0]);
-        
+
         panel.webview.postMessage({
             command: 'updateJobs',
             jobs: this.jobList,
@@ -603,7 +606,7 @@ export class JobLogsViewer {
             currentPage: this.page,
             lastPage: this.lastPage
         });
-        
+
         console.log('Posted updateJobs message to webview');
     }
 
@@ -614,7 +617,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobName}/count`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -627,8 +630,8 @@ export class JobLogsViewer {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
         const headers = this.getHeaders();
 
-        const response = await axios.get(`/api/aip/service/v1/jobs/streamingLen/${serviceName}/${this._organization}`, {
-            baseURL: BASE_URL,
+        const response = await axios.get(`/api/aip/service/v1/jobs/streamingLen/${serviceName}/${this.project.name}`, {
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -641,8 +644,8 @@ export class JobLogsViewer {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
         const headers = this.getHeaders();
 
-        const response = await axios.get(`/api/aip/jobs/${jobName}/${this._organization}?page=${page}&size=${size}`, {
-            baseURL: BASE_URL,
+        const response = await axios.get(`/api/aip/jobs/${jobName}/${this.project.name}?page=${page}&size=${size}`, {
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -656,7 +659,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal2/${internalJob}?page=${page}&size=${size}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -670,7 +673,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=${lineNumber}&size=${size}&status=${status}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -684,7 +687,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=${lineNumber}&runtime=${runtime}&size=${size}&status=${status}&background=${isBackground}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -700,8 +703,8 @@ export class JobLogsViewer {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
         const headers = this.getConsoleHeaders();
 
-        const response = await axios.get(`/api/aip/jobs/console/${jobId}?offset=${offset}&org=${this._organization}&lineno=${lineno}&status=${status}&readconsole=${readconsole}`, {
-            baseURL: BASE_URL,
+        const response = await axios.get(`/api/aip/jobs/console/${jobId}?offset=${offset}&org=${this.project.name}&lineno=${lineno}&status=${status}&readconsole=${readconsole}`, {
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -712,24 +715,24 @@ export class JobLogsViewer {
 
     private async stopPipeline(jobId: string): Promise<any> {
         console.log('stopPipeline called with jobId:', jobId);
-        console.log('BASE_URL:', BASE_URL);
-        console.log('Organization:', this._organization);
-        
+        console.log('BASE_URL:', getBaseUrl());
+        console.log('Organization:', this.project.name);
+
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
         const headers = this.getHeaders();
         console.log('Request headers:', headers);
-        
+
         const url = `/api/aip/service/v1/jobs/stopJob/${jobId}`;
-        console.log('Making GET request to:', `${BASE_URL}${url}`);
+        console.log('Making GET request to:', `${getBaseUrl()}${url}`);
 
         try {
             const response = await axios.get(url, {
-                baseURL: BASE_URL,
+                baseURL: getBaseUrl(),
                 headers,
                 httpsAgent,
                 timeout: 10000
             });
-            
+
             console.log('stopPipeline API response status:', response.status);
             console.log('stopPipeline API response data:', response.data);
             return response.data;
@@ -746,7 +749,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/outputArtifacts/${jobId}`, {
-            baseURL: BASE_URL,
+            baseURL: getBaseUrl(),
             headers,
             httpsAgent,
             timeout: 10000
@@ -760,8 +763,8 @@ export class JobLogsViewer {
             'Accept': 'application/json, text/plain, */*',
             'Authorization': `Bearer ${this._token}`,
             'Content-Type': 'application/json',
-            'Project': '2',
-            'ProjectName': this._organization,
+            'Project': this.project?.id,
+            'ProjectName': this.project?.name,
             'X-Requested-With': 'Leap',
         };
     }
@@ -773,11 +776,11 @@ export class JobLogsViewer {
             'authorization': `Bearer ${this._token}`,
             'content-type': 'application/json',
             'priority': 'u=1, i',
-            'project': '2',
-            'projectname': this._organization,
-            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-            'roleid': '1',
-            'rolename': 'IT Portfolio Manager',
+            'project': this.project?.id,
+            'projectname': this.project?.name,
+            'referer': `${getBaseUrl()}/`,
+            'roleid': this.role?.id || '',
+            'rolename': this.role?.name || '',
             'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
@@ -1363,18 +1366,18 @@ export class JobLogsViewer {
             </div>
             
             <div class="artifacts-container">
-                ${Array.isArray(artifactsData) ? 
-                    artifactsData.map((artifact, index) => `
+                ${Array.isArray(artifactsData) ?
+                artifactsData.map((artifact, index) => `
                         <div class="artifact-item">
                             <div class="artifact-name">Artifact ${index + 1}</div>
                             <div class="artifact-content">${typeof artifact === 'object' ? JSON.stringify(artifact, null, 2) : artifact}</div>
                         </div>
                     `).join('') :
-                    `<div class="artifact-item">
+                `<div class="artifact-item">
                         <div class="artifact-name">Output Data</div>
                         <div class="artifact-content">${typeof artifactsData === 'object' ? JSON.stringify(artifactsData, null, 2) : artifactsData}</div>
                     </div>`
-                }
+            }
             </div>
         </body>
         </html>`;
@@ -1398,7 +1401,7 @@ export class JobLogsViewer {
      */
     public setWebviewContent(webviewView: vscode.WebviewView): void {
         webviewView.webview.html = this.getJobLogsHtml();
-        
+
         // Initialize jobs if we have panel-like interface
         const panelLike = {
             webview: webviewView.webview
@@ -1421,7 +1424,7 @@ export class JobLogsViewer {
      */
     private getConsoleLogsHtml(jobId: string, logData: any): string {
         const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
-        
+
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
