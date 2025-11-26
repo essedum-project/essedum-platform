@@ -80,15 +80,27 @@ public class GitHubOAuthService {
     }
 
     // In-memory storage for tokens (use Redis or database in production)
+    // Maps session ID -> access token (for OAuth flow)
     private final Map<String, String> sessionTokens = new ConcurrentHashMap<>();
+    // Maps state -> session ID (for OAuth callback)
     private final Map<String, String> stateToSession = new ConcurrentHashMap<>();
+    // Maps application username -> GitHub access token (persistent user storage)
+    private final Map<String, String> userTokens = new ConcurrentHashMap<>();
+    // Maps session ID -> application username (for linking OAuth to app user)
+    private final Map<String, String> sessionToUser = new ConcurrentHashMap<>();
 
     /**
      * Generate authorization URL for GitHub OAuth
      */
-    public Map<String, String> getAuthorizationUrl(String sessionId) {
+    public Map<String, String> getAuthorizationUrl(String sessionId, String username) {
         String state = UUID.randomUUID().toString();
         stateToSession.put(state, sessionId);
+
+        // Store the application username for this session
+        if (username != null && !username.isEmpty()) {
+            sessionToUser.put(sessionId, username);
+            log.info("Linking session {} to application user: {}", sessionId, username);
+        }
 
         String authUrl = String.format("%s?client_id=%s&redirect_uri=%s&scope=%s&state=%s",
                 oauthConfig.getAuthorizationUri(),
@@ -101,7 +113,7 @@ public class GitHubOAuthService {
         response.put("authorizationUrl", authUrl);
         response.put("state", state);
 
-        log.info("Generated authorization URL for session: {}", sessionId);
+        log.info("Generated authorization URL for session: {} (user: {})", sessionId, username);
         return response;
     }
 
@@ -141,10 +153,20 @@ public class GitHubOAuthService {
 
             // Store token for this session
             sessionTokens.put(sessionId, accessToken);
+
+            // Store token for the application user if linked
+            String username = sessionToUser.get(sessionId);
+            if (username != null && !username.isEmpty()) {
+                userTokens.put(username, accessToken);
+                log.info("Stored GitHub token for application user: {}", username);
+            } else {
+                log.warn("No application username linked to session {}, token not stored per user", sessionId);
+            }
+
             stateToSession.remove(state);
 
-            log.info("Successfully exchanged code for token, session: {}", sessionId);
-            log.info("Token stored for session: {}, total sessions: {}", sessionId, sessionTokens.size());
+            log.info("Successfully exchanged code for token, session: {}, user: {}", sessionId, username);
+            log.info("Token stored - session tokens: {}, user tokens: {}", sessionTokens.size(), userTokens.size());
             return sessionId;
         } catch (Exception e) {
             log.error("Error exchanging code for token: {}", e.getMessage(), e);
@@ -153,15 +175,24 @@ public class GitHubOAuthService {
     }
 
     /**
-     * Get stored access token for session
+     * Get stored access token for session or user
      */
-    public String getAccessToken(String sessionId) {
-        String token = sessionTokens.get(sessionId);
-        if (token == null) {
-            throw new IllegalArgumentException("No token found for session. Please authenticate first.");
+    public String getAccessToken(String sessionIdOrUsername) {
+        // First try as username (user-based storage)
+        String token = userTokens.get(sessionIdOrUsername);
+        if (token != null) {
+            log.debug("Retrieved token for user {}: {}...", sessionIdOrUsername, token.substring(0, Math.min(10, token.length())));
+            return token;
         }
-        log.debug("Retrieved token for session {}: {}...", sessionId, token.substring(0, Math.min(10, token.length())));
-        return token;
+
+        // Fall back to session-based storage
+        token = sessionTokens.get(sessionIdOrUsername);
+        if (token != null) {
+            log.debug("Retrieved token for session {}: {}...", sessionIdOrUsername, token.substring(0, Math.min(10, token.length())));
+            return token;
+        }
+
+        throw new IllegalArgumentException("No token found for session/user: " + sessionIdOrUsername + ". Please authenticate first.");
     }
 
     /**
@@ -191,24 +222,40 @@ public class GitHubOAuthService {
     }
 
     /**
-     * Revoke token and clear session
+     * Revoke token and clear session/user
      */
-    public void revokeToken(String sessionId) {
-        sessionTokens.remove(sessionId);
-        log.info("Revoked token for session: {}", sessionId);
+    public void revokeToken(String sessionIdOrUsername) {
+        sessionTokens.remove(sessionIdOrUsername);
+        userTokens.remove(sessionIdOrUsername);
+
+        // Also clean up the session-to-user mapping
+        String username = sessionToUser.get(sessionIdOrUsername);
+        if (username != null) {
+            userTokens.remove(username);
+            sessionToUser.remove(sessionIdOrUsername);
+            log.info("Revoked token for session: {} and user: {}", sessionIdOrUsername, username);
+        } else {
+            log.info("Revoked token for session/user: {}", sessionIdOrUsername);
+        }
     }
 
     /**
-     * Check if session has valid token
+     * Check if session or user has valid token
      */
-    public boolean hasValidToken(String sessionId) {
-        boolean hasToken = sessionTokens.containsKey(sessionId);
-        log.info("Checking token for session: {}, has token: {}, total sessions: {}",
-                sessionId, hasToken, sessionTokens.size());
+    public boolean hasValidToken(String sessionIdOrUsername) {
+        // Check user token storage first
+        boolean hasUserToken = userTokens.containsKey(sessionIdOrUsername);
+        // Then check session token storage
+        boolean hasSessionToken = sessionTokens.containsKey(sessionIdOrUsername);
+        boolean hasToken = hasUserToken || hasSessionToken;
 
-        // Debug: Log all session IDs
-        if (!hasToken && sessionTokens.size() > 0) {
-            log.warn("Session {} not found. Available sessions: {}", sessionId, sessionTokens.keySet());
+        log.info("Checking token for '{}': userToken={}, sessionToken={}, total users={}, total sessions={}",
+                sessionIdOrUsername, hasUserToken, hasSessionToken, userTokens.size(), sessionTokens.size());
+
+        // Debug: Log all available keys
+        if (!hasToken && (userTokens.size() > 0 || sessionTokens.size() > 0)) {
+            log.warn("'{}' not found. Available users: {}, Available sessions: {}",
+                    sessionIdOrUsername, userTokens.keySet(), sessionTokens.keySet());
         }
 
         return hasToken;

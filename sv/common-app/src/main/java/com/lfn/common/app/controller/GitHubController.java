@@ -7,6 +7,8 @@ import com.lfn.common.app.service.GitHubIntegrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -41,18 +43,24 @@ public class GitHubController {
             }
 
             // If not a GitHub token, ignore it and try session
-            log.debug("Authorization header contains non-GitHub token (app JWT?), checking session instead");
+            log.debug("Authorization header contains non-GitHub token (app JWT?), checking OAuth storage instead");
         }
 
         // Fall back to session-based OAuth token
-        try {
-            String sessionId = session.getId();
-            String sessionToken = oauthService.getAccessToken(sessionId);
-            log.info("Using GitHub OAuth token from session");
-            return sessionToken;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("No GitHub authentication found. Please login with GitHub OAuth or provide a GitHub PAT token.", e);
+        // Get authenticated username from JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
+            try {
+                String sessionToken = oauthService.getAccessToken(username);
+                log.info("Using GitHub OAuth token for user: {}", username);
+                return sessionToken;
+            } catch (Exception e) {
+                log.debug("No OAuth token found for user: {}", username);
+            }
         }
+
+        throw new IllegalArgumentException("No GitHub authentication found. Please login with GitHub OAuth or provide a GitHub PAT token.");
     }
 
     @GetMapping("/repos")
