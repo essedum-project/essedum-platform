@@ -191,7 +191,10 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 
             } else if (url.contains("storage.googleapis.com") || url.contains("google")) {
                 logger.info("Detected Google Cloud Storage connection");
-				return verifyGCSConnection( loadCredentials(),bucketName);
+				        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("");
+				ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(inputStream);
+				inputStream.close();
+				return verifyGCSConnection( credentials,bucketName);
 
 			} else {
                 logger.info("Detected MinIO connection");
@@ -215,53 +218,53 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
     }
 
 
-    public ServiceAccountCredentials loadCredentials() throws IOException {
-        logger.info("Starting to load GCP Service Account credentials.");
-
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
-        if (inputStream == null) {
-            logger.error("service-account.json not found in resources.");
-            throw new FileNotFoundException("service-account.json not found in resources");
-        }
-        logger.info("service-account.json found and loaded successfully: ");
-        logger.info("GCP_PRIVATE_KEY : {}", System.getenv("GCP_PRIVATE_KEY"));
-        logger.info("GCP_PRIVATE_KEY_ID : {}", System.getenv("GCP_PRIVATE_KEY_ID"));
-
-        String privateKey = System.getenv("GCP_PRIVATE_KEY");
-        String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
-        logger.info("private key : {}", privateKey);
-        ServiceAccountCredentials credentials;
-
-        if (privateKey != null && !privateKey.isEmpty()) {
-            logger.info("Environment variable GCP_PRIVATE_KEY found. Using dynamic private key.");
-            privateKey = privateKey.replace("\\n", "\n");
-
-            String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            inputStream.close();
-            logger.debug("Original service account JSON read successfully.");
-
-            Gson gson = new Gson();
-            JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-            jsonObject.addProperty("private_key", privateKey);
-            jsonObject.addProperty("private_key_id",privateKeyId);
-
-            String modifiedJson = jsonObject.toString().replace("\\\"", "");
-            byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
-            InputStream modifiedInputStream = new ByteArrayInputStream(modifiedJsonBytes);
-
-            credentials = ServiceAccountCredentials.fromStream(modifiedInputStream);
-            modifiedInputStream.close();
-            logger.info("ServiceAccountCredentials created using modified JSON.");
-        } else {
-            logger.warn("Environment variable GCP_PRIVATE_KEY not found. Using default service-account.json.");
-            credentials = ServiceAccountCredentials.fromStream(inputStream);
-            inputStream.close();
-            logger.info("ServiceAccountCredentials created using default JSON.");
-        }
-
-        logger.info("GCP Service Account credentials loaded successfully.");
-        return credentials;
-    }
+//    public ServiceAccountCredentials loadCredentials() throws IOException {
+//        logger.info("Starting to load GCP Service Account credentials.");
+//
+//        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
+//        if (inputStream == null) {
+//            logger.error("service-account.json not found in resources.");
+//            throw new FileNotFoundException("service-account.json not found in resources");
+//        }
+//        logger.info("service-account.json found and loaded successfully: ");
+//        logger.info("GCP_PRIVATE_KEY : {}", System.getenv("GCP_PRIVATE_KEY"));
+//        logger.info("GCP_PRIVATE_KEY_ID : {}", System.getenv("GCP_PRIVATE_KEY_ID"));
+//
+//        String privateKey = System.getenv("GCP_PRIVATE_KEY");
+//        String privateKeyId = System.getenv("GCP_PRIVATE_KEY_ID");
+//        logger.info("private key : {}", privateKey);
+//        ServiceAccountCredentials credentials;
+//
+//        if (privateKey != null && !privateKey.isEmpty()) {
+//            logger.info("Environment variable GCP_PRIVATE_KEY found. Using dynamic private key.");
+//            privateKey = privateKey.replace("\\n", "\n");
+//
+//            String jsonContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+//            inputStream.close();
+//            logger.debug("Original service account JSON read successfully.");
+//
+//            Gson gson = new Gson();
+//            JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+//            jsonObject.addProperty("private_key", privateKey);
+//            jsonObject.addProperty("private_key_id",privateKeyId);
+//
+//            String modifiedJson = jsonObject.toString().replace("\\\"", "");
+//            byte[] modifiedJsonBytes = modifiedJson.getBytes(StandardCharsets.UTF_8);
+//            InputStream modifiedInputStream = new ByteArrayInputStream(modifiedJsonBytes);
+//
+//            credentials = ServiceAccountCredentials.fromStream(modifiedInputStream);
+//            modifiedInputStream.close();
+//            logger.info("ServiceAccountCredentials created using modified JSON.");
+//        } else {
+//            logger.warn("Environment variable GCP_PRIVATE_KEY not found. Using default service-account.json.");
+//            credentials = ServiceAccountCredentials.fromStream(inputStream);
+//            inputStream.close();
+//            logger.info("ServiceAccountCredentials created using default JSON.");
+//        }
+//
+//        logger.info("GCP Service Account credentials loaded successfully.");
+//        return credentials;
+//    }
 
     public static boolean verifyGCSConnection(ServiceAccountCredentials credentials, String bucketName) {
 		try {
