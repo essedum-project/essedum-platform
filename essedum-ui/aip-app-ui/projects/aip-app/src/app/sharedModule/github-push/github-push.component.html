@@ -1,0 +1,105 @@
+<!-- Trigger Button -->
+<button class="btn btn-primary" (click)="openModal()">
+  Push to GitHub
+</button>
+
+<!-- Modal -->
+<div class="modal" [class.active]="showModal" *ngIf="showModal">
+  <div class="modal-overlay" (click)="closeModal()"></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Push to GitHub</h2>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+
+
+
+      <!-- Authenticated -->
+      <div *ngIf="isAuthenticated && !isLoading" class="content-section">
+        <!-- User Info -->
+        <div class="user-info">
+          <p>Logged in as: <strong>{{ username }}</strong></p>
+          <button class="btn btn-link" (click)="logout()">Logout</button>
+        </div>
+
+        <!-- Repository and Branch Selection -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="repo-select">Select Repository *</label>
+            <select id="repo-select" class="form-control" [(ngModel)]="selectedRepo" (change)="onRepoChange()">
+              <option value="">-- Select Repository --</option>
+              <option *ngFor="let repo of repositories" [value]="repo.fullName">
+                {{ repo.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="branches.length > 0">
+            <label for="branch-select">Select Branch *</label>
+            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch">
+              <option *ngFor="let branch of branches" [value]="branch">
+                {{ branch }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Repository Description -->
+        <div *ngIf="selectedRepoObject && selectedRepoObject.description" class="form-group" style="margin-top: -15px;">
+          <small class="form-text">{{ selectedRepoObject.description }}</small>
+        </div>
+
+        <!-- Commit Message -->
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="custom-message" [(ngModel)]="useCustomMessage">
+            <label for="custom-message">Use custom commit message</label>
+          </div>
+
+          <textarea *ngIf="useCustomMessage" class="form-control" rows="3" [(ngModel)]="commitMessage"
+            placeholder="Enter commit message...">
+          </textarea>
+
+          <small class="form-text" *ngIf="!useCustomMessage">
+            Default: Automated commit - [timestamp]
+          </small>
+        </div>
+
+        <!-- Local Path (Optional - can be hidden) -->
+        <div class="form-group">
+          <label for="local-path">Server Path</label>
+          <input type="text" id="local-path" class="form-control" [(ngModel)]="localPath"
+            placeholder="/server/path/to/files">
+          <small class="form-text">Path on server where files are located</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" *ngIf="isAuthenticated && !isLoading">
+      <button class="btn btn-primary" (click)="pushToGitHub()" [disabled]="!selectedRepo || !selectedBranch">
+        Push to GitHub
+      </button>
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

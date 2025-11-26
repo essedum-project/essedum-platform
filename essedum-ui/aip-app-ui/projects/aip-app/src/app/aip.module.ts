@@ -138,6 +138,8 @@ import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/m
 import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
 import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
+import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
+import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
 
 
@@ -236,6 +238,7 @@ const dbConfig: DBConfig = {
     AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
+    GitHubPushComponent,
     AgentComponent
 
   ],
@@ -317,6 +320,7 @@ const dbConfig: DBConfig = {
     SemanticService,
     DynamicRemoteLoad,
     AipSnackbarCustomService,
+    GitHubService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],
