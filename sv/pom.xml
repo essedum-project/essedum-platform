@@ -8,6 +8,7 @@
 	<properties>
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.parameters>true</maven.compiler.parameters>
 		<main.basedir>${project.basedir}</main.basedir>
 		<spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>2022.0.5</spring-cloud-dependencies.version>
