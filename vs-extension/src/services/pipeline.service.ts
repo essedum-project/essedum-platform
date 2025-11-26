@@ -20,7 +20,7 @@ export class PipelineService {
     return getApiEndpoints();
   }
 
-  constructor(token: string = "", role: any = "", project: any = "") {
+  constructor(token: string = "", role: any = "", project: any = "leo1311") {
     this._token = token;
     this._project = project;
     this._role = role;
