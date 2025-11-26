@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
-import { BASE_URL } from '../constants/api-config';
+import { getBaseUrl } from '../constants/api-config';
 
 const axios = require('axios');
 
@@ -23,9 +23,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
     private _files = new Map<string, EssedumFile>();
     private _token: string;
+    private _project: any;
+    private _role: any;
 
-    constructor(token: string) {
+    constructor(token: string, project: any, role: any) {
         this._token = token;
+        this._project = project;
+        this._role = role;
     }
 
     /**
@@ -213,13 +217,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
             'Accept-Language': 'en-US,en;q=0.9',
             'Authorization': `Bearer ${this._token}`,
             'Connection': 'keep-alive',
-            'Project': '2',
-            'ProjectName': file.organization,
+            'Project': this._project.id,
+            'ProjectName': this._project.name,
             'X-Requested-With': 'Leap',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
             'charset': 'utf-8',
-            'roleId': '1',
-            'roleName': 'IT Portfolio Manager',
+            'roleId': this._role.id,
+            'roleName': this._role.name,
             'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
@@ -256,7 +260,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
             uploadEndpoint,
             formData,
             {
-                baseURL: BASE_URL,
+                baseURL: getBaseUrl(),
                 headers: headers,
                 httpsAgent: httpsAgent,
                 timeout: 30000
