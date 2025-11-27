@@ -260,6 +260,58 @@
   color: #586069;
 }
 
+/* Logged Out Section */
+.logged-out-section {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.logged-out-icon {
+  margin: 0 auto 20px;
+  color: #586069;
+  opacity: 0.6;
+}
+
+.logged-out-section h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.logged-out-section p {
+  margin: 0 0 16px;
+  color: #586069;
+  font-size: 14px;
+}
+
+.logout-instructions {
+  text-align: left;
+  margin: 0 auto 24px;
+  padding-left: 24px;
+  max-width: 350px;
+  color: #586069;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.logout-instructions li {
+  margin-bottom: 8px;
+}
+
+.logout-instructions a {
+  color: #0366d6;
+  text-decoration: underline;
+}
+
+.logout-instructions a:hover {
+  color: #0256b9;
+}
+
+.logged-out-section .btn-github {
+  margin: 0 auto;
+}
+
 /* Content Section */
 .content-section {
   padding: 0;

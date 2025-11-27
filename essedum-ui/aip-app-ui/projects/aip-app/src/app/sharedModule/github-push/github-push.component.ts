@@ -109,16 +109,29 @@ export class GitHubPushComponent implements OnInit {
    * Logout
    */
   logout(): void {
+    this.isLoading = true;
     this.githubService.logout().subscribe({
       next: () => {
+        // Clear local state
         this.isAuthenticated = false;
         this.username = '';
         this.repositories = [];
         this.branches = [];
         this.resetForm();
+        this.isLoading = false;
+        
+        // Show message to user about logging out from GitHub
+        this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
+        
+        // Keep modal open to allow login to different account
       },
       error: (error) => {
         console.error('Logout error:', error);
+        this.isLoading = false;
+        this.errorMessage = 'Failed to logout. Please try again.';
       }
     });
   }
