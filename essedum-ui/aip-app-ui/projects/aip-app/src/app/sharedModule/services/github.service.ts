@@ -101,28 +101,55 @@ export class GitHubService {
           );
 
           if (!popup) {
-            observer.error('Popup blocked. Please allow popups for this site.');
+            observer.error({ message: 'Popup blocked. Please allow popups for this site.' });
             return;
           }
 
-          // Poll for authentication every second
+          let pollCount = 0;
+          const maxPolls = 60; // Maximum 60 seconds
+
+          // Poll for authentication status and check if popup is closed
           this.authCheckSubscription = interval(1000)
             .pipe(
-              switchMap(() => this.checkAuthStatus()),
-              take(30) // Maximum 30 seconds
+              switchMap(() => {
+                // Check if popup was closed by user
+                if (popup.closed) {
+                  this.authCheckSubscription?.unsubscribe();
+                  observer.error({ message: 'Authentication cancelled. Login window was closed.' });
+                  return [];
+                }
+                
+                pollCount++;
+                
+                // Check for timeout
+                if (pollCount >= maxPolls) {
+                  this.authCheckSubscription?.unsubscribe();
+                  if (!popup.closed) {
+                    popup.close();
+                  }
+                  observer.error({ message: 'Authentication timeout. Please try again.' });
+                  return [];
+                }
+                
+                return this.checkAuthStatus();
+              })
             )
             .subscribe({
               next: (status) => {
-                if (status.authenticated) {
+                if (status && status.authenticated) {
                   this.authCheckSubscription?.unsubscribe();
-                  popup?.close();
+                  if (!popup.closed) {
+                    popup.close();
+                  }
                   observer.next(status);
                   observer.complete();
                 }
               },
               error: (error) => {
                 this.authCheckSubscription?.unsubscribe();
-                popup?.close();
+                if (popup && !popup.closed) {
+                  popup.close();
+                }
                 observer.error(error);
               }
             });
