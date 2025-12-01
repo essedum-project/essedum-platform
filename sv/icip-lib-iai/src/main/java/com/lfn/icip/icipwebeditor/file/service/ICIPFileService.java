@@ -30,10 +30,7 @@ import java.nio.file.StandardOpenOption;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -356,7 +353,7 @@ public class ICIPFileService {
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
-	public String persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
+	/*public String persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
 			throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 		ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrg(name, org);
 		
@@ -408,12 +405,81 @@ public class ICIPFileService {
 			streamingServicesService.update(ss);
 		}
 		else {
+            String pyFileName = newFileName;
+            String ipynbFileName = pyFileName.replaceAll("(?i)\\.py$", ".ipynb");
+            binaryFiles.setFilename(ipynbFileName);
 			binaryFiles = nativeScriptService.save(binaryFiles);
+//            binaryFiles.setFilename(newFileName);
+//            binaryFiles = nativeScriptService.save(binaryFiles);
+
 		}
 		return binaryFiles.getFilename();
 	}
+*/
 
-	/**
+    public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
+            throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
+
+        List<String> savedFileNames = new ArrayList<>();
+
+        // Check GitHub remote script flag
+        String remoteScript;
+        try {
+            remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
+        } catch (NullPointerException ex) {
+            remoteScript = "false";
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            remoteScript = "false";
+        }
+
+        // Convert bytes to Blob
+        Blob blob = new SerialBlob(bytes);
+
+        if (remoteScript.equals("true")) {
+            logger.info("Git is enabled");
+            Git git = githubservice.getGitHubRepository(org);
+
+            // Pull latest script from Git
+            Boolean result = githubservice.pull(git);
+
+            // Update script in local repo
+            if (result != false)
+                githubservice.updateFileInLocalRepo(blob, name, org, "main.py");
+
+            // Push script to Git
+            githubservice.push(git, "Script pushed");
+
+            ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
+            String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\"" + fileType + "\",\"files\":[\"" + name + "/main.py\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
+            ss.setJsonContent(jsonContent);
+            streamingServicesService.update(ss);
+
+        } else {
+            // Create two ICIPNativeScript entries: one for .py and one for .ipynb
+            ICIPNativeScript pyScript = new ICIPNativeScript();
+            pyScript.setCname(name);
+            pyScript.setOrganization(org);
+            pyScript.setFilename(newFileName); // .py file
+            pyScript.setFilescript(blob);
+            nativeScriptService.save(pyScript);
+            savedFileNames.add(pyScript.getFilename());
+
+            // Create second entry for .ipynb
+            String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+            ICIPNativeScript ipynbScript = new ICIPNativeScript();
+            ipynbScript.setCname(name);
+            ipynbScript.setOrganization(org);
+            ipynbScript.setFilename(ipynbFileName);
+            ipynbScript.setFilescript(blob); // Same content or modify if needed
+            nativeScriptService.save(ipynbScript);
+            savedFileNames.add(ipynbScript.getFilename());
+        }
+
+        return savedFileNames; // Return both filenames
+    }
+
+    /**
 	 * Persist in script table.
 	 *
 	 * @param bytes       the bytes
@@ -538,7 +604,7 @@ public class ICIPFileService {
 			throws IOException, SQLException, InvalidRemoteException, TransportException, GitAPIException {
 		String newFileName = createNewFileName(cname, org, fileType);
 		//Path path = extractPath(scripts, newFileName, FileConstants.NATIVE_CODE);
-		String filename = persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType);
+		String filename = String.valueOf(persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType));
 		
 		return filename;
 //		if(filename!=null) {
