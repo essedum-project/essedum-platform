@@ -417,6 +417,7 @@ public class ICIPFileService {
 	}
 */
 
+
     public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
             throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 
@@ -429,7 +430,6 @@ public class ICIPFileService {
         String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
         Blob blob = new SerialBlob(bytes);
 
-        // Check GitHub remote script flag
         String remoteScript;
         try {
             remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
@@ -461,57 +461,49 @@ public class ICIPFileService {
 
         } else {
             logger.info("GitHub integration disabled. Proceeding with DB operations...");
-            boolean pyExists = false;
-            boolean ipynbExists = false;
 
-            // ✅ Update existing files if present
+            boolean updated = false;
+
+            // ✅ Update only matching filename if present
             for (ICIPNativeScript script : byOrgAndName) {
                 if (script.getFilename().equalsIgnoreCase(newFileName)) {
-                    logger.info("Updating existing .py script: {}", script.getFilename());
+                    logger.info("Updating existing script: {}", newFileName);
                     script.setFilescript(blob);
                     nativeScriptService.save(script);
-                    savedFileNames.add(script.getFilename());
-                    pyExists = true;
-                } else if (script.getFilename().equalsIgnoreCase(ipynbFileName)) {
-                    logger.info("Updating existing .ipynb script: {}", script.getFilename());
-                    script.setFilescript(blob);
-                    nativeScriptService.save(script);
-                    savedFileNames.add(script.getFilename());
-                    ipynbExists = true;
+                    updated = true;
+                    break;
                 }
             }
 
-            // ✅ Create missing files
-            if (!pyExists) {
-                logger.info("Creating new .py script: {}", newFileName);
-                ICIPNativeScript pyScript = new ICIPNativeScript();
-                pyScript.setCname(name);
-                pyScript.setOrganization(org);
-                pyScript.setFilename(newFileName);
-                pyScript.setFilescript(blob);
-                nativeScriptService.save(pyScript);
-                savedFileNames.add(pyScript.getFilename());
+            // ✅ If not found, create new file
+            if (!updated) {
+                logger.info("Creating new script: {}", newFileName);
+                ICIPNativeScript newScript = new ICIPNativeScript();
+                newScript.setCname(name);
+                newScript.setOrganization(org);
+                newScript.setFilename(newFileName);
+                newScript.setFilescript(blob);
+                nativeScriptService.save(newScript);
             }
 
+            // ✅ Ensure both filenames exist in DB (create missing one)
+            boolean ipynbExists = byOrgAndName.stream()
+                    .anyMatch(script -> script.getFilename().equalsIgnoreCase(ipynbFileName));
+
             if (!ipynbExists) {
-                logger.info("Creating new .ipynb script: {}", ipynbFileName);
+                logger.info("Creating missing .ipynb script: {}", ipynbFileName);
                 ICIPNativeScript ipynbScript = new ICIPNativeScript();
                 ipynbScript.setCname(name);
                 ipynbScript.setOrganization(org);
                 ipynbScript.setFilename(ipynbFileName);
                 ipynbScript.setFilescript(blob);
                 nativeScriptService.save(ipynbScript);
-                savedFileNames.add(ipynbScript.getFilename());
             }
         }
 
-        // ✅ Ensure always two filenames in return list
-        if (!savedFileNames.contains(newFileName)) {
-            savedFileNames.add(newFileName);
-        }
-        if (!savedFileNames.contains(ipynbFileName)) {
-            savedFileNames.add(ipynbFileName);
-        }
+        // ✅ Always return both filenames
+        savedFileNames.add(newFileName);
+        savedFileNames.add(ipynbFileName);
 
         logger.info("Persist operation completed. Returning filenames: {}", savedFileNames);
         return savedFileNames;
