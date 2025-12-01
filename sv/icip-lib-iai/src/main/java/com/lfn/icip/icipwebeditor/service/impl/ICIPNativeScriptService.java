@@ -111,6 +111,21 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 		return nativeScriptRepository.findByCnameAndOrganization(name, org);
 	}
 
+    /**
+     * Find by name and org and file.
+     *
+     * @param name the name
+     * @param org  the org
+     * @param filename the filename
+     * @return the ICIP native script
+     */
+    @Override
+    public ICIPNativeScript findByNameAndOrgAndFile(String name, String org, String filename) {
+        logger.info("getting native script by name : {}", name);
+        return nativeScriptRepository.findByCnameAndOrganizationAndFilename(name, org, filename);
+    }
+
+
 	/**
 	 * Delete by name and org.
 	 *

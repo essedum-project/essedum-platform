@@ -274,7 +274,7 @@ public class ICIPFileService {
 	 */
 	public String persistInNativeScriptTable(byte[] bytes, String name, String fileName, String org)
 			throws SQLException {
-		ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrg(name, org);
+		ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrgAndFile(name, org, fileName);
 		SerialBlob blob = new SerialBlob(bytes);
 		if (binaryFiles == null) {
 			binaryFiles = new ICIPNativeScript();
@@ -985,7 +985,7 @@ public class ICIPFileService {
 		}
 		if(!(remoteScript.equalsIgnoreCase("true")) || (in==null && remoteScript.equalsIgnoreCase("true"))) {
 			logger.info("File not found in GitHub. Fetching from db...");
-			ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrg(cname, org);
+			ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrgAndFile(cname, org, filename);
 			if (binaryFiles != null && binaryFiles.getFilescript() != null) {
 				return binaryFiles.getFilescript().getBinaryStream();
 			}
