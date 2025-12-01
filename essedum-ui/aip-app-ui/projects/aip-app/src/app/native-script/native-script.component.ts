@@ -585,6 +585,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       console.log('Starting saveJson for pipeline:', pname);
       console.log('Current data.files:', this.data.files);
       console.log('Current script length:', this.script.length);
+      console.log('Selected file node:', this.selectedFileNode);
 
       // Ensure we have a files array
       if (!this.data.files) {
@@ -597,14 +598,24 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       let scriptFile = new Blob([script], { type: 'text/plain' });
       formData.set('scriptFile', scriptFile);
       
-      // For new pipelines, use a default filename if files array is empty
-      let filename = this.data.files[0] || `${pname}_${this.streamItem.organization}.py`;
+      // Determine the specific file being edited
+      let targetFileName: string;
+      
+      if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
+        // If we have a selected Python file, use that
+        targetFileName = this.selectedFileNode.name;
+        console.log('Using selected Python file:', targetFileName);
+      } else {
+        // For new pipelines or if no specific file is selected, generate default filename
+        targetFileName = `${pname}_${this.streamItem.organization}.py`;
+        console.log('Generated default filename:', targetFileName);
+      }
       
       this.service
         .createNativeFile(
           pname,
           this.streamItem.organization,
-          filename,
+          targetFileName, // Use specific filename instead of files array
           this.data.filetype,
           formData
         )
@@ -614,10 +625,29 @@ export class NativeScriptComponent implements OnInit, OnChanges {
             this.streamItem.name = pname;
             
             // Update the files array with the response
-            if (this.data.files.length === 0) {
+            // Check if this is a new file or updating existing
+            let fileExists = false;
+            if (Array.isArray(this.data.files)) {
+              // Look for existing file in the array (handle both string and array formats)
+              for (let i = 0; i < this.data.files.length; i++) {
+                let fileEntry = this.data.files[i];
+                if (typeof fileEntry === 'string') {
+                  // Check if this entry contains our target file
+                  if (fileEntry.includes(targetFileName)) {
+                    // Update this entry with the response
+                    this.data.files[i] = response;
+                    fileExists = true;
+                    console.log('Updated existing file entry at index', i);
+                    break;
+                  }
+                }
+              }
+            }
+            
+            // If file doesn't exist in array, add it
+            if (!fileExists) {
               this.data.files.push(response);
-            } else {
-              this.data.files[0] = response;
+              console.log('Added new file to array:', response);
             }
             
             this.data.arguments = this.treeData;
@@ -1030,7 +1060,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
               // Mark as selected immediately for UI
               this.fileStructure.forEach(file => file.selected = false);
               firstPyFile.selected = true;
-              this.selectedFileNode = firstPyFile;
+              this.selectedFileNode = firstPyFile; // Ensure selectedFileNode is set
+              
+              console.log('Set selectedFileNode to:', this.selectedFileNode);
               
               // If we already have script content, don't reload
               if (this.script && this.script.length > 0) {
@@ -1047,6 +1079,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
               console.log('No Python file found, setting loadScript to true');
               // If no Python file found, just set loadScript to true for empty editor
               this.loadScript = true;
+              this.selectedFileNode = null;
             }
           } else {
             console.log('No files in structure, setting loadScript to true');
@@ -1082,6 +1115,8 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     // Select the clicked file
     fileNode.selected = true;
     this.selectedFileNode = fileNode;
+    
+    console.log('Selected file node updated:', this.selectedFileNode);
     
     if (fileNode.extension === 'ipynb') {
       // Clear the code editor content when notebook is selected
