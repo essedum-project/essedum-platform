@@ -23,6 +23,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { DynamicParamsGrid, DynamicSecretsGrid } from '../pipeline.description/pipeline.description.component';
+import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
+
+interface FileNode {
+  name: string;
+  extension: string;
+  selected?: boolean;
+  children?: FileNode[];
+}
 
 interface Elementt {
   name: string;
@@ -81,6 +89,15 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   dataSource = new MatTreeNestedDataSource<Elementt>();
   dataSet = new MatTreeNestedDataSource<Elementt>();
   treeControl = new NestedTreeControl<Elementt>((node) => node.children);
+  
+  // File structure properties for the new panel
+  fileStructure: FileNode[] = [];
+  selectedFileNode: FileNode | null = null;
+  fileTreeControl = new NestedTreeControl<FileNode>(node => node.children);
+  fileTreeDataSource = new MatTreeNestedDataSource<FileNode>();
+  scriptsObj: any;
+  fileExtension: string = 'py';
+  scriptSelected: string;
   runTypes: OptionsDTO[] = [];
   selectedRunType: any;
   selectedDatasource: string = '';
@@ -149,6 +166,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+      
+      // Load files for code explorer
+      // Files will be loaded after data is parsed in try block below
 
       if (this.router.url.includes('preview')) {
         this.pipelineAlias = this.streamItem.alias;
@@ -208,8 +228,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         if (this.data.arguments) {
           this.refreshTree();
         }
-        if (this.data.files) {
-          this.readFile(this.data.files[0]);
+        if (this.data.files && this.data.files.length > 0) {
+          // Don't read files here - let buildFileStructure handle it
+          // this.readFile(this.data.files[0]);
         }
         if(this.data.usedSecrets){
           this.dynamicSecretsArray=this.data.usedSecrets;
@@ -218,6 +239,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.data['files'] = [];
           this.loadScript = true;
         }
+        
+        // Build file structure for code explorer
+        this.buildFileStructure();
      
       } catch (e) {
         this.loadScript = true;
@@ -380,6 +404,14 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   }
 
   readFile(filename: string) {
+    console.log('Reading file:', filename, 'for stream:', this.streamItem?.name, 'org:', this.streamItem?.organization);
+    
+    if (!filename || !this.streamItem?.name || !this.streamItem?.organization) {
+      console.error('Missing required parameters for readFile:', { filename, streamName: this.streamItem?.name, org: this.streamItem?.organization });
+      this.service.message('Error: Missing file or stream information', 'error');
+      return;
+    }
+    
     this.service
       .readNativeFile(
         this.streamItem.name,
@@ -388,24 +420,28 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       )
       .subscribe({
         next: (resp) => {
-          // script file to list
-          console.log('File read response:', resp);
-            this.service.message('Reading file done', resp);
+          console.log('File read response received for:', filename);
           try {
             const textDecoder = new TextDecoder('utf-8');
             this.script = textDecoder.decode(resp).split('\n');
             this.loadScript = true;
+            console.log('Successfully loaded script with', this.script.length, 'lines');
+            this.service.message('File loaded successfully', 'success');
           } catch (e) {
             console.error('Error decoding file:', e);
-            this.service.message('Error decoding file', 'error');
+            this.service.message('Error decoding file content', 'error');
+            this.script = [];
+            this.loadScript = true;
           }
         },
         error: (err) => {
-          console.error('Error while reading file:', err);
-          this.service.message('Error! While reading file', 'error');
+          console.error('Error while reading file:', filename, err);
+          this.service.message('Error reading file: ' + (err.message || 'Unknown error'), 'error');
+          this.script = [];
+          this.loadScript = true;
         },
         complete: () => {
-          console.log('readNativeFile observable completed');
+          console.log('readNativeFile observable completed for:', filename);
         }
       });
   }
@@ -532,7 +568,8 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.service.update(this.streamItem).subscribe(
             (response) => {
               this.service.message('Updated Successfully', 'success');
-              // this.ngOnInit();
+              // Refresh the file structure and auto-select Python file after save
+              this.refreshFileStructureAfterSave();
             },
             (error) =>
               this.service.message(
@@ -731,4 +768,210 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     console.log('On Secret Data Change : ', this.dynamicSecretsArray)
 
   }
+
+  // File structure methods
+  buildFileStructure() {
+    console.log('Building file structure in NativeScript...', this.streamItem);
+    this.fileStructure = [];
+    
+    if (this.streamItem && this.streamItem.json_content) {
+      try {
+        const jsonContent = JSON.parse(this.streamItem.json_content);
+        const files = jsonContent.elements[0]?.attributes?.files;
+        
+        console.log('Raw files array from API:', files);
+        
+        if (files && Array.isArray(files) && files.length > 0) {
+          // Process each file entry in the files array
+          files.forEach((fileEntry: string, index: number) => {
+            console.log(`Processing file entry ${index}:`, fileEntry);
+            let fileNames: string[] = [];
+            
+            // Handle different formats of file entries
+            if (typeof fileEntry === 'string') {
+              // Check if the file entry is in bracket format
+              if (fileEntry.startsWith('[') && fileEntry.endsWith(']')) {
+                // Parse the bracket format: "[LEOT3SNJ79133_leo1311.py, LEOT3SNJ79133_leo1311.ipynb]"
+                const cleanEntry = fileEntry.slice(1, -1); // Remove brackets
+                fileNames = cleanEntry.split(',').map(f => f.trim()).filter(f => f.length > 0);
+                console.log('Extracted file names from bracket format:', fileNames);
+              } else if (fileEntry.includes(',')) {
+                // Handle comma-separated without brackets
+                fileNames = fileEntry.split(',').map(f => f.trim()).filter(f => f.length > 0);
+                console.log('Extracted file names from comma-separated format:', fileNames);
+              } else {
+                // Single file name
+                fileNames = [fileEntry.trim()];
+                console.log('Single file name:', fileNames);
+              }
+            } else {
+              console.warn('File entry is not a string:', fileEntry);
+              return; // Exit this iteration of forEach
+            }
+            
+            // Process each extracted file name
+            fileNames.forEach((fileName: string) => {
+              if (fileName && fileName.length > 0) {
+                const extension = fileName.split('.').pop()?.toLowerCase();
+                console.log(`Processing file: ${fileName}, extension: ${extension}`);
+                
+                if (extension === 'py' || extension === 'ipynb') {
+                  // Check if file already exists in structure to avoid duplicates
+                  const existingFile = this.fileStructure.find(f => f.name === fileName);
+                  if (!existingFile) {
+                    this.fileStructure.push({
+                      name: fileName,
+                      extension: extension,
+                      selected: false
+                    });
+                    console.log('Added file to structure:', fileName);
+                  }
+                } else {
+                  console.log('Skipping file with unsupported extension:', fileName);
+                }
+              }
+            });
+          });
+          
+          console.log('Built file structure:', this.fileStructure);
+          
+          // Auto-select the first Python file
+          if (this.fileStructure.length > 0) {
+            const firstPyFile = this.fileStructure.find(file => file.extension === 'py');
+            if (firstPyFile) {
+              console.log('Auto-selecting Python file:', firstPyFile.name);
+              this.onFileNodeSelect(firstPyFile);
+            } else {
+              console.log('No Python file found, setting loadScript to true');
+              // If no Python file found, just set loadScript to true for empty editor
+              this.loadScript = true;
+            }
+          } else {
+            console.log('No files in structure, setting loadScript to true');
+            // No files found, show empty editor
+            this.loadScript = true;
+          }
+        } else {
+          console.log('No files found in json_content or files array is empty');
+          this.loadScript = true;
+        }
+      } catch (error) {
+        console.error('Error parsing json_content:', error);
+        this.loadScript = true;
+      }
+    } else {
+      console.log('No streamItem or json_content available');
+      this.loadScript = true;
+    }
+    
+    this.fileTreeDataSource.data = this.fileStructure;
+    console.log('File tree data source updated:', this.fileTreeDataSource.data);
+    
+    // Trigger change detection
+    this.cdr.detectChanges();
+  }
+
+  onFileNodeSelect(fileNode: FileNode) {
+    console.log('File node selected in NativeScript:', fileNode);
+    // Deselect all files first
+    this.fileStructure.forEach(file => file.selected = false);
+    
+    // Select the clicked file
+    fileNode.selected = true;
+    this.selectedFileNode = fileNode;
+    
+    if (fileNode.extension === 'ipynb') {
+      // Clear the code editor content when notebook is selected
+      this.script = [];
+      this.scriptSelected = '';
+      this.loadScript = true; // Show empty editor
+      // Show dialog for notebook files
+      console.log('Opening notebook dialog for:', fileNode.name);
+      this.showNotebookDialog();
+    } else if (fileNode.extension === 'py') {
+      // Handle Python file selection - read only the selected Python file
+      console.log('Reading Python file:', fileNode.name);
+      this.readFile(fileNode.name);
+    }
+  }
+
+  onFileChange(file: string, i: number) {
+    this.fileExtension = file.substring(file.lastIndexOf(".") + 1);
+    if (this.fileExtension === 'json') {
+      this.scriptSelected = JSON.parse(this.scriptsObj.script[i]);
+    } else {
+      this.scriptSelected = this.scriptsObj.script[i];
+      // Update the main script array used by the code editor
+      this.script = this.scriptSelected ? this.scriptSelected.split('\n') : [];
+    }
+  }
+
+  refreshFileStructureAfterSave() {
+    console.log('Refreshing file structure after save...');
+    
+    if (!this.streamItem?.name) {
+      console.error('Cannot refresh: streamItem.name is missing');
+      this.buildFileStructure();
+      return;
+    }
+    
+    // Re-fetch the streaming service data to get updated file list
+    this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
+      next: (serviceData) => {
+        console.log('Service data refreshed successfully:', serviceData);
+        
+        if (serviceData && serviceData.json_content) {
+          this.streamItem = serviceData;
+          
+          // Parse the updated data to get the file list
+          try {
+            const jsonContent = JSON.parse(serviceData.json_content);
+            console.log('Parsed refreshed json_content:', jsonContent);
+            
+            if (jsonContent.elements && jsonContent.elements[0]?.attributes) {
+              this.data = jsonContent.elements[0].attributes;
+              this.dynamicEnvArray = jsonContent.environment || [];
+              this.defaultRuntimeFromDB = jsonContent.default_runtime;
+              this.selectedRunType = this.defaultRuntimeFromDB;
+              
+              console.log('Updated component data:', {
+                files: this.data.files,
+                environment: this.dynamicEnvArray.length,
+                runtime: this.selectedRunType
+              });
+            } else {
+              console.warn('No attributes found in refreshed data');
+            }
+          } catch (error) {
+            console.error('Error parsing updated json_content:', error);
+          }
+          
+          // Rebuild the file structure with updated data
+          this.buildFileStructure();
+        } else {
+          console.warn('No json_content in refreshed service data');
+          this.buildFileStructure();
+        }
+      },
+      error: (error) => {
+        console.error('Error refreshing service data:', error);
+        this.service.message('Warning: Could not refresh file list', 'warning');
+        // Fallback to current file structure rebuild
+        this.buildFileStructure();
+      }
+    });
+  }
+
+  showNotebookDialog() {
+    const dialogRef = this.dialog.open(NotebookDialogComponent, {
+      width: '400px',
+      data: {
+        message: 'Please access notebook extension file using essedum plugin in Visual Studio Code.'
+      } as NotebookDialogData
+    });
+  }
+
+
+
+  hasChild = (_: number, node: FileNode) => !!node.children && node.children.length > 0;
 }

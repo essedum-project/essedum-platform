@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { NotebookDialogComponent } from './pipeline.description/notebook-dialog/notebook-dialog.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
@@ -172,6 +173,7 @@ const dbConfig: DBConfig = {
     PipelineComponent,
     PipelineCreateComponent,
     PipelineDescriptionComponent,
+    NotebookDialogComponent,
     EnlCodeEditorComponent,
     DatasourceComponent,
     ModalConfigRestDatasourceComponent,
