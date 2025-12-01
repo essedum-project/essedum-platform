@@ -417,9 +417,11 @@ public class ICIPFileService {
 	}
 */
 
+
     public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
             throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 
+        ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrgAndFile(name, org, fileName);
         List<String> savedFileNames = new ArrayList<>();
 
         // Check GitHub remote script flag
@@ -433,21 +435,15 @@ public class ICIPFileService {
             remoteScript = "false";
         }
 
-        // Convert bytes to Blob
         Blob blob = new SerialBlob(bytes);
 
         if (remoteScript.equals("true")) {
+            // GitHub logic remains same
             logger.info("Git is enabled");
             Git git = githubservice.getGitHubRepository(org);
-
-            // Pull latest script from Git
             Boolean result = githubservice.pull(git);
-
-            // Update script in local repo
             if (result != false)
                 githubservice.updateFileInLocalRepo(blob, name, org, "main.py");
-
-            // Push script to Git
             githubservice.push(git, "Script pushed");
 
             ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
@@ -456,27 +452,34 @@ public class ICIPFileService {
             streamingServicesService.update(ss);
 
         } else {
-            // Create two ICIPNativeScript entries: one for .py and one for .ipynb
-            ICIPNativeScript pyScript = new ICIPNativeScript();
-            pyScript.setCname(name);
-            pyScript.setOrganization(org);
-            pyScript.setFilename(newFileName); // .py file
-            pyScript.setFilescript(blob);
-            nativeScriptService.save(pyScript);
-            savedFileNames.add(pyScript.getFilename());
+            if (binaryFiles != null) {
+                // ✅ Update existing record only
+                binaryFiles.setFilename(newFileName);
+                binaryFiles.setFilescript(blob);
+                nativeScriptService.save(binaryFiles);
+                savedFileNames.add(binaryFiles.getFilename());
+            } else {
+                // ✅ Create two new records (.py and .ipynb)
+                ICIPNativeScript pyScript = new ICIPNativeScript();
+                pyScript.setCname(name);
+                pyScript.setOrganization(org);
+                pyScript.setFilename(newFileName); // .py file
+                pyScript.setFilescript(blob);
+                nativeScriptService.save(pyScript);
+                savedFileNames.add(pyScript.getFilename());
 
-            // Create second entry for .ipynb
-            String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
-            ICIPNativeScript ipynbScript = new ICIPNativeScript();
-            ipynbScript.setCname(name);
-            ipynbScript.setOrganization(org);
-            ipynbScript.setFilename(ipynbFileName);
-            ipynbScript.setFilescript(blob); // Same content or modify if needed
-            nativeScriptService.save(ipynbScript);
-            savedFileNames.add(ipynbScript.getFilename());
+                String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+                ICIPNativeScript ipynbScript = new ICIPNativeScript();
+                ipynbScript.setCname(name);
+                ipynbScript.setOrganization(org);
+                ipynbScript.setFilename(ipynbFileName);
+                ipynbScript.setFilescript(blob);
+                nativeScriptService.save(ipynbScript);
+                savedFileNames.add(ipynbScript.getFilename());
+            }
         }
 
-        return savedFileNames; // Return both filenames
+        return savedFileNames;
     }
 
     /**
