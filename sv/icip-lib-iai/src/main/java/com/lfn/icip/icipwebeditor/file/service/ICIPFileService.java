@@ -600,11 +600,11 @@ public class ICIPFileService {
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
-	public String writeNativeFile(String cname, String org, String fileName, String fileType, MultipartFile scripts)
+	public List<String> writeNativeFile(String cname, String org, String fileName, String fileType, MultipartFile scripts)
 			throws IOException, SQLException, InvalidRemoteException, TransportException, GitAPIException {
 		String newFileName = createNewFileName(cname, org, fileType);
 		//Path path = extractPath(scripts, newFileName, FileConstants.NATIVE_CODE);
-		String filename = String.valueOf(persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType));
+		List<String> filename = persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType);
 		
 		return filename;
 //		if(filename!=null) {
