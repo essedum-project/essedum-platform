@@ -417,25 +417,23 @@ public class ICIPFileService {
 	}
 */
 
-
     public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
             throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 
-        ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrgAndFile(name, org, fileName);
+        List<ICIPNativeScript> byOrgAndName = nativeScriptService.findByOrgAndName(name, org);
         List<String> savedFileNames = new ArrayList<>();
+
+        String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+        Blob blob = new SerialBlob(bytes);
 
         // Check GitHub remote script flag
         String remoteScript;
         try {
             remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
-        } catch (NullPointerException ex) {
-            remoteScript = "false";
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             remoteScript = "false";
         }
-
-        Blob blob = new SerialBlob(bytes);
 
         if (remoteScript.equals("true")) {
             // GitHub logic remains same
@@ -452,23 +450,36 @@ public class ICIPFileService {
             streamingServicesService.update(ss);
 
         } else {
-            if (binaryFiles != null) {
-                // ✅ Update existing record only
-                binaryFiles.setFilename(newFileName);
-                binaryFiles.setFilescript(blob);
-                nativeScriptService.save(binaryFiles);
-                savedFileNames.add(binaryFiles.getFilename());
-            } else {
-                // ✅ Create two new records (.py and .ipynb)
+            boolean pyExists = false;
+            boolean ipynbExists = false;
+
+            // ✅ Update existing files if present
+            for (ICIPNativeScript script : byOrgAndName) {
+                if (script.getFilename().equalsIgnoreCase(newFileName)) {
+                    script.setFilescript(blob);
+                    nativeScriptService.save(script);
+                    savedFileNames.add(script.getFilename());
+                    pyExists = true;
+                } else if (script.getFilename().equalsIgnoreCase(ipynbFileName)) {
+                    script.setFilescript(blob);
+                    nativeScriptService.save(script);
+                    savedFileNames.add(script.getFilename());
+                    ipynbExists = true;
+                }
+            }
+
+            // ✅ Create missing files
+            if (!pyExists) {
                 ICIPNativeScript pyScript = new ICIPNativeScript();
                 pyScript.setCname(name);
                 pyScript.setOrganization(org);
-                pyScript.setFilename(newFileName); // .py file
+                pyScript.setFilename(newFileName);
                 pyScript.setFilescript(blob);
                 nativeScriptService.save(pyScript);
                 savedFileNames.add(pyScript.getFilename());
+            }
 
-                String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+            if (!ipynbExists) {
                 ICIPNativeScript ipynbScript = new ICIPNativeScript();
                 ipynbScript.setCname(name);
                 ipynbScript.setOrganization(org);
@@ -477,6 +488,14 @@ public class ICIPFileService {
                 nativeScriptService.save(ipynbScript);
                 savedFileNames.add(ipynbScript.getFilename());
             }
+        }
+
+        // ✅ Ensure always two filenames in return list
+        if (!savedFileNames.contains(newFileName)) {
+            savedFileNames.add(newFileName);
+        }
+        if (!savedFileNames.contains(ipynbFileName)) {
+            savedFileNames.add(ipynbFileName);
         }
 
         return savedFileNames;

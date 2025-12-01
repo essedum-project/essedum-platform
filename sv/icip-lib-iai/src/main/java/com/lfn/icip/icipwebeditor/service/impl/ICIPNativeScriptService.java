@@ -112,6 +112,19 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 	}
 
     /**
+     * Find by org and name.
+     *
+     * @param name the name
+     * @param org  the org
+     * @return the list
+     */
+    @Override
+    public List<ICIPNativeScript> findByOrgAndName(String name, String org) {
+        logger.info("getting native script by name : {}", name);
+        return nativeScriptRepository.findByOrganizationAndCname(org, name);
+    }
+
+    /**
      * Find by name and org and file.
      *
      * @param name the name
@@ -163,12 +176,19 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 			
 		}
 		else {
-			ICIPNativeScript fetched = nativeScriptRepository.findByCnameAndOrganization(name, org);
-			if (fetched != null) {
+			List<ICIPNativeScript> fetched = nativeScriptRepository.findByOrganizationAndCname(org, name);
+			/*if (fetched != null) {
 				nativeScriptRepository.deleteByCnameAndOrg(fetched.getCname(),fetched.getOrganization());
 	//			nativeScriptRepository.deleteById(fetched.getId());
-			}
-		}
+			}*/
+
+            if (fetched != null && !fetched.isEmpty()) {
+                for (ICIPNativeScript script : fetched) {
+                    nativeScriptRepository.deleteById(script.getId()); // ✅ Delete by ID
+                }
+            }
+
+        }
 	}
 
 	/**
