@@ -420,9 +420,12 @@ public class ICIPFileService {
     public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
             throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 
-        List<ICIPNativeScript> byOrgAndName = nativeScriptService.findByOrgAndName(name, org);
-        List<String> savedFileNames = new ArrayList<>();
+        logger.info("Starting persistInNativeScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}", name, org, fileName, newFileName);
 
+        List<ICIPNativeScript> byOrgAndName = nativeScriptService.findByOrgAndName(name, org);
+        logger.debug("Fetched {} existing scripts for cname: {} and org: {}", byOrgAndName.size(), name, org);
+
+        List<String> savedFileNames = new ArrayList<>();
         String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
         Blob blob = new SerialBlob(bytes);
 
@@ -430,37 +433,47 @@ public class ICIPFileService {
         String remoteScript;
         try {
             remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
+            logger.info("Remote script flag: {}", remoteScript);
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error("Error fetching GitHub flag: {}", ex.getMessage());
             remoteScript = "false";
         }
 
         if (remoteScript.equals("true")) {
-            // GitHub logic remains same
-            logger.info("Git is enabled");
+            logger.info("GitHub integration enabled. Performing Git operations...");
             Git git = githubservice.getGitHubRepository(org);
             Boolean result = githubservice.pull(git);
-            if (result != false)
+            logger.debug("Git pull result: {}", result);
+
+            if (result != false) {
                 githubservice.updateFileInLocalRepo(blob, name, org, "main.py");
+                logger.info("Updated file in local Git repo for cname: {}", name);
+            }
+
             githubservice.push(git, "Script pushed");
+            logger.info("Pushed changes to GitHub for cname: {}", name);
 
             ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
             String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\"" + fileType + "\",\"files\":[\"" + name + "/main.py\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
             ss.setJsonContent(jsonContent);
             streamingServicesService.update(ss);
+            logger.info("Updated streaming service JSON for cname: {}", name);
 
         } else {
+            logger.info("GitHub integration disabled. Proceeding with DB operations...");
             boolean pyExists = false;
             boolean ipynbExists = false;
 
             // ✅ Update existing files if present
             for (ICIPNativeScript script : byOrgAndName) {
                 if (script.getFilename().equalsIgnoreCase(newFileName)) {
+                    logger.info("Updating existing .py script: {}", script.getFilename());
                     script.setFilescript(blob);
                     nativeScriptService.save(script);
                     savedFileNames.add(script.getFilename());
                     pyExists = true;
                 } else if (script.getFilename().equalsIgnoreCase(ipynbFileName)) {
+                    logger.info("Updating existing .ipynb script: {}", script.getFilename());
                     script.setFilescript(blob);
                     nativeScriptService.save(script);
                     savedFileNames.add(script.getFilename());
@@ -470,6 +483,7 @@ public class ICIPFileService {
 
             // ✅ Create missing files
             if (!pyExists) {
+                logger.info("Creating new .py script: {}", newFileName);
                 ICIPNativeScript pyScript = new ICIPNativeScript();
                 pyScript.setCname(name);
                 pyScript.setOrganization(org);
@@ -480,6 +494,7 @@ public class ICIPFileService {
             }
 
             if (!ipynbExists) {
+                logger.info("Creating new .ipynb script: {}", ipynbFileName);
                 ICIPNativeScript ipynbScript = new ICIPNativeScript();
                 ipynbScript.setCname(name);
                 ipynbScript.setOrganization(org);
@@ -498,6 +513,7 @@ public class ICIPFileService {
             savedFileNames.add(ipynbFileName);
         }
 
+        logger.info("Persist operation completed. Returning filenames: {}", savedFileNames);
         return savedFileNames;
     }
 
