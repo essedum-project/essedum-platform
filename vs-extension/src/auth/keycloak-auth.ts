@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as https from 'https';
 import { OAuthAuthServer, PKCEChallenge } from './oauth-auth-server';
 import { createHTTPSAgent, initializeSSLBypass } from '../constants/api-config';
+import { NetworkConfig, NetworkType } from '../constants/app-constants';
 
 export interface TokenResponse {
     access_token: string;
@@ -25,6 +26,8 @@ export interface KeycloakConfig {
     issuerUri: string;
     clientId: string;
     scope: string;
+    networkType?: NetworkType;
+    networkName?: string;
 }
 
 export interface UserInfo {
@@ -59,6 +62,7 @@ export interface SessionData {
 
 export class KeycloakAuthService {
     private static readonly TOKEN_KEY = 'keycloak_tokens_v2';
+    private static readonly NETWORK_KEY = 'selected_network';
     
     private config: KeycloakConfig;
     private context: vscode.ExtensionContext;
@@ -74,6 +78,66 @@ export class KeycloakAuthService {
         initializeSSLBypass();
         
         console.log('KeycloakAuthService initialized with SSL bypass enabled');
+        console.log('Network configuration:', {
+            networkType: config.networkType,
+            networkName: config.networkName,
+            issuerUri: config.issuerUri
+        });
+    }
+
+    /**
+     * Update the network configuration for authentication
+     * @param networkConfig - Network configuration to use
+     */
+    public async updateNetworkConfig(networkConfig: NetworkConfig): Promise<void> {
+        console.log('Updating network configuration:', networkConfig);
+        
+        this.config = {
+            issuerUri: networkConfig.issuerUri,
+            clientId: networkConfig.clientId,
+            scope: networkConfig.scope,
+            networkType: networkConfig.id,
+            networkName: networkConfig.displayName
+        };
+        
+        // Store the selected network for future use
+        await this.context.globalState.update(KeycloakAuthService.NETWORK_KEY, networkConfig);
+        
+        // Clear any existing tokens since we're changing networks
+        await this.clearStoredTokens();
+        
+        console.log('Network configuration updated successfully');
+    }
+
+    /**
+     * Get the currently selected network configuration
+     * @returns NetworkConfig or null if none selected
+     */
+    public async getSelectedNetwork(): Promise<NetworkConfig | null> {
+        return this.context.globalState.get<NetworkConfig>(KeycloakAuthService.NETWORK_KEY) || null;
+    }
+
+    /**
+     * Create a new KeycloakAuthService with a specific network configuration
+     * @param networkConfig - Network configuration to use
+     * @param context - VS Code extension context
+     * @returns New KeycloakAuthService instance
+     */
+    public static createWithNetwork(networkConfig: NetworkConfig, context: vscode.ExtensionContext): KeycloakAuthService {
+        const config: KeycloakConfig = {
+            issuerUri: networkConfig.issuerUri,
+            clientId: networkConfig.clientId,
+            scope: networkConfig.scope,
+            networkType: networkConfig.id,
+            networkName: networkConfig.displayName
+        };
+        
+        const service = new KeycloakAuthService(config, context);
+        
+        // Store the network config
+        context.globalState.update(KeycloakAuthService.NETWORK_KEY, networkConfig);
+        
+        return service;
     }
 
     /**
@@ -410,11 +474,16 @@ export class KeycloakAuthService {
     }
 
     /**
-     * Clear stored tokens
+     * Clear stored tokens and optionally network selection
      */
-    public async clearStoredTokens(): Promise<void> {
+    public async clearStoredTokens(clearNetwork: boolean = false): Promise<void> {
         await this.context.secrets.delete(KeycloakAuthService.TOKEN_KEY);
-        console.log('Stored tokens cleared');
+        
+        if (clearNetwork) {
+            await this.context.globalState.update(KeycloakAuthService.NETWORK_KEY, undefined);
+        }
+        
+        console.log('Stored tokens cleared', clearNetwork ? '(including network selection)' : '');
     }
 
     /**
@@ -466,19 +535,24 @@ export class KeycloakAuthService {
 
     /**
      * Logout user and clear stored tokens
+     * @param clearNetwork - Whether to also clear network selection (forces network re-selection)
      */
-    public async logout(): Promise<void> {
+    public async logout(clearNetwork: boolean = false): Promise<void> {
         // Stop any ongoing auth flow
         await this.oauthServer.stopAuthFlow();
         
-        // Clear stored tokens
-        await this.clearStoredTokens();
+        // Clear stored tokens and optionally network selection
+        await this.clearStoredTokens(clearNetwork);
         
         // Open Keycloak logout endpoint
         const logoutUrl = `${this.config.issuerUri}/protocol/openid-connect/logout`;
         await vscode.env.openExternal(vscode.Uri.parse(logoutUrl));
         
-        vscode.window.showInformationMessage('Successfully logged out from Keycloak.');
+        if (clearNetwork) {
+            vscode.window.showInformationMessage('Successfully logged out. You can now select a different network.');
+        } else {
+            vscode.window.showInformationMessage('Successfully logged out from Keycloak.');
+        }
     }
 
     /**
@@ -601,72 +675,6 @@ export class KeycloakAuthService {
         } catch (error) {
             console.error('Error getting user info:', error);
             return null;
-        }
-    }
-
-    /**
-     * Extract session data (project, role, etc.) from token or user info
-     */
-    public async getSessionData(): Promise<SessionData | null> {
-        try {
-            const userInfo = await this.getUserInfo();
-            if (!userInfo) {
-                return null;
-            }
-
-            // // Default fallback values
-            // const defaultSessionData: SessionData = {
-            //     projectId: '2',
-            //     projectName: 'leo1311', 
-            //     roleId: '1',
-            //     roleName: 'IT Portfolio Manager',
-            //     organization: 'leo1311'
-            // };
-
-            // Extract session data from token claims or user info
-            // Look for data in various possible locations in the token
-            const sessionData: SessionData = {
-                projectId: userInfo.projectId || 
-                          userInfo.project_id || 
-                          userInfo.project,
-                          
-                projectName: userInfo.projectName || 
-                            userInfo.project_name || 
-                            userInfo.organization || 
-                            userInfo.org ,
-                            
-                roleId: userInfo.roleId || 
-                       userInfo.role_id || 
-                       userInfo.role ,
-                       
-                roleName: userInfo.roleName || 
-                         userInfo.role_name || 
-                         userInfo.role_display_name,
-                         
-                organization: userInfo.organization || 
-                             userInfo.org || 
-                             userInfo.projectName || 
-                             userInfo.project_name ,
-                             
-                userId: userInfo.sub || userInfo.user_id || userInfo.id,
-                email: userInfo.email,
-                username: userInfo.preferred_username || userInfo.username || userInfo.name
-            };
-
-            console.log('Extracted session data:', sessionData);
-            console.log('Raw user info for debugging:', userInfo);
-            return sessionData;
-        } catch (error) {
-            console.error('Error getting session data:', error);
-            
-            // Return default values if extraction fails
-            return {
-                projectId: '2',
-                projectName: 'leo1311',
-                roleId: '1', 
-                roleName: 'IT Portfolio Manager',
-                organization: 'leo1311'
-            };
         }
     }
 

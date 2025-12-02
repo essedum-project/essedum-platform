@@ -11,10 +11,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>Pipelines</h2>
+            <div class="details-title">Pipelines</div>
+            <!-- <div class="header-buttons">
+                <button type="button" class="btn btn-primary" id="btn-refresh" aria-describedby="refresh-tooltip"
+                    title="Refresh pipeline cards">
+                    <span class="btn-icon" aria-hidden="true">↻</span>
+                    <span class="btn-text">Refresh</span>
+                </button>
+            </div> -->
+
             <div class="header-buttons">
-                <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+                <div class="action-button">
+                    <span id="btn-refresh" class="refresh-icon" title="Refresh pipeline cards"
+                        aria-label="Refresh data">
+                        ↻
+                    </span>
+                </div>
             </div>
+
         </div>
 
         <div class="search-container">
@@ -52,8 +66,8 @@
 
         <!-- Pipeline Details View -->
         <div id="detailsView" class="details-view" style="display: none;">
-            <div class="details-header">
 
+            <div class="details-header">
                 <button class="btn-icon" id="backBtn" title="Back to Pipelines">
                     <svg class="back-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -62,8 +76,9 @@
                     </svg>
                 </button>
 
-                <h3 id="detailsTitle">Pipeline Details</h3>
+                <span id="detailsTitle" class="details-title">Pipeline Details</span>
             </div>
+
 
             <div class="details-content">
                 <div class="details-info">
@@ -91,11 +106,9 @@
                     <div class="actions-section">
                         <h4>Actions</h4>
                         <div class="action-buttons">
-
-                            <button class="btn-icon" id="runPipelineBtn" title="Run Pipeline">▶</button>
-                            <button class="btn-icon" id="viewLogsBtn" title="View Logs">📄</button>
-                            <button class="btn-icon" id="refreshScriptsBtn" title="Refresh Scripts">🔄</button>
-
+                            <button class="btn btn-primary" id="runPipelineBtn">▶ Run Pipeline</button>
+                            <button class="btn btn-secondary" id="viewLogsBtn">📄 View Logs</button>
+                            <button class="btn btn-secondary" id="refreshScriptsBtn">🔄 Refresh Scripts</button>
                         </div>
                     </div>
                 </div>
