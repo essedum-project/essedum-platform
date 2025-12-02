@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -40,6 +41,24 @@ const extensionConfig = {
       }
     ]
   },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/app/pipeline/pipeline-cards.html',
+          to: 'app/pipeline/pipeline-cards.html'
+        },
+        {
+          from: 'src/app/pipeline/pipeline-cards.css',
+          to: 'app/pipeline/pipeline-cards.css'
+        },
+        {
+          from: 'src/app/pipeline/pipeline-cards-client.js',
+          to: 'app/pipeline/pipeline-cards-client.js'
+        }
+      ]
+    })
+  ],
   devtool: 'nosources-source-map',
   infrastructureLogging: {
     level: "log", // enables logging required for problem matchers

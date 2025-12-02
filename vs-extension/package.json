@@ -1,14 +1,34 @@
 {
   "name": "essedum",
-  "displayName": "Essedum AI Platform",
-  "description": "VS Code extension for Essedum AI Platform with Keycloak authentication and pipeline execution",
-  "version": "0.0.1",
+  "displayName": "Essedum",
+  "description": "VS Code extension for Essedum AI Platform",
+  "version": "0.0.16",
+  "publisher": "essedum",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.103.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "ai",
+    "platform",
+    "authentication",
+    "keycloak",
+    "pipeline",
+    "job-logs",
+    "oauth",
+    "essedum"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform.git"
+  },
+  "homepage": "https://github.com/Infosys-MWC-GENAI/ai-platform#readme",
+  "bugs": {
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform/issues"
+  },
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
@@ -18,8 +38,16 @@
         "title": "Open Essedum Panel"
       },
       {
+        "command": "essedum.showLoginScreen",
+        "title": "Show Login Screen"
+      },
+      {
         "command": "essedum.login",
         "title": "Login to Essedum"
+      },
+      {
+        "command": "essedum.loginWithNetwork",
+        "title": "Login with Network Selection"
       },
       {
         "command": "essedum.logout",
@@ -52,6 +80,14 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "essedum.showLoginScreen",
+          "when": "!essedum.isAuthenticated"
+        },
+        {
+          "command": "essedum.loginWithNetwork",
+          "when": "true"
+        },
         {
           "command": "essedum.openJobLogs",
           "when": "true"
@@ -92,9 +128,17 @@
     "views": {
       "essedum-explorer": [
         {
+          "id": "essedum-login",
+          "name": "Network Selection",
+          "type": "webview",
+          "when": "!essedum.isAuthenticated",
+          "icon": "$(key)"
+        },
+        {
           "id": "essedum-sidebar",
           "name": "Essedum AI Platform",
           "type": "webview",
+          "when": "essedum.isAuthenticated",
           "icon": "$(home)"
         }
       ],
@@ -130,8 +174,8 @@
         },
         "essedum.auth.autoLogin": {
           "type": "boolean",
-          "default": true,
-          "description": "Automatically attempt login when the extension starts"
+          "default": false,
+          "description": "Automatically attempt login when the extension starts (requires network to be pre-selected)"
         }
       }
     }
@@ -145,7 +189,9 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "publish": "vsce publish",
+    "package-extension": "vsce package"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
@@ -157,6 +203,7 @@
     "@typescript-eslint/parser": "^8.42.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.34.0",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.2",
