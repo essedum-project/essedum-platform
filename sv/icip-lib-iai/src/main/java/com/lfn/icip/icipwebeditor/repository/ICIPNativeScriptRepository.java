@@ -51,6 +51,7 @@ public interface ICIPNativeScriptRepository extends JpaRepository<ICIPNativeScri
 	 */
 	ICIPNativeScript findByCnameAndOrganization(String cname, String org);
 
+    List<ICIPNativeScript> findByOrganizationAndCname(String org, String cname);
 	/**
 	 * Find by organization.
 	 *

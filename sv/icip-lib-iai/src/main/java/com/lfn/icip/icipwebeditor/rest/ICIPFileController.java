@@ -560,9 +560,9 @@ public class ICIPFileController {
 	 * @return the response entity
 	 */
 	@PostMapping(path = "/create/{cname}/{org}/{fileType}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> createNativeScriptFile(@PathVariable(name = "cname") String cname,
-			@PathVariable(name = "org") String org, @RequestParam(name = "file") String fileName,
-			@PathVariable(name = "fileType") String fileType, @RequestParam(value = "scriptFile", required = true) MultipartFile script) {
+	public ResponseEntity<List<String>> createNativeScriptFile(@PathVariable(name = "cname") String cname,
+                                                         @PathVariable(name = "org") String org, @RequestParam(name = "file") String fileName,
+                                                         @PathVariable(name = "fileType") String fileType, @RequestParam(value = "scriptFile", required = true) MultipartFile script) {
 		logger.info("request to create native script file");
 		try {
 			return new ResponseEntity<>(fileService.writeNativeFile(cname, org, fileName, fileType, script), HttpStatus.OK);
