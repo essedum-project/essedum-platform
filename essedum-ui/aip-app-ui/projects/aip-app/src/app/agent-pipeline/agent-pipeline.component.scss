@@ -475,85 +475,221 @@
 
 .file-panel {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 16px;
+  grid-template-columns: 320px 1fr; // Slightly wider for better readability
+  gap: 20px;
   min-height: 500px;
+  width: 100%;
 }
 
 .file-explorer {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: #1e1e1e; // VS Code dark background
+  border: 1px solid #2e2e2e;
   border-radius: 8px;
   overflow: hidden;
   
   .explorer-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
-    background: #0a142f;
-    color: white;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #252526; // VS Code header background
+    color: #cccccc;
+    border-bottom: 1px solid #2e2e2e;
     
     mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #cccccc;
     }
     
     h3 {
       margin: 0;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cccccc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
   }
   
   .file-tree {
-    padding: 12px;
+    padding: 8px 0;
     max-height: 500px;
-    overflow-y: auto;
+    overflow: auto; // Allow both horizontal and vertical scrolling
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-size: 13px;
+    line-height: 1.3;
+    background: #1e1e1e;
+    min-width: 100%;
+    
+    // Custom scrollbar for dark theme
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px; // Add horizontal scrollbar height
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #424242;
+      border-radius: 4px;
+      
+      &:hover {
+        background: #4f4f4f;
+      }
+    }
+    
+    &::-webkit-scrollbar-corner {
+      background: #1e1e1e;
+    }
   }
 }
 
+// File tree structure styles
+.tree-level {
+  display: block;
+  min-width: max-content; // Allow content to expand beyond container
+}
+
 .tree-node {
+  margin: 0;
+  min-width: max-content; // Allow content to expand beyond container
+  
   .tree-node-content {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 3px 8px;
     cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    border-radius: 3px;
+    transition: background-color 0.15s ease;
+    min-height: 22px;
+    min-width: max-content; // Ensure content doesn't get cut off
+    box-sizing: border-box;
+    position: relative;
     
     .node-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #0094ff;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      
+      &.folder-icon {
+        color: #dcb67a; // VS Code folder yellow
+      }
       
       &.file-icon {
-        color: #666;
+        color: #519aba; // VS Code file blue
       }
     }
     
     .node-name {
-      font-size: 14px;
-      color: #1a1a1a;
+      font-size: 13px;
+      color: #cccccc;
+      font-family: inherit;
+      white-space: nowrap;
+      user-select: none;
+      min-width: 0; // Allow shrinking
+      flex: 1;
+      
+      // Tooltip on hover for full filename
+      &:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background: #2d2d30;
+        color: #cccccc;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        border: 1px solid #454545;
+        margin-top: 2px;
+      }
     }
     
     &:hover {
-      background: #e3f2fd;
+      background: #2a2d2e;
     }
     
     &.selected {
-      background: #0094ff;
-      color: white;
+      background: #094771;
       
-      .node-icon,
       .node-name {
-        color: white;
+        color: #ffffff;
+      }
+      
+      .node-icon {
+        &.folder-icon {
+          color: #ffffff;
+        }
+        
+        &.file-icon {
+          color: #ffffff;
+        }
+      }
+    }
+    
+    // Folder specific styles
+    &.folder-node {
+      .node-name {
+        font-weight: 500;
+      }
+    }
+    
+    // File specific styles  
+    &.file-node {
+      .node-name {
+        font-weight: 400;
+      }
+      
+      // File type specific icon colors
+      &:has(.node-name:contains('.java')) .node-icon {
+        color: #f89820; // Java orange
+      }
+      
+      &:has(.node-name:contains('.xml')) .node-icon {
+        color: #f44336; // XML red
+      }
+      
+      &:has(.node-name:contains('.properties')) .node-icon {
+        color: #4caf50; // Properties green
       }
     }
   }
+  
+  .tree-children {
+    width: 100%;
+  }
+}
+
+// Tree loading state
+.tree-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #cccccc;
+  font-size: 13px;
+  justify-content: center;
+  
+  .spin-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .file-editor {

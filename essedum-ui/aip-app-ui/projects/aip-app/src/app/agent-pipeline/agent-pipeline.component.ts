@@ -9,7 +9,127 @@ interface FileNode {
   type: 'file' | 'folder';
   children?: FileNode[];
   content?: string;
+  id?: string;
+  path?: string;
 }
+
+// API Configuration
+const API_CONFIG = {
+  baseUrl: 'http://localhost:8080',
+  endpoints: {
+    uploadZip: '/api/zip/upload',
+    getUserFiles: '/api/zip/user/{userId}',
+    downloadFile: '/api/zip/download/{fileId}'
+  }
+};
+
+// Sample API structure for reference
+const SAMPLE_API_SPEC = {
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/zip/upload": {
+      "post": {
+        "tags": ["zip-controller"],
+        "operationId": "uploadZip",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["file"],
+                "type": "object",
+                "properties": {
+                  "file": {"type": "string", "format": "binary"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {"*/*": {"schema": {"type": "string"}}}
+          }
+        }
+      }
+    },
+    "/api/zip/user/{userId}": {
+      "get": {
+        "tags": ["zip-controller"],
+        "operationId": "getFilesForUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/zip/download/{fileId}": {
+      "get": {
+        "tags": ["zip-controller"],
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "format": "int64"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {"type": "string", "format": "byte"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {}
+};
 
 interface AgentCard {
   cid: string;
@@ -35,6 +155,10 @@ interface AgentCard {
 export class AgentPipelineComponent implements OnInit {
  
  githubUsername:string = "";
+  
+  // API-related properties
+  currentUserId: string = 'user123'; // Default user ID for testing
+  isLoadingFiles: boolean = false;
   // View mode: 'list' shows cards, 'detail' shows script/generate tabs
   viewMode: 'list' | 'detail' = 'list';
   selectedAgent: AgentCard | null = null;
@@ -165,6 +289,8 @@ export class AgentPipelineComponent implements OnInit {
       this.selectedAgent = null;
       this.isJsonProcessed = false;
       this.isProcessingJson = false;
+      this.hasGeneratedAgent = false;
+      this.fileSystemData = [];
     } else {
       this.location.back();
     }
@@ -204,37 +330,28 @@ export class AgentPipelineComponent implements OnInit {
     // Reset file selection and processing state
     this.selectedFileName = '';
     this.selectedFileContent = '';
-    this.isJsonProcessed = false;
+    this.isJsonProcessed = true; // Show JSON and console directly
     this.isProcessingJson = false;
     this.hasGeneratedAgent = false; // Reset playground button state
     
     // Update JSON content based on selected agent
     this.updateJsonContent(agent);
-    // Don't generate file system data until JSON is processed
+    // Don't generate file system data until agent is generated
   }
 
-  runJsonConfiguration(): void {
-    if (!this.selectedAgent) return;
-    
-    this.isProcessingJson = true;
-    
-    // Simulate backend processing (in real implementation, this would call backend API)
-    setTimeout(() => {
-      // Simulate receiving unzipped folder from backend
-      this.updateFileSystemData(this.selectedAgent!);
-      this.isProcessingJson = false;
-      this.isJsonProcessed = true;
-    }, 2000);
-  }
+
 
   refreshConfiguration(): void {
     if (!this.selectedAgent) return;
     
-    // Reset to initial state to show JSON and run button again
-    this.isJsonProcessed = false;
+    // Reset file selection and regenerate file structure
     this.selectedFileName = '';
     this.selectedFileContent = '';
-    this.fileSystemData = [];
+    this.isLoadingFiles = true;
+    
+    // Update JSON content and regenerate file structure
+    this.updateJsonContent(this.selectedAgent);
+    this.updateFileSystemData(this.selectedAgent);
   }
 
   updateJsonContent(agent: AgentCard): void {
@@ -281,125 +398,125 @@ export class AgentPipelineComponent implements OnInit {
   }
 
   updateFileSystemData(agent: AgentCard): void {
-    const mainPyContent = this.getMainPyContent(agent.name);
+    this.isLoadingFiles = true;
     
-    this.fileSystemData = [
-      {
-        name: 'agent',
-        type: 'folder',
-        children: [
-          {
-            name: 'src',
-            type: 'folder',
-            children: [
-              {
-                name: 'main.py',
-                type: 'file',
-                content: mainPyContent
-              },
-              {
-                name: 'tools.py',
-                type: 'file',
-                content: this.getToolsPyContent(agent.name)
-              },
-              {
-                name: 'config.py',
-                type: 'file',
-                content: `"""
-Agent configuration settings
-"""
-
-AGENT_CONFIG = {
-    'model': 'gpt-4',
-    'temperature': 0.7,
-    'max_tokens': 2000,
-    'timeout': 30,
-    'retry_attempts': 3,
-    'api_version': 'v1'
-}
-
-DATABASE_CONFIG = {
-    'host': 'localhost',
-    'port': 5432,
-    'database': 'agent_db',
-    'user': 'agent_user'
-}
-
-LOGGING_CONFIG = {
-    'level': 'INFO',
-    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-}
-`
-              }
-            ]
-          },
-          {
-            name: 'tests',
-            type: 'folder',
-            children: [
-              {
-                name: 'test_agent.py',
-                type: 'file',
-                content: `import unittest
-from src.main import ${this.getClassName(agent.name)}
-
-class Test${this.getClassName(agent.name)}(unittest.TestCase):
-    def setUp(self):
-        self.agent = ${this.getClassName(agent.name)}()
+    // Use hardcoded API simulation that matches exact endpoint behavior
+    this.fetchUserFiles(this.currentUserId)
+      .then(apiResponse => {
+        console.log('Building file tree from API response:', apiResponse);
+        this.fileSystemData = this.buildFileTreeFromApiResponse(apiResponse);
+        this.isLoadingFiles = false;
+      })
+      .catch(error => {
+        console.error('Error loading files:', error);
+        this.isLoadingFiles = false;
+        // Fallback to empty structure
+        this.fileSystemData = [];
+      });
+  }
+  
+  // Build nested file tree structure from flat API response
+  buildFileTreeFromApiResponse(apiResponse: any[]): FileNode[] {
+    const root: FileNode = { name: 'root', type: 'folder', children: [] };
+    
+    apiResponse.forEach(item => {
+      const pathParts = item.path.split('/');
+      let currentNode = root;
+      
+      // Navigate/create the directory structure
+      for (let i = 0; i < pathParts.length; i++) {
+        const part = pathParts[i];
+        const isFile = i === pathParts.length - 1;
         
-    def test_initialization(self):
-        self.assertIsNotNone(self.agent)
+        if (!currentNode.children) {
+          currentNode.children = [];
+        }
         
-    def test_process_request(self):
-        response = self.agent.process_request("Test query")
-        self.assertIsNotNone(response)
-
-if __name__ == '__main__':
-    unittest.main()
-`
-              }
-            ]
-          },
-          {
-            name: 'requirements.txt',
-            type: 'file',
-            content: `openai>=1.0.0
-requests>=2.28.0
-python-dotenv>=0.19.0
-pytest>=7.0.0
-pandas>=2.0.0
-numpy>=1.24.0
-`
-          },
-          {
-            name: 'README.md',
-            type: 'file',
-            content: `# ${agent.alias}
-
-${agent.description}
-
-## Version: ${agent.version}
-
-## Features
-${this.getToolsForAgent(agent.name).map(t => `- ${t.description}`).join('\n')}
-
-## Setup
-1. Install dependencies: \`pip install -r requirements.txt\`
-2. Set up environment variables in \`.env\`
-3. Run: \`python src/main.py\`
-`
-          },
-          {
-            name: '.env.example',
-            type: 'file',
-            content: `OPENAI_API_KEY=your_api_key_here
-API_ENDPOINT=https://api.example.com
-LOG_LEVEL=INFO
-`
-          }
-        ]
+        // Find existing node or create new one
+        let existingNode = currentNode.children.find(child => child.name === part);
+        
+        if (!existingNode) {
+          existingNode = {
+            name: part,
+            type: isFile ? 'file' : 'folder',
+            id: isFile ? item.id : undefined,
+            path: isFile ? item.path : undefined,
+            children: isFile ? undefined : []
+          };
+          currentNode.children.push(existingNode);
+        }
+        
+        currentNode = existingNode;
       }
-    ];
+    });
+    
+    return root.children || [];
+  }
+  
+  // Method to fetch files from API (hardcoded for now with exact API structure)
+  async fetchUserFiles(userId: string): Promise<any[]> {
+    try {
+      // Simulate the API call with exact endpoint structure
+      console.log(`Calling GET ${API_CONFIG.baseUrl}${API_CONFIG.endpoints.getUserFiles.replace('{userId}', userId)}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Return exact API response structure as provided
+      const response = [
+        { "path": "pom.xml", "fileName": "pom.xml", "id": "1" },
+        { "path": "src/main/resources/application.properties", "fileName": "application.properties", "id": "2" },
+        { "path": "src/main/java/com/example/zipupload/ZipUploadApplication.java", "fileName": "ZipUploadApplication.java", "id": "3" },
+        { "path": "src/main/java/com/example/zipupload/service/ZipProcessingService.java", "fileName": "ZipProcessingService.java", "id": "4" },
+        { "path": "src/main/java/com/example/zipupload/repository/FileRepository.java", "fileName": "FileRepository.java", "id": "5" },
+        { "path": "src/main/java/com/example/zipupload/entity/FileEntity.java", "fileName": "FileEntity.java", "id": "6" },
+        { "path": "src/main/java/com/example/zipupload/controller/ZipController.java", "fileName": "ZipController.java", "id": "7" }
+      ];
+      
+      console.log('API Response:', response);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch user files:', error);
+      return [];
+    }
+  }
+  
+  // Method to download file content from API (hardcoded for now with exact API structure)
+  async downloadFileContent(fileId: string): Promise<string> {
+    try {
+      // Simulate the API call with exact endpoint structure
+      console.log(`Calling GET ${API_CONFIG.baseUrl}${API_CONFIG.endpoints.downloadFile.replace('{fileId}', fileId)}`);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // API returns byte array according to OpenAPI spec
+      // Simulate converting byte array response to string content
+      const byteArrayResponse = this.simulateByteArrayResponse(fileId);
+      const content = this.convertByteArrayToString(byteArrayResponse);
+      
+      console.log(`Downloaded file ${fileId}, content length: ${content.length}`);
+      return content;
+    } catch (error) {
+      console.error('Failed to download file:', error);
+      return 'Error loading file content';
+    }
+  }
+  
+  // Simulate byte array response from API
+  simulateByteArrayResponse(fileId: string): number[] {
+    const content = this.getSampleFileContent(fileId);
+    // Convert string to byte array simulation
+    const byteArray = [];
+    for (let i = 0; i < content.length; i++) {
+      byteArray.push(content.charCodeAt(i));
+    }
+    return byteArray;
+  }
+  
+  // Convert byte array to string (as would be done in real implementation)
+  convertByteArrayToString(byteArray: number[]): string {
+    return String.fromCharCode(...byteArray);
   }
 
   getClassName(agentName: string): string {
@@ -509,19 +626,215 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     // Implementation for tags
   }
 
+  // Generate sample file content based on file ID and type
+  getSampleFileContent(fileId: string): string {
+    const fileMap: { [key: string]: string } = {
+      '1': `<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.example</groupId>
+    <artifactId>zip-upload</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    
+    <name>Zip Upload Service</name>
+    <description>Service for handling zip file uploads and processing</description>
+</project>`,
+      '2': `# Application Configuration
+server.port=8080
+spring.application.name=zip-upload-service
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Database Configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.h2.console.enabled=true`,
+      '3': `package com.example.zipupload;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ZipUploadApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ZipUploadApplication.class, args);
+    }
+
+}`,
+      '4': `package com.example.zipupload.service;
+
+import org.springframework.stereotype.Service;
+import java.io.*;
+import java.util.zip.*;
+import java.util.List;
+import java.util.ArrayList;
+
+@Service
+public class ZipProcessingService {
+
+    public List<String> extractZipFile(InputStream zipInputStream) throws IOException {
+        List<String> extractedFiles = new ArrayList<>();
+        
+        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory()) {
+                    extractedFiles.add(zipEntry.getName());
+                    // Process file content here
+                }
+                zis.closeEntry();
+            }
+        }
+        
+        return extractedFiles;
+    }
+}`,
+      '5': `package com.example.zipupload.repository;
+
+import com.example.zipupload.entity.FileEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface FileRepository extends JpaRepository<FileEntity, Long> {
+    List<FileEntity> findByUserId(String userId);
+}`,
+      '6': `package com.example.zipupload.entity;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "files")
+public class FileEntity {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "user_id")
+    private String userId;
+    
+    @Column(name = "file_name")
+    private String fileName;
+    
+    @Column(name = "file_path")
+    private String filePath;
+    
+    @Lob
+    @Column(name = "content")
+    private byte[] content;
+    
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+    
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+    
+    public byte[] getContent() { return content; }
+    public void setContent(byte[] content) { this.content = content; }
+}`,
+      '7': `package com.example.zipupload.controller;
+
+import com.example.zipupload.service.ZipProcessingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/zip")
+public class ZipController {
+
+    @Autowired
+    private ZipProcessingService zipProcessingService;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadZip(
+            @RequestParam("userId") String userId,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            List<String> extractedFiles = zipProcessingService.extractZipFile(file.getInputStream());
+            return ResponseEntity.ok("Files processed successfully: " + extractedFiles.size());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing zip file: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Map<String, String>>> getFilesForUser(@PathVariable String userId) {
+        // Implementation here
+        return ResponseEntity.ok(List.of());
+    }
+
+    @GetMapping("/download/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
+        // Implementation here
+        return ResponseEntity.ok(new byte[0]);
+    }
+}`
+    };
+    
+    return fileMap[fileId] || `// File content for ID: ${fileId}\n// This is a sample file generated from the API response\n// In a real implementation, this would be fetched from the backend`;
+  }
+
   // File system methods
-  selectFile(node: FileNode): void {
-    if (node.type === 'file' && node.content) {
+  async selectFile(node: FileNode): Promise<void> {
+    if (node.type === 'file') {
       this.selectedFileName = node.name;
-      this.selectedFileContent = node.content || '';
       
-      // Set file extension like pipeline does
+      // Set file extension
       if (node.name.endsWith('.py')) {
         this.fileExtension = 'py';
       } else if (node.name.endsWith('.json')) {
         this.fileExtension = 'json';
+      } else if (node.name.endsWith('.java')) {
+        this.fileExtension = 'java';
+      } else if (node.name.endsWith('.xml')) {
+        this.fileExtension = 'xml';
+      } else if (node.name.endsWith('.properties')) {
+        this.fileExtension = 'properties';
+      } else if (node.name.endsWith('.md')) {
+        this.fileExtension = 'markdown';
       } else {
         this.fileExtension = 'txt';
+      }
+      
+      // Load file content from API if node has an ID
+      if (node.id) {
+        this.selectedFileContent = 'Loading...';
+        try {
+          this.selectedFileContent = await this.downloadFileContent(node.id);
+        } catch (error) {
+          console.error('Error loading file content:', error);
+          this.selectedFileContent = 'Error loading file content';
+        }
+      } else {
+        this.selectedFileContent = node.content || '';
       }
       
       console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Content length:', this.selectedFileContent.length);
@@ -578,6 +891,8 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
       '',
       `Output: ./dist/${this.selectedAgent?.name}-v${version}.tar.gz`,
       `Size: 2.4 MB`,
+      '',
+      'Loading file structure for Essedum Codespace...'
     ];
 
     let index = 0;
@@ -589,6 +904,12 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         clearInterval(interval);
         this.isGenerating = false;
         this.hasGeneratedAgent = true; // Show playground button after generation
+        
+        // Generate file structure for Essedum Codespace
+        if (this.selectedAgent) {
+          this.updateFileSystemData(this.selectedAgent);
+        }
+        
         // Show playground popup after generation completes
         setTimeout(() => {
           this.openPlayground();

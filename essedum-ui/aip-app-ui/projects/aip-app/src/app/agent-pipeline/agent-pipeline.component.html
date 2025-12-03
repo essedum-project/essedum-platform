@@ -28,50 +28,10 @@
             <!-- Main Content Panel -->
             <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
 
-              <!-- Run Button Section (Before Processing) -->
-              <div class="run-section" *ngIf="!isJsonProcessed">
-                <div class="run-header">
-                  <div class="run-info">
-                    <h3>Configuration Ready</h3>
-                    <p>Review the JSON configuration below and click "Run" to process and generate the agent structure
-                    </p>
-                  </div>
-                  <button mat-raised-button color="primary" class="run-config-button" (click)="runJsonConfiguration()"
-                    [disabled]="isProcessingJson">
-                    <mat-icon>{{ isProcessingJson ? 'hourglass_empty' : 'play_circle_filled' }}</mat-icon>
-                    {{ isProcessingJson ? 'Processing...' : 'Run Configuration' }}
-                  </button>
-                </div>
+              <!-- Tabs (Show directly on view details) -->
+              <mat-tab-group disableRipple>
 
-                <!-- JSON Configuration Display -->
-                <div class="json-display-section">
-                  <div class="file-editor">
-                    <div class="editor-header">
-                      <mat-icon>code</mat-icon>
-                      <h3>config.json</h3>
-                    </div>
-                    <div class="code-editor">
-                      <div class="code-content">
-                        <p id="code-box" class="code-color">{{ jsonContent }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Processing Indicator -->
-                <div class="processing-indicator" *ngIf="isProcessingJson">
-                  <mat-icon class="spin-icon">sync</mat-icon>
-                  <p>Processing configuration and generating file structure...</p>
-                  <div class="progress-dots">
-                    <span></span><span></span><span></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Tabs (After Processing) -->
-              <mat-tab-group disableRipple *ngIf="isJsonProcessed">
-
-                <!-- Script Tab - Split View -->
+                <!-- Script Tab - Split View (Always visible) -->
                 <mat-tab label="Script" class="lfx-u-header-xl">
                   <div class="tab-content mb-5">
                     <div class="script-split-container">
@@ -148,8 +108,8 @@
                   </div>
                 </mat-tab>
 
-                <!-- Essedum Codespace Tab -->
-                <mat-tab label="Essedum Codespace" class="lfx-u-header-xl">
+                <!-- Essedum Codespace Tab (Only show after agent generation) -->
+                <mat-tab label="Essedum Codespace" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
                   <div class="tab-content mb-5">
 
                     <!-- Refresh Configuration Button -->
@@ -171,8 +131,13 @@
                             <h3>Project Files</h3>
                           </div>
                           <div class="file-tree">
-                            <ng-container
-                              *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: fileSystemData, level: 0 }"></ng-container>
+                            <div *ngIf="isLoadingFiles" class="tree-loading">
+                              <mat-icon class="spin-icon">hourglass_empty</mat-icon>
+                              <span>Loading files...</span>
+                            </div>
+                            <ng-container *ngIf="!isLoadingFiles">
+                              <ng-container *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: fileSystemData, level: 0 }"></ng-container>
+                            </ng-container>
                           </div>
                         </div>
 
@@ -221,18 +186,32 @@
 
 <!-- File Tree Template -->
 <ng-template #fileTreeTemplate let-nodes let-level="level">
-  <div class="tree-level" [style.padding-left.px]="level * 20">
+  <div class="tree-level">
     <div *ngFor="let node of nodes" class="tree-node">
-      <div class="tree-node-content" [class.selected]="isFileSelected(node)" (click)="selectFile(node)">
-        <mat-icon class="node-icon" *ngIf="node.type === 'folder'">
+      <div class="tree-node-content" 
+           [class.selected]="isFileSelected(node)" 
+           [class.folder-node]="node.type === 'folder'"
+           [class.file-node]="node.type === 'file'"
+           [style.padding-left.px]="(level * 16) + 8"
+           (click)="selectFile(node)">
+        <mat-icon class="node-icon folder-icon" *ngIf="node.type === 'folder'">
           folder
         </mat-icon>
-        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file'">
+        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.java')">
+          code
+        </mat-icon>
+        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.xml')">
+          code
+        </mat-icon>
+        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.properties')">
+          settings
+        </mat-icon>
+        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && !node.name.endsWith('.java') && !node.name.endsWith('.xml') && !node.name.endsWith('.properties')">
           description
         </mat-icon>
-        <span class="node-name">{{ node.name }}</span>
+        <span class="node-name" [title]="node.name">{{ node.name }}</span>
       </div>
-      <div *ngIf="node.children && node.children.length > 0">
+      <div *ngIf="node.children && node.children.length > 0" class="tree-children">
         <ng-container
           *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: node.children, level: level + 1 }"></ng-container>
       </div>
