@@ -1,52 +1,189 @@
-// Pipeline Cards Component for displaying Essedum pipeline data
+/**
+ * Pipeline Cards Provider for Essedum AI Platform
+ * 
+ * This component provides a webview-based interface for managing and interacting
+ * with pipeline data from the Essedum AI Platform. It handles:
+ * - Pipeline listing and filtering
+ * - Detailed pipeline views with scripts and run types
+ * - Script editing and file management
+ * - Pipeline execution and monitoring
+ * - Authentication and authorization
+ * 
+ * @fileoverview Main pipeline cards webview provider
+ * @author Essedum AI Platform Team
+ * @version 1.0.0
+ */
+
+// ================================
+// IMPORTS
+// ================================
+
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
+
+// Service and provider imports
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
-import { JobLogsViewer } from './job-logs-viewer';
+import { JobLogsViewer } from '../job-logs/job-logs-viewer';
 import { HttpParams, PipelineCard, PipelineScript, ScriptFile } from '../../interfaces/pipeline.interfaces';
 import { PipelineService } from '../../services/pipeline.service';
 
-export class PipelineCardsProvider implements vscode.WebviewViewProvider {
-    private _view?: vscode.WebviewView;
-    private _extensionUri: vscode.Uri;
-    private _token: string = '';
-    private _isAuthenticated: boolean = false;
-    private _authService?: any; // Will be injected from extension
-    private _fileProvider?: EssedumFileSystemProvider; // File provider for upload operations
-    private _currentPipelineName?: string; // Track current pipeline for file system operations
+// Constants and utility imports
+import {
+    PIPELINE_CONFIG,
+    UI_TEXT,
+    WEBVIEW_COMMANDS,
+    CSS_CLASSES,
+    FILE_TYPES,
+    SCRIPT_TEMPLATES,
+    FORM_DATA_HEADERS,
+    getLanguageFromExtension,
+    isLocalRuntime
+} from '../../constants/pipeline-constants';
 
-    // Configuration
-    private pageNumber: number = 1;
-    private pageSize: number = 4;
+import {
+    formatDate,
+    formatFullDate,
+    toTitleCase,
+    truncateText,
+    sanitizeHtml,
+    getUserAvatarLetter,
+    postToWebview,
+    showWebviewLoading,
+    updateWebviewCards,
+    getUserFriendlyErrorMessage,
+    logError,
+    handleAsyncOperation,
+    getFileInfo,
+    createEssedumFileUri,
+    validateScriptContent,
+    calculatePagination,
+    createExecutionParams,
+    debounce,
+    getStoredValue,
+    setStoredValue,
+    normalizeRuntime
+} from '../../constants/pipeline-utils';
+import { getBaseUrl } from '../../constants/api-config';
+
+// ================================
+// TYPES AND INTERFACES
+// ================================
+
+interface PaginationInfo {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    pageSize: number;
+}
+
+interface WebviewMessage {
+    command: string;
+    [key: string]: any;
+}
+
+// ================================
+// MAIN CLASS DEFINITION
+// ================================
+
+/**
+ * Pipeline Cards Provider - Main webview provider for pipeline management
+ */
+export class PipelineCardsProvider implements vscode.WebviewViewProvider {
+    // ================================
+    // PRIVATE PROPERTIES
+    // ================================
+
+    /** VS Code webview instance */
+    private _view?: vscode.WebviewView;
+
+    /** Extension URI for resource loading */
+    private _extensionUri: vscode.Uri;
+
+    /** Authentication token */
+    private _token: string = '';
+
+    private project: any;
+    private role:any;
+    /** Authentication state */
+    private _isAuthenticated: boolean = false;
+
+    /** Authentication service reference */
+    private _authService?: any;
+
+    /** File provider for virtual file operations */
+    private _fileProvider?: EssedumFileSystemProvider;
+
+    /** Current pipeline name for file system operations */
+    private _currentPipelineName?: string;
+
+    // Pagination and filtering configuration
+    private pageNumber: number = PIPELINE_CONFIG.INITIAL_PAGE;
+    private pageSize: number = PIPELINE_CONFIG.DEFAULT_PAGE_SIZE;
     private totalCount: number = 0;
     private totalPages: number = 0;
-    private allCards: PipelineCard[] = []; // Store all cards for client-side pagination
-    private organization: string = 'leo1311';
+    private allCards: PipelineCard[] = [];
+    private organization: string;
     private filter: string = '';
     private selectedAdapterType: string[] = [];
-    private script: string[] = []; // Track script lines for editing
-    private scriptContent: string = ''; // Store current script content
+    private script: string[] = [];
+    private scriptContent: string = '';
     private selectedTag: string[] = [];
     private loading: boolean = false;
     private cards: PipelineCard[] = [];
     private filteredCards: PipelineCard[] = [];
+
+    /** Pipeline service instance */
     private _pipelineService: PipelineService;
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: EssedumFileSystemProvider, pipelineService?: PipelineService) {
+    /** Component logger prefix */
+    private readonly logPrefix = '[PipelineCards]';
+
+    // ================================
+    // CONSTRUCTOR
+    // ================================
+
+    /**
+     * Creates a new Pipeline Cards Provider instance
+     * @param _context - VS Code extension context
+     * @param token - Authentication token
+     * @param authService - Authentication service instance
+     * @param fileProvider - File system provider instance
+     * @param pipelineService - Pipeline service instance
+     */
+    constructor(
+        private readonly _context: vscode.ExtensionContext,
+        token: string,
+        authService?: any,
+        fileProvider?: EssedumFileSystemProvider,
+        pipelineService?: PipelineService
+    ) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
+        this.project = _context.globalState.get('project');
+        this.organization = this.project?.name;
+        this.role = _context.globalState.get('role');
         this._authService = authService;
         this._fileProvider = fileProvider;
-        this._pipelineService = pipelineService || new PipelineService(token, 'leo1311'); // Create default if not provided
+        this._pipelineService = pipelineService || new PipelineService(token, this.organization);
+
+        console.log(`${this.logPrefix} Pipeline Cards Provider initialized`);
     }
 
-    public updateToken(token: string) {
+    // ================================
+    // PUBLIC METHODS
+    // ================================
+
+    /**
+     * Updates the authentication token and related services
+     * @param token - New authentication token
+     */
+    public updateToken(token: string): void {
         this._token = token;
         this._isAuthenticated = !!token && token.trim().length > 0;
-        console.log('Token updated, authenticated:', this._isAuthenticated);
+        console.log(`${this.logPrefix} Token updated, authenticated:`, this._isAuthenticated);
 
         // Update the authentication context when token changes
         vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', this._isAuthenticated);
@@ -64,9 +201,25 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
     /**
      * Set the authentication service reference
+     * @param authService - Authentication service instance
      */
-    public setAuthService(authService: any) {
+    public setAuthService(authService: any): void {
         this._authService = authService;
+    }
+
+    /**
+     * Handle external token update (called when token is updated outside this component)
+     * @param token - New authentication token
+     */
+    public async onTokenUpdated(token: string): Promise<void> {
+        console.log(`${this.logPrefix} External token update received`);
+        this.updateToken(token);
+        
+        // If we now have a valid token and the view is showing auth required, switch to main view
+        if (this._isAuthenticated && this._view) {
+            console.log(`${this.logPrefix} Token update successful, switching to main view`);
+            await this.returnToMainView();
+        }
     }
 
     public resolveWebviewView(
@@ -155,30 +308,56 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                 });
                             }
 
+                            let authSuccessful = false;
+
                             // Force fresh authentication through the auth service
                             if (this._authService) {
                                 console.log('Using auth service for fresh authentication');
                                 const tokens = await this._authService.forceAuthentication();
                                 console.log('Fresh authentication successful, updating token');
                                 this.updateToken(tokens.access_token);
+                                authSuccessful = true;
                             } else {
                                 console.log('No auth service available, using command execution');
                                 // Fallback to command execution if auth service not available
                                 await vscode.commands.executeCommand('essedum.login');
+
+                                // After command execution, we need to wait and check for token updates
+                                // The external command might update the token in the context, so we need to retrieve it
+                                console.log('Waiting for external authentication to complete...');
+                                
+                                // Wait a moment for the command to complete and token to be set
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                
+                                // Try to get the updated token from the context
+                                const updatedToken = this._context.globalState.get('accessToken') as string;
+                                if (updatedToken && updatedToken.trim().length > 0) {
+                                    console.log('Found updated token in context, updating component token');
+                                    this.updateToken(updatedToken);
+                                    authSuccessful = true;
+                                } else {
+                                    console.log('No token found after external authentication');
+                                    throw new Error('Authentication completed but no valid token was found');
+                                }
                             }
 
-                            // Show success feedback
-                            if (this._view) {
-                                this._view.webview.postMessage({
-                                    command: 'authenticationSuccess',
-                                    message: 'Authentication successful!'
-                                });
+                            // Only proceed if authentication was successful
+                            if (authSuccessful && this._isAuthenticated) {
+                                // Show success feedback
+                                if (this._view) {
+                                    this._view.webview.postMessage({
+                                        command: 'authenticationSuccess',
+                                        message: 'Authentication successful!'
+                                    });
+                                }
+
+                                // After successful login, return to main pipeline view
+                                await this.returnToMainView();
+
+                                vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
+                            } else {
+                                throw new Error('Authentication did not complete successfully');
                             }
-
-                            // After successful login, return to main pipeline view
-                            await this.returnToMainView();
-
-                            vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
 
                         } catch (error: any) {
                             console.error('Error executing fresh authentication:', error);
@@ -207,7 +386,20 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
      * Load initial content based on authentication state
      */
     public async loadInitialContent(): Promise<void> {
+        console.log(`${this.logPrefix} Loading initial content, current auth state: ${this._isAuthenticated}`);
+        
+        // Check if we have a valid token, with fallback to context
+        if (!this._isAuthenticated) {
+            console.log('Not authenticated, checking context for token...');
+            const contextToken = this._context.globalState.get('accessToken') as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                console.log('Found valid token in context, updating component state');
+                this.updateToken(contextToken);
+            }
+        }
+
         if (this._isAuthenticated) {
+            console.log('Authenticated, loading main pipeline interface');
             // Load main pipeline interface
             if (this._view) {
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
@@ -215,6 +407,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 setTimeout(() => this.getCards(), 100);
             }
         } else {
+            console.log('Not authenticated, showing authentication required page');
             // Show authentication required page
             this.showAuthenticationRequired();
         }
@@ -418,9 +611,27 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     private async getCards(): Promise<void> {
-        // Check authentication before proceeding
+        console.log(`${this.logPrefix} getCards called, token length: ${this._token ? this._token.length : 0}`);
+        
+        // Check authentication before proceeding - with fallback token check
         if (!this._isAuthenticated) {
-            console.log('Not authenticated, showing authentication required page');
+            console.log('Not authenticated, checking for token in context...');
+            
+            // Try to get token from global state as a fallback
+            const contextToken = this._context.globalState.get('accessToken') as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                console.log('Found valid token in context, updating component state');
+                this.updateToken(contextToken);
+            } else {
+                console.log('No valid token found, showing authentication required page');
+                this.showAuthenticationRequired();
+                return;
+            }
+        }
+
+        // Double-check we're now authenticated
+        if (!this._isAuthenticated) {
+            console.log('Still not authenticated after checking context, showing auth page');
             this.showAuthenticationRequired();
             return;
         }
@@ -432,14 +643,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 if (!isValidToken) {
                     console.log('Token is invalid or expired, checking authentication status...');
                     const authStatus = await this._authService.getAuthenticationStatus();
-                    
+
                     if (!authStatus.isAuthenticated) {
                         console.log('Token expired, showing authentication required page');
                         this._isAuthenticated = false;
                         this.showAuthenticationRequired();
                         return;
                     }
-                    
+
                     // If we reach here, the token was refreshed automatically
                     const newToken = await this._authService.getAccessToken();
                     this.updateToken(newToken);
@@ -607,7 +818,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         let params: HttpParams = {
             page: this.pageNumber.toString(),
             size: this.pageSize.toString(),
-            project: this.organization,
+            project:'leo1311',
             isCached: 'true',  // Enable caching for better performance
             adapter_instance: 'internal',
             interfacetype: 'pipeline',
@@ -1004,26 +1215,23 @@ if __name__ == "__main__":
         }
     }
 
+    /**
+     * Gets the programming language identifier from file extension
+     * @param extension - File extension
+     * @returns Language identifier
+     */
     private getLanguageByExtension(extension: string): string {
-        const languageMap: { [key: string]: string } = {
-            'py': 'python',
-            'js': 'javascript',
-            'ts': 'typescript',
-            'json': 'json',
-            'sql': 'sql',
-            'sh': 'shellscript',
-            'bat': 'bat',
-            'yml': 'yaml',
-            'yaml': 'yaml',
-            'xml': 'xml',
-            'txt': 'plaintext'
-        };
-        return languageMap[extension.toLowerCase()] || 'plaintext';
+        return getLanguageFromExtension(extension);
     }
 
+    /**
+     * Updates query parameters for filtering and pagination
+     * @param pageNumber - Current page number
+     * @param filter - Search filter
+     * @param adapterType - Adapter type filter
+     */
     private updateQueryParam(pageNumber: number, filter: string, adapterType: string): void {
-        // This would typically update URL query parameters in a web app
-        console.log(`Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
+        console.log(`${this.logPrefix} Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
     }
 
     public goToPage(page: number): void {
@@ -1087,7 +1295,7 @@ if __name__ == "__main__":
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
         // Read HTML template from external file
-        const htmlPath = path.join(this._context.extensionPath, 'src', 'app', 'pipeline', 'pipeline-cards.html');
+        const htmlPath = path.join(this._context.extensionPath, 'dist', 'app', 'pipeline', 'pipeline-cards.html');
         let htmlTemplate = '';
 
         try {
@@ -1098,11 +1306,11 @@ if __name__ == "__main__":
         }
 
         // Get CSS file URI
-        const cssPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'app', 'pipeline', 'pipeline-cards.css');
+        const cssPath = vscode.Uri.joinPath(this._extensionUri, 'dist', 'app', 'pipeline', 'pipeline-cards.css');
         const cssUri = webview.asWebviewUri(cssPath);
 
         // Get JavaScript file URI
-        const jsPath = vscode.Uri.joinPath(this._extensionUri, 'src', 'app', 'pipeline', 'pipeline-cards-client.js');
+        const jsPath = vscode.Uri.joinPath(this._extensionUri, 'dist', 'app', 'pipeline', 'pipeline-cards-client.js');
         const jsUri = webview.asWebviewUri(jsPath);
 
         // Replace placeholders with actual URIs
@@ -2255,20 +2463,20 @@ print(f"The model got uploaded {uploaded_path} here")
             });
 
             console.log('✅ FormData created successfully');
+           
 
-         
             // Headers matching the exact working curl command
             const headers = {
                 'accept': 'application/json, text/plain, */*',
                 'accept-language': 'en-US,en;q=0.9',
                 'authorization': `Bearer ${this._token}`,
-                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'origin': getBaseUrl(),
                 'priority': 'u=1, i',
-                'project': '2',
-                'projectname': this.organization,
-                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                'roleid': '1',
-                'rolename': 'IT Portfolio Manager',
+                'project': this.project.id,
+                'projectname': this.project.name,
+                'referer': `${getBaseUrl()}/`,
+                'roleid': this.role.id,
+                'rolename': this.role.name,
                 'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
@@ -2281,7 +2489,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 ...formData.getHeaders()
             };
 
-            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+            const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
             console.log('🌐 API URL:', url);
             console.log('🔑 Authorization token length:', this._token?.length || 0);
@@ -2341,9 +2549,7 @@ print(f"The model got uploaded {uploaded_path} here")
             console.log('📄 File Name:', fileName);
             console.log('📏 Script Content Length:', scriptContent.length);
 
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false
-            });
+
 
             // Create FormData for multipart/form-data request
             const form = new FormData();
@@ -2358,13 +2564,13 @@ print(f"The model got uploaded {uploaded_path} here")
                 'accept': 'application/json, text/plain, */*',
                 'accept-language': 'en-US,en;q=0.9',
                 'authorization': `Bearer ${this._token}`,
-                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'origin': getBaseUrl(),
                 'priority': 'u=1, i',
-                'project': '2',
-                'projectname': this.organization,
-                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                'roleid': '1',
-                'rolename': 'IT Portfolio Manager',
+                'project': this.project.id,
+                'projectname': this.project.name,
+                'referer': `${getBaseUrl()}/`,
+                'roleid': this.role.id,
+                'rolename': this.role.name,
                 'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
@@ -2376,7 +2582,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 ...form.getHeaders()
             };
 
-            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+            const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
             console.log('🌐 API URL:', url);
             console.log('📋 Headers:', JSON.stringify(headers, null, 2));
@@ -2439,11 +2645,11 @@ print(f"The model got uploaded {uploaded_path} here")
             'authorization': `Bearer ${this._token}`,
             'content-type': 'application/json',
             'priority': 'u=1, i',
-            'project': '2',
-            'projectname': org,
-            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-            'roleid': '1',
-            'rolename': 'IT Portfolio Manager',
+            'project': this.project.id,
+            'projectname': this.project.name,
+            'referer': `${getBaseUrl()}/`,
+            'roleid': this.role.id,
+            'rolename': this.role.name,
             'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"',
@@ -2455,7 +2661,7 @@ print(f"The model got uploaded {uploaded_path} here")
         };
 
         // Build URL exactly matching your curl: run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}
-        const baseUrl = `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
+        const baseUrl = `${getBaseUrl()}/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
 
         // Build query parameters exactly matching your curl
         const queryParams = new URLSearchParams();
@@ -2617,18 +2823,18 @@ print(f"The model got uploaded {uploaded_path} here")
         }
 
         try {
-            const scripts = await this.fetchPipelineScripts(card.alias || card.name);
-            const scriptFile = scripts.files.find(f => f.fileName === fileName);
+            const scripts = await this._pipelineService.readPipelineFile(card.name, fileName);
+            const textDecoder = new TextDecoder('utf-8');
+            const scriptFile = textDecoder.decode(scripts.data);
 
             if (scriptFile) {
-                await vscode.env.clipboard.writeText(scriptFile.content);
+                await vscode.env.clipboard.writeText(scriptFile);
                 vscode.window.showInformationMessage('Script copied to clipboard!');
             }
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to copy script: ${error.message}`);
         }
     }
-
     private async refreshScripts(cardId: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
@@ -2674,11 +2880,28 @@ print(f"The model got uploaded {uploaded_path} here")
         try {
             console.log('Returning to main pipeline view...');
 
-            // Ensure we have a valid token before proceeding
+            // Double-check authentication state and try to get token from context if needed
             if (!this._isAuthenticated) {
-                console.log('Warning: returnToMainView called but not authenticated');
+                console.log('Warning: returnToMainView called but not authenticated, checking context...');
+                
+                // Try to get token from global state as a fallback
+                const contextToken = this._context.globalState.get('accessToken') as string;
+                if (contextToken && contextToken.trim().length > 0) {
+                    console.log('Found valid token in context, updating component state');
+                    this.updateToken(contextToken);
+                } else {
+                    console.log('No valid token found in context either, cannot proceed');
+                    return;
+                }
+            }
+
+            // Verify we're now authenticated
+            if (!this._isAuthenticated) {
+                console.log('Still not authenticated after checking context, aborting main view load');
                 return;
             }
+
+            console.log('Authentication confirmed, proceeding with main view setup');
 
             // Update authentication context to ensure logout button appears
             await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', true);
@@ -2692,10 +2915,12 @@ print(f"The model got uploaded {uploaded_path} here")
 
             // Update the webview to show the main HTML template
             if (this._view) {
+                console.log('Updating webview HTML to main template');
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
                 // Wait a moment for the webview to load, then get cards
                 setTimeout(async () => {
+                    console.log('Loading cards after HTML update');
                     await this.getCards();
                 }, 500);
             }
@@ -2800,7 +3025,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 title: `Generating scripts for ${pipelineName}...`,
                 cancellable: false
             }, async (progress) => {
-            
+
                 progress.report({ increment: 10, message: 'Initiating script generation...' });
 
                 // First, save the pipeline JSON 
@@ -2814,7 +3039,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 }
 
                 // Trigger script generation using event-based approach 
-                const triggerResponse = await this._pipelineService.triggerScriptEvent('generateScript_Pipeline',pipelineName);
+                const triggerResponse = await this._pipelineService.triggerScriptEvent('generateScript_Pipeline', pipelineName);
 
 
                 const eventId = triggerResponse.data.eventId || triggerResponse.data.id;

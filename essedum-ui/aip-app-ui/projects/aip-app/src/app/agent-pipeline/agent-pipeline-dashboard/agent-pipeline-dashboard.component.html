@@ -1,0 +1,37 @@
+<div class="aip-container" id="mainCtr">
+  <div class="lfx-u-pad-lr-30">
+    <!-- Header Section -->
+    <app-aip-header 
+      [cardTitle]="CARD_TITLE" 
+      [lastRefreshedTime]="lastRefreshedTime" 
+      [showAddButton]="false"
+      (search)="onSearch($event)" 
+      (refresh)="onRefresh()" 
+      (add)="onAdd()">
+    </app-aip-header>
+
+    <!-- Filter Section -->
+    <app-aip-filter 
+      [tagrefresh]="tagrefresh" 
+      [servicev1]="'agent'" 
+      [selectedPipelineTypeList]="selectedFilterTypes"
+      (tagSelected)="onTagSelected($event)"
+      (filterStatusChange)="onFilterStatusChange($event)">
+    </app-aip-filter>
+
+    <!-- Agent Cards -->
+    <div class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll" aria-label="Agent Pipeline cards">
+      <div *ngFor="let agent of agentCards; trackBy: trackByCardId">
+        <app-aip-card 
+          [servicev1]="'agent'" 
+          [card]="agent" 
+          [editAuth]="true" 
+          [deleteAuth]="true"
+          (viewDetails)="onViewDetails(agent)" 
+          (edit)="onEdit(agent)"
+          (delete)="onDelete(agent)">
+        </app-aip-card>
+      </div>
+    </div>
+  </div>
+</div>

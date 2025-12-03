@@ -1,4 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AipRouting } from './aip-routing';
 import { AipComponent } from './aip.component';
 import { MatCardModule } from '@angular/material/card';
@@ -140,6 +141,10 @@ import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confir
 import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
 import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
 import { AgentComponent } from './agent/agent.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -238,10 +243,13 @@ const dbConfig: DBConfig = {
     AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
-    AgentComponent
+    AgentComponent,
+    AgentPipelineComponent,
+    AgentPipelineDashboardComponent
 
   ],
   imports: [
+    CommonModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
@@ -249,6 +257,7 @@ const dbConfig: DBConfig = {
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
+    GithubLoginComponent,
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
@@ -262,6 +271,7 @@ const dbConfig: DBConfig = {
     MatSliderModule,
     MatSnackBarModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,
