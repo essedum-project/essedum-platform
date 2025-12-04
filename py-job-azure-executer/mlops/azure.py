@@ -408,7 +408,7 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
     run_id = payload.get("runId")
     model_name = payload.get("model_name")
     
-    logger.info(f"Model registration parameters: experiment=loandemo12345, run_id={run_id}, model_name={model_name}")
+    
     
     # Validate required parameters
     if not all([experiment_name, run_id, model_name]):
@@ -525,8 +525,9 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
         try:
           # This might help identify what outputs are actually available
           logger.error(f"Job properties: {best_child.properties if hasattr(best_child, 'properties') else 'N/A'}")
-        except:
-          pass
+        except Exception as e:
+          logger.warning(f"Failed to check properties: {str(e)}")
+
         
         logger.error(f"All model paths failed. Last error: {last_error}")
         return {
@@ -1071,8 +1072,8 @@ transformations:
       try:
         shutil.rmtree(mltable_folder)
         logger.info(f"Cleaned up temporary folder: {mltable_folder}")
-      except:
-        pass
+      except Exception as cleanup_error:
+        logger.warning(f"Failed to cleanup temporary folder {mltable_folder}: {str(cleanup_error)}")
     
     logger.info(f"Created training data input")
     
@@ -1418,8 +1419,8 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
       # Clean up temporary data asset
       try:
         ml_client.data.archive(name=temp_data_name, label="latest")
-      except:
-        pass
+      except Exception as archive_error:
+        logger.warning(f"Failed to archive temporary data asset {temp_data_name}: {str(archive_error)}")
       
       # Provide specific error message
       return {
@@ -1427,7 +1428,7 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
                  f"Please verify: "
                  f"1) Endpoint exists and is provisioned successfully, "
                  f"2) Deployment is in 'Succeeded' state, "
-                 f"3) Compute cluster 'testcomputeaiplatform' is running, "
+                 f"3) Compute cluster is running, "
                  f"4) The scoring script is compatible with your MLflow model. "
                  f"Error details: {error_msg[:500]}"
       }, 500
@@ -1452,7 +1453,6 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
       values = responseFormat(adapter_instance, project, values)
       values["job_name"] = job_name
       values["temp_data_asset"] = temp_data_name
-      values["endpoint_url"] = f"https://azuretest1.eastus.inference.ml.azure.com/jobs"
       values["message"] = f"Batch inference job submitted. Job ID: {job_name}. Check Azure ML Studio for progress."
       return values, response.status_code
     else:
@@ -1462,7 +1462,6 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
         "endpoint_name": endpoint_name,
         "deployment_name": deploymentName,
         "temp_data_asset": temp_data_name,
-        "endpoint_url": "https://azuretest1.eastus.inference.ml.azure.com/jobs",
         "status": "submitted",
         "message": f"Inference job submitted successfully. Job ID: {job_name}. Check Azure ML Studio for progress."
       }, 202

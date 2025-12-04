@@ -6,8 +6,11 @@ import requests
 import traceback
 from utils import *
 import logging
+import os
+from dotenv import load_dotenv
 # Gets or creates a logger
-logger = logging.getLogger(__name__)  
+logger = logging.getLogger(__name__)
+load_dotenv()  
 
 # set log level
 logger.setLevel(logging.INFO)
@@ -101,9 +104,7 @@ def get_connection_details_with_token(referer, adapter_instance, project, header
 		logger.info(f"The url is: {str(url)}")
 
 		payload = {}
-		# headers = {
-		# 'access-token': DB_CONNECTIONS[referer].get('TOKEN', '')
-		# }
+		
 
 		if referer != "http://localhost:8087/":
 			headers = dict(headers)
@@ -111,7 +112,7 @@ def get_connection_details_with_token(referer, adapter_instance, project, header
 				del headers['Authorization']
 				
 			headers['access-token'] = DB_CONNECTIONS[referer].get('TOKEN', '')
-			headers['Host']="essedum.az.ad.idemo-ppc.com"
+			headers['Host']=os.environ.get('host')
 			logger.info("Using external referer - removed Authorization and added access-token")
 		logger.info(f"Final headers: {headers}")
 
