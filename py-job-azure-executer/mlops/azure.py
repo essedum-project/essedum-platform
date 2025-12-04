@@ -57,108 +57,228 @@ def token_generate():
   response = requests.request("POST", url, headers=headers, data=payload)
   return response.text
   
-def responseFormat(adapter_instance,project,values):   
-  format=[]
-    
-  
-  if "value" in values and isinstance(values["value"],list):   
-    for value in values["value"]:
-      #print(value)
-      response_format={
-        "sourceId": value.get("name")  ,
-        "container":value.get("id") ,
-        "adapter":adapter_instance,
-        "rawPayload":value,
-        "syncDate":value.get("systemData").get("createdAt") ,
-        "description": value.get("properties").get("description"," "),
-        "organisation":project,
-        "type":value.get("type"),
-        "createdOn": value.get("systemData").get("createdAt") ,
+
+
+def responseFormat(adapter_instance,project,values):
+  if isinstance(values, list):
+    result = []
+    for value in values:
+      system_data = value.get("systemData") or {}
+      properties = value.get("properties") or {}
+      
+      result.append({
+        "sourceId": value.get("name"),
+        "container": value.get("id"),
+        "adapter": adapter_instance,
+        "rawPayload": value,
+        "syncDate": system_data.get("createdAt"),
+        "description": properties.get("description"),
+        "organisation": project,
+        "type": value.get("type"),
+        "createdOn": system_data.get("createdAt"),
         "sourceOrg": adapter_instance,
-        "createdBy": value.get("systemData").get("createdBy","Application"),
-        "name":value.get("id"),
-        "modifiedBy": value.get("systemData").get("lastModifiedBy","Application"),
-        "id":value.get("id"),
+        "createdBy": system_data.get("createdBy"),
+        "name": value.get("id"),
+        "modifiedBy": system_data.get("createdByType"),
+        "id": value.get("id"),
         "sourceName": value.get("name"),
         "adapterId": None,
-        "status": value.get("provisioningState","registered"),
+        "status": "registered",
         "likes": None,
         "artifacts": value.get("id"),
-        "deployment": None,            
-      }
-      response_format['rawPayload'] = json.dumps(response_format, default=str)      
-      format.append(response_format)     
-    return format
-  else:  
-    response_format={
+        "deployment": None
+      })
+    return result
+  else:
+    system_data = values.get("systemData") or {}
+    properties = values.get("properties") or {}
+    
+    return {
       "sourceId": values.get("name"),
-      "container":values.get("id"),
-      "adapter":adapter_instance,
-      "rawPayload":values,
-      "syncDate":values.get("systemData").get("createdAt"),
-      "description": values.get("properties").get("description"," "),
-      "organisation":project,
-      "type":values.get("type"),
-      "createdOn": values.get("systemData").get("createdAt") ,
+      "container": values.get("id"),
+      "adapter": adapter_instance,
+      "rawPayload": values,
+      "syncDate": system_data.get("createdAt"),
+      "description": properties.get("description"),
+      "organisation": project,
+      "type": values.get("type"),
+      "createdOn": system_data.get("createdAt"),
       "sourceOrg": adapter_instance,
-      "createdBy": values.get("systemData").get("createdBy","Application"),
-      "name":values.get("id"),
-      "modifiedBy": values.get("systemData").get("lastModifiedBy","Application"),
-      "id":values.get("id"),
+      "createdBy": system_data.get("createdBy"),
+      "name": values.get("id"),
+      "modifiedBy": system_data.get("createdByType"),
+      "id": values.get("id"),
       "sourceName": values.get("name"),
       "adapterId": None,
-      "status": values.get("properties").get("provisioningState","registered"),
+      "status": "registered",
       "likes": None,
       "artifacts": values.get("id"),
-      "deployment": None,            
-        }
-    response_format['rawPayload'] = json.dumps(json.dumps(response_format, default=str))
-    #format.append(response_format) 
-    # result={"values":format}
-    # result.update(result)
-    return response_format
-              
+      "deployment": None
+    }
+
 def projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  dataset_name=payload.get("name")
-  api_version=connections.get("datasets_api-version",None)
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  path=payload.get("path")
-  description=payload.get("description")
-  version=payload.get("version")
-  ml_client=ConnectClient() 
-  my_data = Data(
-          path=path,
-          type=AssetTypes.URI_FILE,
-          description=description,
-          name=dataset_name,
-          version=version,
-      )
-  ml_client.data.create_or_update(my_data)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/data/{dataset_name}?api-version={api_version}"
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization)
-  }
-  response = requests.request("GET", url, headers=headers)
+  logger.info("Starting dataset creation")
+  
   try:
-    if response.status_code == 200 or 201:
-      values=json.loads(response.text)
-      values=responseFormat(adapter_instance,project,values)
-      return values,response.status_code
-    elif response.status_code == 400:
-      return "Error: Bad Parameters(HTTP 400)"
-    elif response.status_code ==500:
-      return "Internal Server Error(HTTP 500)"
+    connect = token_generate()
+    value = json.loads(connect)
+    Authorization = value["access_token"]
+    
+    dataset_name = payload.get("name")
+    api_version = connections.get("datasets_api-version", "2023-04-01")
+    subscriptionId = connections.get('subscriptionId')
+    resourceGroupName = connections.get('resourceGroupName')
+    workspaceName = connections.get('workspaceName')
+    file_url = payload.get("path")  # Original file URL
+    description = payload.get("description", "")
+    version = payload.get("version", "1")
+    
+    logger.info(f"Creating MLTable dataset: {dataset_name} from {file_url}")
+    
+    ml_client = ConnectClient()
+    
+    # Extract filename from URL
+    import os
+    from urllib.parse import urlparse
+    
+    parsed_url = urlparse(file_url)
+    filename = os.path.basename(parsed_url.path)
+    logger.info(f"Extracted filename: {filename}")
+    
+    # Create temporary folder for MLTable
+    import tempfile
+    import shutil
+    
+    temp_dir = tempfile.mkdtemp()
+    mltable_folder = os.path.join(temp_dir, dataset_name)
+    os.makedirs(mltable_folder, exist_ok=True)
+    
+    logger.info(f"Created temporary MLTable folder: {mltable_folder}")
+    
+    # Download the CSV file using Azure Storage SDK with authentication
+    csv_path = os.path.join(mltable_folder, filename)
+    
+    try:
+      from azure.storage.blob import BlobServiceClient
+      from azure.identity import DefaultAzureCredential
+      
+      logger.info(f"Downloading file from: {file_url}")
+      
+      # Parse storage account and container from URL
+      # URL format: https://{account}.blob.core.windows.net/{container}/{blob}
+      storage_account = parsed_url.netloc.split('.')[0]
+      path_parts = parsed_url.path.strip('/').split('/', 1)
+      container_name = path_parts[0]
+      blob_name = path_parts[1] if len(path_parts) > 1 else filename
+      
+      logger.info(f"Storage account: {storage_account}, Container: {container_name}, Blob: {blob_name}")
+      
+      # Create blob service client with DefaultAzureCredential (uses service principal)
+      account_url = f"https://{storage_account}.blob.core.windows.net"
+      
+      # Use service principal credentials
+      from azure.identity import ClientSecretCredential
+      
+      credential = ClientSecretCredential(
+        tenant_id=os.environ.get('tenant_id'),
+        client_id=os.environ.get('service_principal_id'),
+        client_secret=os.environ.get('service_principal_password')
+      )
+      
+      blob_service_client = BlobServiceClient(
+        account_url=account_url,
+        credential=credential
+      )
+      
+      # Get blob client
+      blob_client = blob_service_client.get_blob_client(
+        container=container_name,
+        blob=blob_name
+      )
+      
+      # Download blob
+      with open(csv_path, 'wb') as download_file:
+        download_stream = blob_client.download_blob()
+        download_file.write(download_stream.readall())
+      
+      logger.info(f"File downloaded successfully to: {csv_path}")
+      
+    except Exception as download_error:
+      logger.error(f"Failed to download file: {str(download_error)}")
+      shutil.rmtree(temp_dir)
+      return {"error": f"Failed to download file: {str(download_error)}"}, 400
+    
+    # Create MLTable YAML file - use relative path
+    mltable_yaml_path = os.path.join(mltable_folder, "MLTable")
+    
+    # MLTable YAML content - using relative path to the CSV file
+    mltable_yaml_content = f"""paths:
+  - file: ./{filename}
+transformations:
+  - read_delimited:
+      delimiter: ','
+      encoding: 'utf8'
+      header: all_files_same_headers
+"""
+    
+    with open(mltable_yaml_path, 'w') as f:
+      f.write(mltable_yaml_content)
+    
+    logger.info(f"Created MLTable YAML with relative path: ./{filename}")
+    
+    # Create Data asset as MLTABLE type
+    my_data = Data(
+      path=mltable_folder,  # Points to folder containing both MLTable and CSV
+      type=AssetTypes.MLTABLE,
+      description=description,
+      name=dataset_name,
+      version=version
+    )
+    
+    logger.info("Uploading MLTable to Azure ML...")
+    created_data = ml_client.data.create_or_update(my_data)
+    logger.info(f"MLTable dataset created: {created_data.name}, version: {created_data.version}")
+    logger.info(f"Dataset path: {created_data.path}")
+    
+    # Cleanup temporary folder
+    try:
+      shutil.rmtree(temp_dir)
+      logger.info("Cleaned up temporary folder")
+    except Exception as cleanup_error:
+      logger.warning(f"Cleanup warning: {str(cleanup_error)}")
+    
+    # Get dataset details via REST API
+    url = f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/data/{dataset_name}/versions/{version}?api-version={api_version}"
+    
+    headers = {
+      "Authorization": "Bearer " + str(Authorization)
+    }
+    
+    response = requests.request("GET", url, headers=headers, verify=False)
+    
+    if response.status_code == 200:
+      values = json.loads(response.text)
+      values = responseFormat(adapter_instance, project, values)
+      return values, response.status_code
     else:
-      return f"Request failed with status code:{response.status_code}"
-          
+      # Return success response even if REST API fails
+      return {
+        "name": dataset_name,
+        "version": version,
+        "type": "mltable",
+        "datastore_path": created_data.path,
+        "status": "created",
+        "message": "MLTable dataset created successfully"
+      }, 201
+    
   except Exception as e:
-    logger.error(f"an error occured:{str(e)}")  
-    return e
+    logger.error(f"Dataset creation failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
+
+
+
+
+
 
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
   connect=token_generate()
@@ -279,43 +399,184 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
     logger.error(f"an error occured:{str(e)}")  
     return e
 
+
 def projects_models_register_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  experiment_name=payload.get("experiment_name")
-  runId=payload.get("runId")
-  model_name=payload.get("model_name")
-  ws=ConfigEnvironment()
-  experiment = ws.experiments[experiment_name]
-  automl_run = AutoMLRun(experiment, runId)
-  best_run, fitted_model = automl_run.get_output()
-  model=best_run.register_model(model_name,model_path="outputs/model.pkl")
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  api_version=connections.get('models_api-version',None)
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/models/{model_name}?api-version={api_version}"        
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization)
-  }
-  response = requests.request("GET", url, headers=headers)
-  training_dataset_name=connections.get('trainingData',None)
-  training_data = Dataset.get_by_name(workspace=ws, name=training_dataset_name)
-  train_data=(training_data.to_pandas_dataframe().dtypes).to_dict()
+  logger.info("Starting projects_models_register_create")
+  
   try:
-    if response.status_code == 200:
-      values=json.loads(response.text)
-      values=responseFormat(adapter_instance,project,values)
-      status="creating"
-      values["metadata"]=train_data
-      #print(values,"11111")
-      # values['rawPayload'] = json.dumps(json.dumps(values, default=str))
-      # print(values,"2222")
-      return values,response.status_code
+    experiment_name = payload.get("experiment_name")
+    run_id = payload.get("runId")
+    model_name = payload.get("model_name")
+    
+    
+    
+    # Validate required parameters
+    if not all([experiment_name, run_id, model_name]):
+      missing = []
+      if not experiment_name: missing.append('experiment_name')
+      if not run_id: missing.append('runId')
+      if not model_name: missing.append('model_name')
+      logger.error(f"Missing required parameters: {', '.join(missing)}")
+      return {"error": f"Missing required parameters: {', '.join(missing)}"}, 400
+    
+    # Use ML Client for better compatibility
+    ml_client = ConnectClient()
+    logger.info("ML Client connected successfully")
+    
+    # Get the run/job
+    try:
+      job = ml_client.jobs.get(run_id)
+      logger.info(f"Job retrieved: {job.name}, Status: {job.status}")
+    except Exception as job_error:
+      logger.error(f"Failed to get job '{run_id}': {str(job_error)}")
+      return {"error": f"Job '{run_id}' not found. Please verify the run ID."}, 404
+    
+    # Check if job is completed
+    if job.status != "Completed":
+      logger.warning(f"Job status is '{job.status}', not 'Completed'.")
+      return {"error": f"Job '{run_id}' is not completed yet. Current status: {job.status}. Please wait for the job to complete."}, 400
+    
+    # For AutoML jobs, we need to find the best child run and register its model
+    from azure.ai.ml.entities import Model as MLModel
+    from azure.ai.ml.constants import AssetTypes
+    
+    # Get child runs (AutoML iterations)
+    try:
+      # List all child jobs
+      child_jobs = list(ml_client.jobs.list(parent_job_name=run_id))
+      logger.info(f"Found {len(child_jobs)} child jobs")
+      
+      if not child_jobs:
+        logger.error("No child jobs found for this AutoML run")
+        return {"error": "No child jobs found. This may not be an AutoML job or it hasn't produced any models yet."}, 400
+      
+      # Filter out setup, featurization, and other non-training jobs
+      training_jobs = [
+        job for job in child_jobs 
+        if job.status == "Completed" 
+        and not any(suffix in job.name.lower() for suffix in ['_setup', '_featurization', '_hd'])
+      ]
+      
+      logger.info(f"Found {len(training_jobs)} training jobs (filtered out setup/featurization jobs)")
+      
+      if not training_jobs:
+        logger.error("No completed training jobs found")
+        return {"error": "No completed training jobs found among child jobs"}, 400
+      
+      # Find the best run by checking tags or properties
+      best_child = None
+      
+      # First, try to find a job tagged as 'best_run' or 'AutoML_best_run'
+      for child in training_jobs:
+        if hasattr(child, 'tags') and child.tags:
+          if child.tags.get('model_explain_run') == 'best_run' or child.tags.get('automl_best_child_run_id'):
+            best_child = child
+            logger.info(f"Found best run via tags: {child.name}")
+            break
+      
+      # If no best run found via tags, use the first completed training job
+      if best_child is None:
+        best_child = training_jobs[0]
+        logger.info(f"Using first completed training job: {best_child.name}")
+      
+      logger.info(f"Selected best child job: {best_child.name}")
+      
+      # AutoML SDK v2 stores models in specific output named 'mlflow_model_folder'
+      model_paths = [
+        f"azureml://jobs/{best_child.name}/outputs/mlflow_model_folder/",
+        f"azureml://jobs/{best_child.name}/outputs/model_output/",
+        f"azureml://jobs/{run_id}/outputs/best_model/",
+        f"azureml://jobs/{best_child.name}/outputs/artifacts/",
+      ]
+      
+      registered_model = None
+      last_error = None
+      
+      for model_path in model_paths:
+        try:
+          logger.info(f"Trying model path: {model_path}")
+          
+          model = MLModel(
+            path=model_path,
+            name=model_name,
+            description=f"Model registered from AutoML experiment {experiment_name}, run {run_id}",
+            type=AssetTypes.MLFLOW_MODEL,
+            tags={
+              "experiment_name": experiment_name,
+              "parent_run_id": run_id,
+              "best_child_run_id": best_child.name,
+              "framework": "AutoML"
+            }
+          )
+          
+          registered_model = ml_client.models.create_or_update(model)
+          logger.info(f"Model registered successfully with path: {model_path}")
+          logger.info(f"Model: {registered_model.name}, Version: {registered_model.version}")
+          break
+          
+        except Exception as path_error:
+          last_error = str(path_error)
+          logger.warning(f"Failed with path {model_path}: {last_error[:200]}")
+          continue
+      
+      if registered_model is None:
+        # Try to list available outputs for debugging
+        logger.error("Attempting to list available outputs from the job...")
+        try:
+          # This might help identify what outputs are actually available
+          logger.error(f"Job properties: {best_child.properties if hasattr(best_child, 'properties') else 'N/A'}")
+        except Exception as e:
+          logger.warning(f"Failed to check properties: {str(e)}")
+
+        
+        logger.error(f"All model paths failed. Last error: {last_error}")
+        return {
+          "error": f"Could not find model artifacts. The AutoML job may have failed to produce a model. "
+                   f"Please check the job '{best_child.name}' in Azure ML Studio to verify model outputs exist. "
+                   f"Last error: {last_error[:500]}"
+        }, 404
+      
+      # Get model details via REST API
+      connect = token_generate()
+      value = json.loads(connect)
+      Authorization = value["access_token"]
+      subscriptionId = connections.get('subscriptionId', None)
+      resourceGroupName = connections.get('resourceGroupName', None)
+      workspaceName = connections.get('workspaceName', None)
+      api_version = connections.get("models_api-version", None)
+      
+      url = f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/models/{model_name}/versions/{registered_model.version}?api-version={api_version}"
+      headers = {
+        "Authorization": "Bearer " + str(Authorization)
+      }
+      response = requests.request("GET", url, headers=headers, verify=False)
+      
+      if response.status_code == 200:
+        values = json.loads(response.text)
+        values = responseFormat(adapter_instance, project, values)
+        values["model_name"] = model_name
+        values["version"] = registered_model.version
+        values["parent_run_id"] = run_id
+        values["best_child_run_id"] = best_child.name
+        return values, response.status_code
+      else:
+        logger.warning(f"Could not retrieve model details via REST API: {response.status_code}")
+        return {
+          "model_name": model_name,
+          "version": registered_model.version,
+          "parent_run_id": run_id,
+          "best_child_run_id": best_child.name,
+          "status": "registered",
+          "message": "Model registered successfully"
+        }, 201
+        
+    except Exception as model_error:
+      logger.error(f"Failed to register model: {str(model_error)}", exc_info=True)
+      return {"error": f"Failed to register model: {str(model_error)}"}, 500
+    
   except Exception as e:
-    logger.error(f"an error occured:{str(e)}")  
-    return e    
+    logger.error(f"Model registration failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
 
           
 def projects_models_get(adapter_instance, project, isCached, isInstance, connections,model_name):
@@ -405,38 +666,86 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e  
-                              
+ 
+
 def projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  endpoint_name=payload.get("name")
-  api_version=connections.get("endpoints_api-version",None)
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/batchEndpoints/{endpoint_name}?api-version={api_version}"
-  payload_json = json.dumps(payload)
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization),
-  "Content-Type":"application/json"
-  }
-  response = requests.request("PUT", url, headers=headers,data=payload_json)
+  logger.info("Starting online endpoint creation")
+  
   try:
-    if response.status_code == 200 or 201:
-      values=json.loads(response.text)
-      values=responseFormat(adapter_instance,project,values)
-      return values,response.status_code
-    elif response.status_code == 400:
-      return "Error: Bad Parameters(HTTP 400)"
-    elif response.status_code ==500:
-      return "Internal Server Error(HTTP 500)"
+    ml_client = ConnectClient()
+    
+    endpoint_name = payload.get("name")
+    description = payload.get("description", "Online endpoint for real-time inference")
+    auth_mode = payload.get("auth_mode", "key")  # "key" or "aml_token"
+    
+    logger.info(f"Creating online endpoint: {endpoint_name}")
+    
+    # Validate parameters
+    if not endpoint_name:
+      return {"error": "Missing required parameter: name"}, 400
+    
+    # Import required classes
+    from azure.ai.ml.entities import ManagedOnlineEndpoint
+    
+    # Create online endpoint
+    endpoint = ManagedOnlineEndpoint(
+      name=endpoint_name,
+      description=description,
+      auth_mode=auth_mode,
+      tags=payload.get("tags", {})
+    )
+    
+    logger.info(f"Submitting online endpoint creation: {endpoint_name}")
+    
+    # Create the endpoint
+    endpoint_operation = ml_client.online_endpoints.begin_create_or_update(endpoint)
+    
+    # Wait for completion
+    logger.info("Waiting for endpoint creation to complete...")
+    created_endpoint = endpoint_operation.result()
+    logger.info(f"Online endpoint created successfully: {created_endpoint.name}")
+    
+    # Get endpoint details via REST API
+    connect = token_generate()
+    value = json.loads(connect)
+    Authorization = value["access_token"]
+    
+    subscriptionId = connections.get('subscriptionId')
+    resourceGroupName = connections.get('resourceGroupName')
+    workspaceName = connections.get('workspaceName')
+    api_version = connections.get("endpoints_api-version", "2023-04-01")
+    
+    # Use onlineEndpoints instead of batchEndpoints
+    url = f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/onlineEndpoints/{endpoint_name}?api-version={api_version}"
+    
+    headers = {
+      "Authorization": "Bearer " + str(Authorization)
+    }
+    
+    response = requests.request("GET", url, headers=headers, verify=False)
+    
+    if response.status_code == 200:
+      values = json.loads(response.text)
+      values = responseFormat(adapter_instance, project, values)
+      values["endpoint_type"] = "online"
+      values["scoring_uri"] = created_endpoint.scoring_uri
+      values["auth_mode"] = created_endpoint.auth_mode
+      return values, response.status_code
     else:
-      return f"Request failed with status code:{response.status_code}"
-        
+      logger.warning(f"Could not retrieve endpoint details: {response.status_code}")
+      return {
+        "name": endpoint_name,
+        "endpoint_type": "online",
+        "scoring_uri": created_endpoint.scoring_uri,
+        "auth_mode": created_endpoint.auth_mode,
+        "provisioning_state": created_endpoint.provisioning_state,
+        "status": "created",
+        "message": "Online endpoint created successfully"
+      }, 201
+      
   except Exception as e:
-    logger.error(f"an error occured:{str(e)}")  
-    return e
+    logger.error(f"Online endpoint creation failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
 
 def projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_name):
   connect=token_generate()
@@ -577,105 +886,280 @@ def ConfigEnvironment():
     return workspace 
 
 def training_train_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  ws=ConfigEnvironment()
-  #list_vms = AmlCompute.supported_vmsizes(workspace=ws)
-  compute_name=payload.get("compute")
-  vm_size=payload.get("vm_size")
-  dataset_name=payload.get("dataset_name")
-  name=payload.get("name")
-  task=payload.get("task_type")
-  column_name=payload.get("target_column_name")
-  metrics=payload.get("metrics_type")
-  compute_config = RunConfiguration()
-  compute_config.target = compute_name
-  compute_config.amlcompute.vm_size = vm_size
-  step_compute_target  = ComputeTarget(workspace=ws, name=compute_name)
-  training_data = Dataset.get_by_name(workspace=ws, name=dataset_name)
-  print(training_data)
-   
-    
-  automl_config = AutoMLConfig(
-        task=task,
-        compute_target=step_compute_target,
-        run_configuration=compute_config,
-        training_data=training_data,
-        label_column_name = column_name,
-        iterations=5,
-        iteration_timeout_minutes=60,
-        experiment_timeout_hours=3.0,
-        primary_metric=metrics,
-        # path='outputs/',
-        # debug_log='debug.log',
-        featurization='auto',
-    )
-
-  automl_step = AutoMLStep(
-                      name='Auto  M L',
-                      automl_config=automl_config,
-                      passthru_automl_config=False,
-                      
-                      enable_default_model_output=True,
-                      enable_default_metrics_output=False,
-                      allow_reuse='True')
-  pipeline = Pipeline(ws, automl_step)
-  experiment = Experiment(name=name, workspace=ws)
-  run = experiment.submit(pipeline,show_output=True)
-  step_run_ids = [step.id for step in run.get_children()]
-
-  # Print the step run IDs
-  for step_run_id in step_run_ids:
-      print("Step Run ID:", step_run_id)
-  #run.wait_for_completion()
-  #logs=run.get_details_with_logs()
-  # format=[]
-  #logs.get('runId')
-  # format=format_logs(adapter_instance, project,logs)
-  # return format
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  api_version=connections.get("trainingPipeline_api-version",None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs/{name}?api-version={api_version}"
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization)
-  }
-  response = requests.request("GET", url, headers=headers)
+  logger.info("Starting training_train_create")
   
-  values=json.loads(response.text)
-  values=responseFormat(adapter_instance,project,values)
-  values["run_id"]=step_run_id
-  return values,response.status_code 
-
-def training_delete(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  api_version=connections.get("trainingPipeline_api-version")
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  api_version=connections.get("trainingPipeline_api-version",None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs/{training_job_id}?api-version={api_version}"
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization)
-  }    
-  response = requests.request("DELETE", url, headers=headers)
   try:
-    if response.status_code == 200 or 202:
-      return response.text,response.status_code
-    elif response.status_code == 400:
-      return "Error: Bad Parameters(HTTP 400)"
-    elif response.status_code ==500:
-      return "Internal Server Error(HTTP 500)"
-    else:
-      return f"Request failed with status code:{response.status_code}"
+    ml_client = ConnectClient()
+    logger.info("ML Client connected successfully")
+    
+    compute_name = payload.get("compute")
+    dataset_name = payload.get("dataset_name")
+    name = payload.get("name")
+    task = payload.get("task_type")
+    column_name = payload.get("target_column_name")
+    metrics = payload.get("metrics_type")
+    
+    logger.info(f"Training parameters: compute={compute_name}, dataset={dataset_name}, experiment={name}, task={task}, target_column={column_name}, metric={metrics}")
+    
+    # Validate required parameters
+    if not all([compute_name, dataset_name, name, task, column_name, metrics]):
+      missing = []
+      if not compute_name: missing.append('compute')
+      if not dataset_name: missing.append('dataset_name')
+      if not name: missing.append('name')
+      if not task: missing.append('task_type')
+      if not column_name: missing.append('target_column_name')
+      if not metrics: missing.append('metrics_type')
+      logger.error(f"Missing required parameters: {', '.join(missing)}")
+      return {"error": f"Missing required parameters: {', '.join(missing)}"}, 400
+    
+    # Get dataset - TRY MULTIPLE APPROACHES
+    dataset = None
+    dataset_path = None
+    dataset_type = None
+    
+    try:
+      # Approach 1: Try to get by name with "latest" label
+      logger.info(f"Attempting to get dataset '{dataset_name}' with label 'latest'")
+      dataset = ml_client.data.get(name=dataset_name, label="latest")
+      dataset_path = dataset.path
+      dataset_type = dataset.type
+      logger.info(f"✓ Dataset found with 'latest' label")
+      
+    except Exception as e1:
+      logger.warning(f"Failed to get dataset with 'latest' label: {str(e1)}")
+      
+      try:
+        # Approach 2: Try to get latest version by listing all versions
+        logger.info(f"Attempting to list all versions of dataset '{dataset_name}'")
+        dataset_versions = list(ml_client.data.list(name=dataset_name))
         
+        if dataset_versions:
+          # Sort by version number (assuming versions are integers)
+          dataset_versions.sort(key=lambda x: int(x.version) if x.version.isdigit() else 0, reverse=True)
+          dataset = dataset_versions[0]
+          dataset_path = dataset.path
+          dataset_type = dataset.type
+          logger.info(f"✓ Dataset found - using version {dataset.version}")
+        else:
+          raise Exception(f"No versions found for dataset '{dataset_name}'")
+          
+      except Exception as e2:
+        logger.error(f"Failed to list dataset versions: {str(e2)}")
+        
+        # Approach 3: List ALL datasets and find a case-insensitive match
+        try:
+          logger.info("Attempting to find dataset by listing all datasets")
+          all_datasets = list(ml_client.data.list())
+          
+          # Try exact match first
+          matching = [d for d in all_datasets if d.name == dataset_name]
+          
+          if not matching:
+            # Try case-insensitive match
+            matching = [d for d in all_datasets if d.name.lower() == dataset_name.lower()]
+          
+          if matching:
+            # Group by name and get latest version
+            from itertools import groupby
+            matching.sort(key=lambda x: x.name)
+            
+            for name_key, group in groupby(matching, key=lambda x: x.name):
+              versions = list(group)
+              versions.sort(key=lambda x: int(x.version) if x.version.isdigit() else 0, reverse=True)
+              dataset = versions[0]
+              dataset_path = dataset.path
+              dataset_type = dataset.type
+              logger.info(f"✓ Dataset found: '{dataset.name}' (version {dataset.version})")
+              break
+          else:
+            # List available datasets for debugging
+            available_names = [d.name for d in all_datasets[:10]]
+            logger.error(f"Dataset '{dataset_name}' not found. Available datasets: {available_names}")
+            
+            return {
+              "error": f"Dataset '{dataset_name}' not found in workspace.",
+              "available_datasets": available_names,
+              "suggestion": "Please verify the dataset name and ensure it has been successfully registered."
+            }, 404
+            
+        except Exception as e3:
+          logger.error(f"Failed to list all datasets: {str(e3)}")
+          return {
+            "error": f"Dataset '{dataset_name}' not found. Please verify it exists and has been registered successfully.",
+            "details": str(e3)
+          }, 404
+    
+    # Validate we got a dataset
+    if not dataset or not dataset_path:
+      return {
+        "error": f"Failed to retrieve dataset '{dataset_name}' after trying multiple approaches.",
+        "troubleshooting": [
+          "Verify the dataset was successfully created",
+          "Check the exact dataset name in Azure ML Studio",
+          "Ensure the dataset has a valid version"
+        ]
+      }, 404
+    
+    # Remove trailing slash if present
+    if dataset_path.endswith('/'):
+      dataset_path = dataset_path.rstrip('/')
+    
+    logger.info(f"Dataset '{dataset.name}' retrieved successfully")
+    logger.info(f"Dataset path: {dataset_path}")
+    logger.info(f"Dataset type: {dataset_type}")
+    logger.info(f"Dataset version: {dataset.version}")
+    
+    from azure.ai.ml import automl
+    from azure.ai.ml.constants import AssetTypes
+    
+    # HANDLE DIFFERENT DATASET TYPES
+    if dataset_type == AssetTypes.MLTABLE:
+      # Dataset is already an MLTable - use it directly
+      logger.info("Dataset is already MLTable type - using directly")
+      
+      training_data_input = Input(
+        type=AssetTypes.MLTABLE, 
+        path=f"azureml:{dataset.name}:{dataset.version}"  # Use explicit version
+      )
+      
+    else:
+      # Dataset is URI_FILE - need to create MLTable wrapper
+      logger.info("Dataset is URI_FILE type - creating MLTable wrapper")
+      
+      import os
+      import shutil
+      
+      # Create MLTable configuration for CSV file
+      mltable_folder = f"./mltable_{name}"
+      os.makedirs(mltable_folder, exist_ok=True)
+      
+      # Write MLTable yaml file
+      mltable_yaml_content = f"""paths:
+  - file: {dataset_path}
+transformations:
+  - read_delimited:
+      delimiter: ','
+      encoding: 'utf8'
+      header: all_files_same_headers
+"""
+      
+      mltable_yaml_path = os.path.join(mltable_folder, "MLTable")
+      with open(mltable_yaml_path, 'w') as f:
+        f.write(mltable_yaml_content)
+      
+      logger.info(f"Created MLTable yaml at: {mltable_yaml_path}")
+      
+      # Upload MLTable folder to datastore
+      from azure.ai.ml.entities import Data
+      
+      mltable_data = Data(
+        path=mltable_folder,
+        type=AssetTypes.MLTABLE,
+        name=f"{dataset.name}_mltable",
+        description=f"MLTable version of {dataset.name}"
+      )
+      
+      registered_mltable = ml_client.data.create_or_update(mltable_data)
+      logger.info(f"Registered MLTable: {registered_mltable.name}")
+      
+      training_data_input = Input(
+        type=AssetTypes.MLTABLE, 
+        path=f"azureml:{registered_mltable.name}:{registered_mltable.version}"
+      )
+      
+      # Cleanup temporary MLTable folder
+      try:
+        shutil.rmtree(mltable_folder)
+        logger.info(f"Cleaned up temporary folder: {mltable_folder}")
+      except Exception as cleanup_error:
+        logger.warning(f"Failed to cleanup temporary folder {mltable_folder}: {str(cleanup_error)}")
+    
+    logger.info(f"Created training data input")
+    
+    # Configure AutoML job
+    if task.lower() == "classification":
+      automl_job = automl.classification(
+        compute=compute_name,
+        experiment_name=name,
+        training_data=training_data_input,
+        target_column_name=column_name,
+        primary_metric=metrics,
+        n_cross_validations=5
+      )
+      logger.info("Classification AutoML job configured")
+      
+    elif task.lower() == "regression":
+      automl_job = automl.regression(
+        compute=compute_name,
+        experiment_name=name,
+        training_data=training_data_input,
+        target_column_name=column_name,
+        primary_metric=metrics,
+        n_cross_validations=5
+      )
+      logger.info("Regression AutoML job configured")
+      
+    else:
+      return {"error": f"Unsupported task type: {task}. Supported: classification, regression"}, 400
+    
+    # Set limits
+    automl_job.set_limits(
+      timeout_minutes=180,
+      trial_timeout_minutes=60,
+      max_trials=5,
+      enable_early_termination=True
+    )
+    logger.info("AutoML job limits configured")
+    
+    # Submit the job
+    logger.info("Submitting AutoML job...")
+    returned_job = ml_client.jobs.create_or_update(automl_job)
+    logger.info(f"Job submitted successfully: {returned_job.name}")
+    
+    parent_run_id = returned_job.name
+    
+    # Get job details via REST API
+    connect = token_generate()
+    value = json.loads(connect)
+    Authorization = value["access_token"]
+    subscriptionId = connections.get('subscriptionId', None)
+    resourceGroupName = connections.get('resourceGroupName', None)
+    workspaceName = connections.get('workspaceName', None)
+    api_version = connections.get("trainingPipeline_api-version", None)
+    
+    url = f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs/{parent_run_id}?api-version={api_version}"
+    headers = {
+      "Authorization": "Bearer " + str(Authorization)
+    }
+    response = requests.request("GET", url, headers=headers, verify=False)
+    
+    if response.status_code == 200:
+      values = json.loads(response.text)
+      values = responseFormat(adapter_instance, project, values)
+      values["run_id"] = parent_run_id
+      values["dataset_type"] = dataset_type
+      values["dataset_name_used"] = dataset.name
+      values["dataset_version_used"] = dataset.version
+      return values, response.status_code
+    else:
+      logger.warning(f"Could not retrieve job details via REST API: {response.status_code}")
+      return {
+        "run_id": parent_run_id,
+        "status": "submitted",
+        "name": name,
+        "dataset_type": dataset_type,
+        "dataset_name_used": dataset.name,
+        "dataset_version_used": dataset.version,
+        "message": "Job submitted successfully using Azure ML SDK v2"
+      }, 202
+    
   except Exception as e:
-    logger.error(f"an error occured:{str(e)}")  
-    return e 
+    logger.error(f"Training job creation failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
+
+
+
  
 def training_cancel_list(adapter_instance, project, isCached, isInstance, connections, training_job_id):
   connect=token_generate()
@@ -703,83 +1187,100 @@ def training_cancel_list(adapter_instance, project, isCached, isInstance, connec
     logger.error(f"an error occured:{str(e)}") 
     return e
 
-def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, payload):
-  connect=token_generate()
-  value=json.loads(connect)
-  #batchEndpointsName=connections.get('batchEndpointsName',None)
-  ml_client=ConnectClient()  
-  #deploymentName=payload.get('name')
-  model_name=payload.get("model_name")
-  version=payload.get("model_version")
-  compute_target=payload.get("compute_target")
-  mini_batch=payload.get("mini_batch")
-  deploymentName=payload.get("deployment_name")
-  model = ml_client.models.get(model_name,version)
-  compute_name = compute_target
-  conda_file_dir = os.getcwd()
-  conda_file_path = os.path.join(conda_file_dir,'housing-env.yml')
-  env = ['name: project_environment\r', 'dependencies:\r', '  # The python interpreter version.\r', '  # Currently Azure ML only supports 3.8 and later.\r', '- python=3.7.9\r', '\r', '- pip:\r', '  - azureml-train-automl-runtime==1.48.0.post1\r', '  - inference-schema\r', '  - azureml-interpret==1.48.0\r', '  - azureml-defaults==1.48.0\r', '- numpy==1.21.6\r', '- pandas==1.1.5\r', '- scikit-learn==0.22.1\r', '- py-xgboost==1.3.3\r', '- fbprophet==0.7.1\r', '- holidays==0.10.3\r', '- psutil==5.9.3\r', 'channels:\r', '- anaconda\r', '- conda-forge\r', '\r', '\r', '\r', '\r', '\r', '\r', '\r', '']
-  with open(conda_file_path, 'w+') as f:
-      # write elements of list
-      for line in env:
-          f.write('%s\n' %line)
-  f.close()
 
+def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, payload):
+  logger.info("Starting online deployment creation")
   
-  env = Environment(
-      name='batch-torch-py39',
-      conda_file=conda_file_path,
-      image = 'mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04:20220616.v1'
-  )
-  cwd = os.getcwd()
-  script_path = os.path.join(cwd,'score.py')
-  script = ['import os', 'import numpy as np', 'import pandas as pd', 'import azureml.automl.core ', 'from azureml.core import Model', 'import joblib', 'def init():', '    # Runs when the pipeline step is initialized', '    global model', '    # load the model', '    model_path = Model.get_model_path(\'mdlname\')', '    model = joblib.load(model_path)', 'def run(mini_batch):', '    # This runs for each batch', '    resultList = []', '    for f in mini_batch:', '        data = pd.read_csv(f)','        prediction = model.predict(data)', '        data[\'Prediction\'] = prediction', '        # Append prediction to results', '        resultList.append(data)', '        print(resultList)', '    result = pd.concat(resultList)', '    return resultList']
-  script = [s.replace('mdlname', model_name) for s in script]
-  with open(script_path, 'w+') as f:
-      # write elements of list
-      for line in script:
-          f.write('%s\n' %line)
-  f.close()
-  
-  deploymentConfig = ModelBatchDeploymentSettings(
-          max_concurrency_per_instance=2,
-          mini_batch_size=mini_batch,
-          instance_count=2,
-          output_action=BatchDeploymentOutputAction.APPEND_ROW,
-          output_file_name='predictions.csv',
-          retry_settings=BatchRetrySettings(max_retries=3, timeout=30),
-          logging_level='info',
-      )
-  deployment = ModelBatchDeployment(
-      name=deploymentName,
-      description='A deployment for regression dataset.',
-      endpoint_name=endpoint_id,
-      model=model,
-      code_configuration=CodeConfiguration(code=cwd, scoring_script='score.py'),
-      environment=env,
-      compute=compute_name,
-      settings=deploymentConfig
-  )
-  response=ml_client.begin_create_or_update(deployment).result()
-  Authorization=value["access_token"]
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  api_version=connections.get("inferencePipeline_api-version",None)
-  #batchEndpointsName=connections.get('batchEndpointsName',None)
-  
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/batchEndpoints/{endpoint_id}/deployments/{deploymentName}?api-version={api_version}"    
-  print(url)
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization) 
-  }
-  response= requests.request("GET", url, headers=headers)
-  values=json.loads(response.text)
-  print(values)
-  values=responseFormat(adapter_instance,project,values)
+  try:
+    ml_client = ConnectClient()
     
-  return values,response.status_code   
- 
+    model_name = payload.get("model_name")
+    version = payload.get("model_version")
+    instance_type = payload.get("instance_type", "Standard_DS3_v2")
+    instance_count = payload.get("instance_count", 3)
+    deploymentName = payload.get("deployment_name")
+    
+    logger.info(f"Online deployment params: model={model_name}, version={version}, instance_type={instance_type}, deployment={deploymentName}")
+    
+    if not all([model_name, version, deploymentName]):
+      return {"error": "Missing required parameters: model_name, model_version, deployment_name"}, 400
+    
+    # Get model
+    try:
+      model = ml_client.models.get(model_name, version)
+      logger.info(f"Model retrieved: {model_name} v{version}, Type: {model.type}")
+    except Exception as e:
+      return {"error": f"Model '{model_name}' version '{version}' not found"}, 404
+    
+    from azure.ai.ml.entities import ManagedOnlineDeployment, ProbeSettings, OnlineRequestSettings
+    
+    # Create probe settings
+    liveness_probe = ProbeSettings(
+      initial_delay=10,
+      period=10,
+      timeout=2,
+      success_threshold=1,
+      failure_threshold=30
+    )
+    
+    readiness_probe = ProbeSettings(
+      initial_delay=10,
+      period=10,
+      timeout=2,
+      success_threshold=1,
+      failure_threshold=3
+    )
+    
+    request_settings = OnlineRequestSettings(
+      request_timeout_ms=90000,
+      max_concurrent_requests_per_instance=1,
+      max_queue_wait_ms=60000
+    )
+    
+    # Create online deployment WITHOUT code_configuration or environment
+    # MLflow models handle everything automatically
+    online_deployment = ManagedOnlineDeployment(
+      name=deploymentName,
+      endpoint_name=endpoint_id,
+      model=model,  # MLflow model - no code or environment needed!
+      instance_type=instance_type,
+      instance_count=instance_count,
+      request_settings=request_settings,
+      liveness_probe=liveness_probe,
+      readiness_probe=readiness_probe
+    )
+    
+    logger.info("Submitting online deployment with auto-generated MLflow environment...")
+    deployment_operation = ml_client.online_deployments.begin_create_or_update(online_deployment)
+    
+    logger.info("Waiting for online deployment to complete...")
+    result = deployment_operation.result()
+    logger.info(f"Online deployment completed: {result.name}")
+    
+    # Set as default deployment
+    try:
+      endpoint = ml_client.online_endpoints.get(endpoint_id)
+      endpoint.traffic = {deploymentName: 100}
+      ml_client.online_endpoints.begin_create_or_update(endpoint).result()
+      logger.info(f"Set {deploymentName} as default deployment")
+    except Exception as traffic_error:
+      logger.warning(f"Could not set traffic: {str(traffic_error)}")
+    
+    return {
+      "deployment_name": deploymentName,
+      "endpoint_name": endpoint_id,
+      "model_name": model_name,
+      "model_version": version,
+      "deployment_type": "online",
+      "instance_type": instance_type,
+      "instance_count": instance_count,
+      "status": "created",
+      "message": "Online deployment created successfully with auto-generated MLflow environment"
+    }, 201
+      
+  except Exception as e:
+    logger.error(f"Online deployment failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
 
 def ConnectClient():
     global ml_client
@@ -800,54 +1301,174 @@ def ConnectClient():
     print('MLCLIENT CONNECTED')
     return ml_client
 
-def projects_inferencePipelines_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  ml_client=ConnectClient() 
-  adapter_id=connections.get('adapter_id',None)
-  endpoint_name=payload.get("endpoint_name")
-  dataset_name=payload.get("dataset_name")
-  deploymentName=payload.get("deploymentName")
-  azml_ds = ml_client.datastores.get('azureml')
-  filename = f'predictions-{dataset_name}.csv'
-  version = payload.get("model_version")
-  input_data = ml_client.data.get(dataset_name,version)
-  input_path = getattr(input_data,'path')
-  job = ml_client.batch_endpoints.invoke(
-  endpoint_name=endpoint_name,
-  deployment_name=deploymentName,
-  input= Input(
-      path=input_path,
-      type=AssetTypes.URI_FOLDER,
-  ),
-  params_override=[
-      {'output_dataset.datastore_id': f'azureml:{azml_ds.id}'},
-      {'output_dataset.path': f'/{endpoint_name}/'},
-      {'output_file_name': filename},
-  ],
-  )  
-  job_name=job.name  
-  # ml_client.jobs.stream(name=job.name)
-  # print('job completed')
-  # print('#######################')
-  # job_name = getattr(job,'name')
-  # print(job_name)
-  # print('completed')
-  #ml_client.jobs.download(name=job_name, download_path='./', output_name='score')
-  connect=token_generate()
-  value=json.loads(connect)
-  Authorization=value["access_token"]
-  subscriptionId=connections.get('subscriptionId',None)
-  resourceGroupName=connections.get('resourceGroupName',None)
-  workspaceName=connections.get('workspaceName',None)
-  api_version=connections.get("trainingPipeline_api-version",None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs/{job_name}?api-version={api_version}"
-  headers = {
-  "Authorization" : "Bearer "+str(Authorization)
-  }
-  response = requests.request("GET", url, headers=headers)
+
+def check_batch_deployment_status(endpoint_name, deployment_name):
+  ml_client = ConnectClient()
   
-  values=json.loads(response.text)
-  values=responseFormat(adapter_instance,project,values)
-  return values,response.status_code   
+  try:
+    # Check endpoint
+    endpoint = ml_client.batch_endpoints.get(endpoint_name)
+    logger.info(f"Endpoint '{endpoint_name}' state: {endpoint.provisioning_state}")
+    
+    # Check deployment
+    deployment = ml_client.batch_deployments.get(
+      endpoint_name=endpoint_name,
+      name=deployment_name
+    )
+    logger.info(f"Deployment '{deployment_name}' state: {deployment.provisioning_state}")
+    
+    # Check compute
+    compute = ml_client.compute.get(deployment.compute)
+    logger.info(f"Compute '{deployment.compute}' state: {compute.provisioning_state}")
+    
+    return {
+      "endpoint_state": endpoint.provisioning_state,
+      "deployment_state": deployment.provisioning_state,
+      "compute_state": compute.provisioning_state
+    }
+    
+  except Exception as e:
+    logger.error(f"Status check failed: {str(e)}")
+    return {"error": str(e)}
+
+
+def projects_inferencePipelines_create(adapter_instance, project, isCached, isInstance, connections, payload):
+  logger.info("Starting batch inference pipeline creation")
+  
+  try:
+    ml_client = ConnectClient()
+    
+    endpoint_name = payload.get("endpoint_name")
+    dataset_name = payload.get("dataset_name")
+    deploymentName = payload.get("deploymentName")
+    
+    logger.info(f"Inference params: endpoint={endpoint_name}, dataset={dataset_name}, deployment={deploymentName}")
+    
+    # Validate parameters
+    if not all([endpoint_name, dataset_name, deploymentName]):
+      return {"error": "Missing required parameters: endpoint_name, dataset_name, deploymentName"}, 400
+    
+    # Get the original dataset
+    try:
+      input_data = ml_client.data.get(name=dataset_name, label="latest")
+      original_path = input_data.path
+      logger.info(f"Original dataset path: {original_path}")
+    except Exception as e:
+      logger.error(f"Failed to get dataset: {str(e)}")
+      return {"error": f"Dataset '{dataset_name}' not found"}, 404
+    
+    # Extract blob path from azureml URI
+    if '/paths/' in original_path:
+      blob_path = original_path.split('/paths/')[1]
+    else:
+      blob_path = original_path
+    
+    logger.info(f"Extracted blob path: {blob_path}")
+    
+    # Get folder containing the file
+    folder_path = '/'.join(blob_path.split('/')[:-1])
+    
+    # Create a new data asset for batch inference
+    from azure.ai.ml.entities import Data
+    from azure.ai.ml.constants import AssetTypes
+    import time
+    
+    timestamp = int(time.time())
+    temp_data_name = f"batch_input_{timestamp}"
+    
+    # Register the folder as a data asset
+    batch_data = Data(
+      name=temp_data_name,
+      path=f"azureml://datastores/workspaceblobstore/paths/{folder_path}",
+      type=AssetTypes.URI_FOLDER,
+      description=f"Batch inference input from {dataset_name}"
+    )
+    
+    logger.info(f"Registering batch data asset: {temp_data_name}")
+    try:
+      registered_batch_data = ml_client.data.create_or_update(batch_data)
+      logger.info(f"Batch data asset registered: {registered_batch_data.name}")
+    except Exception as reg_error:
+      logger.error(f"Failed to register data asset: {str(reg_error)}")
+      return {"error": f"Failed to register data asset: {str(reg_error)}"}, 500
+    
+    # Invoke batch endpoint
+    from azure.ai.ml import Input
+    
+    batch_input = Input(
+      type=AssetTypes.URI_FOLDER,
+      path=f"azureml:{temp_data_name}@latest"
+    )
+    
+    logger.info(f"Invoking batch endpoint: {endpoint_name}, deployment: {deploymentName}")
+    
+    try:
+      job = ml_client.batch_endpoints.invoke(
+        endpoint_name=endpoint_name,
+        deployment_name=deploymentName,
+        input=batch_input
+      )
+      
+      job_name = job.name
+      logger.info(f"Batch inference job submitted successfully: {job_name}")
+      
+    except Exception as invoke_error:
+      error_msg = str(invoke_error)
+      logger.error(f"Batch endpoint invoke failed: {error_msg}")
+      
+      # Clean up temporary data asset
+      try:
+        ml_client.data.archive(name=temp_data_name, label="latest")
+      except Exception as archive_error:
+        logger.warning(f"Failed to archive temporary data asset {temp_data_name}: {str(archive_error)}")
+      
+      # Provide specific error message
+      return {
+        "error": f"Failed to invoke batch endpoint '{endpoint_name}' with deployment '{deploymentName}'. "
+                 f"Please verify: "
+                 f"1) Endpoint exists and is provisioned successfully, "
+                 f"2) Deployment is in 'Succeeded' state, "
+                 f"3) Compute cluster is running, "
+                 f"4) The scoring script is compatible with your MLflow model. "
+                 f"Error details: {error_msg[:500]}"
+      }, 500
+    
+    # Get job details via REST API
+    connect = token_generate()
+    value = json.loads(connect)
+    Authorization = value["access_token"]
+    subscriptionId = connections.get('subscriptionId')
+    resourceGroupName = connections.get('resourceGroupName')
+    workspaceName = connections.get('workspaceName')
+    api_version = connections.get("trainingPipeline_api-version", "2022-10-01")
+    
+    url = f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs/{job_name}?api-version={api_version}"
+    headers = {
+      "Authorization": "Bearer " + str(Authorization)
+    }
+    response = requests.request("GET", url, headers=headers, verify=False)
+    
+    if response.status_code == 200:
+      values = json.loads(response.text)
+      values = responseFormat(adapter_instance, project, values)
+      values["job_name"] = job_name
+      values["temp_data_asset"] = temp_data_name
+      values["message"] = f"Batch inference job submitted. Job ID: {job_name}. Check Azure ML Studio for progress."
+      return values, response.status_code
+    else:
+      logger.warning(f"Could not retrieve job details: {response.status_code}")
+      return {
+        "job_name": job_name,
+        "endpoint_name": endpoint_name,
+        "deployment_name": deploymentName,
+        "temp_data_asset": temp_data_name,
+        "status": "submitted",
+        "message": f"Inference job submitted successfully. Job ID: {job_name}. Check Azure ML Studio for progress."
+      }, 202
+      
+  except Exception as e:
+    logger.error(f"Batch inference failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
  
 def projects_inferencePipelines_delete(adapter_instance, project, isCached, isInstance, connections, training_job_id):
   connect=token_generate()
@@ -902,6 +1523,205 @@ def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isIn
   except Exception as e:
     logger.error(f"an error occured:{str(e)}") 
     return e 
+
+def projects_endpoints_infer_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, payload, isOnline):
+  logger.info(f"Starting inference - endpoint_id: {endpoint_id}, isOnline: {isOnline}")
+  logger.info(f"Payload received: {payload}")
+  
+  try:
+    ml_client = ConnectClient()
+    
+    # Normalize isOnline to boolean
+    is_online_mode = str(isOnline).lower() == "true" if isOnline else False
+    
+    # Auto-detect mode based on payload if isOnline not explicitly set
+    if not is_online_mode and "input_data" in payload and "dataset_name" not in payload:
+      is_online_mode = True
+      logger.info("Auto-detected online inference mode based on payload structure")
+    
+    if is_online_mode:
+      # ===== ONLINE REAL-TIME INFERENCE =====
+      logger.info("Processing online inference request")
+      
+      endpoint_name = payload.get("endpoint_name") or endpoint_id
+      deployment_name = payload.get("deployment_name") or payload.get("deploymentName")
+      input_data = payload.get("input_data")
+      
+      logger.info(f"Online inference: endpoint={endpoint_name}, deployment={deployment_name}")
+      
+      # Validate parameters
+      if not input_data:
+        return {"error": "Missing required parameter: input_data"}, 400
+      
+      # Get endpoint details
+      try:
+        endpoint = ml_client.online_endpoints.get(endpoint_name)
+        logger.info(f"Online endpoint retrieved: {endpoint_name}")
+        logger.info(f"Endpoint auth mode: {endpoint.auth_mode}")
+        logger.info(f"Provisioning state: {endpoint.provisioning_state}")
+      except Exception as e:
+        logger.error(f"Failed to get online endpoint: {str(e)}")
+        return {
+          "error": f"Online endpoint '{endpoint_name}' not found. "
+                   f"Please create an online endpoint first."
+        }, 404
+      
+      # Prepare input data for MLflow model - CORRECTED FORMAT
+      if isinstance(input_data, dict):
+        # Single record - convert to MLflow tabular format
+        columns = list(input_data.keys())
+        data = [list(input_data.values())]
+        input_json = {
+          "input_data": {
+            "columns": columns,
+            "data": data
+          }
+        }
+      elif isinstance(input_data, list):
+        # Multiple records - convert to MLflow tabular format
+        if len(input_data) > 0 and isinstance(input_data[0], dict):
+          columns = list(input_data[0].keys())
+          data = [list(record.values()) for record in input_data]
+          input_json = {
+            "input_data": {
+              "columns": columns,
+              "data": data
+            }
+          }
+        else:
+          return {"error": "input_data list must contain dict objects"}, 400
+      else:
+        return {"error": "input_data must be a dict or list of dicts"}, 400
+      
+      logger.info(f"Input data prepared in MLflow format: {input_json}")
+      
+      # Get scoring URI
+      scoring_uri = endpoint.scoring_uri
+      logger.info(f"Scoring URI: {scoring_uri}")
+      
+      # Get the correct authentication based on endpoint auth mode
+      if endpoint.auth_mode == "key":
+        # Use API key authentication
+        logger.info("Using key-based authentication")
+        try:
+          endpoint_keys = ml_client.online_endpoints.get_keys(endpoint_name)
+          api_key = endpoint_keys.primary_key
+          logger.info("Retrieved primary API key")
+        except Exception as key_error:
+          logger.error(f"Failed to get endpoint keys: {str(key_error)}")
+          return {"error": f"Failed to retrieve endpoint API key: {str(key_error)}"}, 500
+        
+        headers = {
+          "Content-Type": "application/json",
+          "Authorization": f"Bearer {api_key}"
+        }
+      else:
+        # Use AAD token authentication
+        logger.info("Using AAD token authentication")
+        connect = token_generate()
+        value = json.loads(connect)
+        Authorization = value["access_token"]
+        
+        headers = {
+          "Content-Type": "application/json",
+          "Authorization": f"Bearer {Authorization}"
+        }
+      
+      # Add deployment name to headers if specified
+      if deployment_name:
+        headers["azureml-model-deployment"] = deployment_name
+      
+      # Make inference request
+      try:
+        logger.info(f"Calling scoring endpoint: {scoring_uri}")
+        logger.info(f"Request body: {json.dumps(input_json)[:200]}")
+        
+        response = requests.post(
+          scoring_uri,
+          json=input_json,
+          headers=headers,
+          verify=False,
+          timeout=60
+        )
+        
+        logger.info(f"Response status: {response.status_code}")
+        
+        if response.status_code == 200:
+          predictions = response.json()
+          logger.info(f"Inference successful: {predictions}")
+          
+          return {
+            "endpoint_name": endpoint_name,
+            "deployment_name": deployment_name,
+            "input_data": input_data,
+            "predictions": predictions,
+            "status": "success"
+          }, 200
+        else:
+          error_text = response.text
+          logger.error(f"Inference failed: {response.status_code} - {error_text}")
+          return {
+            "error": f"Inference request failed with status {response.status_code}",
+            "details": error_text[:500],
+            "endpoint": endpoint_name,
+            "deployment": deployment_name,
+            "auth_mode": endpoint.auth_mode,
+            "input_format_sent": input_json,
+            "troubleshooting": "Check Azure ML Studio logs for the deployment to see the exact error"
+          }, response.status_code
+          
+      except requests.exceptions.Timeout:
+        logger.error("Request timed out")
+        return {"error": "Inference request timed out after 60 seconds"}, 504
+      except Exception as req_error:
+        logger.error(f"Request failed: {str(req_error)}", exc_info=True)
+        return {"error": f"Failed to call scoring endpoint: {str(req_error)}"}, 500
+    else:
+      
+      logger.info("Processing batch inference request")
+      
+      batch_payload = {
+        "endpoint_name": payload.get("endpoint_name") or endpoint_id,
+        "dataset_name": payload.get("dataset_name"),
+        "deploymentName": payload.get("deploymentName") or payload.get("deployment_name")
+      }
+      
+      # Validate batch parameters
+      missing_params = []
+      if not batch_payload.get("endpoint_name"):
+        missing_params.append("endpoint_name")
+      if not batch_payload.get("dataset_name"):
+        missing_params.append("dataset_name")
+      if not batch_payload.get("deploymentName"):
+        missing_params.append("deploymentName")
+      
+      if missing_params:
+        return {
+          "error": f"Missing required parameters for batch inference: {', '.join(missing_params)}",
+          "required_params": {
+            "endpoint_name": "Name of the batch endpoint",
+            "dataset_name": "Name of the registered dataset",
+            "deploymentName": "Name of the deployment"
+          }
+        }, 400
+      
+      logger.info(f"Batch inference payload: {batch_payload}")
+      
+      return projects_inferencePipelines_create(
+        adapter_instance, 
+        project, 
+        isCached, 
+        isInstance, 
+        connections, 
+        batch_payload
+      )
+    
+  except Exception as e:
+    logger.error(f"Inference failed: {str(e)}", exc_info=True)
+    return {"error": str(e)}, 500
+    
+    
+
 
 def projects_inferencePipelines_list_list(adapter_instance, project, isCached, isInstance, connections):
   connect=token_generate()

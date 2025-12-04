@@ -6,8 +6,11 @@ import requests
 import traceback
 from utils import *
 import logging
+import os
+from dotenv import load_dotenv
 # Gets or creates a logger
-logger = logging.getLogger(__name__)  
+logger = logging.getLogger(__name__)
+load_dotenv()  
 
 # set log level
 logger.setLevel(logging.INFO)
@@ -89,25 +92,40 @@ def get_connection_details(referer, adapter_instance, project, isInstance=None):
 	return connection_details
 
 
-def get_connection_details_with_token(referer, adapter_instance, project, isInstance=None):
+def get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance=None):
 	os.environ['no_proxy'] = "localhost,0.0.0.0,10.*,*.ad.infosys.com,10.82.53.110,victlpast02,infyaiplat-tst.ad.infosys.com,infyaiplat.ad.infosys.com"
 	logger.info(f"Inside datasource.py file...")
 	connection_details = {}
 	try:
-		url = f"{referer}api/services/fetchConnectionDetailsByAdapterInstance?project={project}&adapter_instance={adapter_instance}"
+		url = f"{referer}api/aip/services/fetchConnectionDetailsByAdapterInstance?project={project}&adapter_instance={adapter_instance}"
 		if isInstance is not None:
 			url += f"&isInstance={isInstance}"
 
 		logger.info(f"The url is: {str(url)}")
 
 		payload = {}
-		headers = {
-		'access-token': DB_CONNECTIONS[referer].get('TOKEN', '')
-		}
+		
 
-		logger.info(f"The headers are: {str(headers)}")
+		if referer != "http://localhost:8087/":
+			headers = dict(headers)
+			if 'Authorization' in headers:
+				del headers['Authorization']
+				
+			headers['access-token'] = DB_CONNECTIONS[referer].get('TOKEN', '')
+			headers['Host']=os.environ.get('host')
+			logger.info("Using external referer - removed Authorization and added access-token")
+		logger.info(f"Final headers: {headers}")
 
-		response = requests.request("GET", url, headers=headers, data=payload,verify=False)
+		headers = headers
+		proxies = {
+            'http': None,
+            'https': None
+        }
+
+
+		response = requests.request("GET", url, headers=headers, data=payload, proxies=proxies,verify=False)
+		logger.info(f"Response status code: {response.status_code}")
+
 		response = json.loads(response.text)
 
 		logger.info(f"The response from url: {str(url)} is: {str(response)}")
