@@ -16,6 +16,8 @@ import { useDarkStore } from "../../stores/darkStore";
 import { downloadFlow, removeApiKeys } from "../../utils/reactflowUtils";
 import BaseModal from "../baseModal";
 import { Button } from "../../components/ui/button";
+import { get_agent_export } from "@/controllers/API/services/exportModelService";
+import { put_agent_export } from "@/controllers/API/services/exportModelService";
 
 const ExportModal = forwardRef(
   (
@@ -25,8 +27,8 @@ const ExportModal = forwardRef(
       setOpen?: (open: boolean) => void;
       flowData?: FlowType;
     },
-    ref,
-  ): JSX.Element => {    
+    ref
+  ): JSX.Element => {
     const version = useDarkStore((state) => state.version);
     const setSuccessData = useAlertStore((state) => state.setSuccessData);
     const setNoticeData = useAlertStore((state) => state.setNoticeData);
@@ -37,10 +39,10 @@ const ExportModal = forwardRef(
     useEffect(() => {
       setName(currentFlow?.name ?? "");
       setDescription(currentFlow?.description ?? "");
-    }, [currentFlow?.name, currentFlow?.description]);   
+    }, [currentFlow?.name, currentFlow?.description]);
     const [name, setName] = useState(currentFlow?.name ?? "");
     const [description, setDescription] = useState(
-      currentFlow?.description ?? "",
+      currentFlow?.description ?? ""
     );
 
     const [customOpen, customSetOpen] = useState(false);
@@ -54,100 +56,58 @@ const ExportModal = forwardRef(
         size="smaller-h-full"
         open={open}
         setOpen={setOpen}
+        onSubmit={async () => {
+          try {
+            // Build FormData with flow JSON and meta
+            const flowPayload = checked
+              ? {
+                  id: currentFlow!.id,
+                  data: currentFlow!.data!,
+                  description,
+                  name,
+                  last_tested_version: version,
+                  endpoint_name: currentFlow!.endpoint_name,
+                  is_component: false,
+                  tags: currentFlow!.tags,
+                }
+              : removeApiKeys({
+                  id: currentFlow!.id,
+                  data: currentFlow!.data!,
+                  description,
+                  name,
+                  last_tested_version: version,
+                  endpoint_name: currentFlow!.endpoint_name,
+                  is_component: false,
+                  tags: currentFlow!.tags,
+                });
 
-onSubmit={async () => {
-  try {
-    // Get authentication token - prioritize access_token_lf, fallback to others
-    const access_token_lf = localStorage.getItem("access_token_lf");
-    const authToken = access_token_lf;
-    
-    // Static values as per curl example
-    const projectId = "2";
-    const projectName = "leo1311";
-    const roleId = "1";
-    const roleName = "IT Portfolio Manager";
+            const jsonString = JSON.stringify(flowPayload);
+            const blob = new Blob([jsonString], { type: "application/json" });
 
-    const apiUrl = "/api/aip/langflow/langflow_export"; // This will be proxied by Vite to port 8081
+            const form = new FormData();
+            form.append("json", blob, `${name || "flow"}.json`);
+            form.append("name", name ?? "flow");
+            form.append("details", description ?? "exported from ui");
 
-    // Build headers to match the working curl request
-    const headers: Record<string, string> = {
-      "Accept": "application/json, text/plain, */*",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Connection": "keep-alive",
-      "Content-Type": "application/json",
-      "X-Requested-With": "Leap",
-      "charset": "utf-8",
-      "Sec-Fetch-Dest": "empty",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "same-origin",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
-    };
-    
-    // Add authentication and project headers
-    if (authToken) {
-      headers["Authorization"] = `Bearer ${authToken}`;
-    }
-    if (projectId) headers["Project"] = String(projectId);
-    if (projectName) headers["ProjectName"] = String(projectName);
-    if (roleId) headers["roleId"] = String(roleId);
-    if (roleName) headers["roleName"] = String(roleName);
+            const access_token_lf =
+              localStorage.getItem("access_token_lf") || undefined;
 
-    console.log("Making API request to:", apiUrl);
-    console.log("Headers:", headers);
-
-    const resp = await fetch(apiUrl, { 
-      method: "GET", 
-      headers, 
-      credentials: "include",
-      mode: "cors"
-    });
-    
-    const text = await resp.text().catch(() => null);
-    
-    if (!resp.ok) {
-      console.error(`API failed: ${resp.status} ${resp.statusText}`, text);
-      throw new Error(`API failed: ${resp.status} ${text || resp.statusText}`);
-    }
-
-    console.log("API response received successfully");
-
-    if (checked) {
-      const payload = { 
-        id: currentFlow!.id, 
-        data: currentFlow!.data!, 
-        description, 
-        name, 
-        last_tested_version: version, 
-        endpoint_name: currentFlow!.endpoint_name, 
-        is_component: false, 
-        tags: currentFlow!.tags, 
-        parentToken: authToken 
-      };
-      await downloadFlow(payload, name!, description);
-      setNoticeData({ title: API_WARNING_NOTICE_ALERT });
-    } else {
-      const cleaned = removeApiKeys({ 
-        id: currentFlow!.id, 
-        data: currentFlow!.data!, 
-        description, 
-        name, 
-        last_tested_version: version, 
-        endpoint_name: currentFlow!.endpoint_name, 
-        is_component: false, 
-        tags: currentFlow!.tags 
-      });
-      await downloadFlow(cleaned, name!, description);
-      setSuccessData({ title: "Flow exported successfully" });
-    }
-
-    setOpen(false);
-    track("Flow Exported", { flowId: currentFlow!.id });
-  } catch (error) {
-    console.error("Export failed:", error);
-    setNoticeData({ title: `Export failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
-  }
-}}
-
+            const resp = await put_agent_export({
+              form,
+              token: access_token_lf,
+            });
+            console.log("put_agent_export response", resp);
+            setSuccessData({ title: "Exported to DB successfully" });
+            setOpen(false);
+          } catch (err) {
+            console.error("Export to DB failed", err);
+            setNoticeData({
+              title: `Export to DB failed: ${
+                err instanceof Error ? err.message : "Unknown error"
+              }`,
+            });
+          }
+        }}
       >
         <BaseModal.Trigger asChild>{props.children ?? <></>}</BaseModal.Trigger>
         <BaseModal.Header description={EXPORT_DIALOG_SUBTITLE}>
@@ -190,54 +150,35 @@ onSubmit={async () => {
           }}
         >
           <div className="flex items-center">
-            <Button
+            {/* <Button
               variant="secondary"
               type="button"
               onClick={async () => {
                 try {
-                  // Build FormData with flow JSON and meta
-                  const flowPayload = checked
-                    ? { id: currentFlow!.id, data: currentFlow!.data!, description, name, last_tested_version: version, endpoint_name: currentFlow!.endpoint_name, is_component: false, tags: currentFlow!.tags }
-                    : removeApiKeys({ id: currentFlow!.id, data: currentFlow!.data!, description, name, last_tested_version: version, endpoint_name: currentFlow!.endpoint_name, is_component: false, tags: currentFlow!.tags });
-
-                  const jsonString = JSON.stringify(flowPayload);
-                  const blob = new Blob([jsonString], { type: 'application/json' });
-
-                  const form = new FormData();
-                  form.append('json', blob, `${(name || 'flow')}.json`);
-                  form.append('name', name ?? 'flow');
-                  form.append('details', description ?? 'exported from ui');
-
-                  const access_token_lf = localStorage.getItem('access_token_lf') || '';
-
-                  const resp = await fetch('/api/aip/langflow/langflow_export_2', {
-                    method: 'POST',
-                    body: form,
-                    credentials: 'include',
-                    headers: access_token_lf ? { Authorization: `Bearer ${access_token_lf}` } : undefined,
+                  const access_token_lf =
+                    localStorage.getItem("access_token_lf") || undefined;
+                  const result = await get_agent_export({
+                    token: access_token_lf,
                   });
-
-                  const data = await resp.json().catch(() => null);
-                  if (!resp.ok) {
-                    console.error('Export to DB failed', resp.status, data);
-                    setNoticeData({ title: `Export to DB failed: ${resp.status}` });
-                    return;
-                  }
-
-                  setSuccessData({ title: 'Exported to DB successfully' });
+                  console.log("get_agent_export response", result);
+                  setSuccessData({ title: "get_agent_export succeeded" });
                   setOpen(false);
                 } catch (err) {
-                  console.error('Export to DB error', err);
-                  setNoticeData({ title: 'Export to DB failed' });
+                  console.error("get_agent_export failed", err);
+                  setNoticeData({
+                    title: `get_agent_export failed: ${
+                      err instanceof Error ? err.message : "Unknown error"
+                    }`,
+                  });
                 }
               }}
             >
               Export to DB
-            </Button>
+            </Button> */}
           </div>
         </BaseModal.Footer>
       </BaseModal>
     );
-  },
+  }
 );
 export default ExportModal;

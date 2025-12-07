@@ -124,8 +124,8 @@ class CustomAuthSecurityConfig {
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_2")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
                         .anyRequest().authenticated();
@@ -137,8 +137,8 @@ class CustomAuthSecurityConfig {
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_2")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
                         .anyRequest().authenticated();
@@ -163,8 +163,8 @@ class CustomAuthSecurityConfig {
 
 			@Override
 			public boolean matches(HttpServletRequest request) {
-				// Exclude the langflow_export endpoints from authentication filter
-				if (request.getRequestURI().contains("/api/aip/langflow/langflow_export")) {
+				// Exclude the langflow_agent_export endpoints from authentication filter
+				if (request.getRequestURI().contains("/api/aip/langflow/langflow_agent_export")) {
 					return false;
 				}
 				return AntPathRequestMatcher.antMatcher("/api/**").matches(request);
