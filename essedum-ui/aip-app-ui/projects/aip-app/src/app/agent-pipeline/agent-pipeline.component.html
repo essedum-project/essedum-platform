@@ -112,16 +112,6 @@
                 <mat-tab label="Essedum Codespace" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
                   <div class="tab-content mb-5">
 
-                    <!-- Refresh Configuration Button -->
-                    <div class="refresh-section">
-                      <button mat-stroked-button color="primary" class="refresh-config-button"
-                        (click)="refreshConfiguration()" [disabled]="isProcessingJson">
-                        <mat-icon>refresh</mat-icon>
-                        Refresh & Regenerate Files
-                      </button>
-                      <span class="refresh-hint">Update the JSON configuration and regenerate the file structure</span>
-                    </div>
-
                     <!-- File Structure -->
                     <div class="file-structure-container">
                       <div class="file-panel">
@@ -141,26 +131,120 @@
                           </div>
                         </div>
 
-                        <div class="file-editor" *ngIf="selectedFileName">
-                          <div class="editor-header">
-                            <h3>{{ selectedFileName }}</h3>
-                            <button mat-icon-button (click)="selectedFileName = ''; selectedFileContent = ''">
-                              <mat-icon>close</mat-icon>
-                            </button>
+                        <!-- File Editor with Pipeline Script Style -->
+                        <div class="file-editor-container" *ngIf="selectedFileName">
+                          <!-- Editor Controls Bar -->
+                          <div class="editor-controls-bar">
+                            <div class="file-info">
+                              <mat-icon class="file-type-icon" [ngClass]="getFileTypeClass(selectedFileName)">{{ getFileIcon(selectedFileName) }}</mat-icon>
+                              <span class="file-name" [class.modified]="isFileModified">{{ selectedFileName }}</span>
+                              <span class="file-path-breadcrumb">{{ selectedFilePath }}</span>
+                              <span class="modified-indicator" *ngIf="isFileModified" title="File has unsaved changes">●</span>
+                            </div>
+                            <ul class="d-flex align-items-center py-2 px-4" style="list-style: none; margin: 0;">
+                              <li style="padding-right: 20px;">
+                                <mat-tooltip [matTooltip]="'Copy Content'" [matTooltipPosition]="'above'">
+                                  <i class="icon copy-icon x-24" (click)="copyFileContent()" style="cursor: pointer;"></i>
+                                </mat-tooltip>
+                              </li>
+                              <li style="padding-right: 20px;">
+                                <span matTooltip="Save File" [matTooltipPosition]="'above'">
+                                  <i class="aip-led-icons icon x-24" 
+                                     [class.save-enabled]="isFileModified" 
+                                     [class.save-disabled]="!isFileModified"
+                                     (click)="saveFile()" 
+                                     style="cursor: pointer;">💾</i>
+                                </span>
+                              </li>
+                              <li>
+                                <span matTooltip="Close File" [matTooltipPosition]="'above'">
+                                  <i class="aip-led-icons icon x-24" (click)="closeFile()" style="cursor: pointer;">✖</i>
+                                </span>
+                              </li>
+                            </ul>
                           </div>
-                          <div class="code-editor">
+
+                          <!-- Code Editor Content -->
+                          <div class="pipeline-code-editor">
                             <ng-container *ngIf="fileExtension === 'py'">
-                              <app-enl-code-editor id="ele" [script]="selectedFileContent.split('\n')" lang="python"
+                              <app-enl-code-editor 
+                                id="ele" 
+                                [script]="selectedFileContent.split('\n')" 
+                                lang="python"
+                                [class.editor-modified]="isFileModified"
                                 (scriptChange)="onFileContentChange($event)">
                               </app-enl-code-editor>
                             </ng-container>
-                            <div *ngIf="fileExtension != 'py'" class="code-content">
-                              <ng-container *ngIf="fileExtension === 'json'">
-                                <p id="code-box" class="code-color">{{ selectedFileContent }}</p>
-                              </ng-container>
-                              <ng-container *ngIf="fileExtension != 'json'">
-                                <p id="code-box" class="code-color">{{ selectedFileContent }}</p>
-                              </ng-container>
+            <div *ngIf="fileExtension != 'py'" class="pipeline-code-content">
+              <div class="diff-editor-container">
+                <!-- Line numbers and diff indicators with virtual scrolling -->
+                <div class="line-numbers-gutter" (scroll)="onLineNumbersScroll($event)">
+                  <div 
+                    *ngFor="let lineNum of getVisibleLineNumbers(); let i = index" 
+                    class="line-number"
+                    [class.line-added]="addedLines.has(lineNum - 1)"
+                    [class.line-modified]="modifiedLines.has(lineNum - 1)"
+                    [class.user-modified]="isUserModifiedContent && userModifiedLines.has(lineNum - 1)">
+                    <span class="line-number-text">{{ lineNum }}</span>
+                    <span class="diff-indicator" *ngIf="addedLines.has(lineNum - 1)">+</span>
+                    <span class="diff-indicator" *ngIf="modifiedLines.has(lineNum - 1) && !addedLines.has(lineNum - 1)">~</span>
+                    <span class="user-indicator" *ngIf="isUserModifiedContent && userModifiedLines.has(lineNum - 1)">●</span>
+                  </div>
+                  <!-- Spacer for remaining lines -->
+                  <div class="line-spacer" [style.height.px]="(totalLineCount - getVisibleLineNumbers().length) * 20"></div>
+                </div>                                <!-- Code editor textarea with diff styling -->
+                                <div class="editor-wrapper">
+                                  <ng-container *ngIf="fileExtension === 'json'">
+                                    <textarea 
+                                      class="pipeline-file-editor json-editor" 
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent" 
+                                      (ngModelChange)="onTextContentChange($event)"
+                                      placeholder="JSON content..."
+                                      spellcheck="false"
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
+                                  </ng-container>
+                                  <ng-container *ngIf="fileExtension != 'json'">
+                                    <textarea 
+                                      class="pipeline-file-editor" 
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent" 
+                                      (ngModelChange)="onTextContentChange($event)"
+                                      placeholder="File content..."
+                                      spellcheck="false"
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
+                                  </ng-container>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Save Status Bar -->
+                          <div class="editor-status-bar" *ngIf="isFileModified || isSavingFile">
+                            <div class="status-left">
+                              <span class="status-indicator" [class.saving]="isSavingFile" [class.modified]="isFileModified && !isSavingFile">
+                                <mat-icon *ngIf="isSavingFile">sync</mat-icon>
+                                <mat-icon *ngIf="!isSavingFile && isFileModified">edit</mat-icon>
+                              </span>
+                              <span class="status-text">
+                                <ng-container *ngIf="isSavingFile">Saving...</ng-container>
+                                <ng-container *ngIf="!isSavingFile && isFileModified">
+                                  {{ getDiffStats().total }} change(s) 
+                                  <span *ngIf="getDiffStats().added > 0" class="added-count">+{{ getDiffStats().added }}</span>
+                                  <span *ngIf="getDiffStats().modified > 0" class="modified-count">~{{ getDiffStats().modified }}</span>
+                                </ng-container>
+                              </span>
+                            </div>
+                            <div class="status-right">
+                              <button 
+                                mat-stroked-button 
+                                color="primary" 
+                                class="save-button"
+                                (click)="saveFile()" 
+                                [disabled]="!isFileModified || isSavingFile">
+                                <mat-icon>{{ isSavingFile ? 'hourglass_empty' : 'save' }}</mat-icon>
+                                {{ isSavingFile ? 'Saving...' : 'Save File' }}
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -192,8 +276,15 @@
            [class.selected]="isFileSelected(node)" 
            [class.folder-node]="node.type === 'folder'"
            [class.file-node]="node.type === 'file'"
+           [class.drag-over]="dropTarget === node"
            [style.padding-left.px]="(level * 16) + 8"
-           (click)="selectFile(node)">
+           [draggable]="true"
+           (click)="selectFile(node)"
+           (dragstart)="onDragStart($event, node)"
+           (dragover)="onDragOver($event)"
+           (dragenter)="onDragEnter($event, node)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event, node)">
         <mat-icon class="node-icon folder-icon" *ngIf="node.type === 'folder'">
           folder
         </mat-icon>
@@ -370,6 +461,42 @@
           [disabled]="!canPush() || isPushing">
           <mat-icon>cloud_upload</mat-icon>
           {{ isPushing ? 'Pushing...' : 'Push to GitHub' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Save File Structure Dialog -->
+<div class="save-structure-overlay" *ngIf="showSaveStructureDialog" (click)="cancelStructureChange()">
+  <div class="save-structure-popup" (click)="$event.stopPropagation()">
+    <div class="save-structure-header">
+      <div class="save-structure-title">
+        <mat-icon>save</mat-icon>
+        <h2>Save File Structure Changes</h2>
+        <span class="save-structure-subtitle">The file/folder structure has been modified</span>
+      </div>
+      <button mat-icon-button (click)="cancelStructureChange()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="save-structure-content">
+      <div class="structure-info">
+        <mat-icon>info</mat-icon>
+        <p>You have moved files or folders. Do you want to save the new structure?</p>
+        <p class="warning-text">This action will update the file paths permanently.</p>
+      </div>
+    </div>
+
+    <div class="save-structure-footer">
+      <div class="structure-actions">
+        <button mat-stroked-button (click)="cancelStructureChange()">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" class="save-structure-button" (click)="saveNewFileStructure()">
+          <mat-icon>save</mat-icon>
+          Save New Structure
         </button>
       </div>
     </div>

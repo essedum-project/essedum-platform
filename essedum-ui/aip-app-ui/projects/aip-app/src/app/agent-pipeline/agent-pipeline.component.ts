@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -173,7 +173,7 @@ export class AgentPipelineComponent implements OnInit {
   
   // JSON Processing Flow
   isJsonProcessed = false;
-  isProcessingJson = false;
+
   
   // Console output for Generate SDK Agent
   consoleOutput: string[] = [];
@@ -264,7 +264,33 @@ export class AgentPipelineComponent implements OnInit {
   // Selected file content for editor
   selectedFileContent = '';
   selectedFileName = '';
+  selectedFileNode: FileNode | null = null;
+  selectedFilePath = '';
   fileExtension = 'py';
+  isFileModified = false;
+  isSavingFile = false;
+  
+  // Track original content and changes for diff highlighting
+  originalFileContent = '';
+  modifiedLines: Set<number> = new Set();
+  addedLines: Set<number> = new Set();
+  
+  // Track user modifications vs API content
+  isUserModifiedContent = false;
+  userModifiedLines: Set<number> = new Set();
+  
+  // Virtual scrolling for line numbers
+  visibleLineCount = 50; // Show 50 lines initially
+  currentLineOffset = 0;
+  totalLineCount = 0;
+  scrollContainer: HTMLElement | null = null;
+  
+  // Drag and Drop functionality
+  isDragging = false;
+  draggedNode: FileNode | null = null;
+  dropTarget: FileNode | null = null;
+  showSaveStructureDialog = false;
+  originalFileStructure: FileNode[] = [];
   
   // Hover states
   isHoveredBack = false;
@@ -288,7 +314,6 @@ export class AgentPipelineComponent implements OnInit {
       this.viewMode = 'list';
       this.selectedAgent = null;
       this.isJsonProcessed = false;
-      this.isProcessingJson = false;
       this.hasGeneratedAgent = false;
       this.fileSystemData = [];
     } else {
@@ -331,7 +356,6 @@ export class AgentPipelineComponent implements OnInit {
     this.selectedFileName = '';
     this.selectedFileContent = '';
     this.isJsonProcessed = true; // Show JSON and console directly
-    this.isProcessingJson = false;
     this.hasGeneratedAgent = false; // Reset playground button state
     
     // Update JSON content based on selected agent
@@ -341,17 +365,80 @@ export class AgentPipelineComponent implements OnInit {
 
 
 
-  refreshConfiguration(): void {
-    if (!this.selectedAgent) return;
+  // Save current file changes
+  async saveFile(): Promise<void> {
+    if (!this.selectedFileNode || !this.isFileModified) {
+      return;
+    }
+
+    this.isSavingFile = true;
+    try {
+      console.log('Saving file:', this.selectedFileName);
+      
+      // Simulate API call to save file content
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real implementation, this would call the backend API
+      console.log('File saved successfully:', {
+        fileId: this.selectedFileNode.id,
+        fileName: this.selectedFileName,
+        path: this.selectedFilePath,
+        contentLength: this.selectedFileContent.length
+      });
+      
+      this.isFileModified = false;
+      
+      // Show success message (you can add a snackbar here)
+      console.log('File saved successfully!');
+      
+      // Update original content and reset diff tracking after successful save
+      this.originalFileContent = this.selectedFileContent;
+      this.resetDiffTracking();
+      
+    } catch (error) {
+      console.error('Error saving file:', error);
+      // Show error message (you can add a snackbar here)
+    } finally {
+      this.isSavingFile = false;
+    }
+  }
+
+  // Close file with unsaved changes check
+  closeFile(): void {
+    if (this.isFileModified) {
+      const shouldProceed = confirm('You have unsaved changes. Do you want to close without saving?');
+      if (!shouldProceed) {
+        return;
+      }
+    }
     
-    // Reset file selection and regenerate file structure
     this.selectedFileName = '';
     this.selectedFileContent = '';
-    this.isLoadingFiles = true;
+    this.selectedFileNode = null;
+    this.selectedFilePath = '';
+    this.isFileModified = false;
+    this.resetDiffTracking();
+  }
+
+  // Keyboard shortcut for saving files (Ctrl+S)
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    if (event.ctrlKey && event.key === 's' && this.selectedFileName && this.isFileModified) {
+      event.preventDefault();
+      this.saveFile();
+    }
     
-    // Update JSON content and regenerate file structure
-    this.updateJsonContent(this.selectedAgent);
-    this.updateFileSystemData(this.selectedAgent);
+    // Ctrl+C for copying file content when editor is focused
+    if (event.ctrlKey && event.key === 'c' && this.selectedFileName && event.altKey) {
+      event.preventDefault();
+      this.copyFileContent();
+    }
+    
+    // Ctrl+W for closing file
+    if (event.ctrlKey && event.key === 'w' && this.selectedFileName) {
+      event.preventDefault();
+      this.closeFile();
+    }
   }
 
   updateJsonContent(agent: AgentCard): void {
@@ -450,7 +537,32 @@ export class AgentPipelineComponent implements OnInit {
       }
     });
     
+    // Sort the tree alphabetically (folders first, then files)
+    this.sortFileTree(root);
+    
     return root.children || [];
+  }
+
+  // Sort file tree alphabetically (folders first, then files)
+  private sortFileTree(node: FileNode): void {
+    if (node.children && node.children.length > 0) {
+      // Sort children: folders first, then files, both alphabetically
+      node.children.sort((a, b) => {
+        // If one is folder and other is file, folder comes first
+        if (a.type !== b.type) {
+          return a.type === 'folder' ? -1 : 1;
+        }
+        // Both are same type, sort alphabetically (case-insensitive)
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      });
+      
+      // Recursively sort children of folders
+      node.children.forEach(child => {
+        if (child.type === 'folder') {
+          this.sortFileTree(child);
+        }
+      });
+    }
   }
   
   // Method to fetch files from API (hardcoded for now with exact API structure)
@@ -501,6 +613,79 @@ export class AgentPipelineComponent implements OnInit {
       console.error('Failed to download file:', error);
       return 'Error loading file content';
     }
+  }
+  
+  // Track user modifications for neon green highlighting
+  onUserContentChange(newContent: string): void {
+    this.isUserModifiedContent = true;
+    this.selectedFileContent = newContent;
+    this.isFileModified = true;
+    
+    // Track which lines are user-modified
+    this.trackUserModifiedLines();
+  }
+  
+  // Track which lines have been modified by user
+  private trackUserModifiedLines(): void {
+    const originalLines = this.originalFileContent.split('\n');
+    const currentLines = this.selectedFileContent.split('\n');
+    
+    this.userModifiedLines.clear();
+    
+    // Compare lines to find user modifications
+    const maxLines = Math.max(originalLines.length, currentLines.length);
+    for (let i = 0; i < maxLines; i++) {
+      const originalLine = originalLines[i] || '';
+      const currentLine = currentLines[i] || '';
+      
+      if (originalLine !== currentLine) {
+        this.userModifiedLines.add(i);
+      }
+    }
+  }
+  
+  // Get CSS class for user-modified lines
+  getUserModifiedLineClass(lineIndex: number): string {
+    if (this.isUserModifiedContent && this.userModifiedLines.has(lineIndex)) {
+      return 'user-modified-line';
+    }
+    return '';
+  }
+  
+  // Virtual scrolling methods
+  initializeVirtualScrolling(): void {
+    this.scrollContainer = document.querySelector('.line-numbers-gutter');
+    if (this.scrollContainer) {
+      this.scrollContainer.addEventListener('scroll', this.onLineNumbersScroll.bind(this));
+    }
+    this.updateTotalLineCount();
+  }
+  
+  updateTotalLineCount(): void {
+    this.totalLineCount = this.selectedFileContent.split('\n').length;
+  }
+  
+  onLineNumbersScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    const scrollTop = target.scrollTop;
+    const itemHeight = 20; // Height of each line number
+    
+    const newOffset = Math.floor(scrollTop / itemHeight);
+    if (newOffset !== this.currentLineOffset) {
+      this.currentLineOffset = newOffset;
+      this.updateVisibleLines();
+    }
+  }
+  
+  updateVisibleLines(): void {
+    const endLine = Math.min(this.currentLineOffset + this.visibleLineCount, this.totalLineCount);
+    // Update visible line range
+  }
+  
+  getVisibleLineNumbers(): number[] {
+    const start = this.currentLineOffset;
+    const end = Math.min(start + this.visibleLineCount, this.totalLineCount);
+    return Array.from({length: end - start}, (_, i) => start + i + 1);
   }
   
   // Simulate byte array response from API
@@ -608,7 +793,362 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   }
 
   onFileContentChange(event: any): void {
-    this.selectedFileContent = event.join('\n');
+    const newContent = event.join('\n');
+    if (newContent !== this.selectedFileContent) {
+      this.isFileModified = true;
+      this.isUserModifiedContent = true;
+      this.updateDiffTracking(newContent);
+      this.selectedFileContent = newContent;
+      this.trackUserModifiedLines();
+      this.updateTotalLineCount();
+    }
+  }
+
+  // Handle text content changes for non-Python files
+  onTextContentChange(newContent: string): void {
+    if (newContent !== this.selectedFileContent) {
+      this.isFileModified = true;
+      this.isUserModifiedContent = true;
+      this.updateDiffTracking(newContent);
+      
+      // Update the actual content after diff tracking
+      this.selectedFileContent = newContent;
+      this.trackUserModifiedLines();
+      this.updateTotalLineCount();
+    }
+  }
+
+  // Reset diff tracking
+  resetDiffTracking(): void {
+    this.modifiedLines.clear();
+    this.addedLines.clear();
+  }
+
+  // Update diff tracking when content changes
+  updateDiffTracking(newContent: string): void {
+    const originalLines = this.originalFileContent.split('\n');
+    const newLines = newContent.split('\n');
+    
+    this.modifiedLines.clear();
+    this.addedLines.clear();
+    
+    // Simple diff algorithm
+    const maxLines = Math.max(originalLines.length, newLines.length);
+    
+    for (let i = 0; i < newLines.length; i++) {
+      const newLine = newLines[i] || '';
+      const originalLine = originalLines[i] || '';
+      
+      if (i >= originalLines.length) {
+        // New line added
+        this.addedLines.add(i);
+      } else if (originalLine !== newLine) {
+        // Line was modified
+        this.modifiedLines.add(i);
+      }
+    }
+    
+    // Handle case where lines were deleted (mark previous line as modified)
+    if (newLines.length < originalLines.length) {
+      for (let i = newLines.length; i < originalLines.length; i++) {
+        if (newLines.length > 0) {
+          this.modifiedLines.add(newLines.length - 1);
+        }
+      }
+    }
+  }
+
+  // Get line classes for styling
+  getLineClasses(lineIndex: number): string[] {
+    const classes: string[] = [];
+    
+    if (this.addedLines.has(lineIndex)) {
+      classes.push('line-added');
+    } else if (this.modifiedLines.has(lineIndex)) {
+      classes.push('line-modified');
+    }
+    
+    return classes;
+  }
+
+  // Check if a line is modified or added
+  isLineChanged(lineIndex: number): boolean {
+    return this.addedLines.has(lineIndex) || this.modifiedLines.has(lineIndex);
+  }
+
+  // Get diff statistics for display
+  getDiffStats(): { added: number; modified: number; total: number } {
+    return {
+      added: this.addedLines.size,
+      modified: this.modifiedLines.size,
+      total: this.addedLines.size + this.modifiedLines.size
+    };
+  }
+
+  // Get current line content for display
+  getCurrentLines(): string[] {
+    return this.selectedFileContent.split('\n');
+  }
+  
+  // Drag and Drop Methods
+  onDragStart(event: DragEvent, node: FileNode): void {
+    this.isDragging = true;
+    this.draggedNode = node;
+    this.originalFileStructure = JSON.parse(JSON.stringify(this.fileSystemData)); // Deep copy
+    
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', node.name);
+    }
+  }
+  
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+  }
+  
+  onDragEnter(event: DragEvent, node: FileNode): void {
+    event.preventDefault();
+    if (node.type === 'folder' && node !== this.draggedNode) {
+      this.dropTarget = node;
+      // Add visual feedback
+      (event.currentTarget as HTMLElement)?.classList.add('drag-over');
+    }
+  }
+  
+  onDragLeave(event: DragEvent): void {
+    (event.currentTarget as HTMLElement)?.classList.remove('drag-over');
+  }
+  
+  onDrop(event: DragEvent, targetNode: FileNode): void {
+    event.preventDefault();
+    (event.currentTarget as HTMLElement)?.classList.remove('drag-over');
+    
+    if (!this.draggedNode || !targetNode || this.draggedNode === targetNode) {
+      return;
+    }
+    
+    if (targetNode.type === 'folder') {
+      this.moveNodeToFolder(this.draggedNode, targetNode);
+      this.showSaveStructureDialog = true;
+    }
+    
+    this.isDragging = false;
+    this.draggedNode = null;
+    this.dropTarget = null;
+  }
+  
+  private moveNodeToFolder(sourceNode: FileNode, targetFolder: FileNode): void {
+    // Remove from current location
+    this.removeNodeFromStructure(sourceNode, this.fileSystemData);
+    
+    // Add to target folder
+    if (!targetFolder.children) {
+      targetFolder.children = [];
+    }
+    
+    // Update the path correctly
+    const newPath = this.buildNewPath(targetFolder, sourceNode);
+    sourceNode.path = newPath;
+    
+    // Add to target folder and sort
+    targetFolder.children.push(sourceNode);
+    this.sortFileTree({children: targetFolder.children} as FileNode);
+    
+    // Update the selected file path if it's currently selected
+    if (this.selectedFileNode === sourceNode) {
+      this.selectedFilePath = newPath;
+    }
+    
+    console.log(`Moved ${sourceNode.name} to ${targetFolder.name}. New path: ${newPath}`);
+  }
+  
+  private removeNodeFromStructure(nodeToRemove: FileNode, nodes: FileNode[]): boolean {
+    const index = nodes.findIndex(node => node === nodeToRemove);
+    if (index !== -1) {
+      nodes.splice(index, 1);
+      return true;
+    }
+    
+    for (const node of nodes) {
+      if (node.children && this.removeNodeFromStructure(nodeToRemove, node.children)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  private buildNewPath(targetFolder: FileNode, sourceNode: FileNode): string {
+    const targetPath = this.getFullNodePath(targetFolder);
+    if (targetPath) {
+      return `${targetPath}/${sourceNode.name}`;
+    }
+    return sourceNode.name;
+  }
+  
+  private getFullNodePath(node: FileNode): string {
+    // First, try to get the path from the node itself if it exists
+    if (node.path && node.path !== node.name) {
+      return node.path;
+    }
+    
+    // Otherwise, build the path by finding the node in the tree
+    const pathParts: string[] = [];
+    if (this.findNodePath(node, this.fileSystemData, pathParts)) {
+      return pathParts.join('/');
+    }
+    
+    return node.name;
+  }
+  
+  private findNodePath(targetNode: FileNode, nodes: FileNode[], currentPath: string[]): boolean {
+    for (const node of nodes) {
+      // Check if this is the target node
+      if (node === targetNode) {
+        currentPath.push(node.name);
+        return true;
+      }
+      
+      // Search in children if this is a folder
+      if (node.children && node.children.length > 0) {
+        currentPath.push(node.name);
+        if (this.findNodePath(targetNode, node.children, currentPath)) {
+          return true;
+        }
+        currentPath.pop(); // Remove this node from path if not found in this branch
+      }
+    }
+    return false;
+  }
+  
+  // Save structure dialog methods
+  saveNewFileStructure(): void {
+    // Dummy API call to save new structure
+    this.callSaveStructureAPI(this.fileSystemData).then(() => {
+      console.log('File structure saved successfully');
+      this.showSaveStructureDialog = false;
+      this.originalFileStructure = [];
+    }).catch(error => {
+      console.error('Failed to save file structure:', error);
+    });
+  }
+  
+  cancelStructureChange(): void {
+    // Restore original structure
+    this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
+    this.showSaveStructureDialog = false;
+    this.originalFileStructure = [];
+  }
+  
+  private async callSaveStructureAPI(structure: FileNode[]): Promise<any> {
+    // Dummy API call
+    console.log('Calling API to save new file structure:', structure);
+    
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({success: true, message: 'File structure updated successfully'});
+      }, 1000);
+    });
+  }
+
+  // Generate CSS background gradients for line diff highlighting
+  getLineDiffStyles(): string {
+    if (!this.isFileModified) {
+      return 'none';
+    }
+    
+    const lines = this.getCurrentLines();
+    const lineHeight = 20; // pixels
+    const gradients: string[] = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const yStart = i * lineHeight;
+      const yEnd = (i + 1) * lineHeight;
+      
+      if (this.addedLines.has(i)) {
+        gradients.push(`linear-gradient(to right, rgba(40, 167, 69, 0.3) 0%, rgba(40, 167, 69, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`);
+      } else if (this.modifiedLines.has(i)) {
+        gradients.push(`linear-gradient(to right, rgba(255, 149, 0, 0.3) 0%, rgba(255, 149, 0, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`);
+      }
+    }
+    
+    return gradients.length > 0 ? gradients.join(', ') : 'none';
+  }
+
+  // Get file type class for styling
+  getFileTypeClass(fileName: string): string {
+    if (fileName.endsWith('.py')) return 'python-file';
+    if (fileName.endsWith('.json')) return 'json-file';
+    if (fileName.endsWith('.java')) return 'java-file';
+    if (fileName.endsWith('.xml')) return 'xml-file';
+    if (fileName.endsWith('.properties')) return 'properties-file';
+    if (fileName.endsWith('.md')) return 'markdown-file';
+    return 'text-file';
+  }
+
+  // Get file icon based on file type
+  getFileIcon(fileName: string): string {
+    if (fileName.endsWith('.py')) return 'code';
+    if (fileName.endsWith('.json')) return 'data_object';
+    if (fileName.endsWith('.java')) return 'code';
+    if (fileName.endsWith('.xml')) return 'code';
+    if (fileName.endsWith('.properties')) return 'settings';
+    if (fileName.endsWith('.md')) return 'description';
+    return 'insert_drive_file';
+  }
+
+  // Copy file content to clipboard
+  copyFileContent(): void {
+    if (this.selectedFileContent) {
+      navigator.clipboard.writeText(this.selectedFileContent).then(() => {
+        console.log('File content copied to clipboard');
+        // You can add a snackbar notification here
+      }).catch(err => {
+        console.error('Failed to copy content: ', err);
+      });
+    }
+  }
+
+  // Syntax highlighting for JSON
+  highlightJsonSyntax(line: string): string {
+    if (!line.trim()) return '&nbsp;';
+    
+    return line
+      .replace(/("[^"]*":\s*)/g, '<span class="json-key">$1</span>')
+      .replace(/:\s*("([^"]*)")/g, ': <span class="json-string">$1</span>')
+      .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+      .replace(/:\s*(true|false|null)/g, ': <span class="json-literal">$1</span>')
+      .replace(/([{}[\],])/g, '<span class="json-punctuation">$1</span>');
+  }
+
+  // Basic syntax highlighting for other file types
+  highlightCodeSyntax(line: string, extension: string): string {
+    if (!line.trim()) return '&nbsp;';
+    
+    let highlightedLine = line;
+    
+    // Common patterns for different file types
+    if (extension === 'xml') {
+      highlightedLine = highlightedLine
+        .replace(/(&lt;\/?)([a-zA-Z0-9-]+)/g, '<span class="xml-tag">$1$2</span>')
+        .replace(/([a-zA-Z-]+)(=)/g, '<span class="xml-attribute">$1</span>$2')
+        .replace(/(="[^"]*")/g, '<span class="xml-value">$1</span>');
+    } else if (extension === 'java') {
+      highlightedLine = highlightedLine
+        .replace(/\b(public|private|protected|static|final|class|interface|extends|implements|import|package)\b/g, '<span class="java-keyword">$1</span>')
+        .replace(/\b(String|int|boolean|void|Object)\b/g, '<span class="java-type">$1</span>')
+        .replace(/(\/\/.*$)/g, '<span class="java-comment">$1</span>');
+    } else if (extension === 'properties') {
+      highlightedLine = highlightedLine
+        .replace(/^([^=]+)(=)/g, '<span class="prop-key">$1</span><span class="prop-equals">$2</span>')
+        .replace(/(#.*$)/g, '<span class="prop-comment">$1</span>');
+    }
+    
+    return highlightedLine;
   }
 
   saveChanges(): void {
@@ -805,7 +1345,18 @@ public class ZipController {
   // File system methods
   async selectFile(node: FileNode): Promise<void> {
     if (node.type === 'file') {
+      // Check if there are unsaved changes before switching files
+      if (this.isFileModified) {
+        const shouldProceed = confirm('You have unsaved changes. Do you want to proceed without saving?');
+        if (!shouldProceed) {
+          return;
+        }
+      }
+
       this.selectedFileName = node.name;
+      this.selectedFileNode = node;
+      this.selectedFilePath = node.path || node.name;
+      this.isFileModified = false;
       
       // Set file extension
       if (node.name.endsWith('.py')) {
@@ -829,15 +1380,33 @@ public class ZipController {
         this.selectedFileContent = 'Loading...';
         try {
           this.selectedFileContent = await this.downloadFileContent(node.id);
+          this.originalFileContent = this.selectedFileContent; // Store original content
+          this.isUserModifiedContent = false; // Reset user modification flag
+          this.userModifiedLines.clear(); // Clear user modified lines
+          this.resetDiffTracking(); // Reset diff tracking
+          
+          // Initialize virtual scrolling
+          this.currentLineOffset = 0;
+          this.updateTotalLineCount();
+          setTimeout(() => this.initializeVirtualScrolling(), 100);
         } catch (error) {
           console.error('Error loading file content:', error);
           this.selectedFileContent = 'Error loading file content';
         }
       } else {
         this.selectedFileContent = node.content || '';
+        this.originalFileContent = this.selectedFileContent; // Store original content
+        this.isUserModifiedContent = false; // Reset user modification flag
+        this.userModifiedLines.clear(); // Clear user modified lines
+        this.resetDiffTracking(); // Reset diff tracking
+        
+        // Initialize virtual scrolling
+        this.currentLineOffset = 0;
+        this.updateTotalLineCount();
+        setTimeout(() => this.initializeVirtualScrolling(), 100);
       }
       
-      console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Content length:', this.selectedFileContent.length);
+      console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Path:', this.selectedFilePath, 'Content length:', this.selectedFileContent.length);
     }
   }
 
