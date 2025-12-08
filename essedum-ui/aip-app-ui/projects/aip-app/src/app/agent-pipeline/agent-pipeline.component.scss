@@ -2271,6 +2271,9 @@
 .tree-node-content {
   cursor: grab;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   
   &:active {
     cursor: grabbing;
@@ -2288,6 +2291,47 @@
       background-color: rgba(0, 0, 0, 0.02);
     }
   }
+}
+
+// Folder Toggle Styles
+.folder-toggle {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #0094ff;
+    transform: scale(1.1);
+  }
+}
+
+.folder-spacer {
+  width: 16px;
+  display: inline-block;
+}
+
+.node-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  
+  &.folder-icon {
+    color: #ffa726;
+  }
+  
+  &.file-icon {
+    color: #666;
+  }
+}
+
+.node-name {
+  flex: 1;
+  margin-left: 4px;
+  font-size: 13px;
+  user-select: none;
 }
 
 // Save Structure Dialog Styles

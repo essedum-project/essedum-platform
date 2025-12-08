@@ -285,8 +285,21 @@
            (dragenter)="onDragEnter($event, node)"
            (dragleave)="onDragLeave($event)"
            (drop)="onDrop($event, node)">
+        
+        <!-- Folder toggle icon -->
+        <mat-icon class="folder-toggle" 
+                  *ngIf="node.type === 'folder' && node.children && node.children.length > 0"
+                  (click)="toggleFolder(node, $event)">
+          {{ isFolderExpanded(node) ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+        </mat-icon>
+        
+        <!-- Spacer for files and empty folders -->
+        <span class="folder-spacer" 
+              *ngIf="node.type === 'file' || !node.children || node.children.length === 0">
+        </span>
+        
         <mat-icon class="node-icon folder-icon" *ngIf="node.type === 'folder'">
-          folder
+          {{ isFolderExpanded(node) ? 'folder_open' : 'folder' }}
         </mat-icon>
         <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.java')">
           code
@@ -302,7 +315,8 @@
         </mat-icon>
         <span class="node-name" [title]="node.name">{{ node.name }}</span>
       </div>
-      <div *ngIf="node.children && node.children.length > 0" class="tree-children">
+      <!-- Only show children if folder is expanded -->
+      <div *ngIf="node.children && node.children.length > 0 && isFolderExpanded(node)" class="tree-children">
         <ng-container
           *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: node.children, level: level + 1 }"></ng-container>
       </div>

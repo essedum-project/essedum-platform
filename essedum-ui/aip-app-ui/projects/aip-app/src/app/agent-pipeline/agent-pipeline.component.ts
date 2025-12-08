@@ -11,6 +11,7 @@ interface FileNode {
   content?: string;
   id?: string;
   path?: string;
+  expanded?: boolean; // Add expanded state for folders
 }
 
 // API Configuration
@@ -528,7 +529,8 @@ export class AgentPipelineComponent implements OnInit {
             type: isFile ? 'file' : 'folder',
             id: isFile ? item.id : undefined,
             path: isFile ? item.path : undefined,
-            children: isFile ? undefined : []
+            children: isFile ? undefined : [],
+            expanded: isFile ? undefined : true // Default folders to expanded
           };
           currentNode.children.push(existingNode);
         }
@@ -888,6 +890,20 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   // Get current line content for display
   getCurrentLines(): string[] {
     return this.selectedFileContent.split('\n');
+  }
+  
+  // Toggle folder expand/collapse
+  toggleFolder(node: FileNode, event: Event): void {
+    event.stopPropagation(); // Prevent file selection when clicking folder toggle
+    if (node.type === 'folder') {
+      node.expanded = !node.expanded;
+    }
+  }
+  
+  // Check if folder is expanded (default to true for root folders)
+  isFolderExpanded(node: FileNode): boolean {
+    if (node.type !== 'folder') return false;
+    return node.expanded !== false; // Default to expanded if not explicitly set
   }
   
   // Drag and Drop Methods
