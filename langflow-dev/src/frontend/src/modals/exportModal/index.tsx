@@ -17,7 +17,11 @@ import { downloadFlow, removeApiKeys } from "../../utils/reactflowUtils";
 import BaseModal from "../baseModal";
 import { Button } from "../../components/ui/button";
 import { get_agent_export } from "@/controllers/API/services/exportModelService";
-import { put_agent_export } from "@/controllers/API/services/exportModelService";
+import {
+  put_agent_export,
+  post_agent_export_details,
+  post_agent_export_file_details,
+} from "@/controllers/API/services/exportModelService";
 
 const ExportModal = forwardRef(
   (
@@ -97,6 +101,30 @@ const ExportModal = forwardRef(
               token: access_token_lf,
             });
             console.log("put_agent_export response", resp);
+
+
+            try {
+              let alias = `${name || 'flow'}.json`;
+              let organization = 'leo1311';
+              let loadFileName = `${organization}_${name || 'flow'}`;
+
+              // Call the new file details export API
+              const fileDetailsResp = await post_agent_export_file_details({
+                token: access_token_lf,
+                alias,
+                loadFileName,
+              });
+              console.log('post_agent_export_file_details response', fileDetailsResp);
+            } catch (err) {
+              console.error("post_agent_export_file_details failed", err);
+              // don't block the main flow; surface notice
+              setNoticeData({
+                title: `post_agent_export_file_details failed: ${
+                  err instanceof Error ? err.message : "Unknown error"
+                }`,
+              });
+            }
+
             setSuccessData({ title: "Exported to DB successfully" });
             setOpen(false);
           } catch (err) {

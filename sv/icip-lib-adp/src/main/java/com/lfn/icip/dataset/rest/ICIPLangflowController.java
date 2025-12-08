@@ -71,7 +71,7 @@ public class ICIPLangflowController {
     }
 
     /**
-     * Mock API: Receives JSON file + name + details, logs info, returns success/failure.
+     * Mock API: Receives JSON file + name, logs info, returns success/failure.
      */
     @PostMapping(
             value = "/langflow_agent_export",
@@ -80,11 +80,10 @@ public class ICIPLangflowController {
     )
     public ResponseEntity<?> langflowExport(
             @RequestPart(name = "json", required = false) MultipartFile jsonFile,
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "details", required = false) String details
+            @RequestParam(name = "name", required = false) String name
     ) {
         String requestId = UUID.randomUUID().toString();
-        logger.info("reqId={} Received export request: name={}, details={}", requestId, name, details);
+        logger.info("reqId={} Received export request: name={}", requestId, name);
 
         if (jsonFile == null || jsonFile.isEmpty()) {
             logger.warn("reqId={} No JSON file received", requestId);
@@ -110,7 +109,7 @@ public class ICIPLangflowController {
             logger.info("reqId={} Parsed JSON successfully. sample={}", requestId, sample.replaceAll("\n", " "));
 
             // Simulate DB export
-            logger.info("reqId={} Simulating DB save for name={} details={}", requestId, name, details);
+            logger.info("reqId={} Simulating DB save for name={} details={}", requestId, name);
 
             // Include received JSON metadata in response for quick verification
             String detailsMessage = String.format("Stored mock record at %s (jsonChars=%d)", Instant.now(), jsonText.length());
@@ -122,6 +121,54 @@ public class ICIPLangflowController {
             logger.error("reqId={} Failed to process JSON", requestId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildResponse("failure", requestId,
                     "Export failed", e.getMessage()));
+        }
+    }
+
+    /**
+     * Mock API: Receives JSON payload for file export details.
+     */
+    @PostMapping(
+            value = "/langflow_export_file_details",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> langflowExportFileDetails(@RequestBody Map<String, Object> payload) {
+        String requestId = UUID.randomUUID().toString();
+        logger.info("reqId={} Received file details export request", requestId);
+
+        try {
+            // Log received payload
+            if (logger.isDebugEnabled()) {
+                String pretty = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+                logger.debug("reqId={} Received payload (pretty):\n{}", requestId, pretty);
+            }
+
+            String payloadJson = objectMapper.writeValueAsString(payload);
+            String sample = payloadJson.length() > 800 ? payloadJson.substring(0, 800) + "..." : payloadJson;
+            logger.info("reqId={} Processed file details. sample={}", requestId, sample.replaceAll("\n", " "));
+
+            // Extract key fields for logging
+            String alias = (String) payload.get("alias");
+            String name = (String) payload.get("name");
+            String projectName = (String) payload.get("projectName");
+            String portfolioName = (String) payload.get("portfolioName");
+            String userName = (String) payload.get("userName");
+            
+            logger.info("reqId={} File details - alias={}, name={}, projectName={}, portfolioName={}, userName={}", 
+                       requestId, alias, name, projectName, portfolioName, userName);
+
+            // Return the payload back with timestamp and requestId
+            Map<String, Object> response = new HashMap<>(payload);
+            response.put("requestId", requestId);
+            response.put("timestamp", Instant.now());
+            response.put("status", "success");
+            response.put("message", "Langflow file details exported successfully");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("reqId={} Failed to process file details", requestId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildResponse("failure", requestId,
+                    "File details export failed", e.getMessage()));
         }
     }
 

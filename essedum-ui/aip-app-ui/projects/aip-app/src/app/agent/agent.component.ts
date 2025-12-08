@@ -50,13 +50,16 @@ export class AgentComponent implements OnInit, AfterViewInit {
             try {
               const project = sessionStorage.getItem('project');
               const role = sessionStorage.getItem('role');
-              const portfoliodata = sessionStorage.getItem('portfoliodata');
+              const portfoliodata = sessionStorage.getItem('portfoliodata');  
+              const user = sessionStorage.getItem('user');
               const projectId = project ? JSON.parse(String(project)).id : undefined;
               const projectName = project ? JSON.parse(String(project)).name : undefined;
               const roleId = role ? JSON.parse(String(role)).id : undefined;
               const roleName = role ? JSON.parse(String(role)).name : undefined;
               const portfolioId = portfoliodata ? JSON.parse(String(portfoliodata)).id : undefined;
               const portfolioName = portfoliodata ? JSON.parse(String(portfoliodata)).portfolioName : undefined;
+              const userId = user ? JSON.parse(String(user)).id : undefined;
+              const userName = user ? JSON.parse(String(user)).user_login : undefined;
               const parentSessionDetails = {
                 projectId,
                 projectName,
@@ -64,7 +67,8 @@ export class AgentComponent implements OnInit, AfterViewInit {
                 roleName,
                 portfolioId,
                 portfolioName,
-                token
+                token,userId,
+                userName,
               };
               console.log('Parent: posting parentSessionDetails to iframe', { parentSessionDetails });
               sendToIframe({ type: 'SET_PARENT_SESSION', parentSessionDetails });

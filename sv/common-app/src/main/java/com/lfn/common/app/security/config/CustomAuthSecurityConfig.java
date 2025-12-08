@@ -126,6 +126,7 @@ class CustomAuthSecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
                         .anyRequest().authenticated();
@@ -139,6 +140,7 @@ class CustomAuthSecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
                         .anyRequest().authenticated();
