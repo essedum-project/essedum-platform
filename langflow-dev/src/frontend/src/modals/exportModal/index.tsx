@@ -19,8 +19,10 @@ import { Button } from "../../components/ui/button";
 import { get_agent_export } from "@/controllers/API/services/exportModelService";
 import {
   put_agent_export,
-  post_agent_export_details,
   post_agent_export_file_details,
+  create_pipeline,
+  create_native_file,
+  update_pipeline,
 } from "@/controllers/API/services/exportModelService";
 
 const ExportModal = forwardRef(
@@ -178,23 +180,135 @@ const ExportModal = forwardRef(
           }}
         >
           <div className="flex items-center">
-            {/* <Button
+            <Button
               variant="secondary"
               type="button"
               onClick={async () => {
                 try {
                   const access_token_lf =
                     localStorage.getItem("access_token_lf") || undefined;
-                  const result = await get_agent_export({
+
+                  // Build flow payload similar to Angular saveDetails
+                  const flowPayload = checked
+                    ? {
+                        id: currentFlow!.id,
+                        data: currentFlow!.data!,
+                        description,
+                        name,
+                        last_tested_version: version,
+                        endpoint_name: currentFlow!.endpoint_name,
+                        is_component: false,
+                        tags: currentFlow!.tags,
+                      }
+                    : removeApiKeys({
+                        id: currentFlow!.id,
+                        data: currentFlow!.data!,
+                        description,
+                        name,
+                        last_tested_version: version,
+                        endpoint_name: currentFlow!.endpoint_name,
+                        is_component: false,
+                        tags: currentFlow!.tags,
+                      });
+
+                  // const jsonContent = JSON.stringify({
+                  //   elements: [flowPayload], // Wrap in elements array like Angular does
+                  // });
+
+                  const result = await create_pipeline({
+                    alias: name || 'flow',
+                    description: description || 'Exported from Langflow UI',
+                    type: 'AIAgent', // Default type, can be made configurable
+                    interfaceType: 'pipeline',
+                    isTemplate: false,
+                    jsonContent: null,
+                    groups: [],
                     token: access_token_lf,
                   });
-                  console.log("get_agent_export response", result);
-                  setSuccessData({ title: "get_agent_export succeeded" });
-                  setOpen(false);
+
+                  console.log("create_pipeline response", result);
+                  const cname = result?.name;
+                  sessionStorage.removeItem('cname');
+                  
+                  // Store cname globally in sessionStorage for later use
+                  if (cname) {
+                    sessionStorage.setItem('cname', cname);
+                  }
+
+                  // First API call: create_native_file (upload script file)
+                  // Use the actual flow data instead of default script
+                  const actualFlowScript = JSON.stringify(flowPayload, null, 2);
+
+                  const scriptFormData = new FormData();
+                  const scriptBlob = new Blob([actualFlowScript], { type: 'application/json' });
+                  scriptFormData.set('scriptFile', scriptBlob);
+
+                  const scriptFileName = `${cname}_${name || 'flow'}.json`; // Use cname from sessionStorage
+                  const organization = 'leo1311'; // Default organization
+
+                  console.log("Calling create_native_file...");
+                 
+
+                  const nativeFileResponse = await create_native_file({
+                    pipelineName: sessionStorage.getItem('cname') || "", // Use cname from sessionStorage
+                    organization,
+                    fileName: scriptFileName,
+                    fileType: 'json', // Default file type
+                    scriptFormData,
+                    token: access_token_lf,
+                  });
+                  console.log("create_native_file response", nativeFileResponse);
+
+                  if (!result.cid) {
+                    console.error("No id in create_pipeline response, cannot update");
+                    setNoticeData({ title: "Failed to get pipeline ID for update" });
+                    return;
+                  }
+
+                  // Third API call: update_pipeline (update the pipeline with file info)
+                  const jsonContent = JSON.stringify({
+                    elements: [{
+                      attributes: {
+                        filetype: 'json',
+                        files: [scriptFileName],
+                        arguments: [],
+                        dsName: 'LEOMN-RM22869',
+                        type: 'REMOTE'
+                      }
+                    }],
+                    environment: [],
+                    default_runtime: { dsAlias: 'Sample-Remote', dsName: 'LEOMN-RM22869', type: 'REMOTE' }
+                  });
+
+                  const updatePayload = {
+                    cid: result.cid,
+                    alias: name || 'flow',
+                    name: cname,
+                    description: description || 'Exported from Langflow UI',
+                    jsonContent: jsonContent,
+                    type: 'AIAgent',
+                    organization: 'leo1311',
+                    interfacetype: 'pipeline',
+                    isTemplate: false,
+                    token: access_token_lf,
+                  };
+                  console.log("update_pipeline payload", updatePayload);
+
+                  const updateResponse = await update_pipeline(updatePayload);
+                  console.log("update_pipeline response", updateResponse);
+                  
+                  // Also save to local like the regular export button
+                  downloadFlow(
+                    flowPayload,
+                    name ?? "flow",
+                    description ?? ""
+                  );
+                  
+                  setSuccessData({ title: "Pipeline saved to DB and downloaded locally" });
                 } catch (err) {
-                  console.error("get_agent_export failed", err);
+                  console.error("create_pipeline failed", err);
                   setNoticeData({
-                    title: `get_agent_export failed: ${
+                    title: `Pipeline creation failed: ${
                       err instanceof Error ? err.message : "Unknown error"
                     }`,
                   });
@@ -202,7 +316,7 @@ const ExportModal = forwardRef(
               }}
             >
               Export to DB
-            </Button> */}
+            </Button>
           </div>
         </BaseModal.Footer>
       </BaseModal>

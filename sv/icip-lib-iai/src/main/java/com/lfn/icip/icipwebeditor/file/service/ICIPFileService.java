@@ -673,6 +673,9 @@ public class ICIPFileService {
 		case "javascript":
 			ext = "js";
 			break;
+        case "json":
+            ext = "json";
+            break;
 		case "yaml":
 		default:
 			ext = "yaml";

@@ -1,0 +1,46 @@
+<div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
+
+  <!-- Header Section -->
+  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="false"
+    (search)="onSearch($event)" (refresh)="onRefresh()" >
+  </app-aip-header>
+
+  <!-- Filter Section -->
+  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPipelineTypeList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }" (tagSelected)="onTagSelected($event)"
+    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+
+
+  <!-- Loading State -->
+  <div *ngIf="loading" role="status" aria-label="Loading cards">
+    <app-aip-loading></app-aip-loading>
+  </div>
+
+  <!-- Content Area (only shown when not loading) -->
+  <ng-container *ngIf="!loading">
+
+    <!-- Cards container -->
+    <div *ngIf="paginatedCards.length > 0" class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll"
+      aria-label="Pipeline agent cards">
+      <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
+
+        <!-- Cards  -->
+        <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+          [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)" (edit)="editPipeline(card.cid)"
+          (delete)="deletePipeline(card.cid)" (jobConsole)="jobConsole(card.name)">
+        </app-aip-card>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
+
+    <!-- Pagination -->
+    <app-aip-pagination *ngIf="shouldShowPagination" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
+      [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates"
+      (prevPage)="onPrevPage()" (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
+    </app-aip-pagination>
+
+  </ng-container>
+</div>
