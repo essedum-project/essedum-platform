@@ -107,7 +107,7 @@ export class AgentPipelineComponent implements OnInit {
   agentCards: AgentCard[] = [
     {
       cid: '1',
-      cname: 'customer-support-agent-v1',
+      cname: 'YL79B9', // Short alphanumeric cname for Customer Support Agent
       name: 'customer-support-agent',
       alias: 'Customer Support Agent',
       description: 'AI-powered customer support agent with knowledge base integration and ticket management',
@@ -123,7 +123,7 @@ export class AgentPipelineComponent implements OnInit {
     },
     {
       cid: '2',
-      cname: 'data-analysis-agent-v2',
+      cname: 'MK84C7', // Short alphanumeric cname for Data Analysis Agent
       name: 'data-analysis-agent',
       alias: 'Data Analysis Agent',
       description: 'Automated data analysis and visualization agent for business intelligence',
@@ -139,7 +139,7 @@ export class AgentPipelineComponent implements OnInit {
     },
     {
       cid: '3',
-      cname: 'code-review-agent-v1',
+      cname: 'QR53F1', // Short alphanumeric cname for Code Review Agent
       name: 'code-review-agent',
       alias: 'Code Review Agent',
       description: 'Intelligent code review agent that analyzes pull requests and suggests improvements',
@@ -234,10 +234,23 @@ export class AgentPipelineComponent implements OnInit {
       this.viewMode = 'list';
       this.selectedAgent = null;
       // Clear current state - data will be fetched fresh from API when we return
-      this.resetToInitialState();
+      this.resetToDashboardState();
     } else {
       this.location.back();
     }
+  }
+
+  // Reset state when going back to dashboard
+  private resetToDashboardState(): void {
+    this.selectedFileName = '';
+    this.selectedFileContent = '';
+    this.isJsonProcessed = false;
+    this.hasGeneratedAgent = false;
+    this.currentCname = ''; // Clear cname when going back to dashboard
+    this.fileSystemData = [];
+    this.consoleOutput = [];
+    this.clearFileSelection();
+    console.log('Reset state for dashboard navigation');
   }
 
   onSearch(searchTerm: string): void {
@@ -271,9 +284,19 @@ export class AgentPipelineComponent implements OnInit {
     this.selectedAgent = agent;
     this.viewMode = 'detail';
     
-    // Always use the agent's fixed cname and fetch its current state from API
-    console.log('Loading agent with cname:', agent.cname);
-    this.checkAndLoadAgentData(agent.cname);
+    // Special handling for QR53F1 - generate new cname each time
+    if (agent.cname === 'QR53F1') {
+      // Generate a new random cname for fresh generation
+      this.currentCname = this.agentPipelineService.generateRandomCname();
+      console.log('QR53F1 detected - using new random cname:', this.currentCname);
+      // Always show fresh generation state
+      this.resetToInitialStateForNewAgent();
+    } else {
+      // For other agents, use their fixed cname
+      this.currentCname = agent.cname;
+      console.log('Loading agent with fixed cname:', agent.cname);
+      this.checkAndLoadAgentData(agent.cname);
+    }
     
     // Update JSON content based on selected agent
     this.updateJsonContent(agent);
@@ -1574,6 +1597,7 @@ public class ZipController {
       agentName: this.selectedAgent.name,
       version: this.selectedAgent.version,
       description: this.selectedAgent.description,
+      cname: this.currentCname, // Use the agent's fixed cname
       configuration: {
         model: 'gpt-4',
         temperature: 0.7,
@@ -1592,16 +1616,17 @@ public class ZipController {
 
     this.consoleOutput.push('Calling agent generation API...');
     console.log('About to call agentPipelineService.generateSDKAgent with payload:', agentRequest);
+    console.log('Using fixed cname:', this.currentCname);
     
     // Call the real API
     this.agentPipelineService.generateSDKAgent(agentRequest).subscribe({
       next: (response) => {
         this.consoleOutput.push('✓ Agent generation API call successful');
-        this.consoleOutput.push(`✓ Container Name: ${response.cname}`);
+        this.consoleOutput.push(`✓ Container Name: ${this.currentCname}`);
         this.consoleOutput.push('✓ Processing agent files...');
         
-        // Store the container name for future API calls
-        this.currentCname = response.cname || '';
+        // Keep using the agent's fixed cname (don't change it)
+        console.log('Using fixed cname for agent:', this.currentCname);
         
         // Process the file structure directly from the response
         console.log('Building file tree from API response:', response.fileStructure);
@@ -1895,9 +1920,6 @@ public class ZipController {
   private checkAndLoadAgentData(cname: string): void {
     console.log('Fetching data for agent cname:', cname);
     
-    // Set the current cname immediately
-    this.currentCname = cname;
-    
     // Try to fetch files for this specific cname
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
@@ -1910,7 +1932,7 @@ public class ZipController {
       error: (error) => {
         console.log('No existing files found for cname:', cname, error);
         // No files exist yet - show initial state with script tab only
-        this.resetToInitialState();
+        this.resetToInitialStateForNewAgent();
         this.isLoadingFiles = false;
       }
     });
@@ -1940,15 +1962,16 @@ public class ZipController {
   }
 
   // Reset to initial state (no saved data)
-  private resetToInitialState(): void {
+  private resetToInitialStateForNewAgent(): void {
     this.selectedFileName = '';
     this.selectedFileContent = '';
-    this.isJsonProcessed = true; // Show JSON and console directly
+    this.isJsonProcessed = false; // Show script tab only (not JSON/console)
     this.hasGeneratedAgent = false; // Reset playground button state
-    this.currentCname = ''; // Reset container name
+    // Don't reset currentCname - keep the agent's fixed cname
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
+    console.log('Reset to initial state for new agent with cname:', this.currentCname);
   }
 
   // Clear file selection

@@ -26,6 +26,7 @@ export interface AgentGenerationRequest {
   agentName: string;
   version: string;
   description: string;
+  cname: string; // Fixed container name for the agent
   configuration: any;
   runtime: any;
 }
@@ -49,9 +50,9 @@ export class AgentPipelineService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Generate random cname (container name)
+   * Generate random cname (container name) for fresh agents
    */
-  private generateRandomCname(): string {
+  generateRandomCname(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < 6; i++) {
@@ -64,11 +65,13 @@ export class AgentPipelineService {
    * Generate SDK Agent by calling the real API
    */
   generateSDKAgent(agentRequest: AgentGenerationRequest): Observable<AgentGenerationResponse> {
-    const cname = this.generateRandomCname();
+    // Use the cname from the request instead of generating a random one
+    const cname = agentRequest.cname;
     const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;
     
     console.log('Calling agent generation API:', url);
     console.log('Request payload:', agentRequest);
+    console.log('Using cname from request:', cname);
     console.log('Making HTTP POST request to:', url);
     
     return this.http.post<any>(url, agentRequest).pipe(
@@ -83,7 +86,7 @@ export class AgentPipelineService {
               message: 'Agent generated successfully',
               fileStructure: filesList,
               generatedCode: response.generatedCode || {},
-              cname: cname
+              cname: cname // Return the same cname that was used
             } as AgentGenerationResponse;
           })
         );
@@ -174,7 +177,7 @@ export class AgentPipelineService {
    * Get files for a specific container/user
    */
   getAgentFiles(cname: string): Observable<any[]> {
-    const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;
+    const url = `${this.baseUrl}/folder/list/${cname}/${this.orgName}`;
     
     console.log('Fetching agent files from:', url);
     
