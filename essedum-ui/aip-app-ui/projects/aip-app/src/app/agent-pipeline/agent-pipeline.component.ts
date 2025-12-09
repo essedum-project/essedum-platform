@@ -2,7 +2,8 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { GithubLoginComponent } from './github-login/github-login.component';
+import { Services } from '../services/service';
+import { AgentPipelineService, FileNode as ServiceFileNode, AgentGenerationRequest, ICIPAiAgentScript } from './agent-pipeline.service';
 
 interface FileNode {
   name: string;
@@ -14,126 +15,9 @@ interface FileNode {
   expanded?: boolean; // Add expanded state for folders
 }
 
-// API Configuration
-const API_CONFIG = {
-  baseUrl: 'http://localhost:8080',
-  endpoints: {
-    uploadZip: '/api/zip/upload',
-    getUserFiles: '/api/zip/user/{userId}',
-    downloadFile: '/api/zip/download/{fileId}'
-  }
-};
-
-// Sample API structure for reference
-const SAMPLE_API_SPEC = {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "OpenAPI definition",
-    "version": "v0"
-  },
-  "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Generated server url"
-    }
-  ],
-  "paths": {
-    "/api/zip/upload": {
-      "post": {
-        "tags": ["zip-controller"],
-        "operationId": "uploadZip",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "required": true,
-            "schema": {"type": "string"}
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "required": ["file"],
-                "type": "object",
-                "properties": {
-                  "file": {"type": "string", "format": "binary"}
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {"*/*": {"schema": {"type": "string"}}}
-          }
-        }
-      }
-    },
-    "/api/zip/user/{userId}": {
-      "get": {
-        "tags": ["zip-controller"],
-        "operationId": "getFilesForUser",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {"type": "string"}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": {"type": "string"}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/zip/download/{fileId}": {
-      "get": {
-        "tags": ["zip-controller"],
-        "operationId": "downloadFile",
-        "parameters": [
-          {
-            "name": "fileId",
-            "in": "path",
-            "required": true,
-            "schema": {"type": "integer", "format": "int64"}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {"type": "string", "format": "byte"}
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {}
-};
-
 interface AgentCard {
   cid: string;
+  cname: string; // Fixed container name for this agent
   name: string;
   alias: string;
   description: string;
@@ -148,6 +32,20 @@ interface AgentCard {
   hover?: boolean;
 }
 
+// Interface for persisting agent state
+interface AgentState {
+  cname: string;
+  hasGeneratedAgent: boolean;
+  fileSystemData: FileNode[];
+  isJsonProcessed: boolean;
+  consoleOutput: string[];
+  selectedFileName?: string;
+  selectedFileContent?: string;
+  selectedFilePath?: string;
+  fileExtension?: string;
+  originalFileContent?: string;
+}
+
 @Component({
   selector: 'app-agent-pipeline',
   templateUrl: './agent-pipeline.component.html',
@@ -159,6 +57,7 @@ export class AgentPipelineComponent implements OnInit {
   
   // API-related properties
   currentUserId: string = 'user123'; // Default user ID for testing
+  currentCname: string = ''; // Current container/agent name
   isLoadingFiles: boolean = false;
   // View mode: 'list' shows cards, 'detail' shows script/generate tabs
   viewMode: 'list' | 'detail' = 'list';
@@ -204,10 +103,11 @@ export class AgentPipelineComponent implements OnInit {
   commitMessage = '';
   isPushing = false;
   
-  // Hardcoded agent cards
+  // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
     {
       cid: '1',
+      cname: 'customer-support-agent-v1',
       name: 'customer-support-agent',
       alias: 'Customer Support Agent',
       description: 'AI-powered customer support agent with knowledge base integration and ticket management',
@@ -223,6 +123,7 @@ export class AgentPipelineComponent implements OnInit {
     },
     {
       cid: '2',
+      cname: 'data-analysis-agent-v2',
       name: 'data-analysis-agent',
       alias: 'Data Analysis Agent',
       description: 'Automated data analysis and visualization agent for business intelligence',
@@ -238,6 +139,7 @@ export class AgentPipelineComponent implements OnInit {
     },
     {
       cid: '3',
+      cname: 'code-review-agent-v1',
       name: 'code-review-agent',
       alias: 'Code Review Agent',
       description: 'Intelligent code review agent that analyzes pull requests and suggests improvements',
@@ -278,12 +180,19 @@ export class AgentPipelineComponent implements OnInit {
   
   // Track user modifications vs API content
   isUserModifiedContent = false;
-  userModifiedLines: Set<number> = new Set();
   
-  // Virtual scrolling for line numbers
-  visibleLineCount = 50; // Show 50 lines initially
-  currentLineOffset = 0;
-  totalLineCount = 0;
+  // Virtual scrolling properties
+  visibleLineStart: number = 0;
+  visibleLineEnd: number = 50;
+  maxVisibleLines: number = 50;
+  currentLineOffset: number = 0;
+  visibleLineCount: number = 50;
+  totalLineCount: number = 100;
+  
+  // Additional dialog properties
+  showUnsavedDialog = false;
+  pendingAction: (() => void) | null = null;
+  userModifiedLines: Set<number> = new Set();
   scrollContainer: HTMLElement | null = null;
   
   // Drag and Drop functionality
@@ -292,6 +201,14 @@ export class AgentPipelineComponent implements OnInit {
   dropTarget: FileNode | null = null;
   showSaveStructureDialog = false;
   originalFileStructure: FileNode[] = [];
+  
+  // Save confirmation dialog
+  showSaveConfirmationDialog = false;
+  pendingNavigation: FileNode | null = null;
+  
+  // Delete confirmation dialog
+  showDeleteDialog = false;
+  isDownloading = false;
   
   // Hover states
   isHoveredBack = false;
@@ -303,7 +220,9 @@ export class AgentPipelineComponent implements OnInit {
     private location: Location,
     private router: Router,
     private route: ActivatedRoute,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private agentPipelineService: AgentPipelineService,
+    private service: Services
   ) {}
 
   ngOnInit(): void {
@@ -314,9 +233,8 @@ export class AgentPipelineComponent implements OnInit {
     if (this.viewMode === 'detail') {
       this.viewMode = 'list';
       this.selectedAgent = null;
-      this.isJsonProcessed = false;
-      this.hasGeneratedAgent = false;
-      this.fileSystemData = [];
+      // Clear current state - data will be fetched fresh from API when we return
+      this.resetToInitialState();
     } else {
       this.location.back();
     }
@@ -353,22 +271,19 @@ export class AgentPipelineComponent implements OnInit {
     this.selectedAgent = agent;
     this.viewMode = 'detail';
     
-    // Reset file selection and processing state
-    this.selectedFileName = '';
-    this.selectedFileContent = '';
-    this.isJsonProcessed = true; // Show JSON and console directly
-    this.hasGeneratedAgent = false; // Reset playground button state
+    // Always use the agent's fixed cname and fetch its current state from API
+    console.log('Loading agent with cname:', agent.cname);
+    this.checkAndLoadAgentData(agent.cname);
     
     // Update JSON content based on selected agent
     this.updateJsonContent(agent);
-    // Don't generate file system data until agent is generated
   }
 
 
 
   // Save current file changes
   async saveFile(): Promise<void> {
-    if (!this.selectedFileNode || !this.isFileModified) {
+    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
       return;
     }
 
@@ -376,29 +291,103 @@ export class AgentPipelineComponent implements OnInit {
     try {
       console.log('Saving file:', this.selectedFileName);
       
-      // Simulate API call to save file content
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update the node content first
+      this.selectedFileNode.content = this.selectedFileContent;
       
-      // In a real implementation, this would call the backend API
-      console.log('File saved successfully:', {
-        fileId: this.selectedFileNode.id,
-        fileName: this.selectedFileName,
-        path: this.selectedFilePath,
-        contentLength: this.selectedFileContent.length
-      });
+      // Call the bulk update API with the modified file
+      const result = await this.agentPipelineService.updateFileContent(
+        this.currentCname,
+        this.selectedFileNode.id!,
+        this.selectedFileName,
+        this.selectedFileContent,
+        this.selectedFilePath
+      ).toPromise();
+      
+      console.log('File saved successfully via bulk update API:', result);
       
       this.isFileModified = false;
-      
-      // Show success message (you can add a snackbar here)
-      console.log('File saved successfully!');
+      this.isUserModifiedContent = false;
+      this.userModifiedLines.clear();
       
       // Update original content and reset diff tracking after successful save
       this.originalFileContent = this.selectedFileContent;
       this.resetDiffTracking();
       
+      // Show success message with properly formatted response
+      const successResponse = { status: 200, body: result || [] };
+      this.service.messageService(successResponse, 'File saved successfully!');
+      
     } catch (error) {
       console.error('Error saving file:', error);
-      // Show error message (you can add a snackbar here)
+      // Show error message
+      this.service.messageService(error);
+    } finally {
+      this.isSavingFile = false;
+    }
+  }
+
+  // Show delete confirmation dialog
+  showDeleteConfirmation(): void {
+    if (!this.selectedFileNode || !this.currentCname || !this.selectedFileName) {
+      console.log('Cannot delete: missing file info', {
+        hasFileNode: !!this.selectedFileNode,
+        hasCname: !!this.currentCname,
+        hasFileName: !!this.selectedFileName
+      });
+      return;
+    }
+    
+    if (this.isSavingFile) {
+      console.log('Cannot delete: file is currently being saved');
+      return;
+    }
+    
+    console.log('Showing delete confirmation for:', this.selectedFileName);
+    this.showDeleteDialog = true;
+  }
+
+  // Delete current file
+  async deleteFile(): Promise<void> {
+    if (!this.selectedFileNode || !this.currentCname) {
+      return;
+    }
+
+    this.isSavingFile = true; // Reuse the saving flag for UI state
+    try {
+      console.log('Deleting file:', this.selectedFileName);
+      
+      // Call the delete API
+      const result = await this.agentPipelineService.deleteFile(
+        this.currentCname,
+        'leo1311', // Fixed org name as used in other APIs
+        this.selectedFilePath,
+        this.selectedFileName
+      ).toPromise();
+      
+      console.log('File deleted successfully:', result);
+      
+      // Update the file tree with the response
+      if (result && Array.isArray(result)) {
+        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(result);
+      }
+      
+      // Clear the editor
+      this.selectedFileName = '';
+      this.selectedFileContent = '';
+      this.selectedFileNode = null;
+      this.selectedFilePath = '';
+      this.isFileModified = false;
+      this.userModifiedLines.clear();
+      this.resetDiffTracking();
+      
+      // Show success message with properly formatted response
+      const successResponse = { status: 200, body: result || [] };
+      this.service.messageService(successResponse, 'File deleted successfully!');
+      
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      // Show error message
+      this.service.messageService(error);
     } finally {
       this.isSavingFile = false;
     }
@@ -407,17 +396,19 @@ export class AgentPipelineComponent implements OnInit {
   // Close file with unsaved changes check
   closeFile(): void {
     if (this.isFileModified) {
-      const shouldProceed = confirm('You have unsaved changes. Do you want to close without saving?');
-      if (!shouldProceed) {
-        return;
-      }
+      console.log('Showing save confirmation dialog for file close');
+      this.pendingNavigation = null; // No specific navigation target, just closing
+      this.showSaveConfirmationDialog = true;
+      return;
     }
     
+    // No unsaved changes, close immediately
     this.selectedFileName = '';
     this.selectedFileContent = '';
     this.selectedFileNode = null;
     this.selectedFilePath = '';
     this.isFileModified = false;
+    this.userModifiedLines.clear();
     this.resetDiffTracking();
   }
 
@@ -486,135 +477,34 @@ export class AgentPipelineComponent implements OnInit {
   }
 
   updateFileSystemData(agent: AgentCard): void {
+    // This method is now replaced by loadAgentFiles()
+    // which is called after successful agent generation
+    this.loadAgentFiles();
+  }
+  
+  loadAgentFiles(): void {
+    if (!this.currentCname) {
+      console.warn('No container name available for loading files');
+      return;
+    }
+
     this.isLoadingFiles = true;
     
-    // Use hardcoded API simulation that matches exact endpoint behavior
-    this.fetchUserFiles(this.currentUserId)
-      .then(apiResponse => {
+    this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
+      next: (apiResponse) => {
         console.log('Building file tree from API response:', apiResponse);
-        this.fileSystemData = this.buildFileTreeFromApiResponse(apiResponse);
+        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
         this.isLoadingFiles = false;
-      })
-      .catch(error => {
-        console.error('Error loading files:', error);
+      },
+      error: (error) => {
+        console.error('Error loading agent files:', error);
         this.isLoadingFiles = false;
-        // Fallback to empty structure
         this.fileSystemData = [];
-      });
-  }
-  
-  // Build nested file tree structure from flat API response
-  buildFileTreeFromApiResponse(apiResponse: any[]): FileNode[] {
-    const root: FileNode = { name: 'root', type: 'folder', children: [] };
-    
-    apiResponse.forEach(item => {
-      const pathParts = item.path.split('/');
-      let currentNode = root;
-      
-      // Navigate/create the directory structure
-      for (let i = 0; i < pathParts.length; i++) {
-        const part = pathParts[i];
-        const isFile = i === pathParts.length - 1;
         
-        if (!currentNode.children) {
-          currentNode.children = [];
-        }
-        
-        // Find existing node or create new one
-        let existingNode = currentNode.children.find(child => child.name === part);
-        
-        if (!existingNode) {
-          existingNode = {
-            name: part,
-            type: isFile ? 'file' : 'folder',
-            id: isFile ? item.id : undefined,
-            path: isFile ? item.path : undefined,
-            children: isFile ? undefined : [],
-            expanded: isFile ? undefined : true // Default folders to expanded
-          };
-          currentNode.children.push(existingNode);
-        }
-        
-        currentNode = existingNode;
+        // Show error message to user
+        alert(`Failed to load agent files: ${error.message}`);
       }
     });
-    
-    // Sort the tree alphabetically (folders first, then files)
-    this.sortFileTree(root);
-    
-    return root.children || [];
-  }
-
-  // Sort file tree alphabetically (folders first, then files)
-  private sortFileTree(node: FileNode): void {
-    if (node.children && node.children.length > 0) {
-      // Sort children: folders first, then files, both alphabetically
-      node.children.sort((a, b) => {
-        // If one is folder and other is file, folder comes first
-        if (a.type !== b.type) {
-          return a.type === 'folder' ? -1 : 1;
-        }
-        // Both are same type, sort alphabetically (case-insensitive)
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-      });
-      
-      // Recursively sort children of folders
-      node.children.forEach(child => {
-        if (child.type === 'folder') {
-          this.sortFileTree(child);
-        }
-      });
-    }
-  }
-  
-  // Method to fetch files from API (hardcoded for now with exact API structure)
-  async fetchUserFiles(userId: string): Promise<any[]> {
-    try {
-      // Simulate the API call with exact endpoint structure
-      console.log(`Calling GET ${API_CONFIG.baseUrl}${API_CONFIG.endpoints.getUserFiles.replace('{userId}', userId)}`);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Return exact API response structure as provided
-      const response = [
-        { "path": "pom.xml", "fileName": "pom.xml", "id": "1" },
-        { "path": "src/main/resources/application.properties", "fileName": "application.properties", "id": "2" },
-        { "path": "src/main/java/com/example/zipupload/ZipUploadApplication.java", "fileName": "ZipUploadApplication.java", "id": "3" },
-        { "path": "src/main/java/com/example/zipupload/service/ZipProcessingService.java", "fileName": "ZipProcessingService.java", "id": "4" },
-        { "path": "src/main/java/com/example/zipupload/repository/FileRepository.java", "fileName": "FileRepository.java", "id": "5" },
-        { "path": "src/main/java/com/example/zipupload/entity/FileEntity.java", "fileName": "FileEntity.java", "id": "6" },
-        { "path": "src/main/java/com/example/zipupload/controller/ZipController.java", "fileName": "ZipController.java", "id": "7" }
-      ];
-      
-      console.log('API Response:', response);
-      return response;
-    } catch (error) {
-      console.error('Failed to fetch user files:', error);
-      return [];
-    }
-  }
-  
-  // Method to download file content from API (hardcoded for now with exact API structure)
-  async downloadFileContent(fileId: string): Promise<string> {
-    try {
-      // Simulate the API call with exact endpoint structure
-      console.log(`Calling GET ${API_CONFIG.baseUrl}${API_CONFIG.endpoints.downloadFile.replace('{fileId}', fileId)}`);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // API returns byte array according to OpenAPI spec
-      // Simulate converting byte array response to string content
-      const byteArrayResponse = this.simulateByteArrayResponse(fileId);
-      const content = this.convertByteArrayToString(byteArrayResponse);
-      
-      console.log(`Downloaded file ${fileId}, content length: ${content.length}`);
-      return content;
-    } catch (error) {
-      console.error('Failed to download file:', error);
-      return 'Error loading file content';
-    }
   }
   
   // Track user modifications for neon green highlighting
@@ -644,6 +534,15 @@ export class AgentPipelineComponent implements OnInit {
         this.userModifiedLines.add(i);
       }
     }
+    
+    // Don't set isUserModifiedContent to prevent whole textarea styling
+    
+    console.log('User modification tracking complete:', {
+      modifiedLines: this.userModifiedLines.size,
+      totalOriginalLines: originalLines.length,
+      totalCurrentLines: currentLines.length,
+      modifiedLineNumbers: Array.from(this.userModifiedLines)
+    });
   }
   
   // Get CSS class for user-modified lines
@@ -661,10 +560,6 @@ export class AgentPipelineComponent implements OnInit {
       this.scrollContainer.addEventListener('scroll', this.onLineNumbersScroll.bind(this));
     }
     this.updateTotalLineCount();
-  }
-  
-  updateTotalLineCount(): void {
-    this.totalLineCount = this.selectedFileContent.split('\n').length;
   }
   
   onLineNumbersScroll(event: Event): void {
@@ -688,6 +583,195 @@ export class AgentPipelineComponent implements OnInit {
     const start = this.currentLineOffset;
     const end = Math.min(start + this.visibleLineCount, this.totalLineCount);
     return Array.from({length: end - start}, (_, i) => start + i + 1);
+  }
+  
+  // Sync line numbers with textarea scroll - fix dual scrollbar issue
+  onTextareaScroll(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    const scrollTop = textarea.scrollTop;
+    
+    // Calculate visible line range based on scroll position
+    const lineHeight = 20; // matches CSS line-height
+    this.currentLineOffset = Math.floor(scrollTop / lineHeight);
+    this.visibleLineStart = this.currentLineOffset;
+    this.visibleLineEnd = Math.min(this.visibleLineStart + this.visibleLineCount, this.totalLineCount);
+  }
+  
+  // Check if user can navigate away from unsaved changes
+  canNavigateAway(): boolean {
+    // Allow navigation if no modifications
+    if (!this.isFileModified) {
+      return true;
+    }
+    
+    // Block navigation if there are unsaved changes - show custom dialog instead of browser alert
+    console.log('Navigation blocked - unsaved changes detected');
+    return false;
+  }
+  
+  // Show save confirmation dialog before navigation
+  confirmNavigation(targetNode: FileNode): void {
+    if (this.canNavigateAway()) {
+      this.selectFile(targetNode);
+    } else {
+      this.pendingNavigation = targetNode;
+      this.showSaveConfirmationDialog = true;
+    }
+  }
+  
+  // Handle save and continue navigation
+  async saveAndContinue(): Promise<void> {
+    try {
+      await this.saveFile();
+      this.showSaveConfirmationDialog = false;
+      if (this.pendingNavigation) {
+        const targetNode = this.pendingNavigation;
+        this.pendingNavigation = null;
+        this.selectFile(targetNode);
+      }
+    } catch (error) {
+      console.error('Failed to save file:', error);
+      // Handle save error - maybe show error dialog
+    }
+  }
+  
+  // Handle discard changes and continue navigation
+  discardAndContinue(): void {
+    console.log('Discarding changes and continuing...');
+    
+    // Restore original content
+    this.selectedFileContent = this.originalFileContent;
+    this.isFileModified = false;
+    this.userModifiedLines.clear();
+    this.modifiedLines.clear();
+    this.addedLines.clear();
+    
+    this.showSaveConfirmationDialog = false;
+    
+    if (this.pendingNavigation) {
+      // Navigate to new file
+      const targetNode = this.pendingNavigation;
+      this.pendingNavigation = null;
+      this.selectFile(targetNode);
+    } else {
+      // Just close the current file
+      this.selectedFileName = '';
+      this.selectedFileContent = '';
+      this.selectedFileNode = null;
+      this.selectedFilePath = '';
+      this.isFileModified = false;
+      this.userModifiedLines.clear();
+      this.resetDiffTracking();
+    }
+  }
+  
+  // Cancel navigation and stay on current file
+  cancelNavigation(): void {
+    this.showSaveConfirmationDialog = false;
+    this.pendingNavigation = null;
+  }
+
+  /**
+   * Download all files as a ZIP archive
+   */
+  downloadAllFiles(): void {
+    if (!this.currentCname) {
+      console.error('No container name available for download');
+      return;
+    }
+
+    this.isDownloading = true;
+
+    this.agentPipelineService.downloadAllFilesAsZip(this.currentCname, 'leo1311')
+      .subscribe({
+        next: (blob: Blob) => {
+          // Create download link
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${this.currentCname}-leo1311.zip`;
+          
+          // Trigger download
+          document.body.appendChild(link);
+          link.click();
+          
+          // Cleanup
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          
+          console.log('Download completed successfully');
+          // Create a properly formatted success response for messageService
+          const successResponse = { status: 200, body: [] };
+          this.service.messageService(successResponse, 'Files downloaded successfully!');
+        },
+        error: (error) => {
+          console.error('Error downloading files:', error);
+          this.service.messageService(error);
+        },
+        complete: () => {
+          this.isDownloading = false;
+        }
+      });
+  }
+  
+  // Confirm delete action
+  confirmDelete(): void {
+    this.showDeleteDialog = false;
+    this.deleteFile();
+  }
+  
+  // Cancel delete action
+  cancelDelete(): void {
+    this.showDeleteDialog = false;
+  }
+  
+  // Show custom unsaved changes dialog
+  showUnsavedChangesDialog(action: () => void): void {
+    if (this.isFileModified) {
+      this.pendingAction = action;
+      this.showUnsavedDialog = true;
+    } else {
+      action();
+    }
+  }
+  
+  // Cancel unsaved dialog
+  cancelUnsavedDialog(): void {
+    this.showUnsavedDialog = false;
+    this.pendingAction = null;
+  }
+  
+  // Proceed without saving changes
+  proceedWithoutSaving(): void {
+    this.showUnsavedDialog = false;
+    
+    // Reset content to original
+    this.selectedFileContent = this.originalFileContent;
+    this.isFileModified = false;
+    this.userModifiedLines.clear();
+    
+    // Execute pending action
+    if (this.pendingAction) {
+      this.pendingAction();
+      this.pendingAction = null;
+    }
+  }
+  
+  // Save and then proceed with pending action
+  async saveAndProceed(): Promise<void> {
+    try {
+      await this.saveFile();
+      this.showUnsavedDialog = false;
+      
+      // Execute pending action after successful save
+      if (this.pendingAction) {
+        this.pendingAction();
+        this.pendingAction = null;
+      }
+    } catch (error) {
+      console.error('Failed to save file before proceeding:', error);
+      // Don't proceed if save failed
+    }
   }
   
   // Simulate byte array response from API
@@ -798,7 +882,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     const newContent = event.join('\n');
     if (newContent !== this.selectedFileContent) {
       this.isFileModified = true;
-      this.isUserModifiedContent = true;
+      // Don't set isUserModifiedContent to prevent whole editor styling
       this.updateDiffTracking(newContent);
       this.selectedFileContent = newContent;
       this.trackUserModifiedLines();
@@ -808,22 +892,60 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
 
   // Handle text content changes for non-Python files
   onTextContentChange(newContent: string): void {
-    if (newContent !== this.selectedFileContent) {
+    console.log('onTextContentChange called with content length:', newContent.length);
+    console.log('Current content length:', this.selectedFileContent.length);
+    console.log('Original content length:', this.originalFileContent.length);
+    
+    // Store the previous content for comparison
+    const previousContent = this.selectedFileContent;
+    
+    // Update the content
+    this.selectedFileContent = newContent;
+    
+    // Check if this represents a real change from the original
+    const hasChangesFromOriginal = this.selectedFileContent !== this.originalFileContent;
+    const hasChangesFromPrevious = this.selectedFileContent !== previousContent;
+    
+    console.log('Content comparison:', {
+      hasChangesFromOriginal,
+      hasChangesFromPrevious,
+      isTyping: hasChangesFromPrevious && hasChangesFromOriginal
+    });
+    
+    if (hasChangesFromOriginal) {
       this.isFileModified = true;
-      this.isUserModifiedContent = true;
+      // Don't set isUserModifiedContent to prevent textarea styling
       this.updateDiffTracking(newContent);
-      
-      // Update the actual content after diff tracking
-      this.selectedFileContent = newContent;
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
+      
+      console.log('Content changed - flags set:', {
+        isFileModified: this.isFileModified,
+        userModifiedLines: this.userModifiedLines.size
+      });
+    } else {
+      // Reset flags if content matches original
+      this.isFileModified = false;
+      this.userModifiedLines.clear();
+      
+      console.log('Content matches original - flags reset');
     }
+  }
+  
+  // Update total line count for virtual scrolling
+  updateTotalLineCount(): void {
+    this.totalLineCount = this.selectedFileContent.split('\n').length;
   }
 
   // Reset diff tracking
   resetDiffTracking(): void {
     this.modifiedLines.clear();
     this.addedLines.clear();
+  }
+  
+  // Get current lines for display
+  getCurrentLines(): string[] {
+    return this.selectedFileContent.split('\n');
   }
 
   // Update diff tracking when content changes
@@ -888,10 +1010,6 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   }
 
   // Get current line content for display
-  getCurrentLines(): string[] {
-    return this.selectedFileContent.split('\n');
-  }
-  
   // Toggle folder expand/collapse
   toggleFolder(node: FileNode, event: Event): void {
     event.stopPropagation(); // Prevent file selection when clicking folder toggle
@@ -971,7 +1089,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     
     // Add to target folder and sort
     targetFolder.children.push(sourceNode);
-    this.sortFileTree({children: targetFolder.children} as FileNode);
+    // Note: Sorting is handled by the service method
     
     // Update the selected file path if it's currently selected
     if (this.selectedFileNode === sourceNode) {
@@ -1042,13 +1160,31 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   
   // Save structure dialog methods
   saveNewFileStructure(): void {
-    // Dummy API call to save new structure
-    this.callSaveStructureAPI(this.fileSystemData).then(() => {
-      console.log('File structure saved successfully');
-      this.showSaveStructureDialog = false;
-      this.originalFileStructure = [];
-    }).catch(error => {
-      console.error('Failed to save file structure:', error);
+    if (!this.currentCname) {
+      console.error('No container name available for saving file structure');
+      return;
+    }
+    
+    // Call bulk update API to save new structure
+    this.agentPipelineService.updateFileStructure(this.currentCname, this.fileSystemData).subscribe({
+      next: (result) => {
+        console.log('File structure saved successfully via bulk update API:', result);
+        this.showSaveStructureDialog = false;
+        this.originalFileStructure = [];
+        
+        // Show success message with properly formatted response
+        const successResponse = { status: 200, body: result || [] };
+        this.service.messageService(successResponse, 'File structure updated successfully!');
+      },
+      error: (error) => {
+        console.error('Failed to save file structure:', error);
+        this.service.messageService(error);
+        
+        // Restore original structure on error
+        this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
+        this.showSaveStructureDialog = false;
+        this.originalFileStructure = [];
+      }
     });
   }
   
@@ -1058,18 +1194,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     this.showSaveStructureDialog = false;
     this.originalFileStructure = [];
   }
-  
-  private async callSaveStructureAPI(structure: FileNode[]): Promise<any> {
-    // Dummy API call
-    console.log('Calling API to save new file structure:', structure);
-    
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({success: true, message: 'File structure updated successfully'});
-      }, 1000);
-    });
-  }
+
 
   // Generate CSS background gradients for line diff highlighting
   getLineDiffStyles(): string {
@@ -1359,71 +1484,59 @@ public class ZipController {
   }
 
   // File system methods
-  async selectFile(node: FileNode): Promise<void> {
+  selectFile(node: FileNode): void {
     if (node.type === 'file') {
       // Check if there are unsaved changes before switching files
       if (this.isFileModified) {
-        const shouldProceed = confirm('You have unsaved changes. Do you want to proceed without saving?');
-        if (!shouldProceed) {
-          return;
-        }
+        // Use custom dialog instead of browser confirm
+        this.showUnsavedChangesDialog(() => {
+          this.proceedWithFileSelection(node);
+        });
+        return;
       }
 
-      this.selectedFileName = node.name;
-      this.selectedFileNode = node;
-      this.selectedFilePath = node.path || node.name;
-      this.isFileModified = false;
-      
-      // Set file extension
-      if (node.name.endsWith('.py')) {
-        this.fileExtension = 'py';
-      } else if (node.name.endsWith('.json')) {
-        this.fileExtension = 'json';
-      } else if (node.name.endsWith('.java')) {
-        this.fileExtension = 'java';
-      } else if (node.name.endsWith('.xml')) {
-        this.fileExtension = 'xml';
-      } else if (node.name.endsWith('.properties')) {
-        this.fileExtension = 'properties';
-      } else if (node.name.endsWith('.md')) {
-        this.fileExtension = 'markdown';
-      } else {
-        this.fileExtension = 'txt';
-      }
-      
-      // Load file content from API if node has an ID
-      if (node.id) {
-        this.selectedFileContent = 'Loading...';
-        try {
-          this.selectedFileContent = await this.downloadFileContent(node.id);
-          this.originalFileContent = this.selectedFileContent; // Store original content
-          this.isUserModifiedContent = false; // Reset user modification flag
-          this.userModifiedLines.clear(); // Clear user modified lines
-          this.resetDiffTracking(); // Reset diff tracking
-          
-          // Initialize virtual scrolling
-          this.currentLineOffset = 0;
-          this.updateTotalLineCount();
-          setTimeout(() => this.initializeVirtualScrolling(), 100);
-        } catch (error) {
-          console.error('Error loading file content:', error);
-          this.selectedFileContent = 'Error loading file content';
-        }
-      } else {
-        this.selectedFileContent = node.content || '';
-        this.originalFileContent = this.selectedFileContent; // Store original content
-        this.isUserModifiedContent = false; // Reset user modification flag
-        this.userModifiedLines.clear(); // Clear user modified lines
-        this.resetDiffTracking(); // Reset diff tracking
-        
-        // Initialize virtual scrolling
-        this.currentLineOffset = 0;
-        this.updateTotalLineCount();
-        setTimeout(() => this.initializeVirtualScrolling(), 100);
-      }
-      
-      console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Path:', this.selectedFilePath, 'Content length:', this.selectedFileContent.length);
+      // No unsaved changes, proceed directly
+      this.proceedWithFileSelection(node);
     }
+  }
+
+  // New method to handle file selection after confirmation
+  private async proceedWithFileSelection(node: FileNode): Promise<void> {
+    this.selectedFileName = node.name;
+    this.selectedFileNode = node;
+    this.selectedFilePath = node.path || node.name;
+    this.isFileModified = false;
+    
+    // Set file extension
+    if (node.name.endsWith('.py')) {
+      this.fileExtension = 'py';
+    } else if (node.name.endsWith('.json')) {
+      this.fileExtension = 'json';
+    } else if (node.name.endsWith('.java')) {
+      this.fileExtension = 'java';
+    } else if (node.name.endsWith('.xml')) {
+      this.fileExtension = 'xml';
+    } else if (node.name.endsWith('.properties')) {
+      this.fileExtension = 'properties';
+    } else if (node.name.endsWith('.md')) {
+      this.fileExtension = 'markdown';
+    } else {
+      this.fileExtension = 'txt';
+    }
+    
+    // Use content directly from the file node (already loaded from upload API)
+    this.selectedFileContent = node.content || 'No content available';
+    this.originalFileContent = this.selectedFileContent; // Store original content
+    this.isUserModifiedContent = false; // Reset user modification flag
+    this.userModifiedLines.clear(); // Clear user modified lines
+    this.resetDiffTracking(); // Reset diff tracking
+    
+    // Initialize virtual scrolling
+    this.currentLineOffset = 0;
+    this.updateTotalLineCount();
+    setTimeout(() => this.initializeVirtualScrolling(), 100);
+    
+    console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Path:', this.selectedFilePath, 'Content length:', this.selectedFileContent.length);
   }
 
   isFileSelected(node: FileNode): boolean {
@@ -1440,67 +1553,90 @@ public class ZipController {
 
   // Generate SDK Agent
   generateSDKAgent(): void {
+    if (!this.selectedAgent) {
+      console.error('No agent selected');
+      return;
+    }
+
     this.isGenerating = true;
-    this.hasGeneratedAgent = false; // Reset flag when starting new generation
+    this.hasGeneratedAgent = false;
     this.consoleOutput = [];
     
-    const agentName = this.selectedAgent ? this.selectedAgent.alias : 'Agent';
-    const version = this.selectedAgent ? this.selectedAgent.version : '1.0.0';
+    const agentName = this.selectedAgent.alias;
+    const version = this.selectedAgent.version;
     
-    // Simulate console output
-    const messages = [
-      `Starting SDK Agent generation for ${agentName}...`,
-      'Initializing build environment...',
-      'Installing dependencies...',
-      '  - openai>=1.0.0',
-      '  - requests>=2.28.0',
-      '  - python-dotenv>=0.19.0',
-      '  - pandas>=2.0.0',
-      '  - numpy>=1.24.0',
-      'Setting up project structure...',
-      '  - Created src/ directory',
-      '  - Created tests/ directory',
-      '  - Generated main.py',
-      '  - Generated tools.py',
-      '  - Generated config.py',
-      'Running validation checks...',
-      '  ✓ Configuration valid',
-      '  ✓ Dependencies resolved',
-      '  ✓ Code syntax valid',
-      '  ✓ All tests passed',
-      'Building agent package...',
-      'Compiling bytecode...',
-      'Creating distribution...',
-      'Packaging complete!',
-      `SDK Agent generated successfully for ${agentName}!`,
-      '',
-      `Output: ./dist/${this.selectedAgent?.name}-v${version}.tar.gz`,
-      `Size: 2.4 MB`,
-      '',
-      'Loading file structure for Essedum Codespace...'
-    ];
+    // Add initial console output
+    this.consoleOutput.push(`Starting SDK Agent generation for ${agentName}...`);
+    this.consoleOutput.push('Preparing agent configuration...');
+    
+    // Prepare the request payload
+    const agentRequest: AgentGenerationRequest = {
+      agentName: this.selectedAgent.name,
+      version: this.selectedAgent.version,
+      description: this.selectedAgent.description,
+      configuration: {
+        model: 'gpt-4',
+        temperature: 0.7,
+        maxTokens: 2000,
+        tools: this.getToolsForAgent(this.selectedAgent.name)
+      },
+      runtime: {
+        type: this.selectedAgent.language,
+        dependencies: [
+          'openai>=1.0.0',
+          'requests>=2.28.0',
+          'python-dotenv>=0.19.0'
+        ]
+      }
+    };
 
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < messages.length) {
-        this.consoleOutput.push(messages[index]);
-        index++;
-      } else {
-        clearInterval(interval);
-        this.isGenerating = false;
-        this.hasGeneratedAgent = true; // Show playground button after generation
+    this.consoleOutput.push('Calling agent generation API...');
+    console.log('About to call agentPipelineService.generateSDKAgent with payload:', agentRequest);
+    
+    // Call the real API
+    this.agentPipelineService.generateSDKAgent(agentRequest).subscribe({
+      next: (response) => {
+        this.consoleOutput.push('✓ Agent generation API call successful');
+        this.consoleOutput.push(`✓ Container Name: ${response.cname}`);
+        this.consoleOutput.push('✓ Processing agent files...');
         
-        // Generate file structure for Essedum Codespace
-        if (this.selectedAgent) {
-          this.updateFileSystemData(this.selectedAgent);
-        }
+        // Store the container name for future API calls
+        this.currentCname = response.cname || '';
+        
+        // Process the file structure directly from the response
+        console.log('Building file tree from API response:', response.fileStructure);
+        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
+        
+        this.consoleOutput.push(`SDK Agent generated successfully for ${agentName}!`);
+        this.consoleOutput.push('');
+        this.consoleOutput.push(`Container: ${this.currentCname}`);
+        this.consoleOutput.push('Status: Ready for development');
+        
+        this.isGenerating = false;
+        this.hasGeneratedAgent = true;
+        
+        // Show success message with properly formatted response
+        const successResponse = { status: 200, body: response || [] };
+        this.service.messageService(successResponse, `SDK Agent '${agentName}' generated successfully!`);
         
         // Show playground popup after generation completes
         setTimeout(() => {
           this.openPlayground();
         }, 500);
+      },
+      error: (error) => {
+        console.error('Agent generation failed:', error);
+        this.consoleOutput.push('✗ Agent generation failed');
+        this.consoleOutput.push(`Error: ${error.message}`);
+        this.consoleOutput.push('Please check the server connection and try again.');
+        
+        this.isGenerating = false;
+        this.hasGeneratedAgent = false;
+        
+        // Show error message to user
+        this.service.messageService(error);
       }
-    }, 300);
+    });
   }
 
   clearConsole(): void {
@@ -1635,27 +1771,8 @@ public class ZipController {
   }
 
   private openGitHubLoginDialog(): void {
-    const dialogRef = this.dialog.open(GithubLoginComponent, {
-      width: '450px',
-      maxWidth: '90vw',
-      disableClose: true,
-      panelClass: 'github-login-dialog'
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.token) {
-        // Save authentication data
-        localStorage.setItem('github_token', result.token);
-        localStorage.setItem('github_username', result.username);
-        this.githubUsername = result.username;
-        // Now open the GitHub push dialog
-        this.showGitHubPush = true;
-        if (this.selectedAgent && !this.githubRepoName) {
-          this.githubRepoName = `${this.selectedAgent.name}-sdk`;
-        }
-        this.loadAvailableBranches();
-      }
-    });
+    // TODO: Implement proper GitHub login dialog
+    alert('GitHub authentication not implemented yet. Please add your GitHub token manually to localStorage.');
   }
   
   closeGitHubPush(): void {
@@ -1772,5 +1889,78 @@ public class ZipController {
     
     nodes.forEach(node => processNode(node));
     return files;
+  }
+
+  // Check and load agent data using the fixed cname
+  private checkAndLoadAgentData(cname: string): void {
+    console.log('Fetching data for agent cname:', cname);
+    
+    // Set the current cname immediately
+    this.currentCname = cname;
+    
+    // Try to fetch files for this specific cname
+    this.isLoadingFiles = true;
+    this.agentPipelineService.getAgentFiles(cname).subscribe({
+      next: (apiResponse) => {
+        // Agent has generated files - load all data
+        console.log('Found existing files for cname:', cname, apiResponse);
+        this.loadExistingAgentFromAPI(apiResponse);
+        this.isLoadingFiles = false;
+      },
+      error: (error) => {
+        console.log('No existing files found for cname:', cname, error);
+        // No files exist yet - show initial state with script tab only
+        this.resetToInitialState();
+        this.isLoadingFiles = false;
+      }
+    });
+  }
+
+  // Load existing agent data from API
+  private loadExistingAgentFromAPI(fileData: any): void {
+    this.hasGeneratedAgent = true;
+    this.isJsonProcessed = true;
+    
+    // Build file tree from API response
+    this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+    
+    // Set console output to show that agent was loaded
+    this.consoleOutput = [
+      `SDK Agent loaded from existing data`,
+      `Container: ${this.currentCname}`,
+      `Status: Ready for development`,
+      `Files: ${fileData.length} files loaded`
+    ];
+    
+    console.log('Successfully loaded existing agent:', {
+      cname: this.currentCname,
+      hasFiles: this.fileSystemData.length > 0,
+      fileCount: fileData.length
+    });
+  }
+
+  // Reset to initial state (no saved data)
+  private resetToInitialState(): void {
+    this.selectedFileName = '';
+    this.selectedFileContent = '';
+    this.isJsonProcessed = true; // Show JSON and console directly
+    this.hasGeneratedAgent = false; // Reset playground button state
+    this.currentCname = ''; // Reset container name
+    this.fileSystemData = [];
+    this.consoleOutput = [];
+    this.clearFileSelection();
+  }
+
+  // Clear file selection
+  private clearFileSelection(): void {
+    this.selectedFileName = '';
+    this.selectedFileContent = '';
+    this.selectedFileNode = null;
+    this.selectedFilePath = '';
+    this.fileExtension = 'py';
+    this.isFileModified = false;
+    this.originalFileContent = '';
+    this.userModifiedLines.clear();
+    this.resetDiffTracking();
   }
 }

@@ -25,7 +25,7 @@ import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
 import { AipInterceptorService } from './services/interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 import {
@@ -250,6 +250,7 @@ const dbConfig: DBConfig = {
   ],
   imports: [
     CommonModule,
+    HttpClientModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
