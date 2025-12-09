@@ -155,9 +155,9 @@ public class GitHubIntegrationService {
     }
 
     /**
-     * Push ADK folder to GitHub repository
+     * Push ADK folder or file contents to GitHub repository
      *
-     * @param request Push request containing repo, branch, path details
+     * @param request Push request containing repo, branch, path/files details
      * @param token GitHub Personal Access Token
      * @param username GitHub username
      * @throws Exception if push fails
@@ -171,15 +171,32 @@ public class GitHubIntegrationService {
             GHRepository repo = github.getRepository(request.getRepoName());
             String remoteUrl = repo.getHttpTransportUrl();
 
-            gitStorageProvider.push(
-                request.getLocalPath(),
-                remoteUrl,
-                request.getBranch(),
-                request.getCommitMessage(),
-                username,
-                token,
-                verifySsl
-            );
+            // Check if files list is provided (new approach) or localPath (old approach)
+            if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+                log.info("Pushing {} files directly from content", request.getFiles().size());
+                gitStorageProvider.pushFileContents(
+                    request.getFiles(),
+                    remoteUrl,
+                    request.getBranch(),
+                    request.getCommitMessage(),
+                    username,
+                    token,
+                    verifySsl
+                );
+            } else if (request.getLocalPath() != null && !request.getLocalPath().isEmpty()) {
+                log.info("Pushing from local path: {}", request.getLocalPath());
+                gitStorageProvider.push(
+                    request.getLocalPath(),
+                    remoteUrl,
+                    request.getBranch(),
+                    request.getCommitMessage(),
+                    username,
+                    token,
+                    verifySsl
+                );
+            } else {
+                throw new IllegalArgumentException("Either 'files' or 'localPath' must be provided in the request");
+            }
 
             log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
                      request.getRepoName(), request.getBranch());

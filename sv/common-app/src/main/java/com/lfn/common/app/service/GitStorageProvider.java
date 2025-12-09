@@ -15,6 +15,9 @@
 
 package com.lfn.common.app.service;
 
+import com.lfn.common.app.web.rest.dto.FileContent;
+import java.util.List;
+
 /**
  * Interface for Git storage operations
  */
@@ -34,5 +37,20 @@ public interface GitStorageProvider {
      */
     void push(String localPath, String remoteUrl, String branch,
               String commitMessage, String username, String token, boolean verifySsl) throws Exception;
+
+    /**
+     * Push file contents directly to remote Git repository
+     *
+     * @param files List of files with their contents
+     * @param remoteUrl Remote Git repository URL
+     * @param branch Branch name to push to
+     * @param commitMessage Commit message
+     * @param username GitHub username
+     * @param token Personal Access Token
+     * @param verifySsl Whether to verify SSL certificates
+     * @throws Exception if push operation fails
+     */
+    void pushFileContents(List<FileContent> files, String remoteUrl, String branch,
+                         String commitMessage, String username, String token, boolean verifySsl) throws Exception;
 }
 

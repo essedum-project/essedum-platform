@@ -16,6 +16,7 @@
 package com.lfn.common.app.service.impl;
 
 import com.lfn.common.app.service.GitStorageProvider;
+import com.lfn.common.app.web.rest.dto.FileContent;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
@@ -30,6 +31,8 @@ import javax.net.ssl.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -218,6 +221,139 @@ public class JGitProvider implements GitStorageProvider {
         HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
 
         log.info("SSL verification bypass configured for JGit operations");
+    }
+
+    @Override
+    public void pushFileContents(List<FileContent> files, String remoteUrl, String branch,
+                                 String commitMessage, String username, String token, boolean verifySsl) throws Exception {
+        // Create a temporary directory for the repository
+        Path tempDir = Files.createTempDirectory("github-push-");
+        File repoDir = tempDir.toFile();
+
+        log.info("Starting push operation with {} files to branch: {}", files.size(), branch);
+        log.info("Using temporary directory: {}", tempDir);
+
+        try {
+            // Configure SSL bypass if needed
+            if (!verifySsl) {
+                log.warn("SSL verification is disabled for Git operations - DO NOT USE IN PRODUCTION");
+                configureInsecureSSL();
+            }
+
+            // Initialize git repository
+            try (Git git = Git.init().setDirectory(repoDir).call()) {
+                // Write all files to the temporary directory
+                for (FileContent file : files) {
+                    Path filePath = tempDir.resolve(file.getPath());
+
+                    // Create parent directories if they don't exist
+                    Files.createDirectories(filePath.getParent());
+
+                    // Write file content
+                    Files.write(filePath, file.getContent().getBytes(StandardCharsets.UTF_8));
+                    log.debug("Created file: {}", file.getPath());
+                }
+
+                // Configure credentials
+                UsernamePasswordCredentialsProvider credentials =
+                    new UsernamePasswordCredentialsProvider(username, token);
+
+                // Add remote
+                git.remoteAdd()
+                   .setName("origin")
+                   .setUri(new URIish(remoteUrl))
+                   .call();
+                log.info("Added remote origin: {}", remoteUrl);
+
+                // Create orphan branch (fresh start)
+                git.checkout()
+                   .setOrphan(true)
+                   .setName(branch)
+                   .call();
+                log.info("Created orphan branch: {}", branch);
+
+                // Add all files
+                git.add()
+                   .addFilepattern(".")
+                   .call();
+                log.info("Added all files to staging");
+
+                // Check status to see what's staged
+                org.eclipse.jgit.api.Status status = git.status().call();
+                log.info("Status - Added: {}, Changed: {}, Modified: {}, Untracked: {}",
+                        status.getAdded().size(), status.getChanged().size(),
+                        status.getModified().size(), status.getUntracked().size());
+
+                // Commit all files
+                org.eclipse.jgit.revwalk.RevCommit commit = git.commit()
+                   .setMessage(commitMessage)
+                   .setAuthor(username, username + "@github.com")
+                   .setAll(true)
+                   .call();
+                log.info("Created commit with message: {}, SHA: {}", commitMessage, commit.getName());
+
+                // Verify commit has files
+                try (org.eclipse.jgit.treewalk.TreeWalk treeWalk = new org.eclipse.jgit.treewalk.TreeWalk(git.getRepository())) {
+                    treeWalk.addTree(commit.getTree());
+                    treeWalk.setRecursive(true);
+                    int fileCount = 0;
+                    while (treeWalk.next()) {
+                        fileCount++;
+                        if (fileCount <= 5) { // Log first 5 files
+                            log.info("File in commit: {}", treeWalk.getPathString());
+                        }
+                    }
+                    log.info("Total files in commit: {}", fileCount);
+
+                    if (fileCount == 0) {
+                        throw new RuntimeException("Commit is empty - no files to push!");
+                    }
+                }
+
+                // Push to remote with force
+                log.info("Attempting to push to remote: origin, branch: {}, refSpec: refs/heads/{}:refs/heads/{}",
+                         branch, branch, branch);
+
+                Iterable<org.eclipse.jgit.transport.PushResult> pushResults = git.push()
+                   .setRemote("origin")
+                   .setRefSpecs(new RefSpec("refs/heads/" + branch + ":refs/heads/" + branch))
+                   .setCredentialsProvider(credentials)
+                   .setForce(true) // Force push since we're overwriting
+                   .call();
+
+                // Log push results
+                for (org.eclipse.jgit.transport.PushResult pushResult : pushResults) {
+                    log.info("Push result for remote: {}", pushResult.getURI());
+                    for (org.eclipse.jgit.transport.RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
+                        log.info("Remote update - Ref: {}, Status: {}, Message: {}",
+                                 update.getRemoteName(),
+                                 update.getStatus(),
+                                 update.getMessage());
+
+                        if (update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK
+                            && update.getStatus() != org.eclipse.jgit.transport.RemoteRefUpdate.Status.UP_TO_DATE) {
+                            log.error("Push failed for ref {} with status: {}, message: {}",
+                                      update.getRemoteName(), update.getStatus(), update.getMessage());
+                            throw new RuntimeException("Push failed: " + update.getStatus() + " - " + update.getMessage());
+                        }
+                    }
+                }
+
+                log.info("Successfully pushed {} files to {} on branch {}", files.size(), remoteUrl, branch);
+
+            } catch (GitAPIException e) {
+                log.error("Git operation failed: {}", e.getMessage(), e);
+                throw new RuntimeException("Git operation failed: " + e.getMessage(), e);
+            }
+        } finally {
+            // Clean up temporary directory
+            try {
+                deleteDirectory(repoDir);
+                log.info("Cleaned up temporary directory: {}", tempDir);
+            } catch (IOException e) {
+                log.warn("Failed to delete temporary directory: {}", tempDir, e);
+            }
+        }
     }
 }
 

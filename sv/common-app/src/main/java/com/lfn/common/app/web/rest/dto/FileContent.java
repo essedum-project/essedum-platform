@@ -15,59 +15,48 @@
 
 package com.lfn.common.app.web.rest.dto;
 
-import java.util.List;
-
 /**
- * DTO for GitHub Push Request
+ * DTO representing a file with its content to be pushed to GitHub
  */
-public class PushRequest {
-    private String repoName;
-    private String branch;
-    private String commitMessage;
-    private String localPath; // Kept for backward compatibility
-    private List<FileContent> files; // New: list of files with content
+public class FileContent {
+    private String path;
+    private String fileName;
+    private String id;
+    private String content;
 
-    public PushRequest() {
+    public FileContent() {
     }
 
-    public String getRepoName() {
-        return repoName;
+    public String getPath() {
+        return path;
     }
 
-    public void setRepoName(String repoName) {
-        this.repoName = repoName;
+    public void setPath(String path) {
+        this.path = path;
     }
 
-    public String getBranch() {
-        return branch;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setBranch(String branch) {
-        this.branch = branch;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getCommitMessage() {
-        return commitMessage;
+    public String getId() {
+        return id;
     }
 
-    public void setCommitMessage(String commitMessage) {
-        this.commitMessage = commitMessage;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getLocalPath() {
-        return localPath;
+    public String getContent() {
+        return content;
     }
 
-    public void setLocalPath(String localPath) {
-        this.localPath = localPath;
-    }
-
-    public List<FileContent> getFiles() {
-        return files;
-    }
-
-    public void setFiles(List<FileContent> files) {
-        this.files = files;
+    public void setContent(String content) {
+        this.content = content;
     }
 }
 
