@@ -15,20 +15,14 @@
 
 package com.lfn.icip.icipwebeditor.folder.service;
 
-import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
-import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.icip.dataset.service.impl.ICIPDatasetFilesService;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
 import com.lfn.icip.icipwebeditor.service.IICIPAiAgentService;
-import com.lfn.icip.icipwebeditor.service.IICIPStreamingServiceService;
-import com.lfn.icip.icipwebeditor.service.impl.*;
+import com.lfn.icip.icipwebeditor.service.impl.ICIPBinaryFilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -390,7 +384,6 @@ public class ICIPFolderService {
      * @param cname the cname
      * @param org   the org
      * @return the list
-     * @throws Exception the exception
      */
     public List<ICIPAiAgentScriptDTO> listAsDTO(String cname, String org) {
         logger.info("Listing scripts as DTO for cname: {}, org: {}", cname, org);
@@ -406,7 +399,21 @@ public class ICIPFolderService {
                 dto.setOrganization(script.getOrganization());
                 dto.setFilename(script.getFilename());
                 dto.setFilePath(script.getFilePath());
-                // Note: Not including blob content in DTO for performance
+
+                // Include blob content in DTO
+                if (script.getFilescript() != null) {
+                    try {
+                        Blob blob = script.getFilescript();
+                        byte[] blobBytes = blob.getBytes(1, (int) blob.length());
+                        String fileContent = new String(blobBytes, java.nio.charset.StandardCharsets.UTF_8);
+                        dto.setFilescript(fileContent);
+                    } catch (SQLException e) {
+                        logger.warn("Failed to read blob content for script: {} at path: {}. Error: {}",
+                                script.getFilename(), script.getFilePath(), e.getMessage());
+                        dto.setFilescript(null);
+                    }
+                }
+
                 dtos.add(dto);
             }
 
