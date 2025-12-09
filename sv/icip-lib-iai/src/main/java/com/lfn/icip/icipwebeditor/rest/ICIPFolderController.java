@@ -102,7 +102,7 @@ public class ICIPFolderController {
     public ResponseEntity<List<ICIPAiAgentScript>> bulkUpdateNativeScriptFilesJson(
             @PathVariable(name = "cname") String cname,
             @PathVariable(name = "org") String org,
-            @RequestBody List<ICIPAiAgentScript> updates
+            @RequestBody List<ICIPAiAgentScriptDTO> updates
     ) {
         logger.info("request to bulk update ai-agent script files via JSON: count={}",
                 updates == null ? 0 : updates.size());

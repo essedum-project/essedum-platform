@@ -365,4 +365,4 @@ INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-folder
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/download/.*/.*', 'POST', 0, 'cip-get-api-folder-downloadBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-folder-downloadBycnameAndorg' limit 1;
 
 INSERT INTO usm_permissions (module,permission) Values('cip','cip-delete-api-folder-fileBycnameAndorg');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/file/.*/.*', 'POST', 0, 'cip-delete-api-folder-fileBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-delete-api-folder-fileBycnameAndorg' limit 1;
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/file/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*', 'POST', 0, 'cip-delete-api-folder-fileBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-delete-api-folder-fileBycnameAndorg' limit 1;

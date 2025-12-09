@@ -298,28 +298,38 @@ public class ICIPFolderService {
      *
      * @param cname   the cname
      * @param org     the org
-     * @param updates the updates
+     * @param updates the updates (as DTOs with String content)
      * @return the list
      */
-    public List<ICIPAiAgentScript> bulkUpdateAiAgentScripts(String cname, String org, List<ICIPAiAgentScript> updates) {
+    public List<ICIPAiAgentScript> bulkUpdateAiAgentScripts(String cname, String org, List<ICIPAiAgentScriptDTO> updates) {
         logger.info("Starting bulk update for cname: {}, org: {} with {} scripts", cname, org, updates.size());
 
         try {
             List<ICIPAiAgentScript> existingScripts = aiAgentService.findByNameAndOrg(cname, org);
             logger.debug("Fetched {} existing scripts for cname: {} and org: {}", existingScripts.size(), cname, org);
 
-            for (ICIPAiAgentScript updateScript : updates) {
+            for (ICIPAiAgentScriptDTO updateDTO : updates) {
                 boolean found = false;
 
                 // Check if script exists in database
                 for (ICIPAiAgentScript existingScript : existingScripts) {
                     if (existingScript.getFilename() != null && existingScript.getFilePath() != null &&
-                            existingScript.getFilename().equalsIgnoreCase(updateScript.getFilename()) &&
-                            existingScript.getFilePath().equals(updateScript.getFilePath())) {
+                            existingScript.getId().equals(updateDTO.getId())) {
 
-                        logger.info("Updating existing script: {} at path: {}", updateScript.getFilename(), updateScript.getFilePath());
-                        existingScript.setFilescript(updateScript.getFilescript());
-                        aiAgentService.save(existingScript);
+                        logger.info("Updating existing script: {} at path: {}", updateDTO.getFilename(), updateDTO.getFilePath());
+
+                        // Convert String content from DTO to Blob
+                        if (updateDTO.getFilescript() != null) {
+                            byte[] fileBytes = updateDTO.getFilescript().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                            Blob blob = new SerialBlob(fileBytes);
+                            existingScript.setFilescript(blob);
+                            existingScript.setFilePath(updateDTO.getFilePath());
+                            aiAgentService.save(existingScript);
+                        } else {
+                            logger.warn("No file content provided for script: {} at path: {}. Skipping update.",
+                                    updateDTO.getFilename(), updateDTO.getFilePath());
+                        }
+
                         found = true;
                         break;
                     }
@@ -327,11 +337,14 @@ public class ICIPFolderService {
 
                 if (!found) {
                     logger.warn("Script not found in database: {} at path: {}. Skipping update.",
-                            updateScript.getFilename(), updateScript.getFilePath());
+                            updateDTO.getFilename(), updateDTO.getFilePath());
                 }
             }
 
             return aiAgentService.findByNameAndOrg(cname, org);
+        } catch (SQLException e) {
+            logger.error("SQL error during bulk update for cname: {}, org: {}. Error: {}", cname, org, e.getMessage(), e);
+            throw new RuntimeException("SQL error during bulk update", e);
         } catch (Exception e) {
             logger.error("Bulk update failed for cname: {}, org: {}. Error: {}", cname, org, e.getMessage(), e);
             throw new RuntimeException("Bulk update failed", e);
