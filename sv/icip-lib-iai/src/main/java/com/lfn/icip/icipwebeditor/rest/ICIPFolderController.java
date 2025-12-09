@@ -166,20 +166,13 @@ public class ICIPFolderController {
     /**
      * Delete file.
      *
-     * @param cname the cname
-     * @param org the org
-     * @param filePath the file path
-     * @param fileName the file name
+     * @param id the script id
      * @return the response entity
      */
-    @DeleteMapping(path = "/file/{cname}/{org}")
-    public ResponseEntity<List<ICIPAiAgentScript>> deleteFile(
-            @PathVariable("cname") String cname,
-            @PathVariable("org") String org,
-            @RequestParam String filePath,
-            @RequestParam String fileName) {
-        folderService.deleteFile(cname, org, filePath, fileName);
-        return ResponseEntity.ok(aiAgentScriptRepository.findByCnameAndOrganization(cname, org));
+    @DeleteMapping(path = "/file/{id}")
+    public ResponseEntity<Void> deleteFile(@PathVariable("id") Integer id) {
+        folderService.deleteFileById(id);
+        return ResponseEntity.noContent().build();
     }
     
 }

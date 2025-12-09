@@ -440,6 +440,34 @@ public class ICIPFolderService {
     }
 
     /**
+     * Delete file by ID.
+     *
+     * @param id the script id
+     */
+    public void deleteFileById(Integer id) {
+        logger.info("Deleting file by ID: {}", id);
+
+        try {
+            ICIPAiAgentScript script = aiAgentService.findById(id);
+
+            if (script == null) {
+                logger.warn("Script not found with ID: {}", id);
+                throw new RuntimeException("Script not found with ID: " + id);
+            }
+
+            logger.info("Deleting script: {} at path: {} for cname: {}, org: {}",
+                    script.getFilename(), script.getFilePath(), script.getCname(), script.getOrganization());
+
+            aiAgentService.deleteById(id);
+            logger.info("Successfully deleted script with ID: {}", id);
+
+        } catch (Exception e) {
+            logger.error("Error deleting file by ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete file", e);
+        }
+    }
+
+    /**
      * Delete file.
      *
      * @param cname    the cname
@@ -460,7 +488,7 @@ public class ICIPFolderService {
                         script.getFilePath().equals(filePath)) {
 
                     logger.info("Found matching script to delete: {} at path: {}", fileName, filePath);
-                    aiAgentService.delete(String.valueOf(script));
+                    aiAgentService.deleteById(script.getId());
                     logger.info("Successfully deleted file: {} at path: {}", fileName, filePath);
                     return;
                 }

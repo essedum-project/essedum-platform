@@ -30,6 +30,7 @@ import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
@@ -235,7 +236,31 @@ public class ICIPAiAgentScriptService implements IICIPAiAgentService {
 	public void delete(String project) {
 		aiAgentScriptRepository.deleteByProject(project);
 	}
-	
+
+	/**
+	 * Find by id.
+	 *
+	 * @param id the id
+	 * @return the ICIP ai agent script
+	 */
+	@Override
+	public ICIPAiAgentScript findById(Integer id) {
+		logger.info("getting ai agent script by id: {}", id);
+		return aiAgentScriptRepository.findById(id).orElse(null);
+	}
+
+	/**
+	 * Delete by id.
+	 *
+	 * @param id the id
+	 */
+	@Override
+	@Transactional
+	public void deleteById(Integer id) {
+		logger.info("deleting ai agent script by id: {}", id);
+		aiAgentScriptRepository.deleteById(id);
+	}
+
 	@Override
 	public List<ICIPAiAgentScript> findByOrg(String org) {
 		return aiAgentScriptRepository.findByOrganization(org);

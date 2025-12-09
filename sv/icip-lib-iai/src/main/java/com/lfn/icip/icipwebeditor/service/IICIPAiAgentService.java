@@ -86,6 +86,21 @@ public interface IICIPAiAgentService {
 	void delete(String project);
 
 	/**
+	 * Find by id.
+	 *
+	 * @param id the id
+	 * @return the ICIP ai agent script
+	 */
+	ICIPAiAgentScript findById(Integer id);
+
+	/**
+	 * Delete by id.
+	 *
+	 * @param id the id
+	 */
+	void deleteById(Integer id);
+
+	/**
 	 * Update file.
 	 *
 	 * @param name     the name
