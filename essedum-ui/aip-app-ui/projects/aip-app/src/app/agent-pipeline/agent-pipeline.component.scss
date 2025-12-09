@@ -888,6 +888,11 @@
 
 ::ng-deep .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs > .mat-mdc-tab-header .mat-mdc-tab {
   flex-grow: 0 !important;
+  margin-right: 20px !important; // Add spacing between tabs
+  
+  &:last-child {
+    margin-right: 0 !important; // Remove margin from last tab
+  }
 }
 
 ::ng-deep .mat-mdc-tab-list {
@@ -3388,6 +3393,172 @@
     
     &:hover {
       background-color: #3182ce;
+    }
+  }
+}
+
+// GitHub Tab Styles
+.github-tab-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.github-tab-header {
+  margin-bottom: 30px;
+  
+  .github-tab-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    mat-icon {
+      font-size: 28px;
+      color: #0366d6;
+    }
+    
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #24292e;
+    }
+    
+    .github-tab-subtitle {
+      color: #586069;
+      font-size: 14px;
+      font-weight: 400;
+      margin-left: auto;
+    }
+  }
+}
+
+.github-tab-content {
+  .github-form {
+    .github-row {
+      margin-bottom: 20px;
+      
+      .github-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        
+        mat-icon {
+          color: #586069;
+        }
+        
+        .commit-from-label {
+          font-weight: 500;
+          color: #24292e;
+        }
+      }
+      
+      .github-field {
+        width: 100%;
+        
+        &.commit-field textarea {
+          min-height: 80px;
+        }
+      }
+      
+      .commit-option {
+        margin: 10px 0;
+      }
+      
+      .default-commit-preview {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        background-color: #f6f8fa;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        
+        mat-icon {
+          color: #0366d6;
+          font-size: 18px;
+          margin-top: 1px;
+        }
+        
+        .preview-label {
+          font-weight: 500;
+          color: #586069;
+          margin-right: 4px;
+        }
+        
+        .preview-message {
+          color: #24292e;
+          font-family: 'SFMono-Regular', Consolas, monospace;
+          font-size: 13px;
+          flex: 1;
+        }
+      }
+    }
+    
+    .repo-option, .branch-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .repo-description {
+        font-size: 12px;
+        color: #586069;
+        margin-left: auto;
+      }
+      
+      .branch-icon {
+        font-size: 16px;
+        color: #586069;
+      }
+      
+      .branch-indicator {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 500;
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+.github-tab-footer {
+  margin-top: 40px;
+  border-top: 1px solid #e1e4e8;
+  padding-top: 20px;
+  
+  .github-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    
+    .cancel-btn {
+      color: #586069;
+      
+      &:hover {
+        background-color: #f6f8fa;
+      }
+    }
+    
+    .push-btn {
+      background-color: #28a745;
+      color: white;
+      
+      &:hover:not(:disabled) {
+        background-color: #22863a;
+      }
+      
+      &:disabled {
+        background-color: #94d3a2;
+        opacity: 0.8;
+      }
+      
+      .spin-icon {
+        animation: spin 1s linear infinite;
+      }
     }
   }
 }

@@ -86,8 +86,7 @@ export class AgentPipelineComponent implements OnInit {
   userQuestion = '';
   isAgentThinking = false;
   
-  // GitHub Push popup
-  showGitHubPush = false;
+  // GitHub Push functionality
   githubRepoName = '';
   selectedBranch = 'main';
   availableBranches: string[] = ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
@@ -1644,10 +1643,8 @@ public class ZipController {
         const successResponse = { status: 200, body: response || [] };
         this.service.messageService(successResponse, `SDK Agent '${agentName}' generated successfully!`);
         
-        // Show playground popup after generation completes
-        setTimeout(() => {
-          this.openPlayground();
-        }, 500);
+        // Don't automatically open playground - user will click "Open Playground" button when ready
+        console.log('Agent generation complete. Playground available via button.');
       },
       error: (error) => {
         console.error('Agent generation failed:', error);
@@ -1771,22 +1768,6 @@ public class ZipController {
   }
   
   // GitHub Push methods
-  openGitHubPush(): void {
-    // First check if user is authenticated with GitHub
-    if (!this.isGitHubAuthenticated()) {
-      this.openGitHubLoginDialog();
-      return;
-    }
-    
-    this.showGitHubPush = true;
-    // Set default repo name based on selected agent
-    if (this.selectedAgent && !this.githubRepoName) {
-      this.githubRepoName = `${this.selectedAgent.name}-sdk`;
-    }
-    // Load available branches (in real implementation, this would call an API)
-    this.loadAvailableBranches();
-  }
-
   private isGitHubAuthenticated(): boolean {
     // Check if user has GitHub authentication token
     // In a real implementation, check localStorage, sessionStorage, or service
@@ -1798,15 +1779,6 @@ public class ZipController {
   private openGitHubLoginDialog(): void {
     // TODO: Implement proper GitHub login dialog
     alert('GitHub authentication not implemented yet. Please add your GitHub token manually to localStorage.');
-  }
-  
-  closeGitHubPush(): void {
-    this.showGitHubPush = false;
-    this.githubRepoName = '';
-    this.selectedBranch = 'main';
-    this.useCustomCommit = false;
-    this.commitMessage = '';
-    this.isPushing = false;
   }
   
   onRepoNameChange(event: any): void {
@@ -1872,8 +1844,14 @@ public class ZipController {
       this.isPushing = false;
       console.log('Successfully pushed to GitHub!');
       // Show success message or notification
-      alert(`Successfully pushed ${this.selectedAgent?.alias} to ${this.githubRepoName}/${this.selectedBranch}!`);
-      this.closeGitHubPush();
+      const successResponse = { status: 200, body: [] };
+      this.service.messageService(successResponse, `Successfully pushed ${this.selectedAgent?.alias} to ${this.githubRepoName}/${this.selectedBranch}!`);
+      
+      // Reset form after successful push
+      this.githubRepoName = '';
+      this.selectedBranch = 'main';
+      this.useCustomCommit = false;
+      this.commitMessage = '';
     }, 3000);
   }
   

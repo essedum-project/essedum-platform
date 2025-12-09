@@ -75,11 +75,6 @@
                               <mat-icon>smart_toy</mat-icon>
                               Open Playground
                             </button>
-                            <button mat-raised-button color="accent" class="github-button" (click)="openGitHubPush()"
-                              [disabled]="!hasGeneratedAgent">
-                              <mat-icon>cloud_upload</mat-icon>
-                              Push to GitHub
-                            </button>
                           </div>
 
                           <div class="console-container">
@@ -312,6 +307,106 @@
                   <!-- </div> -->
                 </mat-tab>
 
+                <!-- GitHub Push Tab (Only show after agent generation) -->
+                <mat-tab label="Push to GitHub" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
+                  <div class="tab-content mb-5">
+                    <div class="github-tab-container">
+                      <div class="github-tab-header">
+                        <div class="github-tab-title">
+                          <mat-icon>cloud_upload</mat-icon>
+                          <h2>Push to GitHub Repository</h2>
+                          <span class="github-tab-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
+                        </div>
+                      </div>
+                      
+                      <div class="github-tab-content">
+                        <div class="github-form">
+                          <div class="github-row">
+                            <div class="github-info">
+                              <mat-icon>account_circle</mat-icon>
+                              <label class="commit-from-label">Commit from : {{githubUsername}}</label>
+                            </div>
+                          </div>
+
+                          <!-- Repository Selection -->
+                          <div class="github-row">
+                            <mat-form-field appearance="outline" class="github-field">
+                              <mat-label>Repository</mat-label>
+                              <mat-select [(ngModel)]="githubRepoName" (selectionChange)="onRepoNameChange($event)"
+                                placeholder="Select or enter repository">
+                                <mat-option *ngFor="let repo of availableRepositories" [value]="repo.name">
+                                  <div class="repo-option">
+                                    <span class="repo-name">{{ repo.name }}</span>
+                                    <span class="repo-description" *ngIf="repo.description">{{ repo.description }}</span>
+                                  </div>
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <!-- Branch Selection -->
+                          <div class="github-row">
+                            <mat-form-field appearance="outline" class="github-field">
+                              <mat-label>Branch</mat-label>
+                              <mat-select [(ngModel)]="selectedBranch" placeholder="Select target branch">
+                                <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+                                  <div class="branch-option">
+                                    <mat-icon class="branch-icon">account_tree</mat-icon>
+                                    <span>{{ branch }}</span>
+                                    <span class="branch-indicator" *ngIf="branch === 'main'">main</span>
+                                  </div>
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <!-- Custom Commit Message -->
+                          <div class="github-row">
+                            <div class="commit-option">
+                              <mat-checkbox [(ngModel)]="useCustomCommit" (change)="onCustomCommitChange($event)">
+                                Custom commit message
+                              </mat-checkbox>
+                            </div>
+                          </div>
+
+                          <div class="github-row" *ngIf="useCustomCommit">
+                            <mat-form-field appearance="outline" class="github-field commit-field">
+                              <mat-label>Commit Message</mat-label>
+                              <textarea matInput [(ngModel)]="commitMessage" 
+                                placeholder="Enter your commit message..." 
+                                rows="3"></textarea>
+                            </mat-form-field>
+                          </div>
+
+                          <!-- Default commit preview -->
+                          <div class="github-row" *ngIf="!useCustomCommit">
+                            <div class="default-commit-preview">
+                              <mat-icon>info_outline</mat-icon>
+                              <span class="preview-label">Default commit message:</span>
+                              <span class="preview-message">{{ getDefaultCommitMessage() }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="github-tab-footer">
+                        <div class="github-actions">
+                          <button mat-button class="cancel-btn" [disabled]="isPushing">
+                            <mat-icon>close</mat-icon>
+                            Cancel
+                          </button>
+                          <button mat-raised-button color="accent" class="push-btn" 
+                            (click)="pushToGitHub()" [disabled]="!canPush() || isPushing">
+                            <mat-icon *ngIf="!isPushing">cloud_upload</mat-icon>
+                            <mat-icon *ngIf="isPushing" class="spin-icon">hourglass_empty</mat-icon>
+                            {{ isPushing ? 'Pushing...' : 'Push to GitHub' }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-tab>
+
               </mat-tab-group>
             </div>
           </div>
@@ -431,103 +526,6 @@
           [disabled]="!userQuestion.trim() || isAgentThinking">
           <mat-icon>send</mat-icon>
           Send
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- GitHub Push Popup -->
-<div class="github-overlay" *ngIf="showGitHubPush" (click)="closeGitHubPush()">
-  <div class="github-popup" (click)="$event.stopPropagation()">
-    <div class="github-header">
-      <div class="github-title">
-        <mat-icon>cloud_upload</mat-icon>
-        <h2>Push to GitHub</h2>
-        <span class="github-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
-      </div>
-      <button mat-icon-button (click)="closeGitHubPush()" class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <div class="github-content">
-      <div class="form-container">
-
-        <!-- Commit From Info -->
-        <div class="commit-info-section">
-          <label class="commit-from-label">Commit from : {{githubUsername}}</label>
-        </div>
-
-        <!-- Repository Name and Branch in same row -->
-        <div class="form-field row-field">
-          <div>
-            <label>Repository Name</label>
-            <mat-form-field appearance="fill">
-              <mat-label>Repository Name</mat-label>
-              <mat-select [(ngModel)]="githubRepoName" (selectionChange)="onRepoNameChange($event)"
-                placeholder="Select repository" required>
-                <mat-option *ngFor="let repo of availableRepositories" [value]="repo.name">
-                  {{ repo.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div>
-            <label>Branch</label>
-            <mat-form-field appearance="fill">
-              <mat-label>Branch</mat-label>
-              <mat-select [(ngModel)]="selectedBranch" placeholder="Select branch">
-                <mat-option *ngFor="let branch of availableBranches" [value]="branch">
-                  {{ branch }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Custom Commit Checkbox -->
-        <div class="form-field checkbox-field">
-          <mat-checkbox [(ngModel)]="useCustomCommit" (change)="onCustomCommitChange($event)">
-            Use custom commit message
-          </mat-checkbox>
-        </div>
-
-        <!-- Commit Message Field -->
-        <div class="form-field" *ngIf="useCustomCommit">
-          <label>Commit Message</label>
-          <mat-form-field appearance="fill">
-            <mat-label>Commit Message</mat-label>
-            <textarea matInput placeholder="Enter commit message" [(ngModel)]="commitMessage" rows="3"
-              maxlength="500"></textarea>
-            <mat-hint>{{ commitMessage.length }}/500</mat-hint>
-          </mat-form-field>
-        </div>
-
-        <!-- Default Commit Preview -->
-        <div class="form-field" *ngIf="!useCustomCommit">
-          <label>Default Commit Message</label>
-          <div class="default-commit-preview">
-            {{ getDefaultCommitMessage() }}
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="github-footer">
-      <div class="push-status" *ngIf="isPushing">
-        <mat-icon class="spin-icon">sync</mat-icon>
-        <span>Pushing to GitHub...</span>
-      </div>
-      <div class="push-actions">
-        <button mat-stroked-button (click)="closeGitHubPush()" [disabled]="isPushing">
-          Cancel
-        </button>
-        <button mat-raised-button color="primary" class="push-button" (click)="pushToGitHub()"
-          [disabled]="!canPush() || isPushing">
-          <mat-icon>cloud_upload</mat-icon>
-          {{ isPushing ? 'Pushing...' : 'Push to GitHub' }}
         </button>
       </div>
     </div>
