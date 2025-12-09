@@ -113,6 +113,21 @@ UPDATE usm_permission_api SET api='/api/pipeline/run/[A-Za-z0-9- _.]*/[A-Za-z0-9
 
 UPDATE usm_permission_api SET api='/api/file/create/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*/[A-Za-z0-9- _.]*.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'cip'  AND permission ='File-Create' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY) and api='/api/file/create/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*/[A-Za-z0-9- _.]*';
 
+-- Upload
+UPDATE usm_permission_api
+SET api = '/api/folder/upload/[A-Za-z0-9/- _/.]*/[A-Za-z0-9/- _/.]*.*', method = 'POST', is_enabled = 1
+WHERE permission_id = (
+    SELECT TOP 1 id FROM usm_permissions WHERE module = 'cip' AND permission = 'cip-post-api-folder-createBycnameAndorg' ORDER BY id
+)
+AND api = '/api/folder/upload/[A-Za-z0-9/- _/.]*/[A-Za-z0-9/- _/.]*';
+
+-- Update
+UPDATE usm_permission_api
+SET api = '/api/folder/update/[A-Za-z0-9/- _/.]*/[A-Za-z0-9/- _/.]*.*', method = 'POST', is_enabled = 1
+WHERE permission_id = (
+    SELECT TOP 1 id FROM usm_permissions WHERE module = 'cip' AND permission = 'cip-post-api-folder-createBycnameAndorg' ORDER BY id
+)
+
 UPDATE usm_permission_api SET api='/api/jobs/console/[a-zA-Z0-9]*.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'cip'  AND permission ='jobs-Console-ByJobID' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY) and api='/api/jobs/console/[a-zA-Z0-9]*';
 UPDATE usm_permission_api SET api='/api/service/codebuddy/v1/generate.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'cip'  AND permission ='codebuddy-v1-generate' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY) and api='/api/service/codebuddy/v1/generate';
 UPDATE usm_permission_api SET api='/api/pipeline/getPipelines/[A-Za-z0-9- _]*.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'cip'  AND permission ='pipeline-getPipelines' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY) and api='/api/pipeline/getPipelines/[A-Za-z0-9- _]*';

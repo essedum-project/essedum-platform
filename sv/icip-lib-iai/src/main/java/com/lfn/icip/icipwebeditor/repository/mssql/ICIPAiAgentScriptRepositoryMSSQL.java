@@ -13,10 +13,10 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.icip.icipwebeditor.repository.mysql;
+package com.lfn.icip.icipwebeditor.repository.mssql;
 
-import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
-import com.lfn.icip.icipwebeditor.repository.ICIPNativeScriptRepository;
+import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
+import com.lfn.icip.icipwebeditor.repository.ICIPAiAgentScriptRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,13 +25,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 // TODO: Auto-generated Javadoc
+
 /**
- * The Interface ICIPNativeScriptRepositoryMYSQL.
+ * The Interface ICIPAiAgentScriptRepositoryMSSQL.
  */
-@Profile("mysql")
+@Profile("mssql")
 @Repository
-public interface ICIPNativeScriptRepositoryMYSQL extends ICIPNativeScriptRepository {
-	
+public interface ICIPAiAgentScriptRepositoryMSSQL extends ICIPAiAgentScriptRepository {
+
 	/**
 	 * Delete by project.
 	 *
@@ -40,14 +41,14 @@ public interface ICIPNativeScriptRepositoryMYSQL extends ICIPNativeScriptReposit
 	@Modifying
 	@Query(value = "delete from mlpipelinenativescriptentity where organization = :org", nativeQuery = true)
 	void deleteByProject(@Param("org") String org);
-		
+
 	@Modifying
 	@Transactional
 	@Query(value = "delete from mlpipelinenativescriptentity where cname = :cname and organization = :org", nativeQuery = true)
 	void deleteByCnameAndOrg(@Param("cname") String cname, @Param("org") String org);
 	
 	@Override
-	default ICIPNativeScript customSave(ICIPNativeScript nativeScript) {
+	default ICIPAiAgentScript customSave(ICIPAiAgentScript nativeScript) {
 		return save(nativeScript);
 	}
 }
