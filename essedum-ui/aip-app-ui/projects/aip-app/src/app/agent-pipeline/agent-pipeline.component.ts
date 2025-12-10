@@ -166,6 +166,7 @@ export class AgentPipelineComponent implements OnInit {
   // Selected file content for editor
   selectedFileContent = '';
   selectedFileName = '';
+  selectedFileId = ''; // File ID for API operations
   selectedFileNode: FileNode | null = null;
   selectedFilePath = '';
   fileExtension = 'py';
@@ -377,14 +378,11 @@ export class AgentPipelineComponent implements OnInit {
 
     this.isSavingFile = true; // Reuse the saving flag for UI state
     try {
-      console.log('Deleting file:', this.selectedFileName);
+      console.log('Deleting file:', this.selectedFileName, 'with ID:', this.selectedFileId);
       
-      // Call the delete API
+      // Call the delete API with just the file ID
       const result = await this.agentPipelineService.deleteFile(
-        this.currentCname,
-        'leo1311', // Fixed org name as used in other APIs
-        this.selectedFilePath,
-        this.selectedFileName
+        this.selectedFileId
       ).toPromise();
       
       console.log('File deleted successfully:', result);
@@ -399,6 +397,7 @@ export class AgentPipelineComponent implements OnInit {
       this.selectedFileContent = '';
       this.selectedFileNode = null;
       this.selectedFilePath = '';
+      this.selectedFileId = '';
       this.isFileModified = false;
       this.userModifiedLines.clear();
       this.resetDiffTracking();
@@ -1528,6 +1527,7 @@ public class ZipController {
     this.selectedFileName = node.name;
     this.selectedFileNode = node;
     this.selectedFilePath = node.path || node.name;
+    this.selectedFileId = node.id || ''; // Store the file ID
     this.isFileModified = false;
     
     // Set file extension
@@ -1572,6 +1572,36 @@ public class ZipController {
     if (fileName.endsWith('.md')) return 'markdown';
     if (fileName.endsWith('.txt')) return 'text';
     return 'text';
+  }
+
+  /**
+   * Check if Generate Agent button should be disabled
+   * - Disabled when already generating
+   * - Disabled when agent has already been generated (files exist)
+   * - Disabled when files exist in the codespace
+   */
+  get isGenerateAgentDisabled(): boolean {
+    return this.isGenerating || this.hasGeneratedAgent || this.hasExistingFiles();
+  }
+
+  /**
+   * Check if agent has existing files in the codespace
+   */
+  hasExistingFiles(): boolean {
+    return this.fileSystemData && this.fileSystemData.length > 0;
+  }
+
+  /**
+   * Get tooltip text for Generate Agent button
+   */
+  getGenerateButtonTooltip(): string {
+    if (this.isGenerating) {
+      return 'Agent generation is in progress...';
+    }
+    if (this.hasGeneratedAgent || this.hasExistingFiles()) {
+      return 'Agent has already been generated. Use the Essedum Codespace tab to edit existing files.';
+    }
+    return 'Click to generate SDK agent with project files and structure';
   }
 
   // Generate SDK Agent
@@ -1964,6 +1994,7 @@ public class ZipController {
   private resetToInitialStateForNewAgent(): void {
     this.selectedFileName = '';
     this.selectedFileContent = '';
+    this.selectedFileId = '';
     this.isJsonProcessed = false; // Show script tab only initially
     this.hasGeneratedAgent = false; // Reset playground button state
     // Don't reset currentCname - keep the agent's fixed cname
@@ -1979,6 +2010,7 @@ public class ZipController {
     this.selectedFileContent = '';
     this.selectedFileNode = null;
     this.selectedFilePath = '';
+    this.selectedFileId = '';
     this.fileExtension = 'py';
     this.isFileModified = false;
     this.originalFileContent = '';

@@ -61,9 +61,11 @@
 
                           <div class="generate-controls">
                             <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
-                              [disabled]="isGenerating">
+                              [disabled]="isGenerateAgentDisabled"
+                              [matTooltip]="getGenerateButtonTooltip()"
+                              matTooltipPosition="above">
                               <mat-icon>play_arrow</mat-icon>
-                              {{ isGenerating ? 'Generating...' : 'Generate Agent' }}
+                              Generate Agent
                             </button>
                             <button mat-raised-button class="clear-button" (click)="clearConsole()"
                               [disabled]="consoleOutput.length === 0">
@@ -92,7 +94,8 @@
                                 <span class="console-text console-loading">Processing...</span>
                               </div>
                               <div *ngIf="consoleOutput.length === 0 && !isGenerating" class="console-empty">
-                                Click "Generate Agent" to start the build process
+                                <span *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Click "Generate Agent" to start the build process</span>
+                                <span *ngIf="hasGeneratedAgent || hasExistingFiles()">Agent is ready for development. Use the Essedum Codespace tab to edit files.</span>
                               </div>
                             </div>
                           </div>

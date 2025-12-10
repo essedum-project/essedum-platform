@@ -426,17 +426,13 @@ export class AgentPipelineService {
   /**
    * Delete a file from the backend
    */
-  deleteFile(cname: string, org: string, filePath: string, fileName: string): Observable<any> {
-    const url = `${this.baseUrl}/folder/file/${cname}/${org}`; // Correct endpoint with folder prefix
-    const params = new HttpParams()
-      .set('filePath', filePath)
-      .set('fileName', fileName);
+  deleteFile(id: string | number): Observable<any> {
+    const url = `${this.baseUrl}/folder/file/${id}`;
     
-    console.log(`Deleting file: ${fileName} at path: ${filePath}`);
+    console.log(`Deleting file with ID: ${id}`);
     console.log(`DELETE request to: ${url}`);
-    console.log('Request params:', params.toString());
     
-    return this.http.delete<any[]>(url, { params }).pipe(
+    return this.http.delete<any>(url).pipe(
       map(response => {
         console.log('Delete file API response:', response);
         return response;
