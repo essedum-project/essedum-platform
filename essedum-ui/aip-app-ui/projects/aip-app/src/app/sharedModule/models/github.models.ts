@@ -22,5 +22,5 @@ export interface PushRequest {
   repoName: string;
   branch: string;
   commitMessage: string;
-  localPath: string;
+  files: any;
 }

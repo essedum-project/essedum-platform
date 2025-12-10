@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { GitHubService } from '../services/github.service';
 import { GitHubRepository, PushRequest } from '../models/github.models';
+import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.service';
 
 @Component({
   selector: 'app-github-push',
@@ -30,7 +31,10 @@ export class GitHubPushComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private githubService: GitHubService) { }
+  @Input() cname: string;
+  constructor(private githubService: GitHubService,
+    private agentPipelineService: AgentPipelineService
+  ) { }
 
   ngOnInit(): void {
     this.checkAuthStatus();
@@ -93,7 +97,7 @@ export class GitHubPushComponent implements OnInit {
       next: (status) => {
         this.isLoading = false;
         this.isAuthenticated = true;
-        this.username = status.githubUsername|| '';
+        this.username = status.githubUsername || '';
         this.showModal = true;
         this.loadRepositories();
       },
@@ -119,13 +123,13 @@ export class GitHubPushComponent implements OnInit {
         this.branches = [];
         this.resetForm();
         this.isLoading = false;
-        
+
         // Show message to user about logging out from GitHub
         this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
         setTimeout(() => {
           this.successMessage = '';
         }, 3000);
-        
+
         // Keep modal open to allow login to different account
       },
       error: (error) => {
@@ -206,23 +210,37 @@ export class GitHubPushComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.agentPipelineService.getFilesList(this.cname).subscribe({
+      next: (fetchedFiles) => {
+        console.log('Fetched files:', fetchedFiles);
 
-    const request: PushRequest = {
-      repoName: this.selectedRepo,
-      branch: this.selectedBranch,
-      commitMessage: this.getCommitMessage(),
-      localPath: this.localPath
-    };
+        const request: PushRequest = {
+          repoName: this.selectedRepo,
+          branch: this.selectedBranch,
+          commitMessage: this.getCommitMessage(),
+          files: fetchedFiles.map(file => ({
+            path: file.filePath,
+            fileName: file.filename,
+            id: file.id,
+            content: file.filescript
+          }))
+        };
 
-    this.githubService.pushToGitHub(request).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.successMessage = response;
-        setTimeout(() => this.closeModal(), 2000);
+        this.githubService.pushToGitHub(request).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.successMessage = response;
+            setTimeout(() => this.closeModal(), 2000);
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.errorMessage = 'Push failed: ' + (error.error || error.message);
+          }
+        });
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = 'Push failed: ' + (error.error || error.message);
+        this.errorMessage = 'Failed to fetch files: ' + (error.error || error.message);
       }
     });
   }
