@@ -51,6 +51,10 @@ const ExportModal = forwardRef(
       currentFlow?.description ?? ""
     );
 
+    // Allow dynamic binding for type and interfacetype
+    const [agentType, setAgentType] = useState<string>('AIAgent');
+    const [interfaceType, setInterfaceType] = useState<string>('pipeline-agent');
+
     const [customOpen, customSetOpen] = useState(false);
     const [open, setOpen] =
       props.open !== undefined && props.setOpen !== undefined
@@ -173,21 +177,22 @@ const ExportModal = forwardRef(
         </BaseModal.Content>
 
         <BaseModal.Footer
-          submit={{
-            label: "Export",
-            loading: isBuilding,
-            dataTestId: "modal-export-button",
-          }}
         >
           <div className="flex items-center">
             <Button
-              variant="secondary"
+              variant="default"
               type="button"
               onClick={async () => {
                 try {
                   const access_token_lf =
                     localStorage.getItem("access_token_lf") || undefined;
+                  const parentToken =
+                    localStorage.getItem("baseParentToken") || undefined;
 
+                  // Read userId from global session details (matching exportModelService parsing)
+                  const _sessionData = sessionStorage.getItem('parentSessionDetails');
+                  const _parsed = _sessionData ? JSON.parse(_sessionData) : null;
+                  const userIdFromSession = _parsed?.userId || '';
                   // Build flow payload similar to Angular saveDetails
                   const flowPayload = checked
                     ? {
@@ -218,8 +223,8 @@ const ExportModal = forwardRef(
                   const result = await create_pipeline({
                     alias: name || 'flow',
                     description: description || 'Exported from Langflow UI',
-                    type: 'AIAgent', // Default type, can be made configurable
-                    interfaceType: 'pipeline',
+                    type: agentType, // dynamic via binding
+                    interfaceType: interfaceType, // dynamic via binding
                     isTemplate: false,
                     jsonContent: null,
                     groups: [],
@@ -271,14 +276,10 @@ const ExportModal = forwardRef(
                       attributes: {
                         filetype: 'json',
                         files: [scriptFileName],
-                        arguments: [],
-                        dsName: 'LEOMN-RM22869',
-                        type: 'REMOTE'
+                     
                       }
                     }],
-                    environment: [],
-                    default_runtime: { dsAlias: 'Sample-Remote', dsName: 'LEOMN-RM22869', type: 'REMOTE' }
-                  });
+                    });
 
                   const updatePayload = {
                     cid: result.cid,
@@ -286,11 +287,13 @@ const ExportModal = forwardRef(
                     name: cname,
                     description: description || 'Exported from Langflow UI',
                     jsonContent: jsonContent,
-                    type: 'AIAgent',
+                    type: agentType,
                     organization: 'leo1311',
-                    interfacetype: 'pipeline',
+                    interfacetype: interfaceType,
                     isTemplate: false,
                     token: access_token_lf,
+                    userId: userIdFromSession,
+                    parentToken: parentToken,
                   };
                   console.log("update_pipeline payload", updatePayload);
 
@@ -302,9 +305,11 @@ const ExportModal = forwardRef(
                     flowPayload,
                     name ?? "flow",
                     description ?? ""
-                  );
-                  
-                  setSuccessData({ title: "Pipeline saved to DB and downloaded locally" });
+                  ); 
+
+                  // Close modal and show success after DB export
+                  setSuccessData({ title: "Pipeline saved to DB successfully" });
+                  setOpen(false);
                 } catch (err) {
                   console.error("create_pipeline failed", err);
                   setNoticeData({
@@ -315,7 +320,7 @@ const ExportModal = forwardRef(
                 }
               }}
             >
-              Export to DB
+              Export to Database
             </Button>
           </div>
         </BaseModal.Footer>

@@ -26,9 +26,9 @@
       <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
 
         <!-- Cards  -->
-        <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
-          [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)" (edit)="editPipeline(card.cid)"
-          (delete)="deletePipeline(card.cid)" (jobConsole)="jobConsole(card.name)">
+        <app-aip-card [servicev1]="SERVICE_V1" [card]="card" 
+          [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)" 
+          (delete)="deletePipeline(card.cid)" >
         </app-aip-card>
       </div>
     </div>

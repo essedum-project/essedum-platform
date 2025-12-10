@@ -37,7 +37,6 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
 
   // Auth flags
   createAuth = false;
-  editAuth = false;
   deleteAuth = false;
   deployAuth = false;
 
@@ -201,7 +200,6 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
   private loadAuthentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       this.createAuth = cipAuthority.includes('pipeline-create');
-      this.editAuth = cipAuthority.includes('pipeline-edit');
       this.deleteAuth = cipAuthority.includes('pipeline-delete');
     });
   }
@@ -240,8 +238,8 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
       .set('size', this.pageSize.toString())
       .set('project', this.organization)
       .set('isCached', 'true')
-      .set('adapter_instance', 'internal')
-      .set('interfacetype', 'pipeline');
+      .set('adapter_instance', 'internal')    
+      .set('interfacetype', 'pipeline-agent');
 
     if (this.selectedAdapterType.length >= 1) {
       params = params.set('type', this.selectedAdapterType.toString());
@@ -380,22 +378,6 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     }
   }
 
-  onAdd(): void {
-    const dialogRef = this.dialog.open(PipelineCreateComponent, {
-      height: '80%',
-      width: '60%',
-      minWidth: '60vw',
-      disableClose: true,
-      data: {
-        edit: false,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.refresh();
-      }
-    });
-  }
 
   onRefresh(): void {
     this.tagrefresh = true;
@@ -449,30 +431,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     });
   }
 
-  editPipeline(id: string): void {
-    this.service.getStreamingServices(id).subscribe(
-      (pageResponse) => {
-        const dialogRef = this.dialog.open(PipelineCreateComponent, {
-          height: '80%',
-          width: '60%',
-          minWidth: '60vw',
-          disableClose: true,
-          data: {
-            canvasData: pageResponse,
-            edit: true,
-          },
-        });
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result) {
-            this.refresh();
-          }
-        });
-      },
-      (error) =>
-        this.service.message('Could not get the results', 'error')
-    );
-  }
-
+ 
   deletePipeline(cid: string): void {
     try {
       const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
@@ -515,7 +474,5 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     }
   }
 
-  jobConsole(name: string): void {
-    // Pipeline agent specific job console logic
-  }
+
 }

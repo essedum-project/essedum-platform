@@ -1,20 +1,24 @@
 // Service for Export modal API calls
 // Provides two methods: get_agent_export (GET) and put_agent_export (POST with FormData)
 
-// Global session data retrieval
-const sessionData = sessionStorage.getItem("parentSessionDetails");
-const parsedData = sessionData ? JSON.parse(sessionData) : null;
-
-// Extract all session data globally for easy access
-const globalPortfolioId = parsedData?.portfolioId;
-const globalPortfolioName = parsedData?.portfolioName;
-const globalProjectId = parsedData?.projectId;
-const globalProjectName = parsedData?.projectName;
-const globalRoleId = parsedData?.roleId;
-const globalRoleName = parsedData?.roleName;
-const globalUserId = parsedData?.userId;
-const globalUserName = parsedData?.userName;
-const globalCname = sessionStorage.getItem('cname');
+// Helper to read current session and local values at call-time
+function getSessionInfo() {
+  const sessionData = sessionStorage.getItem("parentSessionDetails");
+  const parsedData = sessionData ? JSON.parse(sessionData) : {};
+  return {
+    parentToken: localStorage.getItem("baseParentToken") || undefined,
+    jwtToken: localStorage.getItem("jwtToken") || undefined,
+    portfolioId: parsedData?.portfolioId,
+    portfolioName: parsedData?.portfolioName,
+    projectId: parsedData?.projectId,
+    projectName: parsedData?.projectName,
+    roleId: parsedData?.roleId,
+    roleName: parsedData?.roleName,
+    userId: parsedData?.userId,
+    userName: parsedData?.userName,
+    cname: sessionStorage.getItem('cname') || undefined,
+  };
+}
 
 export type GetAgentExportParams = {
   token?: string;
@@ -123,6 +127,7 @@ export async function post_agent_export_file_details(
   // Compute extension from alias (filename with extension)
   const extension = alias?.split(".").pop() || "json";
   const fileName = alias ?? "sample.json";
+  const sess = getSessionInfo();
 
   const payload = {
     alias: alias,
@@ -134,14 +139,14 @@ export async function post_agent_export_file_details(
     organization: "leo1311",
     filetype: extension,
     type: "ai-agent",
-    portfolioId: globalPortfolioId,
-    portfolioName: globalPortfolioName,
-    projectId: globalProjectId,
-    projectName: globalProjectName,
-    roleId: globalRoleId,
-    roleName: globalRoleName,
-    userId: globalUserId,
-    userName: globalUserName,
+    portfolioId: sess.portfolioId,
+    portfolioName: sess.portfolioName,
+    projectId: sess.projectId,
+    projectName: sess.projectName,
+    roleId: sess.roleId,
+    roleName: sess.roleName,
+    userId: sess.userId,
+    userName: sess.userName,
   };
 
   const headers: Record<string, string> = {
@@ -185,8 +190,8 @@ export async function create_native_file(params: CreateNativeFileParams) {
   const { pipelineName, organization, fileName, fileType, scriptFormData, token } = params;
   const url = `/api/aip/file/create/${pipelineName}/${organization}/${fileType}?file=${fileName}`;
 
-  // Get session data for headers (similar to create_pipeline)
-  const jwtToken = localStorage.getItem('jwtToken');
+  const sess = getSessionInfo();
+  const jwtToken = sess.jwtToken;
 
   const headers: Record<string, string> = {
     'Accept': 'application/json',
@@ -196,21 +201,15 @@ export async function create_native_file(params: CreateNativeFileParams) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
   if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
 
-  // Add project and role headers using global variables
-  if (globalProjectId) {
-    headers['Project'] = globalProjectId.toString();
-    headers['ProjectName'] = globalProjectName || 'leo1311';
-  } else {
-    headers['Project'] = '2'; // fallback
-    headers['ProjectName'] = 'leo1311';
+  // Add project and role headers using session values (no static fallbacks)
+  if (sess.projectId) {
+    headers['Project'] = String(sess.projectId);
+    headers['ProjectName'] = sess.projectName || 'leo1311';
   }
 
-  if (globalRoleId) {
-    headers['roleId'] = globalRoleId.toString();
-    headers['roleName'] = globalRoleName || 'IT Portfolio Manager';
-  } else {
-    headers['roleId'] = '1'; // fallback
-    headers['roleName'] = 'IT Portfolio Manager';
+  if (sess.roleId) {
+    headers['roleId'] = String(sess.roleId);
+    headers['roleName'] = sess.roleName || 'IT Portfolio Manager';
   }
 
   const resp = await fetch(url, {
@@ -257,6 +256,7 @@ export async function create_pipeline(params: CreatePipelineParams) {
     interfacetype = 'pipeline';
   
 
+  const sess = getSessionInfo();
   const payload = {
     alias,
     description,
@@ -266,20 +266,21 @@ export async function create_pipeline(params: CreatePipelineParams) {
     json_content: jsonContent,
     groups: groups || [],
     organization: sessionStorage.getItem('organization') || 'leo1311',
-    portfolioId: globalPortfolioId,
-    portfolioName: globalPortfolioName,
-    projectId: globalProjectId,
-    projectName: globalProjectName,
-    roleId: globalRoleId,
-    roleName: globalRoleName,
-    userId: globalUserId,
-    userName: globalUserName,
+    portfolioId: sess.portfolioId,
+    portfolioName: sess.portfolioName,
+    projectId: sess.projectId,
+    projectName: sess.projectName,
+    roleId: sess.roleId,
+    roleName: sess.roleName,
+    userId: sess.userId,
+    userName: sess.userName,
+    parentToken: sess.parentToken,
   };
 
 
 
-  // Get session data for headers (similar to Angular service)
-  const jwtToken = localStorage.getItem('jwtToken');
+  const sess2 = getSessionInfo();
+  const jwtToken2 = sess2.jwtToken;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -288,23 +289,16 @@ export async function create_pipeline(params: CreatePipelineParams) {
   };
 
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
+  if (jwtToken2) headers['Authorization'] = `Bearer ${jwtToken2}`;
 
-  // Add project and role headers using global variables
-  if (globalProjectId) {
-    headers['Project'] = globalProjectId.toString();
-    headers['ProjectName'] = globalProjectName || 'leo1311';
-  } else {
-    headers['Project'] = '2'; // fallback
-    headers['ProjectName'] = 'leo1311';
+  if (sess2.projectId) {
+    headers['Project'] = String(sess2.projectId);
+    headers['ProjectName'] = sess2.projectName || 'leo1311';
   }
 
-  if (globalRoleId) {
-    headers['roleId'] = globalRoleId.toString();
-    headers['roleName'] = globalRoleName || 'IT Portfolio Manager';
-  } else {
-    headers['roleId'] = '1'; // fallback
-    headers['roleName'] = 'IT Portfolio Manager';
+  if (sess2.roleId) {
+    headers['roleId'] = String(sess2.roleId);
+    headers['roleName'] = sess2.roleName || 'IT Portfolio Manager';
   }
   
 
@@ -358,8 +352,8 @@ export async function update_pipeline(params: UpdatePipelineParams) {
     is_template: isTemplate || false,
   };
 
-  // Get session data for headers (similar to create_pipeline)
-  const jwtToken = localStorage.getItem('jwtToken');
+  const sess = getSessionInfo();
+  const jwtToken = sess.jwtToken;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -370,21 +364,14 @@ export async function update_pipeline(params: UpdatePipelineParams) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
   if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
 
-  // Add project and role headers using global variables
-  if (globalProjectId) {
-    headers['Project'] = globalProjectId.toString();
-    headers['ProjectName'] = globalProjectName || 'leo1311';
-  } else {
-    headers['Project'] = '2'; // fallback
-    headers['ProjectName'] = 'leo1311';
+  if (sess.projectId) {
+    headers['Project'] = String(sess.projectId);
+    headers['ProjectName'] = sess.projectName || 'leo1311';
   }
 
-  if (globalRoleId) {
-    headers['roleId'] = globalRoleId.toString();
-    headers['roleName'] = globalRoleName || 'IT Portfolio Manager';
-  } else {
-    headers['roleId'] = '1'; // fallback
-    headers['roleName'] = 'IT Portfolio Manager';
+  if (sess.roleId) {
+    headers['roleId'] = String(sess.roleId);
+    headers['roleName'] = sess.roleName || 'IT Portfolio Manager';
   }
 
   const resp = await fetch(url, {
