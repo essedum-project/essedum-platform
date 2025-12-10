@@ -264,6 +264,7 @@ export class PipelineAgentDetailComponent implements OnInit {
       params = params.set('org', this.organisation);
       this.service.getPipelineByName(params).subscribe({
         next: (res) => {
+        this.selectedAgent = res;
           console.log('Pipeline fetch response:', res);
           if (res && res.length > 0) {
             // Extract file information from pipeline data using actual API structure
@@ -650,14 +651,14 @@ export class PipelineAgentDetailComponent implements OnInit {
   
     updateJsonContent(agent: AgentCard): void {
       this.jsonContent = `{
-    "agent_name": "${agent.name}",
+    "agent_name": "${agent.alias}",
     "version": "${agent.version}",
     "description": "${agent.description}",
     "configuration": {
       "model": "gpt-4",
       "temperature": 0.7,
       "max_tokens": 2000,
-      "tools": ${JSON.stringify(this.getToolsForAgent(agent.name), null, 6)}
+      "tools": ${JSON.stringify(this.getToolsForAgent(agent.alias), null, 6)}
     },
     "runtime": {
       "type": "${agent.language}",
@@ -692,7 +693,7 @@ export class PipelineAgentDetailComponent implements OnInit {
     }
   
     updateFileSystemData(agent: AgentCard): void {
-      const mainPyContent = this.getMainPyContent(agent.name);
+      const mainPyContent = this.getMainPyContent(agent.alias);
       
       this.fileSystemData = [
         {
@@ -711,7 +712,7 @@ export class PipelineAgentDetailComponent implements OnInit {
                 {
                   name: 'tools.py',
                   type: 'file',
-                  content: this.getToolsPyContent(agent.name)
+                  content: this.getToolsPyContent(agent.alias)
                 },
                 {
                   name: 'config.py',
@@ -752,11 +753,11 @@ export class PipelineAgentDetailComponent implements OnInit {
                   name: 'test_agent.py',
                   type: 'file',
                   content: `import unittest
-  from src.main import ${this.getClassName(agent.name)}
+  from src.main import ${this.getClassName(agent.alias)}
   
-  class Test${this.getClassName(agent.name)}(unittest.TestCase):
+  class Test${this.getClassName(agent.alias)}(unittest.TestCase):
       def setUp(self):
-          self.agent = ${this.getClassName(agent.name)}()
+          self.agent = ${this.getClassName(agent.alias)}()
           
       def test_initialization(self):
           self.assertIsNotNone(self.agent)
@@ -792,7 +793,7 @@ export class PipelineAgentDetailComponent implements OnInit {
   ## Version: ${agent.version}
   
   ## Features
-  ${this.getToolsForAgent(agent.name).map(t => `- ${t.description}`).join('\n')}
+  ${this.getToolsForAgent(agent.alias).map(t => `- ${t.description}`).join('\n')}
   
   ## Setup
   1. Install dependencies: \`pip install -r requirements.txt\`
@@ -814,9 +815,7 @@ export class PipelineAgentDetailComponent implements OnInit {
     }
   
     getClassName(agentName: string): string {
-      return agentName.split('-').map((word: string) => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join('') + 'Agent';
+      return agentName;
     }
   
     getMainPyContent(agentName: string): string {
@@ -845,7 +844,7 @@ export class PipelineAgentDetailComponent implements OnInit {
   ${toolMethods}
       
       def process_request(self, message: str) -> str:
-          """Process ${agentName.replace(/-/g, ' ')} request"""
+          """Process ${agentName} request"""
           response = self.client.chat.completions.create(
               model=self.model,
               messages=[

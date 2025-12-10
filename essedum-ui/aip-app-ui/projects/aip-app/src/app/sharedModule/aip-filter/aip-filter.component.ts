@@ -29,6 +29,7 @@ interface FilterItem {
 
 // Enum for service types
 enum ServiceType {
+  PIPELINEAGENT='pipelineagent',
   PIPELINE = 'pipeline',
   CHAIN = 'chain',
   CONNECTIONS = 'connections',
@@ -90,6 +91,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   @Input() selectedModelDataSourceList:any;
   @Input() selectedDatasetTypeList: any;
   @Input() selectedPipelineTypeList: any;
+  @Input() selectedAgentPipelineTypeList: any;
   @Input() selectedToolsTypeList: any;
   @Input() selectedChainTypeList: any;
   @Input() selectedModelTypeLists: any;
@@ -126,6 +128,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedAdapterList: string[] = [];
   selectedAdapterInstance: string[] = [];
   selectedPipelineType: string[] = [];
+  selectedAgentPipelineType: string[] = [];
   selectedToolsType: string[] = [];
   selectedconnectionType: string[] = [];
   selectedMlAdapterConnectionType: string[] = [];
@@ -146,11 +149,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
   appTypes: any[] = [];
   adapterInstanceList: FilterItem[] = [];
   pipelinesTypeList: FilterItem[] = [];
+  agentPipelinesTypeList: FilterItem[] = [];
   toolsTypeList: FilterItem[] = [];
   connectionsTypeList: FilterItem[] = [];
   datasetTopicList: FilterItem[] = [];
   datasetsTypes: string[] = [];
   pipelinesTypes: string[] = [];
+  agentPipelinesTypes: string[] = [];
   toolsTypes: string[] = [];
   connectionsTypes: string[] = [];
   datasetsTypeList: FilterItem[] = [];
@@ -183,6 +188,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   pipelineType: string[] = [];
   toolsType: string[] = [];
   chainType: string[] = [];
+  agentPipelineType: string[] = [];
   instanceType: string[] = [];
   appType: string[] = [];
 
@@ -249,6 +255,17 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.pipelineType =
         this.selectedPipelineTypeList.selectedAdapterType ?? [];
     }
+
+    if (this.selectedPipelineTypeList) {
+      this.pipelineType =
+        this.selectedPipelineTypeList.selectedAdapterType ?? [];
+    }
+
+    if (this.selectedAgentPipelineTypeList) {
+      this.agentPipelineType =
+        this.selectedAgentPipelineTypeList.selectedAdapterType ?? [];
+    }
+
     if (this.selectedToolsTypeList) {
       this.toolsType = this.selectedToolsTypeList.selectedAdapterType ?? [];
     }
@@ -304,6 +321,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
       ...this.type,
       ...this.appType,
       ...this.pipelineType,
+      ...this.agentPipelineType,
       ...this.toolsType,
       ...this.chainType,
     ];
@@ -322,6 +340,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
       case ServiceType.PIPELINE:
       case ServiceType.CHAIN:
         this.getPipelinesTypes();
+        this.getTags();
+        break;
+      case ServiceType.PIPELINEAGENT:
+        this.getAgentPipelinesTypes();
         this.getTags();
         break;
       case ServiceType.CONNECTIONS:
@@ -562,8 +584,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.pipelinesTypes = JSON.parse(res);
 
       const excludedTypes =
-        this.servicev1 === ServiceType.CHAIN ? ['App'] : ['App', 'Langchain'];
+        this.servicev1 === ServiceType.CHAIN
+          ? ['App'] : ['App', 'Langchain'];
 
+      
       this.pipelinesTypeList = this.pipelinesTypes
         .filter((element) => element && !excludedTypes.includes(element))
         .map((element) => {
@@ -582,6 +606,50 @@ export class AipFilterComponent implements OnInit, OnChanges {
         });
     });
   }
+
+   /**
+   * Gets Agent pipeline types based on service type
+   */
+  getAgentPipelinesTypes(): void {
+    this.agentPipelinesTypeList = [];
+    this.agentPipelinesTypes = [];
+    this.selectedAgentPipelineType = [];
+
+    // Add pipeline types to selected types
+    this.agentPipelineType.forEach((type) => {
+      if (!this.selectedAdapterType.includes(type)) {
+        this.selectedAdapterType.push(type);
+      }
+    });
+
+    this.service.getPipelinesTypeByOrganization().subscribe((res) => {
+      this.agentPipelinesTypes = JSON.parse(res);
+
+      const excludedTypes =
+       this.servicev1 === ServiceType.PIPELINEAGENT
+          ? ['App', 'Langchain', 'NativeScript']
+          : ['App', 'Langchain'];
+
+      
+      this.agentPipelinesTypeList = this.agentPipelinesTypes
+        .filter((element) => element && !excludedTypes.includes(element))
+        .map((element) => {
+          const typesList =
+            this.servicev1 === ServiceType.PIPELINEAGENT
+              ? this.agentPipelineType
+              : this.pipelineType;
+          const isSelected = typesList.includes(element);
+
+          return {
+            category: 'Type',
+            label: element,
+            value: element,
+            selected: isSelected,
+          } as FilterItem;
+        });
+    });
+  }
+
 
   /**
    * Gets datasource types
@@ -1063,6 +1131,22 @@ export class AipFilterComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Handles agent pipeline type selection
+   */
+  agentPipelineTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.agentPipelinesTypeList?.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
+  }
+
+  /**
    * Removes a pipeline type from selection
    */
   removePipelineType(type: string): void {
@@ -1070,6 +1154,18 @@ export class AipFilterComponent implements OnInit, OnChanges {
       type,
       this.selectedAdapterType,
       this.pipelinesTypeList || [],
+      true
+    );
+  }
+
+  /**
+   * Removes a pipeline type from selection
+   */
+  removeAgentPipelineType(type: string): void {
+    this.removeFromSelection(
+      type,
+      this.selectedAdapterType,
+      this.agentPipelinesTypeList || [],
       true
     );
   }

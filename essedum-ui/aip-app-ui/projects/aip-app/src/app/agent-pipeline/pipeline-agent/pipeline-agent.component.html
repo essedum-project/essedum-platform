@@ -6,8 +6,8 @@
   </app-aip-header>
 
   <!-- Filter Section -->
-  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPipelineTypeList]="{ 
-                        selectedAdapterType: selectedAdapterType
+  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedAgentPipelineTypeList]="{ 
+                        selectedPipelineAgentType: selectedPipelineAgentType
                       }" (tagSelected)="onTagSelected($event)"
     (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
 

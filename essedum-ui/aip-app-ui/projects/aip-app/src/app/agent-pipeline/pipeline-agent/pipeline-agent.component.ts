@@ -25,7 +25,7 @@ import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline
 export class PipelineAgentComponent implements OnInit, OnChanges {
   // Constants
   readonly CARD_TITLE = 'Pipeline Agents';
-  readonly SERVICE_V1 = 'pipeline';
+  readonly SERVICE_V1 = 'pipelineagent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -49,7 +49,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
   filt = '';
   filtbackup = '';
   selectedAdapterInstance: string[] = [];
-  selectedAdapterType: string[] = [];
+  selectedPipelineAgentType: string[] = [];
   selectedTag: string[] = [];
 
   // Pagination
@@ -98,6 +98,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     this.filteredCards = [];
     this.organization = sessionStorage.getItem('organization');
 
+
     if (this.organization) {
       this.handleRouteState();
       this.setupQueryParamHandling();
@@ -124,7 +125,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
       if (params['page']) {
         this.pageNumber = +params['page'];
         this.filter = params['search'] || '';
-        this.selectedAdapterType = params['pipelineType']
+        this.selectedPipelineAgentType = params['pipelineType']
           ? params['pipelineType'].split(',')
           : [];
       } else {
@@ -199,7 +200,6 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
 
   private loadAuthentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
-      this.createAuth = cipAuthority.includes('pipeline-create');
       this.deleteAuth = cipAuthority.includes('pipeline-delete');
     });
   }
@@ -227,7 +227,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
       this.updateQueryParam(
         this.pageNumber,
         this.filter,
-        this.selectedAdapterType.toString()
+        this.selectedPipelineAgentType.toString()
       );
     });
   }
@@ -241,8 +241,8 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
       .set('adapter_instance', 'internal')    
       .set('interfacetype', 'pipeline-agent');
 
-    if (this.selectedAdapterType.length >= 1) {
-      params = params.set('type', this.selectedAdapterType.toString());
+    if (this.selectedPipelineAgentType.length >= 1) {
+      params = params.set('type', this.selectedPipelineAgentType.toString());
     }
 
     if (this.filter.length >= 1) {
@@ -299,10 +299,10 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
       this.pageNumber = 1;
     }
 
-    if (this.selectedAdapterType.length > 0) {
+    if (this.selectedPipelineAgentType.length > 0) {
       this.finalDataList = [];
 
-      for (const adapterType of this.selectedAdapterType) {
+      for (const adapterType of this.selectedPipelineAgentType) {
         const matchingCards = this.cards.filter((data) => {
           const isAdapterTypeIncluded = data.type?.includes(adapterType);
           const isFiltIncluded =
@@ -336,7 +336,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     this.updateQueryParam(
       this.pageNumber,
       this.filt,
-      this.selectedAdapterType.toString()
+      this.selectedPipelineAgentType.toString()
     );
   }
 
@@ -384,7 +384,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
     this.pageNumber = 1;
     this.pageSize = 8;
     this.filter = '';
-    this.selectedAdapterType = [];
+    this.selectedPipelineAgentType = [];
     this.selectedTag = [];
     this.getCountPipelines();
     this.getCards();
@@ -394,7 +394,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
 
   onTagSelected(event: any): void {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
-    this.selectedAdapterType = event.getSelectedAdapterType();
+    this.selectedPipelineAgentType = event.getSelectedAdapterType();
     this.pageNumber = 1;
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
@@ -412,7 +412,7 @@ export class PipelineAgentComponent implements OnInit, OnChanges {
         queryParams: {
           page: this.pageNumber,
           search: this.filter,
-          pipelineType: this.selectedAdapterType.toString(),
+          pipelineType: this.selectedPipelineAgentType.toString(),
           org: this.organization,
           roleId: JSON.parse(sessionStorage.getItem('role')).id,
         },
