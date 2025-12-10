@@ -169,8 +169,9 @@ public class ICIPFolderController {
      * @param id the script id
      * @return the response entity
      */
-    @DeleteMapping(path = "/file/{id}")
+    @DeleteMapping(path = "/delete/{id}")
     public ResponseEntity<Void> deleteFile(@PathVariable("id") Integer id) {
+        logger.info("request to delete ai-agent script file with id: {}", id);
         folderService.deleteFileById(id);
         return ResponseEntity.noContent().build();
     }

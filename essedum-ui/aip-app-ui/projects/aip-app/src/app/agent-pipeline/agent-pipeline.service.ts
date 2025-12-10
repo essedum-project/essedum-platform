@@ -427,7 +427,7 @@ export class AgentPipelineService {
    * Delete a file from the backend
    */
   deleteFile(id: string | number): Observable<any> {
-    const url = `${this.baseUrl}/folder/file/${id}`;
+    const url = `${this.baseUrl}/folder/delete/${id}`;
     
     console.log(`Deleting file with ID: ${id}`);
     console.log(`DELETE request to: ${url}`);
