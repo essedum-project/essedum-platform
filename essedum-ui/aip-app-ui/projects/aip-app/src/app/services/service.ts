@@ -1605,10 +1605,30 @@ export class Services {
 
   //read native file
   readNativeFile(cname, org, filename): Observable<any> {
+    console.log('Making API call to read native file:', {
+      cname,
+      org, 
+      filename,
+      url: this.baseUrl + '/file/read/' + cname + '/' + org
+    });
+    
     return this.https.get(this.baseUrl + '/file/read/' + cname + '/' + org, {
       params: { file: filename },
       responseType: 'arraybuffer',
-    });
+      // Add headers to improve error handling
+      observe: 'body',
+      reportProgress: false
+    }).pipe(
+      catchError((error) => {
+        console.error('API Error in readNativeFile:', {
+          status: error.status,
+          statusText: error.statusText,
+          url: error.url,
+          message: error.message
+        });
+        return throwError(error);
+      })
+    );
   }
 
   //modal-edit-canvas

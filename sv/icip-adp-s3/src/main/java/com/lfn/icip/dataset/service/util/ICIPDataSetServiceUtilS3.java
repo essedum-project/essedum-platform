@@ -334,7 +334,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     // Google Cloud Storage client for the given dataset, with the class SSL bypass helpers
     private Storage buildGcsClient(ICIPDataset dataset) throws Exception {
         JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("JsonData/service-account.json");
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("");
         if (inputStream == null) {
             throw new FileNotFoundException("service-account.json not found in resources");
         }

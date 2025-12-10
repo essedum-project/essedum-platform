@@ -28,7 +28,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileConstants {
 
-	/**
+    public static final String AI_AGENT_SCRIPT_ZIP_FOLDER_PATH = "C:\\Users\\satyam.kumar28\\Downloads\\springboot_zip_upload_project.zip";
+
+    /**
 	 * Instantiates a new file constants.
 	 */
 	private FileConstants() {

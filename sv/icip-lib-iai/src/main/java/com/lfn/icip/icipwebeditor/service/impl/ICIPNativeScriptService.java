@@ -111,6 +111,34 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 		return nativeScriptRepository.findByCnameAndOrganization(name, org);
 	}
 
+    /**
+     * Find by org and name.
+     *
+     * @param name the name
+     * @param org  the org
+     * @return the list
+     */
+    @Override
+    public List<ICIPNativeScript> findByOrgAndName(String name, String org) {
+        logger.info("getting native script by name : {}", name);
+        return nativeScriptRepository.findByOrganizationAndCname(org, name);
+    }
+
+    /**
+     * Find by name and org and file.
+     *
+     * @param name the name
+     * @param org  the org
+     * @param filename the filename
+     * @return the ICIP native script
+     */
+    @Override
+    public ICIPNativeScript findByNameAndOrgAndFile(String name, String org, String filename) {
+        logger.info("getting native script by name : {}", name);
+        return nativeScriptRepository.findByCnameAndOrganizationAndFilename(name, org, filename);
+    }
+
+
 	/**
 	 * Delete by name and org.
 	 *
@@ -148,12 +176,19 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 			
 		}
 		else {
-			ICIPNativeScript fetched = nativeScriptRepository.findByCnameAndOrganization(name, org);
-			if (fetched != null) {
+			List<ICIPNativeScript> fetched = nativeScriptRepository.findByOrganizationAndCname(org, name);
+			/*if (fetched != null) {
 				nativeScriptRepository.deleteByCnameAndOrg(fetched.getCname(),fetched.getOrganization());
 	//			nativeScriptRepository.deleteById(fetched.getId());
-			}
-		}
+			}*/
+
+            if (fetched != null && !fetched.isEmpty()) {
+                for (ICIPNativeScript script : fetched) {
+                    nativeScriptRepository.deleteById(script.getId()); // ✅ Delete by ID
+                }
+            }
+
+        }
 	}
 
 	/**

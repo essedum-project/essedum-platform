@@ -1,0 +1,94 @@
+<div class="github-login-container">
+  <div class="login-header">
+    <button 
+      mat-icon-button 
+      class="close-button"
+      (click)="onCancel()"
+      type="button"
+      [attr.aria-label]="'Close login dialog'">
+      <mat-icon>close</mat-icon>
+    </button>
+    
+    <div class="github-logo">
+      <img 
+        src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTgiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5OCA5NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ4Ljg1NCAwQzIxLjgzOSAwIDAgMjIgMCA0OS4yMTdjMCAyMS43NTYgMTMuOTkzIDQwLjE3MiAzMy40MDUgNDYuNjkgMi40MjcuNDkgMy4zMTYtMS4wNTkgMy4zMTYtMi4zNjIgMC0xLjE0MS0uMDgtNS4wNTItLjA4LTkuMTI3LTEzLjU5IDIuOTM0LTE2LjQyLTUuODY3LTE2LjQyLTUuODY3LTIuMTg0LTUuNzA0LTUuNDItNy4xNy01LjQyLTcuMTctNC40NDgtMy4wMTUuMzI0LTMuMDE1LjMyNC0zLjAxNSA0LjkzNC4zMjYgNy41MjMgNS4wNTIgNy41MjMgNS4wNTIgNC4zNjcgNy40OTYgMTEuNDA0IDUuMzc4IDE0LjIzNSA0LjA3NC41MDQtMy4xOSAxLjY5OS01LjM3OCAzLjA3NC02LjZDMjkuMTkgNTYuMzc2IDE3Ljc3MyA1Mi45NTMgMTcuNzczIDM3LjU0NmMwLTUuOTQ2IDIuMTA0LTEwLjg1NSA1LjU2OC0xNC42ODQtLjU2OC0xLjM4MS0yLjQyNy02Ljk2OS40NDktMTQuNDY3IDAgMCA0LjEyNS0xLjMwNCAxMy40MjYgNS4wNTJhNDcuMDM0IDQ3LjAzNCAwIDAgMSAxMi4yMTQtMS42NTNjNC4xMjUgMCA4LjMzLjU3MSAxMi4yMTMgMS42NTMgOS4zMDItNi4zNTYgMTMuNDI3LTUuMDUyIDEzLjQyNy01LjA1MiAyLjg3NyA3LjQ5OCAxLjAxNyAxMy4wODYuNDQ4IDE0LjQ2NyAzLjQ2NSAzLjgyOSA1LjU2OCA4LjczOCA1LjU2OCAxNC42ODQgMCAxNS40NjQtMTEuNDk4IDE4LjcyOS0yMi43NzIgMTkuNzI4IDEuOTgyIDEuNzEgMy42ODQgNC44MjYgMy42ODQgOS43MTQgMCA2LjEtLjA4MSAxMC45MjMtLjA4MSAxMi4zNTQgMCAxLjMwNi44OSAyLjc5MiAzLjMxNiAyLjM2NCAzMy4zMi02LjU3OCAzNy4yMDMtMjQuOTY3IDM3LjIwMy00Ni43IDAgMC0uMDAzLS4wNDEtLjAwOS0uMTI0QzgwLjM1NiAzMy4wNTkgNzMuOTU4IDI4LjA5IDY3LjA0OSAyOC4wOWMtMS4wMTkgMC0yLjAzOC4wNC0zLjA1Ny4xMiAxLjU3OC0xLjI0OSAzLjUwNi0yLjYxNiA1LjU1MS00LjQwNyA2LjM0MS00LjE5MyAxNC4zNzItMTAuNDA2IDE0LjM3Mi0yMi4xMTJhMTcuODE2IDE3LjgxNiAwIDAgMC01LjE1My0xMi41NDVDNzIuNTc3IDI5LjQwOSA1OC42NTIgMzguMDYgNDguODU0IDAiIGZpbGw9IiMxNjE2MTQiLz48L3N2Zz4="
+        alt="GitHub Logo"
+        width="48"
+        height="48">
+    </div>
+    <h2 class="sub-header">Sign in to GitHub</h2>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <!-- Username/Email Field -->
+    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+      <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
+        <mat-label>Username </mat-label>
+        <input 
+          matInput 
+          formControlName="username"
+          type="email"
+          placeholder="Enter your username or email..."
+          autocomplete="username" required>
+        <mat-error class="ml-15m" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+          {{ getErrorMessage('username') }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Password Field -->
+    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+   
+      <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always" class="password-field">
+        <mat-label>Password</mat-label>
+        <input 
+          matInput 
+          formControlName="password"
+          [type]="hidePassword ? 'password' : 'text'"
+          placeholder="Enter your password..."
+          autocomplete="current-password">
+        <mat-icon 
+          matSuffix 
+          class="password-toggle-icon"
+          (click)="togglePasswordVisibility()" 
+          [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+          tabindex="0"
+          role="button">
+          {{ hidePassword ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+        <mat-error class="ml-15m" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          {{ getErrorMessage('password') }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="loginError">
+      <mat-icon class="error-icon">error</mat-icon>
+      <span>{{ loginError }}</span>
+    </div>
+
+    <!-- Sign In Button -->
+    <div class="form-actions">
+      <button 
+        mat-raised-button 
+        color="primary"
+        type="submit" 
+        class="sign-in-button"
+        [disabled]="loginForm.invalid || isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="20" class="loading-spinner"></mat-spinner>
+        <span *ngIf="!isLoading">Sign in</span>
+        <span *ngIf="isLoading">Signing in...</span>
+      </button>
+    </div>
+       <div class="password-field-header">
+        <a href="#" class="forgot-password" (click)="forgotPassword(); $event.preventDefault()">
+          Forgot password?
+        </a>
+      </div>
+    </form>
+</div>
+
+
+
+

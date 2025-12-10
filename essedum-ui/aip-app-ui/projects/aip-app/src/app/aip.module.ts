@@ -1,4 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AipRouting } from './aip-routing';
 import { AipComponent } from './aip.component';
 import { MatCardModule } from '@angular/material/card';
@@ -15,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { NotebookDialogComponent } from './pipeline.description/notebook-dialog/notebook-dialog.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
@@ -23,7 +25,7 @@ import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
 import { AipInterceptorService } from './services/interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 import {
@@ -141,6 +143,10 @@ import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/
 import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
 import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -174,6 +180,7 @@ const dbConfig: DBConfig = {
     PipelineComponent,
     PipelineCreateComponent,
     PipelineDescriptionComponent,
+    NotebookDialogComponent,
     EnlCodeEditorComponent,
     DatasourceComponent,
     ModalConfigRestDatasourceComponent,
@@ -238,11 +245,16 @@ const dbConfig: DBConfig = {
     AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
+    AgentComponent,
+    AgentPipelineComponent,
+    AgentPipelineDashboardComponent
     GitHubPushComponent,
     AgentComponent
 
   ],
   imports: [
+    CommonModule,
+    HttpClientModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
@@ -250,6 +262,7 @@ const dbConfig: DBConfig = {
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
+    GithubLoginComponent,
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
@@ -263,6 +276,7 @@ const dbConfig: DBConfig = {
     MatSliderModule,
     MatSnackBarModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,

@@ -545,4 +545,5 @@ export class PipelineComponent implements OnInit, OnChanges {
       this.getCards();
     }
   }
+
 }

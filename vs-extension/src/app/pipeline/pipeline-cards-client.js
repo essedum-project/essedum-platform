@@ -1,5 +1,295 @@
-// Pipeline Cards JavaScript logic
-// This file contains the client-side JavaScript for pipeline cards functionality
+/**
+ * Pipeline Cards Client-Side JavaScript
+ * 
+ * This file contains the client-side JavaScript logic for the pipeline cards
+ * webview interface. It handles:
+ * - User interface interactions
+ * - Communication with the VS Code extension
+ * - Dynamic content rendering
+ * - Form handling and validation
+ * - Event management
+ * 
+ * @fileoverview Client-side JavaScript for pipeline cards webview
+ * @author Essedum AI Platform Team
+ * @version 1.0.0
+ */
+
+// ================================
+// CONSTANTS AND CONFIGURATION
+// ================================
+
+/**
+ * Application configuration constants
+ */
+const CONFIG = {
+    /** Maximum visible pages in pagination */
+    MAX_VISIBLE_PAGES: 5,
+
+    /** Default pagination page size */
+    DEFAULT_PAGE_SIZE: 4,
+
+    /** Search debounce delay in milliseconds */
+    SEARCH_DEBOUNCE_DELAY: 300,
+
+    /** Animation durations */
+    ANIMATION: {
+        FAST: 200,
+        NORMAL: 300,
+        SLOW: 500
+    },
+
+    /** Loading state timeouts */
+    TIMEOUTS: {
+        LOADING_MIN: 500,
+        ERROR_DISPLAY: 5000,
+        SUCCESS_DISPLAY: 3000
+    }
+};
+
+/**
+ * Webview command constants
+ */
+const COMMANDS = {
+    // Data operations
+    // LOAD_CARDS: 'loadCards',
+    REFRESH: 'refresh',
+    FILTER: 'filter',
+
+    // Navigation
+    NEXT_PAGE: 'nextPage',
+    PREVIOUS_PAGE: 'previousPage',
+    FIRST_PAGE: 'firstPage',
+    LAST_PAGE: 'lastPage',
+    GO_TO_PAGE: 'goToPage',
+
+    // Pipeline actions
+    VIEW_DETAILS: 'viewDetails',
+    RUN_PIPELINE: 'runPipeline',
+    VIEW_LOGS: 'viewLogs',
+    REFRESH_SCRIPTS: 'refreshScripts',
+
+    // Script actions
+    OPEN_SCRIPT: 'openScript',
+    COPY_SCRIPT: 'copyScript',
+    GENERATE_SCRIPTS: 'generateScripts',
+
+    // UI updates
+    UPDATE_CARDS: 'updateCards',
+    SHOW_DETAILS: 'showDetails',
+    SHOW_LOGIN_PROGRESS: 'showLoginProgress',
+    SHOW_LOGIN_ERROR: 'showLoginError'
+};
+
+/**
+ * CSS selector constants
+ */
+const SELECTORS = {
+    // Input elements
+    SEARCH_INPUT: '#searchInput',
+    SEARCH_BTN: '#searchBtn',
+    REFRESH_BTN: '#refreshBtn',
+
+    // Content containers
+    LOADING_STATE: '#loadingState',
+    CARDS_CONTAINER: '#cardsContainer',
+    EMPTY_STATE: '#emptyState',
+    DETAILS_VIEW: '#detailsView',
+
+    // Pagination elements
+    PAGINATION_CONTAINER: '#paginationContainer',
+    PAGINATION_INFO: '#paginationInfo',
+    PAGINATION_PAGES: '#paginationPages',
+    FIRST_PAGE_BTN: '#firstPageBtn',
+    PREV_PAGE_BTN: '#prevPageBtn',
+    NEXT_PAGE_BTN: '#nextPageBtn',
+    LAST_PAGE_BTN: '#lastPageBtn',
+
+    // Details view elements
+    BACK_BTN: '#backBtn',
+    DETAILS_TITLE: '#detailsTitle',
+    PIPELINE_INFO: '#pipelineInfo',
+    SCRIPTS_CONTAINER: '#scriptsContainer',
+    RUN_TYPES_CONTAINER: '#runTypesContainer',
+    RUN_PIPELINE_BTN: '#runPipelineBtn',
+    VIEW_LOGS_BTN: '#viewLogsBtn',
+    REFRESH_SCRIPTS_BTN: '#refreshScriptsBtn',
+
+    // Login elements
+    LOGIN_BUTTON: '.login-button',
+    LOGIN_MESSAGE: '.logout-message p'
+};
+
+/**
+ * UI text constants
+ */
+const UI_TEXT = {
+    LOADING: {
+        PIPELINES: 'Loading pipelines...',
+        SCRIPTS: 'Loading scripts...',
+        AUTHENTICATING: 'Authenticating...'
+    },
+
+    EMPTY_STATES: {
+        NO_PIPELINES: 'No pipelines found.',
+        NO_SCRIPTS: 'No scripts available for this pipeline.'
+    },
+
+    BUTTONS: {
+        VIEW_DETAILS: 'View Details',
+        RUN_PIPELINE: '▶ Run Pipeline',
+        VIEW_LOGS: '📄 View Logs',
+        REFRESH_SCRIPTS: '🔄 Refresh Scripts',
+        OPEN: '📂 Open',
+        COPY: '📋 Copy',
+        AUTHENTICATING: 'Authenticating...',
+        LOGIN: 'Login to Essedum'
+    },
+
+    TOOLTIPS: {
+        FIRST_PAGE: 'First Page',
+        PREVIOUS_PAGE: 'Previous Page',
+        NEXT_PAGE: 'Next Page',
+        LAST_PAGE: 'Last Page',
+        BACK_TO_PIPELINES: 'Back to Pipelines'
+    },
+
+    MESSAGES: {
+        AUTHENTICATION_ERROR: 'Authentication failed. Please try again.',
+        NETWORK_ERROR: 'Network error. Please check your connection.',
+        UNKNOWN_ERROR: 'An unexpected error occurred.'
+    }
+};
+
+/**
+ * CSS class name constants
+ */
+const CSS_CLASSES = {
+    // State classes
+    HIDDEN: 'hidden',
+    LOADING: 'loading',
+    ACTIVE: 'active',
+    DISABLED: 'disabled',
+    SELECTED: 'selected',
+
+    // Button classes
+    BTN: 'btn',
+    BTN_PRIMARY: 'btn-primary',
+    BTN_SECONDARY: 'btn-secondary',
+    BTN_SMALL: 'btn-small',
+
+    // Card classes
+    PIPELINE_CARD: 'pipeline-card',
+    CARD_HEADER: 'pipeline-card-header',
+    CARD_BODY: 'pipeline-card-body',
+    CARD_ACTIONS: 'pipeline-card-actions',
+
+    // Pagination classes
+    PAGE_NUMBER: 'page-number',
+    PAGE_ELLIPSIS: 'page-ellipsis'
+};
+
+// ================================
+// UTILITY FUNCTIONS
+// ================================
+
+/**
+ * Utility functions for common operations
+ */
+const Utils = {
+    /**
+     * Converts string to title case
+     * @param {string} str - Input string
+     * @returns {string} Title case string
+     */
+    toTitleCase(str) {
+        if (!str) {
+            return '';
+        }
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    },
+
+    /**
+     * Formats date to user-friendly format
+     * @param {string} dateStr - ISO date string
+     * @returns {string} Formatted date
+     */
+    formatDate(dateStr) {
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'Unknown Date';
+        }
+    },
+
+    /**
+     * Sanitizes HTML content
+     * @param {string} html - HTML string to sanitize
+     * @returns {string} Sanitized HTML
+     */
+    sanitizeHtml(html) {
+        const div = document.createElement('div');
+        div.textContent = html;
+        return div.innerHTML;
+    },
+
+    /**
+     * Debounces function execution
+     * @param {Function} func - Function to debounce
+     * @param {number} delay - Delay in milliseconds
+     * @returns {Function} Debounced function
+     */
+    debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    },
+
+    /**
+     * Shows/hides element with optional animation
+     * @param {HTMLElement} element - Element to show/hide
+     * @param {boolean} show - Whether to show or hide
+     * @param {string} displayType - CSS display type when showing
+     */
+    toggleElement(element, show, displayType = 'block') {
+        if (!element) {
+            return;
+        }
+
+        if (show) {
+            element.style.display = displayType;
+            element.classList.remove(CSS_CLASSES.HIDDEN);
+        } else {
+            element.style.display = 'none';
+            element.classList.add(CSS_CLASSES.HIDDEN);
+        }
+    },
+
+    /**
+     * Gets user avatar letter from name
+     * @param {string} name - User name
+     * @returns {string} Avatar letter
+     */
+    getAvatarLetter(name) {
+        return (name && name.length > 0) ? name.charAt(0).toUpperCase() : 'U';
+    }
+};
+
+// ================================
+// MAIN CLASS DEFINITION
+// ================================
 
 class PipelineCardsClient {
     constructor() {
@@ -171,64 +461,122 @@ class PipelineCardsClient {
         this.updatePagination(pagination);
     }
 
+    /**
+     * Format date as "Tuesday, October 7, 2025"
+     * @param {string} dateStr - Date string to format
+     * @returns {string} Formatted date string
+     */
+    formatFullDate(dateStr) {
+        if (!dateStr) { return 'Unknown'; }
+        const date = new Date(dateStr);
+        return date.toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    /**
+     * Convert string to title case
+     * @param {string} str - String to convert
+     * @returns {string} Title case string
+     */
+    toTitleCase(str) {
+        if (!str) { return ''; }
+        return str.replace(/\w\S*/g, (txt) => {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
+
+    // createCardHTML(pipeline) {
+    //     const createdDate = new Date(pipeline.createdDate).toLocaleDateString();
+
+    //     return `
+    //         <div class="pipeline-card" tabindex="0" role="article" aria-label="Pipeline: ${this.toTitleCase(pipeline.alias)}">
+    //             <div class="pipeline-card-header">                   
+    //                     <span class="pipeline-title">${this.toTitleCase(pipeline.alias)}</span>
+    //                      <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+    //             </div>
+
+    //             <div class="pipeline-card-body">                                              
+    //                         <span class="metadata-value">${this.formatFullDate(pipeline.createdDate)}</span>                       
+    //             </div>
+
+    //             <div class="pipeline-card-actions">
+    //             <button class="pipeline-action-btn primary" data-pipeline-id="${pipeline.id}" aria-label="View details for ${this.toTitleCase(pipeline.alias)}">
+    //                     <span class="action-icon">👁</span>
+    //                     <span class="action-text">View Details</span>
+    //                 </button>
+    //             <div class="pipeline-avatar-section">
+    //                     <div class="pipeline-avatar" title="${pipeline.target?.created_by || 'Unknown User'}">
+    //                         ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'U'}
+    //                     </div>
+    //                 </div>
+
+    //             </div>
+    //         </div>
+    //     `;
+    // }
+    /**
+        * Creates HTML for a single pipeline card
+        * @param {Object} pipeline - Pipeline data
+        * @returns {string} HTML string for the card
+        */
     createCardHTML(pipeline) {
-        const createdDate = new Date(pipeline.createdDate).toLocaleDateString();
-
-        // Format date as "Tuesday, October 7, 2025"
-        function formatFullDate(dateStr) {
-            if (!dateStr) { return 'Unknown'; }
-            const date = new Date(dateStr);
-            return date.toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-
-        function toTitleCase(str) {
-            return str.replace(/\w\S*/g, (txt) => {
-                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            });
-        }
+        const createdDate = Utils.formatDate(pipeline.createdDate);
+        const title = Utils.toTitleCase(pipeline.alias);
+        const avatarLetter = Utils.getAvatarLetter(pipeline.target?.created_by);
+        const createdBy = pipeline.target?.created_by || 'Unknown User';
 
         return `
-            <div class="pipeline-card" tabindex="0" role="article" aria-label="Pipeline: ${toTitleCase(pipeline.alias)}">
-                <div class="pipeline-card-header">                   
-                        <span class="pipeline-title">${toTitleCase(pipeline.alias)}</span>
-                         <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+            <div class="${CSS_CLASSES.PIPELINE_CARD}" tabindex="0" role="article" 
+                 aria-label="Pipeline: ${Utils.sanitizeHtml(title)}" 
+                 data-pipeline-id="${pipeline.id}">
+                <div class="${CSS_CLASSES.CARD_HEADER}">                   
+                    <span class="pipeline-title">${Utils.sanitizeHtml(title)}</span>
+                    <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
                 </div>
                 
-                <div class="pipeline-card-body">                                              
-                            <span class="metadata-value">${formatFullDate(pipeline.createdDate)}</span>                       
+                <div class="${CSS_CLASSES.CARD_BODY}">                                              
+                    <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>                       
                 </div>
                 
-                <div class="pipeline-card-actions">
-                <button class="pipeline-action-btn primary" data-pipeline-id="${pipeline.id}" aria-label="View details for ${toTitleCase(pipeline.alias)}">
+                <div class="${CSS_CLASSES.CARD_ACTIONS}">
+                    <button class="pipeline-action-btn primary" 
+                            data-pipeline-id="${pipeline.id}" 
+                            aria-label="View details for ${Utils.sanitizeHtml(title)}">
                         <span class="action-icon">👁</span>
-                        <span class="action-text">View Details</span>
+                        <span class="action-text">${UI_TEXT.BUTTONS.VIEW_DETAILS}</span>
                     </button>
-                <div class="pipeline-avatar-section">
-                        <div class="pipeline-avatar" title="${pipeline.target?.created_by || 'Unknown User'}">
-                            ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'U'}
+                    <div class="pipeline-avatar-section">
+                        <div class="pipeline-avatar" title="${Utils.sanitizeHtml(createdBy)}">
+                            ${avatarLetter}
                         </div>
                     </div>
-                    
                 </div>
             </div>
         `;
     }
 
+    // ================================
+    // PAGINATION METHODS
+    // ================================
+
+    /**
+     * Updates pagination display
+     * @param {Object} pagination - Pagination data
+     */
     updatePagination(pagination) {
         if (!pagination || pagination.totalPages <= 1) {
             if (this.paginationContainer) {
-                this.paginationContainer.style.display = 'none';
+                Utils.toggleElement(this.paginationContainer, false);
             }
             return;
         }
 
         if (this.paginationContainer) {
-            this.paginationContainer.style.display = 'flex';
+            Utils.toggleElement(this.paginationContainer, true);
         }
 
         // Update pagination info
@@ -239,23 +587,37 @@ class PipelineCardsClient {
         }
 
         // Update button states
-        if (this.firstPageBtn) {
-            this.firstPageBtn.disabled = pagination.currentPage === 1;
-        }
-        if (this.prevPageBtn) {
-            this.prevPageBtn.disabled = pagination.currentPage === 1;
-        }
-        if (this.nextPageBtn) {
-            this.nextPageBtn.disabled = pagination.currentPage === pagination.totalPages;
-        }
-        if (this.lastPageBtn) {
-            this.lastPageBtn.disabled = pagination.currentPage === pagination.totalPages;
-        }
+        this.updatePaginationButtons(pagination);
 
         // Update page numbers
         this.updatePageNumbers(pagination);
     }
 
+    /**
+   * Updates pagination button states
+   * @param {Object} pagination - Pagination data
+   */
+    updatePaginationButtons(pagination) {
+        const { currentPage, totalPages } = pagination;
+
+        if (this.firstPageBtn) {
+            this.firstPageBtn.disabled = currentPage === 1;
+        }
+        if (this.prevPageBtn) {
+            this.prevPageBtn.disabled = currentPage === 1;
+        }
+        if (this.nextPageBtn) {
+            this.nextPageBtn.disabled = currentPage === totalPages;
+        }
+        if (this.lastPageBtn) {
+            this.lastPageBtn.disabled = currentPage === totalPages;
+        }
+    }
+
+    /**
+      * Updates page number display
+      * @param {Object} pagination - Pagination data
+      */
     updatePageNumbers(pagination) {
         if (!this.paginationPages) { return; }
 
@@ -319,7 +681,19 @@ class PipelineCardsClient {
         });
     }
 
+    // ================================
+    // DETAILS VIEW METHODS
+    // ================================
+
+    /**
+     * Shows pipeline details view
+     * @param {Object} pipeline - Pipeline data
+     * @param {Object} scripts - Scripts data
+     * @param {Array} runTypes - Run types data
+     */
     showPipelineDetails(pipeline, scripts, runTypes) {
+        console.log('[PipelineClient] Showing pipeline details:', pipeline.alias);
+
         this.currentView = 'details';
         this.currentPipelineId = pipeline.id;
         this.currentPipelineData = { pipeline, scripts, runTypes };
@@ -328,9 +702,7 @@ class PipelineCardsClient {
         this.hideListView();
 
         // Show details view
-        if (this.detailsView) {
-            this.detailsView.style.display = 'flex';
-        }
+        Utils.toggleElement(this.detailsView, true, 'flex');
 
         // Update details content
         this.updateDetailsContent(pipeline, scripts, runTypes);
@@ -419,35 +791,51 @@ class PipelineCardsClient {
         this.setupActionButtons(pipeline);
     }
 
+    /**
+     * Updates pipeline information section
+     * @param {Object} pipeline - Pipeline data
+     */
     updatePipelineInfo(pipeline) {
-        if (!this.pipelineInfo) { return; }
+        if (!this.pipelineInfo) {
+            return;
+        }
 
-        const createdDate = pipeline.createdDate ? new Date(pipeline.createdDate).toLocaleDateString() : 'Unknown';
+        const createdDate = pipeline.createdDate || 'Unknown';
+        const createdBy = pipeline.target?.created_by || 'Unknown';
 
         this.pipelineInfo.innerHTML = `
-        <div>
-         <div class="pipeline-card-header-info">                   
-                        <span class="pipeline-title">${pipeline.alias}</span>
-                         <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+            <div>
+                <div class="pipeline-card-header-info">                   
+                    <span class="pipeline-title">${Utils.sanitizeHtml(Utils.toTitleCase(pipeline.alias))}</span>
+                    <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
                 </div>
-
                 <div class="pipeline-card-body">                                              
-                           <div class="metadata-item"><strong>Created Date: </strong> <span class="metadata-value">${pipeline.createdDate}</span></div>
-                           <div class="metadata-item"><strong>Created By: </strong> <span class="metadata-value">${pipeline.target?.created_by || 'Unknown'}</span></div>
+                    <div class="metadata-item">
+                        <strong>Created Date: </strong>
+                        <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <strong>Created By: </strong>
+                        <span class="metadata-value">${Utils.sanitizeHtml(createdBy)}</span>
+                    </div>
                 </div>
-        </div>            
+            </div>            
         `;
     }
 
+    /**
+        * Updates scripts content section
+        * @param {Object} scripts - Scripts data
+        */
     updateScriptsContent(scripts) {
-
-        if (!this.scriptsContainer) { return; }
+        if (!this.scriptsContainer) {
+            return;
+        }
 
         if (!scripts || !scripts.files || scripts.files.length === 0) {
             this.scriptsContainer.innerHTML = `
                 <div class="empty-scripts">
-                    <p>No scripts available for this pipeline.</p>
-                    <button class="btn btn-primary btn-small" onclick="window.pipelineClient.generateScripts()">Generate Scripts</button>
+                    <p>${UI_TEXT.EMPTY_STATES.NO_SCRIPTS}</p>
                 </div>
             `;
             return;
@@ -456,17 +844,20 @@ class PipelineCardsClient {
         const scriptsHtml = scripts.files.map((file, index) => `
             <div class="script-item">
                 <div class="script-info">
-                    <div class="script-name">${file.fileName}</div>                    
+                    <div class="script-name">${Utils.sanitizeHtml(file.fileName)}</div>                    
                     <div class="script-type">${file.language} (${file.extension})</div>
                 </div>
                 <div class="script-actions">                    
-                <button class="btn btn-small btn-primary" onclick="window.pipelineClient.openScript(${index})" title="Open ${file.fileName}">
-                    📂 Open
-                </button>                  
-                <button class="btn btn-small btn-secondary" onclick="window.pipelineClient.copyScript('${file.fileName}')" title="Copy ${file.fileName}">
-                    📋 Copy
-                </button>
-
+                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_PRIMARY}" 
+                            onclick="window.pipelineClient.openScript(${index})" 
+                            title="Open ${Utils.sanitizeHtml(file.fileName)}">
+                        ${UI_TEXT.BUTTONS.OPEN}
+                    </button>                  
+                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_SECONDARY}" 
+                            onclick="window.pipelineClient.copyScript('${file.fileName}')" 
+                            title="Copy ${Utils.sanitizeHtml(file.fileName)}">
+                        ${UI_TEXT.BUTTONS.COPY}
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -474,12 +865,18 @@ class PipelineCardsClient {
         this.scriptsContainer.innerHTML = scriptsHtml;
     }
 
+    /**
+     * Updates run types content section
+     * @param {Array} runTypes - Run types data
+     */
     updateRunTypesContent(runTypes) {
-        if (!this.runTypesContainer) { return; }
+        if (!this.runTypesContainer) {
+            return;
+        }
 
         if (!runTypes || runTypes.length === 0) {
             this.runTypesContainer.innerHTML = `
-                <div class="empty-scripts">
+                <div class="empty-run-types">
                     <p>No run types available.</p>
                 </div>
             `;
@@ -505,6 +902,13 @@ class PipelineCardsClient {
         this.selectedRunType = runTypes[0] || null;
     }
 
+
+
+    // Helper methods for script actions
+    /**
+    * Sets up action buttons for details view
+    * @param {Object} pipeline - Pipeline data
+    */
     setupActionButtons(pipeline) {
         // Run Pipeline button
         if (this.runPipelineBtn) {
@@ -545,7 +949,6 @@ class PipelineCardsClient {
         }
     }
 
-    // Helper methods for script actions
     openScript(fileIndex) {
         if (this.currentPipelineData && this.currentPipelineData.scripts && this.currentPipelineData.scripts.files) {
             const file = this.currentPipelineData.scripts.files[fileIndex];
