@@ -119,6 +119,7 @@
                               <mat-icon>folder_open</mat-icon>
                               <h3>Project Files</h3>
                             </div>
+                            <app-github-push></app-github-push>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
                               <button mat-icon-button class="download-button" (click)="downloadAllFiles()" [disabled]="isDownloading" title="Download ZIP">
                                 <mat-icon *ngIf="!isDownloading">file_download</mat-icon>
@@ -301,7 +302,6 @@
                         </div>
 
                         <div class="file-editor-placeholder" *ngIf="!selectedFileName">
-                          <mat-icon>description</mat-icon>
                           <p>Select a file to view its contents</p>
                         </div>
                       </div>
@@ -318,6 +318,7 @@
                         <div class="github-tab-title">
                           <mat-icon>cloud_upload</mat-icon>
                           <h2>Push to GitHub Repository</h2>
+                          <app-github-push></app-github-push>
                           <span class="github-tab-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
                         </div>
                       </div>

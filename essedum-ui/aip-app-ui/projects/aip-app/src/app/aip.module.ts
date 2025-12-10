@@ -247,10 +247,9 @@ const dbConfig: DBConfig = {
     ModalConfigComponent,
     AgentComponent,
     AgentPipelineComponent,
-    AgentPipelineDashboardComponent
+    AgentPipelineDashboardComponent,
     GitHubPushComponent,
     AgentComponent
-
   ],
   imports: [
     CommonModule,
