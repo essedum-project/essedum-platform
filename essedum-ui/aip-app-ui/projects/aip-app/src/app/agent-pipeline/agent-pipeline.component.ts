@@ -106,7 +106,7 @@ export class AgentPipelineComponent implements OnInit {
   agentCards: AgentCard[] = [
     {
       cid: '1',
-      cname: 'YL79B9', // Short alphanumeric cname for Customer Support Agent
+      cname: 'YL79B7', // Short alphanumeric cname for Customer Support Agent
       name: 'customer-support-agent',
       alias: 'Customer Support Agent',
       description: 'AI-powered customer support agent with knowledge base integration and ticket management',
@@ -291,10 +291,11 @@ export class AgentPipelineComponent implements OnInit {
       // Always show fresh generation state
       this.resetToInitialStateForNewAgent();
     } else {
-      // For other agents, use their fixed cname
+      // For other agents, use their fixed cname and check for existing files
       this.currentCname = agent.cname;
       console.log('Loading agent with fixed cname:', agent.cname);
-      this.checkAndLoadAgentData(agent.cname);
+      // Always check for existing files first
+      this.checkForExistingFilesAndLoadState(agent.cname);
     }
     
     // Update JSON content based on selected agent
@@ -1894,30 +1895,39 @@ public class ZipController {
     return files;
   }
 
-  // Check and load agent data using the fixed cname
-  private checkAndLoadAgentData(cname: string): void {
-    console.log('Fetching data for agent cname:', cname);
+  // Check for existing files and load appropriate state
+  private checkForExistingFilesAndLoadState(cname: string): void {
+    console.log('Checking for existing files for cname:', cname);
+    
+    // Reset to initial state first
+    this.resetToInitialStateForNewAgent();
     
     // Try to fetch files for this specific cname
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
       next: (apiResponse) => {
-        // Agent has generated files - load all data
-        console.log('Found existing files for cname:', cname, apiResponse);
-        this.loadExistingAgentFromAPI(apiResponse);
+        // Check if we actually have files
+        if (apiResponse && Array.isArray(apiResponse) && apiResponse.length > 0) {
+          console.log('Found existing files for cname:', cname, 'Files count:', apiResponse.length);
+          this.loadExistingAgentWithFilesFromAPI(apiResponse);
+        } else {
+          console.log('No files found in response for cname:', cname);
+          // Even if API succeeds but no files, show script tab only
+          this.showScriptTabOnly();
+        }
         this.isLoadingFiles = false;
       },
       error: (error) => {
-        console.log('No existing files found for cname:', cname, error);
-        // No files exist yet - show initial state with script tab only
-        this.resetToInitialStateForNewAgent();
+        console.log('API error or no existing files found for cname:', cname, error);
+        // API error or no files exist yet - show script tab only
+        this.showScriptTabOnly();
         this.isLoadingFiles = false;
       }
     });
   }
 
-  // Load existing agent data from API
-  private loadExistingAgentFromAPI(fileData: any): void {
+  // Load existing agent data from API when files exist
+  private loadExistingAgentWithFilesFromAPI(fileData: any): void {
     this.hasGeneratedAgent = true;
     this.isJsonProcessed = true;
     
@@ -1932,24 +1942,35 @@ public class ZipController {
       `Files: ${fileData.length} files loaded`
     ];
     
-    console.log('Successfully loaded existing agent:', {
+    console.log('Successfully loaded existing agent with files:', {
       cname: this.currentCname,
       hasFiles: this.fileSystemData.length > 0,
       fileCount: fileData.length
     });
   }
 
-  // Reset to initial state (no saved data)
+  // Show only script tab when no files exist
+  private showScriptTabOnly(): void {
+    this.hasGeneratedAgent = false;
+    this.isJsonProcessed = false; // This will show only the script tab
+    this.fileSystemData = [];
+    this.consoleOutput = [];
+    this.clearFileSelection();
+    
+    console.log('Showing script tab only - no existing files found for cname:', this.currentCname);
+  }
+
+  // Reset to initial state (no saved data) - used as starting point
   private resetToInitialStateForNewAgent(): void {
     this.selectedFileName = '';
     this.selectedFileContent = '';
-    this.isJsonProcessed = false; // Show script tab only (not JSON/console)
+    this.isJsonProcessed = false; // Show script tab only initially
     this.hasGeneratedAgent = false; // Reset playground button state
     // Don't reset currentCname - keep the agent's fixed cname
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
-    console.log('Reset to initial state for new agent with cname:', this.currentCname);
+    console.log('Reset to initial state for agent with cname:', this.currentCname);
   }
 
   // Clear file selection
