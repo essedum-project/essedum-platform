@@ -337,6 +337,9 @@ export class AgentPipelineComponent implements OnInit {
       this.originalFileContent = this.selectedFileContent;
       this.resetDiffTracking();
       
+      // Refresh file structure to ensure UI reflects any server-side changes
+      this.refreshFileStructure();
+      
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
@@ -387,12 +390,7 @@ export class AgentPipelineComponent implements OnInit {
       
       console.log('File deleted successfully:', result);
       
-      // Update the file tree with the response
-      if (result && Array.isArray(result)) {
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(result);
-      }
-      
-      // Clear the editor
+      // Clear the editor first
       this.selectedFileName = '';
       this.selectedFileContent = '';
       this.selectedFileNode = null;
@@ -401,6 +399,10 @@ export class AgentPipelineComponent implements OnInit {
       this.isFileModified = false;
       this.userModifiedLines.clear();
       this.resetDiffTracking();
+      
+      // Always refresh the file structure from API after successful deletion
+      // This ensures the UI reflects the current state on the server
+      this.refreshFileStructure();
       
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
@@ -527,6 +529,17 @@ export class AgentPipelineComponent implements OnInit {
         alert(`Failed to load agent files: ${error.message}`);
       }
     });
+  }
+  
+  // Refresh file structure - can be called manually or after operations
+  refreshFileStructure(): void {
+    if (!this.currentCname) {
+      console.warn('No container name available for refreshing files');
+      return;
+    }
+    
+    console.log('Refreshing file structure for container:', this.currentCname);
+    this.loadAgentFiles();
   }
   
   // Track user modifications for neon green highlighting
@@ -1193,6 +1206,9 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         console.log('File structure saved successfully via bulk update API:', result);
         this.showSaveStructureDialog = false;
         this.originalFileStructure = [];
+        
+        // Refresh file structure from API to ensure consistency
+        this.refreshFileStructure();
         
         // Show success message with properly formatted response
         const successResponse = { status: 200, body: result || [] };
