@@ -56,6 +56,7 @@ export class PipelineAgentDetailComponent implements OnInit {
     isJsonProcessed = false;
     isProcessingJson = false;
     
+    
     // Console output for Generate SDK Agent
     consoleOutput: string[] = [];
     isGenerating = false;
@@ -66,6 +67,7 @@ export class PipelineAgentDetailComponent implements OnInit {
     playgroundMessages: Array<{role: 'user' | 'agent', content: string}> = [];
     userQuestion = '';
     isAgentThinking = false;
+    isBackHovered: boolean = false;
   
     // Properties moved to avoid duplication
     
@@ -268,8 +270,7 @@ export class PipelineAgentDetailComponent implements OnInit {
           console.log('Pipeline fetch response:', res);
           if (res && res.length > 0) {
             // Extract file information from pipeline data using actual API structure
-            const pipelineData = res[0];
-            
+            const pipelineData = res[0];         
             // Extract alias and name for dynamic content
             const alias = pipelineData.alias || 'Unknown';
             const pipelineName = pipelineData.name || this.cardName;

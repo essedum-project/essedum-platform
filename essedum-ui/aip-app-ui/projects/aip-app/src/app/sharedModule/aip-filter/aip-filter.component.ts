@@ -585,7 +585,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
 
       const excludedTypes =
         this.servicev1 === ServiceType.CHAIN
-          ? ['App'] : ['App', 'Langchain'];
+          ? ['App'] : ['App', 'Langchain','AIAgent'];
 
       
       this.pipelinesTypeList = this.pipelinesTypes
