@@ -3815,8 +3815,13 @@
   background-color: #f8f9fa;
   border-top: 1px solid #e0e0e0;
   display: flex;
-  gap: 12px;
   justify-content: flex-end;
+  
+  .dialog-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
   
   button {
     padding: 8px 16px;

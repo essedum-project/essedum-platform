@@ -589,12 +589,14 @@
     </div>
 
     <div class="prompt-copy-footer">
-      <button mat-stroked-button (click)="closePromptCopyDialog()" class="cancel-btn">
-        Cancel
-      </button>
-      <button mat-raised-button color="primary" (click)="closePromptCopyDialog()" class="ok-btn">
-        OK
-      </button>
+      <div class="dialog-actions">
+        <button mat-stroked-button (click)="closePromptCopyDialog()" class="cancel-btn">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" (click)="closePromptCopyDialog()" class="ok-btn">
+          OK
+        </button>
+      </div>
     </div>
   </div>
 </div>
