@@ -3821,3 +3821,24 @@
 }
 
 
+
+.llm-selection-container.disabled {
+  .llm-selection-row {
+    label {
+      color: #999 !important;
+      opacity: 0.7;
+    }
+    
+    .llm-select {
+      opacity: 0.6;
+      
+      ::ng-deep .mat-select-trigger {
+        color: #999 !important;
+      }
+      
+      ::ng-deep .mat-select-arrow {
+        color: #999 !important;
+      }
+    }
+  }
+}
