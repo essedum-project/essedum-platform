@@ -17,6 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { NotebookDialogComponent } from './pipeline.description/notebook-dialog/notebook-dialog.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
@@ -25,7 +26,7 @@ import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
 import { AipInterceptorService } from './services/interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 import {
@@ -140,6 +141,8 @@ import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/m
 import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
 import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
+import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
+import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
@@ -181,6 +184,7 @@ const dbConfig: DBConfig = {
 PipelineAgentDetailComponent,
     PipelineCreateComponent,
     PipelineDescriptionComponent,
+    NotebookDialogComponent,
     EnlCodeEditorComponent,
     DatasourceComponent,
     ModalConfigRestDatasourceComponent,
@@ -247,11 +251,13 @@ PipelineAgentDetailComponent,
     ModalConfigComponent,
     AgentComponent,
     AgentPipelineComponent,
-    AgentPipelineDashboardComponent
-
+    AgentPipelineDashboardComponent,
+    GitHubPushComponent,
+    AgentComponent
   ],
   imports: [
     CommonModule,
+    HttpClientModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
@@ -331,6 +337,7 @@ PipelineAgentDetailComponent,
     SemanticService,
     DynamicRemoteLoad,
     AipSnackbarCustomService,
+    GitHubService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],

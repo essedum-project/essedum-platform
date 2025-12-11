@@ -1,0 +1,131 @@
+<!-- Trigger Button -->
+<div class="btn btn-primary" (click)="openModal()">
+ <svg height="16" aria-hidden="true" viewBox="0 0 24 24" version="1.1" width="16" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
+    <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"></path>
+</svg>
+</div>
+
+<!-- Modal -->
+<div class="modal" [class.active]="showModal" *ngIf="showModal">
+  <div class="modal-overlay" (click)="closeModal()"></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Push to GitHub</h2>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+
+      <!-- Not Authenticated (After Logout) -->
+      <div *ngIf="!isAuthenticated && !isLoading" class="logged-out-section">
+        <div class="logged-out-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </div>
+        <h3>You have been logged out</h3>
+        <p>To login with a different GitHub account, please:</p>
+        <ol class="logout-instructions">
+          <li>Logout from <a href="https://github.com/logout" target="_blank" rel="noopener">GitHub.com</a> in your
+            browser</li>
+          <li>Then click the button below to login</li>
+        </ol>
+        <button class="btn btn-github" (click)="login()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+            </path>
+          </svg>
+          Login with GitHub
+        </button>
+      </div>
+
+      <!-- Authenticated -->
+      <div *ngIf="isAuthenticated && !isLoading" class="content-section">
+        <!-- User Info -->
+        <div class="user-info">
+          <p>Logged in as: <strong>{{ username }}</strong></p>
+          <button class="btn btn-link" (click)="logout()">Logout</button>
+        </div>
+
+        <!-- Repository and Branch Selection -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="repo-select">Select Repository *</label>
+            <select id="repo-select" class="form-control" [(ngModel)]="selectedRepo" (change)="onRepoChange()">
+              <option value="">-- Select Repository --</option>
+              <option *ngFor="let repo of repositories" [value]="repo.fullName">
+                {{ repo.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="branches.length > 0">
+            <label for="branch-select">Select Branch *</label>
+            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch">
+              <option *ngFor="let branch of branches" [value]="branch">
+                {{ branch }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Repository Description -->
+        <div *ngIf="selectedRepoObject && selectedRepoObject.description" class="form-group" style="margin-top: -15px;">
+          <small class="form-text">{{ selectedRepoObject.description }}</small>
+        </div>
+
+        <!-- Commit Message -->
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="custom-message" [(ngModel)]="useCustomMessage">
+            <label for="custom-message">Use custom commit message</label>
+          </div>
+
+          <textarea *ngIf="useCustomMessage" class="form-control" rows="1" [(ngModel)]="commitMessage"
+            placeholder="Enter commit message...">
+          </textarea>
+
+          <small class="form-text" *ngIf="!useCustomMessage">
+            Default: Automated commit - [timestamp]
+          </small>
+        </div>
+
+        <!-- Local Path (Optional - can be hidden) -->
+        <!-- <div class="form-group">
+          <label for="local-path">Server Path</label>
+          <input type="text" id="local-path" class="form-control" [(ngModel)]="localPath"
+            placeholder="/server/path/to/files">
+          <small class="form-text">Path on server where files are located</small>
+        </div> -->
+      </div>
+    </div>
+
+    <div class="modal-footer" *ngIf="isAuthenticated && !isLoading">
+      <button class="btn btn-primary" (click)="pushToGitHub()" [disabled]="!selectedRepo || !selectedBranch">
+         Push to GitHub
+      </button>
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

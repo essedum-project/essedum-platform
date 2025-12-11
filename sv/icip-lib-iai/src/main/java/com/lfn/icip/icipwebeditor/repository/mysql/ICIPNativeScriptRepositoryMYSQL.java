@@ -15,19 +15,14 @@
 
 package com.lfn.icip.icipwebeditor.repository.mysql;
 
-import java.sql.Blob;
-import java.sql.SQLException;
-
+import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
+import com.lfn.icip.icipwebeditor.repository.ICIPNativeScriptRepository;
 import jakarta.transaction.Transactional;
-
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
-import com.lfn.icip.icipwebeditor.repository.ICIPNativeScriptRepository;
 
 // TODO: Auto-generated Javadoc
 /**
