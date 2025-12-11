@@ -519,6 +519,10 @@
     }
     
     .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
       .download-button {
         background: transparent;
         border: none;

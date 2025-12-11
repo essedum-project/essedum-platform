@@ -120,8 +120,8 @@
                               <mat-icon>folder_open</mat-icon>
                               <h3>Project Files</h3>
                             </div>
-                            <app-github-push [cname]="currentCname"></app-github-push>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
+                              <app-github-push [cname]="currentCname" class="git-push-button"></app-github-push>
                               <button mat-icon-button class="download-button" (click)="downloadAllFiles()"
                                 [disabled]="isDownloading" title="Download ZIP">
                                 <mat-icon *ngIf="!isDownloading">file_download</mat-icon>
