@@ -53,19 +53,32 @@
 
                       <!-- Right Half - Generate SDK Console -->
                       <div class="console-panel">
-                        <div class="generate-agent-container">
-                          <div class="generate-header">
-                            <h2>Generate SDK Agent</h2>
-                            <p>Build and package your agent for deployment</p>
-                          </div>
+                          <div class="generate-agent-container">
+                            <div class="generate-header">
+                              <h2>Generate SDK Agent</h2>
+                              <p>Build and package your agent for deployment</p>
+                            </div>
 
-                          <div class="generate-controls">
-                            <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
-                              [disabled]="isGenerateAgentDisabled" [matTooltip]="getGenerateButtonTooltip()"
-                              matTooltipPosition="above">
-                              <mat-icon>play_arrow</mat-icon>
-                              Generate Agent
-                            </button>
+                            <!-- LLM Selection Dropdown -->
+                            <div class="llm-selection-container">
+                              <div class="llm-selection-row">
+                                <label for="llm-select">Select LLM Provider</label>
+                                <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select">
+                                  <mat-option value="github-copilot">GitHub Copilot</mat-option>
+                                  <mat-option value="aws-bedrock">AWS Bedrock</mat-option>
+                                  <mat-option value="azure-ai-studio">Azure AI Studio</mat-option>
+                                  <mat-option value="gcp-vertex-ai">GCP Vertex AI</mat-option>
+                                </mat-select>
+                              </div>
+                            </div>
+
+                            <div class="generate-controls">
+                              <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
+                                [disabled]="isGenerateAgentDisabled || !selectedLLM" [matTooltip]="getGenerateButtonTooltip()"
+                                matTooltipPosition="above">
+                                <mat-icon>play_arrow</mat-icon>
+                                Generate Agent
+                              </button>
                             <button mat-raised-button class="clear-button" (click)="clearConsole()"
                               [disabled]="consoleOutput.length === 0">
                               <mat-icon>clear_all</mat-icon>
@@ -78,7 +91,26 @@
                             </button>
                           </div>
 
-                          <div class="console-container">
+                          <!-- GitHub Copilot Prompt Template -->
+                          <div class="prompt-template-container" *ngIf="selectedLLM === 'github-copilot'">
+                            <div class="prompt-template-header">
+                              <mat-icon>description</mat-icon>
+                              <span>Prompt Template</span>
+                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
+                                matTooltip="Copy Prompt" matTooltipPosition="above">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
+                            </div>
+                            <div class="prompt-instructions">
+                              <p><strong>Instructions:</strong> Copy and paste this prompt into the Essedum Plugin's GitHub Copilot interface to generate your agent.</p>
+                            </div>
+                            <div class="prompt-template-content">
+                              <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
+                            </div>
+                          </div>
+
+                          <!-- Regular Console Output for other LLM providers -->
+                          <div class="console-container" *ngIf="selectedLLM && selectedLLM !== 'github-copilot'">
                             <div class="console-header">
                               <mat-icon>terminal</mat-icon>
                               <span>Console Output</span>
@@ -98,6 +130,14 @@
                                 <span *ngIf="hasGeneratedAgent || hasExistingFiles()">Agent is ready for development.
                                   Use the Essedum Codespace tab to edit files.</span>
                               </div>
+                            </div>
+                          </div>
+
+                          <!-- LLM Selection Required Message -->
+                          <div class="llm-selection-required" *ngIf="!selectedLLM">
+                            <div class="selection-message">
+                              <mat-icon>info</mat-icon>
+                              <p>Please select an LLM provider above to continue</p>
                             </div>
                           </div>
                         </div>
@@ -520,6 +560,32 @@
       </button>
       <button mat-raised-button color="warn" (click)="confirmDelete()" class="delete-btn">
         Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Prompt Copy Confirmation Dialog -->
+<div class="prompt-copy-overlay" *ngIf="showPromptCopyDialog" (click)="closePromptCopyDialog()">
+  <div class="prompt-copy-popup" (click)="$event.stopPropagation()">
+    <div class="prompt-copy-header">
+      <h3>Prompt Copied!</h3>
+      <button mat-icon-button (click)="closePromptCopyDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="prompt-copy-content">
+      <p>The GitHub Copilot prompt template has been copied to your clipboard.</p>
+      <p class="copy-instruction">Paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent.</p>
+    </div>
+
+    <div class="prompt-copy-footer">
+      <button mat-stroked-button (click)="closePromptCopyDialog()" class="cancel-btn">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" (click)="closePromptCopyDialog()" class="ok-btn">
+        OK
       </button>
     </div>
   </div>
