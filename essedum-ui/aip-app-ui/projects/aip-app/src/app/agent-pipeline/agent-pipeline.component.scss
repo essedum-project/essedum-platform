@@ -232,14 +232,16 @@
       align-items: center;
       gap: 12px;
       padding: 16px;
-      background: #0a142f;
+      background: #2d2d2d;
       color: white;
       flex-shrink: 0;
+      border-bottom: 1px solid #444;
       
       mat-icon {
         font-size: 24px;
         width: 24px;
         height: 24px;
+        color: #4caf50;
       }
       
       h3 {
@@ -423,8 +425,57 @@
     }
   }
   
+  // Generate Controls Row Layout
+  .generate-controls-row {
+    display: flex;
+    gap: 40px; // Increased gap for more separation
+    align-items: flex-end;
+    margin-bottom: 16px;
+    justify-content: space-between; // Push elements to opposite ends
+    
+    .llm-selection-container {
+      flex: 0 0 auto;
+      min-width: 250px;
+    }
+    
+    .generate-controls {
+      flex: 0 0 auto; // Don't grow, stay at natural size
+      display: flex;
+      gap: 12px; // Spacing between buttons
+      align-items: center;
+      justify-content: flex-end; // Align buttons to the right
+    }
+  }
+
+  // Compact button styles
+  .compact-button {
+    padding: 0 !important;
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      margin: 0 !important;
+    }
+    
+    .mat-button-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+    }
+  }
+
   // LLM Selection Styles
   .llm-selection-container {
+    margin-bottom: 0;
     margin-bottom: 16px;
     flex-shrink: 0;
     
@@ -501,15 +552,17 @@
     }
     
     .prompt-instructions {
-      padding: 12px 16px;
+      padding: 16px 20px;
       background: #e3f2fd;
-      border-bottom: 1px solid #bbdefb;
-      flex-shrink: 0;
+      border: 1px solid #bbdefb;
+      border-radius: 8px;
+      margin: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       
       p {
-        margin: 0 0 8px 0;
-        font-size: 13px;
-        color: #1976d2;
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: #1565c0;
         
         strong {
           font-weight: 600;
@@ -520,11 +573,11 @@
       ol {
         margin: 0;
         padding-left: 20px;
-        color: #1976d2;
+        color: #1565c0;
         
         li {
-          margin-bottom: 6px;
-          line-height: 1.4;
+          margin-bottom: 8px;
+          line-height: 1.5;
           
           strong {
             color: #0d47a1;
@@ -948,13 +1001,15 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: #0a142f;
+    background: #2d2d2d;
     color: white;
+    border-bottom: 1px solid #444;
     
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
+      color: #4caf50;
     }
     
     h3 {
@@ -1948,8 +2003,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  background: #2d2d2d;
+  color: white;
+  border-bottom: 1px solid #444;
   padding: 8px 16px;
   min-height: 48px;
 
@@ -1961,34 +2017,34 @@
     .file-type-icon {
       font-size: 18px;
       
-      &.python-file { color: #306998; }
+      &.python-file { color: #4caf50; }
       &.json-file { color: #f39c12; }
       &.java-file { color: #ed8b00; }
       &.xml-file { color: #e34c26; }
-      &.properties-file { color: #6c757d; }
-      &.markdown-file { color: #083fa1; }
-      &.text-file { color: #6c757d; }
+      &.properties-file { color: #ccc; }
+      &.markdown-file { color: #4caf50; }
+      &.text-file { color: #ccc; }
     }
 
     .file-name {
       font-weight: 500;
-      color: #1a1a1a;
+      color: white;
       transition: color 0.3s ease;
       
       &.modified {
-        color: #0094ff;
+        color: #ff9800;
         font-style: italic;
       }
     }
 
     .file-path-breadcrumb {
-      color: #737373;
+      color: #ccc;
       font-size: 12px;
       margin-left: 8px;
     }
 
     .modified-indicator {
-      color: #ff9500;
+      color: #ff9800;
       font-size: 14px;
       font-weight: bold;
       animation: pulse 2s infinite;
@@ -2008,7 +2064,7 @@
       .action-button {
         background: transparent;
         border: none;
-        color: #666666;
+        color: #ffffff !important; // Bright white for enabled - force override
         padding: 0;
         width: 32px;
         height: 32px;
@@ -2018,15 +2074,29 @@
         justify-content: center;
         border-radius: 50%;
         transition: all 0.2s ease;
+        cursor: pointer;
+        
+        mat-icon {
+          color: inherit !important; // Ensure icon inherits button color
+        }
         
         &:hover:not(:disabled) {
-          background: rgba(0, 148, 255, 0.1);
-          color: #0094ff;
+          background-color: rgba(0, 148, 255, 0.1);
+          color: #0094ff !important; // Blue on hover
+          
+          mat-icon {
+            color: #0094ff !important;
+          }
         }
         
         &:disabled {
-          color: #cccccc;
+          color: #cccccc !important; // Grey for disabled
           cursor: not-allowed;
+          opacity: 0.7;
+          
+          mat-icon {
+            color: #cccccc !important;
+          }
         }
         
         mat-icon {
@@ -2689,7 +2759,7 @@
 }
 
 .unsaved-changes-header {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   border-bottom: 1px solid #e9ecef;
   padding: 16px 20px;
   display: flex;
@@ -2703,7 +2773,7 @@
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #495057;
+      color: white;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -3097,7 +3167,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   
   .save-structure-title {
     display: flex;
@@ -3111,7 +3181,7 @@
     }
     
     mat-icon {
-      color: #1565c0;
+      color: white;
       font-size: 24px;
     }
     
@@ -3119,27 +3189,34 @@
       margin: 0;
       font-size: 18px;
       font-weight: 600;
-      color: #1565c0;
-    }
-      font-weight: 600;
-      color: #1a1a1a;
+      color: white;
     }
     
     .save-structure-subtitle {
       font-size: 13px;
-      color: #666;
+      color: rgba(255, 255, 255, 0.9);
       margin-left: 36px;
     }
   }
   
   .close-button {
-    color: #999;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover {
-      color: #666;
-      background-color: rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    mat-icon {
+      font-size: 20px;
     }
   }
+}
 
 
 .save-structure-content {
@@ -3217,22 +3294,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   
   h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 500;
-    color: #1565c0;
+    color: white;
   }
   
   .close-button {
-    color: #1565c0;
-    width: 32px;
-    height: 32px;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover {
-      background: rgba(21, 101, 192, 0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
     
     mat-icon {
@@ -3298,22 +3379,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   
   h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 500;
-    color: #1565c0;
+    color: white;
   }
   
   .close-button {
-    color: #1565c0;
-    width: 32px;
-    height: 32px;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover {
-      background: rgba(21, 101, 192, 0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
     
     mat-icon {
@@ -3378,22 +3463,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   
   h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 500;
-    color: #1565c0;
+    color: white;
   }
   
   .close-button {
-    color: #1565c0;
-    width: 32px;
-    height: 32px;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover {
-      background: rgba(21, 101, 192, 0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
     
     mat-icon {
@@ -3449,7 +3538,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  background: linear-gradient(135deg, #0094ff 0%, #0066cc 100%);
   
   .unsaved-changes-title {
     display: flex;
@@ -3466,7 +3555,7 @@
       margin: 0;
       font-size: 20px;
       font-weight: 600;
-      color: #e67e22;
+      color: white;
     }
     
     .unsaved-changes-subtitle {
@@ -3908,8 +3997,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  background: #2d2d2d;
+  color: white;
+  border-bottom: 1px solid #444;
   min-height: 48px;
   
   .file-info {
@@ -3922,13 +4012,13 @@
     max-width: calc(100% - 200px); // Reserve space for action buttons
     
     .file-type-icon {
-      color: #666;
+      color: #4caf50;
       flex-shrink: 0;
     }
     
     .file-name {
       font-weight: 500;
-      color: #333;
+      color: white;
       flex-shrink: 0;
       
       &.modified {
@@ -3937,7 +4027,7 @@
     }
     
     .file-path-breadcrumb {
-      color: #999;
+      color: #ccc;
       font-size: 12px;
       overflow: hidden;
       text-overflow: ellipsis;

@@ -59,51 +59,46 @@
                             <p>Build and package your agent for deployment</p>
                           </div>
 
-                          <!-- LLM Selection Dropdown -->
-                          <div class="llm-selection-container"
-                            [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
-                            <div class="llm-selection-row">
-                              <label for="llm-select">Select LLM Provider</label>
-                              <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select"
-                                [disabled]="hasGeneratedAgent || hasExistingFiles()">
-                                <mat-option value="github-copilot">GitHub Copilot</mat-option>
-                                <mat-option value="aws-bedrock" disabled>AWS Bedrock</mat-option>
-                                <mat-option value="azure-ai-studio" disabled>Azure AI Studio</mat-option>
-                                <mat-option value="gcp-vertex-ai" disabled>GCP Vertex AI</mat-option>
-                              </mat-select>
+                          <!-- LLM Selection and Generate Controls in same row -->
+                          <div class="generate-controls-row">
+                            <!-- LLM Selection Dropdown -->
+                            <div class="llm-selection-container"
+                              [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
+                              <div class="llm-selection-row">
+                                <label for="llm-select">Select LLM Provider</label>
+                                <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select"
+                                  [disabled]="hasGeneratedAgent || hasExistingFiles()">
+                                  <mat-option value="github-copilot">GitHub Copilot</mat-option>
+                                  <mat-option value="aws-bedrock" disabled>AWS Bedrock</mat-option>
+                                  <mat-option value="azure-ai-studio" disabled>Azure AI Studio</mat-option>
+                                  <mat-option value="gcp-vertex-ai" disabled>GCP Vertex AI</mat-option>
+                                </mat-select>
+                              </div>
                             </div>
-                          </div>
 
-                          <div class="generate-controls">
-                            <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
-                              [disabled]="isGenerateAgentDisabled || !selectedLLM"
-                              [matTooltip]="getGenerateButtonTooltip()" matTooltipPosition="above">
-                              <mat-icon>play_arrow</mat-icon>
-                              Generate Agent
-                            </button>
-                            <button mat-raised-button class="clear-button" (click)="clearConsole()"
-                              [disabled]="consoleOutput.length === 0">
-                              <mat-icon>clear_all</mat-icon>
-                              Clear Console
-                            </button>
-                            <button mat-raised-button color="primary" class="playground-button"
-                              (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent">
-                              <mat-icon>smart_toy</mat-icon>
-                              Open Playground
-                            </button>
+                            <!-- Generate Controls -->
+                            <div class="generate-controls">
+                              <button mat-raised-button color="primary" class="play-button compact-button" (click)="generateSDKAgent()"
+                                [disabled]="isGenerateAgentDisabled || !selectedLLM"
+                                [matTooltip]="getGenerateButtonTooltip()" matTooltipPosition="above">
+                                <mat-icon>play_arrow</mat-icon>
+                              </button>
+                              <button mat-raised-button class="clear-button compact-button" (click)="clearConsole()"
+                                [disabled]="consoleOutput.length === 0"
+                                matTooltip="Clear Console" matTooltipPosition="above">
+                                <mat-icon>backspace</mat-icon>
+                              </button>
+                              <button mat-raised-button color="primary" class="playground-button compact-button"
+                                (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent"
+                                matTooltip="Open Playground" matTooltipPosition="above">
+                                <mat-icon>smart_toy</mat-icon>
+                              </button>
+                            </div>
                           </div>
 
                           <!-- GitHub Copilot Prompt Template (only show initially) -->
                           <div class="prompt-template-container"
                             *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
-                            <div class="prompt-template-header">
-                              <mat-icon>description</mat-icon>
-                              <span>Prompt Template</span>
-                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
-                                matTooltip="Copy Prompt" matTooltipPosition="above">
-                                <mat-icon>content_copy</mat-icon>
-                              </button>
-                            </div>
                             <div class="prompt-instructions">
                               <p><strong>Setup Instructions:</strong></p>
                               <ol>
@@ -111,6 +106,14 @@
                                 <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum" extension from the VS Code marketplace</li>
                                 <li><strong>Generate Agent:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent files</li>
                               </ol>
+                            </div>
+                            <div class="prompt-template-header">
+                              <mat-icon>description</mat-icon>
+                              <span>Copilot Prompt Template</span>
+                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
+                                matTooltip="Copy Prompt" matTooltipPosition="above">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
                             </div>
                             <div class="prompt-template-content">
                               <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
@@ -230,7 +233,7 @@
                               </li>
                               <li>
                                 <span matTooltip="Close File" [matTooltipPosition]="'above'">
-                                  <i class="aip-led-icons icon x-24" (click)="closeFile()"
+                                  <i class="action-button aip-led-icons icon x-24" (click)="closeFile()"
                                     style="cursor: pointer;">✖</i>
                                 </span>
                               </li>
