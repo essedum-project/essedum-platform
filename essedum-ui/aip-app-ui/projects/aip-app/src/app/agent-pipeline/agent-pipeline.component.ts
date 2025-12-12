@@ -75,7 +75,7 @@ export class AgentPipelineComponent implements OnInit {
   isJsonProcessed = false;
 
   
-  // Console output for Generate SDK Agent
+  // Console output for Generate adk Agent
   consoleOutput: string[] = [];
   isGenerating = false;
   
@@ -95,12 +95,12 @@ export class AgentPipelineComponent implements OnInit {
   selectedBranch = 'main';
   availableBranches: string[] = ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
   availableRepositories: Array<{name: string, description?: string}> = [
-    { name: 'customer-support-agent-sdk', description: 'Customer Support Agent SDK' },
-    { name: 'data-analysis-agent-sdk', description: 'Data Analysis Agent SDK' },
-    { name: 'code-review-agent-sdk', description: 'Code Review Agent SDK' },
-    { name: 'marketing-automation-sdk', description: 'Marketing Automation SDK' },
-    { name: 'content-generator-sdk', description: 'Content Generator SDK' },
-    { name: 'chatbot-framework-sdk', description: 'Chatbot Framework SDK' }
+    { name: 'customer-support-agent-adk', description: 'Customer Support Agent adk' },
+    { name: 'data-analysis-agent-adk', description: 'Data Analysis Agent adk' },
+    { name: 'code-review-agent-adk', description: 'Code Review Agent adk' },
+    { name: 'marketing-automation-adk', description: 'Marketing Automation adk' },
+    { name: 'content-generator-adk', description: 'Content Generator adk' },
+    { name: 'chatbot-framework-adk', description: 'Chatbot Framework adk' }
   ];
   useCustomCommit = false;
   commitMessage = '';
@@ -1642,11 +1642,11 @@ public class ZipController {
     if (this.hasGeneratedAgent || this.hasExistingFiles()) {
       return 'Agent has already been generated. Use the Essedum Codespace tab to edit existing files.';
     }
-    return 'Click to generate SDK agent with project files and structure';
+    return 'Click to generate adk agent with project files and structure';
   }
 
-  // Generate SDK Agent
-  generateSDKAgent(): void {
+  // Generate adk Agent
+  generateadkAgent(): void {
     if (!this.selectedAgent) {
       console.error('No agent selected');
       return;
@@ -1660,7 +1660,7 @@ public class ZipController {
     const version = this.selectedAgent.version;
     
     // Add initial console output
-    this.consoleOutput.push(`Starting SDK Agent generation for ${agentName}...`);
+    this.consoleOutput.push(`Starting adk Agent generation for ${agentName}...`);
     this.consoleOutput.push('Preparing agent configuration...');
     
     // Prepare the request payload
@@ -1686,11 +1686,11 @@ public class ZipController {
     };
 
     this.consoleOutput.push('Calling agent generation API...');
-    console.log('About to call agentPipelineService.generateSDKAgent with payload:', agentRequest);
+    console.log('About to call agentPipelineService.generateadkAgent with payload:', agentRequest);
     console.log('Using fixed cname:', this.currentCname);
     
     // Call the real API
-    this.agentPipelineService.generateSDKAgent(agentRequest).subscribe({
+    this.agentPipelineService.generateadkAgent(agentRequest).subscribe({
       next: (response) => {
         this.consoleOutput.push('✓ Agent generation API call successful');
         this.consoleOutput.push(`✓ Container Name: ${this.currentCname}`);
@@ -1704,7 +1704,7 @@ public class ZipController {
         this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
         this.expandAllFolders(this.fileSystemData); // Expand all folders by default
         
-        this.consoleOutput.push(`SDK Agent generated successfully for ${agentName}!`);
+        this.consoleOutput.push(`adk Agent generated successfully for ${agentName}!`);
         this.consoleOutput.push('');
         this.consoleOutput.push(`Container: ${this.currentCname}`);
         this.consoleOutput.push('Status: Ready for development');
@@ -1714,7 +1714,7 @@ public class ZipController {
         
         // Show success message with properly formatted response
         const successResponse = { status: 200, body: response || [] };
-        this.service.messageService(successResponse, `SDK Agent '${agentName}' generated successfully!`);
+        this.service.messageService(successResponse, `adk Agent '${agentName}' generated successfully!`);
         
         // Don't automatically open playground - user will click "Open Playground" button when ready
         console.log('Agent generation complete. Playground available via button.');
@@ -2000,7 +2000,7 @@ DELIVERABLES
     this.playgroundMessages = [
       {
         role: 'agent',
-        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated SDK. How can I help you today?`
+        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated adk. How can I help you today?`
       }
     ];
   }
@@ -2072,7 +2072,7 @@ DELIVERABLES
       return `I'm equipped with the following capabilities: ${tools.map(t => t.description).join(', ')}. Which of these would you like me to help you with?`;
     }
     
-    return `I understand your question: "${question}". Based on my SDK configuration, I can process this request using my trained model. How would you like me to proceed?`;
+    return `I understand your question: "${question}". Based on my adk configuration, I can process this request using my trained model. How would you like me to proceed?`;
   }
 
   onPlaygroundKeyPress(event: KeyboardEvent): void {
@@ -2106,9 +2106,9 @@ DELIVERABLES
   loadAvailableBranches(): void {
     // Mock data - in real implementation, this would call GitHub API
     const mockBranches = {
-      'customer-support-agent-sdk': ['main', 'develop', 'feature/chat-integration', 'hotfix/bug-fixes'],
-      'data-analysis-agent-sdk': ['main', 'develop', 'feature/new-charts', 'staging'],
-      'code-review-agent-sdk': ['main', 'develop', 'feature/security-scan', 'production']
+      'customer-support-agent-adk': ['main', 'develop', 'feature/chat-integration', 'hotfix/bug-fixes'],
+      'data-analysis-agent-adk': ['main', 'develop', 'feature/new-charts', 'staging'],
+      'code-review-agent-adk': ['main', 'develop', 'feature/security-scan', 'production']
     };
     
     this.availableBranches = mockBranches[this.githubRepoName as keyof typeof mockBranches] || 
@@ -2126,7 +2126,7 @@ DELIVERABLES
     const agentName = this.selectedAgent?.alias || 'Agent';
     const version = this.selectedAgent?.version || '1.0.0';
     const timestamp = new Date().toISOString().split('T')[0];
-    return `feat: Add ${agentName} SDK v${version} - Generated on ${timestamp}`;
+    return `feat: Add ${agentName} adk v${version} - Generated on ${timestamp}`;
   }
   
   canPush(): boolean {
@@ -2251,7 +2251,7 @@ DELIVERABLES
     
     // Set console output to show that agent was loaded
     this.consoleOutput = [
-      `SDK Agent loaded from existing data`,
+      `adk Agent loaded from existing data`,
       `Container: ${this.currentCname}`,
       `Status: Ready for development`,
       `Files: ${fileData.length} files loaded`
