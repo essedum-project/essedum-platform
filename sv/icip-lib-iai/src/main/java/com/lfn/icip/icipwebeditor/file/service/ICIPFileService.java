@@ -346,18 +346,23 @@ public class ICIPFileService {
 	 * @param org         the org
 	 * @param fileName    the file name
 	 * @param newFileName the new file name
-	 * @return the string
+	 * @param fileType    the file type
+	 * @return the list of saved filenames
 	 * @throws SQLException the SQL exception
 	 * @throws IOException 
 	 * @throws GitAPIException 
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
-	/*public String persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
+	public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
 			throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
-		ICIPNativeScript binaryFiles = nativeScriptService.findByNameAndOrg(name, org);
-		
-//		String remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
+
+		logger.info("Starting persistInNativeJsonScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}, fileType: {}",
+					name, org, fileName, newFileName, fileType);
+
+		List<String> savedFileNames = new ArrayList<>();
+		Blob blob = new SerialBlob(bytes);
+
 		String remoteScript = null;
 		try {
 			remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
@@ -365,149 +370,218 @@ public class ICIPFileService {
 			remoteScript = "false";
 		}catch(Exception ex) {
 			logger.error(ex.getMessage());
+			remoteScript = "false";
 		}
-		
-		if(binaryFiles == null) {
-			binaryFiles = new ICIPNativeScript();
-		}
-		Blob blob = new SerialBlob(bytes);
-		if (binaryFiles.getCname() == null) {
-			binaryFiles = new ICIPNativeScript();
-			binaryFiles.setCname(name);
-			binaryFiles.setOrganization(org);
-		}
-		binaryFiles.setFilename(newFileName);
-		binaryFiles.setFilescript(blob);
-		
-		//Get github repository
-		
+
 		if(remoteScript.equals("true")) {
 			logger.info("Git is enabled");
 			Git git = githubservice.getGitHubRepository(org);
-			
+
 			//Pulling latest script from  Git
 			Boolean result = githubservice.pull(git);
-			
+
 			//Updating script
-			if(result!=false)
-				githubservice.updateFileInLocalRepo(blob, name, org,"main.py");
-			
+			if(result!=false) {
+				String gitFileName = "json".equalsIgnoreCase(fileType.trim()) ? "main.json" : "main.py";
+				githubservice.updateFileInLocalRepo(blob, name, org, gitFileName);
+			}
+
 			//Pushing script to Git
 			githubservice.push(git,"Script pushed");
-			
+
 			ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
-			  
-			String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\""+fileType+"\",\"files\":[\""+name+"/main.py\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
-			
-			
+
+			String gitFileName = "json".equalsIgnoreCase(fileType.trim()) ? "main.json" : "main.py";
+			String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\""+fileType+"\",\"files\":[\""+name+"/"+gitFileName+"\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
+
 			ss.setJsonContent(jsonContent);
-			
 			streamingServicesService.update(ss);
-		}
-		else {
-            String pyFileName = newFileName;
-            String ipynbFileName = pyFileName.replaceAll("(?i)\\.py$", ".ipynb");
-            binaryFiles.setFilename(ipynbFileName);
-			binaryFiles = nativeScriptService.save(binaryFiles);
-//            binaryFiles.setFilename(newFileName);
-//            binaryFiles = nativeScriptService.save(binaryFiles);
+			logger.info("Updated streaming service JSON for cname: {}", name);
 
+		} else {
+			logger.info("GitHub integration disabled. Proceeding with DB operations...");
+
+			// Check fileType to determine how many files to create
+			if ("json".equalsIgnoreCase(fileType.trim())) {
+				// For JSON: create only one file
+				logger.info("Creating JSON file: {}", newFileName);
+
+				List<ICIPNativeScript> existingScripts = nativeScriptService.findByOrgAndName(name, org);
+				boolean updated = false;
+
+				// Update existing JSON file if present
+				for (ICIPNativeScript script : existingScripts) {
+					if (script.getFilename().equalsIgnoreCase(newFileName)) {
+						logger.info("Updating existing JSON script: {}", newFileName);
+						script.setFilescript(blob);
+						nativeScriptService.save(script);
+						updated = true;
+						break;
+					}
+				}
+
+				// If not found, create new JSON file
+				if (!updated) {
+					logger.info("Creating new JSON script: {}", newFileName);
+					ICIPNativeScript newScript = new ICIPNativeScript();
+					newScript.setCname(name);
+					newScript.setOrganization(org);
+					newScript.setFilename(newFileName);
+					newScript.setFilescript(blob);
+					nativeScriptService.save(newScript);
+				}
+
+				savedFileNames.add(newFileName);
+
+			} else {
+				// For Python: create two files (.py and .ipynb)
+				logger.info("Creating Python files for: {}", newFileName);
+
+				String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+				List<ICIPNativeScript> existingScripts = nativeScriptService.findByOrgAndName(name, org);
+
+				boolean pyUpdated = false;
+				boolean ipynbUpdated = false;
+
+				// Update existing files if present
+				for (ICIPNativeScript script : existingScripts) {
+					if (script.getFilename().equalsIgnoreCase(newFileName)) {
+						logger.info("Updating existing .py script: {}", newFileName);
+						script.setFilescript(blob);
+						nativeScriptService.save(script);
+						pyUpdated = true;
+					} else if (script.getFilename().equalsIgnoreCase(ipynbFileName)) {
+						logger.info("Updating existing .ipynb script: {}", ipynbFileName);
+						script.setFilescript(blob);
+						nativeScriptService.save(script);
+						ipynbUpdated = true;
+					}
+				}
+
+				// Create missing .py file
+				if (!pyUpdated) {
+					logger.info("Creating new .py script: {}", newFileName);
+					ICIPNativeScript pyScript = new ICIPNativeScript();
+					pyScript.setCname(name);
+					pyScript.setOrganization(org);
+					pyScript.setFilename(newFileName);
+					pyScript.setFilescript(blob);
+					nativeScriptService.save(pyScript);
+				}
+
+				// Create missing .ipynb file
+				if (!ipynbUpdated) {
+					logger.info("Creating new .ipynb script: {}", ipynbFileName);
+					ICIPNativeScript ipynbScript = new ICIPNativeScript();
+					ipynbScript.setCname(name);
+					ipynbScript.setOrganization(org);
+					ipynbScript.setFilename(ipynbFileName);
+					ipynbScript.setFilescript(blob);
+					nativeScriptService.save(ipynbScript);
+				}
+
+				savedFileNames.add(newFileName);
+				savedFileNames.add(ipynbFileName);
+			}
 		}
-		return binaryFiles.getFilename();
+
+		logger.info("Persist operation completed. Returning filenames: {}", savedFileNames);
+		return savedFileNames;
 	}
-*/
 
 
-    public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
-            throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
 
-        logger.info("Starting persistInNativeScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}", name, org, fileName, newFileName);
-
-        List<ICIPNativeScript> byOrgAndName = nativeScriptService.findByOrgAndName(name, org);
-        logger.debug("Fetched {} existing scripts for cname: {} and org: {}", byOrgAndName.size(), name, org);
-
-        List<String> savedFileNames = new ArrayList<>();
-        String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
-        Blob blob = new SerialBlob(bytes);
-
-        String remoteScript;
-        try {
-            remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
-            logger.info("Remote script flag: {}", remoteScript);
-        } catch (Exception ex) {
-            logger.error("Error fetching GitHub flag: {}", ex.getMessage());
-            remoteScript = "false";
-        }
-
-        if (remoteScript.equals("true")) {
-            logger.info("GitHub integration enabled. Performing Git operations...");
-            Git git = githubservice.getGitHubRepository(org);
-            Boolean result = githubservice.pull(git);
-            logger.debug("Git pull result: {}", result);
-
-            if (result != false) {
-                githubservice.updateFileInLocalRepo(blob, name, org, "main.py");
-                logger.info("Updated file in local Git repo for cname: {}", name);
-            }
-
-            githubservice.push(git, "Script pushed");
-            logger.info("Pushed changes to GitHub for cname: {}", name);
-
-            ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
-            String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\"" + fileType + "\",\"files\":[\"" + name + "/main.py\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
-            ss.setJsonContent(jsonContent);
-            streamingServicesService.update(ss);
-            logger.info("Updated streaming service JSON for cname: {}", name);
-
-        } else {
-            logger.info("GitHub integration disabled. Proceeding with DB operations...");
-
-            boolean updated = false;
-
-            // ✅ Update only matching filename if present
-            for (ICIPNativeScript script : byOrgAndName) {
-                if (script.getFilename().equalsIgnoreCase(newFileName)) {
-                    logger.info("Updating existing script: {}", newFileName);
-                    script.setFilescript(blob);
-                    nativeScriptService.save(script);
-                    updated = true;
-                    break;
-                }
-            }
-
-            // ✅ If not found, create new file
-            if (!updated) {
-                logger.info("Creating new script: {}", newFileName);
-                ICIPNativeScript newScript = new ICIPNativeScript();
-                newScript.setCname(name);
-                newScript.setOrganization(org);
-                newScript.setFilename(newFileName);
-                newScript.setFilescript(blob);
-                nativeScriptService.save(newScript);
-            }
-
-            // ✅ Ensure both filenames exist in DB (create missing one)
-            boolean ipynbExists = byOrgAndName.stream()
-                    .anyMatch(script -> script.getFilename().equalsIgnoreCase(ipynbFileName));
-
-            if (!ipynbExists) {
-                logger.info("Creating missing .ipynb script: {}", ipynbFileName);
-                ICIPNativeScript ipynbScript = new ICIPNativeScript();
-                ipynbScript.setCname(name);
-                ipynbScript.setOrganization(org);
-                ipynbScript.setFilename(ipynbFileName);
-                ipynbScript.setFilescript(blob);
-                nativeScriptService.save(ipynbScript);
-            }
-        }
-
-        // ✅ Always return both filenames
-        savedFileNames.add(newFileName);
-        savedFileNames.add(ipynbFileName);
-
-        logger.info("Persist operation completed. Returning filenames: {}", savedFileNames);
-        return savedFileNames;
-    }
+//    public List<String> persistInNativeScriptTable(byte[] bytes, String name, String org, String fileName, String newFileName, String fileType)
+//            throws SQLException, InvalidRemoteException, TransportException, GitAPIException, IOException {
+//
+//        logger.info("Starting persistInNativeScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}", name, org, fileName, newFileName);
+//
+//        List<ICIPNativeScript> byOrgAndName = nativeScriptService.findByOrgAndName(name, org);
+//        logger.debug("Fetched {} existing scripts for cname: {} and org: {}", byOrgAndName.size(), name, org);
+//
+//        List<String> savedFileNames = new ArrayList<>();
+//        String ipynbFileName = newFileName.replaceAll("(?i)\\.py$", ".ipynb");
+//        Blob blob = new SerialBlob(bytes);
+//
+//        String remoteScript;
+//        try {
+//            remoteScript = constantsService.getByKeys("icip.script.github.enabled", org).getValue();
+//            logger.info("Remote script flag: {}", remoteScript);
+//        } catch (Exception ex) {
+//            logger.error("Error fetching GitHub flag: {}", ex.getMessage());
+//            remoteScript = "false";
+//        }
+//
+//        if (remoteScript.equals("true")) {
+//            logger.info("GitHub integration enabled. Performing Git operations...");
+//            Git git = githubservice.getGitHubRepository(org);
+//            Boolean result = githubservice.pull(git);
+//            logger.debug("Git pull result: {}", result);
+//
+//            if (result != false) {
+//                githubservice.updateFileInLocalRepo(blob, name, org, "main.py");
+//                logger.info("Updated file in local Git repo for cname: {}", name);
+//            }
+//
+//            githubservice.push(git, "Script pushed");
+//            logger.info("Pushed changes to GitHub for cname: {}", name);
+//
+//            ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(name, org);
+//            String jsonContent = "{\"elements\":[{\"attributes\":{\"filetype\":\"" + fileType + "\",\"files\":[\"" + name + "/main.py\"],\"arguments\":[{\"name\":\"type\",\"value\":\"pipeline\"}],\"dataset\":[]}}]}";
+//            ss.setJsonContent(jsonContent);
+//            streamingServicesService.update(ss);
+//            logger.info("Updated streaming service JSON for cname: {}", name);
+//
+//        } else {
+//            logger.info("GitHub integration disabled. Proceeding with DB operations...");
+//
+//            boolean updated = false;
+//
+//            // ✅ Update only matching filename if present
+//            for (ICIPNativeScript script : byOrgAndName) {
+//                if (script.getFilename().equalsIgnoreCase(newFileName)) {
+//                    logger.info("Updating existing script: {}", newFileName);
+//                    script.setFilescript(blob);
+//                    nativeScriptService.save(script);
+//                    updated = true;
+//                    break;
+//                }
+//            }
+//
+//            // ✅ If not found, create new file
+//            if (!updated) {
+//                logger.info("Creating new script: {}", newFileName);
+//                ICIPNativeScript newScript = new ICIPNativeScript();
+//                newScript.setCname(name);
+//                newScript.setOrganization(org);
+//                newScript.setFilename(newFileName);
+//                newScript.setFilescript(blob);
+//                nativeScriptService.save(newScript);
+//            }
+//
+//            // ✅ Ensure both filenames exist in DB (create missing one)
+//
+//            boolean ipynbExists = byOrgAndName.stream()
+//                    .anyMatch(script -> script.getFilename().equalsIgnoreCase(ipynbFileName));
+//
+//            if (!ipynbExists) {
+//                logger.info("Creating missing .ipynb script: {}", ipynbFileName);
+//                ICIPNativeScript ipynbScript = new ICIPNativeScript();
+//                ipynbScript.setCname(name);
+//                ipynbScript.setOrganization(org);
+//                ipynbScript.setFilename(ipynbFileName);
+//                ipynbScript.setFilescript(blob);
+//                nativeScriptService.save(ipynbScript);
+//            }
+//        }
+//
+//        // ✅ Always return both filenames
+//        savedFileNames.add(newFileName);
+//        savedFileNames.add(ipynbFileName);
+//
+//        logger.info("Persist operation completed. Returning filenames: {}", savedFileNames);
+//        return savedFileNames;
+//    }
 
     /**
 	 * Persist in script table.
@@ -634,12 +708,8 @@ public class ICIPFileService {
 			throws IOException, SQLException, InvalidRemoteException, TransportException, GitAPIException {
 		String newFileName = createNewFileName(cname, org, fileType);
 		//Path path = extractPath(scripts, newFileName, FileConstants.NATIVE_CODE);
-		List<String> filename = persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType);
-		
-		return filename;
-//		if(filename!=null) {
-//			
-//		}
+
+		return persistInNativeScriptTable(scripts.getBytes(), cname, org, fileName, newFileName, fileType);
 	}
 
 	/**
