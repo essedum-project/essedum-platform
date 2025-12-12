@@ -774,7 +774,7 @@
       align-items: center;
       gap: 8px;
       
-      .download-button {
+      .download-button, .upload-button {
         background: transparent;
         border: none;
         color: #cccccc;
@@ -2238,6 +2238,7 @@
   min-height: 400px;
   background-color: #282a36;
   position: relative;
+  overflow: hidden; // Prevent independent scrolling
 }
 
 .line-numbers-gutter {
@@ -2247,18 +2248,20 @@
   flex-shrink: 0;
   position: relative;
   z-index: 2;
+  overflow: hidden; // Prevent independent scrolling
   
   .line-number {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    height: 20px;
+    height: 20px; // Fixed height to match textarea line height
     line-height: 20px;
     padding: 0 8px 0 4px;
-    font: 11px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Source Code Pro', monospace;
+    font: 11px/20px 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Source Code Pro', monospace;
     color: #6272a4;
     user-select: none;
     position: relative;
+    box-sizing: border-box;
     
     &.line-added {
       background-color: rgba(40, 167, 69, 0.3);
@@ -2311,7 +2314,11 @@
   padding: 0 16px;
   resize: vertical;
   transition: all 0.3s ease;
-  line-height: 20px;
+  line-height: 20px !important; // Force consistent line height
+  overflow-y: auto;
+  overflow-x: auto;
+  white-space: pre;
+  word-wrap: normal;
   
   &::placeholder {
     color: #6272a4;

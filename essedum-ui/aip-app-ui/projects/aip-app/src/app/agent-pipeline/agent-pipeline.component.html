@@ -172,6 +172,9 @@
                               <h3>Project Files</h3>
                             </div>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
+                              <button mat-icon-button class="upload-button" title="Upload to MinIO">
+                                <mat-icon>cloud_upload</mat-icon>
+                              </button>
                               <app-github-push [cname]="currentCname" class="git-push-button"></app-github-push>
                               <button mat-icon-button class="download-button" (click)="downloadAllFiles()"
                                 [disabled]="isDownloading" title="Download ZIP">
@@ -276,27 +279,31 @@
                                   <ng-container *ngIf="fileExtension === 'java'">
                                     <textarea class="pipeline-file-editor java-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="Java code..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="Java code..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'xml'">
                                     <textarea class="pipeline-file-editor xml-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="XML content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="XML content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'properties'">
                                     <textarea class="pipeline-file-editor properties-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="Properties content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="Properties content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container
                                     *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
                                     <textarea class="pipeline-file-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="File content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="File content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                 </div>
                               </div>
