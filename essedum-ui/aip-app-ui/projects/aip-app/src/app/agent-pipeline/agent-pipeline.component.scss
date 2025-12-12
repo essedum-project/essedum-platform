@@ -334,13 +334,14 @@
   }
   
   .console-container {
-    background: #1e1e1e;
+    background: #282a36;
     border-radius: 8px;
     overflow: hidden;
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    border: 1px solid #444;
     
     .console-header {
       padding: 10px 16px;
@@ -350,7 +351,7 @@
       gap: 12px;
       background: #2d2d2d;
       color: white;
-      border-bottom: 1px solid #3d3d3d;
+      border-bottom: 1px solid #444;
       
       mat-icon {
         font-size: 20px;
@@ -374,6 +375,8 @@
       font-size: 13px;
       line-height: 1.6;
       max-height: 100%;
+      background: #282a36;
+      color: white;
       
       /* Custom scrollbar styling for console */
       &::-webkit-scrollbar {
@@ -381,7 +384,7 @@
       }
       
       &::-webkit-scrollbar-track {
-        background: #1a1a1a;
+        background: #2a2a2a;
       }
       
       &::-webkit-scrollbar-thumb {
@@ -391,6 +394,31 @@
         &:hover {
           background: #777;
         }
+      }
+      
+      .console-line {
+        margin-bottom: 4px;
+        
+        .console-prompt {
+          color: #569cd6;
+          margin-right: 8px;
+        }
+        
+        .console-text {
+          color: #d4d4d4;
+          
+          &.console-loading {
+            color: #ffa500;
+            font-style: italic;
+          }
+        }
+      }
+      
+      .console-empty {
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
       }
     }
   }
@@ -527,8 +555,8 @@
         margin: 0;
         white-space: pre-wrap;
         word-wrap: break-word;
-        color: #f8f8f2;
-        background: #1e1e1e;
+        color: white;
+        background: #282a36;
         border: none;
       }
     }
@@ -947,6 +975,8 @@
   border: 2px dashed #e0e0e0;
   border-radius: 8px;
   min-height: 500px;
+  flex: 1;
+  width: 100%;
   
   mat-icon {
     font-size: 64px;
@@ -3869,5 +3899,105 @@
         color: #999 !important;
       }
     }
+  }
+}
+
+// Enhanced editor controls for better file path display and action button visibility
+.editor-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  min-height: 48px;
+  
+  .file-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 200px); // Reserve space for action buttons
+    
+    .file-type-icon {
+      color: #666;
+      flex-shrink: 0;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      color: #333;
+      flex-shrink: 0;
+      
+      &.modified {
+        color: #ff9800;
+      }
+    }
+    
+    .file-path-breadcrumb {
+      color: #999;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      direction: rtl;
+      text-align: left;
+      flex: 1;
+      min-width: 0;
+      margin-left: 4px;
+    }
+    
+    .modified-indicator {
+      color: #ff9800;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+  }
+  
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    
+    li {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+// Align file editor container with file explorer
+.file-editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+// File panel alignment
+.file-panel {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  align-items: flex-start;
+  
+  .file-explorer {
+    flex: 0 0 300px;
+    min-width: 300px;
+  }
+  
+  .file-editor-container {
+    flex: 1;
+    min-width: 0;
   }
 }

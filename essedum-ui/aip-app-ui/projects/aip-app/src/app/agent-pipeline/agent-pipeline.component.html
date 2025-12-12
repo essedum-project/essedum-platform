@@ -141,7 +141,8 @@
                               </div>
                             </div>
                           </div> <!-- LLM Selection Required Message -->
-                          <div class="llm-selection-required" *ngIf="!selectedLLM">
+                          <div class="llm-selection-required" 
+                            *ngIf="!selectedLLM && !hasGeneratedAgent && !hasExistingFiles()">
                             <div class="selection-message">
                               <mat-icon>info</mat-icon>
                               <p>Please select an LLM provider above to continue</p>
@@ -299,33 +300,6 @@
                             </div>
                           </div>
 
-                          <!-- Save Status Bar -->
-                          <div class="editor-status-bar" *ngIf="isFileModified || isSavingFile">
-                            <div class="status-left">
-                              <span class="status-indicator" [class.saving]="isSavingFile"
-                                [class.modified]="isFileModified && !isSavingFile">
-                                <mat-icon *ngIf="isSavingFile">sync</mat-icon>
-                                <mat-icon *ngIf="!isSavingFile && isFileModified">edit</mat-icon>
-                              </span>
-                              <span class="status-text">
-                                <ng-container *ngIf="isSavingFile">Saving...</ng-container>
-                                <ng-container *ngIf="!isSavingFile && isFileModified">
-                                  {{ getDiffStats().total }} change(s)
-                                  <span *ngIf="getDiffStats().added > 0" class="added-count">+{{ getDiffStats().added
-                                    }}</span>
-                                  <span *ngIf="getDiffStats().modified > 0" class="modified-count">~{{
-                                    getDiffStats().modified }}</span>
-                                </ng-container>
-                              </span>
-                            </div>
-                            <div class="status-right">
-                              <button mat-stroked-button color="primary" class="save-button" (click)="saveFile()"
-                                [disabled]="!isFileModified || isSavingFile">
-                                <mat-icon>{{ isSavingFile ? 'hourglass_empty' : 'save' }}</mat-icon>
-                                {{ isSavingFile ? 'Saving...' : 'Save File' }}
-                              </button>
-                            </div>
-                          </div>
                         </div>
 
                         <div class="file-editor-placeholder" *ngIf="!selectedFileName">

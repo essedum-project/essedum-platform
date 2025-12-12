@@ -527,6 +527,7 @@ export class AgentPipelineComponent implements OnInit {
       next: (apiResponse) => {
         console.log('Building file tree from API response:', apiResponse);
         this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
+        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
         this.isLoadingFiles = false;
       },
       error: (error) => {
@@ -1066,6 +1067,18 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   isFolderExpanded(node: FileNode): boolean {
     if (node.type !== 'folder') return false;
     return node.expanded !== false; // Default to expanded if not explicitly set
+  }
+
+  // Expand all folders recursively
+  expandAllFolders(nodes: FileNode[]): void {
+    nodes.forEach(node => {
+      if (node.type === 'folder') {
+        node.expanded = true;
+        if (node.children) {
+          this.expandAllFolders(node.children);
+        }
+      }
+    });
   }
   
   // Drag and Drop Methods
@@ -1689,6 +1702,7 @@ public class ZipController {
         // Process the file structure directly from the response
         console.log('Building file tree from API response:', response.fileStructure);
         this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
+        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
         
         this.consoleOutput.push(`SDK Agent generated successfully for ${agentName}!`);
         this.consoleOutput.push('');
@@ -2233,6 +2247,7 @@ DELIVERABLES
     
     // Build file tree from API response
     this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+    this.expandAllFolders(this.fileSystemData); // Expand all folders by default
     
     // Set console output to show that agent was loaded
     this.consoleOutput = [
