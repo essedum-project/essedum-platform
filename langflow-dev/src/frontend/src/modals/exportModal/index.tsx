@@ -131,12 +131,12 @@ const ExportModal = forwardRef(
               });
             }
 
-            setSuccessData({ title: "Exported to DB successfully" });
+            setSuccessData({ title: "Exported to Essedum successfully" });
             setOpen(false);
           } catch (err) {
-            console.error("Export to DB failed", err);
+            console.error("Export to Essedum failed", err);
             setNoticeData({
-              title: `Export to DB failed: ${
+              title: `Export to Essedum failed: ${
                 err instanceof Error ? err.message : "Unknown error"
               }`,
             });
@@ -245,20 +245,82 @@ const ExportModal = forwardRef(
                   const actualFlowScript = JSON.stringify(flowPayload, null, 2);
 
                   const scriptFormData = new FormData();
-                  const scriptBlob = new Blob([actualFlowScript], { type: 'application/json' });
-                  scriptFormData.set('scriptFile', scriptBlob);
-
-                  const scriptFileName = `${cname}_${name || 'flow'}.json`; // Use cname from sessionStorage
+                  // Match working curl exactly: Content-Type: text/plain and filename: "blob"
+                  const scriptBlob = new Blob([actualFlowScript], { type: 'text/plain' });
+                  const scriptFileName = `${cname}_${name || 'flow'}.json`;
                   const organization = 'leo1311'; // Default organization
 
-                  console.log("Calling create_native_file...");
-                 
+                  // Match curl exactly: filename="blob" (not the actual filename)
+                  scriptFormData.append('scriptFile', scriptBlob, 'blob');
+                  
+                  // Debug FormData contents
+                  console.log("FormData contents:");
+                  Array.from(scriptFormData.entries()).forEach(([key, value]) => {
+                    console.log(`${key}:`, value);
+                    // Use globalThis to access runtime constructors (cast to any) so TypeScript treats them as values
+                    if (
+                      typeof value === "object" &&
+                      ((value instanceof (globalThis as any).File) || (value instanceof (globalThis as any).Blob))
+                    ) {
+                      console.log(`  - Type: ${ (value as Blob).type }`);
+                      console.log(`  - Size: ${ (value as Blob).size }`);
+                      if (value instanceof (globalThis as any).File) {
+                        console.log(`  - Name: ${ (value as File).name }`);
+                      }
+                    }
+                  });
 
+                  console.log("Calling create_native_file...");
+                  console.log("scriptFileName:", scriptFileName);
+                  console.log("cname:", cname);
+                  
+                  // Try direct fetch to match curl exactly
+                  console.log("Trying direct fetch approach...");
+                  
+                  const directUrl = `/api/aip/file/create/${cname}/${organization}/JSON?file=${scriptFileName}`;
+                  const directHeaders = {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Authorization': `Bearer ${access_token_lf}`,
+                    'Connection': 'keep-alive',
+                    'Origin': 'http://localhost:3000',
+                    'Project': '2',
+                    'ProjectName': 'leo1311',
+                    'Referer': 'http://localhost:3000/flows',
+                    'X-Requested-With': 'Leap',
+                    'roleId': '1',
+                    'roleName': 'IT Portfolio Manager'
+                  };
+                  
+                  console.log("Direct fetch URL:", directUrl);
+                  console.log("Direct fetch headers:", directHeaders);
+
+                  try {
+                    const directResponse = await fetch(directUrl, {
+                      method: 'POST',
+                      headers: directHeaders,
+                      body: scriptFormData,
+                      credentials: 'include'
+                    });
+                    
+                    const directText = await directResponse.text();
+                    console.log("Direct fetch response:", directResponse.status, directText);
+                    
+                    if (directResponse.ok) {
+                      console.log("Direct fetch SUCCESS!");
+                    } else {
+                      console.error("Direct fetch failed:", directResponse.status, directText);
+                    }
+                  } catch (directErr) {
+                    console.error("Direct fetch error:", directErr);
+                  }
+                 
+                  // Also try the service method
                   const nativeFileResponse = await create_native_file({
                     pipelineName: sessionStorage.getItem('cname') || "", // Use cname from sessionStorage
                     organization,
                     fileName: scriptFileName,
-                    fileType: 'json', // Default file type
+                    fileType: 'JSON', // Uppercase to match server expectations
                     scriptFormData,
                     token: access_token_lf,
                   });
@@ -307,8 +369,8 @@ const ExportModal = forwardRef(
                     description ?? ""
                   ); 
 
-                  // Close modal and show success after DB export
-                  setSuccessData({ title: "Pipeline saved to DB successfully" });
+                  // Close modal and show success after Essedum export
+                  setSuccessData({ title: "Pipeline saved to Essedum successfully" });
                   setOpen(false);
                 } catch (err) {
                   console.error("create_pipeline failed", err);
@@ -320,7 +382,7 @@ const ExportModal = forwardRef(
                 }
               }}
             >
-              Export to Database
+              Export to Essedum
             </Button>
           </div>
         </BaseModal.Footer>

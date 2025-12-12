@@ -37,6 +37,7 @@ import { ModalConfigComponent } from './model/modal-config/modal-config.componen
 import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 
 
 const routes: Routes = [
@@ -82,7 +83,7 @@ const routes: Routes = [
       {
         path: 'agent-pipeline',
         children: [
-          { path: '', component: AgentPipelineComponent },
+          { path: '', component: AgentPipelineDashboardComponent },
            { path: 'view/:cname', component: AgentPipelineComponent },
         ],
       },

@@ -1,12 +1,12 @@
-<app-agent-pipeline-dashboard *ngIf="viewMode === 'list'" [agentCards]="agentCards" [CARD_TITLE]="CARD_TITLE"
+<!-- <app-agent-pipeline-dashboard *ngIf="viewMode === 'list'" [agentCards]="agentCards" [CARD_TITLE]="CARD_TITLE"
   [lastRefreshedTime]="lastRefreshedTime" [tagrefresh]="tagrefresh" [selectedFilterTypes]="selectedFilterTypes"
   (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()" (tagSelected)="onTagSelected($event)"
   (filterStatusChange)="onFilterStatusChange($event)" (viewDetails)="viewDetails($event)" (edit)="editAgent($event)"
   (delete)="deleteAgent($event)">
-</app-agent-pipeline-dashboard>
+</app-agent-pipeline-dashboard> -->
 
 <!-- Detail View: Script & Generate Tabs -->
-<div class="aip-container" *ngIf="viewMode === 'detail'" id="mainCtr">
+<div class="aip-container">
   <div class="row">
     <div class="col-lg-12">
       <div class="lfx-l-level1-middle-col">

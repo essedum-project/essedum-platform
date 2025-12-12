@@ -191,27 +191,68 @@ export async function create_native_file(params: CreateNativeFileParams) {
   const url = `/api/aip/file/create/${pipelineName}/${organization}/${fileType}?file=${fileName}`;
 
   const sess = getSessionInfo();
+  
+  // Get tokens with preference: passed token > jwtToken > access_token_lf
   const jwtToken = sess.jwtToken;
+  const accessToken = localStorage.getItem('access_token_lf');
+  const authToken = token || jwtToken || accessToken;
 
   const headers: Record<string, string> = {
     'Accept': 'application/json',
+    'Accept-Language': 'en-US,en;q=0.9',
     'X-Requested-With': 'Leap',
   };
 
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+    console.log("Using auth token:", authToken.substring(0, 20) + "...");
+  } else {
+    console.error("No authentication token found!");
+  }
 
-  // Add project and role headers using session values (no static fallbacks)
+  // Debug session info - more detailed
+  console.log("=== DEBUG create_native_file ===");
+  console.log("Session info:", sess);
+  console.log("URL:", url);
+  console.log("Available storage keys:", Object.keys(sessionStorage));
+  
+  // Check what's actually in parentSessionDetails
+  const sessionData = sessionStorage.getItem("parentSessionDetails");
+  console.log("Raw parentSessionDetails:", sessionData);
+  
+  // Add project and role headers - use exact values from working curl
   if (sess.projectId) {
     headers['Project'] = String(sess.projectId);
     headers['ProjectName'] = sess.projectName || 'leo1311';
+    console.log("Using session Project:", sess.projectId);
+  } else {
+    // Use values from working curl request
+    headers['Project'] = '2';  // From working curl
+    headers['ProjectName'] = 'leo1311';
+    console.warn("No projectId in session, using curl fallback Project: 2");
   }
 
   if (sess.roleId) {
     headers['roleId'] = String(sess.roleId);
     headers['roleName'] = sess.roleName || 'IT Portfolio Manager';
+    console.log("Using session roleId:", sess.roleId);
+  } else {
+    // Use values from working curl request
+    headers['roleId'] = '1';  // From working curl
+    headers['roleName'] = 'IT Portfolio Manager';
+    console.warn("No roleId in session, using curl fallback roleId: 1");
   }
 
+  console.log("Final headers:", headers);
+  
+  // Debug FormData before sending
+  console.log("About to send FormData with entries:");
+  (scriptFormData as any).forEach((value: any, key: any) => {
+    console.log(`  ${key}:`, value);
+  });
+
+  // Don't set Content-Type header - let the browser set it automatically for FormData
+  // This ensures proper multipart boundary is set
   const resp = await fetch(url, {
     method: "POST",
     body: scriptFormData,
@@ -253,7 +294,7 @@ export async function create_pipeline(params: CreatePipelineParams) {
   // Build payload similar to Angular saveDetails method
   let interfacetype = interfaceType;
     type === 'AIAgent';
-    interfacetype = 'pipeline';
+    interfacetype = 'pipeline-agent';
   
 
   const sess = getSessionInfo();
