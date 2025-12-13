@@ -1,6 +1,5 @@
 // Service for Export modal API calls
 // Provides two methods: get_agent_export (GET) and put_agent_export (POST with FormData)
-
 // Helper to read current session and local values at call-time
 function getSessionInfo() {
   const sessionData = sessionStorage.getItem("parentSessionDetails");
@@ -8,6 +7,8 @@ function getSessionInfo() {
   return {
     parentToken: localStorage.getItem("baseParentToken") || undefined,
     jwtToken: localStorage.getItem("jwtToken") || undefined,
+    organization: localStorage.getItem("organization") || undefined,
+    cname: sessionStorage.getItem('cname'),
     portfolioId: parsedData?.portfolioId,
     portfolioName: parsedData?.portfolioName,
     projectId: parsedData?.projectId,
@@ -16,165 +17,8 @@ function getSessionInfo() {
     roleName: parsedData?.roleName,
     userId: parsedData?.userId,
     userName: parsedData?.userName,
-    cname: sessionStorage.getItem('cname') || undefined,
+    organisation:parsedData?.organisation
   };
-}
-
-export type GetAgentExportParams = {
-  token?: string;
-};
-
-export async function get_agent_export(params: GetAgentExportParams = {}) {
-  const { token } = params;
-  const url = "/api/aip/langflow/get_langflow_agent_export";
-
-  const headers: Record<string, string> = {
-    Accept: "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "X-Requested-With": "Leap",
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const resp = await fetch(url, {
-    method: "GET",
-    headers,
-    credentials: "include",
-    mode: "cors",
-  });
-
-  const text = await resp.text().catch(() => null);
-  if (!resp.ok) {
-    const err = new Error(
-      `GET ${url} failed: ${resp.status} ${resp.statusText} ${text ?? ""}`
-    );
-    // attach response body for debugging
-    (err as any).responseBody = text;
-    throw err;
-  }
-
-  try {
-    return JSON.parse(text ?? "null");
-  } catch (e) {
-    return text;
-  }
-}
-
-export type PutAgentExportParams = {
-  flowJson?: object | string; // either already-serialized JSON or an object
-  name?: string; 
-  token?: string;
-  // if you already have a FormData object you can pass it in `form` and skip flowJson/name/details`
-  form?: FormData;
-};
-
-export async function put_agent_export(params: PutAgentExportParams = {}) {
-  const { flowJson, name, token, form } = params;
-  const url = "/api/aip/langflow/langflow_agent_export";
-
-  let body: BodyInit;
-
-  if (form instanceof FormData) {
-    body = form;
-  } else {
-    const formData = new FormData();
-    const jsonString =
-      typeof flowJson === "string" ? flowJson : JSON.stringify(flowJson ?? {});
-    const blob = new Blob([jsonString], { type: "application/json" });
-    formData.append("json", blob, `${name || "flow"}.json`);
-    if (name) formData.append("name", name);
-    body = formData;
-  }
-
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const resp = await fetch(url, {
-    method: "POST",
-    body,
-    credentials: "include",
-    headers: Object.keys(headers).length ? headers : undefined,
-  });
-
-  const text = await resp.text().catch(() => null);
-  if (!resp.ok) {
-    const err = new Error(
-      `POST ${url} failed: ${resp.status} ${resp.statusText} ${text ?? ""}`
-    );
-    (err as any).responseBody = text;
-    throw err;
-  }
-
-  try {
-    return JSON.parse(text ?? "null");
-  } catch (e) {
-    return text;
-  }
-}
-
-// New: post agent export file details 
-export type PostAgentExportFileDetailsParams = {
-  token?: string;
-  alias?: string;
-  loadFileName?: string;
-};
-
-export async function post_agent_export_file_details(
-  params: PostAgentExportFileDetailsParams = {}
-) {
-  const { token, alias, loadFileName } = params;
-  const url = "/api/aip/langflow/langflow_export_file_details";
-
-  // Compute extension from alias (filename with extension)
-  const extension = alias?.split(".").pop() || "json";
-  const fileName = alias ?? "sample.json";
-  const sess = getSessionInfo();
-
-  const payload = {
-    alias: alias,
-    description: "",
-    interfacetype: "ai agent",
-    is_template: false,
-    json_content: `{"elements":[{"attributes":{"filetype":"${extension}","files":["${fileName}"],"arguments":[]}}] }`,
-    name: loadFileName,
-    organization: "leo1311",
-    filetype: extension,
-    type: "ai-agent",
-    portfolioId: sess.portfolioId,
-    portfolioName: sess.portfolioName,
-    projectId: sess.projectId,
-    projectName: sess.projectName,
-    roleId: sess.roleId,
-    roleName: sess.roleName,
-    userId: sess.userId,
-    userName: sess.userName,
-  };
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const resp = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-    credentials: "include",
-  });
-
-  const text = await resp.text().catch(() => null);
-  if (!resp.ok) {
-    const err = new Error(
-      `POST ${url} failed: ${resp.status} ${resp.statusText} ${text ?? ""}`
-    );
-    (err as any).responseBody = text;
-    throw err;
-  }
-
-  try {
-    return JSON.parse(text ?? "null");
-  } catch (e) {
-    return text;
-  }
 }
 
 export type CreateNativeFileParams = {
@@ -188,71 +32,45 @@ export type CreateNativeFileParams = {
 
 export async function create_native_file(params: CreateNativeFileParams) {
   const { pipelineName, organization, fileName, fileType, scriptFormData, token } = params;
-  const url = `/api/aip/file/create/${pipelineName}/${organization}/${fileType}?file=${fileName}`;
+  const url = `/api/aip/file/create/${pipelineName}/${organization}/${fileType}?file=${encodeURIComponent(fileName)}`;
 
-  const sess = getSessionInfo();
-  
-  // Get tokens with preference: passed token > jwtToken > access_token_lf
-  const jwtToken = sess.jwtToken;
-  const accessToken = localStorage.getItem('access_token_lf');
-  const authToken = token || jwtToken || accessToken;
+  const session = getSessionInfo();
 
+  // Match the working curl headers exactly
   const headers: Record<string, string> = {
     'Accept': 'application/json',
     'Accept-Language': 'en-US,en;q=0.9',
+    'Connection': 'keep-alive',
+    'Origin': window.location.origin,
+    'Referer': window.location.href,
     'X-Requested-With': 'Leap',
+    'User-Agent': navigator.userAgent,
   };
 
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
-    console.log("Using auth token:", authToken.substring(0, 20) + "...");
-  } else {
-    console.error("No authentication token found!");
-  }
+  // Note: Authorization header will be automatically added by the API interceptor for /api/aip URLs
 
-  // Debug session info - more detailed
-  console.log("=== DEBUG create_native_file ===");
-  console.log("Session info:", sess);
-  console.log("URL:", url);
-  console.log("Available storage keys:", Object.keys(sessionStorage));
+  // Use hardcoded values that match the working curl (adjust these based on your session)
+  headers['Project'] = session.projectId;;
+  headers['ProjectName'] = session.projectName;
+  headers['roleId'] = session.roleId;
+  headers['roleName'] = session.roleName;
   
-  // Check what's actually in parentSessionDetails
-  const sessionData = sessionStorage.getItem("parentSessionDetails");
-  console.log("Raw parentSessionDetails:", sessionData);
-  
-  // Add project and role headers - use exact values from working curl
-  if (sess.projectId) {
-    headers['Project'] = String(sess.projectId);
-    headers['ProjectName'] = sess.projectName || 'leo1311';
-    console.log("Using session Project:", sess.projectId);
-  } else {
-    // Use values from working curl request
-    headers['Project'] = '2';  // From working curl
-    headers['ProjectName'] = 'leo1311';
-    console.warn("No projectId in session, using curl fallback Project: 2");
+  // Validate FormData structure - match Java controller signature
+  if (!scriptFormData.has('scriptFile')) {
+    throw new Error('FormData must contain a "scriptFile" entry');
   }
-
-  if (sess.roleId) {
-    headers['roleId'] = String(sess.roleId);
-    headers['roleName'] = sess.roleName || 'IT Portfolio Manager';
-    console.log("Using session roleId:", sess.roleId);
-  } else {
-    // Use values from working curl request
-    headers['roleId'] = '1';  // From working curl
-    headers['roleName'] = 'IT Portfolio Manager';
-    console.warn("No roleId in session, using curl fallback roleId: 1");
-  }
-
-  console.log("Final headers:", headers);
   
-  // Debug FormData before sending
-  console.log("About to send FormData with entries:");
-  (scriptFormData as any).forEach((value: any, key: any) => {
-    console.log(`  ${key}:`, value);
+  Array.from(scriptFormData.entries()).forEach(([key, value]) => {
+    if (value instanceof File) {
+      console.log(`  ${key}: File(name="${value.name}", type="${value.type}", size=${value.size})`);
+    } else if (value instanceof Blob) {
+      console.log(`  ${key}: Blob(type="${value.type}", size=${value.size})`);
+    } else {
+      console.log(`  ${key}:`, value);
+    }
   });
 
-  // Don't set Content-Type header - let the browser set it automatically for FormData
-  // This ensures proper multipart boundary is set
+  // Don't set Content-Type - let browser handle multipart boundary
   const resp = await fetch(url, {
     method: "POST",
     body: scriptFormData,
@@ -306,7 +124,7 @@ export async function create_pipeline(params: CreatePipelineParams) {
     is_template: isTemplate || false,
     json_content: jsonContent,
     groups: groups || [],
-    organization: sessionStorage.getItem('organization') || 'leo1311',
+    organization: sess.organization,
     portfolioId: sess.portfolioId,
     portfolioName: sess.portfolioName,
     projectId: sess.projectId,
@@ -318,10 +136,7 @@ export async function create_pipeline(params: CreatePipelineParams) {
     parentToken: sess.parentToken,
   };
 
-
-
   const sess2 = getSessionInfo();
-  const jwtToken2 = sess2.jwtToken;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -329,20 +144,16 @@ export async function create_pipeline(params: CreatePipelineParams) {
     'Accept': 'application/json, text/plain, */*',
   };
 
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  if (jwtToken2) headers['Authorization'] = `Bearer ${jwtToken2}`;
-
   if (sess2.projectId) {
     headers['Project'] = String(sess2.projectId);
-    headers['ProjectName'] = sess2.projectName || 'leo1311';
+    headers['ProjectName'] = sess2.projectName;
   }
 
   if (sess2.roleId) {
     headers['roleId'] = String(sess2.roleId);
-    headers['roleName'] = sess2.roleName || 'IT Portfolio Manager';
+    headers['roleName'] = sess2.roleName;
   }
   
-
   const resp = await fetch(url, {
     method: 'POST',
     headers,
@@ -394,7 +205,6 @@ export async function update_pipeline(params: UpdatePipelineParams) {
   };
 
   const sess = getSessionInfo();
-  const jwtToken = sess.jwtToken;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -402,17 +212,15 @@ export async function update_pipeline(params: UpdatePipelineParams) {
     'Accept': 'application/json, text/plain, */*',
   };
 
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
 
   if (sess.projectId) {
     headers['Project'] = String(sess.projectId);
-    headers['ProjectName'] = sess.projectName || 'leo1311';
+    headers['ProjectName'] = sess.projectName || sess.organization
   }
 
   if (sess.roleId) {
     headers['roleId'] = String(sess.roleId);
-    headers['roleName'] = sess.roleName || 'IT Portfolio Manager';
+    headers['roleName'] = sess.roleName;
   }
 
   const resp = await fetch(url, {
@@ -437,10 +245,6 @@ export async function update_pipeline(params: UpdatePipelineParams) {
 }
 
 export default {
-  get_agent_export,
-  put_agent_export,
-// post_agent_export_details,
-  post_agent_export_file_details,
   create_pipeline,
   create_native_file,
   update_pipeline,

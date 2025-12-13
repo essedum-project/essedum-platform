@@ -18,8 +18,6 @@ import BaseModal from "../baseModal";
 import { Button } from "../../components/ui/button";
 import { get_agent_export } from "@/controllers/API/services/exportModelService";
 import {
-  put_agent_export,
-  post_agent_export_file_details,
   create_pipeline,
   create_native_file,
   update_pipeline,
@@ -66,82 +64,9 @@ const ExportModal = forwardRef(
         size="smaller-h-full"
         open={open}
         setOpen={setOpen}
-        onSubmit={async () => {
-          try {
-            // Build FormData with flow JSON and meta
-            const flowPayload = checked
-              ? {
-                  id: currentFlow!.id,
-                  data: currentFlow!.data!,
-                  description,
-                  name,
-                  last_tested_version: version,
-                  endpoint_name: currentFlow!.endpoint_name,
-                  is_component: false,
-                  tags: currentFlow!.tags,
-                }
-              : removeApiKeys({
-                  id: currentFlow!.id,
-                  data: currentFlow!.data!,
-                  description,
-                  name,
-                  last_tested_version: version,
-                  endpoint_name: currentFlow!.endpoint_name,
-                  is_component: false,
-                  tags: currentFlow!.tags,
-                });
-
-            const jsonString = JSON.stringify(flowPayload);
-            const blob = new Blob([jsonString], { type: "application/json" });
-
-            const form = new FormData();
-            form.append("json", blob, `${name || "flow"}.json`);
-            form.append("name", name ?? "flow");
-            form.append("details", description ?? "exported from ui");
-
-            const access_token_lf =
-              localStorage.getItem("access_token_lf") || undefined;
-
-            const resp = await put_agent_export({
-              form,
-              token: access_token_lf,
-            });
-            console.log("put_agent_export response", resp);
-
-
-            try {
-              let alias = `${name || 'flow'}.json`;
-              let organization = 'leo1311';
-              let loadFileName = `${organization}_${name || 'flow'}`;
-
-              // Call the new file details export API
-              const fileDetailsResp = await post_agent_export_file_details({
-                token: access_token_lf,
-                alias,
-                loadFileName,
-              });
-              console.log('post_agent_export_file_details response', fileDetailsResp);
-            } catch (err) {
-              console.error("post_agent_export_file_details failed", err);
-              // don't block the main flow; surface notice
-              setNoticeData({
-                title: `post_agent_export_file_details failed: ${
-                  err instanceof Error ? err.message : "Unknown error"
-                }`,
-              });
-            }
-
-            setSuccessData({ title: "Exported to Essedum successfully" });
-            setOpen(false);
-          } catch (err) {
-            console.error("Export to Essedum failed", err);
-            setNoticeData({
-              title: `Export to Essedum failed: ${
-                err instanceof Error ? err.message : "Unknown error"
-              }`,
-            });
-          }
-        }}
+        onSubmit={async () => {}}
+          
+             
       >
         <BaseModal.Trigger asChild>{props.children ?? <></>}</BaseModal.Trigger>
         <BaseModal.Header description={EXPORT_DIALOG_SUBTITLE}>
@@ -216,9 +141,6 @@ const ExportModal = forwardRef(
                         tags: currentFlow!.tags,
                       });
 
-                  // const jsonContent = JSON.stringify({
-                  //   elements: [flowPayload], // Wrap in elements array like Angular does
-                  // });
 
                   const result = await create_pipeline({
                     alias: name || 'flow',
@@ -231,7 +153,6 @@ const ExportModal = forwardRef(
                     token: access_token_lf,
                   });
 
-                  console.log("create_pipeline response", result);
                   const cname = result?.name;
                   sessionStorage.removeItem('cname');
                   
@@ -245,89 +166,22 @@ const ExportModal = forwardRef(
                   const actualFlowScript = JSON.stringify(flowPayload, null, 2);
 
                   const scriptFormData = new FormData();
-                  // Match working curl exactly: Content-Type: text/plain and filename: "blob"
-                  const scriptBlob = new Blob([actualFlowScript], { type: 'text/plain' });
-                  const scriptFileName = `${cname}_${name || 'flow'}.json`;
-                  const organization = 'leo1311'; // Default organization
+                  const scriptBlob = new Blob([actualFlowScript], { type: 'application/json' });
+                  scriptFormData.set('scriptFile', scriptBlob);
 
-                  // Match curl exactly: filename="blob" (not the actual filename)
-                  scriptFormData.append('scriptFile', scriptBlob, 'blob');
-                  
-                  // Debug FormData contents
-                  console.log("FormData contents:");
-                  Array.from(scriptFormData.entries()).forEach(([key, value]) => {
-                    console.log(`${key}:`, value);
-                    // Use globalThis to access runtime constructors (cast to any) so TypeScript treats them as values
-                    if (
-                      typeof value === "object" &&
-                      ((value instanceof (globalThis as any).File) || (value instanceof (globalThis as any).Blob))
-                    ) {
-                      console.log(`  - Type: ${ (value as Blob).type }`);
-                      console.log(`  - Size: ${ (value as Blob).size }`);
-                      if (value instanceof (globalThis as any).File) {
-                        console.log(`  - Name: ${ (value as File).name }`);
-                      }
-                    }
-                  });
+                  const organization = localStorage.getItem("organization");
+                  const scriptFileName = `${cname}_${organization}.json`; // Use cname from sessionStorage
 
-                  console.log("Calling create_native_file...");
-                  console.log("scriptFileName:", scriptFileName);
-                  console.log("cname:", cname);
-                  
-                  // Try direct fetch to match curl exactly
-                  console.log("Trying direct fetch approach...");
-                  
-                  const directUrl = `/api/aip/file/create/${cname}/${organization}/JSON?file=${scriptFileName}`;
-                  const directHeaders = {
-                    'Accept': 'application/json',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Authorization': `Bearer ${access_token_lf}`,
-                    'Connection': 'keep-alive',
-                    'Origin': 'http://localhost:3000',
-                    'Project': '2',
-                    'ProjectName': 'leo1311',
-                    'Referer': 'http://localhost:3000/flows',
-                    'X-Requested-With': 'Leap',
-                    'roleId': '1',
-                    'roleName': 'IT Portfolio Manager'
-                  };
-                  
-                  console.log("Direct fetch URL:", directUrl);
-                  console.log("Direct fetch headers:", directHeaders);
-
-                  try {
-                    const directResponse = await fetch(directUrl, {
-                      method: 'POST',
-                      headers: directHeaders,
-                      body: scriptFormData,
-                      credentials: 'include'
-                    });
-                    
-                    const directText = await directResponse.text();
-                    console.log("Direct fetch response:", directResponse.status, directText);
-                    
-                    if (directResponse.ok) {
-                      console.log("Direct fetch SUCCESS!");
-                    } else {
-                      console.error("Direct fetch failed:", directResponse.status, directText);
-                    }
-                  } catch (directErr) {
-                    console.error("Direct fetch error:", directErr);
-                  }
-                 
-                  // Also try the service method
                   const nativeFileResponse = await create_native_file({
                     pipelineName: sessionStorage.getItem('cname') || "", // Use cname from sessionStorage
                     organization,
                     fileName: scriptFileName,
-                    fileType: 'JSON', // Uppercase to match server expectations
+                    fileType: 'json', // Default file type
                     scriptFormData,
                     token: access_token_lf,
                   });
-                  console.log("create_native_file response", nativeFileResponse);
 
                   if (!result.cid) {
-                    console.error("No id in create_pipeline response, cannot update");
                     setNoticeData({ title: "Failed to get pipeline ID for update" });
                     return;
                   }
@@ -350,24 +204,22 @@ const ExportModal = forwardRef(
                     description: description || 'Exported from Langflow UI',
                     jsonContent: jsonContent,
                     type: agentType,
-                    organization: 'leo1311',
+                    organization: localStorage.getItem("parentOrg"),
                     interfacetype: interfaceType,
                     isTemplate: false,
                     token: access_token_lf,
                     userId: userIdFromSession,
                     parentToken: parentToken,
                   };
-                  console.log("update_pipeline payload", updatePayload);
 
                   const updateResponse = await update_pipeline(updatePayload);
-                  console.log("update_pipeline response", updateResponse);
                   
                   // Also save to local like the regular export button
-                  downloadFlow(
-                    flowPayload,
-                    name ?? "flow",
-                    description ?? ""
-                  ); 
+                  // downloadFlow(
+                  //   flowPayload,
+                  //   name ?? "flow",
+                  //   description ?? ""
+                  // ); 
 
                   // Close modal and show success after Essedum export
                   setSuccessData({ title: "Pipeline saved to Essedum successfully" });

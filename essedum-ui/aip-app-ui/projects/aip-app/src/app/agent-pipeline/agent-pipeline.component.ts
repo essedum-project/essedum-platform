@@ -1,18 +1,31 @@
-import { Component, OnInit, HostListener, Input, Inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  HostListener,
+  Input,
+  Inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Services } from '../services/service';
-import { AgentPipelineService, FileNode as ServiceFileNode, AgentGenerationRequest, ICIPAiAgentScript } from './agent-pipeline.service';
+import {
+  AgentPipelineService,
+  FileNode as ServiceFileNode,
+  AgentGenerationRequest,
+  ICIPAiAgentScript,
+} from './agent-pipeline.service';
 import { StreamingServices } from '../streaming-services/streaming-service';
-import { DynamicParamsGrid, DynamicSecretsGrid } from '../pipeline.description/pipeline.description.component';
+import {
+  DynamicParamsGrid,
+  DynamicSecretsGrid,
+} from '../pipeline.description/pipeline.description.component';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
 import { HttpParams } from '@angular/common/http';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-
-
 
 interface FileNode {
   name: string;
@@ -63,12 +76,12 @@ interface AgentState {
   styleUrls: ['./agent-pipeline.component.scss'],
 })
 export class AgentPipelineComponent implements OnInit {
- 
+  streamItem: StreamingServices;
+  cardToggled: boolean = false;
+  card: any;
+  pipelineAlias: String;
+  githubUsername: string = '';
 
-    @Input() streamItem: StreamingServices;
-  
- githubUsername:string = "";
-  
   // API-related properties
   currentUserId: string = 'user123'; // Default user ID for testing
   currentCname: string = ''; // Current container/agent name
@@ -76,14 +89,15 @@ export class AgentPipelineComponent implements OnInit {
   // View mode: 'list' shows cards, 'detail' shows script/generate tabs
   viewMode: 'list' | 'detail' = 'list';
   selectedAgent: AgentCard | null = null;
-  
+
   // Card title
-  CARD_TITLE = 'Agent Pipeline';
+  cardTitle = 'Agent Pipeline';
   lastRefreshedTime: Date | null = null;
 
-    script: any[] = [];
+  script: any[] = [];
   lang: string;
   loadScript: boolean = false;
+  scriptFileName = '';
   dynamicEnvArray: Array<DynamicParamsGrid> = [];
   isExpand: boolean = true;
   uploader: FileUploader;
@@ -94,68 +108,70 @@ export class AgentPipelineComponent implements OnInit {
   linkAuth: boolean;
   relatedComponent: any;
   fileExtension: string = 'py';
-    scriptSelected: string;
-    runTypes: OptionsDTO[] = [];
-    selectedRunType: any;
-   @Input() pipelineAlias: String;
+  scriptSelected: string;
+  runTypes: OptionsDTO[] = [];
+  selectedRunType: any;
   runtypesCheck: boolean = true;
-    defaultRuntimeFromDB: any;
-    defaultRuntime: any;
+  defaultRuntimeFromDB: any;
+  defaultRuntime: any;
   fileTreeDataSource = new MatTreeNestedDataSource<FileNode>();
-
   organisation: any;
-    @Input() cardTitle: String = 'Pipeline';
-    @Input() cardToggled: boolean = false;
-    @Input() card: any;
-
   fileStructure: FileNode[] = [];
 
   data: any = {
     filetype: 'json',
     files: [],
-    
   };
 
-
-  
   // Filter properties
   tagrefresh: boolean = false;
   selectedFilterTypes: any = {};
-  
+
   // JSON Processing Flow
   isJsonProcessed = false;
-dynamicJsonContent:any;
-dynamicFileName:any;
+  dynamicJsonContent: any;
+  dynamicFileName: any;
   relatedloaded = false;
 
-  
   // Console output for Generate SDK Agent
   consoleOutput: string[] = [];
   isGenerating = false;
-  
+
   // Playground popup
   showPlayground = false;
   hasGeneratedAgent = false;
-  playgroundMessages: Array<{role: 'user' | 'agent', content: string}> = [];
+  playgroundMessages: Array<{ role: 'user' | 'agent'; content: string }> = [];
   userQuestion = '';
   isAgentThinking = false;
-  
+
   // GitHub Push functionality
   githubRepoName = '';
   selectedBranch = 'main';
-  availableBranches: string[] = ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
-  availableRepositories: Array<{name: string, description?: string}> = [
-    { name: 'customer-support-agent-sdk', description: 'Customer Support Agent SDK' },
+  availableBranches: string[] = [
+    'main',
+    'develop',
+    'feature/agent-updates',
+    'staging',
+    'production',
+  ];
+  availableRepositories: Array<{ name: string; description?: string }> = [
+    {
+      name: 'customer-support-agent-sdk',
+      description: 'Customer Support Agent SDK',
+    },
     { name: 'data-analysis-agent-sdk', description: 'Data Analysis Agent SDK' },
     { name: 'code-review-agent-sdk', description: 'Code Review Agent SDK' },
-    { name: 'marketing-automation-sdk', description: 'Marketing Automation SDK' },
+    {
+      name: 'marketing-automation-sdk',
+      description: 'Marketing Automation SDK',
+    },
     { name: 'content-generator-sdk', description: 'Content Generator SDK' },
-    { name: 'chatbot-framework-sdk', description: 'Chatbot Framework SDK' }
+    { name: 'chatbot-framework-sdk', description: 'Chatbot Framework SDK' },
   ];
   useCustomCommit = false;
   commitMessage = '';
   isPushing = false;
-  
+
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
     {
@@ -163,7 +179,8 @@ dynamicFileName:any;
       cname: 'YL79B7', // Short alphanumeric cname for Customer Support Agent
       name: 'customer-support-agent',
       alias: 'Customer Support Agent',
-      description: 'AI-powered customer support agent with knowledge base integration and ticket management',
+      description:
+        'AI-powered customer support agent with knowledge base integration and ticket management',
       type: 'AgentScript',
       language: 'Python3',
       status: 'Active',
@@ -172,14 +189,15 @@ dynamicFileName:any;
       tags: ['customer-service', 'automation', 'nlp'],
       lastmodifiedon: new Date('2024-11-15'),
       createdby: 'admin@example.com',
-      hover: false
+      hover: false,
     },
     {
       cid: '2',
       cname: 'MK84C7', // Short alphanumeric cname for Data Analysis Agent
       name: 'data-analysis-agent',
       alias: 'Data Analysis Agent',
-      description: 'Automated data analysis and visualization agent for business intelligence',
+      description:
+        'Automated data analysis and visualization agent for business intelligence',
       type: 'AgentScript',
       language: 'Python3',
       status: 'Active',
@@ -188,14 +206,15 @@ dynamicFileName:any;
       tags: ['analytics', 'bi', 'data-science'],
       lastmodifiedon: new Date('2024-11-17'),
       createdby: 'admin@example.com',
-      hover: false
+      hover: false,
     },
     {
       cid: '3',
       cname: 'QR53F1', // Short alphanumeric cname for Code Review Agent
       name: 'code-review-agent',
       alias: 'Code Review Agent',
-      description: 'Intelligent code review agent that analyzes pull requests and suggests improvements',
+      description:
+        'Intelligent code review agent that analyzes pull requests and suggests improvements',
       type: 'AgentScript',
       language: 'Python3',
       status: 'Ready',
@@ -204,10 +223,10 @@ dynamicFileName:any;
       tags: ['code-quality', 'devops', 'automation'],
       lastmodifiedon: new Date('2024-11-10'),
       createdby: 'admin@example.com',
-      hover: false
-    }
+      hover: false,
+    },
   ];
-  
+
   // JSON configuration
   jsonContent = `{
   "agent_name": "customer-support-agent",
@@ -223,18 +242,18 @@ dynamicFileName:any;
   selectedFileId = ''; // File ID for API operations
   selectedFileNode: FileNode | null = null;
   selectedFilePath = '';
- // fileExtension = 'py';
+  // fileExtension = 'py';
   isFileModified = false;
   isSavingFile = false;
-  
+
   // Track original content and changes for diff highlighting
   originalFileContent = '';
   modifiedLines: Set<number> = new Set();
   addedLines: Set<number> = new Set();
-  
+
   // Track user modifications vs API content
   isUserModifiedContent = false;
-  
+
   // Virtual scrolling properties
   visibleLineStart: number = 0;
   visibleLineEnd: number = 50;
@@ -242,44 +261,45 @@ dynamicFileName:any;
   currentLineOffset: number = 0;
   visibleLineCount: number = 50;
   totalLineCount: number = 100;
-  
+
   // Additional dialog properties
   showUnsavedDialog = false;
   pendingAction: (() => void) | null = null;
   userModifiedLines: Set<number> = new Set();
   scrollContainer: HTMLElement | null = null;
-  
+
   // Drag and Drop functionality
   isDragging = false;
   draggedNode: FileNode | null = null;
   dropTarget: FileNode | null = null;
   showSaveStructureDialog = false;
   originalFileStructure: FileNode[] = [];
-  
+
   // Save confirmation dialog
   showSaveConfirmationDialog = false;
   pendingNavigation: FileNode | null = null;
-  
+
   // Delete confirmation dialog
   showDeleteDialog = false;
   isDownloading = false;
-  
+
   // Hover states
   isHoveredBack = false;
   isHoveredTag = false;
   isHoveredSave = false;
   isHoveredDuplicate = false;
+  isBackHovered = false;
 
   constructor(
-        @Inject('envi') private baseUrl: string,
-    
+    @Inject('envi') private baseUrl: string,
+
     private location: Location,
     private router: Router,
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -291,83 +311,53 @@ dynamicFileName:any;
         this.cardName = this.streamItem.name;
       }
     });
-  
 
     this.getStreamService();
     this.getPipelineByName();
   }
 
-
-
-
-
-
-
-getStreamService() {
+  getStreamService() {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
-      
+
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
 
       if (this.router.url.includes('preview')) {
         this.pipelineAlias = this.streamItem.alias;
       }
-      this.uploader = new FileUploader({
-        url:
-          this.baseUrl +
-          '/file/pipeline/native/upload/' +
-          this.streamItem.name +
-          '/' +
-          this.streamItem.organization,
-      });
+    
       try {
-        if (this.runtypesCheck == true) this.fetchRunTypes();
-        else {
-          if (this.streamItem.json_content) {
-            this.dynamicEnvArray = JSON.parse(this.streamItem.json_content).environment;
-            this.defaultRuntimeFromDB = JSON.parse(this.streamItem.json_content).default_runtime;
-            this.selectedRunType = this.defaultRuntimeFromDB;
-          }
-          this.data = JSON.parse(
+        if (this.streamItem.json_content) {
+          this.dynamicEnvArray = JSON.parse(
             this.streamItem.json_content
-          ).elements[0].attributes;
-          this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
+          ).environment;
           
+        }
+        this.data = JSON.parse(
+          this.streamItem.json_content
+        ).elements[0].attributes;
+        this.dynamicEnvArray = JSON.parse(
+          this.streamItem.json_content
+        ).environment;
 
-        }
-        if (this.data.dataset) {
-          this.data.dataset.forEach((data) => {
-            if (data.datasource) {
-              this.service
-                .getDatasource(data.datasource.name)
-                .subscribe((resp) => {
-                  data.datasource = resp;
-                });
-            }
-          });
-        }
-        if (this.data.filetype == 'Python') {
-          this.data.filetype = 'Python3';
-        }
         if (this.data.filetype) {
           this.changeLang(this.data.filetype);
         }
-        
+
         if (this.data.files && this.data.files.length > 0) {
-          // Don't read files here - let buildFileStructure handle it
-          // this.readFile(this.data.files[0]);
+          //  Don't read files here - let buildFileStructure handle it
+          this.readFile(this.data.files[0]);
         }
-       
-        if(this.data.files==null || this.data.files==undefined){
+
+        if (this.data.files == null || this.data.files == undefined) {
           this.data['files'] = [];
           this.loadScript = true;
         }
-        
+
         // Build file structure for code explorer
         this.buildFileStructure();
-     
       } catch (e) {
         this.loadScript = true;
         console.error('no attribute found in json[element0]');
@@ -376,13 +366,13 @@ getStreamService() {
         this.onErrorItem(item, response, status, headers);
       this.uploader.onSuccessItem = (item, response, status, headers) =>
         this.onSuccessItem(item, response, status, headers);
-      this.getRelatedComponent();
+      //this.getRelatedComponent();
 
       this.linkAuth = true;
     });
   }
 
-    changeLang(type) {
+  changeLang(type) {
     switch (type) {
       case 'Python2':
       case 'Python3':
@@ -397,70 +387,12 @@ getStreamService() {
     }
   }
 
-  fetchRunTypes() {
-    this.runTypes = [];
-    this.service.fetchJobRunTypes().subscribe((resp) => {
-      resp.forEach((ele) => {
-        this.runTypes.push(new OptionsDTO(ele.type + '-' + ele.dsAlias, ele));
-      });
-      if (this.data.filetype === 'Jython') {
-        this.runTypes.push(
-          new OptionsDTO('Local-', { dsAlias: '', dsName: '', type: 'Local' })
-        );
-      }
-      if (!this.defaultRuntimeFromDB) {
-        this.selectedRunType = this.runTypes[0].value;
-      }
-      else {
-        // Set default selection
-        if (this.defaultRuntimeFromDB) {
-          // Find the matching runtime option
-          const matchingOption = this.runTypes.find(
-            (option: any) => option.value.dsName === this.defaultRuntimeFromDB.dsName &&
-              option.value.type === this.defaultRuntimeFromDB.type
-          );
-
-          if (matchingOption) {
-            this.selectedRunType = matchingOption.value;
-            this.defaultRuntime = matchingOption.value;
-          } else {
-            this.selectedRunType = this.runTypes[0]?.value;
-          }
-        } else {
-          this.selectedRunType = this.runTypes[0]?.value;
-        }
-      }
-      this.runtypesCheck = false;
-    });
-  }
-
-
-  getRelatedComponent() {
-    this.component = [];
-    this.service
-      .getRelatedComponent(this.streamItem.cid, 'PIPELINE')
-      .subscribe({
-        next: (res) => {
-          this.relatedComponent = res[0];
-          this.relatedComponent.data = JSON.parse(this.relatedComponent.data);
-          this.component.push(this.relatedComponent);
-          this.cdr.detectChanges();
-
-
-        },
-        complete() {
-          console.log('completed');
-        },
-        error: (err) => {
-          console.log(err);
-        },
-      });
-  }
+  
   refeshrelated(event: any) {
     if (event == true) {
       this.relatedloaded = false;
       setTimeout(() => {
-        this.getRelatedComponent();
+       // this.getRelatedComponent();
       }, 2000);
     }
   }
@@ -474,141 +406,172 @@ getStreamService() {
     params = params.set('org', this.organisation);
     this.service.getPipelineByName(params).subscribe((res) => {
       console.log('res', res);
-      this.cardTitle = 'Pipeline';
+      this.cardTitle = 'Agent Pipeline';
       this.card = res[0];
     });
   }
-  
-   onSuccessItem(
-      item: FileItem,
-      response: string,
-      status: number,
-      headers: ParsedResponseHeaders
-    ): any {
-      this.data.files.push(response);
-      this.uploadingCounter++;
-      if (this.uploadingCounter == this.uploader.queue.length) {
-        this.service.message('Uploaded Successfully', 'success');
-        this.uploader.clearQueue();
-        this.readFile(response);
-      }
+
+  onSuccessItem(
+    item: FileItem,
+    response: string,
+    status: number,
+    headers: ParsedResponseHeaders
+  ): any {
+    this.data.files.push(response);
+    this.uploadingCounter++;
+    if (this.uploadingCounter == this.uploader.queue.length) {
+      this.service.message('Uploaded Successfully', 'success');
+      this.uploader.clearQueue();
+      this.readFile(response);
     }
-  
-    onErrorItem(
-      item: FileItem,
-      response: string,
-      status: number,
-      headers: ParsedResponseHeaders
-    ): any {
-      const error = response;
-      this.service.message('Error! while uploading file', 'error');
-      this.uploadingError = true;
+  }
+
+  onErrorItem(
+    item: FileItem,
+    response: string,
+    status: number,
+    headers: ParsedResponseHeaders
+  ): any {
+    const error = response;
+    this.service.message('Error! while uploading file', 'error');
+    this.uploadingError = true;
+  }
+
+  readFile(filename: string, retryCount = 0) {
+    console.log(
+      'Reading file:',
+      filename,
+      'for stream:',
+      this.streamItem?.name,
+      'org:',
+      this.streamItem?.organization,
+      'retry:',
+      retryCount
+    );
+
+    if (!filename || !this.streamItem?.name || !this.streamItem?.organization) {
+      console.error('Missing required parameters for readFile:', {
+        filename,
+        streamName: this.streamItem?.name,
+        org: this.streamItem?.organization,
+      });
+      this.service.message(
+        'Error: Missing file or stream information',
+        'error'
+      );
+      return;
     }
-  
-    readFile(filename: string, retryCount = 0) {
-      console.log('Reading file:', filename, 'for stream:', this.streamItem?.name, 'org:', this.streamItem?.organization, 'retry:', retryCount);
-      
-      if (!filename || !this.streamItem?.name || !this.streamItem?.organization) {
-        console.error('Missing required parameters for readFile:', { filename, streamName: this.streamItem?.name, org: this.streamItem?.organization });
-        this.service.message('Error: Missing file or stream information', 'error');
-        return;
-      }
-      
-      // Only read .py files
-      const extension = filename.split('.').pop()?.toLowerCase();
-      if (extension !== 'py') {
-        console.log('Skipping file read for non-Python file:', filename);
-        this.script = [];
-        this.loadScript = true;
-        return;
-      }
-      
-      // Encode filename to handle special characters
-      const encodedFilename = encodeURIComponent(filename);
-      
-      this.service
-        .readNativeFile(
-          this.streamItem.name,
-          this.streamItem.organization,
-          encodedFilename
-        )
-        .subscribe({
-          next: (resp) => {
-            console.log('File read response received for:', filename);
-            try {
-              const textDecoder = new TextDecoder('utf-8');
-              this.script = textDecoder.decode(resp).split('\n');
-              this.loadScript = true;
-              console.log('Successfully loaded script with', this.script.length, 'lines');
-              
-              // Update the selected file in the structure
-              if (this.fileStructure.length > 0) {
-                this.fileStructure.forEach(file => {
-                  file.selected = file.name === filename && file.extension === 'py';
-                });
-                this.selectedFileNode = this.fileStructure.find(f => f.name === filename && f.extension === 'py') || null;
-              }
-              
-              // Trigger change detection
-              this.cdr.detectChanges();
-            } catch (e) {
-              console.error('Error decoding file:', e);
-              this.service.message('Error decoding file content', 'error');
-              this.script = [];
-              this.loadScript = true;
+
+    // Encode filename to handle special characters
+    const encodedFilename = encodeURIComponent(filename);
+    this.scriptFileName = filename;
+
+    this.service
+      .readNativeFile(
+        this.streamItem.name,
+        this.streamItem.organization,
+        encodedFilename
+      )
+      .subscribe({
+        next: (resp) => {
+          console.log('File read response received for:', filename);
+          try {
+            const textDecoder = new TextDecoder('utf-8');
+            this.script = textDecoder.decode(resp).split('\n');
+            this.loadScript = true;
+            console.log(
+              'Successfully loaded script with',
+              this.script.length,
+              'lines'
+            );
+
+            // Update the selected file in the structure
+            if (this.fileStructure.length > 0) {
+              this.fileStructure.forEach((file) => {
+                file.selected =
+                  file.name === filename && file.extension === 'py';
+              });
+              this.selectedFileNode =
+                this.fileStructure.find(
+                  (f) => f.name === filename && f.extension === 'py'
+                ) || null;
             }
-          },
-          error: (err) => {
-            console.error('Error while reading file:', filename, 'Attempt:', retryCount + 1, err);
-            
-            // Retry logic for file reading errors
-            if (retryCount < 3) {
-              console.log(`Retrying file read in ${(retryCount + 1) * 1000}ms...`);
-              setTimeout(() => {
-                this.readFile(filename, retryCount + 1);
-              }, (retryCount + 1) * 1000);
-              return;
-            }
-            
-            // After all retries failed
-            let errorMessage = 'Error reading file';
-            if (err.status === 404) {
-              errorMessage = 'Python file not found. The file may still be processing.';
-            } else if (err.status === 400) {
-              errorMessage = 'Invalid file request. Please check the file name.';
-            } else if (err.status === 500) {
-              errorMessage = 'Server error while reading file. Please try again.';
-            } else {
-              errorMessage += ': ' + (err.message || err.statusText || 'Unknown error');
-            }
-            
-            this.service.message(errorMessage, 'error');
+
+            // Trigger change detection
+            this.cdr.detectChanges();
+          } catch (e) {
+            console.error('Error decoding file:', e);
+            this.service.message('Error decoding file content', 'error');
             this.script = [];
             this.loadScript = true;
-          },
-          complete: () => {
-            console.log('readNativeFile observable completed for:', filename);
           }
-        });
-      }
+        },
+        error: (err) => {
+          console.error(
+            'Error while reading file:',
+            filename,
+            'Attempt:',
+            retryCount + 1,
+            err
+          );
 
-       buildFileStructure() {
+          // Retry logic for file reading errors
+          if (retryCount < 3) {
+            console.log(
+              `Retrying file read in ${(retryCount + 1) * 1000}ms...`
+            );
+            setTimeout(() => {
+              this.readFile(filename, retryCount + 1);
+            }, (retryCount + 1) * 1000);
+            return;
+          }
+
+          // After all retries failed
+          let errorMessage = 'Error reading file';
+          if (err.status === 404) {
+            errorMessage =
+              'Python file not found. The file may still be processing.';
+          } else if (err.status === 400) {
+            errorMessage = 'Invalid file request. Please check the file name.';
+          } else if (err.status === 500) {
+            errorMessage = 'Server error while reading file. Please try again.';
+          } else {
+            errorMessage +=
+              ': ' + (err.message || err.statusText || 'Unknown error');
+          }
+
+          this.service.message(errorMessage, 'error');
+          this.script = [];
+          this.loadScript = true;
+        },
+        complete: () => {
+          console.log('readNativeFile observable completed for:', filename);
+        },
+      });
+  }
+
+  buildFileStructure() {
     console.log('Building file structure in NativeScript...', this.streamItem);
     this.fileStructure = [];
-    
+
     if (this.streamItem && this.streamItem.json_content) {
       try {
         const jsonContent = JSON.parse(this.streamItem.json_content);
         const files = jsonContent.elements[0]?.attributes?.files;
-        
+
         console.log('Raw files array from API:', files);
-        
+
         if (files && Array.isArray(files) && files.length > 0) {
           // Process each file entry in the files array
           files.forEach((fileEntry: any, index: number) => {
-            console.log(`Processing file entry ${index}:`, fileEntry, 'Type:', typeof fileEntry);
+            console.log(
+              `Processing file entry ${index}:`,
+              fileEntry,
+              'Type:',
+              typeof fileEntry
+            );
             let fileNames: string[] = [];
-            
+
             // Handle different formats of file entries
             if (typeof fileEntry === 'string') {
               // Check if the file entry is in bracket format like '["file1.py","file2.ipynb"]'
@@ -617,22 +580,37 @@ getStreamService() {
                   // Try to parse as JSON array first
                   const parsedArray = JSON.parse(fileEntry);
                   if (Array.isArray(parsedArray)) {
-                    fileNames = parsedArray.filter(name => typeof name === 'string' && name.trim().length > 0);
+                    fileNames = parsedArray.filter(
+                      (name) =>
+                        typeof name === 'string' && name.trim().length > 0
+                    );
                     console.log('Parsed as JSON array:', fileNames);
                   } else {
                     fileNames = [fileEntry.trim()];
                   }
                 } catch (e) {
-                  console.warn('Failed to parse as JSON, trying manual parsing:', e);
+                  console.warn(
+                    'Failed to parse as JSON, trying manual parsing:',
+                    e
+                  );
                   // Fallback: manual parsing of bracket format
                   const cleanEntry = fileEntry.slice(1, -1); // Remove brackets
-                  fileNames = cleanEntry.split(',').map(f => f.trim().replace(/[\"\']/g, '')).filter(f => f.length > 0);
+                  fileNames = cleanEntry
+                    .split(',')
+                    .map((f) => f.trim().replace(/[\"\']/g, ''))
+                    .filter((f) => f.length > 0);
                   console.log('Manually parsed file names:', fileNames);
                 }
               } else if (fileEntry.includes(',')) {
                 // Handle comma-separated without brackets
-                fileNames = fileEntry.split(',').map(f => f.trim()).filter(f => f.length > 0);
-                console.log('Extracted file names from comma-separated format:', fileNames);
+                fileNames = fileEntry
+                  .split(',')
+                  .map((f) => f.trim())
+                  .filter((f) => f.length > 0);
+                console.log(
+                  'Extracted file names from comma-separated format:',
+                  fileNames
+                );
               } else {
                 // Single file name
                 fileNames = [fileEntry.trim()];
@@ -640,54 +618,68 @@ getStreamService() {
               }
             } else if (Array.isArray(fileEntry)) {
               // Handle direct array entries
-              fileNames = fileEntry.filter(name => typeof name === 'string' && name.trim().length > 0);
+              fileNames = fileEntry.filter(
+                (name) => typeof name === 'string' && name.trim().length > 0
+              );
               console.log('Direct array format:', fileNames);
             } else {
-              console.warn('File entry is neither string nor array:', fileEntry);
+              console.warn(
+                'File entry is neither string nor array:',
+                fileEntry
+              );
               return; // Exit this iteration of forEach
             }
-            
+
             // Process each extracted file name
             fileNames.forEach((fileName: string) => {
               if (fileName && fileName.length > 0) {
                 const cleanFileName = fileName.trim();
                 const extension = cleanFileName.split('.').pop()?.toLowerCase();
-                console.log(`Processing file: ${cleanFileName}, extension: ${extension}`);
-                
+                console.log(
+                  `Processing file: ${cleanFileName}, extension: ${extension}`
+                );
+
                 if (extension === 'py' || extension === 'ipynb') {
                   // Check if file already exists in structure to avoid duplicates
-                  const existingFile = this.fileStructure.find(f => f.name === cleanFileName);
+                  const existingFile = this.fileStructure.find(
+                    (f) => f.name === cleanFileName
+                  );
                   if (!existingFile) {
                     this.fileStructure.push({
                       name: cleanFileName,
                       extension: extension,
                       selected: false,
-                      type: 'file'
+                      type: 'file',
                     });
                     console.log('Added file to structure:', cleanFileName);
                   }
                 } else {
-                  console.log('Skipping file with unsupported extension:', cleanFileName);
+                  console.log(
+                    'Skipping file with unsupported extension:',
+                    cleanFileName
+                  );
                 }
               }
             });
           });
-          
+
           console.log('Built file structure:', this.fileStructure);
-          
+
           // Auto-select the first Python file with a delay to ensure backend is ready
           if (this.fileStructure.length > 0) {
-            const firstPyFile = this.fileStructure.find(file => file.extension === 'py');
+            const firstPyFile = this.fileStructure.find(
+              (file) => file.extension === 'py'
+            );
             if (firstPyFile) {
               console.log('Auto-selecting Python file:', firstPyFile.name);
-              
+
               // Mark as selected immediately for UI
-              this.fileStructure.forEach(file => file.selected = false);
+              this.fileStructure.forEach((file) => (file.selected = false));
               firstPyFile.selected = true;
               this.selectedFileNode = firstPyFile; // Ensure selectedFileNode is set
-              
+
               console.log('Set selectedFileNode to:', this.selectedFileNode);
-              
+
               // If we already have script content, don't reload
               if (this.script && this.script.length > 0) {
                 console.log('Script content already available, not reloading');
@@ -722,44 +714,17 @@ getStreamService() {
       console.log('No streamItem or json_content available');
       this.loadScript = true;
     }
-    
+
     this.fileTreeDataSource.data = this.fileStructure;
     console.log('File tree data source updated:', this.fileTreeDataSource.data);
-    
+
     // Trigger change detection
     this.cdr.detectChanges();
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
+  onScriptChange(newContent: string): void {
+    console.log('Script content changed, length:', newContent.length);
+  }
 
   navigateBack(): void {
     if (this.viewMode === 'detail') {
@@ -814,13 +779,17 @@ getStreamService() {
 
   viewDetails(agent: AgentCard): void {
     this.selectedAgent = agent;
-    this.viewMode = 'detail';
-    
+
+    // this.viewMode = 'detail';
+
     // Special handling for QR53F1 - generate new cname each time
     if (agent.cname === 'QR53F1') {
       // Generate a new random cname for fresh generation
       this.currentCname = this.agentPipelineService.generateRandomCname();
-      console.log('QR53F1 detected - using new random cname:', this.currentCname);
+      console.log(
+        'QR53F1 detected - using new random cname:',
+        this.currentCname
+      );
       // Always show fresh generation state
       this.resetToInitialStateForNewAgent();
     } else {
@@ -830,12 +799,10 @@ getStreamService() {
       // Always check for existing files first
       this.checkForExistingFilesAndLoadState(agent.cname);
     }
-    
+
     // Update JSON content based on selected agent
     this.updateJsonContent(agent);
   }
-
-
 
   // Save current file changes
   async saveFile(): Promise<void> {
@@ -846,33 +813,34 @@ getStreamService() {
     this.isSavingFile = true;
     try {
       console.log('Saving file:', this.selectedFileName);
-      
+
       // Update the node content first
       this.selectedFileNode.content = this.selectedFileContent;
-      
+
       // Call the bulk update API with the modified file
-      const result = await this.agentPipelineService.updateFileContent(
-        this.currentCname,
-        this.selectedFileNode.id!,
-        this.selectedFileName,
-        this.selectedFileContent,
-        this.selectedFilePath
-      ).toPromise();
-      
+      const result = await this.agentPipelineService
+        .updateFileContent(
+          this.currentCname,
+          this.selectedFileNode.id!,
+          this.selectedFileName,
+          this.selectedFileContent,
+          this.selectedFilePath
+        )
+        .toPromise();
+
       console.log('File saved successfully via bulk update API:', result);
-      
+
       this.isFileModified = false;
       this.isUserModifiedContent = false;
       this.userModifiedLines.clear();
-      
+
       // Update original content and reset diff tracking after successful save
       this.originalFileContent = this.selectedFileContent;
       this.resetDiffTracking();
-      
+
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
-      
     } catch (error) {
       console.error('Error saving file:', error);
       // Show error message
@@ -884,20 +852,24 @@ getStreamService() {
 
   // Show delete confirmation dialog
   showDeleteConfirmation(): void {
-    if (!this.selectedFileNode || !this.currentCname || !this.selectedFileName) {
+    if (
+      !this.selectedFileNode ||
+      !this.currentCname ||
+      !this.selectedFileName
+    ) {
       console.log('Cannot delete: missing file info', {
         hasFileNode: !!this.selectedFileNode,
         hasCname: !!this.currentCname,
-        hasFileName: !!this.selectedFileName
+        hasFileName: !!this.selectedFileName,
       });
       return;
     }
-    
+
     if (this.isSavingFile) {
       console.log('Cannot delete: file is currently being saved');
       return;
     }
-    
+
     console.log('Showing delete confirmation for:', this.selectedFileName);
     this.showDeleteDialog = true;
   }
@@ -910,20 +882,26 @@ getStreamService() {
 
     this.isSavingFile = true; // Reuse the saving flag for UI state
     try {
-      console.log('Deleting file:', this.selectedFileName, 'with ID:', this.selectedFileId);
-      
-      // Call the delete API with just the file ID
-      const result = await this.agentPipelineService.deleteFile(
+      console.log(
+        'Deleting file:',
+        this.selectedFileName,
+        'with ID:',
         this.selectedFileId
-      ).toPromise();
-      
+      );
+
+      // Call the delete API with just the file ID
+      const result = await this.agentPipelineService
+        .deleteFile(this.selectedFileId)
+        .toPromise();
+
       console.log('File deleted successfully:', result);
-      
+
       // Update the file tree with the response
       if (result && Array.isArray(result)) {
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(result);
+        this.fileSystemData =
+          this.agentPipelineService.buildFileTreeFromApiResponse(result);
       }
-      
+
       // Clear the editor
       this.selectedFileName = '';
       this.selectedFileContent = '';
@@ -933,11 +911,13 @@ getStreamService() {
       this.isFileModified = false;
       this.userModifiedLines.clear();
       this.resetDiffTracking();
-      
+
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
-      this.service.messageService(successResponse, 'File deleted successfully!');
-      
+      this.service.messageService(
+        successResponse,
+        'File deleted successfully!'
+      );
     } catch (error) {
       console.error('Error deleting file:', error);
       // Show error message
@@ -955,7 +935,7 @@ getStreamService() {
       this.showSaveConfirmationDialog = true;
       return;
     }
-    
+
     // No unsaved changes, close immediately
     this.selectedFileName = '';
     this.selectedFileContent = '';
@@ -969,17 +949,27 @@ getStreamService() {
   // Keyboard shortcut for saving files (Ctrl+S)
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
-    if (event.ctrlKey && event.key === 's' && this.selectedFileName && this.isFileModified) {
+    if (
+      event.ctrlKey &&
+      event.key === 's' &&
+      this.selectedFileName &&
+      this.isFileModified
+    ) {
       event.preventDefault();
       this.saveFile();
     }
-    
+
     // Ctrl+C for copying file content when editor is focused
-    if (event.ctrlKey && event.key === 'c' && this.selectedFileName && event.altKey) {
+    if (
+      event.ctrlKey &&
+      event.key === 'c' &&
+      this.selectedFileName &&
+      event.altKey
+    ) {
       event.preventDefault();
       this.copyFileContent();
     }
-    
+
     // Ctrl+W for closing file
     if (event.ctrlKey && event.key === 'w' && this.selectedFileName) {
       event.preventDefault();
@@ -1012,20 +1002,41 @@ getStreamService() {
   getToolsForAgent(agentName: string): any[] {
     const toolsMap: any = {
       'customer-support-agent': [
-        { name: "search_knowledge_base", description: "Search the knowledge base for relevant articles" },
-        { name: "create_ticket", description: "Create a support ticket" },
-        { name: "get_customer_info", description: "Retrieve customer information" }
+        {
+          name: 'search_knowledge_base',
+          description: 'Search the knowledge base for relevant articles',
+        },
+        { name: 'create_ticket', description: 'Create a support ticket' },
+        {
+          name: 'get_customer_info',
+          description: 'Retrieve customer information',
+        },
       ],
       'data-analysis-agent': [
-        { name: "load_dataset", description: "Load and preprocess datasets" },
-        { name: "generate_visualizations", description: "Create charts and graphs" },
-        { name: "run_statistical_analysis", description: "Perform statistical computations" }
+        { name: 'load_dataset', description: 'Load and preprocess datasets' },
+        {
+          name: 'generate_visualizations',
+          description: 'Create charts and graphs',
+        },
+        {
+          name: 'run_statistical_analysis',
+          description: 'Perform statistical computations',
+        },
       ],
       'code-review-agent': [
-        { name: "analyze_code_quality", description: "Check code quality metrics" },
-        { name: "detect_vulnerabilities", description: "Scan for security issues" },
-        { name: "suggest_improvements", description: "Provide code optimization suggestions" }
-      ]
+        {
+          name: 'analyze_code_quality',
+          description: 'Check code quality metrics',
+        },
+        {
+          name: 'detect_vulnerabilities',
+          description: 'Scan for security issues',
+        },
+        {
+          name: 'suggest_improvements',
+          description: 'Provide code optimization suggestions',
+        },
+      ],
     };
     return toolsMap[agentName] || [];
   }
@@ -1035,7 +1046,7 @@ getStreamService() {
     // which is called after successful agent generation
     this.loadAgentFiles();
   }
-  
+
   loadAgentFiles(): void {
     if (!this.currentCname) {
       console.warn('No container name available for loading files');
@@ -1043,62 +1054,63 @@ getStreamService() {
     }
 
     this.isLoadingFiles = true;
-    
+
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (apiResponse) => {
         console.log('Building file tree from API response:', apiResponse);
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
+        this.fileSystemData =
+          this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
         this.isLoadingFiles = false;
       },
       error: (error) => {
         console.error('Error loading agent files:', error);
         this.isLoadingFiles = false;
         this.fileSystemData = [];
-        
+
         // Show error message to user
         alert(`Failed to load agent files: ${error.message}`);
-      }
+      },
     });
   }
-  
+
   // Track user modifications for neon green highlighting
   onUserContentChange(newContent: string): void {
     this.isUserModifiedContent = true;
     this.selectedFileContent = newContent;
     this.isFileModified = true;
-    
+
     // Track which lines are user-modified
     this.trackUserModifiedLines();
   }
-  
+
   // Track which lines have been modified by user
   private trackUserModifiedLines(): void {
     const originalLines = this.originalFileContent.split('\n');
     const currentLines = this.selectedFileContent.split('\n');
-    
+
     this.userModifiedLines.clear();
-    
+
     // Compare lines to find user modifications
     const maxLines = Math.max(originalLines.length, currentLines.length);
     for (let i = 0; i < maxLines; i++) {
       const originalLine = originalLines[i] || '';
       const currentLine = currentLines[i] || '';
-      
+
       if (originalLine !== currentLine) {
         this.userModifiedLines.add(i);
       }
     }
-    
+
     // Don't set isUserModifiedContent to prevent whole textarea styling
-    
+
     console.log('User modification tracking complete:', {
       modifiedLines: this.userModifiedLines.size,
       totalOriginalLines: originalLines.length,
       totalCurrentLines: currentLines.length,
-      modifiedLineNumbers: Array.from(this.userModifiedLines)
+      modifiedLineNumbers: Array.from(this.userModifiedLines),
     });
   }
-  
+
   // Get CSS class for user-modified lines
   getUserModifiedLineClass(lineIndex: number): string {
     if (this.isUserModifiedContent && this.userModifiedLines.has(lineIndex)) {
@@ -1106,63 +1118,72 @@ getStreamService() {
     }
     return '';
   }
-  
+
   // Virtual scrolling methods
   initializeVirtualScrolling(): void {
     this.scrollContainer = document.querySelector('.line-numbers-gutter');
     if (this.scrollContainer) {
-      this.scrollContainer.addEventListener('scroll', this.onLineNumbersScroll.bind(this));
+      this.scrollContainer.addEventListener(
+        'scroll',
+        this.onLineNumbersScroll.bind(this)
+      );
     }
     this.updateTotalLineCount();
   }
-  
+
   onLineNumbersScroll(event: Event): void {
     const target = event.target as HTMLElement;
     const scrollTop = target.scrollTop;
     const itemHeight = 20; // Height of each line number
-    
+
     const newOffset = Math.floor(scrollTop / itemHeight);
     if (newOffset !== this.currentLineOffset) {
       this.currentLineOffset = newOffset;
       this.updateVisibleLines();
     }
   }
-  
+
   updateVisibleLines(): void {
-    const endLine = Math.min(this.currentLineOffset + this.visibleLineCount, this.totalLineCount);
+    const endLine = Math.min(
+      this.currentLineOffset + this.visibleLineCount,
+      this.totalLineCount
+    );
     // Update visible line range
   }
-  
+
   getVisibleLineNumbers(): number[] {
     const start = this.currentLineOffset;
     const end = Math.min(start + this.visibleLineCount, this.totalLineCount);
-    return Array.from({length: end - start}, (_, i) => start + i + 1);
+    return Array.from({ length: end - start }, (_, i) => start + i + 1);
   }
-  
+
   // Sync line numbers with textarea scroll - fix dual scrollbar issue
   onTextareaScroll(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
     const scrollTop = textarea.scrollTop;
-    
+
     // Calculate visible line range based on scroll position
     const lineHeight = 20; // matches CSS line-height
     this.currentLineOffset = Math.floor(scrollTop / lineHeight);
     this.visibleLineStart = this.currentLineOffset;
-    this.visibleLineEnd = Math.min(this.visibleLineStart + this.visibleLineCount, this.totalLineCount);
+    this.visibleLineEnd = Math.min(
+      this.visibleLineStart + this.visibleLineCount,
+      this.totalLineCount
+    );
   }
-  
+
   // Check if user can navigate away from unsaved changes
   canNavigateAway(): boolean {
     // Allow navigation if no modifications
     if (!this.isFileModified) {
       return true;
     }
-    
+
     // Block navigation if there are unsaved changes - show custom dialog instead of browser alert
     console.log('Navigation blocked - unsaved changes detected');
     return false;
   }
-  
+
   // Show save confirmation dialog before navigation
   confirmNavigation(targetNode: FileNode): void {
     if (this.canNavigateAway()) {
@@ -1172,7 +1193,7 @@ getStreamService() {
       this.showSaveConfirmationDialog = true;
     }
   }
-  
+
   // Handle save and continue navigation
   async saveAndContinue(): Promise<void> {
     try {
@@ -1188,20 +1209,20 @@ getStreamService() {
       // Handle save error - maybe show error dialog
     }
   }
-  
+
   // Handle discard changes and continue navigation
   discardAndContinue(): void {
     console.log('Discarding changes and continuing...');
-    
+
     // Restore original content
     this.selectedFileContent = this.originalFileContent;
     this.isFileModified = false;
     this.userModifiedLines.clear();
     this.modifiedLines.clear();
     this.addedLines.clear();
-    
+
     this.showSaveConfirmationDialog = false;
-    
+
     if (this.pendingNavigation) {
       // Navigate to new file
       const targetNode = this.pendingNavigation;
@@ -1218,7 +1239,7 @@ getStreamService() {
       this.resetDiffTracking();
     }
   }
-  
+
   // Cancel navigation and stay on current file
   cancelNavigation(): void {
     this.showSaveConfirmationDialog = false;
@@ -1236,7 +1257,8 @@ getStreamService() {
 
     this.isDownloading = true;
 
-    this.agentPipelineService.downloadAllFilesAsZip(this.currentCname, 'leo1311')
+    this.agentPipelineService
+      .downloadAllFilesAsZip(this.currentCname, 'leo1311')
       .subscribe({
         next: (blob: Blob) => {
           // Create download link
@@ -1244,19 +1266,22 @@ getStreamService() {
           const link = document.createElement('a');
           link.href = url;
           link.download = `${this.currentCname}-leo1311.zip`;
-          
+
           // Trigger download
           document.body.appendChild(link);
           link.click();
-          
+
           // Cleanup
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
-          
+
           console.log('Download completed successfully');
           // Create a properly formatted success response for messageService
           const successResponse = { status: 200, body: [] };
-          this.service.messageService(successResponse, 'Files downloaded successfully!');
+          this.service.messageService(
+            successResponse,
+            'Files downloaded successfully!'
+          );
         },
         error: (error) => {
           console.error('Error downloading files:', error);
@@ -1264,21 +1289,21 @@ getStreamService() {
         },
         complete: () => {
           this.isDownloading = false;
-        }
+        },
       });
   }
-  
+
   // Confirm delete action
   confirmDelete(): void {
     this.showDeleteDialog = false;
     this.deleteFile();
   }
-  
+
   // Cancel delete action
   cancelDelete(): void {
     this.showDeleteDialog = false;
   }
-  
+
   // Show custom unsaved changes dialog
   showUnsavedChangesDialog(action: () => void): void {
     if (this.isFileModified) {
@@ -1288,35 +1313,35 @@ getStreamService() {
       action();
     }
   }
-  
+
   // Cancel unsaved dialog
   cancelUnsavedDialog(): void {
     this.showUnsavedDialog = false;
     this.pendingAction = null;
   }
-  
+
   // Proceed without saving changes
   proceedWithoutSaving(): void {
     this.showUnsavedDialog = false;
-    
+
     // Reset content to original
     this.selectedFileContent = this.originalFileContent;
     this.isFileModified = false;
     this.userModifiedLines.clear();
-    
+
     // Execute pending action
     if (this.pendingAction) {
       this.pendingAction();
       this.pendingAction = null;
     }
   }
-  
+
   // Save and then proceed with pending action
   async saveAndProceed(): Promise<void> {
     try {
       await this.saveFile();
       this.showUnsavedDialog = false;
-      
+
       // Execute pending action after successful save
       if (this.pendingAction) {
         this.pendingAction();
@@ -1327,7 +1352,7 @@ getStreamService() {
       // Don't proceed if save failed
     }
   }
-  
+
   // Simulate byte array response from API
   simulateByteArrayResponse(fileId: string): number[] {
     const content = this.getSampleFileContent(fileId);
@@ -1338,27 +1363,34 @@ getStreamService() {
     }
     return byteArray;
   }
-  
+
   // Convert byte array to string (as would be done in real implementation)
   convertByteArrayToString(byteArray: number[]): string {
     return String.fromCharCode(...byteArray);
   }
 
   getClassName(agentName: string): string {
-    return agentName.split('-').map((word: string) => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join('') + 'Agent';
+    return (
+      agentName
+        .split('-')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('') + 'Agent'
+    );
   }
 
   getMainPyContent(agentName: string): string {
     const className = this.getClassName(agentName);
     const tools = this.getToolsForAgent(agentName);
-    
-    const toolMethods = tools.map((tool: any) => `
+
+    const toolMethods = tools
+      .map(
+        (tool: any) => `
     def ${tool.name}(self, *args, **kwargs):
         """${tool.description}"""
         # Implementation here
-        return {"status": "success", "data": {}}`).join('\n');
+        return {"status": "success", "data": {}}`
+      )
+      .join('\n');
 
     return `import os
 from openai import OpenAI
@@ -1401,11 +1433,15 @@ if __name__ == "__main__":
 
   getToolsPyContent(agentName: string): string {
     const tools = this.getToolsForAgent(agentName);
-    const toolFunctions = tools.map((tool: any) => `
+    const toolFunctions = tools
+      .map(
+        (tool: any) => `
 def ${tool.name}(*args, **kwargs):
     """${tool.description}"""
     # Implementation
-    pass`).join('\n');
+    pass`
+      )
+      .join('\n');
 
     return `"""
 Agent tools and utilities for ${agentName}
@@ -1446,46 +1482,50 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
 
   // Handle text content changes for non-Python files
   onTextContentChange(newContent: string): void {
-    console.log('onTextContentChange called with content length:', newContent.length);
+    console.log(
+      'onTextContentChange called with content length:',
+      newContent.length
+    );
     console.log('Current content length:', this.selectedFileContent.length);
     console.log('Original content length:', this.originalFileContent.length);
-    
+
     // Store the previous content for comparison
     const previousContent = this.selectedFileContent;
-    
+
     // Update the content
     this.selectedFileContent = newContent;
-    
+
     // Check if this represents a real change from the original
-    const hasChangesFromOriginal = this.selectedFileContent !== this.originalFileContent;
+    const hasChangesFromOriginal =
+      this.selectedFileContent !== this.originalFileContent;
     const hasChangesFromPrevious = this.selectedFileContent !== previousContent;
-    
+
     console.log('Content comparison:', {
       hasChangesFromOriginal,
       hasChangesFromPrevious,
-      isTyping: hasChangesFromPrevious && hasChangesFromOriginal
+      isTyping: hasChangesFromPrevious && hasChangesFromOriginal,
     });
-    
+
     if (hasChangesFromOriginal) {
       this.isFileModified = true;
       // Don't set isUserModifiedContent to prevent textarea styling
       this.updateDiffTracking(newContent);
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
-      
+
       console.log('Content changed - flags set:', {
         isFileModified: this.isFileModified,
-        userModifiedLines: this.userModifiedLines.size
+        userModifiedLines: this.userModifiedLines.size,
       });
     } else {
       // Reset flags if content matches original
       this.isFileModified = false;
       this.userModifiedLines.clear();
-      
+
       console.log('Content matches original - flags reset');
     }
   }
-  
+
   // Update total line count for virtual scrolling
   updateTotalLineCount(): void {
     this.totalLineCount = this.selectedFileContent.split('\n').length;
@@ -1496,7 +1536,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     this.modifiedLines.clear();
     this.addedLines.clear();
   }
-  
+
   // Get current lines for display
   getCurrentLines(): string[] {
     return this.selectedFileContent.split('\n');
@@ -1506,17 +1546,17 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   updateDiffTracking(newContent: string): void {
     const originalLines = this.originalFileContent.split('\n');
     const newLines = newContent.split('\n');
-    
+
     this.modifiedLines.clear();
     this.addedLines.clear();
-    
+
     // Simple diff algorithm
     const maxLines = Math.max(originalLines.length, newLines.length);
-    
+
     for (let i = 0; i < newLines.length; i++) {
       const newLine = newLines[i] || '';
       const originalLine = originalLines[i] || '';
-      
+
       if (i >= originalLines.length) {
         // New line added
         this.addedLines.add(i);
@@ -1525,7 +1565,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         this.modifiedLines.add(i);
       }
     }
-    
+
     // Handle case where lines were deleted (mark previous line as modified)
     if (newLines.length < originalLines.length) {
       for (let i = newLines.length; i < originalLines.length; i++) {
@@ -1539,13 +1579,13 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   // Get line classes for styling
   getLineClasses(lineIndex: number): string[] {
     const classes: string[] = [];
-    
+
     if (this.addedLines.has(lineIndex)) {
       classes.push('line-added');
     } else if (this.modifiedLines.has(lineIndex)) {
       classes.push('line-modified');
     }
-    
+
     return classes;
   }
 
@@ -1559,7 +1599,7 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     return {
       added: this.addedLines.size,
       modified: this.modifiedLines.size,
-      total: this.addedLines.size + this.modifiedLines.size
+      total: this.addedLines.size + this.modifiedLines.size,
     };
   }
 
@@ -1571,32 +1611,34 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
       node.expanded = !node.expanded;
     }
   }
-  
+
   // Check if folder is expanded (default to true for root folders)
   isFolderExpanded(node: FileNode): boolean {
     if (node.type !== 'folder') return false;
     return node.expanded !== false; // Default to expanded if not explicitly set
   }
-  
+
   // Drag and Drop Methods
   onDragStart(event: DragEvent, node: FileNode): void {
     this.isDragging = true;
     this.draggedNode = node;
-    this.originalFileStructure = JSON.parse(JSON.stringify(this.fileSystemData)); // Deep copy
-    
+    this.originalFileStructure = JSON.parse(
+      JSON.stringify(this.fileSystemData)
+    ); // Deep copy
+
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', node.name);
     }
   }
-  
+
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
     }
   }
-  
+
   onDragEnter(event: DragEvent, node: FileNode): void {
     event.preventDefault();
     if (node.type === 'folder' && node !== this.draggedNode) {
@@ -1605,70 +1647,78 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
       (event.currentTarget as HTMLElement)?.classList.add('drag-over');
     }
   }
-  
+
   onDragLeave(event: DragEvent): void {
     (event.currentTarget as HTMLElement)?.classList.remove('drag-over');
   }
-  
+
   onDrop(event: DragEvent, targetNode: FileNode): void {
     event.preventDefault();
     (event.currentTarget as HTMLElement)?.classList.remove('drag-over');
-    
+
     if (!this.draggedNode || !targetNode || this.draggedNode === targetNode) {
       return;
     }
-    
+
     if (targetNode.type === 'folder') {
       this.moveNodeToFolder(this.draggedNode, targetNode);
       this.showSaveStructureDialog = true;
     }
-    
+
     this.isDragging = false;
     this.draggedNode = null;
     this.dropTarget = null;
   }
-  
+
   private moveNodeToFolder(sourceNode: FileNode, targetFolder: FileNode): void {
     // Remove from current location
     this.removeNodeFromStructure(sourceNode, this.fileSystemData);
-    
+
     // Add to target folder
     if (!targetFolder.children) {
       targetFolder.children = [];
     }
-    
+
     // Update the path correctly
     const newPath = this.buildNewPath(targetFolder, sourceNode);
     sourceNode.path = newPath;
-    
+
     // Add to target folder and sort
     targetFolder.children.push(sourceNode);
     // Note: Sorting is handled by the service method
-    
+
     // Update the selected file path if it's currently selected
     if (this.selectedFileNode === sourceNode) {
       this.selectedFilePath = newPath;
     }
-    
-    console.log(`Moved ${sourceNode.name} to ${targetFolder.name}. New path: ${newPath}`);
+
+    console.log(
+      `Moved ${sourceNode.name} to ${targetFolder.name}. New path: ${newPath}`
+    );
   }
-  
-  private removeNodeFromStructure(nodeToRemove: FileNode, nodes: FileNode[]): boolean {
-    const index = nodes.findIndex(node => node === nodeToRemove);
+
+  private removeNodeFromStructure(
+    nodeToRemove: FileNode,
+    nodes: FileNode[]
+  ): boolean {
+    const index = nodes.findIndex((node) => node === nodeToRemove);
     if (index !== -1) {
       nodes.splice(index, 1);
       return true;
     }
-    
+
     for (const node of nodes) {
-      if (node.children && this.removeNodeFromStructure(nodeToRemove, node.children)) {
+      if (
+        node.children &&
+        this.removeNodeFromStructure(nodeToRemove, node.children)
+      ) {
         return true;
       }
     }
-    
+
     return false;
   }
-  
+
   private buildNewPath(targetFolder: FileNode, sourceNode: FileNode): string {
     const targetPath = this.getFullNodePath(targetFolder);
     if (targetPath) {
@@ -1676,30 +1726,34 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     }
     return sourceNode.name;
   }
-  
+
   private getFullNodePath(node: FileNode): string {
     // First, try to get the path from the node itself if it exists
     if (node.path && node.path !== node.name) {
       return node.path;
     }
-    
+
     // Otherwise, build the path by finding the node in the tree
     const pathParts: string[] = [];
     if (this.findNodePath(node, this.fileSystemData, pathParts)) {
       return pathParts.join('/');
     }
-    
+
     return node.name;
   }
-  
-  private findNodePath(targetNode: FileNode, nodes: FileNode[], currentPath: string[]): boolean {
+
+  private findNodePath(
+    targetNode: FileNode,
+    nodes: FileNode[],
+    currentPath: string[]
+  ): boolean {
     for (const node of nodes) {
       // Check if this is the target node
       if (node === targetNode) {
         currentPath.push(node.name);
         return true;
       }
-      
+
       // Search in children if this is a folder
       if (node.children && node.children.length > 0) {
         currentPath.push(node.name);
@@ -1711,66 +1765,81 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     }
     return false;
   }
-  
+
   // Save structure dialog methods
   saveNewFileStructure(): void {
     if (!this.currentCname) {
       console.error('No container name available for saving file structure');
       return;
     }
-    
+
     // Call bulk update API to save new structure
-    this.agentPipelineService.updateFileStructure(this.currentCname, this.fileSystemData).subscribe({
-      next: (result) => {
-        console.log('File structure saved successfully via bulk update API:', result);
-        this.showSaveStructureDialog = false;
-        this.originalFileStructure = [];
-        
-        // Show success message with properly formatted response
-        const successResponse = { status: 200, body: result || [] };
-        this.service.messageService(successResponse, 'File structure updated successfully!');
-      },
-      error: (error) => {
-        console.error('Failed to save file structure:', error);
-        this.service.messageService(error);
-        
-        // Restore original structure on error
-        this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
-        this.showSaveStructureDialog = false;
-        this.originalFileStructure = [];
-      }
-    });
+    this.agentPipelineService
+      .updateFileStructure(this.currentCname, this.fileSystemData)
+      .subscribe({
+        next: (result) => {
+          console.log(
+            'File structure saved successfully via bulk update API:',
+            result
+          );
+          this.showSaveStructureDialog = false;
+          this.originalFileStructure = [];
+
+          // Show success message with properly formatted response
+          const successResponse = { status: 200, body: result || [] };
+          this.service.messageService(
+            successResponse,
+            'File structure updated successfully!'
+          );
+        },
+        error: (error) => {
+          console.error('Failed to save file structure:', error);
+          this.service.messageService(error);
+
+          // Restore original structure on error
+          this.fileSystemData = JSON.parse(
+            JSON.stringify(this.originalFileStructure)
+          );
+          this.showSaveStructureDialog = false;
+          this.originalFileStructure = [];
+        },
+      });
   }
-  
+
   cancelStructureChange(): void {
     // Restore original structure
-    this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
+    this.fileSystemData = JSON.parse(
+      JSON.stringify(this.originalFileStructure)
+    );
     this.showSaveStructureDialog = false;
     this.originalFileStructure = [];
   }
-
 
   // Generate CSS background gradients for line diff highlighting
   getLineDiffStyles(): string {
     if (!this.isFileModified) {
       return 'none';
     }
-    
+
     const lines = this.getCurrentLines();
     const lineHeight = 20; // pixels
     const gradients: string[] = [];
-    
+
     for (let i = 0; i < lines.length; i++) {
       const yStart = i * lineHeight;
       const yEnd = (i + 1) * lineHeight;
-      
+
       if (this.addedLines.has(i)) {
-        gradients.push(`linear-gradient(to right, rgba(40, 167, 69, 0.3) 0%, rgba(40, 167, 69, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`);
+        gradients.push(
+          `linear-gradient(to right, rgba(40, 167, 69, 0.3) 0%, rgba(40, 167, 69, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`
+        );
       } else if (this.modifiedLines.has(i)) {
-        gradients.push(`linear-gradient(to right, rgba(255, 149, 0, 0.3) 0%, rgba(255, 149, 0, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`);
+        gradients.push(
+          `linear-gradient(to right, rgba(255, 149, 0, 0.3) 0%, rgba(255, 149, 0, 0.3) 100%) 0 ${yStart}px / 100% ${lineHeight}px no-repeat`
+        );
       }
     }
-    
+
     return gradients.length > 0 ? gradients.join(', ') : 'none';
   }
 
@@ -1799,50 +1868,68 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   // Copy file content to clipboard
   copyFileContent(): void {
     if (this.selectedFileContent) {
-      navigator.clipboard.writeText(this.selectedFileContent).then(() => {
-        console.log('File content copied to clipboard');
-        // You can add a snackbar notification here
-      }).catch(err => {
-        console.error('Failed to copy content: ', err);
-      });
+      navigator.clipboard
+        .writeText(this.selectedFileContent)
+        .then(() => {
+          console.log('File content copied to clipboard');
+          // You can add a snackbar notification here
+        })
+        .catch((err) => {
+          console.error('Failed to copy content: ', err);
+        });
     }
   }
 
   // Syntax highlighting for JSON
   highlightJsonSyntax(line: string): string {
     if (!line.trim()) return '&nbsp;';
-    
+
     return line
       .replace(/("[^"]*":\s*)/g, '<span class="json-key">$1</span>')
       .replace(/:\s*("([^"]*)")/g, ': <span class="json-string">$1</span>')
       .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
-      .replace(/:\s*(true|false|null)/g, ': <span class="json-literal">$1</span>')
+      .replace(
+        /:\s*(true|false|null)/g,
+        ': <span class="json-literal">$1</span>'
+      )
       .replace(/([{}[\],])/g, '<span class="json-punctuation">$1</span>');
   }
 
   // Basic syntax highlighting for other file types
   highlightCodeSyntax(line: string, extension: string): string {
     if (!line.trim()) return '&nbsp;';
-    
+
     let highlightedLine = line;
-    
+
     // Common patterns for different file types
     if (extension === 'xml') {
       highlightedLine = highlightedLine
-        .replace(/(&lt;\/?)([a-zA-Z0-9-]+)/g, '<span class="xml-tag">$1$2</span>')
+        .replace(
+          /(&lt;\/?)([a-zA-Z0-9-]+)/g,
+          '<span class="xml-tag">$1$2</span>'
+        )
         .replace(/([a-zA-Z-]+)(=)/g, '<span class="xml-attribute">$1</span>$2')
         .replace(/(="[^"]*")/g, '<span class="xml-value">$1</span>');
     } else if (extension === 'java') {
       highlightedLine = highlightedLine
-        .replace(/\b(public|private|protected|static|final|class|interface|extends|implements|import|package)\b/g, '<span class="java-keyword">$1</span>')
-        .replace(/\b(String|int|boolean|void|Object)\b/g, '<span class="java-type">$1</span>')
+        .replace(
+          /\b(public|private|protected|static|final|class|interface|extends|implements|import|package)\b/g,
+          '<span class="java-keyword">$1</span>'
+        )
+        .replace(
+          /\b(String|int|boolean|void|Object)\b/g,
+          '<span class="java-type">$1</span>'
+        )
         .replace(/(\/\/.*$)/g, '<span class="java-comment">$1</span>');
     } else if (extension === 'properties') {
       highlightedLine = highlightedLine
-        .replace(/^([^=]+)(=)/g, '<span class="prop-key">$1</span><span class="prop-equals">$2</span>')
+        .replace(
+          /^([^=]+)(=)/g,
+          '<span class="prop-key">$1</span><span class="prop-equals">$2</span>'
+        )
         .replace(/(#.*$)/g, '<span class="prop-comment">$1</span>');
     }
-    
+
     return highlightedLine;
   }
 
@@ -2031,10 +2118,13 @@ public class ZipController {
         // Implementation here
         return ResponseEntity.ok(new byte[0]);
     }
-}`
+}`,
     };
-    
-    return fileMap[fileId] || `// File content for ID: ${fileId}\n// This is a sample file generated from the API response\n// In a real implementation, this would be fetched from the backend`;
+
+    return (
+      fileMap[fileId] ||
+      `// File content for ID: ${fileId}\n// This is a sample file generated from the API response\n// In a real implementation, this would be fetched from the backend`
+    );
   }
 
   // File system methods
@@ -2061,7 +2151,7 @@ public class ZipController {
     this.selectedFilePath = node.path || node.name;
     this.selectedFileId = node.id || ''; // Store the file ID
     this.isFileModified = false;
-    
+
     // Set file extension
     if (node.name.endsWith('.py')) {
       this.fileExtension = 'py';
@@ -2078,20 +2168,29 @@ public class ZipController {
     } else {
       this.fileExtension = 'txt';
     }
-    
+
     // Use content directly from the file node (already loaded from upload API)
     this.selectedFileContent = node.content || 'No content available';
     this.originalFileContent = this.selectedFileContent; // Store original content
     this.isUserModifiedContent = false; // Reset user modification flag
     this.userModifiedLines.clear(); // Clear user modified lines
     this.resetDiffTracking(); // Reset diff tracking
-    
+
     // Initialize virtual scrolling
     this.currentLineOffset = 0;
     this.updateTotalLineCount();
     setTimeout(() => this.initializeVirtualScrolling(), 100);
-    
-    console.log('Selected file:', this.selectedFileName, 'Extension:', this.fileExtension, 'Path:', this.selectedFilePath, 'Content length:', this.selectedFileContent.length);
+
+    console.log(
+      'Selected file:',
+      this.selectedFileName,
+      'Extension:',
+      this.fileExtension,
+      'Path:',
+      this.selectedFilePath,
+      'Content length:',
+      this.selectedFileContent.length
+    );
   }
 
   isFileSelected(node: FileNode): boolean {
@@ -2113,7 +2212,9 @@ public class ZipController {
    * - Disabled when files exist in the codespace
    */
   get isGenerateAgentDisabled(): boolean {
-    return this.isGenerating || this.hasGeneratedAgent || this.hasExistingFiles();
+    return (
+      this.isGenerating || this.hasGeneratedAgent || this.hasExistingFiles()
+    );
   }
 
   /**
@@ -2146,14 +2247,16 @@ public class ZipController {
     this.isGenerating = true;
     this.hasGeneratedAgent = false;
     this.consoleOutput = [];
-    
+
     const agentName = this.selectedAgent.alias;
     const version = this.selectedAgent.version;
-    
+
     // Add initial console output
-    this.consoleOutput.push(`Starting SDK Agent generation for ${agentName}...`);
+    this.consoleOutput.push(
+      `Starting SDK Agent generation for ${agentName}...`
+    );
     this.consoleOutput.push('Preparing agent configuration...');
-    
+
     // Prepare the request payload
     const agentRequest: AgentGenerationRequest = {
       agentName: this.selectedAgent.name,
@@ -2164,63 +2267,81 @@ public class ZipController {
         model: 'gpt-4',
         temperature: 0.7,
         maxTokens: 2000,
-        tools: this.getToolsForAgent(this.selectedAgent.name)
+        tools: this.getToolsForAgent(this.selectedAgent.name),
       },
       runtime: {
         type: this.selectedAgent.language,
         dependencies: [
           'openai>=1.0.0',
           'requests>=2.28.0',
-          'python-dotenv>=0.19.0'
-        ]
-      }
+          'python-dotenv>=0.19.0',
+        ],
+      },
     };
 
     this.consoleOutput.push('Calling agent generation API...');
-    console.log('About to call agentPipelineService.generateSDKAgent with payload:', agentRequest);
+    console.log(
+      'About to call agentPipelineService.generateSDKAgent with payload:',
+      agentRequest
+    );
     console.log('Using fixed cname:', this.currentCname);
-    
+
     // Call the real API
     this.agentPipelineService.generateSDKAgent(agentRequest).subscribe({
       next: (response) => {
         this.consoleOutput.push('✓ Agent generation API call successful');
         this.consoleOutput.push(`✓ Container Name: ${this.currentCname}`);
         this.consoleOutput.push('✓ Processing agent files...');
-        
+
         // Keep using the agent's fixed cname (don't change it)
         console.log('Using fixed cname for agent:', this.currentCname);
-        
+
         // Process the file structure directly from the response
-        console.log('Building file tree from API response:', response.fileStructure);
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
-        
-        this.consoleOutput.push(`SDK Agent generated successfully for ${agentName}!`);
+        console.log(
+          'Building file tree from API response:',
+          response.fileStructure
+        );
+        this.fileSystemData =
+          this.agentPipelineService.buildFileTreeFromApiResponse(
+            response.fileStructure
+          );
+
+        this.consoleOutput.push(
+          `SDK Agent generated successfully for ${agentName}!`
+        );
         this.consoleOutput.push('');
         this.consoleOutput.push(`Container: ${this.currentCname}`);
         this.consoleOutput.push('Status: Ready for development');
-        
+
         this.isGenerating = false;
         this.hasGeneratedAgent = true;
-        
+
         // Show success message with properly formatted response
         const successResponse = { status: 200, body: response || [] };
-        this.service.messageService(successResponse, `SDK Agent '${agentName}' generated successfully!`);
-        
+        this.service.messageService(
+          successResponse,
+          `SDK Agent '${agentName}' generated successfully!`
+        );
+
         // Don't automatically open playground - user will click "Open Playground" button when ready
-        console.log('Agent generation complete. Playground available via button.');
+        console.log(
+          'Agent generation complete. Playground available via button.'
+        );
       },
       error: (error) => {
         console.error('Agent generation failed:', error);
         this.consoleOutput.push('✗ Agent generation failed');
         this.consoleOutput.push(`Error: ${error.message}`);
-        this.consoleOutput.push('Please check the server connection and try again.');
-        
+        this.consoleOutput.push(
+          'Please check the server connection and try again.'
+        );
+
         this.isGenerating = false;
         this.hasGeneratedAgent = false;
-        
+
         // Show error message to user
         this.service.messageService(error);
-      }
+      },
     });
   }
 
@@ -2248,8 +2369,10 @@ public class ZipController {
     this.playgroundMessages = [
       {
         role: 'agent',
-        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated SDK. How can I help you today?`
-      }
+        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${
+          this.selectedAgent?.version
+        }). I'm now running from the generated SDK. How can I help you today?`,
+      },
     ];
   }
 
@@ -2261,23 +2384,23 @@ public class ZipController {
 
   sendQuestion(): void {
     if (!this.userQuestion.trim()) return;
-    
+
     // Add user message
     this.playgroundMessages.push({
       role: 'user',
-      content: this.userQuestion
+      content: this.userQuestion,
     });
-    
+
     const question = this.userQuestion;
     this.userQuestion = '';
     this.isAgentThinking = true;
-    
+
     // Simulate agent response
     setTimeout(() => {
       const agentResponse = this.getAgentResponse(question);
       this.playgroundMessages.push({
         role: 'agent',
-        content: agentResponse
+        content: agentResponse,
       });
       this.isAgentThinking = false;
     }, 1500);
@@ -2286,40 +2409,58 @@ public class ZipController {
   getAgentResponse(question: string): string {
     const agentName = this.selectedAgent?.name || '';
     const questionLower = question.toLowerCase();
-    
+
     // Contextual responses based on agent type and question
     if (agentName === 'customer-support-agent') {
       if (questionLower.includes('ticket') || questionLower.includes('issue')) {
-        return 'I can help you create a support ticket. Please provide me with: 1) Issue description, 2) Priority level (Low/Medium/High), and 3) Your contact information. I\'ll search our knowledge base for similar issues first.';
-      } else if (questionLower.includes('order') || questionLower.includes('tracking')) {
+        return "I can help you create a support ticket. Please provide me with: 1) Issue description, 2) Priority level (Low/Medium/High), and 3) Your contact information. I'll search our knowledge base for similar issues first.";
+      } else if (
+        questionLower.includes('order') ||
+        questionLower.includes('tracking')
+      ) {
         return 'I can look up your order status. Let me search our customer database. Could you provide your order number or email address associated with the account?';
-      } else if (questionLower.includes('refund') || questionLower.includes('return')) {
+      } else if (
+        questionLower.includes('refund') ||
+        questionLower.includes('return')
+      ) {
         return 'I can assist with refund requests. According to our policy, refunds are processed within 5-7 business days. Would you like me to create a refund ticket for you?';
       }
     } else if (agentName === 'data-analysis-agent') {
       if (questionLower.includes('analyze') || questionLower.includes('data')) {
-        return 'I can analyze your dataset. I support CSV, Excel, and JSON formats. Please upload your data and specify what insights you\'re looking for: trends, correlations, outliers, or statistical summaries?';
-      } else if (questionLower.includes('visualiz') || questionLower.includes('chart') || questionLower.includes('graph')) {
+        return "I can analyze your dataset. I support CSV, Excel, and JSON formats. Please upload your data and specify what insights you're looking for: trends, correlations, outliers, or statistical summaries?";
+      } else if (
+        questionLower.includes('visualiz') ||
+        questionLower.includes('chart') ||
+        questionLower.includes('graph')
+      ) {
         return 'I can create various visualizations: bar charts, line graphs, scatter plots, heatmaps, and more. What type of visualization would best represent your data?';
       } else if (questionLower.includes('report')) {
         return 'I can generate comprehensive reports with statistical analysis, charts, and insights. Would you like a summary report, detailed analysis, or executive dashboard?';
       }
     } else if (agentName === 'code-review-agent') {
       if (questionLower.includes('review') || questionLower.includes('code')) {
-        return 'I can review your code for quality, security vulnerabilities, and best practices. Please provide the repository URL or paste the code snippet you\'d like me to analyze.';
-      } else if (questionLower.includes('security') || questionLower.includes('vulnerab')) {
-        return 'I\'ll run a security scan to detect: SQL injection risks, XSS vulnerabilities, hardcoded credentials, and insecure dependencies. Should I proceed with a full security audit?';
-      } else if (questionLower.includes('improve') || questionLower.includes('optimize')) {
+        return "I can review your code for quality, security vulnerabilities, and best practices. Please provide the repository URL or paste the code snippet you'd like me to analyze.";
+      } else if (
+        questionLower.includes('security') ||
+        questionLower.includes('vulnerab')
+      ) {
+        return "I'll run a security scan to detect: SQL injection risks, XSS vulnerabilities, hardcoded credentials, and insecure dependencies. Should I proceed with a full security audit?";
+      } else if (
+        questionLower.includes('improve') ||
+        questionLower.includes('optimize')
+      ) {
         return 'I can suggest improvements for: code performance, readability, maintainability, and adherence to design patterns. Would you like me to focus on a specific aspect?';
       }
     }
-    
+
     // Generic helpful response
     const tools = this.getToolsForAgent(agentName);
     if (tools.length > 0) {
-      return `I'm equipped with the following capabilities: ${tools.map(t => t.description).join(', ')}. Which of these would you like me to help you with?`;
+      return `I'm equipped with the following capabilities: ${tools
+        .map((t) => t.description)
+        .join(', ')}. Which of these would you like me to help you with?`;
     }
-    
+
     return `I understand your question: "${question}". Based on my SDK configuration, I can process this request using my trained model. How would you like me to proceed?`;
   }
 
@@ -2329,7 +2470,7 @@ public class ZipController {
       this.sendQuestion();
     }
   }
-  
+
   // GitHub Push methods
   private isGitHubAuthenticated(): boolean {
     // Check if user has GitHub authentication token
@@ -2341,75 +2482,96 @@ public class ZipController {
 
   private openGitHubLoginDialog(): void {
     // TODO: Implement proper GitHub login dialog
-    alert('GitHub authentication not implemented yet. Please add your GitHub token manually to localStorage.');
+    alert(
+      'GitHub authentication not implemented yet. Please add your GitHub token manually to localStorage.'
+    );
   }
-  
+
   onRepoNameChange(event: any): void {
     // Handle both input field (event.target.value) and mat-select (event.value) events
     this.githubRepoName = event.value || event.target?.value || event;
     // Mock: Load branches for the specified repository
     this.loadAvailableBranches();
   }
-  
+
   loadAvailableBranches(): void {
     // Mock data - in real implementation, this would call GitHub API
     const mockBranches = {
-      'customer-support-agent-sdk': ['main', 'develop', 'feature/chat-integration', 'hotfix/bug-fixes'],
-      'data-analysis-agent-sdk': ['main', 'develop', 'feature/new-charts', 'staging'],
-      'code-review-agent-sdk': ['main', 'develop', 'feature/security-scan', 'production']
+      'customer-support-agent-sdk': [
+        'main',
+        'develop',
+        'feature/chat-integration',
+        'hotfix/bug-fixes',
+      ],
+      'data-analysis-agent-sdk': [
+        'main',
+        'develop',
+        'feature/new-charts',
+        'staging',
+      ],
+      'code-review-agent-sdk': [
+        'main',
+        'develop',
+        'feature/security-scan',
+        'production',
+      ],
     };
-    
-    this.availableBranches = mockBranches[this.githubRepoName as keyof typeof mockBranches] || 
-                           ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
+
+    this.availableBranches = mockBranches[
+      this.githubRepoName as keyof typeof mockBranches
+    ] || ['main', 'develop', 'feature/agent-updates', 'staging', 'production'];
   }
-  
+
   onCustomCommitChange(event: any): void {
     this.useCustomCommit = event.checked;
     if (!this.useCustomCommit) {
       this.commitMessage = '';
     }
   }
-  
+
   getDefaultCommitMessage(): string {
     const agentName = this.selectedAgent?.alias || 'Agent';
     const version = this.selectedAgent?.version || '1.0.0';
     const timestamp = new Date().toISOString().split('T')[0];
     return `feat: Add ${agentName} SDK v${version} - Generated on ${timestamp}`;
   }
-  
+
   canPush(): boolean {
     return !!(this.githubRepoName && this.selectedBranch);
   }
-  
+
   pushToGitHub(): void {
     if (!this.canPush()) return;
-    
+
     this.isPushing = true;
-    
+
     // Prepare the commit message
-    const finalCommitMessage = this.useCustomCommit ? 
-      this.commitMessage : 
-      this.getDefaultCommitMessage();
-    
+    const finalCommitMessage = this.useCustomCommit
+      ? this.commitMessage
+      : this.getDefaultCommitMessage();
+
     // Mock API call data
     const pushData = {
       repository: this.githubRepoName,
       branch: this.selectedBranch,
       commitMessage: finalCommitMessage,
       agentCode: this.getAgentCodeForPush(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     console.log('Pushing to GitHub:', pushData);
-    
+
     // Simulate API call
     setTimeout(() => {
       this.isPushing = false;
       console.log('Successfully pushed to GitHub!');
       // Show success message or notification
       const successResponse = { status: 200, body: [] };
-      this.service.messageService(successResponse, `Successfully pushed ${this.selectedAgent?.alias} to ${this.githubRepoName}/${this.selectedBranch}!`);
-      
+      this.service.messageService(
+        successResponse,
+        `Successfully pushed ${this.selectedAgent?.alias} to ${this.githubRepoName}/${this.selectedBranch}!`
+      );
+
       // Reset form after successful push
       this.githubRepoName = '';
       this.selectedBranch = 'main';
@@ -2417,7 +2579,7 @@ public class ZipController {
       this.commitMessage = '';
     }, 3000);
   }
-  
+
   getAgentCodeForPush(): any {
     // Mock: Return the generated agent code structure
     return {
@@ -2427,50 +2589,59 @@ public class ZipController {
         agentAlias: this.selectedAgent?.alias,
         version: this.selectedAgent?.version,
         description: this.selectedAgent?.description,
-        generatedAt: new Date().toISOString()
-      }
+        generatedAt: new Date().toISOString(),
+      },
     };
   }
-  
+
   flattenFileStructure(nodes: FileNode[]): any[] {
     const files: any[] = [];
-    
+
     const processNode = (node: FileNode, path: string = '') => {
       const fullPath = path ? `${path}/${node.name}` : node.name;
-      
+
       if (node.type === 'file') {
         files.push({
           path: fullPath,
           content: node.content || '',
-          type: 'file'
+          type: 'file',
         });
       } else if (node.children) {
         files.push({
           path: fullPath,
-          type: 'directory'
+          type: 'directory',
         });
-        node.children.forEach(child => processNode(child, fullPath));
+        node.children.forEach((child) => processNode(child, fullPath));
       }
     };
-    
-    nodes.forEach(node => processNode(node));
+
+    nodes.forEach((node) => processNode(node));
     return files;
   }
 
   // Check for existing files and load appropriate state
   private checkForExistingFilesAndLoadState(cname: string): void {
     console.log('Checking for existing files for cname:', cname);
-    
+
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
-    
+
     // Try to fetch files for this specific cname
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
       next: (apiResponse) => {
         // Check if we actually have files
-        if (apiResponse && Array.isArray(apiResponse) && apiResponse.length > 0) {
-          console.log('Found existing files for cname:', cname, 'Files count:', apiResponse.length);
+        if (
+          apiResponse &&
+          Array.isArray(apiResponse) &&
+          apiResponse.length > 0
+        ) {
+          console.log(
+            'Found existing files for cname:',
+            cname,
+            'Files count:',
+            apiResponse.length
+          );
           this.loadExistingAgentWithFilesFromAPI(apiResponse);
         } else {
           console.log('No files found in response for cname:', cname);
@@ -2480,11 +2651,15 @@ public class ZipController {
         this.isLoadingFiles = false;
       },
       error: (error) => {
-        console.log('API error or no existing files found for cname:', cname, error);
+        console.log(
+          'API error or no existing files found for cname:',
+          cname,
+          error
+        );
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
-      }
+      },
     });
   }
 
@@ -2492,22 +2667,23 @@ public class ZipController {
   private loadExistingAgentWithFilesFromAPI(fileData: any): void {
     this.hasGeneratedAgent = true;
     this.isJsonProcessed = true;
-    
+
     // Build file tree from API response
-    this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
-    
+    this.fileSystemData =
+      this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+
     // Set console output to show that agent was loaded
     this.consoleOutput = [
       `SDK Agent loaded from existing data`,
       `Container: ${this.currentCname}`,
       `Status: Ready for development`,
-      `Files: ${fileData.length} files loaded`
+      `Files: ${fileData.length} files loaded`,
     ];
-    
+
     console.log('Successfully loaded existing agent with files:', {
       cname: this.currentCname,
       hasFiles: this.fileSystemData.length > 0,
-      fileCount: fileData.length
+      fileCount: fileData.length,
     });
   }
 
@@ -2518,8 +2694,11 @@ public class ZipController {
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
-    
-    console.log('Showing script tab only - no existing files found for cname:', this.currentCname);
+
+    console.log(
+      'Showing script tab only - no existing files found for cname:',
+      this.currentCname
+    );
   }
 
   // Reset to initial state (no saved data) - used as starting point
@@ -2533,7 +2712,10 @@ public class ZipController {
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
-    console.log('Reset to initial state for agent with cname:', this.currentCname);
+    console.log(
+      'Reset to initial state for agent with cname:',
+      this.currentCname
+    );
   }
 
   // Clear file selection

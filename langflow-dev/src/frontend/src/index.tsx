@@ -46,6 +46,17 @@ reportWebVitals();
         sendAck({ type: "TOKEN_RECEIVED", status: "ok" } as const);
       }
 
+      // Handle organisation messages
+      if (data.type === "SET_ORGANISATION" ) {
+        const organisation = data.organisation;
+        console.log("Global listener: received SET_ORGANISATION", { organisation, fullMessage: data });
+        localStorage.setItem("organization", organisation);
+        const customOrg = new CustomEvent("PARENT_ORG", { detail: { organisation, origin: event.origin } });
+        window.dispatchEvent(customOrg);
+        sendAck({ type: "ORG_RECEIVED", status: "ok" } as const);
+      }
+
+
       if (data.type === "SET_PARENT_SESSION") {
         try {
           const details = data.parentSessionDetails ?? null;

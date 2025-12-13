@@ -21,6 +21,13 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     const token = localStorage.getItem('jwtToken') || '';
+    const parentOrg = localStorage.getItem('organization') || '';
+
+    console.log('Agent Component: Retrieved values', {
+      token: token ? 'present' : 'empty',
+      organisation: parentOrg ? `'${parentOrg}'` : 'null/empty'
+    });
+
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
       try { return new URL(environment.langflowUrl).origin; } catch { return environment.langflowUrl; }
@@ -37,14 +44,17 @@ export class AgentComponent implements OnInit, AfterViewInit {
               if (!iframeEl || !iframeEl.contentWindow) return;
               try {
                 iframeEl.contentWindow.postMessage(msg, childOrigin);
-                console.log('Parent: posted message to iframe', msg.type);
+                console.log('Parent: posted message to iframe', msg);
               } catch (err) {
-                console.warn('Parent: failed to post message to iframe', err, msg.type);
+                console.warn('Parent: failed to post message to iframe', err, msg);
               }
             };
 
             // send token
             sendToIframe({ type: 'SET_TOKEN', token });
+            sendToIframe({ type: 'SET_ORGANISATION', organisation: parentOrg });
+            console.log('Parent: sent SET_ORGANISATION message', { organisation: parentOrg });
+
 
             // Build parent session details and send to iframe (do not remove existing token logic)
             try {
@@ -68,7 +78,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
                 portfolioId,
                 portfolioName,
                 token,userId,
-                userName,
+                userName, 
               };
               console.log('Parent: posting parentSessionDetails to iframe', { parentSessionDetails });
               sendToIframe({ type: 'SET_PARENT_SESSION', parentSessionDetails });
@@ -96,6 +106,10 @@ export class AgentComponent implements OnInit, AfterViewInit {
       if (msg.type === 'TOKEN_RECEIVED') {
         // token received ack from child
         console.log('Parent received TOKEN_RECEIVED from child:', msg.status || 'ok', { tokenName: 'jwtToken' });
+      }
+
+      if (msg.type === 'ORG_RECEIVED') {
+        console.log('Parent received ORG_RECEIVED from child:', msg.status || 'ok', { organisation: parentOrg });
       }
 
       if (msg.type === 'PARENT_SESSION_RECEIVED') {
