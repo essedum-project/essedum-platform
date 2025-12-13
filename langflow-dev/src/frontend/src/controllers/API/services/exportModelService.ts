@@ -61,10 +61,12 @@ export async function create_native_file(params: CreateNativeFileParams) {
   }
   
   Array.from(scriptFormData.entries()).forEach(([key, value]) => {
-    if (value instanceof File) {
-      console.log(`  ${key}: File(name="${value.name}", type="${value.type}", size=${value.size})`);
-    } else if (value instanceof Blob) {
-      console.log(`  ${key}: Blob(type="${value.type}", size=${value.size})`);
+    if (typeof globalThis !== 'undefined' && (globalThis as any).File && value instanceof (globalThis as any).File) {
+      const f = value as File;
+      console.log(`  ${key}: File(name="${f.name}", type="${f.type}", size=${f.size})`);
+    } else if (typeof globalThis !== 'undefined' && (globalThis as any).Blob && value instanceof (globalThis as any).Blob) {
+      const b = value as Blob;
+      console.log(`  ${key}: Blob(type="${b.type}", size=${b.size})`);
     } else {
       console.log(`  ${key}:`, value);
     }

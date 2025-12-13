@@ -16,7 +16,6 @@ import { useDarkStore } from "../../stores/darkStore";
 import { downloadFlow, removeApiKeys } from "../../utils/reactflowUtils";
 import BaseModal from "../baseModal";
 import { Button } from "../../components/ui/button";
-import { get_agent_export } from "@/controllers/API/services/exportModelService";
 import {
   create_pipeline,
   create_native_file,
@@ -169,12 +168,12 @@ const ExportModal = forwardRef(
                   const scriptBlob = new Blob([actualFlowScript], { type: 'application/json' });
                   scriptFormData.set('scriptFile', scriptBlob);
 
-                  const organization = localStorage.getItem("organization");
+                  const organization = localStorage.getItem("organization") || "";
                   const scriptFileName = `${cname}_${organization}.json`; // Use cname from sessionStorage
 
                   const nativeFileResponse = await create_native_file({
                     pipelineName: sessionStorage.getItem('cname') || "", // Use cname from sessionStorage
-                    organization,
+                    organization: organization,
                     fileName: scriptFileName,
                     fileType: 'json', // Default file type
                     scriptFormData,
@@ -204,7 +203,7 @@ const ExportModal = forwardRef(
                     description: description || 'Exported from Langflow UI',
                     jsonContent: jsonContent,
                     type: agentType,
-                    organization: localStorage.getItem("parentOrg"),
+                    organization: organization,
                     interfacetype: interfaceType,
                     isTemplate: false,
                     token: access_token_lf,
