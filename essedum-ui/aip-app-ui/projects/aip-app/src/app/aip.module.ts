@@ -11,6 +11,7 @@ import { EventsService } from './services/event.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { ModelComponent } from './model/model.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
@@ -147,6 +148,7 @@ import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.componen
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
 
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -178,6 +180,8 @@ const dbConfig: DBConfig = {
     DatasourceConfigComponent,
     ModelCreateComponent,
     PipelineComponent,
+    PipelineAgentComponent,
+PipelineAgentDetailComponent,
     PipelineCreateComponent,
     PipelineDescriptionComponent,
     NotebookDialogComponent,

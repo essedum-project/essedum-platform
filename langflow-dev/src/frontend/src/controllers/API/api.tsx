@@ -48,14 +48,31 @@ function ApiInterceptor() {
     const unregister = fetchIntercept.register({
       request: (url, config) => {
         const accessToken = customGetAccessToken();
+        const parentToken = localStorage.getItem("baseParentToken");
 
         if (!isExternalURL(url)) {
-          if (accessToken && !isAuthorizedURL(config?.url)) {
-            config.headers["Authorization"] = `Bearer ${accessToken}`;
+          // Check if it's an AIP API (streaming services, file operations, etc.)
+          if (url.includes('/api/aip')) {
+            // Use parent token for AIP APIs
+            if (parentToken) {
+              config.headers["Authorization"] = `Bearer ${parentToken}`;
+            }
+          } else {
+            // Use access token for other internal APIs (like langflow)
+            if (accessToken && !isAuthorizedURL(config?.url)) {
+              config.headers["Authorization"] = `Bearer ${accessToken}`;
+            }
           }
 
           for (const [key, value] of Object.entries(customHeaders)) {
             config.headers[key] = value;
+          }
+        }
+
+        // For external URLs, use parent token
+        if (isExternalURL(url)) {
+          if (parentToken) {
+            config.headers["Authorization"] = `Bearer ${parentToken}`;
           }
         }
 
@@ -161,10 +178,27 @@ function ApiInterceptor() {
         }
 
         const accessToken = customGetAccessToken();
+        const parentToken = localStorage.getItem("baseParentToken");
 
-        if (accessToken && !isAuthorizedURL(config?.url)) {
-          config.headers["Authorization"] = `Bearer ${accessToken}`;
+        // Determine which token to use based on API type
+        if (config?.url?.includes('/api/aip')) {
+          // Use parent token for AIP APIs (streaming services, file operations, etc.)
+          if (parentToken) {
+            config.headers["Authorization"] = `Bearer ${parentToken}`;
+          }
+        } else if (isExternalURL(config?.url || "")) {
+          // Use parent token for external APIs
+          if (parentToken) {
+            config.headers["Authorization"] = `Bearer ${parentToken}`;
+          }
+        } else {
+          // Use access token for other internal APIs (like langflow)
+          if (accessToken && !isAuthorizedURL(config?.url)) {
+            config.headers["Authorization"] = `Bearer ${accessToken}`;
+          }
         }
+
+          
 
         const currentOrigin = window.location.origin;
         const requestUrl = new URL(config?.url as string, currentOrigin);

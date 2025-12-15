@@ -44,23 +44,35 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "import.meta.env.BACKEND_URL": JSON.stringify(
-        envLangflow.BACKEND_URL ?? "http://localhost:7860",
+        envLangflow.BACKEND_URL ?? "http://localhost:7860"
       ),
       "import.meta.env.ACCESS_TOKEN_EXPIRE_SECONDS": JSON.stringify(
-        envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60,
+        envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60
       ),
       "import.meta.env.CI": JSON.stringify(envLangflow.CI ?? false),
       "import.meta.env.LANGFLOW_AUTO_LOGIN": JSON.stringify(
-        envLangflow.LANGFLOW_AUTO_LOGIN ?? true,
+        envLangflow.LANGFLOW_AUTO_LOGIN ?? true
       ),
       "import.meta.env.LANGFLOW_MCP_COMPOSER_ENABLED": JSON.stringify(
-        envLangflow.LANGFLOW_MCP_COMPOSER_ENABLED ?? "true",
+        envLangflow.LANGFLOW_MCP_COMPOSER_ENABLED ?? "true"
       ),
     },
     plugins: [react(), svgr(), tsconfigPaths()],
     server: {
       port: port,
       proxy: {
+        // Specific API routes first (most specific to least specific)
+        "/api/aip/": {
+          target: "http://localhost:8081",
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+          configure: (proxy, options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('Proxying AIP request:', req.method, req.url, '-> http://localhost:8081');
+            });
+          },
+        },        
         ...proxyTargets,
       },
     },
