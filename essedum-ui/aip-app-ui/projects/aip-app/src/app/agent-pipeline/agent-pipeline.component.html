@@ -61,34 +61,78 @@
                         </div>
                       </div>
 
-                      <!-- Right Half - Generate SDK Console -->
+                      <!-- Right Half - Generate adk Console -->
                       <div class="console-panel">
                         <div class="generate-agent-container">
                           <div class="generate-header">
-                            <h2>Generate SDK Agent</h2>
+                            <h2>Generate ADK Agent</h2>
                             <p>Build and package your agent for deployment</p>
                           </div>
 
-                          <div class="generate-controls">
-                            <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
-                              [disabled]="isGenerateAgentDisabled" [matTooltip]="getGenerateButtonTooltip()"
-                              matTooltipPosition="above">
-                              <mat-icon>play_arrow</mat-icon>
-                              Generate Agent
-                            </button>
-                            <button mat-raised-button class="clear-button" (click)="clearConsole()"
-                              [disabled]="consoleOutput.length === 0">
-                              <mat-icon>clear_all</mat-icon>
-                              Clear Console
-                            </button>
-                            <button mat-raised-button color="primary" class="playground-button"
-                              (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent">
-                              <mat-icon>smart_toy</mat-icon>
-                              Open Playground
-                            </button>
+                          <!-- LLM Selection and Generate Controls in same row -->
+                          <div class="generate-controls-row">
+                            <!-- LLM Selection Dropdown -->
+                            <div class="llm-selection-container"
+                              [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
+                              <div class="llm-selection-row">
+                                <label for="llm-select">Select LLM Provider</label>
+                                <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select"
+                                  [disabled]="hasGeneratedAgent || hasExistingFiles()">
+                                  <mat-option value="github-copilot">GitHub Copilot</mat-option>
+                                  <mat-option value="aws-bedrock" disabled>AWS Bedrock</mat-option>
+                                  <mat-option value="azure-ai-studio" disabled>Azure AI Studio</mat-option>
+                                  <mat-option value="gcp-vertex-ai" disabled>GCP Vertex AI</mat-option>
+                                </mat-select>
+                              </div>
+                            </div>
+
+                            <!-- Generate Controls -->
+                            <div class="generate-controls">
+                              <button mat-raised-button color="primary" class="play-button compact-button" (click)="generateadkAgent()"
+                                [disabled]="isGenerateAgentDisabled || !selectedLLM"
+                                [matTooltip]="getGenerateButtonTooltip()" matTooltipPosition="above">
+                                <mat-icon>play_arrow</mat-icon>
+                              </button>
+                              <button mat-raised-button class="clear-button compact-button" (click)="clearConsole()"
+                                [disabled]="consoleOutput.length === 0"
+                                matTooltip="Clear Console" matTooltipPosition="above">
+                                <mat-icon>backspace</mat-icon>
+                              </button>
+                              <button mat-raised-button color="primary" class="playground-button compact-button"
+                                (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent"
+                                matTooltip="Open Playground" matTooltipPosition="above">
+                                <mat-icon>smart_toy</mat-icon>
+                              </button>
+                            </div>
                           </div>
 
-                          <div class="console-container">
+                          <!-- GitHub Copilot Prompt Template (only show initially) -->
+                          <div class="prompt-template-container"
+                            *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
+                            <div class="prompt-instructions">
+                              <p><strong>Setup Instructions:</strong></p>
+                              <ol>
+                                <li><strong>Install Visual Studio Code:</strong> Download and install VS Code</li>
+                                <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum" extension from the VS Code marketplace</li>
+                                <li><strong>Generate Agent:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent files</li>
+                              </ol>
+                            </div>
+                            <div class="prompt-template-header">
+                              <mat-icon>description</mat-icon>
+                              <span>Copilot Prompt Template</span>
+                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
+                                matTooltip="Copy Prompt" matTooltipPosition="above">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
+                            </div>
+                            <div class="prompt-template-content">
+                              <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
+                            </div>
+                          </div>
+
+                          <!-- Regular Console Output for all LLM providers after generation -->
+                          <div class="console-container"
+                            *ngIf="hasGeneratedAgent || hasExistingFiles() || (selectedLLM && (selectedLLM !== 'github-copilot' || hasGeneratedAgent || hasExistingFiles()))">
                             <div class="console-header">
                               <mat-icon>terminal</mat-icon>
                               <span>Console Output</span>
@@ -108,6 +152,13 @@
                                 <span *ngIf="hasGeneratedAgent || hasExistingFiles()">Agent is ready for development.
                                   Use the Essedum Codespace tab to edit files.</span>
                               </div>
+                            </div>
+                          </div> <!-- LLM Selection Required Message -->
+                          <div class="llm-selection-required" 
+                            *ngIf="!selectedLLM && !hasGeneratedAgent && !hasExistingFiles()">
+                            <div class="selection-message">
+                              <mat-icon>info</mat-icon>
+                              <p>Please select an LLM provider above to continue</p>
                             </div>
                           </div>
                         </div>
@@ -130,8 +181,11 @@
                               <mat-icon>folder_open</mat-icon>
                               <h3>Project Files</h3>
                             </div>
-                            <app-github-push [cname]="currentCname"></app-github-push>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
+                              <button mat-icon-button class="upload-button" title="Upload to MinIO">
+                                <mat-icon>cloud_upload</mat-icon>
+                              </button>
+                              <app-github-push [cname]="currentCname" class="git-push-button"></app-github-push>
                               <button mat-icon-button class="download-button" (click)="downloadAllFiles()"
                                 [disabled]="isDownloading" title="Download ZIP">
                                 <mat-icon *ngIf="!isDownloading">file_download</mat-icon>
@@ -192,7 +246,7 @@
                               </li>
                               <li>
                                 <span matTooltip="Close File" [matTooltipPosition]="'above'">
-                                  <i class="aip-led-icons icon x-24" (click)="closeFile()"
+                                  <i class="action-button aip-led-icons icon x-24" (click)="closeFile()"
                                     style="cursor: pointer;">✖</i>
                                 </span>
                               </li>
@@ -235,60 +289,37 @@
                                   <ng-container *ngIf="fileExtension === 'java'">
                                     <textarea class="pipeline-file-editor java-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="Java code..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="Java code..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'xml'">
                                     <textarea class="pipeline-file-editor xml-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="XML content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="XML content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'properties'">
                                     <textarea class="pipeline-file-editor properties-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="Properties content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="Properties content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container
                                     *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
                                     <textarea class="pipeline-file-editor code-editor-textarea"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" placeholder="File content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
+                                      placeholder="File content..." spellcheck="false" 
+                                      [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          <!-- Save Status Bar -->
-                          <div class="editor-status-bar" *ngIf="isFileModified || isSavingFile">
-                            <div class="status-left">
-                              <span class="status-indicator" [class.saving]="isSavingFile"
-                                [class.modified]="isFileModified && !isSavingFile">
-                                <mat-icon *ngIf="isSavingFile">sync</mat-icon>
-                                <mat-icon *ngIf="!isSavingFile && isFileModified">edit</mat-icon>
-                              </span>
-                              <span class="status-text">
-                                <ng-container *ngIf="isSavingFile">Saving...</ng-container>
-                                <ng-container *ngIf="!isSavingFile && isFileModified">
-                                  {{ getDiffStats().total }} change(s)
-                                  <span *ngIf="getDiffStats().added > 0" class="added-count">+{{ getDiffStats().added
-                                    }}</span>
-                                  <span *ngIf="getDiffStats().modified > 0" class="modified-count">~{{
-                                    getDiffStats().modified }}</span>
-                                </ng-container>
-                              </span>
-                            </div>
-                            <div class="status-right">
-                              <button mat-stroked-button color="primary" class="save-button" (click)="saveFile()"
-                                [disabled]="!isFileModified || isSavingFile">
-                                <mat-icon>{{ isSavingFile ? 'hourglass_empty' : 'save' }}</mat-icon>
-                                {{ isSavingFile ? 'Saving...' : 'Save File' }}
-                              </button>
-                            </div>
-                          </div>
                         </div>
 
                         <div class="file-editor-placeholder" *ngIf="!selectedFileName">
@@ -531,6 +562,35 @@
       <button mat-raised-button color="warn" (click)="confirmDelete()" class="delete-btn">
         Delete
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Prompt Copy Confirmation Dialog -->
+<div class="prompt-copy-overlay" *ngIf="showPromptCopyDialog" (click)="closePromptCopyDialog()">
+  <div class="prompt-copy-popup" (click)="$event.stopPropagation()">
+    <div class="prompt-copy-header">
+      <h3>Prompt Copied!</h3>
+      <button mat-icon-button (click)="closePromptCopyDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="prompt-copy-content">
+      <p>The GitHub Copilot prompt template has been copied to your clipboard.</p>
+      <p class="copy-instruction">Paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent.
+      </p>
+    </div>
+
+    <div class="prompt-copy-footer">
+      <div class="dialog-actions">
+        <button mat-stroked-button (click)="closePromptCopyDialog()" class="cancel-btn">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" (click)="closePromptCopyDialog()" class="ok-btn">
+          OK
+        </button>
+      </div>
     </div>
   </div>
 </div>

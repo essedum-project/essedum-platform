@@ -72,31 +72,42 @@ public class ICIPFolderController {
     /**
      * Upload file.
      *
-     * @param file the file
+     * @param cname the customer name
+     * @param org the organization
+     * @param zipFile the zip file (optional - multipart upload)
+     * @param folderPath the folder path (optional - if not uploading a file)
      * @return the response entity
      * @throws Exception the exception
      */
     @PostMapping(path = "/upload/{cname}/{org}")
-    public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(@PathVariable(name = "cname") String cname,
-                                             @PathVariable(name = "org") String org) throws Exception {
-        logger.info("request to upload jar-file");
-        MultipartFile file = null;
-        String zipFolderPath = FileConstants.AI_AGENT_SCRIPT_ZIP_FOLDER_PATH;
-        return new ResponseEntity<>(folderService.persistInAiAgentScriptTableFromZipOrFolder(file, zipFolderPath, cname, org), HttpStatus.OK);
+    public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(
+            @PathVariable(name = "cname") String cname,
+            @PathVariable(name = "org") String org,
+            @RequestParam(value = "zipFile", required = false) MultipartFile zipFile,
+            @RequestParam(value = "folderPath", required = false) String folderPath) throws Exception {
+
+        logger.info("request to upload ai-agent scripts for cname={}, org={}", cname, org);
+
+        /*// Validate that at least one option is provided
+        if ((zipFile == null || zipFile.isEmpty()) && (folderPath == null || folderPath.isBlank())) {
+            logger.warn("Neither zipFile nor folderPath provided");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }*/
+
+        // Use default path if no specific path is provided
+        String pathToUse = folderPath;
+        if (pathToUse == null || pathToUse.isBlank()) {
+            pathToUse = FileConstants.AI_AGENT_SCRIPT_ZIP_FOLDER_PATH;
+            logger.info("Using default path: {}", pathToUse);
+        } else {
+            logger.info("Using provided folder path: {}", pathToUse);
+        }
+
+        return new ResponseEntity<>(
+                folderService.persistInAiAgentScriptTableFromZipOrFolder(zipFile, pathToUse, cname, org),
+                HttpStatus.OK);
     }
 
-    /*@PostMapping(path = "/update/{cname}/{org}")
-    public ResponseEntity<List<ICIPAiAgentScript>> updateNativeScriptFile(@PathVariable(name = "cname") String cname,
-                                                                          @PathVariable(name = "org") String org, @RequestParam(name = "file") String fileName,
-                                                                          @RequestParam(name = "filePath") String filePath, @RequestParam(value = "scriptFile", required = true) MultipartFile script) {
-        logger.info("request to update ai-agent script file");
-        try {
-            return new ResponseEntity<>(folderService.persistInAiAgentScriptTableForSingleFile(script.getBytes(),cname,org,fileName, filePath), HttpStatus.OK);
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }*/
 
     @PostMapping(path = "/update/{cname}/{org}")
     public ResponseEntity<List<ICIPAiAgentScript>> bulkUpdateNativeScriptFilesJson(

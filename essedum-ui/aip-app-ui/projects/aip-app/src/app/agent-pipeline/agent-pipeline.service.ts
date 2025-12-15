@@ -62,9 +62,9 @@ export class AgentPipelineService {
   }
 
   /**
-   * Generate SDK Agent by calling the real API
+   * Generate adk Agent by calling the real API
    */
-  generateSDKAgent(agentRequest: AgentGenerationRequest): Observable<AgentGenerationResponse> {
+  generateadkAgent(agentRequest: AgentGenerationRequest): Observable<AgentGenerationResponse> {
     // Use the cname from the request instead of generating a random one
     const cname = agentRequest.cname;
     const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;

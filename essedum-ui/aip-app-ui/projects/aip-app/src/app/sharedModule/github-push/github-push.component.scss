@@ -1,3 +1,47 @@
+/* Git Push Trigger Button - matches download button style */
+.git-push-trigger {
+  background: transparent !important;
+  border: none !important;
+  color: #cccccc !important;
+  padding: 0 !important;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  &:disabled {
+    color: #858585 !important;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor !important;
+  }
+
+  // Override any btn-primary styles that might still be applied
+  &.btn-primary {
+    background: transparent !important;
+    color: #cccccc !important;
+    
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
 /* Button Styles */
 .btn {
   padding: 4px 8px;

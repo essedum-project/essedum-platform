@@ -133,10 +133,15 @@ export class AgentPipelineComponent implements OnInit {
   dynamicFileName: any;
   relatedloaded = false;
 
-  // Console output for Generate SDK Agent
+  
+  // Console output for Generate adk Agent
   consoleOutput: string[] = [];
   isGenerating = false;
-
+  
+  // LLM Selection and Prompt Template
+  selectedLLM: string = '';
+  showPromptCopyDialog = false;
+  
   // Playground popup
   showPlayground = false;
   hasGeneratedAgent = false;
@@ -730,6 +735,8 @@ export class AgentPipelineComponent implements OnInit {
     if (this.viewMode === 'detail') {
       this.viewMode = 'list';
       this.selectedAgent = null;
+      // Reset LLM selection when navigating back
+      this.selectedLLM = '';
       // Clear current state - data will be fetched fresh from API when we return
       this.resetToDashboardState();
     } else {
@@ -779,9 +786,11 @@ export class AgentPipelineComponent implements OnInit {
 
   viewDetails(agent: AgentCard): void {
     this.selectedAgent = agent;
-
-    // this.viewMode = 'detail';
-
+    this.viewMode = 'detail';
+    
+    // Reset LLM selection when viewing different agent
+    this.selectedLLM = '';
+    
     // Special handling for QR53F1 - generate new cname each time
     if (agent.cname === 'QR53F1') {
       // Generate a new random cname for fresh generation
@@ -837,7 +846,10 @@ export class AgentPipelineComponent implements OnInit {
       // Update original content and reset diff tracking after successful save
       this.originalFileContent = this.selectedFileContent;
       this.resetDiffTracking();
-
+      
+      // Refresh file structure to ensure UI reflects any server-side changes
+      this.refreshFileStructure();
+      
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
@@ -911,7 +923,11 @@ export class AgentPipelineComponent implements OnInit {
       this.isFileModified = false;
       this.userModifiedLines.clear();
       this.resetDiffTracking();
-
+      
+      // Always refresh the file structure from API after successful deletion
+      // This ensures the UI reflects the current state on the server
+      this.refreshFileStructure();
+      
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(
@@ -1058,8 +1074,8 @@ export class AgentPipelineComponent implements OnInit {
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (apiResponse) => {
         console.log('Building file tree from API response:', apiResponse);
-        this.fileSystemData =
-          this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
+        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
+        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
         this.isLoadingFiles = false;
       },
       error: (error) => {
@@ -1072,7 +1088,18 @@ export class AgentPipelineComponent implements OnInit {
       },
     });
   }
-
+  
+  // Refresh file structure - can be called manually or after operations
+  refreshFileStructure(): void {
+    if (!this.currentCname) {
+      console.warn('No container name available for refreshing files');
+      return;
+    }
+    
+    console.log('Refreshing file structure for container:', this.currentCname);
+    this.loadAgentFiles();
+  }
+  
   // Track user modifications for neon green highlighting
   onUserContentChange(newContent: string): void {
     this.isUserModifiedContent = true;
@@ -1618,6 +1645,18 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     return node.expanded !== false; // Default to expanded if not explicitly set
   }
 
+  // Expand all folders recursively
+  expandAllFolders(nodes: FileNode[]): void {
+    nodes.forEach(node => {
+      if (node.type === 'folder') {
+        node.expanded = true;
+        if (node.children) {
+          this.expandAllFolders(node.children);
+        }
+      }
+    });
+  }
+  
   // Drag and Drop Methods
   onDragStart(event: DragEvent, node: FileNode): void {
     this.isDragging = true;
@@ -1774,36 +1813,29 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
     }
 
     // Call bulk update API to save new structure
-    this.agentPipelineService
-      .updateFileStructure(this.currentCname, this.fileSystemData)
-      .subscribe({
-        next: (result) => {
-          console.log(
-            'File structure saved successfully via bulk update API:',
-            result
-          );
-          this.showSaveStructureDialog = false;
-          this.originalFileStructure = [];
-
-          // Show success message with properly formatted response
-          const successResponse = { status: 200, body: result || [] };
-          this.service.messageService(
-            successResponse,
-            'File structure updated successfully!'
-          );
-        },
-        error: (error) => {
-          console.error('Failed to save file structure:', error);
-          this.service.messageService(error);
-
-          // Restore original structure on error
-          this.fileSystemData = JSON.parse(
-            JSON.stringify(this.originalFileStructure)
-          );
-          this.showSaveStructureDialog = false;
-          this.originalFileStructure = [];
-        },
-      });
+    this.agentPipelineService.updateFileStructure(this.currentCname, this.fileSystemData).subscribe({
+      next: (result) => {
+        console.log('File structure saved successfully via bulk update API:', result);
+        this.showSaveStructureDialog = false;
+        this.originalFileStructure = [];
+        
+        // Refresh file structure from API to ensure consistency
+        this.refreshFileStructure();
+        
+        // Show success message with properly formatted response
+        const successResponse = { status: 200, body: result || [] };
+        this.service.messageService(successResponse, 'File structure updated successfully!');
+      },
+      error: (error) => {
+        console.error('Failed to save file structure:', error);
+        this.service.messageService(error);
+        
+        // Restore original structure on error
+        this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
+        this.showSaveStructureDialog = false;
+        this.originalFileStructure = [];
+      }
+    });
   }
 
   cancelStructureChange(): void {
@@ -2228,17 +2260,20 @@ public class ZipController {
    * Get tooltip text for Generate Agent button
    */
   getGenerateButtonTooltip(): string {
+    if (!this.selectedLLM) {
+      return 'Please select an LLM provider first';
+    }
     if (this.isGenerating) {
       return 'Agent generation is in progress...';
     }
     if (this.hasGeneratedAgent || this.hasExistingFiles()) {
       return 'Agent has already been generated. Use the Essedum Codespace tab to edit existing files.';
     }
-    return 'Click to generate SDK agent with project files and structure';
+    return 'Click to generate adk agent with project files and structure';
   }
 
-  // Generate SDK Agent
-  generateSDKAgent(): void {
+  // Generate adk Agent
+  generateadkAgent(): void {
     if (!this.selectedAgent) {
       console.error('No agent selected');
       return;
@@ -2252,9 +2287,7 @@ public class ZipController {
     const version = this.selectedAgent.version;
 
     // Add initial console output
-    this.consoleOutput.push(
-      `Starting SDK Agent generation for ${agentName}...`
-    );
+    this.consoleOutput.push(`Starting adk Agent generation for ${agentName}...`);
     this.consoleOutput.push('Preparing agent configuration...');
 
     // Prepare the request payload
@@ -2280,14 +2313,11 @@ public class ZipController {
     };
 
     this.consoleOutput.push('Calling agent generation API...');
-    console.log(
-      'About to call agentPipelineService.generateSDKAgent with payload:',
-      agentRequest
-    );
+    console.log('About to call agentPipelineService.generateadkAgent with payload:', agentRequest);
     console.log('Using fixed cname:', this.currentCname);
 
     // Call the real API
-    this.agentPipelineService.generateSDKAgent(agentRequest).subscribe({
+    this.agentPipelineService.generateadkAgent(agentRequest).subscribe({
       next: (response) => {
         this.consoleOutput.push('✓ Agent generation API call successful');
         this.consoleOutput.push(`✓ Container Name: ${this.currentCname}`);
@@ -2297,18 +2327,11 @@ public class ZipController {
         console.log('Using fixed cname for agent:', this.currentCname);
 
         // Process the file structure directly from the response
-        console.log(
-          'Building file tree from API response:',
-          response.fileStructure
-        );
-        this.fileSystemData =
-          this.agentPipelineService.buildFileTreeFromApiResponse(
-            response.fileStructure
-          );
-
-        this.consoleOutput.push(
-          `SDK Agent generated successfully for ${agentName}!`
-        );
+        console.log('Building file tree from API response:', response.fileStructure);
+        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
+        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+        
+        this.consoleOutput.push(`adk Agent generated successfully for ${agentName}!`);
         this.consoleOutput.push('');
         this.consoleOutput.push(`Container: ${this.currentCname}`);
         this.consoleOutput.push('Status: Ready for development');
@@ -2318,11 +2341,8 @@ public class ZipController {
 
         // Show success message with properly formatted response
         const successResponse = { status: 200, body: response || [] };
-        this.service.messageService(
-          successResponse,
-          `SDK Agent '${agentName}' generated successfully!`
-        );
-
+        this.service.messageService(successResponse, `adk Agent '${agentName}' generated successfully!`);
+        
         // Don't automatically open playground - user will click "Open Playground" button when ready
         console.log(
           'Agent generation complete. Playground available via button.'
@@ -2349,6 +2369,248 @@ public class ZipController {
     this.consoleOutput = [];
   }
 
+  // LLM Selection and Prompt Template methods
+  getPromptTemplate(): string {
+    return `PROJECT STRUCTURE & EXECUTION PROTOCOL
+1. File Structure:
+   - Place all source code in a \`src/\` directory (e.g., \`src/main.py\`, \`src/config.py\`).
+   - Place \`requirements.txt\` and \`.env\` in the project root.
+
+2. Import Safety (CRITICAL):
+   - The user will run the application from the project root using: \`python src/main.py\`
+   - To prevent "ModuleNotFoundError", the \`main.py\` entry point MUST explicitly add the project root to \`sys.path\` before importing internal modules.
+   - Use this snippet at the top of \`src/main.py\`:
+     \`\`\`python
+     import sys
+     import os
+     # Add project root to sys.path to fix imports when running from src/
+     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+     \`\`\`
+
+3. Import Style:
+   - Use absolute imports starting with \`src.\` (e.g., \`from src.config import AppConfig\`) OR relative imports (e.g., \`from .config import AppConfig\`) consistently.
+   
+FILE CREATION PROTOCOL 
+
+You MUST create and save files directly in the current workspace using file blocks.
+For each file, emit a fenced block that starts with an exact header line:
+# file: src/<filename>.py
+
+(or # file: requirements.txt for requirements)
+After generating the block, apply the edit by creating the file in the workspace at that path. Do not merely display content in chat.
+If the agent cannot apply edits automatically, show and execute the VS Code "Create file" action for each block.
+Never skip file creation; confirm by listing the created files with their relative paths at the end.
+
+ROLE & OBJECTIVE
+You are a Senior Python Engineer and AI Systems Architect.
+Convert a raw **Langflow Design JSON** (directed graph) into a production‑ready, modular **Python ADK** codebase. The output MUST work for ANY Langflow design (any number of nodes/agents/tools). For phase‑1, avoid complex conditional branching: detect it, log one line, and linearize execution.
+
+INPUT
+You will receive a Langflow graph JSON containing:
+- Nodes: functions, agents, tools, prompts, LLMs, etc.
+- Edges: data flow dependencies (source -> target).
+
+OUTPUT — EXACTLY 7 FILES
+Generate a multi‑file Python project with EXACTLY these files and NO extras:
+1) \`__init__.py\`
+2) \`workflow_state.py\`
+3) \`config.py\`
+4) \`nodes.py\`
+5) \`graph_builder.py\`
+6) \`main.py\`
+7) \`requirements.txt\`
+
+FILE EMISSION FORMAT (STRICT)
+- For each file, output a fenced code block.
+- The first line in each block MUST be a comment: \`# file: <relative_path/filename>\`
+- Use \`src/\` as the root code directory for all Python files.
+- Example block header:
+  \`\`\`python
+  # file: src/workflow_state.py
+  \`\`\`
+- Output only ASCII characters in code and logs (Windows‑safe). No emojis, arrows, or unicode symbols.
+- After emitting all seven files, print a short ASCII "Build summary" section (no extra prose).
+
+GENERAL RULES (CRITICAL)
+- **Modern libraries only:** Use \`langchain_core\` + \`langchain_openai\`, \`langgraph.graph\` and \`langgraph.prebuilt\` (where tool use requires it), \`pydantic\` v2, and \`pydantic_settings\` v2. Avoid deprecated modules and legacy agent executors.
+- **Environment management:** Read env via \`pydantic_settings.BaseSettings\` (v2). Do NOT call \`os.getenv\` directly in application logic.
+- **Azure/OpenAI dual support:** Prefer Azure OpenAI if credentials exist; else fall back to OpenAI. Never hard‑code model names—read from node JSON or env; provide safe defaults.
+- **No conditional branching (phase‑1):** If routers/conditions exist, log "Branching detected; skipped in phase-1" and build a straight‑through path using primary edge order only.
+- **Idempotent state:** Each node returns a \`dict\` with only keys it produces; graph merges deterministically.
+- **Error handling:** Each node wraps execution in \`try/except\`, logs concise ASCII messages, and returns \`{ "error": "<message>" }\` without crashing the workflow.
+- **Strict imports whitelist:**
+  - \`langchain_core.*\`
+  - \`langchain_openai\` (AzureChatOpenAI, ChatOpenAI)
+  - \`langgraph.graph\`, \`langgraph.prebuilt\`
+  - \`pydantic\`, \`pydantic_settings\`
+  - \`python_dotenv\` (optional dev convenience)
+  - Standard library and \`typing\`
+- **Logging:** Use the \`logging\` module, INFO level default, ASCII messages only.
+
+PROJECT SPECIFICATION & ACCEPTANCE CRITERIA
+
+1) __init__.py
+- Minimal package initialization; export \`create_workflow\` and \`run_workflow\`.
+- ASCII docstring summarizing the package and phase‑1 limitation.
+
+2) workflow_state.py
+- Define \`WorkflowState\` (Pydantic v2 \`BaseModel\`) capturing all keys produced/required by nodes in the JSON.
+- Include \`messages: list[dict] = Field(default_factory=list)\` for chat history.
+- Include all node outputs as \`Optional[...]\` fields (discoverability).
+- Provide:
+  \`\`\`python
+  def update(self, delta: dict) -> "WorkflowState":
+      # merges keys deterministically and returns self
+  \`\`\`
+- Keep it simple; do NOT use \`Annotated\` or \`operator.add\`.
+
+3) config.py
+- Use \`from pydantic_settings import BaseSettings\`
+- Pydantic v2 config style:
+  \`\`\`python
+  class AppConfig(BaseSettings):
+      model_config = ConfigDict(
+          env_file=".env",
+          env_file_encoding="utf-8",
+          case_sensitive=False
+      )
+  \`\`\`
+- Fields with aliases for env vars:
+  - Azure: \`AZURE_OPENAI_API_KEY\`, \`AZURE_OPENAI_ENDPOINT\`, \`AZURE_OPENAI_DEPLOYMENT\`
+  - OpenAI: \`OPENAI_API_KEY\`
+  - Common: \`MODEL_NAME\`, \`TEMPERATURE\`, \`SYSTEM_PROMPT\`, \`TIMEOUT_SECONDS\`
+- Implement \`model_post_init\` for normalization.
+- Implement:
+  - \`is_azure(self) -> bool\`
+  - \`is_openai(self) -> bool\`
+  - \`validate(self) -> None\` (ensures Azure OR OpenAI creds exist; raises \`ValueError\` single‑line if not)
+- Do not hard‑code values; allow node JSON to override via parameters.
+
+4) nodes.py
+- For every JSON node, create:
+  \`\`\`python
+  def node_<sanitized_node_id>(state: WorkflowState, config: AppConfig) -> dict:
+      ...
+      return { "<output_key>": <value>, ... }
+  \`\`\`
+- Add \`get_model(config: AppConfig, node_params: dict | None = None)\` helper:
+  - If Azure creds exist, return \`AzureChatOpenAI\` with endpoint + deployment; take \`model_name\` from node_params or env.
+  - Else return \`ChatOpenAI\` with \`model_name\` from node_params or env.
+  - Apply \`temperature\`, \`timeout\`, etc., from node_params or config defaults.
+- **LLM usage:**
+  - Prompt‑only nodes: format templates safely (guard missing keys) and call \`llm.invoke([{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}])\` or minimal structured messages as supported.
+  - Tool‑using nodes: construct tools list; use \`langgraph.prebuilt.create_react_agent(llm, tools, prompt=<system_prompt>)\`. Do NOT use \`AgentExecutor\`.
+- **Prompt nodes:** Render with \`str.format(**safe_state_dict)\`; if key missing, log and substitute empty string.
+- **Tool nodes:** Implement Python wrappers; if unknown external tool, stub and log "Tool '<name>' not implemented in phase-1", return passthrough.
+- Each node must have \`try/except\` and concise ASCII logging.
+
+5) graph_builder.py
+- \`from langgraph.graph import StateGraph\`
+- Build \`StateGraph(WorkflowState)\` and add nodes via \`functools.partial(node_func, config=config)\`.
+- Add edges exactly per JSON source->target order. If multiple outgoing edges (branching), choose the first listed edge for phase‑1; log and skip others.
+- Determine \`entry_point\` and \`finish_point\`:
+  - If explicit in JSON, use them.
+  - Else infer: entry = first node with no inbound edges; finish = last node with no outbound edges.
+- Provide:
+  - \`def create_workflow(design_json: dict, config: AppConfig):\` → returns compiled graph
+  - \`def visualize_graph_structure(design_json: dict) -> str:\` → returns ASCII topology (one node per line with its successors)
+
+6) main.py
+- CLI \`main()\` via \`argparse\` supporting only \`--debug\` and \`--session-id\`.
+- \`check_dependencies()\` verifies imports; on ImportError, print one ASCII line and \`sys.exit(1)\`.
+- \`load_config()\` instantiates \`AppConfig\` (auto‑loads \`.env\`) and calls \`config.validate()\`.
+- Load \`./design.json\` from the repo root (phase‑1 requirement).
+- Build workflow with \`create_workflow(design_json, config)\`.
+- Interactive input:
+  \`\`\`python
+  input_message = input("Enter your question: ")
+  \`\`\`
+  Append to \`state.messages\`, run the graph, print concise ASCII result.
+- Graceful errors: one‑line guidance, exit non‑zero.
+
+7) requirements.txt
+- Pin modern, compatible versions (use >= to reduce environment breakage):
+  - langchain>=0.3.0
+  - langchain-core>=0.3.0
+  - langchain-openai>=0.2.0
+  - langgraph>=0.2.0
+  - pydantic>=2.0.0
+  - pydantic-settings>=2.0.0
+  - python-dotenv>=1.0.0
+
+JSON INTERPRETATION RULES
+- Map node types:
+  - "LLM", "Chat Model" → model via \`get_model()\`, call \`invoke()\` with message dicts.
+  - "Prompt" → template format node, output string.
+  - "Tool" → Python wrapper; if unknown or external, stub and log once.
+- Extract per‑node parameters (\`model_name\`, \`temperature\`, \`system_prompt\`, etc.) from node config; fallback to env/config defaults.
+- Sanitize node ids to valid Python identifiers: lower‑case; non‑alphanumeric → \`_\`; ensure uniqueness.
+- Infer output keys per node type; include these as optional fields in \`WorkflowState\`.
+
+QUALITY & SAFETY PRE‑FLIGHT (the agent MUST do before finalizing output)
+- No deprecated imports: do NOT use \`langchain.chat_models\`, \`AgentExecutor\`, or legacy submodules.
+- Use \`create_react_agent\` ONLY if tools exist; otherwise call \`llm.invoke\`.
+- Read env via \`pydantic_settings.BaseSettings\`; do NOT use \`os.getenv\` directly.
+- ASCII logging only.
+- Each file begins with \`# file: src/<name>.py\` (or \`# file: requirements.txt\`) and compiles cleanly.
+
+PHASE‑1 LIMITATION
+- If routers/conditions/branches are found, print/log:
+  "Branching detected; skipped in phase-1"
+  Then build a linear workflow using the first‑listed edge path.
+
+DELIVERABLES
+- Output exactly seven files, each in a fenced code block with the required header.
+- After the files, output a brief ASCII "Build summary" with a single paragraph and a bullet list of node functions generated.`;
+  }
+
+  copyPromptTemplate(): void {
+    const promptText = this.getPromptTemplate();
+    
+    // Copy to clipboard using the Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        this.showPromptCopyDialog = true;
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        // Fallback to other copy method
+        this.fallbackCopyToClipboard(promptText);
+      });
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      this.fallbackCopyToClipboard(promptText);
+    }
+  }
+
+  private fallbackCopyToClipboard(text: string): void {
+    // Create a temporary textarea element
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        this.showPromptCopyDialog = true;
+      } else {
+        console.error('Copy command was unsuccessful');
+      }
+    } catch (err) {
+      console.error('Fallback copy failed: ', err);
+    }
+    
+    document.body.removeChild(textArea);
+  }
+
+  closePromptCopyDialog(): void {
+    this.showPromptCopyDialog = false;
+  }
+
   trackByCardId(index: number, card: AgentCard): string {
     return card.cid;
   }
@@ -2369,10 +2631,8 @@ public class ZipController {
     this.playgroundMessages = [
       {
         role: 'agent',
-        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${
-          this.selectedAgent?.version
-        }). I'm now running from the generated SDK. How can I help you today?`,
-      },
+        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated adk. How can I help you today?`
+      }
     ];
   }
 
@@ -2460,8 +2720,8 @@ public class ZipController {
         .map((t) => t.description)
         .join(', ')}. Which of these would you like me to help you with?`;
     }
-
-    return `I understand your question: "${question}". Based on my SDK configuration, I can process this request using my trained model. How would you like me to proceed?`;
+    
+    return `I understand your question: "${question}". Based on my adk configuration, I can process this request using my trained model. How would you like me to proceed?`;
   }
 
   onPlaygroundKeyPress(event: KeyboardEvent): void {
@@ -2497,24 +2757,9 @@ public class ZipController {
   loadAvailableBranches(): void {
     // Mock data - in real implementation, this would call GitHub API
     const mockBranches = {
-      'customer-support-agent-sdk': [
-        'main',
-        'develop',
-        'feature/chat-integration',
-        'hotfix/bug-fixes',
-      ],
-      'data-analysis-agent-sdk': [
-        'main',
-        'develop',
-        'feature/new-charts',
-        'staging',
-      ],
-      'code-review-agent-sdk': [
-        'main',
-        'develop',
-        'feature/security-scan',
-        'production',
-      ],
+      'customer-support-agent-adk': ['main', 'develop', 'feature/chat-integration', 'hotfix/bug-fixes'],
+      'data-analysis-agent-adk': ['main', 'develop', 'feature/new-charts', 'staging'],
+      'code-review-agent-adk': ['main', 'develop', 'feature/security-scan', 'production']
     };
 
     this.availableBranches = mockBranches[
@@ -2533,7 +2778,7 @@ public class ZipController {
     const agentName = this.selectedAgent?.alias || 'Agent';
     const version = this.selectedAgent?.version || '1.0.0';
     const timestamp = new Date().toISOString().split('T')[0];
-    return `feat: Add ${agentName} SDK v${version} - Generated on ${timestamp}`;
+    return `feat: Add ${agentName} adk v${version} - Generated on ${timestamp}`;
   }
 
   canPush(): boolean {
@@ -2669,12 +2914,12 @@ public class ZipController {
     this.isJsonProcessed = true;
 
     // Build file tree from API response
-    this.fileSystemData =
-      this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
-
+    this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+    this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+    
     // Set console output to show that agent was loaded
     this.consoleOutput = [
-      `SDK Agent loaded from existing data`,
+      `adk Agent loaded from existing data`,
       `Container: ${this.currentCname}`,
       `Status: Ready for development`,
       `Files: ${fileData.length} files loaded`,
