@@ -16,7 +16,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
   constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(environment.langflowUrl);
+    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(environment.langflowProdUrl);;
   }
 
   ngAfterViewInit(): void {
