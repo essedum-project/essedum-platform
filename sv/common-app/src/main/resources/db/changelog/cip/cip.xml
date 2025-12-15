@@ -384,7 +384,7 @@
 			</column>
 			<column name="cname" type="VARCHAR(255)" />
 			<column name="filename" type="VARCHAR(255)" />
-			<column name="filescript" type="BLOB" />
+			<column name="filescript" type="MEDIUMBLOB" />
 			<column name="organization" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
