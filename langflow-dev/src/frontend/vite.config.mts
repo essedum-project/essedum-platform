@@ -37,6 +37,11 @@ export default defineConfig(({ mode }) => {
     return proxyObj;
   }, {});
 
+  const isProduction = mode === 'production' || env.VITE_FORCE_PRODUCTION_PROXY === 'true';
+  const aipTarget = isProduction 
+    ? (env.VITE_BACKEND_URL || "https://essedum.az.ad.idemo-ppc.com")
+    : "http://localhost:8081";
+
   return {
     base: BASENAME || "",
     build: {
@@ -45,6 +50,9 @@ export default defineConfig(({ mode }) => {
     define: {
       "import.meta.env.BACKEND_URL": JSON.stringify(
         envLangflow.BACKEND_URL ?? "http://localhost:7860"
+      ),
+      "import.meta.env.VITE_BACKEND_URL": JSON.stringify(
+        env.VITE_BACKEND_URL ?? "https://essedum.az.ad.idemo-ppc.com"
       ),
       "import.meta.env.ACCESS_TOKEN_EXPIRE_SECONDS": JSON.stringify(
         envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60
@@ -61,16 +69,19 @@ export default defineConfig(({ mode }) => {
     server: {
       port: port,
       proxy: {
-        // Specific API routes first (most specific to least specific)
         "/api/aip/": {
-          target: "http://localhost:8081",
+          target: aipTarget,
           changeOrigin: true,
-          secure: false,
+          secure: isProduction && !env.VITE_IGNORE_SSL_CERTS,
           ws: true,
           configure: (proxy, options) => {
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              console.log('Proxying AIP request:', req.method, req.url, '-> http://localhost:8081');
-            });
+            if (!isProduction && aipTarget.startsWith('https://')) {
+              const https = require('https');
+              options.agent = new https.Agent({
+                rejectUnauthorized: false,
+                keepAlive: true
+              });
+            }
           },
         },        
         ...proxyTargets,
