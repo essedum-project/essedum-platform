@@ -19,7 +19,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const token = localStorage.getItem('jwtToken') || '';
+    const token = localStorage.getItem('access_token') || '';
     const parentOrg = localStorage.getItem('organization') || '';
 
     console.log('Agent Component: Retrieved values', {
@@ -37,7 +37,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
       try {
         // log masked token for debugging
         const mask = (s: string) => s ? `${s.substring(0,20)}...${s.slice(-6)}` : '<empty>';
-        console.log('Parent: posting token to iframe', { name: 'jwtToken', value: mask(token) });
+        console.log('Parent: posting token to iframe', { name: 'access_token', value: mask(token) });
             // helper to safely post messages to iframe
             const sendToIframe = (msg: any) => {
               if (!iframeEl || !iframeEl.contentWindow) return;
@@ -104,7 +104,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
       if (msg.type === 'TOKEN_RECEIVED') {
         // token received ack from child
-        console.log('Parent received TOKEN_RECEIVED from child:', msg.status || 'ok', { tokenName: 'jwtToken' });
+        console.log('Parent received TOKEN_RECEIVED from child:', msg.status || 'ok', { tokenName: 'access_token' });
       }
 
       if (msg.type === 'ORG_RECEIVED') {
