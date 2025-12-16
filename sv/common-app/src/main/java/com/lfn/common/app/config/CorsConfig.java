@@ -84,7 +84,8 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 1. Allow your React app (3000), Angular app (8087), and Python Backend (7860)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8087", "http://localhost:7860"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8087", "http://localhost:7860", "https://langflow.az.ad.idemo-ppc.com",
+                "https://essedum.az.ad.idemo-ppc.com"));
 
         // 2. Allow the standard methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
