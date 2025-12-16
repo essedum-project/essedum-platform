@@ -30,7 +30,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(environment.langflowUrl).origin; } catch { return environment.langflowUrl; }
+      try { return new URL(environment.langflowProdUrl).origin; } catch { return environment.langflowProdUrl; }
     })();
 
     const postToIframe = () => {
