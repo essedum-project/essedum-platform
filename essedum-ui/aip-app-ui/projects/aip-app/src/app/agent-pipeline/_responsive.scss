@@ -1,0 +1,114 @@
+// ===========================================
+// RESPONSIVE DESIGN
+// ===========================================
+@include mobile {
+  .file-panel {
+    flex-direction: column;
+  }
+  
+  .file-panel .file-explorer {
+    flex: none;
+    max-height: 300px;
+  }
+  
+  .playground-popup {
+    width: 95%;
+    height: 90vh;
+  }
+
+  .script-split-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .script-split-container .config-panel,
+  .script-split-container .console-panel {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 400px !important;
+  }
+
+  .console-panel .generate-controls-row {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .console-panel .generate-controls-row .llm-selection-container {
+    min-width: auto;
+  }
+}
+
+@include tablet {
+  .file-panel {
+    gap: 12px;
+  }
+
+  .file-panel .file-explorer {
+    flex: 0 0 280px;
+  }
+
+  .console-panel .generate-controls-row {
+    gap: 20px;
+  }
+}
+
+// ===========================================
+// ANGULAR MATERIAL OVERRIDES
+// ===========================================
+::ng-deep {
+  .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs > .mat-mdc-tab-header .mat-mdc-tab {
+    flex-grow: 0 !important;
+    margin-right: 20px !important;
+  }
+  
+  .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs > .mat-mdc-tab-header .mat-mdc-tab:last-child {
+    margin-right: 0 !important;
+  }
+  
+  .mat-mdc-tab-list {
+    flex-grow: 0 !important;
+  }
+  
+  .black-editor .ace_editor {
+    background-color: $bg-dark !important;
+    color: $text-medium !important;
+  }
+  
+  .black-editor .ace_gutter {
+    background-color: $bg-console !important;
+    color: #858585 !important;
+  }
+  
+  .black-editor .ace_cursor {
+    color: white !important;
+  }
+  
+  .black-editor .ace_marker-layer .ace_selection {
+    background: #264f78 !important;
+  }
+
+  // Material button overrides for better icon visibility
+  .mat-mdc-icon-button {
+    width: 44px !important;
+    height: 44px !important;
+    
+    .mat-icon {
+      font-size: 22px !important;
+      width: 22px !important;
+      height: 22px !important;
+      line-height: 22px !important;
+    }
+  }
+
+  // Fix for Material Select dropdown
+  .mat-mdc-select-panel {
+    max-height: 300px !important;
+  }
+
+  // Enhanced scrollbar for material components
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    @include custom-scrollbar($bg-light, #ccc, #999, 6px);
+  }
+}

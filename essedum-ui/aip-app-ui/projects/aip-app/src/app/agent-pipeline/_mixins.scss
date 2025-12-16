@@ -1,0 +1,201 @@
+// ===========================================
+// MIXINS & UTILITIES
+// ===========================================
+
+// Flexbox mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar($track-color: #2a2a2a, $thumb-color: #555, $thumb-hover: #777, $width: 8px) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $border-radius-small;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: $thumb-hover;
+  }
+}
+
+// Button styling
+@mixin button-base {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-normal;
+  font-weight: 500;
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: $primary-blue;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background: $primary-blue-hover;
+  }
+  
+  &:disabled {
+    background: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background: transparent;
+  color: $text-muted;
+  border: 1px solid $border-light;
+  
+  &:hover:not(:disabled) {
+    background: $bg-light;
+    color: $text-dark;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Text truncation
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Panel styling
+@mixin panel-base {
+  background: white;
+  border: 1px solid $border-light;
+  border-radius: $border-radius;
+  box-shadow: $shadow-md;
+}
+
+@mixin panel-dark {
+  background: $bg-dark;
+  border: 1px solid $border-medium;
+  color: $text-light;
+}
+
+// Editor styling
+@mixin editor-base {
+  font-family: $font-mono;
+  font-size: $font-sm;
+  line-height: 1.6;
+  border: none;
+  outline: none;
+  resize: none;
+  transition: all $transition-normal;
+}
+
+@mixin editor-dark {
+  @include editor-base;
+  background: $bg-editor;
+  color: $text-editor;
+  
+  &::placeholder {
+    color: #6272a4;
+    font-style: italic;
+  }
+  
+  &:focus {
+    background: #2a2d3a;
+    box-shadow: inset 0 0 0 2px $warning-orange;
+  }
+}
+
+// Form styling
+@mixin input-base {
+  border: 2px solid $border-light;
+  border-radius: $border-radius;
+  padding: $space-md $space-lg;
+  font-size: $font-md;
+  transition: all $transition-normal;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary-blue;
+  }
+  
+  &:disabled {
+    background: $bg-light;
+    cursor: not-allowed;
+  }
+}
+
+// Icon styling
+@mixin icon-button($size: 36px) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  @include flex-center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-normal;
+  
+  mat-icon {
+    font-size: #{$size * 0.6};
+  }
+}
+
+// Media query mixins
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1025px) {
+    @content;
+  }
+}
