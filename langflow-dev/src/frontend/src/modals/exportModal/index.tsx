@@ -233,7 +233,7 @@ const ExportModal = forwardRef(
                 }
               }}
             >
-              Export to Essedum
+              Export to Essedum.
             </Button>
           </div>
         </BaseModal.Footer>
