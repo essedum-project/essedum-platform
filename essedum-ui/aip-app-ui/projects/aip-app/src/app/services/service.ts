@@ -1605,14 +1605,18 @@ export class Services {
 
   //read native file
   readNativeFile(cname, org, filename): Observable<any> {
+    const apiUrl = this.baseUrl + '/file/read/' + cname + '/' + org;
+    
     console.log('Making API call to read native file:', {
       cname,
       org, 
       filename,
-      url: this.baseUrl + '/file/read/' + cname + '/' + org
+      baseUrl: this.baseUrl,
+      url: apiUrl,
+      fullUrl: apiUrl + '?file=' + filename
     });
     
-    return this.https.get(this.baseUrl + '/file/read/' + cname + '/' + org, {
+    return this.https.get(apiUrl, {
       params: { file: filename },
       responseType: 'arraybuffer',
       // Add headers to improve error handling

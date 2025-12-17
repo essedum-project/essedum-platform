@@ -232,12 +232,6 @@ export class AgentPipelineComponent implements OnInit {
     },
   ];
 
-  // JSON configuration
-  jsonContent = `{
-  "agent_name": "customer-support-agent",
-  "version": "1.0.0"
-}`;
-
   // File system structure
   fileSystemData: FileNode[] = [];
 
@@ -305,7 +299,9 @@ export class AgentPipelineComponent implements OnInit {
     private agentPipelineService: AgentPipelineService,
     private service: Services,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    console.log('AgentPipelineComponent constructor - baseUrl:', this.baseUrl);
+  }
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
@@ -317,7 +313,43 @@ export class AgentPipelineComponent implements OnInit {
       }
     });
 
-    this.getStreamService();
+    // Check if we have router state data with card information
+    const historyState = history.state;
+    console.log('History state:', historyState);
+    const cardFromState = historyState?.card;
+    
+    if (cardFromState && cardFromState.name) {
+      // This is a real pipeline card from dashboard - use its cname for auto-loading
+      console.log('Real pipeline card detected:', cardFromState);
+      console.log('Card name from state:', cardFromState.name);
+      console.log('cardName from route:', this.cardName);
+      
+      this.currentCname = cardFromState.name; // Use the card name as cname
+      this.viewMode = 'detail';
+      
+      // Set pipeline alias for display
+      if (historyState?.pipelineAlias) {
+        this.pipelineAlias = historyState.pipelineAlias;
+      }
+      
+      console.log('About to call autoLoadAgentDataForPipelineCard with cname:', this.currentCname);
+      
+      // Trigger auto-loading for real pipeline cards
+      this.autoLoadAgentDataForPipelineCard();
+    } else {
+      // Fall back to old flow for hardcoded agent cards or when no state data
+      console.log('No card state found, falling back to old flow. cardName:', this.cardName);
+      
+      // Also try using cardName as currentCname for the new APIs
+      if (this.cardName) {
+        this.currentCname = this.cardName;
+        console.log('Using cardName as currentCname:', this.currentCname);
+        this.autoLoadAgentDataForPipelineCard();
+      } else {
+        this.getStreamService();
+      }
+    }
+    
     this.getPipelineByName();
   }
 
@@ -732,16 +764,24 @@ export class AgentPipelineComponent implements OnInit {
   }
 
   navigateBack(): void {
-    if (this.viewMode === 'detail') {
-      this.viewMode = 'list';
-      this.selectedAgent = null;
-      // Reset LLM selection when navigating back
-      this.selectedLLM = '';
-      // Clear current state - data will be fetched fresh from API when we return
-      this.resetToDashboardState();
-    } else {
-      this.location.back();
-    }
+    console.log('🔙 Navigating back to agent-pipeline dashboard');
+    // Reset all state first
+    this.resetToDashboardState();
+    
+    // Get current route parameters to preserve org and roleId
+    const org = localStorage.getItem('organisation') || 'leo1311';
+    const roleId = localStorage.getItem('roleId') || '1';
+    
+    // Navigate to the agent-pipeline dashboard with proper query parameters
+    this.router.navigate(['/landing/aip/agent-pipeline'], {
+      queryParams: {
+        page: 1,
+        search: '',
+        pipelineType: '',
+        org: org,
+        roleId: roleId
+      }
+    });
   }
 
   // Reset state when going back to dashboard
@@ -793,24 +833,18 @@ export class AgentPipelineComponent implements OnInit {
     
     // Special handling for QR53F1 - generate new cname each time
     if (agent.cname === 'QR53F1') {
-      // Generate a new random cname for fresh generation
-      this.currentCname = this.agentPipelineService.generateRandomCname();
-      console.log(
-        'QR53F1 detected - using new random cname:',
-        this.currentCname
-      );
-      // Always show fresh generation state
-      this.resetToInitialStateForNewAgent();
+      // Generate new random cname for Code Review Agent
+      const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+      this.currentCname = 'CR' + randomSuffix;
+      console.log('Generated new cname for Code Review Agent:', this.currentCname);
     } else {
-      // For other agents, use their fixed cname and check for existing files
+      // Use fixed cname for other agents
       this.currentCname = agent.cname;
-      console.log('Loading agent with fixed cname:', agent.cname);
-      // Always check for existing files first
-      this.checkForExistingFilesAndLoadState(agent.cname);
+      console.log('Using fixed cname:', this.currentCname);
     }
 
-    // Update JSON content based on selected agent
-    this.updateJsonContent(agent);
+    // Automatically call APIs to check for existing data
+    this.autoLoadAgentData();
   }
 
   // Save current file changes
@@ -993,27 +1027,7 @@ export class AgentPipelineComponent implements OnInit {
     }
   }
 
-  updateJsonContent(agent: AgentCard): void {
-    this.jsonContent = `{
-  "agent_name": "${agent.name}",
-  "version": "${agent.version}",
-  "description": "${agent.description}",
-  "configuration": {
-    "model": "gpt-4",
-    "temperature": 0.7,
-    "max_tokens": 2000,
-    "tools": ${JSON.stringify(this.getToolsForAgent(agent.name), null, 6)}
-  },
-  "runtime": {
-    "type": "${agent.language}",
-    "dependencies": [
-      "openai>=1.0.0",
-      "requests>=2.28.0",
-      "python-dotenv>=0.19.0"
-    ]
-  }
-}`;
-  }
+  // updateJsonContent method removed - no placeholder JSON content
 
   getToolsForAgent(agentName: string): any[] {
     const toolsMap: any = {
@@ -1492,7 +1506,8 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
   }
 
   onJsonChange(event: any): void {
-    this.jsonContent = event.join('\n');
+    // Handle JSON content changes from API data only
+    console.log('JSON content changed:', event);
   }
 
   onFileContentChange(event: any): void {
@@ -2229,6 +2244,10 @@ public class ZipController {
     return node.type === 'file' && node.name === this.selectedFileName;
   }
 
+  isNodeFileModified(node: FileNode): boolean {
+    return node.type === 'file' && node.name === this.selectedFileName && this.isFileModified === true;
+  }
+
   getFileLanguage(fileName: string): string {
     if (fileName.endsWith('.py')) return 'python';
     if (fileName.endsWith('.json')) return 'json';
@@ -2240,15 +2259,6 @@ public class ZipController {
   /**
    * Check if Generate Agent button should be disabled
    * - Disabled when already generating
-   * - Disabled when agent has already been generated (files exist)
-   * - Disabled when files exist in the codespace
-   */
-  get isGenerateAgentDisabled(): boolean {
-    return (
-      this.isGenerating || this.hasGeneratedAgent || this.hasExistingFiles()
-    );
-  }
-
   /**
    * Check if agent has existing files in the codespace
    */
@@ -2256,118 +2266,8 @@ public class ZipController {
     return this.fileSystemData && this.fileSystemData.length > 0;
   }
 
-  /**
-   * Get tooltip text for Generate Agent button
-   */
-  getGenerateButtonTooltip(): string {
-    if (!this.selectedLLM) {
-      return 'Please select an LLM provider first';
-    }
-    if (this.isGenerating) {
-      return 'Agent generation is in progress...';
-    }
-    if (this.hasGeneratedAgent || this.hasExistingFiles()) {
-      return 'Agent has already been generated. Use the Essedum Codespace tab to edit existing files.';
-    }
-    return 'Click to generate adk agent with project files and structure';
-  }
-
-  // Generate adk Agent
-  generateadkAgent(): void {
-    if (!this.selectedAgent) {
-      console.error('No agent selected');
-      return;
-    }
-
-    this.isGenerating = true;
-    this.hasGeneratedAgent = false;
-    this.consoleOutput = [];
-
-    const agentName = this.selectedAgent.alias;
-    const version = this.selectedAgent.version;
-
-    // Add initial console output
-    this.consoleOutput.push(`Starting adk Agent generation for ${agentName}...`);
-    this.consoleOutput.push('Preparing agent configuration...');
-
-    // Prepare the request payload
-    const agentRequest: AgentGenerationRequest = {
-      agentName: this.selectedAgent.name,
-      version: this.selectedAgent.version,
-      description: this.selectedAgent.description,
-      cname: this.currentCname, // Use the agent's fixed cname
-      configuration: {
-        model: 'gpt-4',
-        temperature: 0.7,
-        maxTokens: 2000,
-        tools: this.getToolsForAgent(this.selectedAgent.name),
-      },
-      runtime: {
-        type: this.selectedAgent.language,
-        dependencies: [
-          'openai>=1.0.0',
-          'requests>=2.28.0',
-          'python-dotenv>=0.19.0',
-        ],
-      },
-    };
-
-    this.consoleOutput.push('Calling agent generation API...');
-    console.log('About to call agentPipelineService.generateadkAgent with payload:', agentRequest);
-    console.log('Using fixed cname:', this.currentCname);
-
-    // Call the real API
-    this.agentPipelineService.generateadkAgent(agentRequest).subscribe({
-      next: (response) => {
-        this.consoleOutput.push('✓ Agent generation API call successful');
-        this.consoleOutput.push(`✓ Container Name: ${this.currentCname}`);
-        this.consoleOutput.push('✓ Processing agent files...');
-
-        // Keep using the agent's fixed cname (don't change it)
-        console.log('Using fixed cname for agent:', this.currentCname);
-
-        // Process the file structure directly from the response
-        console.log('Building file tree from API response:', response.fileStructure);
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(response.fileStructure);
-        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
-        
-        this.consoleOutput.push(`adk Agent generated successfully for ${agentName}!`);
-        this.consoleOutput.push('');
-        this.consoleOutput.push(`Container: ${this.currentCname}`);
-        this.consoleOutput.push('Status: Ready for development');
-
-        this.isGenerating = false;
-        this.hasGeneratedAgent = true;
-
-        // Show success message with properly formatted response
-        const successResponse = { status: 200, body: response || [] };
-        this.service.messageService(successResponse, `adk Agent '${agentName}' generated successfully!`);
-        
-        // Don't automatically open playground - user will click "Open Playground" button when ready
-        console.log(
-          'Agent generation complete. Playground available via button.'
-        );
-      },
-      error: (error) => {
-        console.error('Agent generation failed:', error);
-        this.consoleOutput.push('✗ Agent generation failed');
-        this.consoleOutput.push(`Error: ${error.message}`);
-        this.consoleOutput.push(
-          'Please check the server connection and try again.'
-        );
-
-        this.isGenerating = false;
-        this.hasGeneratedAgent = false;
-
-        // Show error message to user
-        this.service.messageService(error);
-      },
-    });
-  }
-
-  clearConsole(): void {
-    this.consoleOutput = [];
-  }
+  // Methods removed - auto-loading enabled when viewing details
+  // generateadkAgent() and clearConsole() methods are no longer needed
 
   // LLM Selection and Prompt Template methods
   getPromptTemplate(): string {
@@ -2939,6 +2839,14 @@ DELIVERABLES
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
+    
+    // Show empty script content when no files exist
+    if (!this.loadScript || !this.script || this.script.length === 0) {
+      this.script = [];
+      this.scriptFileName = '';
+      this.loadScript = true;
+      console.log('Showing empty script content - no placeholder data');
+    }
 
     console.log(
       'Showing script tab only - no existing files found for cname:',
@@ -2957,6 +2865,15 @@ DELIVERABLES
     this.fileSystemData = [];
     this.consoleOutput = [];
     this.clearFileSelection();
+    
+    // Ensure script content is empty for new agents - no placeholders
+    if (!this.loadScript || !this.script || this.script.length === 0) {
+      this.script = [];
+      this.scriptFileName = '';
+      this.loadScript = true;
+      console.log('Set empty script content for new agent');
+    }
+    
     console.log(
       'Reset to initial state for agent with cname:',
       this.currentCname
@@ -2975,5 +2892,274 @@ DELIVERABLES
     this.originalFileContent = '';
     this.userModifiedLines.clear();
     this.resetDiffTracking();
+  }
+
+  // Automatically load agent data when viewing details
+  private autoLoadAgentData(): void {
+    if (!this.currentCname) {
+      console.error('Cannot auto-load agent data: no cname available');
+      this.showScriptTabOnly();
+      return;
+    }
+
+    console.log('Auto-loading agent data for cname:', this.currentCname);
+    this.isLoadingFiles = true;
+    
+    // Reset state first
+    this.resetToInitialStateForNewAgent();
+
+    // Call folder list API first
+    this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
+      next: (listResponse) => {
+        console.log('Folder list API response:', listResponse);
+        
+        if (listResponse && listResponse.length > 0) {
+          // Data exists, now call upload API to get full content
+          this.callUploadAPIForContent();
+        } else {
+          // No data from list API, show only script tab
+          console.log('No data from folder list API, showing script tab only');
+          this.showScriptTabOnly();
+          this.isLoadingFiles = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error calling folder list API:', error);
+        // On error, show only script tab
+        this.showScriptTabOnly();
+        this.isLoadingFiles = false;
+      }
+    });
+  }
+
+  // Call the upload API to get full content
+  private callUploadAPIForContent(): void {
+    const folderPath = 'C:/Users/anushka.mishra/Downloads/11TBGT-leo1311'; // Sample path
+    
+    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
+      next: (uploadResponse) => {
+        console.log('Upload API response:', uploadResponse);
+        
+        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
+          // Data exists from both APIs, enable codespace tab
+          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
+          this.hasGeneratedAgent = true;
+          this.isJsonProcessed = true;
+          
+          console.log('Data found from both APIs, enabling codespace tab');
+        } else {
+          // No meaningful data, show script tab only
+          console.log('No meaningful data from upload API, showing script tab only');
+          this.showScriptTabOnly();
+        }
+        
+        this.isLoadingFiles = false;
+      },
+      error: (error) => {
+        console.error('Error calling upload API:', error);
+        // On error, show only script tab
+        this.showScriptTabOnly();
+        this.isLoadingFiles = false;
+      }
+    });
+  }
+
+  // Auto-load agent data specifically for pipeline cards from dashboard
+  private autoLoadAgentDataForPipelineCard(): void {
+    if (!this.currentCname) {
+      console.error('Cannot auto-load pipeline agent data: no cname available');
+      this.showScriptTabOnly();
+      return;
+    }
+
+    console.log('Auto-loading pipeline agent data for cname:', this.currentCname);
+    this.isLoadingFiles = true;
+    
+    // Always load JSON file from API for script tab
+    this.loadJsonFileForScript();
+    
+    // Reset state first
+    this.resetToInitialStateForNewAgent();
+
+    // Call folder list API first - using the cname as both cname and filename for the API
+    this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
+      next: (listResponse) => {
+        console.log('Pipeline folder list API response:', listResponse);
+        
+        if (listResponse && listResponse.length > 0) {
+          // List API succeeded - enable codespace tab immediately
+          console.log('List API succeeded, enabling codespace tab for pipeline card');
+          this.hasGeneratedAgent = true;
+          this.isJsonProcessed = true;
+          
+          // Build file tree from list API response
+          this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(listResponse);
+          this.expandAllFolders(this.fileSystemData);
+          
+          // Set console output to show that files were found
+          this.consoleOutput = [
+            `Pipeline files detected from list API`,
+            `Container: ${this.currentCname}`,
+            `Files: ${listResponse.length} files found`,
+            `Status: Codespace enabled`
+          ];
+          
+          // Now try upload API to get full content (but don't disable codespace if it fails)
+          this.callUploadAPIForPipelineCard();
+        } else {
+          // No data from list API, show only script tab and continue with old flow
+          console.log('No data from pipeline folder list API, falling back to script tab and old flow');
+          this.showScriptTabOnly();
+          this.isLoadingFiles = false;
+          // Fall back to the original getStreamService flow
+          this.getStreamService();
+        }
+      },
+      error: (error) => {
+        console.error('Error calling pipeline folder list API:', error);
+        // On error, show only script tab and fall back to old flow
+        this.showScriptTabOnly();
+        this.isLoadingFiles = false;
+        this.getStreamService();
+      }
+    });
+  }
+
+  // Load JSON file from API for script tab
+  private loadJsonFileForScript(): void {
+    // Ensure we have organisation from localStorage
+    if (!this.organisation) {
+      this.organisation = localStorage.getItem('organisation') || 'leo1311';
+    }
+    
+    if (!this.currentCname || !this.organisation) {
+      console.log('Missing required data for JSON file loading:', {
+        cname: this.currentCname,
+        organisation: this.organisation,
+        localStorage: localStorage.getItem('organisation')
+      });
+      // Show empty editor when no valid data found
+      this.script = [];
+      this.scriptFileName = '';
+      this.loadScript = true;
+      return;
+    }
+
+    const jsonFileName = `${this.currentCname}_${this.organisation}.json`;
+    
+    console.log('🚀 Making API call to read JSON file:', {
+      cname: this.currentCname,
+      organisation: this.organisation,
+      fileName: jsonFileName,
+      expectedUrl: `api/aip/file/read/${this.currentCname}/${this.organisation}?file=${jsonFileName}`
+    });
+    
+    this.service.readNativeFile(this.currentCname, this.organisation, jsonFileName).subscribe({
+      next: (response) => {
+        console.log('✅ JSON file API response received:', {
+          responseType: typeof response,
+          isArrayBuffer: response instanceof ArrayBuffer,
+          responseLength: response instanceof ArrayBuffer ? response.byteLength : (typeof response === 'string' ? response.length : 'unknown')
+        });
+        
+        try {
+          // Convert arraybuffer response to string
+          let jsonString = '';
+          if (response instanceof ArrayBuffer) {
+            const decoder = new TextDecoder('utf-8');
+            jsonString = decoder.decode(response);
+            console.log('Decoded ArrayBuffer to string:', jsonString.substring(0, 200) + '...');
+          } else if (typeof response === 'string') {
+            jsonString = response;
+            console.log('Response is already string:', jsonString.substring(0, 200) + '...');
+          } else {
+            throw new Error('Invalid response format: ' + typeof response);
+          }
+          
+          this.script = jsonString.split('\n');
+          this.scriptFileName = jsonFileName;
+          this.loadScript = true;
+          console.log('✅ Script tab updated with API JSON content, lines:', this.script.length);
+        } catch (error) {
+          console.error('❌ Error processing JSON response:', error);
+          // Show error message instead of fallback
+          this.script = ['Error: Could not load configuration file', 'File may not exist or server is unavailable', ''];
+          this.scriptFileName = 'Error - ' + jsonFileName;
+          this.loadScript = true;
+        }
+      },
+      error: (error) => {
+        console.error('❌ Failed to load JSON file from API:', {
+          error: error,
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
+        // Show error message instead of fallback
+        this.script = [
+          'Error: Could not load configuration file',
+          `Failed to load: ${jsonFileName}`,
+          '',
+          'Possible reasons:',
+          '- File does not exist on server',
+          '- Network connection issue', 
+          '- Server is unavailable',
+          '',
+          'Please check your network connection and try again.'
+        ];
+        this.scriptFileName = 'Error - Configuration Not Found';
+        this.loadScript = true;
+        console.log('Showing error message instead of fallback content');
+      }
+    });
+  }
+
+  // Call the upload API for pipeline cards
+  private callUploadAPIForPipelineCard(): void {
+    const folderPath = `C:/Users/anushka.mishra/Downloads/${this.currentCname}-leo1311`; // Use cname in path
+    
+    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
+      next: (uploadResponse) => {
+        console.log('Pipeline upload API response:', uploadResponse);
+        
+        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
+          // Upload API succeeded - update file tree with full content
+          console.log('Upload API succeeded, updating file tree with full content');
+          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
+          
+          // Update console output to show upload success
+          this.consoleOutput = [
+            `Pipeline files loaded with full content`,
+            `Container: ${this.currentCname}`,
+            `Status: Ready for development`,
+            `Upload: Successful`
+          ];
+        } else {
+          // Upload API returned no data, but codespace tab is already enabled from list API
+          console.log('Upload API returned no meaningful data, but codespace remains enabled');
+          this.consoleOutput = [
+            `Pipeline files detected (list only)`,
+            `Container: ${this.currentCname}`,
+            `Status: Codespace enabled`,
+            `Upload: No content available`
+          ];
+        }
+        
+        this.isLoadingFiles = false;
+      },
+      error: (error) => {
+        console.error('Upload API failed, but codespace remains enabled from list API:', error);
+        // Upload failed, but codespace tab remains enabled since list API succeeded
+        this.consoleOutput = [
+          `Pipeline files detected (list only)`,
+          `Container: ${this.currentCname}`,
+          `Status: Codespace enabled`,
+          `Upload: Failed - ${error.message || 'Unknown error'}`
+        ];
+        
+        this.isLoadingFiles = false;
+        // Note: We don't call getStreamService() here since codespace is already enabled
+      }
+    });
   }
 }

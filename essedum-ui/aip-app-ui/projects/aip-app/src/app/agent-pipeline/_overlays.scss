@@ -1,0 +1,185 @@
+// ===========================================
+// PROCESSING OVERLAY
+// ===========================================
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  @include flex-center;
+  z-index: $z-overlay;
+  animation: fadeIn $transition-normal;
+}
+
+.processing-popup {
+  background: white;
+  border-radius: $border-radius-large;
+  padding: $space-4xl;
+  text-align: center;
+  box-shadow: $shadow-lg;
+  animation: slideUp $transition-normal;
+  min-width: 300px;
+}
+
+.processing-icon {
+  margin-bottom: 20px;
+  
+  mat-icon {
+    font-size: 48px;
+    color: $primary-blue;
+    animation: spin 1s linear infinite;
+  }
+}
+
+.processing-text {
+  h2 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 20px;
+    font-weight: 500;
+  }
+  
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+// ===========================================
+// POPUP DIALOGS
+// ===========================================
+.playground-overlay,
+.save-confirmation-overlay,
+.delete-confirmation-overlay,
+.unsaved-changes-overlay,
+.prompt-copy-overlay,
+.save-structure-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  @include flex-center;
+  z-index: $z-overlay;
+  animation: fadeIn $transition-normal;
+  backdrop-filter: blur(2px);
+}
+
+.playground-popup,
+.save-confirmation-popup,
+.delete-confirmation-popup,
+.unsaved-changes-popup,
+.prompt-copy-popup,
+.save-structure-popup {
+  background: white;
+  border-radius: $border-radius-large;
+  box-shadow: $shadow-lg;
+  animation: slideUp $transition-normal;
+  overflow: hidden;
+  width: 90%;
+  max-width: 500px;
+}
+
+.playground-popup {
+  max-width: 900px;
+  height: 80vh;
+  max-height: 700px;
+  @include flex-column;
+}
+
+.playground-header,
+.save-confirmation-header,
+.delete-confirmation-header,
+.unsaved-changes-header,
+.prompt-copy-header,
+.save-structure-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-hover 100%);
+  color: white;
+  @include flex-between;
+}
+
+.playground-header h2,
+.save-confirmation-header h2,
+.delete-confirmation-header h2,
+.unsaved-changes-header h2,
+.prompt-copy-header h2,
+.save-structure-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.playground-header .close-button,
+.save-confirmation-header .close-button,
+.delete-confirmation-header .close-button,
+.unsaved-changes-header .close-button,
+.prompt-copy-header .close-button,
+.save-structure-header .close-button {
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  @include flex-center;
+}
+
+.playground-header .close-button:hover,
+.save-confirmation-header .close-button:hover,
+.delete-confirmation-header .close-button:hover,
+.unsaved-changes-header .close-button:hover,
+.prompt-copy-header .close-button:hover,
+.save-structure-header .close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.playground-content,
+.save-confirmation-content,
+.delete-confirmation-content,
+.unsaved-changes-content,
+.prompt-copy-content,
+.save-structure-content {
+  padding: 16px 20px;
+}
+
+.playground-content p,
+.save-confirmation-content p,
+.delete-confirmation-content p,
+.unsaved-changes-content p,
+.prompt-copy-content p,
+.save-structure-content p {
+  margin: 0 0 8px 0;
+  color: #555;
+  line-height: 1.4;
+}
+
+.playground-footer,
+.save-confirmation-footer,
+.delete-confirmation-footer,
+.unsaved-changes-footer,
+.prompt-copy-footer,
+.save-structure-footer {
+  padding: 16px 20px;
+  background: $bg-light;
+  border-top: 1px solid $border-light;
+  @include flex-end;
+  gap: 12px;
+}
+
+.playground-footer button,
+.save-confirmation-footer button,
+.delete-confirmation-footer button,
+.unsaved-changes-footer button,
+.prompt-copy-footer button,
+.save-structure-footer button {
+  padding: 8px 16px;
+  border-radius: $border-radius;
+  font-weight: 500;
+  transition: all $transition-normal;
+  cursor: pointer;
+  min-width: 80px;
+  height: 36px;
+}

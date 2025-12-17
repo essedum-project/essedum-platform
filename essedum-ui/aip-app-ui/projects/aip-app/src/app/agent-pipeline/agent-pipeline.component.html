@@ -86,18 +86,8 @@
                               </div>
                             </div>
 
-                            <!-- Generate Controls -->
+                            <!-- Generate Controls - Auto-loading enabled, only playground button remains -->
                             <div class="generate-controls">
-                              <button mat-raised-button color="primary" class="play-button compact-button" (click)="generateadkAgent()"
-                                [disabled]="isGenerateAgentDisabled || !selectedLLM"
-                                [matTooltip]="getGenerateButtonTooltip()" matTooltipPosition="above">
-                                <mat-icon>play_arrow</mat-icon>
-                              </button>
-                              <button mat-raised-button class="clear-button compact-button" (click)="clearConsole()"
-                                [disabled]="consoleOutput.length === 0"
-                                matTooltip="Clear Console" matTooltipPosition="above">
-                                <mat-icon>backspace</mat-icon>
-                              </button>
                               <button mat-raised-button color="primary" class="playground-button compact-button"
                                 (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent"
                                 matTooltip="Open Playground" matTooltipPosition="above">
@@ -146,24 +136,26 @@
                                 <span class="console-prompt">$</span>
                                 <span class="console-text console-loading">Processing...</span>
                               </div>
-                              <div *ngIf="consoleOutput.length === 0 && !isGenerating" class="console-empty">
-                                <span *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Click "Generate Agent" to start
-                                  the build process</span>
+                              <div *ngIf="consoleOutput.length === 0 && !isGenerating && !isLoadingFiles" class="console-empty">
+                                <span *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Auto-loading agent data when you select an agent...</span>
                                 <span *ngIf="hasGeneratedAgent || hasExistingFiles()">Agent is ready for development.
                                   Use the Essedum Codespace tab to edit files.</span>
                               </div>
+                              <div *ngIf="isLoadingFiles" class="console-line">
+                                <span class="console-prompt">$</span>
+                                <span class="console-text console-loading">Loading agent data...</span>
+                              </div>
                             </div>
-                          </div> <!-- LLM Selection Required Message -->
-                          <div class="llm-selection-required" 
-                            *ngIf="!selectedLLM && !hasGeneratedAgent && !hasExistingFiles()">
+                          </div> <!-- Auto-loading Information Message -->
+                          <div class="llm-selection-info" 
+                            *ngIf="!hasGeneratedAgent && !hasExistingFiles()">
                             <div class="selection-message">
                               <mat-icon>info</mat-icon>
-                              <p>Please select an LLM provider above to continue</p>
+                              <p>Agent data will be automatically loaded when available</p>
                             </div>
                           </div>
                         </div>
                       </div>
-
                     </div>
                   </div>
                 </mat-tab>
@@ -212,58 +204,48 @@
                             <div class="file-info">
                               <mat-icon class="file-type-icon" [ngClass]="getFileTypeClass(selectedFileName)">{{
                                 getFileIcon(selectedFileName) }}</mat-icon>
-                              <span class="file-name" [class.modified]="isFileModified">{{ selectedFileName }}</span>
-                              <span class="file-path-breadcrumb">{{ selectedFilePath }}</span>
+                              <span class="file-name" [class.modified]="isFileModified" [title]="selectedFileName">{{ selectedFileName }}</span>
+                              <span class="file-path-breadcrumb" [title]="selectedFilePath">{{ selectedFilePath }}</span>
                               <span class="modified-indicator" *ngIf="isFileModified"
                                 title="File has unsaved changes">●</span>
                             </div>
-                            <ul class="d-flex align-items-center py-2 px-4" style="list-style: none; margin: 0;">
-                              <li style="padding-right: 20px;">
-                                <mat-tooltip [matTooltip]="'Copy Content'" [matTooltipPosition]="'above'">
-                                  <i class="icon copy-icon x-24" (click)="copyFileContent()"
-                                    style="cursor: pointer;"></i>
-                                </mat-tooltip>
-                              </li>
-                              <li style="padding-right: 20px;">
-                                <span matTooltip="Save File" [matTooltipPosition]="'above'">
-                                  <button mat-icon-button class="action-button save-button"
-                                    [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
-                                    (click)="saveFile()" [disabled]="!isFileModified">
-                                    <mat-icon>save</mat-icon>
-                                  </button>
-                                </span>
-                              </li>
-                              <li style="padding-right: 20px;">
-                                <span matTooltip="Delete File" [matTooltipPosition]="'above'">
-                                  <button mat-icon-button class="action-button delete-button"
-                                    [class.delete-enabled]="selectedFileName && !isSavingFile"
-                                    [class.delete-disabled]="!selectedFileName || isSavingFile"
-                                    (click)="showDeleteConfirmation()" [disabled]="!selectedFileName || isSavingFile"
-                                    [attr.data-debug]="'delete-icon-' + selectedFileName">
-                                    <mat-icon>delete</mat-icon>
-                                  </button>
-                                </span>
-                              </li>
-                              <li>
-                                <span matTooltip="Close File" [matTooltipPosition]="'above'">
-                                  <i class="action-button aip-led-icons icon x-24" (click)="closeFile()"
-                                    style="cursor: pointer;">✖</i>
-                                </span>
-                              </li>
-                            </ul>
+                            <div class="editor-actions">
+                              <button mat-icon-button class="action-button copy-button" (click)="copyFileContent()" 
+                                matTooltip="Copy Content" matTooltipPosition="above">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
+                              <button mat-icon-button class="action-button save-button"
+                                [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
+                                (click)="saveFile()" [disabled]="!isFileModified"
+                                matTooltip="Save File" matTooltipPosition="above">
+                                <mat-icon>save</mat-icon>
+                              </button>
+                              <button mat-icon-button class="action-button delete-button"
+                                [class.delete-enabled]="selectedFileName && !isSavingFile"
+                                [class.delete-disabled]="!selectedFileName || isSavingFile"
+                                (click)="showDeleteConfirmation()" [disabled]="!selectedFileName || isSavingFile"
+                                matTooltip="Delete File" matTooltipPosition="above">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                              <button mat-icon-button class="action-button close-button" (click)="closeFile()"
+                                matTooltip="Close File" matTooltipPosition="above">
+                                <mat-icon>close</mat-icon>
+                              </button>
+                            </div>
                           </div>
 
                           <!-- Code Editor Content -->
-                          <div class="pipeline-code-editor">
+                          <div class="editor-content-wrapper">
                             <ng-container *ngIf="fileExtension === 'py'">
-                              <app-enl-code-editor id="ele" [script]="selectedFileContent.split('\n')" lang="python"
-                                [class.editor-modified]="isFileModified" (scriptChange)="onFileContentChange($event)">
-                              </app-enl-code-editor>
+                              <div class="python-editor-container">
+                                <app-enl-code-editor id="ele" [script]="selectedFileContent.split('\n')" lang="python"
+                                  [class.editor-modified]="isFileModified" (scriptChange)="onFileContentChange($event)">
+                                </app-enl-code-editor>
+                              </div>
                             </ng-container>
-                            <div *ngIf="fileExtension != 'py'" class="pipeline-code-content">
-                              <div class="diff-editor-container">
-                                <!-- Line numbers and diff indicators - NO scrollbar, synced with textarea -->
-                                <div class="line-numbers-gutter">
+                            <ng-container *ngIf="fileExtension != 'py'">
+                              <div class="text-editor-container">
+                                <div class="line-numbers-column">
                                   <div *ngFor="let lineNum of getVisibleLineNumbers(); let i = index"
                                     class="line-number" [class.line-added]="addedLines.has(lineNum - 1)"
                                     [class.line-modified]="modifiedLines.has(lineNum - 1)"
@@ -274,34 +256,31 @@
                                       *ngIf="modifiedLines.has(lineNum - 1) && !addedLines.has(lineNum - 1)">~</span>
                                     <span class="user-indicator" *ngIf="userModifiedLines.has(lineNum - 1)">●</span>
                                   </div>
-                                  <!-- Spacer for remaining lines -->
-                                  <div class="line-spacer"
-                                    [style.height.px]="(totalLineCount - getVisibleLineNumbers().length) * 20"></div>
-                                </div> <!-- Code editor textarea with diff styling -->
-                                <div class="editor-wrapper">
+                                </div>
+                                <div class="text-editor-column">
                                   <ng-container *ngIf="fileExtension === 'json'">
-                                    <textarea class="pipeline-file-editor json-editor code-editor-textarea"
+                                    <textarea class="file-content-editor json-editor"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="JSON content..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'java'">
-                                    <textarea class="pipeline-file-editor java-editor code-editor-textarea"
+                                    <textarea class="file-content-editor java-editor"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Java code..." spellcheck="false" 
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'xml'">
-                                    <textarea class="pipeline-file-editor xml-editor code-editor-textarea"
+                                    <textarea class="file-content-editor xml-editor"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="XML content..." spellcheck="false" 
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'properties'">
-                                    <textarea class="pipeline-file-editor properties-editor code-editor-textarea"
+                                    <textarea class="file-content-editor properties-editor"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Properties content..." spellcheck="false" 
@@ -309,7 +288,7 @@
                                   </ng-container>
                                   <ng-container
                                     *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
-                                    <textarea class="pipeline-file-editor code-editor-textarea"
+                                    <textarea class="file-content-editor"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="File content..." spellcheck="false" 
@@ -317,13 +296,16 @@
                                   </ng-container>
                                 </div>
                               </div>
-                            </div>
+                            </ng-container>
                           </div>
-
                         </div>
 
                         <div class="file-editor-placeholder" *ngIf="!selectedFileName">
-                          <p>Select a file to view its contents</p>
+                          <div class="placeholder-content">
+                            <mat-icon>folder_open</mat-icon>
+                            <h3>Select a file to view its contents</h3>
+                            <p>Choose a file from the project explorer to start editing</p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -345,7 +327,8 @@
     <div *ngFor="let node of nodes" class="tree-node">
       <div class="tree-node-content" [class.selected]="isFileSelected(node)"
         [class.folder-node]="node.type === 'folder'" [class.file-node]="node.type === 'file'"
-        [class.drag-over]="dropTarget === node" [style.padding-left.px]="(level * 16) + 8" [draggable]="true"
+        [class.file-modified]="isNodeFileModified(node)" [class.drag-over]="dropTarget === node" 
+        [style.padding-left.px]="(level * 16) + 8" [draggable]="true"
         (click)="selectFile(node)" (dragstart)="onDragStart($event, node)" (dragover)="onDragOver($event)"
         (dragenter)="onDragEnter($event, node)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event, node)">
 
