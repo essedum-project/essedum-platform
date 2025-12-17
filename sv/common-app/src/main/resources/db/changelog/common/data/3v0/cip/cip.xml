@@ -132,7 +132,7 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
             <column name="cname" type="VARCHAR(255)" />
             <column name="organization" type="VARCHAR(255)" />
             <column name="filename" type="VARCHAR(255)" />
-            <column name="filescript" type="BLOB" />
+            <column name="filescript" type="LONGBLOB" />
             <column name="filepath" type="VARCHAR(255)" />
         </createTable>
     </changeSet>
@@ -191,7 +191,7 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
            <column header="cname" name="cname" type="STRING"/>
            <column header="organization" name="organization" type="STRING"/>
            <column header="filename" name="filename" type="STRING"/>
-           <column header="filescript" name="filescript" type="BLOB"/>
+           <column header="filescript" name="filescript" type="LONGBLOB"/>
            <column header="filepath" name="filepath" type="STRING"/>
        </loadData>
    </changeSet>
