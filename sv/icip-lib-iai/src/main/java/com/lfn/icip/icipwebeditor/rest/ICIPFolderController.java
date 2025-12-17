@@ -95,6 +95,23 @@ public class ICIPFolderController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        // Check if files already exist for this cname and org
+        List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
+        if (existingFiles != null && !existingFiles.isEmpty()) {
+            logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
+                        existingFiles.size(), cname, org);
+            try {
+                folderService.deleteAllByCnameAndOrg(cname, org);
+                logger.info("Successfully deleted all existing files for cname={}, org={}", cname, org);
+            } catch (Exception e) {
+                logger.error("Error deleting existing files for cname={}, org={}: {}", cname, org, e.getMessage(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(null);
+            }
+        } else {
+            logger.info("No existing files found for cname={}, org={}", cname, org);
+        }
+
         // Use default path if no specific path is provided
         String pathToUse = folderPath;
         if (pathToUse == null || pathToUse.isBlank()) {

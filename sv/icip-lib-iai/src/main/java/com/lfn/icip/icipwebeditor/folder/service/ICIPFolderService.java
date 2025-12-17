@@ -533,6 +533,38 @@ public class ICIPFolderService {
     }
 
     /**
+     * Delete all files for a specific cname and org.
+     *
+     * @param cname the cname
+     * @param org   the org
+     */
+    public void deleteAllByCnameAndOrg(String cname, String org) {
+        logger.info("Deleting all files for cname: {}, org: {}", cname, org);
+
+        try {
+            List<ICIPAiAgentScript> scripts = aiAgentService.findByNameAndOrg(cname, org);
+
+            if (scripts == null || scripts.isEmpty()) {
+                logger.info("No scripts found to delete for cname: {}, org: {}", cname, org);
+                return;
+            }
+
+            int deletedCount = 0;
+            for (ICIPAiAgentScript script : scripts) {
+                aiAgentService.deleteById(script.getId());
+                deletedCount++;
+            }
+
+            logger.info("Successfully deleted {} scripts for cname: {}, org: {}", deletedCount, cname, org);
+
+        } catch (Exception e) {
+            logger.error("Error deleting all files for cname: {}, org: {}. Error: {}",
+                    cname, org, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete all files for cname: " + cname + ", org: " + org, e);
+        }
+    }
+
+    /**
      * Export zip.
      *
      * @param cname the cname
