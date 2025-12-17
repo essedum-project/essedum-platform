@@ -137,11 +137,7 @@ export class PipelineAgentDetailComponent implements OnInit {
       }
     ];
     
-    // JSON configuration
-    jsonContent = `{
-    "agent_name": "customer-support-agent",
-    "version": "1.0.0"
-  }`;
+    // JSON configuration removed - content comes from API only
   
     // File system structure
     fileSystemData: FileNode[] = [];
@@ -621,8 +617,7 @@ export class PipelineAgentDetailComponent implements OnInit {
       this.isProcessingJson = false;
       this.hasGeneratedAgent = false; // Reset playground button state
       
-      // Update JSON content based on selected agent
-      this.updateJsonContent(agent);
+      // Content will come from API only - no placeholder JSON
       // Don't generate file system data until JSON is processed
     }
   
@@ -651,25 +646,8 @@ export class PipelineAgentDetailComponent implements OnInit {
     }
   
     updateJsonContent(agent: AgentCard): void {
-      this.jsonContent = `{
-    "agent_name": "${agent.alias}",
-    "version": "${agent.version}",
-    "description": "${agent.description}",
-    "configuration": {
-      "model": "gpt-4",
-      "temperature": 0.7,
-      "max_tokens": 2000,
-      "tools": ${JSON.stringify(this.getToolsForAgent(agent.alias), null, 6)}
-    },
-    "runtime": {
-      "type": "${agent.language}",
-      "dependencies": [
-        "openai>=1.0.0",
-        "requests>=2.28.0",
-        "python-dotenv>=0.19.0"
-      ]
-    }
-  }`;
+      // Content will come from API only - no hardcoded JSON generation
+      console.log('JSON content request for agent:', agent.alias);
     }
   
     getToolsForAgent(agentName: string): any[] {
@@ -898,7 +876,8 @@ export class PipelineAgentDetailComponent implements OnInit {
     }
   
     onJsonChange(event: any): void {
-      this.jsonContent = event.join('\n');
+      // Handle JSON content changes from API data only
+      console.log('JSON content changed:', event);
     }
   
     onFileContentChange(event: any): void {

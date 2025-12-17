@@ -187,6 +187,21 @@ export class AgentPipelineService {
   }
 
   /**
+   * Upload agent folder - calls the upload API with folder path
+   */
+  uploadAgentFolder(cname: string, folderPath: string): Observable<any> {
+    const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;
+    const params = new HttpParams().set('folderPath', folderPath);
+    
+    console.log('Uploading agent folder to:', url);
+    console.log('Folder path:', folderPath);
+    
+    return this.http.post<any>(url, {}, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Download specific file content
    */
   downloadFileContent(cname: string, fileId: string): Observable<string> {

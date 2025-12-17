@@ -2,14 +2,18 @@
 // FILE STRUCTURE & TREE
 // ===========================================
 .file-structure-container {
-  min-height: 500px;
+  min-height: calc(100vh - 250px);
+  height: calc(100vh - 250px);
+  display: flex;
+  flex-direction: column;
 }
 
 .file-panel {
   display: flex;
   gap: 20px;
   height: 100%;
-  align-items: flex-start;
+  align-items: stretch; // Change from flex-start to stretch for equal height
+  flex: 1;
 }
 
 .file-panel .file-explorer {
@@ -25,6 +29,9 @@
   @include panel-dark;
   border-radius: $border-radius;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .file-explorer .explorer-header {
@@ -133,7 +140,7 @@
 
 .tree-node .tree-node-content .node-name {
   font-size: $font-base;
-  color: $text-light;
+  color: #cccccc !important;
   white-space: nowrap;
   user-select: none;
   flex: 1;
@@ -141,28 +148,29 @@
   text-align: left; // Explicit left alignment
 }
 
+// Override all file extension colors to use consistent color
 .tree-node .tree-node-content .node-name[title$=".py"] {
-  color: $color-python;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content .node-name[title$=".json"] {
-  color: $color-json;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content .node-name[title$=".java"] {
-  color: $color-java;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content .node-name[title$=".xml"] {
-  color: $color-xml;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content .node-name[title$=".properties"] {
-  color: $color-properties;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content .node-name[title$=".md"] {
-  color: $color-markdown;
+  color: #cccccc !important;
 }
 
 .tree-node .tree-node-content:hover {
@@ -184,6 +192,12 @@
 
 .tree-node .tree-node-content.file-node .node-name {
   font-weight: 400;
+}
+
+// Modified file highlighting
+.tree-node .tree-node-content.file-modified .node-name {
+  color: $warning-orange !important;
+  font-weight: 600;
 }
 
 .tree-node .tree-node-content.drag-over {
