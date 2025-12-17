@@ -54,17 +54,7 @@ logger.addHandler(file_handler)
 
 logger.info("Proxy disabled - all proxy environment variables cleared before requests module loaded")
 
-# def token_generate():
-#   url = f"https://login.microsoftonline.com/{os.environ.get('tenant_id')}/oauth2/token"
 
-#   payload = f"grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}"
-#   headers = {
-#   'Content-Type': 'application/x-www-form-urlencoded',
-#   'Cookie': 'fpc=AnhFZJgHdUZBh0ZeIH62qTPRTIEqAQAAAENpn9wOAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
-#   }
-
-#   response = requests.request("POST", url, headers=headers, data=payload)
-#   return response.text
 
 def token_generate():
   try:
@@ -315,37 +305,6 @@ transformations:
 
 
 
-
-
-
-# def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
-#   connect=token_generate()
-#   value=json.loads(connect)
-#   Authorization=value["access_token"]
-#   api_version=connections.get("datasets_api-version",None)
-#   subscriptionId=connections.get('subscriptionId',None)
-#   resourceGroupName=connections.get('resourceGroupName',None)
-#   workspaceName=connections.get('workspaceName',None)
-#   url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/data?api-version={api_version}"
-#   headers = {
-#   "Authorization" : "Bearer "+str(Authorization)
-#   }
-#   response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
-#   try:
-#     if response.status_code == 200 :
-#       values=json.loads(response.text)
-#       values=responseFormat(adapter_instance,project,values)
-#       return values,response.status_code
-#     elif response.status_code == 400:
-#       return "Error: Bad Parameters(HTTP 400)"
-#     elif response.status_code ==500:
-#       return "Internal Server Error(HTTP 500)"
-#     else:
-#       return f"Request failed with status code:{response.status_code}"
-        
-#   except Exception as e:
-#     logger.error(f"an error occured:{str(e)}")  
-#     return e
 
 
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
