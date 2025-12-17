@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
 
   const port = Number(env.VITE_PORT) || PORT || 3000;
 
-  const proxyTargets = apiRoutes.reduce((proxyObj, route) => {
+  const proxyTargets = apiRoutes.reduce<Record<string, { target: string; changeOrigin: boolean; secure: boolean; ws: boolean }>>((proxyObj, route) => {
     proxyObj[route] = {
       target: target,
       changeOrigin: true,
@@ -42,10 +42,12 @@ export default defineConfig(({ mode }) => {
     return proxyObj;
   }, {});
 
-  const isProduction = mode === 'production' || envConfig.VITE_FORCE_PRODUCTION_PROXY === true;
-  const aipTarget = isProduction 
-    ? envConfig.VITE_BACKEND_URL
-    : "http://localhost:8081";
+  // In development, always proxy AIP calls to the configured backend
+  // In production build, this proxy config is ignored anyway
+  const aipTarget = envConfig.VITE_BACKEND_URL;
+  
+  // Debug info (comment out for production)
+  // console.log('🔥 VITE PROXY DEBUG:', { aipTarget, mode, envConfig });
 
   return {
     base: BASENAME || "",
@@ -61,6 +63,9 @@ export default defineConfig(({ mode }) => {
       ),
       "import.meta.env.VITE_FORCE_PRODUCTION_PROXY": JSON.stringify(
         envConfig.VITE_FORCE_PRODUCTION_PROXY.toString()
+      ),
+      "import.meta.env.VITE_USE_ABSOLUTE_URLS": JSON.stringify(
+        envConfig.VITE_USE_ABSOLUTE_URLS?.toString() ?? "false"
       ),
       "import.meta.env.VITE_IGNORE_SSL_CERTS": JSON.stringify(
         envConfig.VITE_IGNORE_SSL_CERTS.toString()
@@ -83,12 +88,13 @@ export default defineConfig(({ mode }) => {
     server: {
       port: port,
       proxy: {
+        // Always proxy AIP calls in development mode
         "/api/aip/": {
           target: aipTarget,
           changeOrigin: true,
-          secure: isProduction && !envConfig.VITE_IGNORE_SSL_CERTS,
+          secure: mode === 'production' && !envConfig.VITE_IGNORE_SSL_CERTS,
           ws: true,
-          configure: (proxy, options) => {
+          configure: (proxy: any, options: any) => {
             if (envConfig.VITE_IGNORE_SSL_CERTS && aipTarget.startsWith('https://')) {
               options.agent = new https.Agent({
                 rejectUnauthorized: false,
@@ -96,6 +102,13 @@ export default defineConfig(({ mode }) => {
               });
             }
           },
+          // Proxy event handlers for debugging
+          onProxyReq(proxyReq: any, req: any) {
+            console.log(`🚀 AIP PROXY: ${req.method} ${req.url} -> ${aipTarget}${req.url}`);
+          },
+          onError(err: any, req: any) {
+            console.log(`❌ AIP PROXY ERROR: ${err.message} for ${req.url}`);
+          }
         },        
         ...proxyTargets,
       },
