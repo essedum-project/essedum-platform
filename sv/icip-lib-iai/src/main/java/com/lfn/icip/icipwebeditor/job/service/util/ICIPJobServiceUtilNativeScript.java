@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -203,9 +204,23 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String filePathString = file.getAsString();
 			Path path;
 			InputStream is = null;
+            // ✅ Remove brackets and trim spaces
+            filePathString = filePathString.replace("[", "").replace("]", "").trim();
+
+            // ✅ Split by comma
+            String[] filesArray = filePathString.split(",");
+
+            // ✅ Find .py file
+            String pyFileName = Arrays.stream(filesArray)
+                    .map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
+                    .filter(f -> f.toLowerCase().endsWith(".py"))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("No .py file found"));
+
+            System.out.println("Extracted .py file: " + pyFileName);
 			try {
-				is = iCIPFileService.getNativeCodeInputStream(cname, org, filePathString);
-				path = iCIPFileService.getFileInServer(is, filePathString, FileConstants.NATIVE_CODE);
+				is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
+				path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
 			} catch (IOException | SQLException ex) {
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();

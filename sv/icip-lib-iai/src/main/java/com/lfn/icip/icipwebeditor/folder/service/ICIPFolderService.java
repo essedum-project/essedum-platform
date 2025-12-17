@@ -15,19 +15,29 @@
 
 package com.lfn.icip.icipwebeditor.folder.service;
 
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
 import com.lfn.icip.icipwebeditor.service.IICIPAiAgentService;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPBinaryFilesService;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +45,10 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -74,6 +88,21 @@ public class ICIPFolderService {
      * The agents config.
      */
     public ICIPAgentsConfig agentsConfig;
+
+    /**
+     * MinIO configuration properties
+     */
+    @EssedumProperty("icip.minio.url")
+    private String minioUrl;
+
+    @EssedumProperty("icip.minio.access-key")
+    private String minioAccessKey;
+
+    @EssedumProperty("icip.minio.secret-key")
+    private String minioSecretKey;
+
+    @EssedumProperty("icip.certificateCheck")
+    private String certificateCheck;
 
     /**
      * Instantiates a new ICIP file service.
@@ -560,6 +589,320 @@ public class ICIPFolderService {
             logger.error("Unexpected error while exporting ZIP for cname: {}, org: {}. Error: {}",
                     cname, org, e.getMessage(), e);
             throw new RuntimeException("Failed to export ZIP", e);
+        }
+    }
+
+    /**
+     * Push zip file to MinIO server.
+     *
+     * @param zipFile the zip file (optional - MultipartFile)
+     * @param zipBytes the zip bytes (optional - byte array)
+     * @param bucketName the bucket name
+     * @param objectKey the object key/path in MinIO
+     * @param cname the customer name
+     * @param org the organization
+     * @return true if upload successful, false otherwise
+     */
+    public boolean pushZipToMinIO(MultipartFile zipFile, byte[] zipBytes, String bucketName, String objectKey, String cname, String org) {
+        logger.info("Pushing ZIP to MinIO - bucket: {}, objectKey: {}, cname: {}, org: {}", bucketName, objectKey, cname, org);
+
+        try {
+            // Validate that at least one zip source is provided
+            if ((zipFile == null || zipFile.isEmpty()) && (zipBytes == null || zipBytes.length == 0)) {
+                logger.error("Neither zipFile nor zipBytes provided for MinIO upload");
+                return false;
+            }
+
+            // Build MinIO client
+            MinioClient minioClient = buildMinioClient();
+
+            // Check if bucket exists, create if not
+            boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!bucketExists) {
+                logger.info("Bucket '{}' does not exist. Creating bucket...", bucketName);
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                logger.info("Bucket '{}' created successfully", bucketName);
+            }
+
+            // Prepare input stream and content length
+            InputStream inputStream;
+            long contentLength;
+
+            if (zipFile != null && !zipFile.isEmpty()) {
+                inputStream = zipFile.getInputStream();
+                contentLength = zipFile.getSize();
+                logger.info("Using MultipartFile for upload, size: {} bytes", contentLength);
+            } else {
+                inputStream = new ByteArrayInputStream(zipBytes);
+                contentLength = zipBytes.length;
+                logger.info("Using byte array for upload, size: {} bytes", contentLength);
+            }
+
+            // Upload to MinIO
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectKey)
+                            .stream(inputStream, contentLength, -1)
+                            .contentType("application/zip")
+                            .build()
+            );
+
+            logger.info("Successfully uploaded ZIP to MinIO: bucket={}, objectKey={}", bucketName, objectKey);
+            return true;
+
+        } catch (Exception e) {
+            logger.error("Failed to push ZIP to MinIO for bucket: {}, objectKey: {}, cname: {}, org: {}. Error: {}",
+                    bucketName, objectKey, cname, org, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Push zip file to MinIO server.
+     *
+     * @param zipFile the zip file (optional - MultipartFile)
+     * @param zipBytes the zip bytes (optional - byte array)
+     * @param bucketName the bucket name
+     * @param objectKey the object key/path in MinIO
+     * @param cname the customer name
+     * @param org the organization
+     * @param minioUrl custom MinIO URL
+     * @param minioAccessKey custom MinIO access key
+     * @param minioSecretKey custom MinIO secret key
+     * @return true if upload successful, false otherwise
+     */
+    public boolean pushZipToMinIO(MultipartFile zipFile, byte[] zipBytes, String bucketName, String objectKey, String cname, String org, String minioUrl, String minioAccessKey, String minioSecretKey) {
+        logger.info("Pushing ZIP to MinIO (custom connection) - bucket: {}, objectKey: {}, cname: {}, org: {}", bucketName, objectKey, cname, org);
+        try {
+            if ((zipFile == null || zipFile.isEmpty()) && (zipBytes == null || zipBytes.length == 0)) {
+                logger.error("Neither zipFile nor zipBytes provided for MinIO upload");
+                return false;
+            }
+            MinioClient minioClient = buildMinioClient(minioUrl, minioAccessKey, minioSecretKey);
+            boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!bucketExists) {
+                logger.info("Bucket '{}' does not exist. Creating bucket...", bucketName);
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                logger.info("Bucket '{}' created successfully", bucketName);
+            }
+            InputStream inputStream;
+            long contentLength;
+            if (zipFile != null && !zipFile.isEmpty()) {
+                inputStream = zipFile.getInputStream();
+                contentLength = zipFile.getSize();
+                logger.info("Using MultipartFile for upload, size: {} bytes", contentLength);
+            } else {
+                inputStream = new ByteArrayInputStream(zipBytes);
+                contentLength = zipBytes.length;
+                logger.info("Using byte array for upload, size: {} bytes", contentLength);
+            }
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectKey)
+                            .stream(inputStream, contentLength, -1)
+                            .contentType("application/zip")
+                            .build()
+            );
+            logger.info("Successfully uploaded ZIP to MinIO: bucket={}, objectKey={}", bucketName, objectKey);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to push ZIP to MinIO for bucket: {}, objectKey: {}, cname: {}, org: {}. Error: {}",
+                    bucketName, objectKey, cname, org, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Push exported zip to MinIO - convenience method that exports from DB and uploads.
+     *
+     * @param cname the customer name
+     * @param org the organization
+     * @param bucketName the bucket name
+     * @param objectKey the object key/path in MinIO (e.g., "ai-agent-scripts/cname-org.zip")
+     * @return true if successful, false otherwise
+     */
+    public boolean exportAndPushToMinIO(String cname, String org, String bucketName, String objectKey) {
+        logger.info("Exporting and pushing to MinIO for cname: {}, org: {}", cname, org);
+        try {
+            byte[] zipBytes = exportZip(cname, org);
+            if (zipBytes == null || zipBytes.length == 0) {
+                logger.warn("No data to export for cname: {}, org: {}", cname, org);
+                return false;
+            }
+            return pushZipToMinIO(null, zipBytes, bucketName, objectKey, cname, org);
+        } catch (Exception e) {
+            logger.error("Failed to export and push to MinIO for cname: {}, org: {}. Error: {}",
+                    cname, org, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Push exported zip to MinIO - convenience method that exports from DB and uploads.
+     *
+     * @param cname the customer name
+     * @param org the organization
+     * @param bucketName the bucket name
+     * @param objectKey the object key/path in MinIO (e.g., "ai-agent-scripts/cname-org.zip")
+     * @param minioUrl custom MinIO URL
+     * @param minioAccessKey custom MinIO access key
+     * @param minioSecretKey custom MinIO secret key
+     * @return true if successful, false otherwise
+     */
+    public boolean exportAndPushToMinIO(String cname, String org, String bucketName, String objectKey, String minioUrl, String minioAccessKey, String minioSecretKey) {
+        logger.info("Exporting and pushing to MinIO (custom connection) for cname: {}, org: {}", cname, org);
+        try {
+            byte[] zipBytes = exportZip(cname, org);
+            if (zipBytes == null || zipBytes.length == 0) {
+                logger.warn("No data to export for cname: {}, org: {}", cname, org);
+                return false;
+            }
+            return pushZipToMinIO(null, zipBytes, bucketName, objectKey, cname, org, minioUrl, minioAccessKey, minioSecretKey);
+        } catch (Exception e) {
+            logger.error("Failed to export and push to MinIO for cname: {}, org: {}. Error: {}",
+                    cname, org, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Build MinIO client with SSL context configuration.
+     *
+     * @return MinioClient instance
+     * @throws Exception if client creation fails
+     */
+    private MinioClient buildMinioClient() throws Exception {
+        logger.info("Building MinIO client with URL: {}", minioUrl);
+
+        if (minioUrl == null || minioUrl.isBlank()) {
+            throw new IllegalStateException("MinIO URL is not configured. Please set icip.minio.url property.");
+        }
+
+        if (minioAccessKey == null || minioAccessKey.isBlank()) {
+            throw new IllegalStateException("MinIO access key is not configured. Please set icip.minio.access-key property.");
+        }
+
+        if (minioSecretKey == null || minioSecretKey.isBlank()) {
+            throw new IllegalStateException("MinIO secret key is not configured. Please set icip.minio.secret-key property.");
+        }
+
+        // Build SSL context with trust all certificates if certificate check is disabled
+        TrustManager[] trustAllCerts = getTrustAllCerts();
+        SSLContext sslContext = getSslContext(trustAllCerts);
+
+        if (sslContext == null) {
+            throw new IllegalStateException("SSLContext could not be initialized");
+        }
+
+        // Build custom HTTP client with SSL configuration
+        OkHttpClient customHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                .hostnameVerifier((hostname, session) -> true)
+                .build();
+
+        // Build and return MinIO client
+        return MinioClient.builder()
+                .endpoint(minioUrl)
+                .credentials(minioAccessKey, minioSecretKey)
+                .httpClient(customHttpClient)
+                .build();
+    }
+
+    /**
+     * Build MinIO client with SSL context configuration.
+     *
+     * @param minioUrl custom MinIO URL
+     * @param minioAccessKey custom MinIO access key
+     * @param minioSecretKey custom MinIO secret key
+     * @return MinioClient instance
+     * @throws Exception if client creation fails
+     */
+    private MinioClient buildMinioClient(String minioUrl, String minioAccessKey, String minioSecretKey) throws Exception {
+        logger.info("Building MinIO client with custom URL: {}", minioUrl);
+
+        if (minioUrl == null || minioUrl.isBlank()) {
+            throw new IllegalStateException("MinIO URL is not configured (from DB). Please check connection details.");
+        }
+
+        if (minioAccessKey == null || minioAccessKey.isBlank()) {
+            throw new IllegalStateException("MinIO access key is not configured (from DB). Please check connection details.");
+        }
+
+        if (minioSecretKey == null || minioSecretKey.isBlank()) {
+            throw new IllegalStateException("MinIO secret key is not configured (from DB). Please check connection details.");
+        }
+
+        // Build SSL context with trust all certificates if certificate check is disabled
+        TrustManager[] trustAllCerts = getTrustAllCerts();
+        SSLContext sslContext = getSslContext(trustAllCerts);
+
+        if (sslContext == null) {
+            throw new IllegalStateException("SSLContext could not be initialized");
+        }
+
+        // Build custom HTTP client with SSL configuration
+        OkHttpClient customHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                .hostnameVerifier((hostname, session) -> true)
+                .build();
+
+        // Build and return MinIO client
+        return MinioClient.builder()
+                .endpoint(minioUrl)
+                .credentials(minioAccessKey, minioSecretKey)
+                .httpClient(customHttpClient)
+                .build();
+    }
+
+    /**
+     * Get trust manager that trusts all certificates.
+     *
+     * @return array of TrustManager
+     */
+    private TrustManager[] getTrustAllCerts() {
+        return new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                        // Trust all client certificates
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                        // Trust all server certificates
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                }
+        };
+    }
+
+    /**
+     * Get SSL context with custom trust manager.
+     *
+     * @param trustAllCerts the trust manager array
+     * @return SSLContext instance or null if creation fails
+     */
+    private SSLContext getSslContext(TrustManager[] trustAllCerts) {
+        try {
+            // Check if certificate validation should be bypassed
+            if ("false".equalsIgnoreCase(certificateCheck)) {
+                logger.info("Certificate check is disabled, using trust-all SSL context");
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustAllCerts, new SecureRandom());
+                return sslContext;
+            } else {
+                logger.info("Certificate check is enabled, using default SSL context");
+                return SSLContext.getDefault();
+            }
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            logger.error("Failed to create SSL context: {}", e.getMessage(), e);
+            return null;
         }
     }
 }
