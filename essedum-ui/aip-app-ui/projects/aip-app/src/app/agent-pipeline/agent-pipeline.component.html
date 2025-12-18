@@ -41,16 +41,13 @@
                       <div class="config-panel">
                         <div class="file-editor">
                           <div class="editor-header">
-                            <mat-icon>code</mat-icon>
-                            <h3>{{scriptFileName}}</h3>
-                          </div>
-                          <!-- <div class="code-editor">
-                            <div class="code-content">
-                              <p id="code-box" class="code-color">{{ script }}</p>
+                            <div class="file-info">
+                              <mat-icon class="file-type-icon">description</mat-icon>
+                              <span class="file-name" [title]="scriptFileName">{{scriptFileName}}</span>
                             </div>
-                          </div> -->
-                          <div class="code-editor">
-                            <div class="code-content">
+                          </div>
+                          <div class="code-editor" style="height: 400px; overflow: hidden;">
+                            <div class="code-content" style="height: 100%; overflow-y: auto;">
                               <div style="height: max-content">
                                 <app-enl-code-editor id="ele" *ngIf="loadScript" [script]="script" [lang]="lang"
                                   (scriptChange)="onScriptChange($event)" class="selector-764-48">
@@ -157,7 +154,7 @@
                             </div>
                           </div> <!-- Auto-loading Information Message -->
                           <div class="llm-selection-info" 
-                            *ngIf="!hasGeneratedAgent && !hasExistingFiles()">
+                            *ngIf="!hasGeneratedAgent && !hasExistingFiles() && selectedLLM !== 'github-copilot'">
                             <div class="selection-message">
                               <mat-icon>info</mat-icon>
                               <p>Agent data will be automatically loaded when available</p>

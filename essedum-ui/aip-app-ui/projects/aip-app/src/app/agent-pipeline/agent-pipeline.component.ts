@@ -1338,12 +1338,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               'Files downloaded successfully!'
             );
           }, 500); // Small delay to ensure download has started
+          
+          // Reset loading state on success
+          this.isDownloading = false;
         },
         error: (error) => {
           console.error('Error downloading files:', error);
           this.service.messageService(error);
-        },
-        complete: () => {
+          // Reset loading state on error
           this.isDownloading = false;
         },
       });
