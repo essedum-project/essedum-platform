@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   HostListener,
   Input,
   Inject,
@@ -26,6 +27,7 @@ import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 import { HttpParams } from '@angular/common/http';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { io, Socket } from 'socket.io-client';
 
 interface FileNode {
   name: string;
@@ -75,7 +77,7 @@ interface AgentState {
   templateUrl: './agent-pipeline.component.html',
   styleUrls: ['./agent-pipeline.component.scss'],
 })
-export class AgentPipelineComponent implements OnInit {
+export class AgentPipelineComponent implements OnInit, OnDestroy {
   streamItem: StreamingServices;
   cardToggled: boolean = false;
   card: any;
@@ -137,6 +139,11 @@ export class AgentPipelineComponent implements OnInit {
   // Console output for Generate adk Agent
   consoleOutput: string[] = [];
   isGenerating = false;
+  
+  // WebSocket and Run/Deploy functionality
+  private socket: Socket | null = null;
+  isRunningAndDeploying = false;
+  deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
   
   // LLM Selection and Prompt Template
   selectedLLM: string = '';
@@ -792,7 +799,7 @@ export class AgentPipelineComponent implements OnInit {
     this.hasGeneratedAgent = false;
     this.currentCname = ''; // Clear cname when going back to dashboard
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Keep console clear
     this.clearFileSelection();
     console.log('Reset state for dashboard navigation');
   }
@@ -2266,6 +2273,188 @@ public class ZipController {
     return this.fileSystemData && this.fileSystemData.length > 0;
   }
 
+  /**
+   * Check if Run and Deploy button should be enabled
+   * - Enabled when Essedum Codespace tab is visible (hasGeneratedAgent is true)
+   */
+  canRunAndDeploy(): boolean {
+    return this.hasGeneratedAgent && !this.isRunningAndDeploying;
+  }
+
+  /**
+   * Run and Deploy the agent using WebSocket pipeline
+   */
+  runAndDeploy(): void {
+    if (!this.canRunAndDeploy()) {
+      return;
+    }
+
+    this.isRunningAndDeploying = true;
+    this.deploymentStatus = 'running';
+    
+    // Clear previous console output - only show API responses
+    this.consoleOutput = [];
+    
+    // Initialize WebSocket connection
+    this.initializeWebSocket();
+  }
+
+  /**
+   * Initialize WebSocket connection for deployment pipeline
+   */
+  private initializeWebSocket(): void {
+    try {
+      // Connect to the WebSocket server
+      this.socket = io('http://builder-service.aipns.svc.cluster.local:80', {
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        forceNew: true
+      });
+
+      // Connection successful
+      this.socket.on('connect', () => {
+        // Trigger the pipeline immediately upon connection
+        const payload = {
+          minio_endpoint: 'http://100.78.49.20:9000',
+          access_key: '',
+          secret_key: '',
+          bucket_name: 'aiptest',
+          file_path: 'leo1311/remote/adk-code.zip',
+          target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+          deployment_name: 'runner-service'
+        };
+        
+        this.socket?.emit('start_pipeline', payload);
+      });
+
+      // Pipeline update events (high-level steps)
+      this.socket.on('pipeline_update', (data: any) => {
+        this.addToConsole(`[${data.step}] ${data.message}`);
+      });
+
+      // Build log events (raw docker build logs)
+      this.socket.on('build_log', (data: any) => {
+        this.addToConsole(`${data.log}`);
+      });
+
+      // Final pipeline status
+      this.socket.on('pipeline_status', (data: any) => {
+        this.addToConsole(`FINAL STATUS: ${data.status}`);
+        
+        if (data.status === 'success') {
+          this.deploymentStatus = 'success';
+        } else {
+          this.deploymentStatus = 'error';
+          if (data.error) {
+            this.addToConsole(`Error: ${data.error}`);
+          }
+        }
+        
+        this.isRunningAndDeploying = false;
+        this.disconnectWebSocket();
+      });
+
+      // Connection error
+      this.socket.on('connect_error', (error: any) => {
+        this.addToConsole(`Connection error: ${error.message}`);
+        this.deploymentStatus = 'error';
+        this.isRunningAndDeploying = false;
+      });
+
+      // Disconnection
+      this.socket.on('disconnect', (reason: string) => {
+        this.addToConsole(`Disconnected: ${reason}`);
+        if (this.isRunningAndDeploying) {
+          this.isRunningAndDeploying = false;
+          this.deploymentStatus = 'error';
+        }
+      });
+
+    } catch (error) {
+      this.addToConsole(`Failed to initialize WebSocket: ${error}`);
+      this.deploymentStatus = 'error';
+      this.isRunningAndDeploying = false;
+    }
+  }
+
+  /**
+   * Disconnect WebSocket connection
+   */
+  private disconnectWebSocket(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
+
+  /**
+   * Add message to console output with timestamp
+   */
+  private addToConsole(message: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    this.consoleOutput.push(`[${timestamp}] ${message}`);
+    
+    // Trigger change detection to update the UI
+    this.cdr.detectChanges();
+    
+    // Auto-scroll to bottom of console if element exists
+    setTimeout(() => {
+      const consoleElement = document.querySelector('.console-output');
+      if (consoleElement) {
+        consoleElement.scrollTop = consoleElement.scrollHeight;
+      }
+    }, 100);
+  }
+
+  /**
+   * Push agent files to MinIO (integrated with existing Push to MinIO functionality)
+   */
+  pushToMinio(): void {
+    if (!this.currentCname) {
+      return;
+    }
+    
+    // Get organization from localStorage or use default
+    const organization = localStorage.getItem('organisation') || 'leo1311';
+    
+    console.log('Pushing to MinIO:', {
+      cname: this.currentCname,
+      organization: organization
+    });
+    
+    // Add to console output
+    this.addToConsole('📤 Starting push to MinIO...');
+    this.addToConsole(`Container: ${this.currentCname}`);
+    this.addToConsole(`Organization: ${organization}`);
+    
+    // Call the API
+    this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
+      next: (response) => {
+        console.log('MinIO push successful:', response);
+        
+        this.addToConsole('✅ Push to MinIO completed successfully!');
+        if (response && response.message) {
+          this.addToConsole(`Response: ${response.message}`);
+        }
+        if (response && response.minioPath) {
+          this.addToConsole(`MinIO Path: ${response.minioPath}`);
+        }
+      },
+      error: (error) => {
+        console.error('MinIO push failed:', error);
+        
+        this.addToConsole('❌ Push to MinIO failed!');
+        if (error.error && error.error.message) {
+          this.addToConsole(`Error: ${error.error.message}`);
+        } else if (error.message) {
+          this.addToConsole(`Error: ${error.message}`);
+        } else {
+          this.addToConsole('Error: Unknown error occurred');
+        }
+      }
+    });
+  }
+
   // Methods removed - auto-loading enabled when viewing details
   // generateadkAgent() and clearConsole() methods are no longer needed
 
@@ -2817,13 +3006,8 @@ DELIVERABLES
     this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
     this.expandAllFolders(this.fileSystemData); // Expand all folders by default
     
-    // Set console output to show that agent was loaded
-    this.consoleOutput = [
-      `adk Agent loaded from existing data`,
-      `Container: ${this.currentCname}`,
-      `Status: Ready for development`,
-      `Files: ${fileData.length} files loaded`,
-    ];
+    // Keep console clear - only show output after Run and Deploy
+    this.consoleOutput = [];
 
     console.log('Successfully loaded existing agent with files:', {
       cname: this.currentCname,
@@ -2908,20 +3092,20 @@ DELIVERABLES
     // Reset state first
     this.resetToInitialStateForNewAgent();
 
-    // Call folder list API first
+    // Only call folder list API 
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (listResponse) => {
         console.log('Folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // Data exists, now call upload API to get full content
-          this.callUploadAPIForContent();
+          // Data exists, enable codespace
+          this.loadExistingAgentWithFilesFromAPI(listResponse);
         } else {
           // No data from list API, show only script tab
           console.log('No data from folder list API, showing script tab only');
           this.showScriptTabOnly();
-          this.isLoadingFiles = false;
         }
+        this.isLoadingFiles = false;
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
@@ -2933,37 +3117,6 @@ DELIVERABLES
   }
 
   // Call the upload API to get full content
-  private callUploadAPIForContent(): void {
-    const folderPath = 'C:/Users/anushka.mishra/Downloads/11TBGT-leo1311'; // Sample path
-    
-    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
-      next: (uploadResponse) => {
-        console.log('Upload API response:', uploadResponse);
-        
-        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
-          // Data exists from both APIs, enable codespace tab
-          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
-          this.hasGeneratedAgent = true;
-          this.isJsonProcessed = true;
-          
-          console.log('Data found from both APIs, enabling codespace tab');
-        } else {
-          // No meaningful data, show script tab only
-          console.log('No meaningful data from upload API, showing script tab only');
-          this.showScriptTabOnly();
-        }
-        
-        this.isLoadingFiles = false;
-      },
-      error: (error) => {
-        console.error('Error calling upload API:', error);
-        // On error, show only script tab
-        this.showScriptTabOnly();
-        this.isLoadingFiles = false;
-      }
-    });
-  }
-
   // Auto-load agent data specifically for pipeline cards from dashboard
   private autoLoadAgentDataForPipelineCard(): void {
     if (!this.currentCname) {
@@ -2996,16 +3149,7 @@ DELIVERABLES
           this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(listResponse);
           this.expandAllFolders(this.fileSystemData);
           
-          // Set console output to show that files were found
-          this.consoleOutput = [
-            `Pipeline files detected from list API`,
-            `Container: ${this.currentCname}`,
-            `Files: ${listResponse.length} files found`,
-            `Status: Codespace enabled`
-          ];
-          
-          // Now try upload API to get full content (but don't disable codespace if it fails)
-          this.callUploadAPIForPipelineCard();
+          this.isLoadingFiles = false;
         } else {
           // No data from list API, show only script tab and continue with old flow
           console.log('No data from pipeline folder list API, falling back to script tab and old flow');
@@ -3115,51 +3259,11 @@ DELIVERABLES
   }
 
   // Call the upload API for pipeline cards
-  private callUploadAPIForPipelineCard(): void {
-    const folderPath = `C:/Users/anushka.mishra/Downloads/${this.currentCname}-leo1311`; // Use cname in path
-    
-    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
-      next: (uploadResponse) => {
-        console.log('Pipeline upload API response:', uploadResponse);
-        
-        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
-          // Upload API succeeded - update file tree with full content
-          console.log('Upload API succeeded, updating file tree with full content');
-          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
-          
-          // Update console output to show upload success
-          this.consoleOutput = [
-            `Pipeline files loaded with full content`,
-            `Container: ${this.currentCname}`,
-            `Status: Ready for development`,
-            `Upload: Successful`
-          ];
-        } else {
-          // Upload API returned no data, but codespace tab is already enabled from list API
-          console.log('Upload API returned no meaningful data, but codespace remains enabled');
-          this.consoleOutput = [
-            `Pipeline files detected (list only)`,
-            `Container: ${this.currentCname}`,
-            `Status: Codespace enabled`,
-            `Upload: No content available`
-          ];
-        }
-        
-        this.isLoadingFiles = false;
-      },
-      error: (error) => {
-        console.error('Upload API failed, but codespace remains enabled from list API:', error);
-        // Upload failed, but codespace tab remains enabled since list API succeeded
-        this.consoleOutput = [
-          `Pipeline files detected (list only)`,
-          `Container: ${this.currentCname}`,
-          `Status: Codespace enabled`,
-          `Upload: Failed - ${error.message || 'Unknown error'}`
-        ];
-        
-        this.isLoadingFiles = false;
-        // Note: We don't call getStreamService() here since codespace is already enabled
-      }
-    });
+  /**
+   * Component cleanup
+   */
+  ngOnDestroy(): void {
+    // Clean up WebSocket connection
+    this.disconnectWebSocket();
   }
 }

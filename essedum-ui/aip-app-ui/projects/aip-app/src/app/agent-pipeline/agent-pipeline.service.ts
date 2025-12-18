@@ -480,4 +480,29 @@ export class AgentPipelineService {
     
     return throwError(() => new Error(errorMessage));
   };
+
+  /**
+   * Upload agent files to MinIO
+   */
+  uploadToMinio(cname: string, organization: string): Observable<any> {
+    const url = `${this.baseUrl}/folder/push-to-minio/${cname}/${organization}`;
+    
+    console.log('AgentPipelineService - Uploading to MinIO:', {
+      url,
+      cname,
+      organization
+    });
+
+    return this.http.post(url, {}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).pipe(
+      map((response: any) => {
+        console.log('MinIO upload response:', response);
+        return response;
+      }),
+      catchError(this.handleError)
+    );
+  }
 }
