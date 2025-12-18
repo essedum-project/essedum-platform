@@ -24,7 +24,7 @@ import {
 } from '../pipeline.description/pipeline.description.component';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
-import { HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
@@ -159,6 +159,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   playgroundMessages: Array<{ role: 'user' | 'agent'; content: string }> = [];
   userQuestion = '';
   isAgentThinking = false;
+  playgroundUrl = ''; // Store the playground URL from API
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -309,7 +310,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {
     console.log('AgentPipelineComponent constructor - baseUrl:', this.baseUrl);
   }
@@ -2310,75 +2312,111 @@ public class ZipController {
   }
 
   /**
+   * Fetch datasource credentials from the API
+   */
+  private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
+    try {
+      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
+      
+      const response = await this.http.get<any[]>(apiUrl).toPromise();
+      
+      if (response && response.length > 0) {
+        const datasource = response[0];
+        const connectionDetails = JSON.parse(datasource.connectionDetails);
+        
+        return {
+          accessKey: connectionDetails.accessKey,
+          secretKey: connectionDetails.secretKey,
+          url: connectionDetails.url
+        };
+      } else {
+        throw new Error('No datasource found in response');
+      }
+    } catch (error) {
+      console.error('Error fetching datasource credentials:', error);
+      throw new Error(`Failed to fetch datasource credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
    * Initialize WebSocket connection for deployment pipeline
    */
   private initializeWebSocket(): void {
     try {
-      // Connect to the WebSocket server
-      this.socket = io('http://builder-service.aipns.svc.cluster.local:80', {
-        transports: ['websocket', 'polling'],
-        timeout: 20000,
-        forceNew: true
-      });
+      // First fetch datasource credentials
+      this.fetchDatasourceCredentials().then((credentials) => {
+        // Connect to the WebSocket server after getting credentials
+        this.socket = io('http://builder-service.aipns.svc.cluster.local:80', {
+          transports: ['websocket', 'polling'],
+          timeout: 20000,
+          forceNew: true
+        });
 
-      // Connection successful
-      this.socket.on('connect', () => {
-        // Trigger the pipeline immediately upon connection
-        const organization = this.getOrganization();
-        const payload = {
-          minio_endpoint: 'http://100.78.49.20:9000',
-          access_key: '',
-          secret_key: '',
-          bucket_name: 'aiptest',
-          file_path: `${organization}/remote/adk-code.zip`,
-          target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-          deployment_name: 'runner-service'
-        };
-        
-        this.socket?.emit('start_pipeline', payload);
-      });
+        // Connection successful
+        this.socket.on('connect', () => {
+          // Trigger the pipeline immediately upon connection with fetched credentials
+          const organization = this.getOrganization();
+          const payload = {
+            minio_endpoint: 'http://100.78.49.20:9000',
+            access_key: credentials.accessKey,
+            secret_key: credentials.secretKey,
+            bucket_name: 'aiptest',
+            file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
+            target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+            deployment_name: 'runner-service'
+          };
+          
+          this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
+          this.socket?.emit('start_pipeline', payload);
+        });
 
-      // Pipeline update events (high-level steps)
-      this.socket.on('pipeline_update', (data: any) => {
-        this.addToConsole(`[${data.step}] ${data.message}`);
-      });
+        // Pipeline update events (high-level steps)
+        this.socket.on('pipeline_update', (data: any) => {
+          this.addToConsole(`[${data.step}] ${data.message}`);
+        });
 
-      // Build log events (raw docker build logs)
-      this.socket.on('build_log', (data: any) => {
-        this.addToConsole(`${data.log}`);
-      });
+        // Build log events (raw docker build logs)
+        this.socket.on('build_log', (data: any) => {
+          this.addToConsole(`${data.log}`);
+        });
 
-      // Final pipeline status
-      this.socket.on('pipeline_status', (data: any) => {
-        this.addToConsole(`FINAL STATUS: ${data.status}`);
-        
-        if (data.status === 'success') {
-          this.deploymentStatus = 'success';
-        } else {
-          this.deploymentStatus = 'error';
-          if (data.error) {
-            this.addToConsole(`Error: ${data.error}`);
+        // Final pipeline status
+        this.socket.on('pipeline_status', (data: any) => {
+          this.addToConsole(`FINAL STATUS: ${data.status}`);
+          
+          if (data.status === 'success') {
+            this.deploymentStatus = 'success';
+          } else {
+            this.deploymentStatus = 'error';
+            if (data.error) {
+              this.addToConsole(`Error: ${data.error}`);
+            }
           }
-        }
-        
-        this.isRunningAndDeploying = false;
-        this.disconnectWebSocket();
-      });
+          
+          this.isRunningAndDeploying = false;
+          this.disconnectWebSocket();
+        });
 
-      // Connection error
-      this.socket.on('connect_error', (error: any) => {
-        this.addToConsole(`Connection error: ${error.message}`);
+        // Connection error
+        this.socket.on('connect_error', (error: any) => {
+          this.addToConsole(`Connection error: ${error.message}`);
+          this.deploymentStatus = 'error';
+          this.isRunningAndDeploying = false;
+        });
+
+        // Disconnection
+        this.socket.on('disconnect', (reason: string) => {
+          this.addToConsole(`Disconnected: ${reason}`);
+          if (this.isRunningAndDeploying) {
+            this.isRunningAndDeploying = false;
+            this.deploymentStatus = 'error';
+          }
+        });
+        
+      }).catch((error) => {
+        this.addToConsole(`Failed to fetch datasource credentials: ${error.message}`);
         this.deploymentStatus = 'error';
         this.isRunningAndDeploying = false;
-      });
-
-      // Disconnection
-      this.socket.on('disconnect', (reason: string) => {
-        this.addToConsole(`Disconnected: ${reason}`);
-        if (this.isRunningAndDeploying) {
-          this.isRunningAndDeploying = false;
-          this.deploymentStatus = 'error';
-        }
       });
 
     } catch (error) {
@@ -2713,13 +2751,66 @@ DELIVERABLES
 
   // Playground methods
   openPlayground(): void {
-    this.showPlayground = true;
-    this.playgroundMessages = [
-      {
-        role: 'agent',
-        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated adk. How can I help you today?`
+    // First fetch the playground URL from streaming services API
+    this.fetchPlaygroundUrl().then(() => {
+      this.showPlayground = true;
+      const agentName = this.selectedAgent?.alias || this.selectedAgent?.name || this.currentCname || 'Agent';
+      const agentVersion = this.selectedAgent?.version || '1.0.0';
+      this.playgroundMessages = [
+        {
+          role: 'agent',
+          content: `Hello! I'm the ${agentName} (v${agentVersion}). I'm now running from the generated adk. How can I help you today?`
+        }
+      ];
+    }).catch((error) => {
+      console.error('Failed to fetch playground URL:', error);
+      // Show playground anyway with error message
+      this.showPlayground = true;
+      this.playgroundMessages = [
+        {
+          role: 'agent',
+          content: 'Error: Unable to connect to the agent service. Please try again later.'
+        }
+      ];
+    });
+  }
+
+  /**
+   * Fetch playground URL from streaming services API
+   */
+  private async fetchPlaygroundUrl(): Promise<void> {
+    try {
+      console.log('fetchPlaygroundUrl - checking agent data:', {
+        currentCname: this.currentCname,
+        selectedAgent: this.selectedAgent,
+        cardName: this.cardName
+      });
+      
+      if (!this.currentCname) {
+        throw new Error('No agent selected - currentCname is empty');
       }
-    ];
+      
+      const organization = this.getOrganization();
+      const apiUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('fetchPlaygroundUrl - API URL:', apiUrl);
+      
+      const response = await this.http.get<any>(apiUrl).toPromise();
+      
+      if (response && response.json_content) {
+        const jsonContent = JSON.parse(response.json_content);
+        this.playgroundUrl = jsonContent.playgroundurl;
+        
+        if (!this.playgroundUrl) {
+          throw new Error('No playground URL found in response');
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Error fetching playground URL:', error);
+      throw error;
+    }
   }
 
   closePlayground(): void {
@@ -2741,73 +2832,48 @@ DELIVERABLES
     this.userQuestion = '';
     this.isAgentThinking = true;
 
-    // Simulate agent response
-    setTimeout(() => {
-      const agentResponse = this.getAgentResponse(question);
-      this.playgroundMessages.push({
-        role: 'agent',
-        content: agentResponse,
-      });
-      this.isAgentThinking = false;
-    }, 1500);
+    // Call real API instead of simulation
+    this.callPlaygroundAPI(question);
   }
 
-  getAgentResponse(question: string): string {
-    const agentName = this.selectedAgent?.name || '';
-    const questionLower = question.toLowerCase();
+  /**
+   * Call the playground API with user question
+   */
+  private async callPlaygroundAPI(question: string): Promise<void> {
+    try {
+      if (!this.playgroundUrl) {
+        throw new Error('Playground URL not available');
+      }
 
-    // Contextual responses based on agent type and question
-    if (agentName === 'customer-support-agent') {
-      if (questionLower.includes('ticket') || questionLower.includes('issue')) {
-        return "I can help you create a support ticket. Please provide me with: 1) Issue description, 2) Priority level (Low/Medium/High), and 3) Your contact information. I'll search our knowledge base for similar issues first.";
-      } else if (
-        questionLower.includes('order') ||
-        questionLower.includes('tracking')
-      ) {
-        return 'I can look up your order status. Let me search our customer database. Could you provide your order number or email address associated with the account?';
-      } else if (
-        questionLower.includes('refund') ||
-        questionLower.includes('return')
-      ) {
-        return 'I can assist with refund requests. According to our policy, refunds are processed within 5-7 business days. Would you like me to create a refund ticket for you?';
-      }
-    } else if (agentName === 'data-analysis-agent') {
-      if (questionLower.includes('analyze') || questionLower.includes('data')) {
-        return "I can analyze your dataset. I support CSV, Excel, and JSON formats. Please upload your data and specify what insights you're looking for: trends, correlations, outliers, or statistical summaries?";
-      } else if (
-        questionLower.includes('visualiz') ||
-        questionLower.includes('chart') ||
-        questionLower.includes('graph')
-      ) {
-        return 'I can create various visualizations: bar charts, line graphs, scatter plots, heatmaps, and more. What type of visualization would best represent your data?';
-      } else if (questionLower.includes('report')) {
-        return 'I can generate comprehensive reports with statistical analysis, charts, and insights. Would you like a summary report, detailed analysis, or executive dashboard?';
-      }
-    } else if (agentName === 'code-review-agent') {
-      if (questionLower.includes('review') || questionLower.includes('code')) {
-        return "I can review your code for quality, security vulnerabilities, and best practices. Please provide the repository URL or paste the code snippet you'd like me to analyze.";
-      } else if (
-        questionLower.includes('security') ||
-        questionLower.includes('vulnerab')
-      ) {
-        return "I'll run a security scan to detect: SQL injection risks, XSS vulnerabilities, hardcoded credentials, and insecure dependencies. Should I proceed with a full security audit?";
-      } else if (
-        questionLower.includes('improve') ||
-        questionLower.includes('optimize')
-      ) {
-        return 'I can suggest improvements for: code performance, readability, maintainability, and adherence to design patterns. Would you like me to focus on a specific aspect?';
-      }
+      // Use the exact playground URL from the streaming services API response
+      const apiEndpoint = this.playgroundUrl;
+      
+      const payload = {
+        question: question
+      };
+      
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      const response = await this.http.post<any>(apiEndpoint, payload, { headers }).toPromise();
+      
+      // Add agent response
+      this.playgroundMessages.push({
+        role: 'agent',
+        content: response?.answer || response?.response || JSON.stringify(response) || 'I received your question but could not generate a proper response.'
+      });
+      
+    } catch (error) {
+      console.error('Error calling playground API:', error);
+      // Add error message as agent response
+      this.playgroundMessages.push({
+        role: 'agent',
+        content: 'I apologize, but I encountered an error while processing your request. Please try again later.'
+      });
+    } finally {
+      this.isAgentThinking = false;
     }
-
-    // Generic helpful response
-    const tools = this.getToolsForAgent(agentName);
-    if (tools.length > 0) {
-      return `I'm equipped with the following capabilities: ${tools
-        .map((t) => t.description)
-        .join(', ')}. Which of these would you like me to help you with?`;
-    }
-    
-    return `I understand your question: "${question}". Based on my adk configuration, I can process this request using my trained model. How would you like me to proceed?`;
   }
 
   onPlaygroundKeyPress(event: KeyboardEvent): void {
