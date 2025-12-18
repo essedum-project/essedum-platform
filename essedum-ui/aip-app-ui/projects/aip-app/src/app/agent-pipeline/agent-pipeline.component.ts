@@ -120,6 +120,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   organisation: any;
   fileStructure: FileNode[] = [];
 
+  private getOrganization(): string {
+    return localStorage.getItem('organisation') || 'leo1311';
+  }
+
   data: any = {
     filetype: 'json',
     files: [],
@@ -1304,32 +1308,36 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     this.isDownloading = true;
+    const organization = this.getOrganization();
 
     this.agentPipelineService
-      .downloadAllFilesAsZip(this.currentCname, 'leo1311')
+      .downloadAllFilesAsZip(this.currentCname, organization)
       .subscribe({
         next: (blob: Blob) => {
           // Create download link
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `${this.currentCname}-leo1311.zip`;
+          link.download = `${this.currentCname}-${organization}.zip`;
 
           // Trigger download
           document.body.appendChild(link);
           link.click();
 
-          // Cleanup
+          // Cleanup immediately
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
 
-          console.log('Download completed successfully');
-          // Create a properly formatted success response for messageService
-          const successResponse = { status: 200, body: [] };
-          this.service.messageService(
-            successResponse,
-            'Files downloaded successfully!'
-          );
+          // Show success message after download starts
+          setTimeout(() => {
+            console.log('Download completed successfully');
+            // Create a properly formatted success response for messageService
+            const successResponse = { status: 200, body: [] };
+            this.service.messageService(
+              successResponse,
+              'Files downloaded successfully!'
+            );
+          }, 500); // Small delay to ensure download has started
         },
         error: (error) => {
           console.error('Error downloading files:', error);
@@ -2292,7 +2300,7 @@ public class ZipController {
     this.isRunningAndDeploying = true;
     this.deploymentStatus = 'running';
     
-    // Clear previous console output - only show API responses
+    // Clear previous console output - console only shows WebSocket data during deployment
     this.consoleOutput = [];
     
     // Initialize WebSocket connection
@@ -2314,12 +2322,13 @@ public class ZipController {
       // Connection successful
       this.socket.on('connect', () => {
         // Trigger the pipeline immediately upon connection
+        const organization = this.getOrganization();
         const payload = {
           minio_endpoint: 'http://100.78.49.20:9000',
           access_key: '',
           secret_key: '',
           bucket_name: 'aiptest',
-          file_path: 'leo1311/remote/adk-code.zip',
+          file_path: `${organization}/remote/adk-code.zip`,
           target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
           deployment_name: 'runner-service'
         };
@@ -2388,7 +2397,8 @@ public class ZipController {
   }
 
   /**
-   * Add message to console output with timestamp
+   * Add WebSocket message to console output with timestamp
+   * Console is only used for WebSocket deployment data
    */
   private addToConsole(message: string): void {
     const timestamp = new Date().toLocaleTimeString();
@@ -2422,35 +2432,20 @@ public class ZipController {
       organization: organization
     });
     
-    // Add to console output
-    this.addToConsole('📤 Starting push to MinIO...');
-    this.addToConsole(`Container: ${this.currentCname}`);
-    this.addToConsole(`Organization: ${organization}`);
-    
-    // Call the API
+    // Call the API - no console output, only log to browser console
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
         console.log('MinIO push successful:', response);
         
-        this.addToConsole('✅ Push to MinIO completed successfully!');
-        if (response && response.message) {
-          this.addToConsole(`Response: ${response.message}`);
-        }
-        if (response && response.minioPath) {
-          this.addToConsole(`MinIO Path: ${response.minioPath}`);
-        }
+        // Show success message via service notification instead of console
+        const successResponse = { status: 200, body: response || [] };
+        this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
       },
       error: (error) => {
         console.error('MinIO push failed:', error);
         
-        this.addToConsole('❌ Push to MinIO failed!');
-        if (error.error && error.error.message) {
-          this.addToConsole(`Error: ${error.error.message}`);
-        } else if (error.message) {
-          this.addToConsole(`Error: ${error.message}`);
-        } else {
-          this.addToConsole('Error: Unknown error occurred');
-        }
+        // Show error message via service notification instead of console
+        this.service.messageService(error, 'Push to MinIO failed');
       }
     });
   }
@@ -3006,7 +3001,7 @@ DELIVERABLES
     this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
     this.expandAllFolders(this.fileSystemData); // Expand all folders by default
     
-    // Keep console clear - only show output after Run and Deploy
+    // Keep console empty - only WebSocket data from Run and Deploy should appear
     this.consoleOutput = [];
 
     console.log('Successfully loaded existing agent with files:', {
@@ -3021,7 +3016,7 @@ DELIVERABLES
     this.hasGeneratedAgent = false;
     this.isJsonProcessed = false; // This will show only the script tab
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Keep console empty - only WebSocket data allowed
     this.clearFileSelection();
     
     // Show empty script content when no files exist
@@ -3047,7 +3042,7 @@ DELIVERABLES
     this.hasGeneratedAgent = false; // Reset playground button state
     // Don't reset currentCname - keep the agent's fixed cname
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
     
     // Ensure script content is empty for new agents - no placeholders
@@ -3173,7 +3168,7 @@ DELIVERABLES
   private loadJsonFileForScript(): void {
     // Ensure we have organisation from localStorage
     if (!this.organisation) {
-      this.organisation = localStorage.getItem('organisation') || 'leo1311';
+      this.organisation = this.getOrganization();
     }
     
     if (!this.currentCname || !this.organisation) {

@@ -183,7 +183,7 @@
                               <h3>Project Files</h3>
                             </div>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
-                              <button mat-icon-button class="upload-button" title="Upload to MinIO">
+                              <button mat-icon-button class="upload-button" title="Upload to MinIO" (click)="pushToMinio()">
                                 <mat-icon>cloud_upload</mat-icon>
                               </button>
                               <app-github-push [cname]="currentCname" class="git-push-button"></app-github-push>
@@ -219,10 +219,7 @@
                                 title="File has unsaved changes">●</span>
                             </div>
                             <div class="editor-actions">
-                              <button mat-icon-button class="action-button copy-button" (click)="copyFileContent()" 
-                                matTooltip="Copy Content" matTooltipPosition="above">
-                                <mat-icon>content_copy</mat-icon>
-                              </button>
+                            
                               <button mat-icon-button class="action-button save-button"
                                 [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
                                 (click)="saveFile()" [disabled]="!isFileModified"
