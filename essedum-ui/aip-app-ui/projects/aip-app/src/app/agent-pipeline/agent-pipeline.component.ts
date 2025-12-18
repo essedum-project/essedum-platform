@@ -3023,7 +3023,7 @@ DELIVERABLES
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
 
-    // Try to fetch files for this specific cname
+    // Try to fetch files for this specific cname - only to check existence
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
       next: (apiResponse) => {
@@ -3039,7 +3039,8 @@ DELIVERABLES
             'Files count:',
             apiResponse.length
           );
-          this.loadExistingAgentWithFilesFromAPI(apiResponse);
+          // Only enable codespace tab - don't populate file tree from FE
+          this.enableCodespaceTabOnly();
         } else {
           console.log('No files found in response for cname:', cname);
           // Even if API succeeds but no files, show script tab only
@@ -3060,22 +3061,20 @@ DELIVERABLES
     });
   }
 
-  // Load existing agent data from API when files exist
-  private loadExistingAgentWithFilesFromAPI(fileData: any): void {
+  // Enable codespace tab only - backend will handle file population
+  private enableCodespaceTabOnly(): void {
     this.hasGeneratedAgent = true;
     this.isJsonProcessed = true;
 
-    // Build file tree from API response
-    this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
-    this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+    // Don't populate file tree from frontend - backend will handle this
+    this.fileSystemData = []; // Empty initially, backend will populate
     
     // Keep console empty - only WebSocket data from Run and Deploy should appear
     this.consoleOutput = [];
 
-    console.log('Successfully loaded existing agent with files:', {
+    console.log('Enabled codespace tab for existing agent:', {
       cname: this.currentCname,
-      hasFiles: this.fileSystemData.length > 0,
-      fileCount: fileData.length,
+      message: 'Backend will handle file population directly'
     });
   }
 
@@ -3155,14 +3154,14 @@ DELIVERABLES
     // Reset state first
     this.resetToInitialStateForNewAgent();
 
-    // Only call folder list API 
+    // Only call folder list API to check existence
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (listResponse) => {
         console.log('Folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // Data exists, enable codespace
-          this.loadExistingAgentWithFilesFromAPI(listResponse);
+          // Data exists, enable codespace tab only - backend handles file population
+          this.enableCodespaceTabOnly();
         } else {
           // No data from list API, show only script tab
           console.log('No data from folder list API, showing script tab only');
@@ -3203,14 +3202,9 @@ DELIVERABLES
         console.log('Pipeline folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // List API succeeded - enable codespace tab immediately
+          // List API succeeded - enable codespace tab only, backend handles file population
           console.log('List API succeeded, enabling codespace tab for pipeline card');
-          this.hasGeneratedAgent = true;
-          this.isJsonProcessed = true;
-          
-          // Build file tree from list API response
-          this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(listResponse);
-          this.expandAllFolders(this.fileSystemData);
+          this.enableCodespaceTabOnly();
           
           this.isLoadingFiles = false;
         } else {
