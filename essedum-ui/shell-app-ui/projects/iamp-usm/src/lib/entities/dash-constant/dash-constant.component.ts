@@ -124,6 +124,7 @@ export class DashConstantComponent implements OnInit {
   sideCheck: boolean = false;
   childrenCheck: boolean = false;
   horizontal: boolean = true;
+  loading: boolean = true;
   defaultCheck: boolean = false;
   projectRoleMap: boolean = false;
   roles = new Array<Role>();
@@ -702,6 +703,7 @@ export class DashConstantComponent implements OnInit {
   }
 
   fetchDashConstant() {
+    this.loading = true;
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
@@ -749,8 +751,9 @@ export class DashConstantComponent implements OnInit {
         this.dashConstantsPageList = this.dashConstantList.data;
         this.dashConstantList.sort = this.sort;
         this.dashConstantList.paginator = this.paginator;
+        this.loading = false;
       },
-      (error) => { },
+      (error) => { this.loading = false; },
       () => { }
     );
   }

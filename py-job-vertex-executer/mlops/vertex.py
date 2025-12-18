@@ -53,16 +53,29 @@ def get_access_token(connection):
             'auth_provider_x509_cert_url': connection.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': connection.get("client_x509_cert_url")
         }
+    
 
     scopes = [
         'https://www.googleapis.com/auth/cloud-platform',
         'https://www.googleapis.com/auth/cloud-platform.read-only'
     ]
+    
 
+
+    
+    os.environ.pop('http_proxy', None)
+    os.environ.pop('https_proxy', None)
+    os.environ.pop('HTTP_PROXY', None)
+    os.environ.pop('HTTPS_PROXY', None)
+
+
+    logger.info(f"Creating credentials from service account info...")
     credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
+    logger.info(f"Credentials created successfully: {credentials}")
     auth_req = google.auth.transport.requests.Request()
+    logger.info(f"auth_req: {auth_req}")
     credentials.refresh(auth_req)
-
+    logger.info(f"token: {credentials.token}")
     return credentials.token
 
 #cloud connect part
@@ -80,7 +93,7 @@ def cloudconnect(payload):
             'auth_provider_x509_cert_url': payload.get("auth_provider_x509_cert_url"),
             'client_x509_cert_url': payload.get("client_x509_cert_url")
         }
-
+         
         credentials = service_account.Credentials.from_service_account_info(credentials_info)
         storage_client = storage.Client(project=payload.get("project_id"), credentials=credentials)
         buckets = list(storage_client.list_buckets())

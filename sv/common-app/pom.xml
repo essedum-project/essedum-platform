@@ -56,6 +56,7 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
+			<version>4.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.azure.spring</groupId>
@@ -174,7 +175,10 @@
 			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
 		</dependency>
-			
+		<dependency>
+			<groupId>com.lfn.icip.plugins</groupId>
+			<artifactId>icip-adp-gcp-vertex</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.ehcache</groupId>

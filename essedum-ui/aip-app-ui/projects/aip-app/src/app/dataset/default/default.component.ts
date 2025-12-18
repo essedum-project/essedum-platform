@@ -113,7 +113,8 @@ export class DefaultComponent {
   authentications() {
     this.service.getPermission("cip").subscribe(
       (cipAuthority) => {
-        if (cipAuthority.includes("dataset-edit")) this.isAuth = false;
+        const authorityArr = JSON.parse(cipAuthority);
+        this.isAuth = !authorityArr.some(item => item.permission === "dataset-edit");
       }
     );
   }

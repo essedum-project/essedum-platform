@@ -11,7 +11,7 @@
       </div>
 
       <!-- Data Table Section -->
-      <main class="data-table-section" aria-label="Configuration Data">
+      <main class="data-table-section lfx-u-pad-b-40" aria-label="Configuration Data">
         <div *ngIf="dashConstantLength >= 0 && showList" class="table-card">
           <div class="table-scroll-container">
             <table class="styled-table" role="table" aria-label="Configuration data table">
@@ -23,7 +23,7 @@
                   <th scope="col" class="actions-column">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody *ngIf="!loading">
                 <tr *ngFor="let constants of pagedDashConstantList; let i = index; trackBy: trackByConstantId"
                   role="row" [attr.aria-rowindex]="i + 1">
                   <td (click)="ViewDashConstants(constants)" class="td-ellipsis number-col clickable-cell"
@@ -64,6 +64,16 @@
                     </div>
                   </td>
                 </tr>
+              </tbody>
+              <tbody *ngIf="loading">
+
+                <div class="aip-loading-container">
+                  <div class="aip-spinner">
+                    <div class="spinner-circle"></div>
+                    <div class="spinner-circle spinner-circle-outer"></div>
+                  </div>
+                </div>
+
               </tbody>
             </table>
           </div>
@@ -318,63 +328,73 @@
               </div>
               <div cdkDropListGroup class="col-md-6 selector-374-125">
                 <mat-icon *ngIf="!view && addsiblings && dataSource && dataSource.data && dataSource.data.length>0"
-                  style="cursor: pointer;" (click)="displayAddSiblingForm()" matTooltip="Add Sibling"
-                  [matTooltipPosition]="TOOLTIP_POSITION" [attr.aria-label]="getViewTooltip()">add</mat-icon>
+                  [ngClass]="'hover-blue'" style="cursor: pointer;" (click)="displayAddSiblingForm()"
+                  matTooltip="Add Sibling" [matTooltipPosition]="TOOLTIP_POSITION"
+                  [attr.aria-label]="getViewTooltip()">add</mat-icon>
                 <mat-tree cdkDropList (cdkDropListDropped)="drop($event)" *ngIf="sideCheck" [dataSource]="dataSource"
                   [treeControl]="treeControl" class="example-tree treeBox selector-374-126">
                   <!-- This is the tree node template for leaf nodes -->
                   <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node" class="resetOverflow selector-374-127"
-                    *matTreeNodeDef="let node" [ngClass]="{'highlight': node.highlight}" matTreeNodeToggle="">
-                    <ul>
-                      <li class="mat-tree-node resetOverflow selector-374-128" style="cursor: all-scroll;">
-                        <!-- use a disabled button to provide padding for tree leaf -->
-                        <button mat-icon-button="" disabled="" class="selector-374-129"></button>
-
+                    *matTreeNodeDef="let node" [ngClass]="{'highlight': node.highlight}" matTreeNodeToggle>
+                    <div class="mat-tree-node resetOverflow selector-374-128"
+                      style="cursor: all-scroll;justify-content: space-between;width: 400px;">
+                      <!-- use a disabled button to provide padding for tree leaf -->
+                      <div>
+                        <button mat-icon-button disabled class="selector-374-129"></button>
                         <span style="white-space: nowrap;" class="selector-374-130">{{node.label}}</span>
-                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayAddChildForm(node)"
-                          matTooltip="Add Child" [matTooltipPosition]="TOOLTIP_POSITION"
-                          [attr.aria-label]="getViewTooltip()">add</mat-icon>
-                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayEditForm(node)"
-                          matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
+                      </div>
+                      <div style="display: flex; justify-content: space-between; width: 90px;">
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-blue'" style="cursor: pointer;"
+                          (click)="displayAddChildForm(node)" matTooltip="Add Child"
+                          [matTooltipPosition]="TOOLTIP_POSITION" [attr.aria-label]="getViewTooltip()">add</mat-icon>
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-blue'" style="cursor: pointer;"
+                          (click)="displayEditForm(node)" matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
                           [attr.aria-label]="getEditTooltip()">edit</mat-icon>
-                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="deleteChildFromTree(node)"
-                          matTooltip="Delete Child" [matTooltipPosition]="TOOLTIP_POSITION"
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-red'" style="cursor: pointer;"
+                          (click)="deleteChildFromTree(node)" matTooltip="Delete Child"
+                          [matTooltipPosition]="TOOLTIP_POSITION"
                           [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
-                      </li>
-                    </ul>
+                      </div>
+                    </div>
                   </mat-tree-node>
                   <!-- This is the tree node template for expandable nodes -->
                   <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node"
                     *matTreeNodeDef="let node; when: hasChild" [ngClass]="{'highlight': node.highlight}"
                     class="selector-374-134">
-                    <ul>
-                      <li class="selector-374-135">
-                        <div class="mat-tree-node resetOverflow selector-374-136" style="cursor: all-scroll;">
-                          <button (click)="expansionModel.toggle(node._id)" mat-icon-button="" matTreeNodeToggle=""
-                            [attr.aria-label]="'Toggle ' + node.label" class="selector-374-137">
-                            <mat-icon class="mat-icon-rtl-mirror selector-374-138">
-                              {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                            </mat-icon>
-                          </button>
-                          <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
-                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayAddChildForm(node)"
-                            matTooltip="Add Child" [matTooltipPosition]="TOOLTIP_POSITION"
-                            [attr.aria-label]="getViewTooltip()">add</mat-icon>
-                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayEditForm(node)"
-                            matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
-                            [attr.aria-label]="getEditTooltip()">edit</mat-icon>
-                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="deleteChildFromTree(node)"
-                            matTooltip="Delete Child" [matTooltipPosition]="TOOLTIP_POSITION"
-                            [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
-                        </div>
-                        <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
-                          <ng-container matTreeNodeOutlet="" class="selector-374-144"></ng-container>
-                        </ul>
-                      </li>
-                    </ul>
+                    <div class="mat-tree-node resetOverflow selector-374-136"
+                      style="cursor: all-scroll;justify-content: space-between;width: 400px;">
+                      <div>
+                        <button (click)="expansionModel.toggle(node._id)" mat-icon-button matTreeNodeToggle
+                          [attr.aria-label]="'Toggle ' + node.label" class="selector-374-137">
+                          <mat-icon [ngClass]="'hover-blue'" class="mat-icon-rtl-mirror selector-374-138">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                          </mat-icon>
+                        </button>
+                        <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; width: 90px;">
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-blue'" style="cursor: pointer;"
+                          (click)="displayAddChildForm(node)" matTooltip="Add Child"
+                          [matTooltipPosition]="TOOLTIP_POSITION" [attr.aria-label]="getViewTooltip()">add</mat-icon>
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-blue'" style="cursor: pointer;"
+                          (click)="displayEditForm(node)" matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
+                          [attr.aria-label]="getEditTooltip()">edit</mat-icon>
+                        <mat-icon *ngIf="!view" [ngClass]="'hover-red'" style="cursor: pointer;"
+                          (click)="deleteChildFromTree(node)" matTooltip="Delete Child"
+                          [matTooltipPosition]="TOOLTIP_POSITION"
+                          [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
+                      </div>
+                    </div>
+                    <div [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
+                      <ng-container matTreeNodeOutlet class="selector-374-144"></ng-container>
+                    </div>
                   </mat-tree-node>
                 </mat-tree>
               </div>
+
+
+
+
             </div>
           </div>
           <div *ngIf="configureUserLand">

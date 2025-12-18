@@ -27,8 +27,6 @@
 "1449","HideBCCHeader_Project Admin","leo1311","true","2"
 "1615","SreRunDataDashboardUrl","leo1311","../../../../../../../../../../dynamicDashboard/grid/OCC/42476","2"
 
-
-"36154","Admin Side","Core","{\"label\":\"PowerBI view\",\"icon\":\"wrench\",\"url\":\"./ivm/home/projs/power-bi-view\",\"children\":[]}","1"
 "36153","ivm.powerbi.url","Core","https://api.powerbi.com/v1.0/myorg/groups/6c43f3e2-c9cc-4a7e-99b5-d6283f6fc557/reports/{reportId}/GenerateToken","1"
 "36152","ivm.powerbi.reportNames","Core","{	\"Detailed Report\" : [{		\"tabName\": \"Initiative Tracking\",        \"reportId\": \"c304508b-173a-4a10-b782-f56a29023417\"      },	  {		\"tabName\": \"Financial Report\",        \"reportId\": \"7273c07a-c8f9-4590-a14b-37e42b8c1df3\"      }	],	\"Benefit Tracking\" : [{		\"tabName\": \"Initiative Planner\",        \"reportId\": \"1f7d75dd-3fdd-401a-b9c3-55d09945c11a\"      }	]}","1"
 "36151","ivm.powerbi.reportId","Core","{    \"reports\": [      {		\"allowEdit\": false,        \"id\": \"c304508b-173a-4a10-b782-f56a29023417\"      },	  {		\"allowEdit\": false,        \"id\": \"1f7d75dd-3fdd-401a-b9c3-55d09945c11a\"      },	  {		\"allowEdit\": false,       \"id\": \"7273c07a-c8f9-4590-a14b-37e42b8c1df3\"      }    ]}","1"

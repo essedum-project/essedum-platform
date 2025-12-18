@@ -176,5 +176,54 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]}','2',NULL);
         </sql>
     </changeSet>
+    
+    
+     
+    <changeSet id="3v2-usm-2025-15-oct" author="Essedum">
+    <preConditions onFail="MARK_RAN">
+        <sqlCheck expectedResult="0">
+            SELECT COUNT(*) 
+            FROM usm_constant 
+            WHERE item_value LIKE '%AI Agent%' 
+              AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311') 
+              AND item = 'IT Portfolio Manager Side';
+        </sqlCheck>
+    </preConditions>
+    <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+        INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+        ) VALUES (
+            'IT Portfolio Manager Side',
+            'leo1311',
+            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'leo1311'),
+            NULL
+        );
+    </sql>
+</changeSet>
+
+    <changeSet id="3v2-usm-2025-15-oct-core" author="Essedum">
+    <preConditions onFail="MARK_RAN">
+        <sqlCheck expectedResult="0">
+            SELECT COUNT(*) 
+            FROM usm_constant 
+            WHERE item_value LIKE '%AI Agent%' 
+              AND project_id = (SELECT id FROM usm_project WHERE name = 'core') 
+              AND item = 'IT Portfolio Manager Side';
+        </sqlCheck>
+    </preConditions>
+    <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+        INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+        ) VALUES (
+            'IT Portfolio Manager Side',
+            'core',
+            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'core'),
+            NULL
+        );
+    </sql>
+</changeSet>
+
 
 </databaseChangeLog>

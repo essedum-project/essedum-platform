@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langflow
+  namespace: aipns
+  labels:
+    app: langflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langflow
+  template:
+    metadata:
+      labels:
+        app: langflow
+    spec:
+      containers:
+      - name: langflow
+        image: langflowai/langflow:latest
+        ports:
+        - containerPort: 7860
+        env:
+        - name: LANGFLOW_ENV
+          value: "production"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        volumeMounts:
+        - name: langflow-data
+          mountPath: /data
+      volumes:
+      - name: langflow-data
+        persistentVolumeClaim:
+          claimName: langflow-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langflow-service
+  namespace: aipns
+spec:
+  selector:
+    app: langflow
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 7860
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: langflow-ingress
+  namespace: aipns
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - langflow.lfn.essedum.anuket.iol.unh.edu
+    secretName: essedum-secret
+  rules:
+  - host: langflow.lfn.essedum.anuket.iol.unh.edu
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: langflow-service
+            port:
+              number: 80

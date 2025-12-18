@@ -94,7 +94,7 @@
                         }">
                         {{ item.label }}
                       </span>
-                    </div>
+                    </div>             
                   </div>
                 </div>
                 <!-- Sidebar menu popup closed -->
@@ -166,13 +166,19 @@
                           item.icon &&
                           (item.icon.includes('data:image/png') ||
                             item.icon.includes('data:image/jpg') ||
-                            item.icon.includes('data:image/jpeg'))
+                            item.icon.includes('data:image/jpeg')) &&
+                          item.label !== 'AI Agent'
                         " [src]="item.icon" alt="" />
+                      <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                          item.label === 'AI Agent'
+                        " src="assets/img/ai-agent-logo.jpg" alt="AI Agent Icon" style="height: 42px !important; width: 42px !important;" />
                       <i *ngIf="
                           item.icon &&
                           !item.icon.startsWith('assets/icons/') &&
                           !item.icon.startsWith('fa-') &&
-                          !item.icon.startsWith('icon')
+                          !item.icon.startsWith('icon') &&
+                          item.label !== 'AI Agent' &&
+                          !item.icon.includes('data:image/')
                         " class="fa fa-{{ item.icon }} fa-2x" [ngStyle]="{
                           color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
                         }" [ngClass]="{
@@ -220,8 +226,8 @@
                         <!-- {{ item.label }} -->
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </div>                 
+                </div> 
               </mat-nav-list>
             </mat-sidenav>
             <!-- righside container starts-->

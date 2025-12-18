@@ -110,138 +110,26 @@
 				(NULL,'Portfolio Client','Portfolio Client',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Essedum" id="20240810-3v0-usm-6">		
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Manager';
-			</sqlCheck>
-		</preConditions>
-		<sql dbms="mysql">
-			INSERT INTO usm_role(`project_id`,`description`,`name`,`permission`,`project_admin`,`role_admin`,`portfolio_id`,`project_admin_id`) VALUES 
-				(NULL,'Portfolio Manager','Portfolio Manager',b'1',NULL,NULL,NULL,NULL);
-		</sql>
-	</changeSet>
-    <changeSet author="Essedum" id="20240813-3v0-usm-6">		
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Manager';
-			</sqlCheck>
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_role(project_id,description,name,permission,project_admin,role_admin,portfolio_id,project_admin_id) VALUES  
-				(NULL,'Portfolio Manager','Portfolio Manager',NULL,NULL,NULL,NULL,NULL);
-		</sql>
-	</changeSet>
-	<changeSet author="Essedum" id="20240810-3v0-usm-7">		
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Core Project Admin';
-			</sqlCheck>
-		</preConditions>
-		<sql dbms="mysql ">
-			INSERT INTO usm_role(`project_id`,`description`,`name`,`permission`,`project_admin`,`role_admin`,`portfolio_id`,`project_admin_id`) VALUES 
-				(NULL,'Core Project Admin','Core Project Admin',b'1',NULL,NULL,NULL,NULL);
-		</sql>
-	</changeSet>
-    <changeSet author="Essedum" id="20240813-3v0-usm-7">		
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Core Project Admin';
-			</sqlCheck>
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_role(project_id,description,name,permission,project_admin,role_admin,portfolio_id,project_admin_id) VALUES 
-				(NULL,'Core Project Admin','Core Project Admin',NULL,NULL,NULL,NULL,NULL);
-		</sql>
-	</changeSet>
+	
+ 
+
+
 	<changeSet author="Essedum" id="20240810-3v0-usm-8">		
 		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Core Portfolio Admin';
-			</sqlCheck>
+		
 		</preConditions>
-		<sql dbms="mysql">
-			INSERT INTO usm_role(`project_id`,`description`,`name`,`permission`,`project_admin`,`role_admin`,`portfolio_id`,`project_admin_id`) VALUES 
-				(NULL,'Core Portfolio Admin','Core Portfolio Admin',b'1',NULL,NULL,NULL,NULL);
-		</sql>
+
 	</changeSet>
-    <changeSet author="Essedum" id="20240813-3v0-usm-8">		
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE name='Core Portfolio Admin';
-			</sqlCheck>
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_role(project_id,description,name,permission,project_admin,role_admin,portfolio_id,project_admin_id) VALUES 
-				(NULL,'Core Portfolio Admin','Core Portfolio Admin',NULL,NULL,NULL,NULL,NULL);
-		</sql>
-	</changeSet> -->
+
 	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-5">
 		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' LIMIT 1)
-			</sqlCheck>
+
 		</preConditions>
-		<sql dbms="mysql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' LIMIT 1), 1, NULL)
-		</sql>
+	
 	</changeSet>
-	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-6">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
-			</sqlCheck>			
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
-		</sql>
-	</changeSet>
-	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-7">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' LIMIT 1)
-			</sqlCheck>							
-		</preConditions>
-		<sql dbms="mysql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' LIMIT 1), 1, NULL)
-		</sql>		
-	</changeSet>
-	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-8">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
-			</sqlCheck>		
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
-		</sql>
-	</changeSet>
-	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-9">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' LIMIT 1)
-			</sqlCheck>			
-		</preConditions>
-		<sql dbms="mysql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' LIMIT 1), 1, NULL)
-		</sql>		
-	</changeSet>
-	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-10">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
-			</sqlCheck>	
-		</preConditions>
-		<sql dbms="mssql">
-			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id, time_stamp)
-			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
-		</sql>
-	</changeSet>
+
+
+
 	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-11">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
@@ -330,7 +218,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<!--<changeSet author="Essedum" id="20240809-3v0-usm-21">
+	<changeSet author="Essedum" id="20240809-3v0-usm-21">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">  
 			update usm_constant set item_value = '{"label":"Event Management","icon":"sitemap","children":[{"label":"Workflow","url":"./iamp-eda","icon":"bars","_id":2},{"label":"Event","url":"./iamp-eda/event-type","icon":"folder","_id":3}],"horizontal":true}' where item IN ('IT Portfolio Manager Side',  'Project Client Side') AND item_value LIKE '%Event Management%' AND project_name='leo1311'
 			update usm_constant set item_value = '{"label":"Value Management","icon":"icon_certificate","url":"./ivm/home/ams","children":[{"label":"Maturity Assessment","icon":"icon_certificate","url":"./ivm/selectQuestionnaire","children":[],"_id":2},{"label":"Detailed Report","icon":"icon_certificate","url":"./ivm/home/ams/report","children":[],"_id":3},{"label":"Industry Benchmark","icon":"icon_certificate","url":"./ivm/home/ams/report/dynamicDashboard","children":[],"_id":4},{"label":"Metric Planner","icon":"icon_certificate","url":"./ivm/home/ams/metricplanner","children":[],"_id":5},{"label":"Initiative Intelligence","icon":"icon_certificate","url":"./ivm/home/ams/initiativeIntelligence","children":[],"_id":6},{"label":"Initiative Planner","icon":"icon_certificate","url":"./ivm/home/ams/initiativePlanner","children":[],"_id":7},{"label":"Track Initiative","icon":"icon_certificate","url":"./ivm/home/ams/trackInitiative","children":[],"_id":8}]}' where item IN ('IT Portfolio Manager Side',  'Project Client Side') AND item_value LIKE '%Value Management%' AND project_name='leo1311'

@@ -92,8 +92,8 @@ mysql:
     storageClassName: azurefile
   initdb:
     databases:
-      - core_dbb
-      - leap2_8000_quartz
+      - essedum_coredb
+      - essedum_quartzdb
       - telemetrydb
 
 imagePullSecret: acr-secret

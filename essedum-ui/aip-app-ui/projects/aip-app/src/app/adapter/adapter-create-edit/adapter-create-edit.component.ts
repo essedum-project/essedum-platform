@@ -322,10 +322,13 @@ export class AdapterCreateEditComponent implements OnInit {
         spec => spec.domainname === this.data!.spectemplatedomainname
       );
       if (selectedTemplate) {
-        this.data.apispec = selectedTemplate.apispectemplate;
+        this.data.apispec = selectedTemplate.apispectemplate || "{}";
         this.data.category = 'REMOTE';
-      }
+      } else {
+      this.data.apispec = "{}";
     }
+      
+  }
 
     this.adapterServices.createAdapter(this.data)
       .pipe(

@@ -47,6 +47,7 @@
 		<dependency>
 		    <groupId>org.liquibase</groupId>
 		    <artifactId>liquibase-core</artifactId>
+			<version>4.3.5</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->

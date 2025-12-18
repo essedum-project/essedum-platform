@@ -80,11 +80,13 @@ public class MlSpecTemplates2 implements Serializable, Cloneable {
 	
 	@Column(name = "lastmodifiedby")
 	private String lastmodifiedby;
+
+    @Column(name = "apispectemplate")
+    private String apispectemplate;
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "lastmodifiedon")
 	public Timestamp lastmodifiedon;
-
 	
 	@Column(name = "description")
 	private String description;

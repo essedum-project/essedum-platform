@@ -110,8 +110,13 @@
           <div class="filter-control">
             <mat-form-field appearance="fill" class="w-100">
               <label>Permission</label>
-              <mat-select [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects"
+              <mat-select [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects1"
                 placeholder="Select Permission" [disabled]="view" (selectionChange)="applyFilters()">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search permissions..."
+                    noEntriesFoundLabel="No matching permissions found" (keyup)="onKey($event.target.value)">
+                  </ngx-mat-select-search>
+                </mat-option>
                 <mat-option [value]="'All'">All</mat-option>
                 <mat-option *ngFor="let option of filteredPermissions" [value]="option">
                   {{ option.permission }}

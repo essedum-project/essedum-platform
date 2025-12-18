@@ -49,12 +49,12 @@
 			<column name="context" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Essedum (generated)" id="1614785155891-273">
+<!--	<changeSet author="Essedum (generated)" id="1614785155891-273">
 		<createIndex indexName="FKdysllnw4of9n7gdqywdce6q99"
 			tableName="usm_role_permissions">
 			<column name="permission" />
 		</createIndex>
-	</changeSet>
+	</changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-275">
 		<createIndex indexName="FKe3ic1ei1n867d6e91r953swpo"
 			tableName="usm_constant">
@@ -227,13 +227,13 @@
 			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
 			referencedColumnNames="id" referencedTableName="usm_project" />
 	</changeSet>
-	<changeSet author="Essedum (generated)" id="1614785155891-504">
+<!--	<changeSet author="Essedum (generated)" id="1614785155891-504">
 		<addForeignKeyConstraint
 			baseColumnNames="permission" baseTableName="usm_role_permissions"
 			constraintName="FKdysllnw4of9n7gdqywdce6q99" deferrable="false"
 			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
 			referencedColumnNames="id" referencedTableName="usm_permissions" />
-	</changeSet>
+	</changeSet>-->
 <!--	<changeSet author="Essedum (generated)" id="1614785155891-505">
 		<addForeignKeyConstraint
 			baseColumnNames="project"
@@ -708,7 +708,7 @@
 			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
 			referencedColumnNames="id" referencedTableName="usm_role" />
 	</changeSet>	
-	<changeSet author="essedum" id="1614785155891-913">
+<!-- <changeSet author="essedum" id="1614785155891-913">
 		<dropForeignKeyConstraint
 			baseTableName="usm_role_permissions"
 			constraintName="FKdysllnw4of9n7gdqywdce6q99" />
@@ -717,7 +717,7 @@
 			constraintName="FKdysllnw4of9n7gdqywdce6q99" deferrable="false"
 			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
 			referencedColumnNames="id" referencedTableName="usm_permissions" />
-	</changeSet>	
+	</changeSet>	-->
 	<changeSet author="essedum" id="1614785155891-914">
 		<dropForeignKeyConstraint
 			baseTableName="usm_user_project_role"

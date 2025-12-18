@@ -40,6 +40,26 @@
         </div>
     </mat-card-header>
 
+    <!-- Agent card content -->
+    <mat-card-content *ngIf="servicev1 === 'agent'" class="agent-card-content">
+        <!-- <p class="text-body-md text-neutral aip-desc-ellipsis">
+            {{ card.description }}
+        </p> -->
+        <!-- <div class="agent-metadata">
+            <div class="metadata-item">
+                <span class="metadata-label">Status:</span>
+                <span class="metadata-value" [ngClass]="'status-' + card.status?.toLowerCase()">{{ card.status }}</span>
+            </div>
+            <div class="metadata-item" *ngIf="card.lastmodifiedon">
+                <span class="metadata-label">Modified:</span>
+                <span class="metadata-value">{{ card.lastmodifiedon | date:'shortDate' }}</span>
+            </div>
+        </div> -->
+        <!-- <div class="agent-tags" *ngIf="card.tags && card.tags.length > 0">
+            <span class="tag" *ngFor="let tag of card.tags">{{ tag }}</span>
+        </div> -->
+    </mat-card-content>
+
     <!-- <mat-card-content>
                 <p class="text-body-md text-neutral aip-desc-ellipsis">
                   {{ card.description }}
@@ -113,5 +133,49 @@
             (click)="onDelete(card.name)">
             <mat-icon class="action-icon">delete</mat-icon>
         </button>
+    </mat-card-actions>
+
+    <!-- Agent Actions - same style as other cards -->
+    <mat-card-actions *ngIf="servicev1 === 'agent'"
+        class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
+        <div class="button-placeholder">
+            <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
+                [@fadeInOut]="'in'">
+                View Details
+            </button>
+        </div>
+
+        <!-- Created by avatar -->
+        <div class="aip-cursor">
+            <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar"
+                [ngStyle]="{ '--avatar-bg-color': getAvatarBackgroundColor() }">
+                {{ getAvatar() | firstCharacter }}
+            </div>
+            <div class="aip-hover-detail">
+                <div class="lfx-u-header-md lfx-u-mar-8">
+                    {{ getAvatar() }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions menu (conditionally shown) -->
+        <div *ngIf="editAuth || deleteAuth" class="dropdown d-inline-block float-end">
+            <mat-icon class="aip-cursor aip-more-actions-icon" [matMenuTriggerFor]="agentMenu"
+                style="font-size: 24px; padding: 0px; color: #a5aaad; font-weight: 300"
+                [ngStyle]="{ color: isMenuHovered ? '#0094ff' : '#737373' }" (mouseenter)="isMenuHovered = true"
+                (mouseleave)="isMenuHovered = false">
+                more_vert
+            </mat-icon>
+            <mat-menu #agentMenu="matMenu">
+                <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">
+                    <mat-icon class="aip-menu-icon">edit</mat-icon>
+                    Edit
+                </button>
+                <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
+                    <mat-icon class="aip-menu-delete">delete</mat-icon>
+                    Delete
+                </button>
+            </mat-menu>
+        </div>
     </mat-card-actions>
 </mat-card>

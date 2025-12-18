@@ -38,9 +38,15 @@ export class AppHomeComponent implements OnInit {
     this.apiService.findAllModules(module, this.lazyloadevent).subscribe(res => {
       res.content.forEach(ele => {
         if (ele.url === undefined || ele.url === "" || ele.url === null) {
-          this.uninstArr.push(ele)
+            // Only add to uninstArr if module name is 'cip' or 'usm'
+            if (ele.name === 'cip' || ele.name === 'usm') {
+            this.uninstArr.push(ele);
+            }
         } else {
-          this.instArr.push(ele)
+             // Only add to uninstArr if module name is 'cip' or 'usm'
+            if (ele.name === 'cip' || ele.name === 'usm') {
+            this.instArr.push(ele);
+            }
         }
       })
     }, error => {

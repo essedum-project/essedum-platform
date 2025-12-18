@@ -1,0 +1,219 @@
+{
+  "name": "essedum",
+  "displayName": "Essedum",
+  "description": "VS Code extension for Essedum AI Platform",
+  "version": "0.0.16",
+  "publisher": "essedum",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.103.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "platform",
+    "authentication",
+    "keycloak",
+    "pipeline",
+    "job-logs",
+    "oauth",
+    "essedum"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform.git"
+  },
+  "homepage": "https://github.com/Infosys-MWC-GENAI/ai-platform#readme",
+  "bugs": {
+    "url": "https://github.com/Infosys-MWC-GENAI/ai-platform/issues"
+  },
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "essedum.openSidebar",
+        "title": "Open Essedum Panel"
+      },
+      {
+        "command": "essedum.showLoginScreen",
+        "title": "Show Login Screen"
+      },
+      {
+        "command": "essedum.login",
+        "title": "Login to Essedum"
+      },
+      {
+        "command": "essedum.loginWithNetwork",
+        "title": "Login with Network Selection"
+      },
+      {
+        "command": "essedum.logout",
+        "title": "Logout from Essedum",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "essedum.checkAuth",
+        "title": "Check Authentication Status"
+      },
+      {
+        "command": "essedum.openJobLogs",
+        "title": "Open Job Logs Viewer",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "essedum.openInternalJobLogs",
+        "title": "Open Internal Job Logs",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "essedum.showJobLogsInTerminal",
+        "title": "Show Job Logs in Terminal",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "essedum.debugUpload",
+        "title": "Debug Upload Endpoints"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "essedum.showLoginScreen",
+          "when": "!essedum.isAuthenticated"
+        },
+        {
+          "command": "essedum.loginWithNetwork",
+          "when": "true"
+        },
+        {
+          "command": "essedum.openJobLogs",
+          "when": "true"
+        },
+        {
+          "command": "essedum.openInternalJobLogs",
+          "when": "true"
+        },
+        {
+          "command": "essedum.showJobLogsInTerminal",
+          "when": "true"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "essedum.logout",
+          "when": "view == essedum-sidebar && essedum.isAuthenticated",
+          "group": "navigation@1"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "essedum-explorer",
+          "title": "Essedum AI Platform",
+          "icon": "media/essedum-icon.svg"
+        }
+      ],
+      "panel": [
+        {
+          "id": "essedum-panel",
+          "title": "Essedum Job Logs",
+          "icon": "$(list-flat)"
+        }
+      ]
+    },
+    "views": {
+      "essedum-explorer": [
+        {
+          "id": "essedum-login",
+          "name": "Network Selection",
+          "type": "webview",
+          "when": "!essedum.isAuthenticated",
+          "icon": "$(key)"
+        },
+        {
+          "id": "essedum-sidebar",
+          "name": "Essedum AI Platform",
+          "type": "webview",
+          "when": "essedum.isAuthenticated",
+          "icon": "$(home)"
+        }
+      ],
+      "essedum-panel": [
+        {
+          "id": "essedum-job-logs",
+          "name": "Job Logs",
+          "type": "webview",
+          "when": "essedum.jobLogsVisible",
+          "icon": "$(list-flat)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Essedum AI Platform",
+      "properties": {
+        "essedum.auth.allowSelfSignedCertificates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow self-signed SSL certificates for Keycloak authentication (recommended for development environments)"
+        },
+        "essedum.auth.showCertificateWarnings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings when accepting self-signed certificates"
+        },
+        "essedum.auth.oauthPort": {
+          "type": "number",
+          "default": 8085,
+          "description": "Port number for the OAuth callback server (must match Keycloak client configuration)",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "essedum.auth.autoLogin": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically attempt login when the extension starts (requires network to be pre-selected)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test",
+    "publish": "vsce publish",
+    "package-extension": "vsce package"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/form-data": "^2.2.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.103.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "copy-webpack-plugin": "^13.0.1",
+    "eslint": "^9.34.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "crypto-js": "^4.2.0",
+    "form-data": "^4.0.4",
+    "node-fetch": "^2.7.0"
+  }
+}

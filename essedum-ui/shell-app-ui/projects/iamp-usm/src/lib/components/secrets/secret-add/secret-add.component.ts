@@ -29,6 +29,7 @@ export class SecretAddComponent implements OnInit {
   showCreate: boolean = false;
   hidePassword: boolean = true;
   clearLabel = "Clear";
+  isSubmitting: boolean = false;
 
   @Output() secretModelClosed = new EventEmitter<void>();
 
@@ -75,26 +76,43 @@ export class SecretAddComponent implements OnInit {
   }
 
   onCreate() {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
+
     this.secretsService.createKey(this.key, this.passcode).subscribe(
       (res) => {
         this.messageService.messageNotification(`Successfully created`);
-        this.closeSecretAddDialog();
+        if (this.dialogRef) {
+          this.dialogRef.close(true);
+        } else {
+          this.secretModelClosed.emit();
+        }
+        this.isSubmitting = false;
       },
       (err) => {
-        console.log(err);
-        this.messageService.messageNotification(`error  ${err} `,"error");
+        this.messageService.messageNotification(`error  ${err} `, "error");
+        this.isSubmitting = false;
       }
     );
   }
 
   onUpdate() {
-    this.secretsService
-      .updateKey(this.key, this.passcode)
-      .subscribe((res: any) => {
+    this.secretsService.updateKey(this.key, this.passcode).subscribe(
+      (res: any) => {
         this.messageService.messageNotification("Updated Successfully");
-        this.closeSecretAddDialog();
+        if (this.dialogRef) {
+          this.dialogRef.close(true);
+        } else {
+          this.secretModelClosed.emit();
+        }
         this.hideValue();
-      });
+      },
+      (err) => {
+        this.messageService.messageNotification(`error  ${err} `, "error");
+      }
+    );
   }
 
   getValue() {

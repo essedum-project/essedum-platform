@@ -34,7 +34,7 @@ mat-drawer-container {
   justify-content: space-between;
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
+.breadcrumb-item+.breadcrumb-item::before {
   content: ">";
   color: var(--base-color);
   color: var(--breadcrumbtext-color);
@@ -70,12 +70,10 @@ mat-drawer-container {
   top: 0;
   bottom: 0;
   left: 0;
-  right: 0;
-  // height: calc(100vh - var(--footerHeight, 35px));
-  margin-top: 43px;
-  /* Same as header height */
-  height: calc(100vh - 132px);
-  /* Adjust main content height */
+  right: 0;  // height: calc(100vh - var(--footerHeight, 35px));
+  margin-top: 43px;  /* Same as header height */
+  height: calc(100vh - 88px);  /* Adjust main content height */
+  scrollbar-width: thin;
   overflow: auto;
 }
 
@@ -156,7 +154,7 @@ mat-drawer-container {
   margin-top: 6px !important;
   font-size: 9px;
   font-weight: 600;
-  width: 4.5vw;
+  width: 5.5vw;
   overflow: hidden;
   white-space: normal;
   text-overflow: ellipsis;
@@ -193,7 +191,7 @@ mat-drawer-container {
   display: flex;
 }
 
-.iconmapping ~ .sidebar-item-text {
+.iconmapping~.sidebar-item-text {
   white-space: unset;
   text-overflow: unset;
   line-height: normal;
@@ -515,7 +513,7 @@ mat-drawer-container {
   background-color: var(--base-color);
   color: white;
   margin: 3px;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 2.25vmin;
 }
 
@@ -925,12 +923,7 @@ li.leftpanel-item.disabled {
   overflow: auto !important;
 }
 
-.dropdownrole
-  ::ng-deep
-  .mdc-text-field--no-label:not(.mdc-text-field--outlined):not(
-    .mdc-text-field--textarea
-  )
-  .mat-mdc-form-field-infix {
+.dropdownrole ::ng-deep .mdc-text-field--no-label:not(.mdc-text-field--outlined):not(.mdc-text-field--textarea) .mat-mdc-form-field-infix {
   min-height: 0px;
   padding-bottom: 0px;
   padding-top: 0px;
@@ -1195,8 +1188,7 @@ li.leftpanel-item.disabled {
 
 .main-header-bg {
   width: 100%;
-  background: linear-gradient(90deg, #002966 0%, var(--0052cc, #0052cc) 100%) 0%
-    0% no-repeat padding-box;
+  background: linear-gradient(90deg, #002966 0%, var(--0052cc, #0052cc) 100%) 0% 0% no-repeat padding-box;
   position: fixed;
   top: 0;
   left: 0;
@@ -1257,6 +1249,7 @@ li.leftpanel-item.disabled {
 }
 
 @media (max-width: 900px) {
+
   .responsive-main-toggle .main-toggle-btn,
   .responsive-toggle-img,
   .responsive-logo-img {
@@ -1377,9 +1370,9 @@ li.leftpanel-item.disabled {
 }
 
 .sidebar-menu-popup {
-  width: 130px;
+  width: 160px;
   min-width: 100px;
-  max-width: 130px;
+  max-width: 160px;
   transition: width 0.2s;
   margin-left: 130px;
 }
@@ -1428,6 +1421,7 @@ li.leftpanel-item.disabled {
     justify-content: center;
   }
 }
+
 //@import "../../../../node_modules/bootstrap-icons/font/bootstrap-icons.min.css";
 //@import "../../../../node_modules/bootstrap-icons/font/bootstrap-icons.scss";
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
@@ -1445,13 +1439,14 @@ html {
   body {
     background-color: var(--background-colour) !important;
   }
+
   body,
   html {
     font-family: "Roboto", Arial, Helvetica, sans-serif !important;
   }
 
-  .le-c-dropdown__list li > a,
-  .le-c-dropdown__list li > span {
+  .le-c-dropdown__list li>a,
+  .le-c-dropdown__list li>span {
     padding: 0.4rem 1.6rem;
   }
 
@@ -1622,7 +1617,7 @@ html {
     outline: none;
   }
 
-  .aip-select-adapter-dropDown > option {
+  .aip-select-adapter-dropDown>option {
     // background-color: white;
     background-color: var(--background-colour) !important;
   }
@@ -2034,8 +2029,7 @@ html {
   padding-right: 0.3rem;
 }
 
-@media (width<=576px) {
-}
+@media (width<=576px) {}
 
 .ace_print-margin ::ng-deep {
   left: 0 !important;
@@ -2073,7 +2067,7 @@ html {
   word-break: break-all;
 }
 
-::ng-deep.aip-hover-avatar:hover ~ .aip-hover-detail {
+::ng-deep.aip-hover-avatar:hover~.aip-hover-detail {
   display: block;
   transition: display 1s ease-out 0.5s;
 }
@@ -2149,6 +2143,7 @@ div {
 }
 
 ::ng-deep {
+
   //for global CSS datasets, connections , model
   .lfx-u-pad-8 {
     padding: 8px !important;
@@ -2540,15 +2535,11 @@ div {
   }
 
   // Show underline only for readonly input fields, hide for normal fields
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(
-      .mat-form-field-readonly
-    )
-    .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(.mat-form-field-readonly) .mdc-line-ripple {
     display: none !important;
   }
 
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly
-    .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly .mdc-line-ripple {
     display: block !important;
   }
 
@@ -2567,10 +2558,12 @@ div {
   .lfx-u-mar-r-16 {
     margin-right: 16px !important;
   }
+
   .lfx-u-pad-lr-16 {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
+
   .lfx-u-mar-t-16 {
     margin-top: 16px !important;
   }
@@ -2600,6 +2593,7 @@ div {
     padding: 30px 20px;
     min-height: 500px;
   }
+
   .lfx-l-level1-wrapper .lfx-l-whiteBG {
     background: #ffffff;
   }
@@ -2673,6 +2667,7 @@ div {
   .lfx-u-pad-l-16 {
     padding-left: 16px !important;
   }
+
   .lfx-u-pad-l-4 {
     padding-left: 4px !important;
   }
@@ -2711,6 +2706,7 @@ div {
 }
 
 ::ng-deep {
+
   // Dashboard Styles
   #mainCtr {
     width: 100%;
@@ -2750,13 +2746,14 @@ div {
     margin-bottom: 50px !important;
   }
 
-.lfx-u-mar-b-10{
-  margin-bottom: 10px !important;
-}
+  .lfx-u-mar-b-10 {
+    margin-bottom: 10px !important;
+  }
 
 }
 
 ::ng-deep {
+
   .container,
   .container-fluid {
     padding-right: 16px;
@@ -2820,6 +2817,7 @@ div {
   .ml-10 {
     margin-left: 10px !important;
   }
+
   .ml-20 {
     margin-left: 20px !important;
   }

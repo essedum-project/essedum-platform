@@ -140,6 +140,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   // Add emitter for filter panel status changes
   filterStatusChange = new EventEmitter<boolean>();
   
+  // Add properties to track filtering state
+  isFiltering = false;
+  searchText = '';
+  allUsers: Users[] = []; // Store all users for filtering
+  
   isLoading = false;
   page = 0;
   // lastPage updated to number for pagination consistency
@@ -357,61 +362,12 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   getAllUsers() {
     this.checkForAdminAuthority();
-    if(!this.defaultFlag){
-      this.usersService.findAllByProjectIdOrPortfolioId(new Users(), this.lazyloadevent, this.flag, this.callId).subscribe((response) => {
-        let users = response.content;
-        users = users.sort((a, b) => (a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1));
-        
-        // Update users array for the new layout
-        this.users = users;
-        this.usersCopy = JSON.parse(JSON.stringify(users));
-        this.wavesLength = users.length;
-        
-        this.useremails = [];
-        this.userlogins = [];
-        users.forEach((element) => {
-          this.useremails.push(element.user_email);
-          this.userlogins.push(element.user_login);
-        });
-        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-        
-        // Initialize filter options
-        this.updateFilterOptions();
-        
-        // Update table data
-        this.updateTableData();
-      }),
-        (error) => this.messageService.messageNotification(error,"error");
-    }
-    else{
-      this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
-        this.currentPage = response;
-        this.userss = response.content;
-        this.userss = this.userss.sort((a, b) =>
-          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
-        );
-        
-        // Update users array for the new layout
-        this.users = this.userss;
-        this.usersCopy = JSON.parse(JSON.stringify(this.userss));
-        this.wavesLength = this.users.length;
-        
-        this.userss.forEach((element) => {
-          this.useremails.push(element.user_email);
-          this.userlogins.push(element.user_login);
-        });
-        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-        
-        // Initialize filter options
-        this.updateFilterOptions();
-        
-        // Update table data
-        this.updateTableData();
-      }),
-        (error) => this.messageService.messageNotification(error,"error");
-    }
+    // Reset pagination to first page
+    this.page = 0;
+    this.pageIndex = 0;
+    
+    // Load first page of data
+    this.loadUsersForPage();
   }
   callApi() {
     this.checkForAdminAuthority();
@@ -489,6 +445,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
       this.pageIndex = 0;
+      this.page = 0;
     }
 
     if(!this.defaultFlag){
@@ -496,10 +453,18 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.usersService.findByProjectIdOrPortfolioId(this.example, pageEvent, this.flag, this.callId).subscribe((response) => {
         this.currentPage = response;
         this.users = response.content;
-        this.wavesLength = this.currentPage.totalElements;  
+        this.wavesLength = this.currentPage.totalElements;
+        this.lastPage = this.currentPage.totalPages - 1;
         this.users = this.users.sort((a, b) =>
           a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
         );
+        
+        // Update filter options if this is the first page load
+        if (this.page === 0) {
+          this.populateFilterLists();
+          this.updateFilterOptions();
+        }
+        
         this.UserProjectRoleList = new MatTableDataSource(this.users);
         this.UserProjectRoleList.sort = this.sort;
         this.UserProjectRoleList.paginator = this.paginator;
@@ -511,9 +476,17 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.currentPage = response;
         this.users = response.content;
         this.wavesLength = this.currentPage.totalElements;
+        this.lastPage = this.currentPage.totalPages - 1;
         this.users = this.users.sort((a, b) =>
           a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
         );
+        
+        // Update filter options if this is the first page load
+        if (this.page === 0) {
+          this.populateFilterLists();
+          this.updateFilterOptions();
+        }
+        
         this.UserProjectRoleList = new MatTableDataSource(this.users);
         this.UserProjectRoleList.sort = this.sort;
         this.UserProjectRoleList.paginator = this.paginator;
@@ -1133,25 +1106,29 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     }
   }
   ClearFilter() {
+    // Clear filter-related variables
     this.selectedemail = undefined;
     this.selecteduserlogin = undefined;
-    this.myInputReference.nativeElement.value = null;
-    if(this.pageEvent && this.deleteItem){
-      if((this.pageEvent.length-1)%this.pageSize == 0){
-          this.pageEvent.pageIndex = this.pageEvent.pageIndex == 0 ? this.pageEvent.pageIndex : this.pageEvent.pageIndex-1;
-          this.pageIndex = this.pageEvent.pageIndex;
-      }
-      this.pageEvent.length--;
-      this.getAllUserss({ page: this.pageEvent.pageIndex, size: this.pageSize });
-    }
-    else{
-      // this.lastPage = false;
-      this.getAllUserss(null);
-    }
-    this.deleteItem = false;
-    this.filterFlag1 = false;
+    this.selectedFilterValues = {};
     this.userSearched = undefined;
+    this.searchText = '';
+    this.filterFlag1 = false;
     this.filterFlag = false;
+    this.deleteItem = false;
+    this.isFiltering = false;
+    
+    // Reset example object to clear server-side filters
+    this.example = new Users();
+    
+    // Clear search input if it exists
+    if (this.myInputReference && this.myInputReference.nativeElement) {
+      this.myInputReference.nativeElement.value = null;
+    }
+    
+    // Reset to first page and reload data without filters
+    this.page = 0;
+    this.pageIndex = 0;
+    this.loadUsersForPage();
   }
   compareTodiff(curr:any,prev:any){
      let temparr=[];
@@ -1433,41 +1410,25 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     console.log('Filter selected:', event);
     this.selectedFilterValues = { ...this.selectedFilterValues, ...event };
     
-    // Ensure we have a copy of the original data for filtering
-    if (!this.usersCopy || this.usersCopy.length === 0) {
-      this.usersCopy = JSON.parse(JSON.stringify(this.users));
-    }
-    
-    // If no filters are selected, restore original data
+    // Check if any filters are active
     const hasFilters = Object.keys(event).some(key => event[key] && event[key].length > 0);
-    if (!hasFilters) {
-      this.users = JSON.parse(JSON.stringify(this.usersCopy));
-      this.wavesLength = this.users.length;
-      this.updateTableData();
-      return;
+    this.isFiltering = hasFilters || !!(this.searchText && this.searchText.trim());
+    
+    if (this.isFiltering && this.allUsers.length === 0) {
+      // Load all users for filtering if not already loaded
+      this.loadAllUsersForFiltering();
+    } else {
+      // Apply filters to existing data
+      this.page = 0;
+      this.pageIndex = 0;
+      
+      if (this.isFiltering) {
+        this.applyCurrentFilters();
+      } else {
+        // No filters active, switch back to server-side pagination
+        this.loadUsersForPage();
+      }
     }
-    
-    // Apply client-side filtering based on selected filters
-    this.users = this.usersCopy.filter(user => {
-      let matches = true;
-      
-      // Filter by user login if selected
-      if (event.userLogins && event.userLogins.length > 0) {
-        matches = matches && event.userLogins.includes(user.user_login);
-      }
-      
-      // Filter by emails if selected
-      if (event.emails && event.emails.length > 0) {
-        matches = matches && event.emails.includes(user.user_email);
-      }
-      
-      return matches;
-    });
-    
-    // Update table and pagination
-    this.wavesLength = this.users.length;
-    this.page = 0;
-    this.updateTableData();
   }
   
   /**
@@ -1482,62 +1443,142 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
    */
   onSearchInput(searchText: string) {
     this.lastRefreshedTime = new Date();
+    this.searchText = searchText || '';
     
-    // If we don't have usersCopy (original data), initialize it
-    if (!this.usersCopy || this.usersCopy.length === 0) {
-      this.usersCopy = JSON.parse(JSON.stringify(this.users));
-    }
-    
-    // If search text is empty, restore the original data
-    if (!searchText) {
-      this.users = JSON.parse(JSON.stringify(this.usersCopy));
-      this.wavesLength = this.users.length;
-      this.page = 0;
-      this.updateTableData();
-      return;
-    }
-    
-    // Perform client-side filtering on the original data
-    searchText = searchText.toLowerCase();
-    this.users = this.usersCopy.filter(user => 
-      (user.user_f_name && user.user_f_name.toLowerCase().includes(searchText)) ||
-      (user.user_m_name && user.user_m_name.toLowerCase().includes(searchText)) ||
-      (user.user_l_name && user.user_l_name.toLowerCase().includes(searchText)) ||
-      (user.user_login && user.user_login.toLowerCase().includes(searchText)) ||
-      (user.user_email && user.user_email.toLowerCase().includes(searchText)) ||
-      (user.id && user.id.toString().toLowerCase().includes(searchText))
+    // Check if filtering is needed
+    const hasSearch = !!(this.searchText && this.searchText.trim());
+    const hasFilters = this.selectedFilterValues && Object.keys(this.selectedFilterValues).some(key => 
+      this.selectedFilterValues[key] && this.selectedFilterValues[key].length > 0
     );
+    this.isFiltering = hasSearch || hasFilters;
     
-    // Update table and pagination
-    this.wavesLength = this.users.length;
-    this.page = 0;
-    this.updateTableData();
+    if (this.isFiltering && this.allUsers.length === 0) {
+      // Load all users for filtering if not already loaded
+      this.loadAllUsersForFiltering();
+    } else {
+      // Apply filters to existing data
+      this.page = 0;
+      this.pageIndex = 0;
+      
+      if (this.isFiltering) {
+        this.applyCurrentFilters();
+      } else {
+        // No search or filters active, switch back to server-side pagination
+        this.loadUsersForPage();
+      }
+    }
   }
   
   /**
    * Updates the table data source and pagination
    */
   updateTableData() {
-    // Calculate the start and end indices for the current page
+    // For server-side pagination, just load data for current page
+    this.loadUsersForPage();
+  }
+
+  /**
+   * Loads users data for the current page from the server
+   */
+  loadUsersForPage() {
+    if (this.isFiltering) {
+      // When filtering, use client-side pagination on filtered data
+      this.applyClientSidePagination();
+    } else {
+      // When not filtering, use server-side pagination
+      const pageEvent = { page: this.page, size: this.pageSize };
+      this.getAllUserss(pageEvent);
+    }
+  }
+
+  /**
+   * Loads all users for filtering purposes
+   */
+  loadAllUsersForFiltering() {
+    const largePageEvent = { page: 0, size: 10000 }; // Get a large number of users
+    
+    if(!this.defaultFlag){
+      this.usersService.findByProjectIdOrPortfolioId(new Users(), largePageEvent, this.flag, this.callId).subscribe((response) => {
+        this.allUsers = response.content.sort((a, b) => 
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+        this.usersCopy = JSON.parse(JSON.stringify(this.allUsers));
+        this.populateFilterListsFromAllUsers();
+        this.updateFilterOptions();
+        this.applyCurrentFilters();
+      });
+    } else {
+      this.usersService.FindAll(new Users(), largePageEvent).subscribe((response) => {
+        this.allUsers = response.content.sort((a, b) => 
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+        this.usersCopy = JSON.parse(JSON.stringify(this.allUsers));
+        this.populateFilterListsFromAllUsers();
+        this.updateFilterOptions();
+        this.applyCurrentFilters();
+      });
+    }
+  }
+
+  /**
+   * Applies client-side pagination to current filtered data
+   */
+  applyClientSidePagination() {
     const startIndex = this.page * this.pageSize;
     const endIndex = Math.min(startIndex + this.pageSize, this.users.length);
-    
-    // Get the slice of data for the current page
     const paginatedData = this.users.slice(startIndex, endIndex);
     
-    // Update the table data source
     this.UserProjectRoleList = new MatTableDataSource(paginatedData);
+    this.UserProjectRoleList.sort = this.sort;
+    this.UserProjectRoleList.paginator = this.paginator;
     
-    // Update pagination info
     this.wavesLength = this.users.length;
     this.lastPage = Math.ceil(this.wavesLength / this.pageSize) - 1;
+  }
+
+  /**
+   * Applies current filters and search to all users data
+   */
+  applyCurrentFilters() {
+    let filteredUsers = [...this.allUsers];
+
+    // Apply search filter
+    if (this.searchText && this.searchText.trim()) {
+      const searchLower = this.searchText.toLowerCase();
+      filteredUsers = filteredUsers.filter(user => 
+        (user.user_f_name && user.user_f_name.toLowerCase().includes(searchLower)) ||
+        (user.user_m_name && user.user_m_name.toLowerCase().includes(searchLower)) ||
+        (user.user_l_name && user.user_l_name.toLowerCase().includes(searchLower)) ||
+        (user.user_login && user.user_login.toLowerCase().includes(searchLower)) ||
+        (user.user_email && user.user_email.toLowerCase().includes(searchLower)) ||
+        (user.id && user.id.toString().toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply dropdown filters
+    if (this.selectedFilterValues) {
+      if (this.selectedFilterValues.userLogins && this.selectedFilterValues.userLogins.length > 0) {
+        filteredUsers = filteredUsers.filter(user => 
+          this.selectedFilterValues.userLogins.includes(user.user_login)
+        );
+      }
+      
+      if (this.selectedFilterValues.emails && this.selectedFilterValues.emails.length > 0) {
+        filteredUsers = filteredUsers.filter(user => 
+          this.selectedFilterValues.emails.includes(user.user_email)
+        );
+      }
+    }
+
+    this.users = filteredUsers;
+    this.applyClientSidePagination();
   }
 
   /**
    * Gets page numbers for pagination display
    */
   getPageNumbers(): number[] {
-    const totalPages = Math.ceil(this.wavesLength / this.pageSize);
+    const totalPages = this.lastPage + 1; // lastPage is 0-based, so add 1 for total count
     const pages = [];
     
     // Show max 5 page numbers
@@ -1581,7 +1622,40 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
    * Refreshes the data
    */
   Refresh() {
-    this.listUsers();
+    this.lastRefreshedTime = new Date();
+    this.getAllUsers();
+  }
+  
+  /**
+   * Populates filter lists from loaded users data (for first page load)
+   */
+  populateFilterLists() {
+    // For server-side pagination, populate filter lists from current page
+    // This is a compromise - ideally you'd have separate endpoints for filter options
+    if (this.page === 0 && !this.isFiltering) {
+      this.useremails = [];
+      this.userlogins = [];
+      this.users.forEach((element) => {
+        if (element.user_email) this.useremails.push(element.user_email);
+        if (element.user_login) this.userlogins.push(element.user_login);
+      });
+      this.useremails = [...new Set(this.useremails)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+      this.userlogins = [...new Set(this.userlogins)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+    }
+  }
+
+  /**
+   * Populates filter lists from all users data (for filtering)
+   */
+  populateFilterListsFromAllUsers() {
+    this.useremails = [];
+    this.userlogins = [];
+    this.allUsers.forEach((element) => {
+      if (element.user_email) this.useremails.push(element.user_email);
+      if (element.user_login) this.userlogins.push(element.user_login);
+    });
+    this.useremails = [...new Set(this.useremails)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+    this.userlogins = [...new Set(this.userlogins)].sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
   }
   
   /**
