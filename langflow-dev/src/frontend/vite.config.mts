@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => {
 
   // In development, always proxy AIP calls to the configured backend
   // In production build, this proxy config is ignored anyway
-  const aipTarget = envConfig.VITE_BACKEND_URL;
+  const aipTarget = envConfig.VITE_BACKEND_URL || "http://localhost:8081";
   
   // Debug info (comment out for production)
   // console.log('🔥 VITE PROXY DEBUG:', { aipTarget, mode, envConfig });

@@ -119,7 +119,7 @@ export const limitScrollFieldsModal = 10;
  * The base text for subtitle of Export Dialog (Toolbar)
  * @constant
  */
-export const EXPORT_DIALOG_SUBTITLE = "Export flow as JSON file to Essedum.";
+export const EXPORT_DIALOG_SUBTITLE = "Export Agent flow as JSON file to Essedum.";
 /**
  * The base text for subtitle of Flow Settings (Menubar)
  * @constant
