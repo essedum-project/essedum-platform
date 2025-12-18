@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [3.0.0]
 
 ### Added
 - ESSEDUM Visual Studio plugin - for coding, accessing and executing pipeline jobs.
