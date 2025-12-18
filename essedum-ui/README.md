@@ -10,6 +10,7 @@ The frontend provides the user interface for the Essedum platform, allowing user
 
 -   **`aip-app-ui`**: This is the main application UI, which contains the core features of the platform, such as pipeline creation, dataset management, and model deployment.
 -   **`shell-app-ui`**: This application acts as a shell or a container for the `aip-app-ui`. It provides the main layout, navigation, and authentication handling for the platform.
+-   **Langflow Integration**: The frontend includes integration with Langflow, allowing users to access the Agent Designer and playground directly from the Essedum interface.
 -   **`nginx_ui.conf`**: This is a sample Nginx configuration file for serving the frontend application. It defines how Nginx should handle requests and route them to the appropriate application.
 
 ## Building the Frontend

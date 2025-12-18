@@ -22,6 +22,10 @@ The `sv` directory is organized into several modules, including:
 -   `comm-lib-*`: Shared libraries for common functionalities like secrets management and utilities.
 -   `icip-lib-*`: Libraries related to the core ICIP (Essedum Cognitive Insight Platform) functionalities.
 -   `icip-adp-*`: Adapter modules for connecting to different data sources and services.
+    -   `icip-adp-s3`: Support for AWS S3 and Google Cloud Storage (GCS).
+    -   `icip-adp-aws-sagemaker`: Support for AWS SageMaker execution.
+    -   `icip-adp-azure`: Support for Azure Storage and services.
+    -   `icip-adp-gcp-vertex`: Support for GCP Vertex AI execution.
 
 ## Building the Backend
 
