@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -471,12 +472,38 @@ public class ICIPFileService {
 
 				// Create missing .ipynb file
 				if (!ipynbUpdated) {
-					logger.info("Creating new .ipynb script: {}", ipynbFileName);
+					logger.info("Creating missing .ipynb script: {}", ipynbFileName);
+
+					// Default Jupyter Notebook content
+					String defaultIpynbContent = "{\n" +
+							" \"cells\": [\n" +
+							"  {\n" +
+							"   \"cell_type\": \"code\",\n" +
+							"   \"execution_count\": null,\n" +
+							"   \"id\": \"d099134a\",\n" +
+							"   \"metadata\": {},\n" +
+							"   \"outputs\": [],\n" +
+							"   \"source\": [\n" +
+							"    \"#This is a notebook file for pipeline in ESSEDUM\"\n" +
+							"   ]\n" +
+							"  }\n" +
+							" ],\n" +
+							" \"metadata\": {\n" +
+							"  \"language_info\": {\n" +
+							"   \"name\": \"python\"\n" +
+							"  }\n" +
+							" },\n" +
+							" \"nbformat\": 4,\n" +
+							" \"nbformat_minor\": 5\n" +
+							"}";
+
+					Blob ipynbBlob = new SerialBlob(defaultIpynbContent.getBytes(StandardCharsets.UTF_8));
+
 					ICIPNativeScript ipynbScript = new ICIPNativeScript();
 					ipynbScript.setCname(name);
 					ipynbScript.setOrganization(org);
 					ipynbScript.setFilename(ipynbFileName);
-					ipynbScript.setFilescript(blob);
+					ipynbScript.setFilescript(ipynbBlob);
 					nativeScriptService.save(ipynbScript);
 				}
 
