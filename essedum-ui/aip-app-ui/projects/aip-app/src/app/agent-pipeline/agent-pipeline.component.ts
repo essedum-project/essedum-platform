@@ -124,6 +124,46 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     return localStorage.getItem('organisation') || 'leo1311';
   }
 
+  /**
+   * Clean filename to ensure it's always a proper string without array brackets
+   */
+  private cleanFileName(fileName: any): string {
+    if (!fileName) return '';
+    
+    let cleanName = fileName;
+    
+    // Handle if fileName comes as an array
+    if (Array.isArray(fileName)) {
+      cleanName = fileName[0] || '';
+      console.log('🧹 Filename was array, extracted first element:', cleanName);
+    }
+    
+    // Handle string format
+    if (typeof cleanName === 'string') {
+      // Remove array brackets if present: ["file.json"] -> file.json
+      if (cleanName.startsWith('[') && cleanName.endsWith(']')) {
+        try {
+          // Try to parse as JSON array first
+          const parsed = JSON.parse(cleanName);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cleanName = parsed[0];
+            console.log('🧹 Parsed filename from JSON array:', cleanName);
+          }
+        } catch (e) {
+          // Manual cleanup if JSON parsing fails
+          cleanName = cleanName.slice(1, -1).replace(/[\"\'\']/g, '').trim();
+          console.log('🧹 Manually cleaned filename:', cleanName);
+        }
+      }
+      
+      // Remove any remaining quotes and trim whitespace
+      cleanName = cleanName.replace(/[\"\'\']/g, '').trim();
+    }
+    
+    console.log('🧹 Final cleaned filename:', { original: fileName, cleaned: cleanName });
+    return cleanName;
+  }
+
   data: any = {
     filetype: 'json',
     files: [],
@@ -683,10 +723,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
             // Process each extracted file name
             fileNames.forEach((fileName: string) => {
               if (fileName && fileName.length > 0) {
-                const cleanFileName = fileName.trim();
+                const cleanFileName = this.cleanFileName(fileName);
                 const extension = cleanFileName.split('.').pop()?.toLowerCase();
                 console.log(
-                  `Processing file: ${cleanFileName}, extension: ${extension}`
+                  `Processing file: ${cleanFileName}, extension: ${extension}, original: ${fileName}`
                 );
 
                 if (extension === 'py' || extension === 'ipynb') {
@@ -738,7 +778,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               } else {
                 // Add delay before reading file to ensure it's available on the server
                 setTimeout(() => {
-                  this.readFile(firstPyFile.name);
+                  this.readFile(firstPyFile.name); // readFile now handles cleaning internally
                 }, 1000);
               }
             } else {
@@ -3296,12 +3336,15 @@ DELIVERABLES
       return;
     }
 
-    const jsonFileName = `${this.currentCname}_${this.organisation}.json`;
+    // Create and clean the filename
+    const rawJsonFileName = `${this.currentCname}_${this.organisation}.json`;
+    const jsonFileName = this.cleanFileName(rawJsonFileName);
     
     console.log('🚀 Making API call to read JSON file:', {
       cname: this.currentCname,
       organisation: this.organisation,
-      fileName: jsonFileName,
+      rawFileName: rawJsonFileName,
+      cleanedFileName: jsonFileName,
       expectedUrl: `api/aip/file/read/${this.currentCname}/${this.organisation}?file=${jsonFileName}`
     });
     
