@@ -2395,7 +2395,7 @@ public class ZipController {
   /**
    * Initialize WebSocket connection for deployment pipeline
    */
-  private initializeWebSocket(): void {
+ private initializeWebSocket(): void {
     console.log('🔥 STARTING WEBSOCKET INITIALIZATION PROCESS');
     try {
       console.log('🔥 Step 1: Fetching datasource credentials...');
@@ -2406,15 +2406,15 @@ public class ZipController {
           secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
           url: credentials.url
         });
-        
+       
         console.log('🔥 Step 3: Connecting to WebSocket server...');
         // Connect to the WebSocket server after getting credentials
-        this.socket = io('http://builder-service.aipns.svc.cluster.local:80', {
+        this.socket = io('wss://essedum.az.ad.idemo-ppc.com/apps/builder-service/socket.io/', {
           transports: ['websocket', 'polling'],
           timeout: 20000,
           forceNew: true
         });
-
+ 
         // Connection successful
         this.socket.on('connect', () => {
           console.log('🔥 Step 4: WebSocket connected! Preparing payload...');
@@ -2427,31 +2427,30 @@ public class ZipController {
             bucket_name: 'aiptest',
             file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
             target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-            deployment_name: 'runner-service',
-            cname: this.currentCname || 'unknown',
-            organization: organization
+            deployment_name: 'runner-service'
+       
           };
-          
+         
           console.log('🔥 Step 5: Sending start_pipeline event with payload:', payload);
           this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
           this.socket?.emit('start_pipeline', payload);
           console.log('🔥 Step 6: start_pipeline event emitted to WebSocket');
         });
-
+ 
         // Pipeline update events (high-level steps)
         this.socket.on('pipeline_update', (data: any) => {
           this.addToConsole(`[${data.step}] ${data.message}`);
         });
-
+ 
         // Build log events (raw docker build logs)
         this.socket.on('build_log', (data: any) => {
           this.addToConsole(`${data.log}`);
         });
-
+ 
         // Final pipeline status
         this.socket.on('pipeline_status', (data: any) => {
           this.addToConsole(`FINAL STATUS: ${data.status}`);
-          
+         
           if (data.status === 'success') {
             this.deploymentStatus = 'success';
           } else {
@@ -2460,18 +2459,18 @@ public class ZipController {
               this.addToConsole(`Error: ${data.error}`);
             }
           }
-          
+         
           this.isRunningAndDeploying = false;
           this.disconnectWebSocket();
         });
-
+ 
         // Connection error
         this.socket.on('connect_error', (error: any) => {
           this.addToConsole(`Connection error: ${error.message}`);
           this.deploymentStatus = 'error';
           this.isRunningAndDeploying = false;
         });
-
+ 
         // Disconnection
         this.socket.on('disconnect', (reason: string) => {
           this.addToConsole(`Disconnected: ${reason}`);
@@ -2480,13 +2479,13 @@ public class ZipController {
             this.deploymentStatus = 'error';
           }
         });
-        
+       
       }).catch((error) => {
         this.addToConsole(`Failed to fetch datasource credentials: ${error.message}`);
         this.deploymentStatus = 'error';
         this.isRunningAndDeploying = false;
       });
-
+ 
     } catch (error) {
       this.addToConsole(`Failed to initialize WebSocket: ${error}`);
       this.deploymentStatus = 'error';
@@ -2883,18 +2882,18 @@ DELIVERABLES
           console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
           console.log('fetchPlaygroundUrl - No playgroundurl found, using fallback');
-          this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+          this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
           console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
         }
       } else {
         console.log('fetchPlaygroundUrl - No json_content in response, using fallback');
-        this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+        this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
         console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
       console.log('fetchPlaygroundUrl - Error occurred, using fallback URL');
-      this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+      this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
       console.log('fetchPlaygroundUrl - Using fallback URL after error:', this.playgroundUrl);
     }
   }
