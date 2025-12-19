@@ -438,7 +438,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
         if (this.data.files && this.data.files.length > 0) {
           //  Don't read files here - let buildFileStructure handle it
-          this.readFile(this.data.files[0]);
+          const cleanedFileName = this.cleanFileName(this.data.files[0]);
+          this.readFile(cleanedFileName);
         }
 
         if (this.data.files == null || this.data.files == undefined) {
@@ -512,7 +513,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     if (this.uploadingCounter == this.uploader.queue.length) {
       this.service.message('Uploaded Successfully', 'success');
       this.uploader.clearQueue();
-      this.readFile(response);
+      const cleanedResponse = this.cleanFileName(response);
+      this.readFile(cleanedResponse);
     }
   }
 
@@ -611,7 +613,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               `Retrying file read in ${(retryCount + 1) * 1000}ms...`
             );
             setTimeout(() => {
-              this.readFile(filename, retryCount + 1);
+              this.readFile(this.cleanFileName(filename), retryCount + 1);
             }, (retryCount + 1) * 1000);
             return;
           }
@@ -2425,7 +2427,9 @@ public class ZipController {
             bucket_name: 'aiptest',
             file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
             target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-            deployment_name: 'runner-service'
+            deployment_name: 'runner-service',
+            cname: this.currentCname || 'unknown',
+            organization: organization
           };
           
           console.log('🔥 Step 5: Sending start_pipeline event with payload:', payload);
