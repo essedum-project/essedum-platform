@@ -10,8 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "github.oauth")
 public class GitHubOAuthConfig {
 
-    private String clientId;
-    private String clientSecret;
+    private String clientId = System.getenv("GITHUB_CLIENT_ID");
+    private String clientSecret = System.getenv("GITHUB_CLIENT_SECRET");
     private String redirectUri;
     private String authorizationUri = "https://github.com/login/oauth/authorize";
     private String tokenUri = "https://github.com/login/oauth/access_token";
