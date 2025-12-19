@@ -2317,23 +2317,35 @@ public class ZipController {
   private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
     try {
       const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
+      console.log('🔥 FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
       
       const response = await this.http.get<any[]>(apiUrl).toPromise();
+      console.log('🔥 DATASOURCE API RESPONSE:', response);
       
       if (response && response.length > 0) {
         const datasource = response[0];
+        console.log('🔥 DATASOURCE OBJECT:', datasource);
         const connectionDetails = JSON.parse(datasource.connectionDetails);
+        console.log('🔥 CONNECTION DETAILS:', connectionDetails);
         
-        return {
+        const credentials = {
           accessKey: connectionDetails.accessKey,
           secretKey: connectionDetails.secretKey,
           url: connectionDetails.url
         };
+        console.log('🔥 EXTRACTED CREDENTIALS:', {
+          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
+          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
+          url: credentials.url
+        });
+        
+        return credentials;
       } else {
+        console.error('🔥 NO DATASOURCE FOUND IN RESPONSE');
         throw new Error('No datasource found in response');
       }
     } catch (error) {
-      console.error('Error fetching datasource credentials:', error);
+      console.error('🔥 ERROR FETCHING DATASOURCE CREDENTIALS:', error);
       throw new Error(`Failed to fetch datasource credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -2342,9 +2354,18 @@ public class ZipController {
    * Initialize WebSocket connection for deployment pipeline
    */
   private initializeWebSocket(): void {
+    console.log('🔥 STARTING WEBSOCKET INITIALIZATION PROCESS');
     try {
+      console.log('🔥 Step 1: Fetching datasource credentials...');
       // First fetch datasource credentials
       this.fetchDatasourceCredentials().then((credentials) => {
+        console.log('🔥 Step 2: Credentials fetched successfully:', {
+          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
+          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
+          url: credentials.url
+        });
+        
+        console.log('🔥 Step 3: Connecting to WebSocket server...');
         // Connect to the WebSocket server after getting credentials
         this.socket = io('http://builder-service.aipns.svc.cluster.local:80', {
           transports: ['websocket', 'polling'],
@@ -2354,6 +2375,7 @@ public class ZipController {
 
         // Connection successful
         this.socket.on('connect', () => {
+          console.log('🔥 Step 4: WebSocket connected! Preparing payload...');
           // Trigger the pipeline immediately upon connection with fetched credentials
           const organization = this.getOrganization();
           const payload = {
@@ -2366,8 +2388,10 @@ public class ZipController {
             deployment_name: 'runner-service'
           };
           
+          console.log('🔥 Step 5: Sending start_pipeline event with payload:', payload);
           this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
           this.socket?.emit('start_pipeline', payload);
+          console.log('🔥 Step 6: start_pipeline event emitted to WebSocket');
         });
 
         // Pipeline update events (high-level steps)
@@ -2477,14 +2501,22 @@ public class ZipController {
       next: (response) => {
         console.log('MinIO push successful:', response);
         
-        // Show success message via service notification instead of console
-        const successResponse = { status: 200, body: response || [] };
-        this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+        // Check if response indicates success (200 status means success)
+        if (response) {
+          // Show success message via service notification
+          const successResponse = { status: 200, body: response };
+          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+        } else {
+          // Handle unexpected response format
+          console.warn('Unexpected MinIO response format:', response);
+          const successResponse = { status: 200, body: [] };
+          this.service.messageService(successResponse, 'Push to MinIO completed!');
+        }
       },
       error: (error) => {
         console.error('MinIO push failed:', error);
         
-        // Show error message via service notification instead of console
+        // Show error message via service notification
         this.service.messageService(error, 'Push to MinIO failed');
       }
     });
@@ -2796,20 +2828,30 @@ DELIVERABLES
       console.log('fetchPlaygroundUrl - API URL:', apiUrl);
       
       const response = await this.http.get<any>(apiUrl).toPromise();
+      console.log('fetchPlaygroundUrl - Streaming services response:', response);
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
-        this.playgroundUrl = jsonContent.playgroundurl;
+        console.log('fetchPlaygroundUrl - Parsed JSON content:', jsonContent);
         
-        if (!this.playgroundUrl) {
-          throw new Error('No playground URL found in response');
+        if (jsonContent.playgroundurl) {
+          this.playgroundUrl = jsonContent.playgroundurl;
+          console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
+        } else {
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using fallback');
+          this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+          console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
         }
       } else {
-        throw new Error('Invalid response format');
+        console.log('fetchPlaygroundUrl - No json_content in response, using fallback');
+        this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+        console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
-      throw error;
+      console.log('fetchPlaygroundUrl - Error occurred, using fallback URL');
+      this.playgroundUrl = 'http://runner-service.aipns.svc.cluster.local';
+      console.log('fetchPlaygroundUrl - Using fallback URL after error:', this.playgroundUrl);
     }
   }
 
@@ -3039,8 +3081,8 @@ DELIVERABLES
             'Files count:',
             apiResponse.length
           );
-          // Only enable codespace tab - don't populate file tree from FE
-          this.enableCodespaceTabOnly();
+          // Only enable codespace tab and populate with response data
+          this.enableCodespaceTabOnly(apiResponse);
         } else {
           console.log('No files found in response for cname:', cname);
           // Even if API succeeds but no files, show script tab only
@@ -3061,20 +3103,28 @@ DELIVERABLES
     });
   }
 
-  // Enable codespace tab only - backend will handle file population
-  private enableCodespaceTabOnly(): void {
+  // Enable codespace tab and populate file structure from list API response
+  private enableCodespaceTabOnly(fileData?: any): void {
     this.hasGeneratedAgent = true;
     this.isJsonProcessed = true;
 
-    // Don't populate file tree from frontend - backend will handle this
-    this.fileSystemData = []; // Empty initially, backend will populate
+    // Populate file tree from list API response if data is provided
+    if (fileData && Array.isArray(fileData) && fileData.length > 0) {
+      console.log('Populating file structure from list API response:', fileData.length, 'files');
+      this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+      this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+    } else {
+      console.log('No file data provided, keeping empty file structure');
+      this.fileSystemData = []; // Empty initially if no data
+    }
     
     // Keep console empty - only WebSocket data from Run and Deploy should appear
     this.consoleOutput = [];
 
     console.log('Enabled codespace tab for existing agent:', {
       cname: this.currentCname,
-      message: 'Backend will handle file population directly'
+      hasFiles: this.fileSystemData.length > 0,
+      fileCount: fileData ? fileData.length : 0
     });
   }
 
@@ -3160,8 +3210,8 @@ DELIVERABLES
         console.log('Folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // Data exists, enable codespace tab only - backend handles file population
-          this.enableCodespaceTabOnly();
+          // Data exists, enable codespace tab and populate with response data
+          this.enableCodespaceTabOnly(listResponse);
         } else {
           // No data from list API, show only script tab
           console.log('No data from folder list API, showing script tab only');
@@ -3202,9 +3252,9 @@ DELIVERABLES
         console.log('Pipeline folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // List API succeeded - enable codespace tab only, backend handles file population
+          // List API succeeded - enable codespace tab and populate with response data
           console.log('List API succeeded, enabling codespace tab for pipeline card');
-          this.enableCodespaceTabOnly();
+          this.enableCodespaceTabOnly(listResponse);
           
           this.isLoadingFiles = false;
         } else {
