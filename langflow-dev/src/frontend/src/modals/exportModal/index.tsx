@@ -103,19 +103,19 @@ const ExportModal = forwardRef(
           </span>
           
           {/* Export Options Description */}
-          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          {/* <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <h4 className="text-sm font-medium mb-2">Export Options:</h4>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• <strong>Export to Essedum:</strong> Direct export to Essedum platform</li>
               <li>• <strong>Export via Langflow Backend:</strong> Routes through Langflow backend first, then to Essedum</li>
             </ul>
-          </div>
+          </div> */}
         </BaseModal.Content>
 
         <BaseModal.Footer
         >
           <div className="flex items-center">
-            <Button
+            {/* <Button
               variant="default"
               type="button"
               onClick={async () => {
@@ -247,10 +247,10 @@ const ExportModal = forwardRef(
             >
               Export to Essedum.
             </Button>
-            
+             */}
             {/* New EXPORT_LANG_ESSEDUM Button */}
             <Button
-              variant="outline"
+              variant="default"
               type="button"
               className="ml-2 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
               onClick={async () => {
@@ -360,11 +360,12 @@ const ExportModal = forwardRef(
                 }
               }}
             >
-              <IconComponent
+              {/* <IconComponent
                 name="ArrowRight" 
                 className="mr-1 h-4 w-4"
-              />
-              Export via Langflow Backend
+              /> */}
+              {/* Export via Langflow Backend */}
+              Export to Essedum
             </Button>
           </div>
         </BaseModal.Footer>
