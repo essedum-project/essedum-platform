@@ -145,8 +145,8 @@ class CustomAuthSecurityConfig {
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
                         .anyRequest().authenticated();

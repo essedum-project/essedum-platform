@@ -101,9 +101,35 @@
   background: linear-gradient(135deg, $primary-blue 0%, $primary-blue-hover 100%);
   color: white;
   @include flex-between;
+  align-items: center;
+  min-height: 60px;
 }
 
-.playground-header h2,
+.playground-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 .save-confirmation-header h2,
 .delete-confirmation-header h2,
 .unsaved-changes-header h2,

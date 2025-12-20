@@ -41,16 +41,13 @@
                       <div class="config-panel">
                         <div class="file-editor">
                           <div class="editor-header">
-                            <mat-icon>code</mat-icon>
-                            <h3>{{scriptFileName}}</h3>
-                          </div>
-                          <!-- <div class="code-editor">
-                            <div class="code-content">
-                              <p id="code-box" class="code-color">{{ script }}</p>
+                            <div class="file-info">
+                              <mat-icon class="file-type-icon">description</mat-icon>
+                              <span class="file-name" [title]="scriptFileName">{{scriptFileName}}</span>
                             </div>
-                          </div> -->
-                          <div class="code-editor">
-                            <div class="code-content">
+                          </div>
+                          <div class="code-editor" style="height: 400px; overflow: hidden;">
+                            <div class="code-content" style="height: 100%; overflow-y: auto;">
                               <div style="height: max-content">
                                 <app-enl-code-editor id="ele" *ngIf="loadScript" [script]="script" [lang]="lang"
                                   (scriptChange)="onScriptChange($event)" class="selector-764-48">
@@ -86,10 +83,21 @@
                               </div>
                             </div>
 
-                            <!-- Generate Controls - Auto-loading enabled, only playground button remains -->
-                            <div class="generate-controls">
-                              <button mat-raised-button color="primary" class="playground-button compact-button"
-                                (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent"
+                            <!-- Action Buttons Container - Outside disabled LLM container -->
+                            <div class="action-buttons-container">
+                              <!-- Run and Deploy Button -->
+                              <button mat-raised-button 
+                                      class="run-deploy-button"
+                                      (click)="runAndDeploy()" 
+                                      [disabled]="!canRunAndDeploy()"
+                                      matTooltip="Run and Deploy Agent" 
+                                      matTooltipPosition="above">
+                                <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+                              </button>
+                              
+                              <!-- Playground Button -->
+                              <button mat-raised-button class="playground-button"
+                                (click)="openPlayground()"
                                 matTooltip="Open Playground" matTooltipPosition="above">
                                 <mat-icon>smart_toy</mat-icon>
                               </button>
@@ -137,9 +145,7 @@
                                 <span class="console-text console-loading">Processing...</span>
                               </div>
                               <div *ngIf="consoleOutput.length === 0 && !isGenerating && !isLoadingFiles" class="console-empty">
-                                <span *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Auto-loading agent data when you select an agent...</span>
-                                <span *ngIf="hasGeneratedAgent || hasExistingFiles()">Agent is ready for development.
-                                  Use the Essedum Codespace tab to edit files.</span>
+                                <span>Console ready. Click "Run and Deploy" to see output.</span>
                               </div>
                               <div *ngIf="isLoadingFiles" class="console-line">
                                 <span class="console-prompt">$</span>
@@ -148,7 +154,7 @@
                             </div>
                           </div> <!-- Auto-loading Information Message -->
                           <div class="llm-selection-info" 
-                            *ngIf="!hasGeneratedAgent && !hasExistingFiles()">
+                            *ngIf="!hasGeneratedAgent && !hasExistingFiles() && selectedLLM !== 'github-copilot'">
                             <div class="selection-message">
                               <mat-icon>info</mat-icon>
                               <p>Agent data will be automatically loaded when available</p>
@@ -174,7 +180,7 @@
                               <h3>Project Files</h3>
                             </div>
                             <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
-                              <button mat-icon-button class="upload-button" title="Upload to MinIO">
+                              <button mat-icon-button class="upload-button" title="Upload to MinIO" (click)="pushToMinio()">
                                 <mat-icon>cloud_upload</mat-icon>
                               </button>
                               <app-github-push [cname]="currentCname" class="git-push-button"></app-github-push>
@@ -210,10 +216,7 @@
                                 title="File has unsaved changes">●</span>
                             </div>
                             <div class="editor-actions">
-                              <button mat-icon-button class="action-button copy-button" (click)="copyFileContent()" 
-                                matTooltip="Copy Content" matTooltipPosition="above">
-                                <mat-icon>content_copy</mat-icon>
-                              </button>
+                            
                               <button mat-icon-button class="action-button save-button"
                                 [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
                                 (click)="saveFile()" [disabled]="!isFileModified"
@@ -375,8 +378,7 @@
     <div class="playground-header">
       <div class="playground-title">
         <mat-icon>smart_toy</mat-icon>
-        <h2>Agent Playground</h2>
-        <span class="playground-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
+        <h2>{{ pipelineAlias || 'Agent Playground' }}</h2>
       </div>
       <button mat-icon-button (click)="closePlayground()" class="close-button">
         <mat-icon>close</mat-icon>

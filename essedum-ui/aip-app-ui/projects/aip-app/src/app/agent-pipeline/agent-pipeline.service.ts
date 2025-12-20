@@ -45,9 +45,16 @@ export interface AgentGenerationResponse {
 export class AgentPipelineService {
   
   private readonly baseUrl = '/api/aip';
-  private readonly orgName = 'leo1311'; // Organization name
+  private readonly orgName = this.getOrganization(); // Dynamic organization name
   
   constructor(private http: HttpClient) {}
+
+  /**
+   * Get organization from localStorage with fallback
+   */
+  private getOrganization(): string {
+    return localStorage.getItem('organisation') || 'leo1311';
+  }
 
   /**
    * Generate random cname (container name) for fresh agents
@@ -67,7 +74,8 @@ export class AgentPipelineService {
   generateadkAgent(agentRequest: AgentGenerationRequest): Observable<AgentGenerationResponse> {
     // Use the cname from the request instead of generating a random one
     const cname = agentRequest.cname;
-    const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/upload/${cname}/${orgName}`;
     
     console.log('Calling agent generation API:', url);
     console.log('Request payload:', agentRequest);
@@ -99,7 +107,8 @@ export class AgentPipelineService {
    * Bulk update files using the new API - handles both content changes and structure changes
    */
   bulkUpdateFiles(cname: string, updates: ICIPAiAgentScript[]): Observable<ICIPAiAgentScript[]> {
-    const url = `${this.baseUrl}/folder/update/${cname}/${this.orgName}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/update/${cname}/${orgName}`;
     
     console.log('Bulk updating files via API:', url);
     console.log('Update payload:', updates);
@@ -116,7 +125,7 @@ export class AgentPipelineService {
     const update: ICIPAiAgentScript = {
       id: parseInt(fileId),
       cname: cname,
-      organization: this.orgName,
+      organization: this.getOrganization(),
       filename: fileName,
       filePath: filePath,
       filescript: newContent
@@ -138,6 +147,7 @@ export class AgentPipelineService {
    */
   private convertFileNodesToUpdates(fileNodes: FileNode[]): ICIPAiAgentScript[] {
     const updates: ICIPAiAgentScript[] = [];
+    const orgName = this.getOrganization();
     
     const processNode = (node: FileNode, currentPath: string = '') => {
       if (node.type === 'file' && node.id) {
@@ -145,7 +155,7 @@ export class AgentPipelineService {
         updates.push({
           id: parseInt(node.id),
           cname: '', // Will be set by the calling method
-          organization: this.orgName,
+          organization: orgName,
           filename: node.name,
           filePath: fullPath,
           filescript: node.content || ''
@@ -164,7 +174,8 @@ export class AgentPipelineService {
    * Get files list for a specific container/user from the list endpoint
    */
   getFilesList(cname: string): Observable<any[]> {
-    const url = `${this.baseUrl}/folder/list/${cname}/${this.orgName}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
     
     console.log('Fetching files list from:', url);
     
@@ -177,7 +188,8 @@ export class AgentPipelineService {
    * Get files for a specific container/user
    */
   getAgentFiles(cname: string): Observable<any[]> {
-    const url = `${this.baseUrl}/folder/list/${cname}/${this.orgName}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
     
     console.log('Fetching agent files from:', url);
     
@@ -190,7 +202,8 @@ export class AgentPipelineService {
    * Upload agent folder - calls the upload API with folder path
    */
   uploadAgentFolder(cname: string, folderPath: string): Observable<any> {
-    const url = `${this.baseUrl}/folder/upload/${cname}/${this.orgName}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/upload/${cname}/${orgName}`;
     const params = new HttpParams().set('folderPath', folderPath);
     
     console.log('Uploading agent folder to:', url);
@@ -205,7 +218,8 @@ export class AgentPipelineService {
    * Download specific file content
    */
   downloadFileContent(cname: string, fileId: string): Observable<string> {
-    const url = `${this.baseUrl}/folder/download/${cname}/${this.orgName}/${fileId}`;
+    const orgName = this.getOrganization();
+    const url = `${this.baseUrl}/folder/download/${cname}/${orgName}/${fileId}`;
     
     console.log('Downloading file content from:', url);
     
@@ -423,8 +437,9 @@ export class AgentPipelineService {
   /**
    * Download all files as ZIP from the backend
    */
-  downloadAllFilesAsZip(cname: string, org: string): Observable<Blob> {
-    const url = `${this.baseUrl}/folder/download/${cname}/${org}`;
+  downloadAllFilesAsZip(cname: string, org?: string): Observable<Blob> {
+    const orgName = org || this.getOrganization();
+    const url = `${this.baseUrl}/folder/download/${cname}/${orgName}`;
     
     console.log('Downloading all files as ZIP from:', url);
     
@@ -480,4 +495,29 @@ export class AgentPipelineService {
     
     return throwError(() => new Error(errorMessage));
   };
+
+  /**
+   * Upload agent files to MinIO
+   */
+  uploadToMinio(cname: string, organization: string): Observable<any> {
+    const url = `${this.baseUrl}/folder/push-to-minio/${cname}/${organization}`;
+    
+    console.log('AgentPipelineService - Uploading to MinIO:', {
+      url,
+      cname,
+      organization
+    });
+
+    return this.http.post(url, {}, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).pipe(
+      map((response: any) => {
+        console.log('MinIO upload response:', response);
+        return response;
+      }),
+      catchError(this.handleError)
+    );
+  }
 }

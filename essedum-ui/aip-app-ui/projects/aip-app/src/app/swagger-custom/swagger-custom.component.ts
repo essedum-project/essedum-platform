@@ -65,6 +65,8 @@ export class SwaggerCustomComponent implements OnInit {
   edit: string = 'Edit';
   delete: string = 'Delete';
   tooltipPoition: string = 'above';
+  Essedum: string = 'Essedum';
+  essedumTitle: string = '';
   dataset: any;
   createAuth: boolean;
   editAuth: boolean;
@@ -153,6 +155,8 @@ export class SwaggerCustomComponent implements OnInit {
           this.hasSwaggerData = true;
           try {
             this.apispecTemplate = JSON.parse(res[0].swaggerData);
+            this.essedumTitle = this.apispecTemplate.info.title.slice(7);
+
           } catch (error) {
             console.error('Error parsing swaggerData in endpoint:', error);
           }
@@ -212,7 +216,7 @@ export class SwaggerCustomComponent implements OnInit {
     const generatedSpec = {
       openapi: '3.0.1',
       info: {
-        title: 'Infosys AI Platform',
+        title: 'Essedum AI Platform',
         description: restConnection.description || '',
         version: 'vi',
       },

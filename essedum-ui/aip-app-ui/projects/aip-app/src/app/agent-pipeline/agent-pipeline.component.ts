@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   HostListener,
   Input,
   Inject,
@@ -23,9 +24,10 @@ import {
 } from '../pipeline.description/pipeline.description.component';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
-import { HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { io, Socket } from 'socket.io-client';
 
 interface FileNode {
   name: string;
@@ -75,7 +77,7 @@ interface AgentState {
   templateUrl: './agent-pipeline.component.html',
   styleUrls: ['./agent-pipeline.component.scss'],
 })
-export class AgentPipelineComponent implements OnInit {
+export class AgentPipelineComponent implements OnInit, OnDestroy {
   streamItem: StreamingServices;
   cardToggled: boolean = false;
   card: any;
@@ -118,6 +120,50 @@ export class AgentPipelineComponent implements OnInit {
   organisation: any;
   fileStructure: FileNode[] = [];
 
+  private getOrganization(): string {
+    return localStorage.getItem('organisation') || 'leo1311';
+  }
+
+  /**
+   * Clean filename to ensure it's always a proper string without array brackets
+   */
+  private cleanFileName(fileName: any): string {
+    if (!fileName) return '';
+    
+    let cleanName = fileName;
+    
+    // Handle if fileName comes as an array
+    if (Array.isArray(fileName)) {
+      cleanName = fileName[0] || '';
+      console.log('🧹 Filename was array, extracted first element:', cleanName);
+    }
+    
+    // Handle string format
+    if (typeof cleanName === 'string') {
+      // Remove array brackets if present: ["file.json"] -> file.json
+      if (cleanName.startsWith('[') && cleanName.endsWith(']')) {
+        try {
+          // Try to parse as JSON array first
+          const parsed = JSON.parse(cleanName);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cleanName = parsed[0];
+            console.log('🧹 Parsed filename from JSON array:', cleanName);
+          }
+        } catch (e) {
+          // Manual cleanup if JSON parsing fails
+          cleanName = cleanName.slice(1, -1).replace(/[\"\'\']/g, '').trim();
+          console.log('🧹 Manually cleaned filename:', cleanName);
+        }
+      }
+      
+      // Remove any remaining quotes and trim whitespace
+      cleanName = cleanName.replace(/[\"\'\']/g, '').trim();
+    }
+    
+    console.log('🧹 Final cleaned filename:', { original: fileName, cleaned: cleanName });
+    return cleanName;
+  }
+
   data: any = {
     filetype: 'json',
     files: [],
@@ -138,6 +184,11 @@ export class AgentPipelineComponent implements OnInit {
   consoleOutput: string[] = [];
   isGenerating = false;
   
+  // WebSocket and Run/Deploy functionality
+  private socket: Socket | null = null;
+  isRunningAndDeploying = false;
+  deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
+  
   // LLM Selection and Prompt Template
   selectedLLM: string = '';
   showPromptCopyDialog = false;
@@ -148,6 +199,7 @@ export class AgentPipelineComponent implements OnInit {
   playgroundMessages: Array<{ role: 'user' | 'agent'; content: string }> = [];
   userQuestion = '';
   isAgentThinking = false;
+  playgroundUrl = ''; // Store the playground URL from API
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -298,7 +350,8 @@ export class AgentPipelineComponent implements OnInit {
     private dialog: MatDialog,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {
     console.log('AgentPipelineComponent constructor - baseUrl:', this.baseUrl);
   }
@@ -385,7 +438,8 @@ export class AgentPipelineComponent implements OnInit {
 
         if (this.data.files && this.data.files.length > 0) {
           //  Don't read files here - let buildFileStructure handle it
-          this.readFile(this.data.files[0]);
+          const cleanedFileName = this.cleanFileName(this.data.files[0]);
+          this.readFile(cleanedFileName);
         }
 
         if (this.data.files == null || this.data.files == undefined) {
@@ -459,7 +513,8 @@ export class AgentPipelineComponent implements OnInit {
     if (this.uploadingCounter == this.uploader.queue.length) {
       this.service.message('Uploaded Successfully', 'success');
       this.uploader.clearQueue();
-      this.readFile(response);
+      const cleanedResponse = this.cleanFileName(response);
+      this.readFile(cleanedResponse);
     }
   }
 
@@ -558,7 +613,7 @@ export class AgentPipelineComponent implements OnInit {
               `Retrying file read in ${(retryCount + 1) * 1000}ms...`
             );
             setTimeout(() => {
-              this.readFile(filename, retryCount + 1);
+              this.readFile(this.cleanFileName(filename), retryCount + 1);
             }, (retryCount + 1) * 1000);
             return;
           }
@@ -670,10 +725,10 @@ export class AgentPipelineComponent implements OnInit {
             // Process each extracted file name
             fileNames.forEach((fileName: string) => {
               if (fileName && fileName.length > 0) {
-                const cleanFileName = fileName.trim();
+                const cleanFileName = this.cleanFileName(fileName);
                 const extension = cleanFileName.split('.').pop()?.toLowerCase();
                 console.log(
-                  `Processing file: ${cleanFileName}, extension: ${extension}`
+                  `Processing file: ${cleanFileName}, extension: ${extension}, original: ${fileName}`
                 );
 
                 if (extension === 'py' || extension === 'ipynb') {
@@ -725,7 +780,7 @@ export class AgentPipelineComponent implements OnInit {
               } else {
                 // Add delay before reading file to ensure it's available on the server
                 setTimeout(() => {
-                  this.readFile(firstPyFile.name);
+                  this.readFile(firstPyFile.name); // readFile now handles cleaning internally
                 }, 1000);
               }
             } else {
@@ -792,7 +847,7 @@ export class AgentPipelineComponent implements OnInit {
     this.hasGeneratedAgent = false;
     this.currentCname = ''; // Clear cname when going back to dashboard
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Keep console clear
     this.clearFileSelection();
     console.log('Reset state for dashboard navigation');
   }
@@ -1297,38 +1352,44 @@ export class AgentPipelineComponent implements OnInit {
     }
 
     this.isDownloading = true;
+    const organization = this.getOrganization();
 
     this.agentPipelineService
-      .downloadAllFilesAsZip(this.currentCname, 'leo1311')
+      .downloadAllFilesAsZip(this.currentCname, organization)
       .subscribe({
         next: (blob: Blob) => {
           // Create download link
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `${this.currentCname}-leo1311.zip`;
+          link.download = `${this.currentCname}-${organization}.zip`;
 
           // Trigger download
           document.body.appendChild(link);
           link.click();
 
-          // Cleanup
+          // Cleanup immediately
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
 
-          console.log('Download completed successfully');
-          // Create a properly formatted success response for messageService
-          const successResponse = { status: 200, body: [] };
-          this.service.messageService(
-            successResponse,
-            'Files downloaded successfully!'
-          );
+          // Show success message after download starts
+          setTimeout(() => {
+            console.log('Download completed successfully');
+            // Create a properly formatted success response for messageService
+            const successResponse = { status: 200, body: [] };
+            this.service.messageService(
+              successResponse,
+              'Files downloaded successfully!'
+            );
+          }, 500); // Small delay to ensure download has started
+          
+          // Reset loading state on success
+          this.isDownloading = false;
         },
         error: (error) => {
           console.error('Error downloading files:', error);
           this.service.messageService(error);
-        },
-        complete: () => {
+          // Reset loading state on error
           this.isDownloading = false;
         },
       });
@@ -2266,6 +2327,244 @@ public class ZipController {
     return this.fileSystemData && this.fileSystemData.length > 0;
   }
 
+  /**
+   * Check if Run and Deploy button should be enabled
+   * - Enabled when Essedum Codespace tab is visible (hasGeneratedAgent is true)
+   */
+  canRunAndDeploy(): boolean {
+    return this.hasGeneratedAgent && !this.isRunningAndDeploying;
+  }
+
+  /**
+   * Run and Deploy the agent using WebSocket pipeline
+   */
+  runAndDeploy(): void {
+    if (!this.canRunAndDeploy()) {
+      return;
+    }
+
+    this.isRunningAndDeploying = true;
+    this.deploymentStatus = 'running';
+    
+    // Clear previous console output - console only shows WebSocket data during deployment
+    this.consoleOutput = [];
+    
+    // Initialize WebSocket connection
+    this.initializeWebSocket();
+  }
+
+  /**
+   * Fetch datasource credentials from the API
+   */
+  private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
+    try {
+      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
+      console.log('🔥 FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
+      
+      const response = await this.http.get<any[]>(apiUrl).toPromise();
+      console.log('🔥 DATASOURCE API RESPONSE:', response);
+      
+      if (response && response.length > 0) {
+        const datasource = response[0];
+        console.log('🔥 DATASOURCE OBJECT:', datasource);
+        const connectionDetails = JSON.parse(datasource.connectionDetails);
+        console.log('🔥 CONNECTION DETAILS:', connectionDetails);
+        
+        const credentials = {
+          accessKey: connectionDetails.accessKey,
+          secretKey: connectionDetails.secretKey,
+          url: connectionDetails.url
+        };
+        console.log('🔥 EXTRACTED CREDENTIALS:', {
+          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
+          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
+          url: credentials.url
+        });
+        
+        return credentials;
+      } else {
+        console.error('🔥 NO DATASOURCE FOUND IN RESPONSE');
+        throw new Error('No datasource found in response');
+      }
+    } catch (error) {
+      console.error('🔥 ERROR FETCHING DATASOURCE CREDENTIALS:', error);
+      throw new Error(`Failed to fetch datasource credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Initialize WebSocket connection for deployment pipeline
+   */
+ private initializeWebSocket(): void {
+    console.log('🔥 STARTING WEBSOCKET INITIALIZATION PROCESS');
+    try {
+      console.log('🔥 Step 1: Fetching datasource credentials...');
+      // First fetch datasource credentials
+      this.fetchDatasourceCredentials().then((credentials) => {
+        console.log('🔥 Step 2: Credentials fetched successfully:', {
+          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
+          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
+          url: credentials.url
+        });
+       
+        console.log('🔥 Step 3: Connecting to WebSocket server...');
+        // Connect to the WebSocket server after getting credentials
+        this.socket = io('wss://essedum.az.ad.idemo-ppc.com/apps/builder-service/socket.io/', {
+          transports: ['websocket', 'polling'],
+          timeout: 20000,
+          forceNew: true
+        });
+ 
+        // Connection successful
+        this.socket.on('connect', () => {
+          console.log('🔥 Step 4: WebSocket connected! Preparing payload...');
+          // Trigger the pipeline immediately upon connection with fetched credentials
+          const organization = this.getOrganization();
+          const payload = {
+            minio_endpoint: 'http://100.78.49.20:9000',
+            access_key: credentials.accessKey,
+            secret_key: credentials.secretKey,
+            bucket_name: 'aiptest',
+            file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
+            target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+            deployment_name: 'runner-service'
+       
+          };
+         
+          console.log('🔥 Step 5: Sending start_pipeline event with payload:', payload);
+          this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
+          this.socket?.emit('start_pipeline', payload);
+          console.log('🔥 Step 6: start_pipeline event emitted to WebSocket');
+        });
+ 
+        // Pipeline update events (high-level steps)
+        this.socket.on('pipeline_update', (data: any) => {
+          this.addToConsole(`[${data.step}] ${data.message}`);
+        });
+ 
+        // Build log events (raw docker build logs)
+        this.socket.on('build_log', (data: any) => {
+          this.addToConsole(`${data.log}`);
+        });
+ 
+        // Final pipeline status
+        this.socket.on('pipeline_status', (data: any) => {
+          this.addToConsole(`FINAL STATUS: ${data.status}`);
+         
+          if (data.status === 'success') {
+            this.deploymentStatus = 'success';
+          } else {
+            this.deploymentStatus = 'error';
+            if (data.error) {
+              this.addToConsole(`Error: ${data.error}`);
+            }
+          }
+         
+          this.isRunningAndDeploying = false;
+          this.disconnectWebSocket();
+        });
+ 
+        // Connection error
+        this.socket.on('connect_error', (error: any) => {
+          this.addToConsole(`Connection error: ${error.message}`);
+          this.deploymentStatus = 'error';
+          this.isRunningAndDeploying = false;
+        });
+ 
+        // Disconnection
+        this.socket.on('disconnect', (reason: string) => {
+          this.addToConsole(`Disconnected: ${reason}`);
+          if (this.isRunningAndDeploying) {
+            this.isRunningAndDeploying = false;
+            this.deploymentStatus = 'error';
+          }
+        });
+       
+      }).catch((error) => {
+        this.addToConsole(`Failed to fetch datasource credentials: ${error.message}`);
+        this.deploymentStatus = 'error';
+        this.isRunningAndDeploying = false;
+      });
+ 
+    } catch (error) {
+      this.addToConsole(`Failed to initialize WebSocket: ${error}`);
+      this.deploymentStatus = 'error';
+      this.isRunningAndDeploying = false;
+    }
+  }
+
+  /**
+   * Disconnect WebSocket connection
+   */
+  private disconnectWebSocket(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+  }
+
+  /**
+   * Add WebSocket message to console output with timestamp
+   * Console is only used for WebSocket deployment data
+   */
+  private addToConsole(message: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    this.consoleOutput.push(`[${timestamp}] ${message}`);
+    
+    // Trigger change detection to update the UI
+    this.cdr.detectChanges();
+    
+    // Auto-scroll to bottom of console if element exists
+    setTimeout(() => {
+      const consoleElement = document.querySelector('.console-output');
+      if (consoleElement) {
+        consoleElement.scrollTop = consoleElement.scrollHeight;
+      }
+    }, 100);
+  }
+
+  /**
+   * Push agent files to MinIO (integrated with existing Push to MinIO functionality)
+   */
+  pushToMinio(): void {
+    if (!this.currentCname) {
+      return;
+    }
+    
+    // Get organization from localStorage or use default
+    const organization = localStorage.getItem('organisation') || 'leo1311';
+    
+    console.log('Pushing to MinIO:', {
+      cname: this.currentCname,
+      organization: organization
+    });
+    
+    // Call the API - no console output, only log to browser console
+    this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
+      next: (response) => {
+        console.log('MinIO push successful:', response);
+        
+        // Check if response indicates success (200 status means success)
+        if (response) {
+          // Show success message via service notification
+          const successResponse = { status: 200, body: response };
+          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+        } else {
+          // Handle unexpected response format
+          console.warn('Unexpected MinIO response format:', response);
+          const successResponse = { status: 200, body: [] };
+          this.service.messageService(successResponse, 'Push to MinIO completed!');
+        }
+      },
+      error: (error) => {
+        console.error('MinIO push failed:', error);
+        
+        // Show error message via service notification
+        this.service.messageService(error, 'Push to MinIO failed');
+      }
+    });
+  }
+
   // Methods removed - auto-loading enabled when viewing details
   // generateadkAgent() and clearConsole() methods are no longer needed
 
@@ -2527,13 +2826,76 @@ DELIVERABLES
 
   // Playground methods
   openPlayground(): void {
-    this.showPlayground = true;
-    this.playgroundMessages = [
-      {
-        role: 'agent',
-        content: `Hello! I'm the ${this.selectedAgent?.alias || 'Agent'} (v${this.selectedAgent?.version}). I'm now running from the generated adk. How can I help you today?`
+    // First fetch the playground URL from streaming services API
+    this.fetchPlaygroundUrl().then(() => {
+      this.showPlayground = true;
+      const agentName = this.selectedAgent?.alias || this.selectedAgent?.name || this.currentCname || 'Agent';
+      const agentVersion = this.selectedAgent?.version || '1.0.0';
+      this.playgroundMessages = [
+        {
+          role: 'agent',
+          content: `Hello! I'm the ${agentName} (v${agentVersion}). I'm now running from the generated adk. How can I help you today?`
+        }
+      ];
+    }).catch((error) => {
+      console.error('Failed to fetch playground URL:', error);
+      // Show playground anyway with error message
+      this.showPlayground = true;
+      this.playgroundMessages = [
+        {
+          role: 'agent',
+          content: 'Error: Unable to connect to the agent service. Please try again later.'
+        }
+      ];
+    });
+  }
+
+  /**
+   * Fetch playground URL from streaming services API
+   */
+  private async fetchPlaygroundUrl(): Promise<void> {
+    try {
+      console.log('fetchPlaygroundUrl - checking agent data:', {
+        currentCname: this.currentCname,
+        selectedAgent: this.selectedAgent,
+        cardName: this.cardName
+      });
+      
+      if (!this.currentCname) {
+        throw new Error('No agent selected - currentCname is empty');
       }
-    ];
+      
+      const organization = this.getOrganization();
+      const apiUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('fetchPlaygroundUrl - API URL:', apiUrl);
+      
+      const response = await this.http.get<any>(apiUrl).toPromise();
+      console.log('fetchPlaygroundUrl - Streaming services response:', response);
+      
+      if (response && response.json_content) {
+        const jsonContent = JSON.parse(response.json_content);
+        console.log('fetchPlaygroundUrl - Parsed JSON content:', jsonContent);
+        
+        if (jsonContent.playgroundurl) {
+          this.playgroundUrl = jsonContent.playgroundurl;
+          console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
+        } else {
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using fallback');
+          this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
+          console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
+        }
+      } else {
+        console.log('fetchPlaygroundUrl - No json_content in response, using fallback');
+        this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
+        console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
+      }
+    } catch (error) {
+      console.error('Error fetching playground URL:', error);
+      console.log('fetchPlaygroundUrl - Error occurred, using fallback URL');
+      this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
+      console.log('fetchPlaygroundUrl - Using fallback URL after error:', this.playgroundUrl);
+    }
   }
 
   closePlayground(): void {
@@ -2555,73 +2917,48 @@ DELIVERABLES
     this.userQuestion = '';
     this.isAgentThinking = true;
 
-    // Simulate agent response
-    setTimeout(() => {
-      const agentResponse = this.getAgentResponse(question);
-      this.playgroundMessages.push({
-        role: 'agent',
-        content: agentResponse,
-      });
-      this.isAgentThinking = false;
-    }, 1500);
+    // Call real API instead of simulation
+    this.callPlaygroundAPI(question);
   }
 
-  getAgentResponse(question: string): string {
-    const agentName = this.selectedAgent?.name || '';
-    const questionLower = question.toLowerCase();
+  /**
+   * Call the playground API with user question
+   */
+  private async callPlaygroundAPI(question: string): Promise<void> {
+    try {
+      if (!this.playgroundUrl) {
+        throw new Error('Playground URL not available');
+      }
 
-    // Contextual responses based on agent type and question
-    if (agentName === 'customer-support-agent') {
-      if (questionLower.includes('ticket') || questionLower.includes('issue')) {
-        return "I can help you create a support ticket. Please provide me with: 1) Issue description, 2) Priority level (Low/Medium/High), and 3) Your contact information. I'll search our knowledge base for similar issues first.";
-      } else if (
-        questionLower.includes('order') ||
-        questionLower.includes('tracking')
-      ) {
-        return 'I can look up your order status. Let me search our customer database. Could you provide your order number or email address associated with the account?';
-      } else if (
-        questionLower.includes('refund') ||
-        questionLower.includes('return')
-      ) {
-        return 'I can assist with refund requests. According to our policy, refunds are processed within 5-7 business days. Would you like me to create a refund ticket for you?';
-      }
-    } else if (agentName === 'data-analysis-agent') {
-      if (questionLower.includes('analyze') || questionLower.includes('data')) {
-        return "I can analyze your dataset. I support CSV, Excel, and JSON formats. Please upload your data and specify what insights you're looking for: trends, correlations, outliers, or statistical summaries?";
-      } else if (
-        questionLower.includes('visualiz') ||
-        questionLower.includes('chart') ||
-        questionLower.includes('graph')
-      ) {
-        return 'I can create various visualizations: bar charts, line graphs, scatter plots, heatmaps, and more. What type of visualization would best represent your data?';
-      } else if (questionLower.includes('report')) {
-        return 'I can generate comprehensive reports with statistical analysis, charts, and insights. Would you like a summary report, detailed analysis, or executive dashboard?';
-      }
-    } else if (agentName === 'code-review-agent') {
-      if (questionLower.includes('review') || questionLower.includes('code')) {
-        return "I can review your code for quality, security vulnerabilities, and best practices. Please provide the repository URL or paste the code snippet you'd like me to analyze.";
-      } else if (
-        questionLower.includes('security') ||
-        questionLower.includes('vulnerab')
-      ) {
-        return "I'll run a security scan to detect: SQL injection risks, XSS vulnerabilities, hardcoded credentials, and insecure dependencies. Should I proceed with a full security audit?";
-      } else if (
-        questionLower.includes('improve') ||
-        questionLower.includes('optimize')
-      ) {
-        return 'I can suggest improvements for: code performance, readability, maintainability, and adherence to design patterns. Would you like me to focus on a specific aspect?';
-      }
+      // Use the exact playground URL from the streaming services API response
+      const apiEndpoint = this.playgroundUrl;
+      
+      const payload = {
+        question: question
+      };
+      
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      const response = await this.http.post<any>(apiEndpoint, payload, { headers }).toPromise();
+      
+      // Add agent response
+      this.playgroundMessages.push({
+        role: 'agent',
+        content: response?.answer || response?.response || JSON.stringify(response) || 'I received your question but could not generate a proper response.'
+      });
+      
+    } catch (error) {
+      console.error('Error calling playground API:', error);
+      // Add error message as agent response
+      this.playgroundMessages.push({
+        role: 'agent',
+        content: 'I apologize, but I encountered an error while processing your request. Please try again later.'
+      });
+    } finally {
+      this.isAgentThinking = false;
     }
-
-    // Generic helpful response
-    const tools = this.getToolsForAgent(agentName);
-    if (tools.length > 0) {
-      return `I'm equipped with the following capabilities: ${tools
-        .map((t) => t.description)
-        .join(', ')}. Which of these would you like me to help you with?`;
-    }
-    
-    return `I understand your question: "${question}". Based on my adk configuration, I can process this request using my trained model. How would you like me to proceed?`;
   }
 
   onPlaygroundKeyPress(event: KeyboardEvent): void {
@@ -2771,7 +3108,7 @@ DELIVERABLES
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
 
-    // Try to fetch files for this specific cname
+    // Try to fetch files for this specific cname - only to check existence
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
       next: (apiResponse) => {
@@ -2787,7 +3124,8 @@ DELIVERABLES
             'Files count:',
             apiResponse.length
           );
-          this.loadExistingAgentWithFilesFromAPI(apiResponse);
+          // Only enable codespace tab and populate with response data
+          this.enableCodespaceTabOnly(apiResponse);
         } else {
           console.log('No files found in response for cname:', cname);
           // Even if API succeeds but no files, show script tab only
@@ -2808,27 +3146,28 @@ DELIVERABLES
     });
   }
 
-  // Load existing agent data from API when files exist
-  private loadExistingAgentWithFilesFromAPI(fileData: any): void {
+  // Enable codespace tab and populate file structure from list API response
+  private enableCodespaceTabOnly(fileData?: any): void {
     this.hasGeneratedAgent = true;
     this.isJsonProcessed = true;
 
-    // Build file tree from API response
-    this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
-    this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+    // Populate file tree from list API response if data is provided
+    if (fileData && Array.isArray(fileData) && fileData.length > 0) {
+      console.log('Populating file structure from list API response:', fileData.length, 'files');
+      this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
+      this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+    } else {
+      console.log('No file data provided, keeping empty file structure');
+      this.fileSystemData = []; // Empty initially if no data
+    }
     
-    // Set console output to show that agent was loaded
-    this.consoleOutput = [
-      `adk Agent loaded from existing data`,
-      `Container: ${this.currentCname}`,
-      `Status: Ready for development`,
-      `Files: ${fileData.length} files loaded`,
-    ];
+    // Keep console empty - only WebSocket data from Run and Deploy should appear
+    this.consoleOutput = [];
 
-    console.log('Successfully loaded existing agent with files:', {
+    console.log('Enabled codespace tab for existing agent:', {
       cname: this.currentCname,
       hasFiles: this.fileSystemData.length > 0,
-      fileCount: fileData.length,
+      fileCount: fileData ? fileData.length : 0
     });
   }
 
@@ -2837,7 +3176,7 @@ DELIVERABLES
     this.hasGeneratedAgent = false;
     this.isJsonProcessed = false; // This will show only the script tab
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Keep console empty - only WebSocket data allowed
     this.clearFileSelection();
     
     // Show empty script content when no files exist
@@ -2863,7 +3202,7 @@ DELIVERABLES
     this.hasGeneratedAgent = false; // Reset playground button state
     // Don't reset currentCname - keep the agent's fixed cname
     this.fileSystemData = [];
-    this.consoleOutput = [];
+    this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
     
     // Ensure script content is empty for new agents - no placeholders
@@ -2908,20 +3247,20 @@ DELIVERABLES
     // Reset state first
     this.resetToInitialStateForNewAgent();
 
-    // Call folder list API first
+    // Only call folder list API to check existence
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (listResponse) => {
         console.log('Folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // Data exists, now call upload API to get full content
-          this.callUploadAPIForContent();
+          // Data exists, enable codespace tab and populate with response data
+          this.enableCodespaceTabOnly(listResponse);
         } else {
           // No data from list API, show only script tab
           console.log('No data from folder list API, showing script tab only');
           this.showScriptTabOnly();
-          this.isLoadingFiles = false;
         }
+        this.isLoadingFiles = false;
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
@@ -2933,37 +3272,6 @@ DELIVERABLES
   }
 
   // Call the upload API to get full content
-  private callUploadAPIForContent(): void {
-    const folderPath = 'C:/Users/anushka.mishra/Downloads/11TBGT-leo1311'; // Sample path
-    
-    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
-      next: (uploadResponse) => {
-        console.log('Upload API response:', uploadResponse);
-        
-        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
-          // Data exists from both APIs, enable codespace tab
-          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
-          this.hasGeneratedAgent = true;
-          this.isJsonProcessed = true;
-          
-          console.log('Data found from both APIs, enabling codespace tab');
-        } else {
-          // No meaningful data, show script tab only
-          console.log('No meaningful data from upload API, showing script tab only');
-          this.showScriptTabOnly();
-        }
-        
-        this.isLoadingFiles = false;
-      },
-      error: (error) => {
-        console.error('Error calling upload API:', error);
-        // On error, show only script tab
-        this.showScriptTabOnly();
-        this.isLoadingFiles = false;
-      }
-    });
-  }
-
   // Auto-load agent data specifically for pipeline cards from dashboard
   private autoLoadAgentDataForPipelineCard(): void {
     if (!this.currentCname) {
@@ -2987,25 +3295,11 @@ DELIVERABLES
         console.log('Pipeline folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
-          // List API succeeded - enable codespace tab immediately
+          // List API succeeded - enable codespace tab and populate with response data
           console.log('List API succeeded, enabling codespace tab for pipeline card');
-          this.hasGeneratedAgent = true;
-          this.isJsonProcessed = true;
+          this.enableCodespaceTabOnly(listResponse);
           
-          // Build file tree from list API response
-          this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(listResponse);
-          this.expandAllFolders(this.fileSystemData);
-          
-          // Set console output to show that files were found
-          this.consoleOutput = [
-            `Pipeline files detected from list API`,
-            `Container: ${this.currentCname}`,
-            `Files: ${listResponse.length} files found`,
-            `Status: Codespace enabled`
-          ];
-          
-          // Now try upload API to get full content (but don't disable codespace if it fails)
-          this.callUploadAPIForPipelineCard();
+          this.isLoadingFiles = false;
         } else {
           // No data from list API, show only script tab and continue with old flow
           console.log('No data from pipeline folder list API, falling back to script tab and old flow');
@@ -3029,7 +3323,7 @@ DELIVERABLES
   private loadJsonFileForScript(): void {
     // Ensure we have organisation from localStorage
     if (!this.organisation) {
-      this.organisation = localStorage.getItem('organisation') || 'leo1311';
+      this.organisation = this.getOrganization();
     }
     
     if (!this.currentCname || !this.organisation) {
@@ -3045,12 +3339,15 @@ DELIVERABLES
       return;
     }
 
-    const jsonFileName = `${this.currentCname}_${this.organisation}.json`;
+    // Create and clean the filename
+    const rawJsonFileName = `${this.currentCname}_${this.organisation}.json`;
+    const jsonFileName = this.cleanFileName(rawJsonFileName);
     
     console.log('🚀 Making API call to read JSON file:', {
       cname: this.currentCname,
       organisation: this.organisation,
-      fileName: jsonFileName,
+      rawFileName: rawJsonFileName,
+      cleanedFileName: jsonFileName,
       expectedUrl: `api/aip/file/read/${this.currentCname}/${this.organisation}?file=${jsonFileName}`
     });
     
@@ -3115,51 +3412,11 @@ DELIVERABLES
   }
 
   // Call the upload API for pipeline cards
-  private callUploadAPIForPipelineCard(): void {
-    const folderPath = `C:/Users/anushka.mishra/Downloads/${this.currentCname}-leo1311`; // Use cname in path
-    
-    this.agentPipelineService.uploadAgentFolder(this.currentCname, folderPath).subscribe({
-      next: (uploadResponse) => {
-        console.log('Pipeline upload API response:', uploadResponse);
-        
-        if (uploadResponse && Object.keys(uploadResponse).length > 0) {
-          // Upload API succeeded - update file tree with full content
-          console.log('Upload API succeeded, updating file tree with full content');
-          this.loadExistingAgentWithFilesFromAPI(uploadResponse);
-          
-          // Update console output to show upload success
-          this.consoleOutput = [
-            `Pipeline files loaded with full content`,
-            `Container: ${this.currentCname}`,
-            `Status: Ready for development`,
-            `Upload: Successful`
-          ];
-        } else {
-          // Upload API returned no data, but codespace tab is already enabled from list API
-          console.log('Upload API returned no meaningful data, but codespace remains enabled');
-          this.consoleOutput = [
-            `Pipeline files detected (list only)`,
-            `Container: ${this.currentCname}`,
-            `Status: Codespace enabled`,
-            `Upload: No content available`
-          ];
-        }
-        
-        this.isLoadingFiles = false;
-      },
-      error: (error) => {
-        console.error('Upload API failed, but codespace remains enabled from list API:', error);
-        // Upload failed, but codespace tab remains enabled since list API succeeded
-        this.consoleOutput = [
-          `Pipeline files detected (list only)`,
-          `Container: ${this.currentCname}`,
-          `Status: Codespace enabled`,
-          `Upload: Failed - ${error.message || 'Unknown error'}`
-        ];
-        
-        this.isLoadingFiles = false;
-        // Note: We don't call getStreamService() here since codespace is already enabled
-      }
-    });
+  /**
+   * Component cleanup
+   */
+  ngOnDestroy(): void {
+    // Clean up WebSocket connection
+    this.disconnectWebSocket();
   }
 }
