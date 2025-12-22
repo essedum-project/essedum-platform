@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,6 +71,12 @@ import io.micrometer.core.annotation.Timed;
 @RestController
 @Timed
 @RequestMapping(path = "/${icip.pathPrefix}/file")
+@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
+        "https://essedum.az.ad.idemo-ppc.com"},
+        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
+        allowCredentials = "true",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+
 public class ICIPFileController {
 
 	/** The Constant logger. */

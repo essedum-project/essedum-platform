@@ -3,6 +3,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
 // Constants for service types
 const SERVICE_TYPES = {
+  PIPELINEAGENT: 'pipelineagent',
   ADAPTERS: 'adapters',
   INSTANCES: 'instances',
   SPECS: 'specs',
@@ -117,6 +118,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SCHEMAS]: this.card?.name,
       [SERVICE_TYPES.MODEL]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.PIPELINE]: this.card?.type,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.type,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
       [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.AGENT]: this.card?.type,
@@ -131,6 +133,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SPECS]: this.card?.domainname,
       [SERVICE_TYPES.SCHEMAS]: this.card?.alias,
       [SERVICE_TYPES.PIPELINE]: this.card?.alias,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.alias,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
       [SERVICE_TYPES.MODEL]: this.card?.modelName,
       [SERVICE_TYPES.DATASETS]: this.card?.alias,
@@ -149,6 +152,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.DATASETS]: this.card?.lastmodifieddate,
       [SERVICE_TYPES.MODEL]: this.card?.createdOn,
       [SERVICE_TYPES.PIPELINE]: this.card?.createdDate,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.createdDate,
       [SERVICE_TYPES.AGENT]: this.card?.createdon,
     };
     return dateMap[this.servicev1];
@@ -165,6 +169,8 @@ export class AipCardComponent {
         this.card?.lastmodifiedby || 'Name Not Available',
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
+        this.card?.target?.created_by || 'Name Not Available',
+      [SERVICE_TYPES.PIPELINEAGENT]:
         this.card?.target?.created_by || 'Name Not Available',
       [SERVICE_TYPES.AGENT]: this.card?.name || 'Agent',
     };

@@ -1,0 +1,168 @@
+// ===========================================
+// VARIABLES & CONSTANTS
+// ===========================================
+
+// Colors
+$primary-blue: #0094ff;
+$primary-blue-hover: #0066cc;
+$dark-blue: #0d47a1;
+$light-blue: #1565c0;
+$success-green: #28a745;
+$warning-orange: #ff9500;
+$danger-red: #dc3545;
+
+// Background Colors
+$bg-dark: #1e1e1e;
+$bg-medium: #2d2d2d;
+$bg-light: #f8f9fa;
+$bg-editor: #282a36;
+$bg-console: #252526;
+
+// Text Colors
+$text-light: #cccccc;
+$text-medium: #d4d4d4;
+$text-dark: #1a1a1a;
+$text-muted: #737373;
+$text-editor: #f8f8f2;
+
+// Border Colors
+$border-light: #e0e0e0;
+$border-medium: #2e2e2e;
+$border-dark: #444;
+
+// File Extension Colors
+$color-python: #306998;
+$color-json: #f39c12;
+$color-java: #ed8b00;
+$color-xml: #e34c26;
+$color-properties: #6c757d;
+$color-markdown: #083fa1;
+$color-folder: #dcb67a;
+$color-file: #519aba;
+
+// Sizing
+$header-height: 56px;
+$sidebar-width: 320px;
+$border-radius: 8px;
+$border-radius-small: 4px;
+$border-radius-large: 12px;
+
+// Z-index levels
+$z-overlay: 9999;
+$z-dropdown: 1000;
+$z-header: 100;
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Font families
+$font-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// Font sizes
+$font-xs: 11px;
+$font-sm: 12px;
+$font-base: 13px;
+$font-md: 14px;
+$font-lg: 16px;
+$font-xl: 18px;
+$font-2xl: 20px;
+$font-3xl: 24px;
+$font-4xl: 28px;
+
+// Spacing
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 12px;
+$space-lg: 16px;
+$space-xl: 20px;
+$space-2xl: 24px;
+$space-3xl: 32px;
+$space-4xl: 40px;
+
+// Shadows
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.2);
+$shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+// ===========================================
+// MIXINS
+// ===========================================
+
+// Custom scrollbar mixin
+@mixin custom-scrollbar($track-color: #2d2d2d, $thumb-color: #555, $thumb-hover-color: #777) {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $thumb-hover-color;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: $track-color;
+  }
+
+  // Firefox scrollbar styling
+  scrollbar-width: thin;
+  scrollbar-color: $thumb-color $track-color;
+}
+
+// Common flex layouts
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// Panel styling
+@mixin panel-dark {
+  background: $bg-dark;
+  border: 1px solid $border-medium;
+  box-shadow: $shadow-md;
+}
+
+// Button styling
+@mixin icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: none;
+  border-radius: $border-radius-small;
+  cursor: pointer;
+  transition: all $transition-fast;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}

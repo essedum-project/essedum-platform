@@ -1,0 +1,459 @@
+import os
+import boto3
+import subprocess
+import shutil
+import random
+import string
+from datetime import datetime
+from flask import Flask
+from flask_socketio import SocketIO, emit
+from kubernetes import client, config
+import json, base64, requests
+
+app = Flask(__name__)
+#socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_interval=25, ping_timeout=60,) 
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet",
+    ping_interval=25,
+    ping_timeout=60,
+    logger=True,           # <--- add
+    engineio_logger=True   # <--- add
+)
+
+
+
+DOWNLOAD_DIR = "/tmp/downloads"
+EXTRACT_DIR = "/tmp/source_code"
+BUILDKIT_ADDR = os.getenv("BUILDKIT_ADDR", "tcp://buildkitd:1234")
+
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+os.makedirs(EXTRACT_DIR, exist_ok=True)
+
+
+def iso_utc_now():
+    return subprocess.check_output(
+        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], text=True
+    ).strip()
+
+
+def log_to_client(message, step="info"):
+    print(f"[{step}] {message}")
+    socketio.emit(
+        "pipeline_update", {"step": step, "message": message, "timestamp": iso_utc_now()}
+    )
+
+
+@socketio.on("connect")
+def handle_connect():
+    print("Client connected")
+    emit("connection_response", {"data": "Connected to Builder service"})
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("Client disconnected")
+
+
+@socketio.on("start_pipeline")
+def handle_pipeline_trigger(data):
+    """
+    Expected JSON 'data':
+    {
+      "minio_endpoint": "...", "access_key": "...", "secret_key": "...",
+      "bucket_name": "...", "file_path": "...",
+      "target_image_tag": "acrreq0762935.azurecr.io/app:v1",
+      "deployment_name": "runner-service",
+      "namespace": "aipns"   # optional
+    }
+    """
+    try:
+        log_to_client("Pipeline Triggered. Validating inputs...", step="INIT")
+
+        # 1) CLEANUP
+        if os.path.exists(EXTRACT_DIR):
+            shutil.rmtree(EXTRACT_DIR)
+        os.makedirs(EXTRACT_DIR, exist_ok=True)
+
+        # 2) DOWNLOAD (S3/MinIO)
+        log_to_client(
+            f"Downloading {data['file_path']} from {data.get('minio_endpoint', 's3')}",
+            step="DOWNLOAD",
+        )
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=data.get("minio_endpoint") or os.getenv("MINIO_ENDPOINT"),
+            region_name=os.getenv("AWS_REGION", "us-east-1"),
+        )
+        local_zip = os.path.join(DOWNLOAD_DIR, "source.zip")
+        s3.download_file(data["bucket_name"], data["file_path"], local_zip)
+        log_to_client("Download complete.", step="DOWNLOAD")
+        #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
+        deploy_name = data["deployment_name"]
+        target_namespace = data.get("namespace", "aipns")
+
+
+        base_repo = data["target_image_tag"].split(":")[0]  # e.g., acr.../test-adk-app
+        #tag  =  data["target_image_tag"].split(":")[1]
+        #if not acr_tag_exists("acrreq0762935.azurecr.io", base_repo, tag, "/root/.docker/config.json"):
+         #raise Exception(f"Push check failed: {image_tag} not present in ACR")
+
+        uniq_tag  = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+        image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., ...:v1-20251217-1905
+
+
+        # 3) UNZIP
+        log_to_client("Extracting code...", step="EXTRACT")
+        subprocess.run(["unzip", "-o", local_zip, "-d", EXTRACT_DIR], check=True)
+
+
+        # 4) DETECT PROJECT ROOT
+        build_context_path = EXTRACT_DIR
+        dockerfile_exists = False
+        for root, _, files in os.walk(EXTRACT_DIR):
+            if "Dockerfile" in files:
+                build_context_path = root
+                dockerfile_exists = True
+                break
+
+        if not dockerfile_exists:
+            req_path = None
+            for root, _, files in os.walk(EXTRACT_DIR):
+                if "requirements.txt" in files:
+                    req_path = root
+                    break
+            if not req_path:
+                raise Exception("Dockerfile and requirements.txt missing; cannot proceed.")
+            build_context_path = req_path
+            fallback_dockerfile = "/opt/fallback/Dockerfile"
+            if os.path.exists(fallback_dockerfile):
+                shutil.copy(fallback_dockerfile, os.path.join(build_context_path, "Dockerfile"))
+                log_to_client("Dockerfile missing; fallback applied.", step="PREP")
+            else:
+                raise Exception("Fallback Dockerfile not found in /opt/fallback.")
+
+
+        log_to_client(f"Project root detected at {build_context_path}", step="PREP")
+
+
+        # 5) --- NEW STEP: HANDLE SECRETS ---
+        env_file_path = os.path.join(build_context_path, ".env")
+        secret_name = f"{deploy_name}-secrets"
+        has_secrets = False
+
+        try:
+            config.load_incluster_config()
+        except Exception:
+            # Fallback for local testing
+            config.load_kube_config()
+
+        k8s_core = client.CoreV1Api()
+
+        # Check if .env exists in the root of extracted code
+        if os.path.exists(env_file_path):
+            log_to_client(f"Found .env file. Creating Secret {secret_name}...", step="SECRET")
+            secret_obj = create_env_secret(secret_name, target_namespace, env_file_path)
+
+            if secret_obj:
+                try:
+                    # Upsert Logic for Secret
+                    k8s_core.delete_namespaced_secret(name=secret_name, namespace=target_namespace)
+                except:
+                    pass # Ignore if it didn't exist
+
+                k8s_core.create_namespaced_secret(namespace=target_namespace, body=secret_obj)
+                has_secrets = True
+                log_to_client("Secret created successfully.", step="SECRET")
+
+        else:
+             # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
+             fallback_candidates = [
+                     data.get("secret_name"),
+                     secret_name,
+                     "adk-global-secrets",
+                     ]
+
+        # 6) BUILD & PUSH (BuildKit)
+        log_to_client(f"Starting BuildKit for {image_tag}...", step="BUILD")
+
+        cmd = [
+            "buildctl",
+            "--addr",
+            BUILDKIT_ADDR,
+            "build",
+            "--frontend",
+            "dockerfile.v0",
+            "--local",
+            f"context={build_context_path}",
+            "--local",
+            f"dockerfile={build_context_path}",
+            "--output",
+            f"type=image,name={image_tag},push=true",
+        ]
+
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+        )
+
+        for line in iter(process.stdout.readline, ""):
+            if line:
+                socketio.emit("build_log", {"log": line.rstrip()})
+
+        process.stdout.close()
+        return_code = process.wait()
+
+        if return_code != 0:
+            raise Exception("Buildctl failed. Check build logs.")
+
+        log_to_client("Build and Push to ACR Registry Successful", step="BUILD")
+
+        # 7) DEPLOY TO K8S
+        secret_to_use = secret_name if has_secrets else None
+
+        log_to_client(
+            f"Deploying {image_tag} to {deploy_name} in {target_namespace}...",
+            step="DEPLOY",
+        )
+
+
+        k8s_apps = client.AppsV1Api()
+
+        try:
+            # If it exists, PATCH
+            k8s_apps.read_namespaced_deployment(
+                name=deploy_name, namespace=target_namespace
+            )
+            log_to_client("Deployment exists. Updating image...", step="DEPLOY")
+            patch = {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [{"name": "app-container", "image": image_tag}]
+                        }
+                    }
+                }
+            }
+            k8s_apps.patch_namespaced_deployment(
+                name=deploy_name, namespace=target_namespace, body=patch
+            )
+            log_to_client("Update successful.", step="COMPLETE")
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                log_to_client(
+                    "Deployment not found. Creating new deployment...", step="DEPLOY"
+                )
+                deployment_obj = create_deployment_object(
+                    deploy_name, image_tag, target_namespace, secret_to_use
+                )
+                k8s_apps.create_namespaced_deployment(
+                    namespace=target_namespace, body=deployment_obj
+                )
+                log_to_client("Creation successful.", step="COMPLETE")
+            else:
+                raise Exception("Deployment failed. Check build logs.")
+
+        # --- STEP 9: ENSURE SERVICE EXISTS ---
+        try:
+            k8s_core.read_namespaced_service(name=deploy_name, namespace=target_namespace)
+            # Optional: patch to correct targetPort if needed
+            k8s_core.patch_namespaced_service(
+                name=deploy_name, namespace=target_namespace,
+                body={"spec": {"ports": [{"name":"http","port":80,"targetPort":5000}],
+                               "selector": {"app": deploy_name}}}
+            )
+
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                # Create a simple ClusterIP service (Internal Only)
+                svc = client.V1Service(
+                    metadata=client.V1ObjectMeta(name=deploy_name, namespace=target_namespace),
+                    spec=client.V1ServiceSpec(
+                        selector={"app": deploy_name},
+                        ports=[client.V1ServicePort(port=80, target_port=5000)],
+                        type="ClusterIP" #
+                    )
+                )
+                k8s_core.create_namespaced_service(namespace=target_namespace, body=svc)
+        
+
+        
+        ok = wait_for_deployment_ready(k8s_apps, deploy_name, target_namespace, 180)
+        if not ok:
+            raise Exception("Deployment did not become Ready within timeout")
+
+
+        # --- STEP 8: CONSTRUCT DNS LINK ---
+        # Format: http://{service_name}.{namespace}.svc.cluster.local
+        internal_dns_url = f"http://{deploy_name}.{target_namespace}.svc.cluster.local"
+
+        log_to_client(f"App deployed internally at: {internal_dns_url}", step="COMPLETE")
+
+        emit('pipeline_status', {
+            'status': 'SUCCESS',
+            'url': internal_dns_url,
+            'message': 'App accessible via UI Proxy'
+            })
+            #socketio.emit("pipeline_status", {"status": "SUCCESS"})
+
+    except Exception as e:
+        log_to_client(f"Pipeline failed: {e}", step="ERROR")
+        socketio.emit("pipeline_status", {"status": "ERROR", "message": str(e)})
+
+
+def create_deployment_object(name, image, namespace, secret_name=None):
+    """Creates a V1Deployment object for the runner"""
+
+    env_from = []
+    if secret_name:
+        env_from = [
+                client.V1EnvFromSource(secret_ref=client.V1SecretEnvSource(name=secret_name))
+                ]
+
+
+    container = client.V1Container(
+        name="app-container",
+        image=image,
+        image_pull_policy="Always",
+        ports=[client.V1ContainerPort(container_port=5000)],
+        env_from=env_from,
+        readiness_probe=client.V1Probe(
+            tcp_socket=client.V1TCPSocketAction(port=5000),
+            period_seconds=10,
+            timeout_seconds=5,
+            failure_threshold=6
+        ),
+    )
+
+    template = client.V1PodTemplateSpec(
+        metadata=client.V1ObjectMeta(labels={"app": name}),
+        spec=client.V1PodSpec(
+            containers=[container],
+            image_pull_secrets=[client.V1LocalObjectReference(name="regcred")],  # << add
+        ),
+    )
+
+
+    spec = client.V1DeploymentSpec(
+        replicas=1,
+        selector=client.V1LabelSelector(match_labels={"app": name}),
+        template=template,
+    )
+
+    deployment = client.V1Deployment(
+        api_version="apps/v1",
+        kind="Deployment",
+        metadata=client.V1ObjectMeta(name=name, namespace=namespace),
+        spec=spec,
+    )
+    return deployment
+
+
+
+def find_existing_secret(k8s_core, namespace, candidates):
+    """Return the first existing Secret name from the ordered candidates list."""
+    for name in [c for c in candidates if c]:
+        try:
+            k8s_core.read_namespaced_secret(name=name, namespace=namespace)
+            return name
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                continue
+            else:
+                raise
+    return None
+
+
+def create_env_secret(secret_name, namespace, env_file_path):
+    """Reads a .env file and creates a Kubernetes Secret"""
+    data = {}
+
+    if not os.path.exists(env_file_path):
+        return None
+
+    with open(env_file_path, "r", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+
+            # Skip empty or commented lines
+            if not line or line.startswith("#"):
+                continue
+
+            # Optional 'export ' prefix
+            if line.lower().startswith("export "):
+                line = line[7:].lstrip()
+
+            # Must contain '='
+            if "=" not in line:
+                # Safely ignore malformed lines instead of crashing
+                continue
+
+            key, value = line.split("=", 1)
+
+            key = key.strip()
+            value = value.strip()
+
+            # Trim surrounding quotes if present
+            if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+                value = value[1:-1]
+
+            # Skip if key is empty
+            if not key:
+                continue
+
+            data[key] = value
+
+    if not data:
+        return None
+
+    # Use string_data so client handles base64 encoding for us
+    secret = client.V1Secret(
+        metadata=client.V1ObjectMeta(name=secret_name, namespace=namespace),
+        string_data=data,
+        type="Opaque",
+    )
+    return secret
+
+
+
+def wait_for_deployment_ready(api, name, namespace, timeout_seconds=120):
+    import time
+    start = time.time()
+    while time.time() - start < timeout_seconds:
+        dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        desired = dep.status.replicas or 0
+        ready   = dep.status.ready_replicas or 0
+        if desired > 0 and ready == desired:
+            return True
+        time.sleep(2)
+    return False
+
+
+def acr_tag_exists(registry, repo, tag, dockerconfigjson_path="/root/.docker/config.json"):
+    with open(dockerconfigjson_path, "r", encoding="utf-8") as f:
+        cfg = json.load(f)
+    cred = cfg["auths"][registry]
+    username = cred.get("username", "")
+    password = cred.get("password", "")
+    # 1) Get bearer token
+    r = requests.get(
+        f"https://{registry}/oauth2/token",
+        params={"service": registry, "scope": f"repository:{repo}:pull"},
+        auth=(username, password),
+        timeout=10,
+    )
+    r.raise_for_status()
+    token = r.json()["access_token"]
+    # 2) Query manifest
+    h = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+    }
+    r = requests.get(f"https://{registry}/v2/{repo}/manifests/{tag}", headers=h, timeout=10)
+    return r.status_code == 200
+
+
+
+if __name__ == "__main__":
+    print("Starting WebSocket Server on 0.0.0.0:5000...")
+    socketio.run(app, host="0.0.0.0", port=5000)

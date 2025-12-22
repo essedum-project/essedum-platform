@@ -29,10 +29,10 @@
   </div>
 
   <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
-    <div *ngIf="(servicev1 === ServiceType.PIPELINE || servicev1 === ServiceType.CHAIN); else elseBlock">
+    <div *ngIf="(servicev1 === ServiceType.PIPELINE || servicev1 === ServiceType.CHAIN || servicev1=== ServiceType.PIPELINEAGENT); else elseBlock">
       <div class="filter-options">
         <!-- Type Filter -->
-        <div class="filter-group">
+        <div class="filter-group" *ngIf="servicev1=== ServiceType.PIPELINE">
           <div class="filter-control">
             <mat-form-field appearance="fill" class="w-100">
               <label>Type</label>
@@ -63,6 +63,40 @@
             </mat-chip-set>
           </div>
         </div>
+
+        <!-- Type Filter for pipeline agent -->
+        <div class="filter-group" *ngIf="servicev1=== ServiceType.PIPELINEAGENT">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Type</label>
+              <mat-select [id]="'pipeline-type-select-' + (servicev1 || 'default') + '-pipeline'"
+                data-select-type="pipeline-type" (selectionChange)="agentPipelineTypeSelected($event)"
+                aria-labelledby="type-label" placeholder="All">
+                <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('pipelineType')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of agentPipelinesTypeList">
+                  <mat-option *ngIf="!option.selected" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0 ">
+            <mat-chip-set [id]="'adapter-types-chip-set-' + (servicev1 || 'default') + '-pipeline'"
+              aria-label="Selected types">
+              <mat-chip [id]="'adapter-type-chip-' + (servicev1 || 'default') + '-' + i" data-chip-type="adapter-type"
+                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
+                (removed)="removeAgentPipelineType(type)">
+                {{ type }}
+                <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
 
         <!-- Tags Filter -->
         <div class="filter-group" *ngFor="let cat of category">

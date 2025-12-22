@@ -37,6 +37,11 @@ export default defineConfig(({ mode }) => {
     return proxyObj;
   }, {});
 
+  const isProduction = mode === 'production' || env.VITE_FORCE_PRODUCTION_PROXY === 'true';
+  const aipTarget = isProduction 
+    ? (env.VITE_BACKEND_URL || "https://essedum.az.ad.idemo-ppc.com")
+    : "http://localhost:8081";
+
   return {
     base: BASENAME || "",
     build: {
@@ -44,23 +49,41 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "import.meta.env.BACKEND_URL": JSON.stringify(
-        envLangflow.BACKEND_URL ?? "http://localhost:7860",
+        envLangflow.BACKEND_URL ?? "http://localhost:7860"
+      ),
+      "import.meta.env.VITE_BACKEND_URL": JSON.stringify(
+        env.VITE_BACKEND_URL ?? "https://essedum.az.ad.idemo-ppc.com"
       ),
       "import.meta.env.ACCESS_TOKEN_EXPIRE_SECONDS": JSON.stringify(
-        envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60,
+        envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60
       ),
       "import.meta.env.CI": JSON.stringify(envLangflow.CI ?? false),
       "import.meta.env.LANGFLOW_AUTO_LOGIN": JSON.stringify(
-        envLangflow.LANGFLOW_AUTO_LOGIN ?? true,
+        envLangflow.LANGFLOW_AUTO_LOGIN ?? true
       ),
       "import.meta.env.LANGFLOW_MCP_COMPOSER_ENABLED": JSON.stringify(
-        envLangflow.LANGFLOW_MCP_COMPOSER_ENABLED ?? "true",
+        envLangflow.LANGFLOW_MCP_COMPOSER_ENABLED ?? "true"
       ),
     },
     plugins: [react(), svgr(), tsconfigPaths()],
     server: {
       port: port,
       proxy: {
+        "/api/aip/": {
+          target: aipTarget,
+          changeOrigin: true,
+          secure: isProduction && !env.VITE_IGNORE_SSL_CERTS,
+          ws: true,
+          configure: (proxy, options) => {
+            if (!isProduction && aipTarget.startsWith('https://')) {
+              const https = require('https');
+              options.agent = new https.Agent({
+                rejectUnauthorized: false,
+                keepAlive: true
+              });
+            }
+          },
+        },        
         ...proxyTargets,
       },
     },
