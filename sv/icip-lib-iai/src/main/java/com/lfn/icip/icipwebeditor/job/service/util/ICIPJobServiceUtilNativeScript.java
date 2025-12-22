@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -143,9 +143,9 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 * @param jobDetails the job details
 	 * @return the command
 	 * @throws EssedumException the essedum exception
-	 * @throws GitAPIException 
-	 * @throws TransportException 
-	 * @throws InvalidRemoteException 
+	 * @throws GitAPIException
+	 * @throws TransportException
+	 * @throws InvalidRemoteException
 	 */
 	@Override
 	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
@@ -204,6 +204,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String filePathString = file.getAsString();
 			Path path;
 			InputStream is = null;
+
             // ✅ Remove brackets and trim spaces
             filePathString = filePathString.replace("[", "").replace("]", "").trim();
 
@@ -218,7 +219,9 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
                     .orElseThrow(() -> new RuntimeException("No .py file found"));
 
             System.out.println("Extracted .py file: " + pyFileName);
-			try {
+
+            try {
+
 				is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
 				path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
 			} catch (IOException | SQLException ex) {
@@ -458,16 +461,33 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String filePathString = file.getAsString();
 			Path path = null;
 			InputStream is = null;
-			try {
-				is = iCIPFileService.getNativeCodeInputStream(cname, org, filePathString);
-				path = iCIPFileService.getFileInServer(is, filePathString, FileConstants.NATIVE_CODE);
-			} catch (IOException | SQLException ex) {
-				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
-						+ ex.getMessage();
-				log.error(msg, ex);
+            // ✅ Remove brackets and trim spaces
+            filePathString = filePathString.replace("[", "").replace("]", "").trim();
 
-			}
-			return path;
+            // ✅ Split by comma
+            String[] filesArray = filePathString.split(",");
+
+            // ✅ Find .py file
+            String pyFileName = Arrays.stream(filesArray)
+                    .map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
+                    .filter(f -> f.toLowerCase().endsWith(".py"))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("No .py file found"));
+
+            System.out.println("Extracted .py file: " + pyFileName);
+			try {
+                // ✅ Fetch input stream for the .py file
+                is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
+
+                // ✅ Get file path on server
+                path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
+
+            } catch (IOException | SQLException ex) {
+                String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+                log.error(msg, ex);
+            }
+
+            return path;
 		}
 		return null;
 	}
