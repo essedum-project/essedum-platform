@@ -124,6 +124,15 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     return localStorage.getItem('organisation') || 'leo1311';
   }
 
+  /**
+   * Get the environment URL from the injected baseUrl
+   * Removes '/api' suffix if present to get the base environment URL
+   */
+  private getEnvironmentUrl(): string {
+    // Remove '/api' suffix if present to get the base environment URL
+    return this.baseUrl.endsWith('/api') ? this.baseUrl.slice(0, -4) : this.baseUrl;
+  }
+
 
   /**
    * Clean filename to ensure it's always a proper string without array brackets
@@ -2425,7 +2434,9 @@ public class ZipController {
     //      forceNew: true
      //   });
 	  
-	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
+	const environmentUrl = this.getEnvironmentUrl();
+	console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
+	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
@@ -2474,6 +2485,9 @@ public class ZipController {
             this.deploymentStatus = 'success';
             this.deploymentStatusMessage = 'Deployment completed successfully! Playground is now enabled.';
             this.isPlaygroundEnabled = true; // Enable playground only on successful deployment
+            
+            // Call streaming services API after successful deployment
+            this.updateStreamingServicesWithPlaygroundUrl();
           } else {
             this.deploymentStatus = 'error';
             this.deploymentStatusMessage = 'Deployment failed. Please check the console output and try again.';
@@ -2527,6 +2541,60 @@ public class ZipController {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+    }
+  }
+
+  /**
+   * Update streaming services with playground URL after successful deployment
+   */
+  private async updateStreamingServicesWithPlaygroundUrl(): Promise<void> {
+    try {
+      if (!this.currentCname) {
+        console.error('Cannot update streaming services: no currentCname available');
+        return;
+      }
+
+      const organization = this.getOrganization();
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('Fetching streaming services data from:', streamingServicesUrl);
+      this.addToConsole('Updating streaming services with playground URL...');
+      
+      // Step 1: GET the current streaming services data
+      const getResponse = await this.http.get<any>(streamingServicesUrl).toPromise();
+      console.log('Streaming services GET response:', getResponse);
+      
+      if (getResponse && getResponse.json_content) {
+        // Step 2: Parse the existing json_content
+        let jsonContent = JSON.parse(getResponse.json_content);
+        console.log('Parsed existing json_content:', jsonContent);
+        
+        // Step 3: Add/update the playgroundUrl
+        const environmentUrl = this.getEnvironmentUrl();
+        jsonContent.playgroundurl = `${environmentUrl}/apps/runner-service/ask`;
+        console.log('Updated json_content with playground URL:', jsonContent);
+        
+        // Step 4: Prepare the PUT payload with updated json_content
+        const putPayload = {
+          ...getResponse,
+          json_content: JSON.stringify(jsonContent)
+        };
+        
+        console.log('Sending PUT request to update streaming services:', putPayload);
+        
+        // Step 5: PUT the updated data back
+        const putResponse = await this.http.put<any>(streamingServicesUrl, putPayload).toPromise();
+        console.log('Streaming services PUT response:', putResponse);
+        
+        this.addToConsole('Streaming services updated successfully with playground URL!');
+      } else {
+        console.log('No json_content found in streaming services response');
+        this.addToConsole('Warning: Could not update streaming services - no json_content found');
+      }
+      
+    } catch (error) {
+      console.error('Error updating streaming services with playground URL:', error);
+      this.addToConsole(`Error updating streaming services: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -2944,20 +3012,23 @@ DELIVERABLES
           this.playgroundUrl = jsonContent.playgroundurl;
           console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
-          console.log('fetchPlaygroundUrl - No playgroundurl found, using fallback');
-          this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
-          console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using default');
+          const environmentUrl = this.getEnvironmentUrl();
+          this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+          console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
         }
       } else {
-        console.log('fetchPlaygroundUrl - No json_content in response, using fallback');
-        this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
-        console.log('fetchPlaygroundUrl - Using fallback URL:', this.playgroundUrl);
+        console.log('fetchPlaygroundUrl - No json_content in response, using default');
+        const environmentUrl = this.getEnvironmentUrl();
+        this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+        console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
-      console.log('fetchPlaygroundUrl - Error occurred, using fallback URL');
-      this.playgroundUrl = 'https://essedum.az.ad.idemo-ppc.com/apps/runner-service/ask';
-      console.log('fetchPlaygroundUrl - Using fallback URL after error:', this.playgroundUrl);
+      console.log('fetchPlaygroundUrl - Error occurred, using default URL');
+      const environmentUrl = this.getEnvironmentUrl();
+      this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+      console.log('fetchPlaygroundUrl - Using default URL after error:', this.playgroundUrl);
     }
   }
 
