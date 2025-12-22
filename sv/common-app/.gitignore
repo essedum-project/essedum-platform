@@ -5,6 +5,7 @@
 *.iws
 *.jar
 *.sw?
+*.class
 *~
 .#*
 .*.md.html
@@ -36,6 +37,7 @@ target
 transaction-logs
 .flattened-pom.xml
 secrets.yml
+github.properties
 .gradletasknamecache
 .sts4-cache
 node_modules

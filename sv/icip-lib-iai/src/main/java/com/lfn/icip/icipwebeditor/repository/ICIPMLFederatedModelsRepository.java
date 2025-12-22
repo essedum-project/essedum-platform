@@ -30,8 +30,8 @@ public interface ICIPMLFederatedModelsRepository extends JpaRepository<ICIPMLFed
 	Long getCountOfAllModelsByOrganisation(@Param("org")String org);
 
 	@Query(value="SELECT * FROM mlfederatedmodels WHERE id IN(SELECT DISTINCT id FROM mlfederatedendpoints WHERE organisation = :org and model_name like CONCAT('%',:search,'%'))",nativeQuery = true)
-	List<ICIPMLFederatedModel> getAllDistinctModelsByOrganisation(String organization, String search, Pageable page);
-	
+	List<ICIPMLFederatedModel> getAllDistinctModelsByOrganisation(@Param("org") String organization, @Param("search") String search, Pageable page);
+
 	@Query(value="Select * from  mlfederatedmodels t1 WHERE t1.id=:id and t1.organisation=:org ",nativeQuery = true)
 	ICIPMLFederatedModel findByIdAndOrg(@Param("id")Integer id, @Param("org")String organization);
 	

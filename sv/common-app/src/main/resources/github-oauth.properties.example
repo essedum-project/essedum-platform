@@ -1,0 +1,29 @@
+# GitHub OAuth Configuration - EXAMPLE FILE
+# =========================
+# INSTRUCTIONS:
+# 1. Copy this file to 'github.properties' (in the same directory)
+# 2. Go to https://github.com/settings/developers
+# 3. Click "New OAuth App"
+# 4. Fill in:
+#    - Application name: Your App Name (e.g., "ESSEDUM ADK Push")
+#    - Homepage URL: {use commonAppUrl value from application-mysql.yml}
+#    - Authorization callback URL: {commonAppUrl}/api/github/oauth/callback
+# 5. Copy the Client ID and Client Secret from GitHub to your github.properties file
+
+# GitHub OAuth Client Credentials (Replace with your values)
+github.oauth.client-id=YOUR_GITHUB_CLIENT_ID_HERE
+github.oauth.client-secret=YOUR_GITHUB_CLIENT_SECRET_HERE
+github.oauth.redirect-uri=${commonAppUrl}api/github/oauth/callback
+github.oauth.scope=repo,user
+
+# GitHub OAuth URLs (Don't change these)
+github.oauth.authorization-uri=https://github.com/login/oauth/authorize
+github.oauth.token-uri=https://github.com/login/oauth/access_token
+
+# GitHub SSL Configuration (Set to false for development with self-signed certs)
+github.ssl.verify=false
+
+# Note: The redirect-uri uses commonAppUrl property from application-mysql.yml
+# Make sure commonAppUrl is set correctly for your environment (e.g., nginx proxy or direct backend URL)
+# Note: Never commit github.properties (with real secrets) to version control!
+

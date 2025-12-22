@@ -1,0 +1,324 @@
+// ===========================================
+// CONSOLE PANEL
+// ===========================================
+.console-panel .generate-agent-container {
+  padding: 0;
+  height: 100%;
+  @include flex-column;
+}
+
+.console-panel .generate-header {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.console-panel .generate-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-dark;
+  margin: 0 0 4px 0;
+}
+
+.console-panel .generate-header p {
+  font-size: $font-sm;
+  color: $text-muted;
+  margin: 0;
+}
+
+.console-panel .generate-controls-row {
+  display: flex;
+  gap: 40px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  justify-content: space-between;
+}
+
+.console-panel .generate-controls-row .llm-selection-container {
+  flex: 0 0 auto;
+  min-width: 250px;
+}
+
+.console-panel .generate-controls-row .llm-selection-container.disabled {
+  opacity: 0.6;
+}
+
+.console-panel .generate-controls-row .llm-selection-container.disabled label {
+  color: #999 !important;
+}
+
+.console-panel .generate-controls-row .llm-selection-container .llm-selection-row {
+  @include flex-start;
+  gap: 16px;
+}
+
+.console-panel .generate-controls-row .llm-selection-container .llm-selection-row label {
+  font-size: $font-md;
+  font-weight: 500;
+  color: $text-dark;
+  min-width: 140px;
+}
+
+.console-panel .generate-controls-row .llm-selection-container .llm-selection-row .llm-select {
+  flex: 1;
+  font-size: $font-md;
+}
+
+// Generate controls row layout
+.console-panel .generate-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+// LLM Selection Container
+.console-panel .generate-controls-row .llm-selection-container {
+  flex: 1;
+  
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.console-panel .generate-controls-row .llm-selection-container .llm-selection-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  label {
+    font-size: $font-md;
+    font-weight: 500;
+    color: $text-dark;
+    min-width: 120px;
+  }
+}
+
+.console-panel .generate-controls-row .llm-selection-container .llm-selection-row .llm-select {
+  flex: 1;
+  font-size: $font-md;
+}
+
+// Action Buttons Container - Completely independent of LLM container
+.console-panel .generate-controls-row .action-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+// Run and Deploy Button styles - Clean independent styling
+.console-panel .generate-controls-row .action-buttons-container .run-deploy-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  min-width: 44px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: #1976D2 !important;
+  color: white !important;
+  transition: all 0.3s ease;
+  outline: none !important;
+  
+  &:not(:disabled) {
+    background-color: #1976D2 !important;
+    color: white !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+  }
+  
+  &:disabled {
+    background-color: #BDBDBD !important;
+    color: #757575 !important;
+    opacity: 1 !important;
+    cursor: not-allowed !important;
+  }
+  
+  &:hover:not(:disabled) {
+    background-color: #1565C0 !important;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+    transform: translateY(-1px);
+  }
+  
+  mat-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+}
+
+// Playground Button styles - Clean independent styling
+.console-panel .generate-controls-row .action-buttons-container .playground-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  min-width: 44px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: #1976D2 !important;
+  color: white !important;
+  transition: all 0.3s ease;
+  outline: none !important;
+  cursor: pointer !important;
+  
+  &:not(:disabled) {
+    background-color: #1976D2 !important;
+    color: white !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+  }
+  
+  &:disabled {
+    background-color: #BDBDBD !important;
+    color: #757575 !important;
+    opacity: 1 !important;
+    cursor: not-allowed !important;
+  }
+  
+  &:hover:not(:disabled) {
+    background-color: #1565C0 !important;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+    transform: translateY(-1px);
+  }
+  
+  mat-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+}
+
+.console-panel .generate-controls-row .generate-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.console-panel .generate-controls-row .generate-controls .compact-button {
+  @include button-primary;
+  padding: 0 !important;
+  min-width: 44px !important; // Increased from 40px for better icon visibility
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+}
+
+.console-panel .generate-controls-row .generate-controls .compact-button mat-icon {
+  font-size: 22px !important; // Increased icon size for better visibility
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.console-panel .generate-controls-row .generate-controls .playground-button {
+  background-color: $primary-blue !important;
+  color: white !important;
+}
+
+.console-panel .generate-controls-row .generate-controls .playground-button:hover {
+  background-color: $primary-blue-hover !important;
+}
+
+.console-panel .generate-controls-row .generate-controls .playground-button:disabled {
+  background-color: #cccccc !important;
+  color: #666666 !important;
+}
+
+.console-container {
+  @include panel-dark;
+  border-radius: $border-radius;
+  overflow: hidden;
+  flex: 1;
+  @include flex-column;
+  border: 1px solid $border-dark;
+}
+
+.console-container .console-header {
+  padding: 10px 16px;
+  @include flex-center;
+  gap: 12px;
+  background: $bg-medium;
+  color: white;
+  border-bottom: 1px solid $border-dark;
+}
+
+.console-container .console-header mat-icon {
+  font-size: 20px;
+  color: $success-green;
+}
+
+.console-container .console-output {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  font-family: $font-mono;
+  font-size: $font-sm;
+  line-height: 1.8; // Improved line height to prevent text overlap
+  background: $bg-editor;
+  color: $text-editor;
+  @include custom-scrollbar(#2a2a2a, #555, #777);
+}
+
+.console-container .console-output .console-line {
+  margin-bottom: 4px;
+  line-height: 1.8; // Consistent line height
+}
+
+.console-container .console-output .console-line .console-prompt {
+  color: #569cd6;
+  margin-right: 8px;
+}
+
+.console-container .console-output .console-line .console-text {
+  color: #d4d4d4;
+  line-height: inherit; // Inherit proper line height
+}
+
+.console-container .console-output .console-line .console-text.console-loading {
+  color: #ffa500;
+  font-style: italic;
+}
+
+.console-container .console-output .console-empty {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+.llm-selection-required {
+  flex: 1;
+  @include flex-center;
+  background: $bg-light;
+  border: 2px dashed #e9ecef;
+  border-radius: $border-radius;
+  min-height: 200px;
+}
+
+.llm-selection-required .selection-message {
+  text-align: center;
+  color: #6c757d;
+}
+
+.llm-selection-required .selection-message mat-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  color: #adb5bd;
+}
+
+.llm-selection-required .selection-message p {
+  font-size: $font-md;
+  margin: 0;
+  font-weight: 500;
+}
