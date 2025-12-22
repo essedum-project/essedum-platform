@@ -48,14 +48,37 @@ function ApiInterceptor() {
     const unregister = fetchIntercept.register({
       request: (url, config) => {
         const accessToken = customGetAccessToken();
-        const parentToken = localStorage.getItem("baseParentToken");
+        const parentToken = localStorage.getItem('baseParentToken');
+        // IMPORTANT: This token MUST match SHARED_PARENT_TOKEN in exportModelService.ts 
+        // In production, use: localStorage.getItem('baseParentToken')
 
-        if (!isExternalURL(url)) {
+        // Check if this is an AIP API call (relative or absolute URL)
+        const isAipApi = url.includes('/api/aip') || 
+                        url.includes('essedum.az.ad.idemo-ppc.com/api/aip');
+
+        if (!isExternalURL(url) || isAipApi) {
           // Check if it's an AIP API (streaming services, file operations, etc.)
-          if (url.includes('/api/aip')) {
+          if (isAipApi) {
             // Use parent token for AIP APIs
             if (parentToken) {
               config.headers["Authorization"] = `Bearer ${parentToken}`;
+              config.headers["access-token"] = parentToken;
+            }
+            
+            // Add project/role headers from parent session
+            const parentSessionDetails = sessionStorage.getItem('parentSessionDetails');
+            if (parentSessionDetails) {
+              try {
+                const sessionData = JSON.parse(parentSessionDetails);
+                if (sessionData.Project) config.headers['Project'] = sessionData.Project;
+                if (sessionData.ProjectName) config.headers['ProjectName'] = sessionData.ProjectName;
+                if (sessionData.roleId) config.headers['roleId'] = sessionData.roleId;
+                if (sessionData.roleName) config.headers['roleName'] = sessionData.roleName;
+                if (sessionData.userId) config.headers['userId'] = sessionData.userId;
+                if (sessionData.userName) config.headers['userName'] = sessionData.userName;
+              } catch (e) {
+                console.warn('Failed to parse parentSessionDetails:', e);
+              }
             }
           } else {
             // Use access token for other internal APIs (like langflow)
@@ -64,8 +87,10 @@ function ApiInterceptor() {
             }
           }
 
-          for (const [key, value] of Object.entries(customHeaders)) {
-            config.headers[key] = value;
+          if (!isExternalURL(url)) {
+            for (const [key, value] of Object.entries(customHeaders)) {
+              config.headers[key] = value;
+            }
           }
         }
 
@@ -178,16 +203,42 @@ function ApiInterceptor() {
         }
 
         const accessToken = customGetAccessToken();
+        // IMPORTANT: This token MUST match SHARED_PARENT_TOKEN in exportModelService.ts
+        // In production, use: localStorage.getItem('baseParentToken')
         const parentToken = localStorage.getItem("baseParentToken");
 
+        // Check if this is an AIP API call (relative or absolute URL)
+        const isAipApi = config?.url?.includes('/api/aip') || 
+                        config?.url?.includes('essedum.az.ad.idemo-ppc.com/api/aip');
+
         // Determine which token to use based on API type
-        if (config?.url?.includes('/api/aip')) {
+        if (isAipApi) {
           // Use parent token for AIP APIs (streaming services, file operations, etc.)
           if (parentToken) {
             config.headers["Authorization"] = `Bearer ${parentToken}`;
+            config.headers["access-token"] = parentToken;
           }
+          
+          // Add project/role headers from parent session for AIP calls
+          const parentSessionDetails = sessionStorage.getItem('parentSessionDetails');
+          if (parentSessionDetails) {
+            try {
+              const sessionData = JSON.parse(parentSessionDetails);
+              if (sessionData.Project) config.headers['Project'] = sessionData.Project;
+              if (sessionData.ProjectName) config.headers['ProjectName'] = sessionData.ProjectName;
+              if (sessionData.roleId) config.headers['roleId'] = sessionData.roleId;
+              if (sessionData.roleName) config.headers['roleName'] = sessionData.roleName;
+              if (sessionData.userId) config.headers['userId'] = sessionData.userId;
+              if (sessionData.userName) config.headers['userName'] = sessionData.userName;
+            } catch (e) {
+              console.warn('Failed to parse parentSessionDetails:', e);
+            }
+          }
+          
+          // Enable credentials for AIP requests to forward cookies
+          config.withCredentials = true;
         } else if (isExternalURL(config?.url || "")) {
-          // Use parent token for external APIs
+          // Use parent token for other external APIs
           if (parentToken) {
             config.headers["Authorization"] = `Bearer ${parentToken}`;
           }

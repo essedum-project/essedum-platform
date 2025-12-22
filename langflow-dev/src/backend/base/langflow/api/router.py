@@ -5,6 +5,7 @@ from langflow.api.v1 import (
     api_key_router,
     chat_router,
     endpoints_router,
+    essedum_export_router,
     files_router,
     flows_router,
     folders_router,
@@ -35,6 +36,7 @@ router_v2 = APIRouter(
 
 router_v1.include_router(chat_router)
 router_v1.include_router(endpoints_router)
+router_v1.include_router(essedum_export_router)
 router_v1.include_router(validate_router)
 router_v1.include_router(store_router)
 router_v1.include_router(flows_router)

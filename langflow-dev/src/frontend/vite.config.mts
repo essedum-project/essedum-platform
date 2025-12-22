@@ -1,5 +1,6 @@
 import react from "@vitejs/plugin-react-swc";
 import * as dotenv from "dotenv";
+import https from "https";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import svgr from "vite-plugin-svgr";
@@ -10,6 +11,7 @@ import {
   PORT,
   PROXY_TARGET,
 } from "./src/customization/config-constants";
+import { environmentConfig } from "./src/config/environment";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -20,6 +22,9 @@ export default defineConfig(({ mode }) => {
 
   const envLangflow = envLangflowResult.parsed || {};
 
+  // Get config based on mode (development or production)
+  const envConfig = environmentConfig[mode as keyof typeof environmentConfig] || environmentConfig.development;
+
   const apiRoutes = API_ROUTES || ["^/api/v1/", "^/api/v2/", "/health"];
 
   const target =
@@ -27,7 +32,7 @@ export default defineConfig(({ mode }) => {
 
   const port = Number(env.VITE_PORT) || PORT || 3000;
 
-  const proxyTargets = apiRoutes.reduce((proxyObj, route) => {
+  const proxyTargets = apiRoutes.reduce<Record<string, { target: string; changeOrigin: boolean; secure: boolean; ws: boolean }>>((proxyObj, route) => {
     proxyObj[route] = {
       target: target,
       changeOrigin: true,
@@ -37,10 +42,12 @@ export default defineConfig(({ mode }) => {
     return proxyObj;
   }, {});
 
-  const isProduction = mode === 'production' || env.VITE_FORCE_PRODUCTION_PROXY === 'true';
-  const aipTarget = isProduction 
-    ? (env.VITE_BACKEND_URL || "https://essedum.az.ad.idemo-ppc.com")
-    : "http://localhost:8081";
+  // In development, always proxy AIP calls to the configured backend
+  // In production build, this proxy config is ignored anyway
+  const aipTarget = envConfig.VITE_BACKEND_URL || "http://localhost:8081";
+  
+  // Debug info (comment out for production)
+  // console.log('🔥 VITE PROXY DEBUG:', { aipTarget, mode, envConfig });
 
   return {
     base: BASENAME || "",
@@ -52,7 +59,19 @@ export default defineConfig(({ mode }) => {
         envLangflow.BACKEND_URL ?? "http://localhost:7860"
       ),
       "import.meta.env.VITE_BACKEND_URL": JSON.stringify(
-        env.VITE_BACKEND_URL ?? "https://essedum.az.ad.idemo-ppc.com"
+        envConfig.VITE_BACKEND_URL
+      ),
+      "import.meta.env.VITE_FORCE_PRODUCTION_PROXY": JSON.stringify(
+        envConfig.VITE_FORCE_PRODUCTION_PROXY.toString()
+      ),
+      "import.meta.env.VITE_USE_ABSOLUTE_URLS": JSON.stringify(
+        envConfig.VITE_USE_ABSOLUTE_URLS?.toString() ?? "false"
+      ),
+      "import.meta.env.VITE_IGNORE_SSL_CERTS": JSON.stringify(
+        envConfig.VITE_IGNORE_SSL_CERTS.toString()
+      ),
+      "import.meta.env.VITE_PORT": JSON.stringify(
+        envConfig.VITE_PORT.toString()
       ),
       "import.meta.env.ACCESS_TOKEN_EXPIRE_SECONDS": JSON.stringify(
         envLangflow.ACCESS_TOKEN_EXPIRE_SECONDS ?? 60
@@ -69,20 +88,27 @@ export default defineConfig(({ mode }) => {
     server: {
       port: port,
       proxy: {
+        // Always proxy AIP calls in development mode
         "/api/aip/": {
           target: aipTarget,
           changeOrigin: true,
-          secure: isProduction && !env.VITE_IGNORE_SSL_CERTS,
+          secure: mode === 'production' && !envConfig.VITE_IGNORE_SSL_CERTS,
           ws: true,
-          configure: (proxy, options) => {
-            if (!isProduction && aipTarget.startsWith('https://')) {
-              const https = require('https');
+          configure: (proxy: any, options: any) => {
+            if (envConfig.VITE_IGNORE_SSL_CERTS && aipTarget.startsWith('https://')) {
               options.agent = new https.Agent({
                 rejectUnauthorized: false,
                 keepAlive: true
               });
             }
           },
+          // Proxy event handlers for debugging
+          onProxyReq(proxyReq: any, req: any) {
+            console.log(`🚀 AIP PROXY: ${req.method} ${req.url} -> ${aipTarget}${req.url}`);
+          },
+          onError(err: any, req: any) {
+            console.log(`❌ AIP PROXY ERROR: ${err.message} for ${req.url}`);
+          }
         },        
         ...proxyTargets,
       },

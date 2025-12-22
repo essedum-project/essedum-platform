@@ -20,6 +20,9 @@ import {
   create_pipeline,
   create_native_file,
   update_pipeline,
+  export_lang_essedum_create_pipeline,
+  export_lang_essedum_update_pipeline,
+  export_lang_essedum_create_native_file,
 } from "@/controllers/API/services/exportModelService";
 
 const ExportModal = forwardRef(
@@ -98,12 +101,21 @@ const ExportModal = forwardRef(
           <span className="mt-1 text-xs text-destructive">
             {ALERT_SAVE_WITH_API}
           </span>
+          
+          {/* Export Options Description */}
+          {/* <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <h4 className="text-sm font-medium mb-2">Export Options:</h4>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• <strong>Export to Essedum:</strong> Direct export to Essedum platform</li>
+              <li>• <strong>Export via Langflow Backend:</strong> Routes through Langflow backend first, then to Essedum</li>
+            </ul>
+          </div> */}
         </BaseModal.Content>
 
         <BaseModal.Footer
         >
           <div className="flex items-center">
-            <Button
+            {/* <Button
               variant="default"
               type="button"
               onClick={async () => {
@@ -233,6 +245,126 @@ const ExportModal = forwardRef(
                 }
               }}
             >
+              Export to Essedum.
+            </Button>
+             */}
+            {/* New EXPORT_LANG_ESSEDUM Button */}
+            <Button
+              variant="default"
+              type="button"
+              className="ml-2 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950"
+              onClick={async () => {
+                try {
+                  const access_token_lf =
+                    localStorage.getItem("access_token_lf") || undefined;
+
+                  // Read session details
+                  const _sessionData = sessionStorage.getItem('parentSessionDetails');
+                  const _parsed = _sessionData ? JSON.parse(_sessionData) : null;
+
+                  // Build flow payload similar to regular export
+                  const flowPayload = checked
+                    ? {
+                        id: currentFlow!.id,
+                        data: currentFlow!.data!,
+                        description,
+                        name,
+                        last_tested_version: version,
+                        endpoint_name: currentFlow!.endpoint_name,
+                        is_component: false,
+                        tags: currentFlow!.tags,
+                      }
+                    : removeApiKeys({
+                        id: currentFlow!.id,
+                        data: currentFlow!.data!,
+                        description,
+                        name,
+                        last_tested_version: version,
+                        endpoint_name: currentFlow!.endpoint_name,
+                        is_component: false,
+                        tags: currentFlow!.tags,
+                      });
+
+                  // Step 1: Create pipeline via Langflow backend (with json_content: null)
+                  const createResult = await export_lang_essedum_create_pipeline({
+                    alias: name || 'flow',
+                    description: description || 'Exported from Langflow UI via Langflow Backend',
+                    type: agentType,
+                    interfaceType: interfaceType,
+                    isTemplate: false,
+                    jsonContent: null, // Initially null, will be updated in step 3
+                    groups: [],
+                    token: access_token_lf,
+                  });
+
+                  const cname = createResult?.essedum_response?.name;
+                  if (cname) {
+                    sessionStorage.setItem('cname', cname);
+                  }
+
+                  // Step 2: Create native file via Langflow backend  
+                  if (createResult?.essedum_response?.cid) {
+                    const actualFlowScript = JSON.stringify(flowPayload, null, 2);
+                    const scriptFormData = new FormData();
+                    const scriptBlob = new Blob([actualFlowScript], { type: 'application/json' });
+                    scriptFormData.set('scriptFile', scriptBlob);
+
+                    const organization = localStorage.getItem("organization") || "";
+                    const scriptFileName = `${cname}_${organization}.json`;
+
+                    const nativeFileResult = await export_lang_essedum_create_native_file({
+                      pipelineName: cname || "",
+                      organization: organization,
+                      fileName: scriptFileName,
+                      fileType: 'json',
+                      scriptFormData,
+                      token: access_token_lf,
+                    });
+
+                    // Step 3: Update pipeline with file info via Langflow backend
+                    const jsonContent = JSON.stringify({
+                      elements: [{
+                        attributes: {
+                          filetype: 'json',
+                          files: [scriptFileName],
+                        }
+                      }],
+                    });
+
+                    const updateResult = await export_lang_essedum_update_pipeline({
+                      cid: createResult.essedum_response.cid,
+                      alias: name || 'flow',
+                      name: cname,
+                      description: description || 'Exported from Langflow UI via Langflow Backend',
+                      jsonContent: jsonContent,
+                      type: agentType,
+                      organization: organization,
+                      interfacetype: interfaceType,
+                      isTemplate: false,
+                      token: access_token_lf,
+                    });
+
+                    setSuccessData({ title: "Pipeline exported via Langflow Backend successfully" });
+                  } else {
+                    setSuccessData({ title: "Pipeline created via Langflow Backend successfully" });
+                  }
+                  
+                  setOpen(false);
+                } catch (err) {
+                  console.error("EXPORT_LANG_ESSEDUM failed", err);
+                  setNoticeData({
+                    title: `Langflow Backend export failed: ${
+                      err instanceof Error ? err.message : "Unknown error"
+                    }`,
+                  });
+                }
+              }}
+            >
+              {/* <IconComponent
+                name="ArrowRight" 
+                className="mr-1 h-4 w-4"
+              /> */}
+              {/* Export via Langflow Backend */}
               Export to Essedum
             </Button>
           </div>
