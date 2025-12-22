@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: essedum-ingress
+  name: leap-app-ingress
   namespace: aipns
   annotations:
     appgw.ingress.kubernetes.io/health-probe: /
@@ -9,19 +9,21 @@ metadata:
     kubectl.kubernetes.io/last-applied-configuration: ""
     appgw.ingress.kubernetes.io/rewrite-rule-set: AddSecurity_Headers
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    #kubernetes.io/ingress.class: azure/application-gateway
+    #nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - lfn.essedum.anuket.iol.unh.edu
+    - essedum.az.ad.idemo-ppc.com
     secretName: essedum-secret
   rules:
-  - host: lfn.essedum.anuket.iol.unh.edu
+  - host: essedum.az.ad.idemo-ppc.com
     http:
       paths:
       - backend:
           service:
-            name: essedum-ui-service
+            name: leap-app-ui-service
             port:
               number: 8084
         path: /

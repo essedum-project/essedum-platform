@@ -1,0 +1,360 @@
+<!-- Detail View: Script & Generate Tabs -->
+<div class="aip-container" id="mainCtr">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="lfx-l-level1-middle-col">
+        <div class="lfx-l-level2-middle-ctr">
+          <div class="lfx-l-level2-middle-col">
+            <div class="align-items-center justify-content-between d-flex">
+              <div class="selector-model-title-head d-flex align-items-center">
+                <span class="">
+                  <!-- <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="navigateBack()"></i>
+                </span> -->
+                      <mat-icon class="aip-led-icons" (click)="navigateBack()"
+                                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon></span> &nbsp; &nbsp;
+                <span class="aip-desc-title lfx-u-header-xxl">
+                  <span style="color: #737373">Agent Pipeline: </span>
+                  {{ selectedAgent[0].alias }}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- Main Content Panel -->
+            <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
+
+              <!-- Tabs (After Processing) -->
+              <mat-tab-group disableRipple>
+
+                <!-- Script Tab - Split View -->
+                <mat-tab label="Script" class="lfx-u-header-xl">
+                  <div class="tab-content mb-5">
+                    <div class="script-split-container">
+
+                      <!-- Left Half - Config File -->
+                      <div class="config-panel">
+                        <div class="file-editor">
+                          <div class="editor-header">
+                            <mat-icon>code</mat-icon>
+                            <h3>{{dynamicFileName}}</h3>
+                          </div>
+                   
+                          <div class="code-editor">
+                            <div class="code-content">
+                              <div style="height: max-content">
+                                <app-enl-code-editor id="ele" *ngIf="loadScript" [script]="script" [lang]="lang"
+                                  (scriptChange)="onScriptChange($event)" class="selector-764-48">
+                                </app-enl-code-editor>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Right Half - Generate SDK Console -->
+                      <div class="console-panel">
+                        <div class="generate-agent-container">
+                          <div class="generate-header">
+                            <h2>Generate SDK Agent</h2>
+                            <p>Build and package your agent for deployment</p>
+                          </div>
+
+                          <div class="generate-controls">
+                            <button mat-raised-button color="primary" class="play-button" (click)="generateSDKAgent()"
+                              [disabled]="isGenerating">
+                              <mat-icon>play_arrow</mat-icon>
+                              {{ isGenerating ? 'Generating...' : 'Generate Agent' }}
+                            </button>
+                            <button mat-raised-button class="clear-button" (click)="clearConsole()"
+                              [disabled]="consoleOutput.length === 0">
+                              <mat-icon>clear_all</mat-icon>
+                              Clear Console
+                            </button>
+                            <button mat-raised-button color="primary" class="playground-button"
+                              (click)="openPlayground()" [disabled]="!selectedAgent" *ngIf="hasGeneratedAgent">
+                              <mat-icon>smart_toy</mat-icon>
+                              Open Playground
+                            </button>
+                            <button mat-raised-button color="accent" class="github-button" (click)="openGitHubPush()"
+                              [disabled]="!hasGeneratedAgent">
+                              <mat-icon>cloud_upload</mat-icon>
+                              Push to GitHub
+                            </button>
+                          </div>
+
+                          <div class="console-container">
+                            <div class="console-header">
+                              <mat-icon>terminal</mat-icon>
+                              <span>Console Output</span>
+                            </div>
+                            <div class="console-output">
+                              <div *ngFor="let line of consoleOutput" class="console-line">
+                                <span class="console-prompt">$</span>
+                                <span class="console-text">{{ line }}</span>
+                              </div>
+                              <div *ngIf="isGenerating" class="console-line">
+                                <span class="console-prompt">$</span>
+                                <span class="console-text console-loading">Processing...</span>
+                              </div>
+                              <div *ngIf="consoleOutput.length === 0 && !isGenerating" class="console-empty">
+                                Click "Generate Agent" to start the build process
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </mat-tab>
+
+                <!-- Essedum Codespace Tab -->
+                <mat-tab label="Essedum Codespace" class="lfx-u-header-xl">
+                  <div class="tab-content mb-5">
+
+                    <!-- Refresh Configuration Button -->
+                    <div class="refresh-section">
+                      <button mat-stroked-button color="primary" class="refresh-config-button"
+                        (click)="refreshConfiguration()" [disabled]="isProcessingJson">
+                        <mat-icon>refresh</mat-icon>
+                        Refresh & Regenerate Files
+                      </button>
+                      <span class="refresh-hint">Update the JSON configuration and regenerate the file structure</span>
+                    </div>
+
+                    <!-- File Structure -->
+                    <div class="file-structure-container">
+                      <div class="file-panel">
+                        <div class="file-explorer">
+                          <div class="explorer-header">
+                            <mat-icon>folder_open</mat-icon>
+                            <h3>Project Files</h3>
+                          </div>
+                          <div class="file-tree">
+                            <ng-container
+                              *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: fileSystemData, level: 0 }"></ng-container>
+                          </div>
+                        </div>
+
+                        <div class="file-editor" *ngIf="selectedFileName">
+                          <div class="editor-header">
+                            <h3>{{ selectedFileName }}</h3>
+                            <button mat-icon-button (click)="selectedFileName = ''; selectedFileContent = ''">
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                          <div class="code-editor">
+                            <ng-container *ngIf="fileExtension === 'py'">
+                              <app-enl-code-editor id="ele" [script]="selectedFileContent.split('\n')" lang="python"
+                                (scriptChange)="onFileContentChange($event)">
+                              </app-enl-code-editor>
+                            </ng-container>
+                            <div *ngIf="fileExtension != 'py'" class="code-content">
+                              <ng-container *ngIf="fileExtension === 'json'">
+                                <p id="code-box" class="code-color">{{ selectedFileContent }}</p>
+                              </ng-container>
+                              <ng-container *ngIf="fileExtension != 'json'">
+                                <p id="code-box" class="code-color">{{ selectedFileContent }}</p>
+                              </ng-container>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="file-editor-placeholder" *ngIf="!selectedFileName">
+                          <mat-icon>description</mat-icon>
+                          <p>Select a file to view its contents</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- </div> -->
+                </mat-tab>
+
+              </mat-tab-group>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File Tree Template -->
+<ng-template #fileTreeTemplate let-nodes let-level="level">
+  <div class="tree-level" [style.padding-left.px]="level * 20">
+    <div *ngFor="let node of nodes" class="tree-node">
+      <div class="tree-node-content" [class.selected]="isFileSelected(node)" (click)="selectFile(node)">
+        <mat-icon class="node-icon" *ngIf="node.type === 'folder'">
+          folder
+        </mat-icon>
+        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file'">
+          description
+        </mat-icon>
+        <span class="node-name">{{ node.name }}</span>
+      </div>
+      <div *ngIf="node.children && node.children.length > 0">
+        <ng-container
+          *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: node.children, level: level + 1 }"></ng-container>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Playground Popup -->
+<div class="playground-overlay" *ngIf="showPlayground" (click)="closePlayground()">
+  <div class="playground-popup" (click)="$event.stopPropagation()">
+    <div class="playground-header">
+      <div class="playground-title">
+        <mat-icon>smart_toy</mat-icon>
+        <h2>Agent Playground</h2>
+        <span class="playground-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
+      </div>
+      <button mat-icon-button (click)="closePlayground()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="playground-content">
+      <div class="chat-messages">
+        <div *ngFor="let message of playgroundMessages" class="message-wrapper"
+          [class.user-message-wrapper]="message.role === 'user'"
+          [class.agent-message-wrapper]="message.role === 'agent'">
+          <div class="message" [class.user-message]="message.role === 'user'"
+            [class.agent-message]="message.role === 'agent'">
+            <div class="message-avatar">
+              <mat-icon *ngIf="message.role === 'agent'">smart_toy</mat-icon>
+              <mat-icon *ngIf="message.role === 'user'">person</mat-icon>
+            </div>
+            <div class="message-content">
+              <div class="message-role">{{ message.role === 'user' ? 'You' : selectedAgent?.alias }}</div>
+              <div class="message-text">{{ message.content }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="isAgentThinking" class="message-wrapper agent-message-wrapper">
+          <div class="message agent-message">
+            <div class="message-avatar">
+              <mat-icon>smart_toy</mat-icon>
+            </div>
+            <div class="message-content">
+              <div class="message-role">{{ selectedAgent?.alias }}</div>
+              <div class="message-text typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-container">
+        <textarea class="chat-input" [(ngModel)]="userQuestion" (keypress)="onPlaygroundKeyPress($event)"
+          placeholder="Ask the agent a question..." rows="2" [disabled]="isAgentThinking"></textarea>
+        <button mat-raised-button color="primary" class="send-button" (click)="sendQuestion()"
+          [disabled]="!userQuestion.trim() || isAgentThinking">
+          <mat-icon>send</mat-icon>
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub Push Popup -->
+<div class="github-overlay" *ngIf="showGitHubPush" (click)="closeGitHubPush()">
+  <div class="github-popup" (click)="$event.stopPropagation()">
+    <div class="github-header">
+      <div class="github-title">
+        <mat-icon>cloud_upload</mat-icon>
+        <h2>Push to GitHub</h2>
+        <span class="github-subtitle">{{ selectedAgent?.alias }} - v{{ selectedAgent?.version }}</span>
+      </div>
+      <button mat-icon-button (click)="closeGitHubPush()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="github-content">
+      <div class="form-container">
+
+        <!-- Commit From Info -->
+        <div class="commit-info-section">
+          <label class="commit-from-label">Commit from : {{githubUsername}}</label>
+        </div>
+
+        <!-- Repository Name and Branch in same row -->
+        <div class="form-field row-field">
+          <div>
+            <label>Repository Name</label>
+            <mat-form-field appearance="fill">
+              <mat-label>Repository Name</mat-label>
+              <mat-select [(ngModel)]="githubRepoName" (selectionChange)="onRepoNameChange($event)"
+                placeholder="Select repository" required>
+                <mat-option *ngFor="let repo of availableRepositories" [value]="repo.name">
+                  {{ repo.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <label>Branch</label>
+            <mat-form-field appearance="fill">
+              <mat-label>Branch</mat-label>
+              <mat-select [(ngModel)]="selectedBranch" placeholder="Select branch">
+                <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+                  {{ branch }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Custom Commit Checkbox -->
+        <div class="form-field checkbox-field">
+          <mat-checkbox [(ngModel)]="useCustomCommit" (change)="onCustomCommitChange($event)">
+            Use custom commit message
+          </mat-checkbox>
+        </div>
+
+        <!-- Commit Message Field -->
+        <div class="form-field" *ngIf="useCustomCommit">
+          <label>Commit Message</label>
+          <mat-form-field appearance="fill">
+            <mat-label>Commit Message</mat-label>
+            <textarea matInput placeholder="Enter commit message" [(ngModel)]="commitMessage" rows="3"
+              maxlength="500"></textarea>
+            <mat-hint>{{ commitMessage.length }}/500</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Default Commit Preview -->
+        <div class="form-field" *ngIf="!useCustomCommit">
+          <label>Default Commit Message</label>
+          <div class="default-commit-preview">
+            {{ getDefaultCommitMessage() }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="github-footer">
+      <div class="push-status" *ngIf="isPushing">
+        <mat-icon class="spin-icon">sync</mat-icon>
+        <span>Pushing to GitHub...</span>
+      </div>
+      <div class="push-actions">
+        <button mat-stroked-button (click)="closeGitHubPush()" [disabled]="isPushing">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" class="push-button" (click)="pushToGitHub()"
+          [disabled]="!canPush() || isPushing">
+          <mat-icon>cloud_upload</mat-icon>
+          {{ isPushing ? 'Pushing...' : 'Push to GitHub' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

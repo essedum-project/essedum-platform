@@ -26,6 +26,8 @@ export class AipSwaggerCustomComponent implements OnInit {
   @Input() instanceName: any;
   @Input() restProvider: any;
   @Input() endpointName: any;
+  Essedum: string = 'Essedum';
+  essedumTitle: string = '';
   hasSwaggerData: Boolean = false;
   updateEndpoint: any;
   restProviderData: any;
@@ -117,7 +119,7 @@ export class AipSwaggerCustomComponent implements OnInit {
         if (swaggerData && swaggerData.trim() !== '') {
           this.hasSwaggerData = true;
           try {
-            this.apispecTemplate = JSON.parse(res[0].swaggerData);
+            this.apispecTemplate = JSON.parse(res[0].swaggerData);            
           } catch (error) {
             console.error('Error parsing swaggerData in endpoint:', error);
           }
@@ -429,6 +431,7 @@ export class AipSwaggerCustomComponent implements OnInit {
             );
         }
         this.apispecTemplate = JSON.parse(this.mlspecTemplate.apispectemplate);
+        this.essedumTitle = this.apispecTemplate.info.title.slice(7);
         if (
           this.apispecTemplate.servers &&
           this.apispecTemplate.servers[0]?.url

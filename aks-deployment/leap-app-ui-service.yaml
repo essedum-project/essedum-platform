@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: leap-app-ui-service
+  namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true" # Makes the LoadBalancer internal
+spec:
+  selector:
+    app: leap-app-ui # Matches the label in the Deployment
+  ports:
+  - protocol: TCP
+    port: 8082          # External port to expose
+    targetPort: 8082  # Port where the application is running inside the pod
+    name: port-8082
+  - protocol: TCP
+    port: 8084          # External port to expose
+    targetPort: 8084  # Port where the application is running inside the pod
+    name: port-8084
+  type: LoadBalancer

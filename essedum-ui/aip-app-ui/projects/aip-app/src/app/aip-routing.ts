@@ -2,6 +2,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 import { AipComponent } from './aip.component';
@@ -34,6 +35,9 @@ import { PaginationComponent } from './pagination/pagination.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { AgentComponent } from './agent/agent.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
+import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 
 
 const routes: Routes = [
@@ -67,6 +71,20 @@ const routes: Routes = [
         
           { path: 'view/:cname', component: NativeScriptComponent },
     
+        ],
+      },
+      {
+        path: 'pipeline-agent',
+        children: [
+          { path: '', component: PipelineAgentComponent },
+          { path: 'pipeline-detail/:cname', component: PipelineAgentDetailComponent },
+        ],
+      },
+      {
+        path: 'agent-pipeline',
+        children: [
+          { path: '', component: AgentPipelineDashboardComponent },
+           { path: 'view/:cname', component: AgentPipelineComponent },
         ],
       },
         {

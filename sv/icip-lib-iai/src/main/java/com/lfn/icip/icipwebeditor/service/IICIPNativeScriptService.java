@@ -46,6 +46,9 @@ public interface IICIPNativeScriptService {
 	 */
 	ICIPNativeScript findByNameAndOrg(String name, String org);
 
+    List<ICIPNativeScript> findByOrgAndName(String name, String org);
+
+    ICIPNativeScript findByNameAndOrgAndFile(String name, String org, String filename);
 	/**
 	 * Delete by name and org.
 	 *

@@ -323,7 +323,7 @@ public class ICIPDataSourceServiceUtilAzure extends ICIPDataSourceServiceUtilRes
 		String userName = authDetailsObj.optString("username").trim();
 		String password = authDetailsObj.optString("password");
 		String testDataset = new JSONObject(connectionDetails.optString("testDataset")).optString("attributes");
-		String method = "POST";
+		String method = "GET";
 		String headers = new JSONObject(testDataset).optString("Headers");
 		JSONArray headersArray = new JSONArray();
 		Boolean isContentTypePresent = false;

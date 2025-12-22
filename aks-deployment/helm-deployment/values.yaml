@@ -1,9 +1,9 @@
 backend:
-  deploymentName: essedum-backend
-  serviceName: essedum-backend-service
+  deploymentName: leap-app-backend
+  serviceName: leap-app-backend-service
   replicaCount: 1
   image:
-    repository: acrreq0762935.azurecr.io/essedum_backend
+    repository: acrreq0762935.azurecr.io/leap_app_backend
     tag: latest
     pullPolicy: Always
   containerPort: 8082
@@ -12,11 +12,11 @@ backend:
     targetPort: 8082
 
 frontend:
-  deploymentName: essedum-ui
-  serviceName: essedum-ui-service-1
+  deploymentName: leap-app-ui
+  serviceName: leap-app-ui-service-1
   replicaCount: 1
   image:
-    repository: acrreq0762935.azurecr.io/essedum_ui
+    repository: acrreq0762935.azurecr.io/leap_app_ui
     tag: "1"
     pullPolicy: Always
   containerPorts:
@@ -92,17 +92,17 @@ mysql:
     storageClassName: azurefile
   initdb:
     databases:
-      - essedum_coredb
-      - essedum_quartzdb
+      - core_dbb
+      - leap2_8000_quartz
       - telemetrydb
 
 imagePullSecret: acr-secret
 
 ingress:
-  name: essedum-ingress2
+  name: leap-app-ingress2
   host: test.az.ad.idemo-ppc.com
   tlsSecret: essedum-secret
-  serviceName: essedum-ui-service-1
+  serviceName: leap-app-ui-service-1
   servicePort: 8084
 
 keycloak:

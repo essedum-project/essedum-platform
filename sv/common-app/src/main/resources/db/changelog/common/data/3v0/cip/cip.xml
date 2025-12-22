@@ -118,6 +118,24 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
 			</column>
 		</createTable>
 	</changeSet>
+    <changeSet author="Essedum (generated)" id="3v0-cip-8">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="mlpipelineaiagentscriptentity" />
+            </not>
+        </preConditions>
+        <createTable tableName="mlpipelineaiagentscriptentity">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="cname" type="VARCHAR(255)" />
+            <column name="organization" type="VARCHAR(255)" />
+            <column name="filename" type="VARCHAR(255)" />
+            <column name="filescript" type="LONGBLOB" />
+            <column name="filepath" type="VARCHAR(255)" />
+        </createTable>
+    </changeSet>
 
 	<changeSet author="Essedum" id="3v0-cip-3">
 		<sql splitStatements="true" stripComments="true">
@@ -166,8 +184,17 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	
-	
+
+    <changeSet dbms="mysql,postgresql,mssql" author="Essedum (generated)" id="3v0-cip-99">
+       <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/common/data/3v0/cip/mlpipelineaiagentscriptentity.csv" quotchar="&quot;" separator="," tableName="mlpipelineaiagentscriptentity">
+           <column header="id" name="id" type="NUMERIC"/>
+           <column header="cname" name="cname" type="STRING"/>
+           <column header="organization" name="organization" type="STRING"/>
+           <column header="filename" name="filename" type="STRING"/>
+           <column header="filescript" name="filescript" type="LONGBLOB"/>
+           <column header="filepath" name="filepath" type="STRING"/>
+       </loadData>
+   </changeSet>
    
    
    <changeSet author="Essedum (generated)" id="3v0-cip-100">

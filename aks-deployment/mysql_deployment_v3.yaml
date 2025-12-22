@@ -16,6 +16,8 @@ spec:
       containers:
       - image: mysql:8.0
         name: mysql
+        args:
+          - "--datadir=/var/lib/mysqldata"
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: password

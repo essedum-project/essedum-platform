@@ -1,0 +1,126 @@
+// ===========================================
+// BASE COMPONENTS
+// ===========================================
+
+.back-icon {
+  font-size: 24px;
+  cursor: pointer;
+  color: $text-muted;
+  margin-right: 16px;
+  transition: all $transition-normal;
+  
+  &:hover {
+    color: $primary-blue;
+  }
+}
+
+.aip-desc-title {
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.aip-panel-shadow {
+  box-shadow: $shadow-md;
+  border-radius: $border-radius;
+}
+
+.tab-content {
+  width: 100%;
+  background: white;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.tab-content.mb-5 {
+  margin-bottom: 0 !important;
+}
+
+.tab-content:has(.script-split-container) {
+  height: calc(60vh + 40px);
+  @include flex-column;
+}
+
+// ===========================================
+// LAYOUT CONTAINERS
+// ===========================================
+.script-split-container {
+  display: flex;
+  gap: 20px;
+  height: 600px;
+  width: 100%;
+}
+
+@include tablet {
+  .script-split-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .script-split-container .config-panel,
+  .script-split-container .console-panel {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: 400px !important;
+  }
+}
+
+.config-panel,
+.console-panel {
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+// ===========================================
+// UTILITY CLASSES
+// ===========================================
+.loading-state {
+  @include flex-center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.processing-indicator {
+  @include flex-center;
+  flex-direction: column;
+  padding: 24px 20px;
+  margin-top: 20px;
+  background: $bg-light;
+  border-radius: $border-radius;
+  border: 2px dashed $primary-blue;
+}
+
+.processing-indicator .spin-icon {
+  font-size: 36px;
+  color: $primary-blue;
+  margin-bottom: 8px;
+}
+
+.processing-indicator p {
+  font-size: $font-base;
+  color: $text-dark;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.processing-indicator .progress-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.processing-indicator .progress-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $primary-blue;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.processing-indicator .progress-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.processing-indicator .progress-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
