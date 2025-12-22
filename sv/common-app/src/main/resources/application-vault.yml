@@ -3,7 +3,7 @@ spring:
     vault:
       enabled: true
       uri: http://10.85.12.206:31854
-      token: hvs.HnrDFMDqj3SJuGxlEShfAbfU
+      token: test
       scheme: http
   #      kv:
   #        enabled: true
