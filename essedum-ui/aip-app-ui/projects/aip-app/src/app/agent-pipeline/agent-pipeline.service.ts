@@ -511,7 +511,8 @@ export class AgentPipelineService {
     return this.http.post(url, {}, {
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      responseType: 'text' // Expect text response instead of JSON to prevent parsing errors
     }).pipe(
       map((response: any) => {
         console.log('MinIO upload response:', response);

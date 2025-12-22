@@ -135,7 +135,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Handle if fileName comes as an array
     if (Array.isArray(fileName)) {
       cleanName = fileName[0] || '';
-      console.log('🧹 Filename was array, extracted first element:', cleanName);
+      console.log('   Filename was array, extracted first element:', cleanName);
     }
     
     // Handle string format
@@ -147,12 +147,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           const parsed = JSON.parse(cleanName);
           if (Array.isArray(parsed) && parsed.length > 0) {
             cleanName = parsed[0];
-            console.log('🧹 Parsed filename from JSON array:', cleanName);
+            console.log('   Parsed filename from JSON array:', cleanName);
           }
         } catch (e) {
           // Manual cleanup if JSON parsing fails
           cleanName = cleanName.slice(1, -1).replace(/[\"\'\']/g, '').trim();
-          console.log('🧹 Manually cleaned filename:', cleanName);
+          console.log('   Manually cleaned filename:', cleanName);
         }
       }
       
@@ -160,7 +160,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       cleanName = cleanName.replace(/[\"\'\']/g, '').trim();
     }
     
-    console.log('🧹 Final cleaned filename:', { original: fileName, cleaned: cleanName });
+    console.log('   Final cleaned filename:', { original: fileName, cleaned: cleanName });
     return cleanName;
   }
 
@@ -819,7 +819,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   navigateBack(): void {
-    console.log('🔙 Navigating back to agent-pipeline dashboard');
+    console.log('Navigating back to agent-pipeline dashboard');
     // Reset all state first
     this.resetToDashboardState();
     
@@ -2359,23 +2359,23 @@ public class ZipController {
   private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
     try {
       const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
-      console.log('🔥 FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
+      console.log('  FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
       
       const response = await this.http.get<any[]>(apiUrl).toPromise();
-      console.log('🔥 DATASOURCE API RESPONSE:', response);
+      console.log('  DATASOURCE API RESPONSE:', response);
       
       if (response && response.length > 0) {
         const datasource = response[0];
-        console.log('🔥 DATASOURCE OBJECT:', datasource);
+        console.log('  DATASOURCE OBJECT:', datasource);
         const connectionDetails = JSON.parse(datasource.connectionDetails);
-        console.log('🔥 CONNECTION DETAILS:', connectionDetails);
+        console.log('  CONNECTION DETAILS:', connectionDetails);
         
         const credentials = {
           accessKey: connectionDetails.accessKey,
           secretKey: connectionDetails.secretKey,
           url: connectionDetails.url
         };
-        console.log('🔥 EXTRACTED CREDENTIALS:', {
+        console.log('  EXTRACTED CREDENTIALS:', {
           accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
           secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
           url: credentials.url
@@ -2383,11 +2383,11 @@ public class ZipController {
         
         return credentials;
       } else {
-        console.error('🔥 NO DATASOURCE FOUND IN RESPONSE');
+        console.error('  NO DATASOURCE FOUND IN RESPONSE');
         throw new Error('No datasource found in response');
       }
     } catch (error) {
-      console.error('🔥 ERROR FETCHING DATASOURCE CREDENTIALS:', error);
+      console.error('  ERROR FETCHING DATASOURCE CREDENTIALS:', error);
       throw new Error(`Failed to fetch datasource credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -2396,21 +2396,21 @@ public class ZipController {
    * Initialize WebSocket connection for deployment pipeline
    */
  private initializeWebSocket(): void {
-    console.log('🔥 STARTING WEBSOCKET INITIALIZATION PROCESS');
+    console.log('  STARTING WEBSOCKET INITIALIZATION PROCESS');
     try {
-      console.log('🔥 Step 1: Fetching datasource credentials...');
+      console.log('  Step 1: Fetching datasource credentials...');
       // First fetch datasource credentials
       this.fetchDatasourceCredentials().then((credentials) => {
-        console.log('🔥 Step 2: Credentials fetched successfully:', {
+        console.log('  Step 2: Credentials fetched successfully:', {
           accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
           secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
           url: credentials.url
         });
        
-        console.log('🔥 Step 3: Connecting to WebSocket server...');
+        console.log('  Step 3: Connecting to WebSocket server...');
         // Connect to the WebSocket server after getting credentials
       //  const webSocketUrl = 'http://100.78.49.149/';
-        //console.log('🔗 WebSocket connecting to URL:', webSocketUrl);
+        //console.log(' WebSocket connecting to URL:', webSocketUrl);
        // this.socket = io(webSocketUrl, {
 //	  transports: ['websocket'],
   //        timeout: 20000,
@@ -2428,7 +2428,7 @@ public class ZipController {
 	}); 
         // Connection successful
         this.socket.on('connect', () => {
-          console.log('🔥 Step 4: WebSocket connected! Preparing payload...');
+          console.log('  Step 4: WebSocket connected! Preparing payload...');
           // Trigger the pipeline immediately upon connection with fetched credentials
           const organization = this.getOrganization();
           const payload = {
@@ -2442,10 +2442,10 @@ public class ZipController {
        
           };
          
-          console.log('🔥 Step 5: Sending start_pipeline event with payload:', payload);
+          console.log('  Step 5: Sending start_pipeline event with payload:', payload);
           this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
           this.socket?.emit('start_pipeline', payload);
-          console.log('🔥 Step 6: start_pipeline event emitted to WebSocket');
+          console.log('  Step 6: start_pipeline event emitted to WebSocket');
         });
  
         // Pipeline update events (high-level steps)
@@ -2550,28 +2550,32 @@ public class ZipController {
       organization: organization
     });
     
-    // Call the API - no console output, only log to browser console
+    // Call the API - Handle parsing errors and different response types properly
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
         console.log('MinIO push successful:', response);
         
-        // Check if response indicates success (200 status means success)
-        if (response) {
-          // Show success message via service notification
-          const successResponse = { status: 200, body: response };
-          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
-        } else {
-          // Handle unexpected response format
-          console.warn('Unexpected MinIO response format:', response);
-          const successResponse = { status: 200, body: [] };
-          this.service.messageService(successResponse, 'Push to MinIO completed!');
-        }
+        // Always show success message for 200 status - API returned success
+        const successResponse = { status: 200, body: response || 'Success' };
+        this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
       },
       error: (error) => {
-        console.error('MinIO push failed:', error);
+        console.error('MinIO push error:', error);
         
-        // Show error message via service notification
-        this.service.messageService(error, 'Push to MinIO failed');
+        // Check if this is a parsing error with 200 status (success but unparseable response)
+        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
+            (error.message?.includes('parsing') || error.error?.text)) {
+          console.log('API returned 200 but response parsing failed - treating as success');
+          
+          // Extract the response text if available
+          const responseText = error.error?.text || 'Upload completed';
+          const successResponse = { status: 200, body: responseText };
+          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+        } else {
+          // Real error - show error message
+          const errorResponse = error.status ? error : { status: 500, body: 'Unknown error' };
+          this.service.messageService(errorResponse, 'Push to MinIO failed. Please try again.');
+        }
       }
     });
   }
@@ -3354,7 +3358,7 @@ DELIVERABLES
     const rawJsonFileName = `${this.currentCname}_${this.organisation}.json`;
     const jsonFileName = this.cleanFileName(rawJsonFileName);
     
-    console.log('🚀 Making API call to read JSON file:', {
+    console.log(' Making API call to read JSON file:', {
       cname: this.currentCname,
       organisation: this.organisation,
       rawFileName: rawJsonFileName,
@@ -3364,7 +3368,7 @@ DELIVERABLES
     
     this.service.readNativeFile(this.currentCname, this.organisation, jsonFileName).subscribe({
       next: (response) => {
-        console.log('✅ JSON file API response received:', {
+        console.log(' JSON file API response received:', {
           responseType: typeof response,
           isArrayBuffer: response instanceof ArrayBuffer,
           responseLength: response instanceof ArrayBuffer ? response.byteLength : (typeof response === 'string' ? response.length : 'unknown')
@@ -3387,9 +3391,9 @@ DELIVERABLES
           this.script = jsonString.split('\n');
           this.scriptFileName = jsonFileName;
           this.loadScript = true;
-          console.log('✅ Script tab updated with API JSON content, lines:', this.script.length);
+          console.log('Script tab updated with API JSON content, lines:', this.script.length);
         } catch (error) {
-          console.error('❌ Error processing JSON response:', error);
+          console.error(' Error processing JSON response:', error);
           // Show error message instead of fallback
           this.script = ['Error: Could not load configuration file', 'File may not exist or server is unavailable', ''];
           this.scriptFileName = 'Error - ' + jsonFileName;
@@ -3397,7 +3401,7 @@ DELIVERABLES
         }
       },
       error: (error) => {
-        console.error('❌ Failed to load JSON file from API:', {
+        console.error('Failed to load JSON file from API:', {
           error: error,
           status: error.status,
           message: error.message,
