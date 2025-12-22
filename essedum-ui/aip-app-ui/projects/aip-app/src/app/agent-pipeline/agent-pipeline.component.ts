@@ -2438,17 +2438,18 @@ public class ZipController {
 	console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
 	
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
-	// Force HTTPS protocol and disable websocket transport to prevent wss:// conversion
+	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
 	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
-	  transports: ['polling'],       // Force HTTPS polling only - prevents wss:// conversion
+	  transports: ['websocket', 'polling'], // Allow websocket but prevent WSS upgrade
 	  timeout: 60000,
 	  forceNew: true,
 	  rejectUnauthorized: false,
 	  withCredentials: true,
 	  reconnection: false,
-	  upgrade: false,                // Prevent upgrade to websocket protocol
+	  upgrade: false,                // Prevent protocol upgrade to WSS
 	  rememberUpgrade: false,        // Don't remember previous transport upgrades
+	  forceBase64: true,             // Force base64 encoding to stay on HTTP
 	}); 
         // Connection successful
         this.socket.on('connect', () => {
