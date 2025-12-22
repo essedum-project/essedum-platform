@@ -2409,12 +2409,23 @@ public class ZipController {
        
         console.log('🔥 Step 3: Connecting to WebSocket server...');
         // Connect to the WebSocket server after getting credentials
-        this.socket = io('wss://essedum.az.ad.idemo-ppc.com/apps/builder-service/socket.io/', {
-          transports: ['websocket', 'polling'],
-          timeout: 20000,
-          forceNew: true
-        });
- 
+      //  const webSocketUrl = 'http://100.78.49.149/';
+        //console.log('🔗 WebSocket connecting to URL:', webSocketUrl);
+       // this.socket = io(webSocketUrl, {
+//	  transports: ['websocket'],
+  //        timeout: 20000,
+    //      forceNew: true
+     //   });
+	  
+	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
+	  path: '/apps/builder-service/socket.io',
+	  transports: ['websocket','polling'],       // <-- force polling only
+	  timeout: 60000,
+	  forceNew: true,
+	  rejectUnauthorized: false,
+	  withCredentials: true,         // optional; harmless if cookies are set
+	  reconnection: false,
+	}); 
         // Connection successful
         this.socket.on('connect', () => {
           console.log('🔥 Step 4: WebSocket connected! Preparing payload...');
@@ -2422,12 +2433,12 @@ public class ZipController {
           const organization = this.getOrganization();
           const payload = {
             minio_endpoint: 'http://100.78.49.20:9000',
-            access_key: credentials.accessKey,
-            secret_key: credentials.secretKey,
             bucket_name: 'aiptest',
             file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
             target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-            deployment_name: 'runner-service'
+            deployment_name: 'runner-service',
+            cname: this.currentCname ,
+            organization: organization
        
           };
          
