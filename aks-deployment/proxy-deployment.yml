@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-service
+  namespace: aipns
+  labels:
+    app: proxy-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy-service
+  template:
+    metadata:
+      labels:
+        app: proxy-service
+    spec:
+      containers:
+      - name: proxy
+        image: acrreq0762935.azurecr.io/proxy-service:v2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: TARGET_NAMESPACE
+          value: "aipns"
+        # Optional allowlist: uncomment to restrict services
+        # - name: ALLOWLIST
+        #   value: "runner-service,tunner-service,abc-service"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      imagePullSecrets:
+      - name: regcred   # if your cluster needs ACR pull creds; remove if not required
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-service
+  namespace: aipns
+  labels:
+    app: proxy-service
+spec:
+  type: ClusterIP
+  selector:
+    app: proxy-service
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

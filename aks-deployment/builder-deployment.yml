@@ -1,0 +1,64 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: builder-service
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: builder
+  template:
+    metadata:
+      labels:
+        app: builder
+    spec:
+      serviceAccountName: builder-sa  # Grants permission per RBAC
+      imagePullSecrets:
+        - name: regcred               # Secret for pulling this image (if private)
+      containers:
+        - name: builder
+          image:  acrreq0762935.azurecr.io/builder-service:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          env:
+            - name: BUILDKIT_ADDR
+              value: "tcp://buildkitd:1234"   # Points to your buildkitd Service
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: DOCKER_CONFIG
+              value: "/root/.docker"
+          volumeMounts:
+            - name: docker-config
+              mountPath: /root/.docker
+              readOnly: true
+            - name: dockerfile-template
+              mountPath: /opt/fallback
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: regcred
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+        - name: dockerfile-template
+          configMap:
+            name: adk-dockerfile-template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: builder-service
+  namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  selector:
+    app: builder
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: LoadBalancer
+  sessionAffinity: ClientIP

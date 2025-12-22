@@ -1,0 +1,8 @@
+# MySQL MCP Server Dependencies
+# Core dependencies for MySQL MCP server integration
+
+fastapi>=0.104.0
+uvicorn>=0.24.0
+mysql-connector-python>=8.0.33
+aiohttp>=3.8.0
+pydantic>=2.0.0

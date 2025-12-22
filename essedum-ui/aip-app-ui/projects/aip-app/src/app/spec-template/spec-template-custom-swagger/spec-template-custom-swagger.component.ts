@@ -15,6 +15,8 @@ export class SpecTemplateCustomSwaggerComponent implements OnInit {
   disabled: Boolean = false;
   disableRipple: Boolean = true;
   labelPosition: string = 'before';
+  Essedum: string = 'Essedum';
+  essedumTitle: string = '';
   swaggerView: Boolean = true;
   mlspecTemplate: any;
   apispecTemplate: any;
@@ -76,6 +78,7 @@ export class SpecTemplateCustomSwaggerComponent implements OnInit {
           this.executionRequired = true;
         }
         this.apispecTemplate = JSON.parse(this.mlspecTemplate.apispectemplate);
+        this.essedumTitle = this.apispecTemplate.info.title.slice(7);
         if (
           this.apispecTemplate.servers &&
           this.apispecTemplate.servers[0]?.url

@@ -1,0 +1,238 @@
+// ===========================================
+// FILE STRUCTURE & TREE
+// ===========================================
+.file-structure-container {
+  min-height: calc(100vh - 250px);
+  height: calc(100vh - 250px);
+  display: flex;
+  flex-direction: column;
+}
+
+.file-panel {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  align-items: stretch; // Change from flex-start to stretch for equal height
+  flex: 1;
+}
+
+.file-panel .file-explorer {
+  flex: 0 0 $sidebar-width;
+}
+
+.file-panel .file-editor-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-explorer {
+  @include panel-dark;
+  border-radius: $border-radius;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.file-explorer .explorer-header {
+  padding: 12px 16px;
+  @include flex-between;
+  background: $bg-console;
+  color: $text-light;
+  border-bottom: 1px solid $border-medium;
+}
+
+.file-explorer .explorer-header .header-left {
+  @include flex-start;
+  gap: 8px;
+}
+
+.file-explorer .explorer-header .header-left mat-icon {
+  font-size: 18px;
+  color: $text-light;
+}
+
+.file-explorer .explorer-header .header-left h3 {
+  margin: 0;
+  font-size: $font-base;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.file-explorer .explorer-header .header-right {
+  @include flex-start;
+  gap: 8px;
+}
+
+.file-explorer .explorer-header .header-right .download-button,
+.file-explorer .explorer-header .header-right .upload-button {
+  background: transparent;
+  border: none;
+  color: $text-light;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  @include flex-center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.file-explorer .explorer-header .header-right .download-button:hover:not(:disabled),
+.file-explorer .explorer-header .header-right .upload-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.file-explorer .explorer-header .header-right .download-button:disabled,
+.file-explorer .explorer-header .header-right .upload-button:disabled {
+  color: #858585;
+  cursor: not-allowed;
+}
+
+.file-explorer .explorer-header .header-right .download-button mat-icon,
+.file-explorer .explorer-header .header-right .upload-button mat-icon {
+  font-size: 16px;
+}
+
+.file-explorer .file-tree {
+  padding: 8px 0;
+  max-height: 500px;
+  overflow: auto;
+  font-family: $font-mono;
+  font-size: $font-base;
+  line-height: 20px;
+  background: $bg-dark;
+  color: $text-editor;
+  min-width: 100%;
+  @include custom-scrollbar($bg-dark, #424242, #4f4f4f);
+}
+
+.tree-node {
+  margin: 0;
+  min-width: max-content;
+}
+
+.tree-node .tree-node-content {
+  @include flex-start;
+  gap: 6px;
+  padding: 3px 8px 3px 0; // Remove left padding to align to extreme left
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all $transition-normal;
+  min-height: 22px;
+  min-width: max-content;
+  position: relative;
+}
+
+.tree-node .tree-node-content .node-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.tree-node .tree-node-content .node-icon.folder-icon {
+  color: $color-folder;
+}
+
+.tree-node .tree-node-content .node-icon.file-icon {
+  color: $color-file;
+}
+
+.tree-node .tree-node-content .node-name {
+  font-size: $font-base;
+  color: #cccccc !important;
+  white-space: nowrap;
+  user-select: none;
+  flex: 1;
+  margin-left: 0; // Ensure no left margin
+  text-align: left; // Explicit left alignment
+}
+
+// Override all file extension colors to use consistent color
+.tree-node .tree-node-content .node-name[title$=".py"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content .node-name[title$=".json"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content .node-name[title$=".java"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content .node-name[title$=".xml"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content .node-name[title$=".properties"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content .node-name[title$=".md"] {
+  color: #cccccc !important;
+}
+
+.tree-node .tree-node-content:hover {
+  background: #2a2d2e;
+}
+
+.tree-node .tree-node-content.selected {
+  background: #094771;
+}
+
+.tree-node .tree-node-content.selected .node-name,
+.tree-node .tree-node-content.selected .node-icon {
+  color: white;
+}
+
+.tree-node .tree-node-content.folder-node .node-name {
+  font-weight: 500;
+}
+
+.tree-node .tree-node-content.file-node .node-name {
+  font-weight: 400;
+}
+
+// Modified file highlighting
+.tree-node .tree-node-content.file-modified .node-name {
+  color: $warning-orange !important;
+  font-weight: 600;
+}
+
+.tree-node .tree-node-content.drag-over {
+  background: rgba(0, 148, 255, 0.1);
+  border: 2px dashed $primary-blue;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 148, 255, 0.2);
+}
+
+.folder-toggle {
+  font-size: 16px !important;
+  cursor: pointer;
+  color: #666;
+  transition: all $transition-normal;
+}
+
+.folder-toggle:hover {
+  color: $primary-blue;
+  transform: scale(1.1);
+}
+
+.folder-spacer {
+  width: 16px;
+  display: inline-block;
+}
+
+.tree-loading {
+  @include flex-center;
+  gap: 8px;
+  padding: 16px;
+  color: $text-light;
+  font-size: $font-base;
+}
+
+.tree-loading .spin-icon {
+  font-size: 16px;
+  animation: spin 1s linear infinite;
+}

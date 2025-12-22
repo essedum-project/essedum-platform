@@ -46,3 +46,94 @@
 ::ng-deep .mat-mdc-tab-list {
   flex-grow: 0 !important;
 }
+
+// File Explorer Styles
+.file-explorer-container {
+  font-family: 'Roboto', sans-serif;
+  
+  .file-explorer-panel {
+    .file-explorer-header {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .file-tree {
+      .mat-tree-node {
+        transition: all 0.2s ease;
+        border-radius: 4px;
+        margin: 1px 0;
+        
+        &:hover {
+          background-color: #f5f5f5 !important;
+        }
+        
+        &.selected-file {
+          background-color: #e3f2fd !important;
+          border-left: 3px solid #2196f3 !important;
+          
+          span {
+            color: #2196f3 !important;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+  
+  .code-editor-panel {
+    .code-editor-header {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+  }
+}
+
+// Global tree styles for file explorer
+::ng-deep .file-tree {
+  .mat-tree {
+    background: transparent;
+  }
+  
+  .mat-tree-node {
+    min-height: 32px !important;
+    padding-left: 12px !important;
+    
+    &:hover {
+      background-color: #f5f5f5 !important;
+    }
+  }
+  
+  .selected-file {
+    background-color: #e3f2fd !important;
+    border-left: 3px solid #2196f3 !important;
+  }
+}
+
+// Notebook placeholder styling
+.notebook-placeholder {
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  margin: 20px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #c0c0c0;
+    background-color: #f0f0f0 !important;
+  }
+  
+  h3 {
+    font-weight: 500;
+  }
+  
+  button {
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}

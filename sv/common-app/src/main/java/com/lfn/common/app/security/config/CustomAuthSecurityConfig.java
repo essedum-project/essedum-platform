@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -51,6 +52,8 @@ import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 // 
 /**
@@ -118,19 +121,36 @@ class CustomAuthSecurityConfig {
 		if (activeProfile.contains(DBJWT))
 			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
 				authorizationManagerRequestMatcherRegistry
+						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll();
-			});
+                        .anyRequest().authenticated();
+
+            });
 		else if (activeProfile.contains(OAUTH2))
 			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
 				authorizationManagerRequestMatcherRegistry
+						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
 						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll();
-				try {
+                        .anyRequest().authenticated();
+                try {
 					http.oauth2ResourceServer(
 							oauth2 -> oauth2.jwt(t -> t.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 				} catch (Exception e) {
@@ -145,11 +165,16 @@ class CustomAuthSecurityConfig {
 //			configurer.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 //			configurer.ignoringRequestMatchers(antMatchers(ignoreCsrfUrls));
 //		});
-		http.csrf((csrf) -> csrf.disable());
+
+        http.cors(withDefaults()).csrf((csrf) -> csrf.disable());
 		FilterChainProxy filterChainProxy = new FilterChainProxy(new SecurityFilterChain() {
 
 			@Override
 			public boolean matches(HttpServletRequest request) {
+				// Exclude the langflow_agent_export, file/create, and streamingServices/update endpoints from authentication filter
+				if (request.getRequestURI().contains("/api/aip/langflow/langflow_agent_export") || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update")) {
+					return false;
+				}
 				return AntPathRequestMatcher.antMatcher("/api/**").matches(request);
 			}
 

@@ -47,7 +47,8 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 		//The below URLS - does not require authentication nor authorization  - permitAll
 		if(AntPathRequestMatcher.antMatcher("/api/getConfigDetails").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/authenticate").matcher(authorizationContext.getRequest()).isMatch() ||
-		   		AntPathRequestMatcher.antMatcher("/actuator/**").matcher(authorizationContext.getRequest()).isMatch() ||
+                AntPathRequestMatcher.antMatcher("/api/github/**").matcher(authorizationContext.getRequest()).isMatch() ||
+                AntPathRequestMatcher.antMatcher("/actuator/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/get-startup-constants**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/pipelinemodels/**").matcher(authorizationContext.getRequest()).isMatch() ||
 				AntPathRequestMatcher.antMatcher("/api/projects/page").matcher(authorizationContext.getRequest()).isMatch() ||
