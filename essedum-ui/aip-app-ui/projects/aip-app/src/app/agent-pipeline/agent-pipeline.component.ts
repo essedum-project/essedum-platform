@@ -124,7 +124,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     return localStorage.getItem('organisation') || 'leo1311';
   }
 
-  
+
   /**
    * Clean filename to ensure it's always a proper string without array brackets
    */
@@ -189,6 +189,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   private socket: Socket | null = null;
   isRunningAndDeploying = false;
   deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
+  deploymentStatusMessage: string = ''; // User-friendly status message for deployment
+  isPlaygroundEnabled = false; // Enable playground only after successful deployment
   
   // LLM Selection and Prompt Template
   selectedLLM: string = '';
@@ -849,6 +851,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.currentCname = ''; // Clear cname when going back to dashboard
     this.fileSystemData = [];
     this.consoleOutput = []; // Keep console clear
+    this.deploymentStatus = 'idle'; // Reset deployment status
+    this.deploymentStatusMessage = ''; // Clear status message
+    this.isPlaygroundEnabled = false; // Disable playground
     this.clearFileSelection();
     console.log('Reset state for dashboard navigation');
   }
@@ -2346,6 +2351,8 @@ public class ZipController {
 
     this.isRunningAndDeploying = true;
     this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deployment in progress...';
+    this.isPlaygroundEnabled = false; // Disable playground during deployment
     
     // Clear previous console output - console only shows WebSocket data during deployment
     this.consoleOutput = [];
@@ -2463,10 +2470,14 @@ public class ZipController {
         this.socket.on('pipeline_status', (data: any) => {
           this.addToConsole(`FINAL STATUS: ${data.status}`);
          
-          if (data.status === 'success') {
+          if (data.status === 'SUCCESS' || data.status === 'success') {
             this.deploymentStatus = 'success';
+            this.deploymentStatusMessage = 'Deployment completed successfully! Playground is now enabled.';
+            this.isPlaygroundEnabled = true; // Enable playground only on successful deployment
           } else {
             this.deploymentStatus = 'error';
+            this.deploymentStatusMessage = 'Deployment failed. Please check the console output and try again.';
+            this.isPlaygroundEnabled = false; // Keep playground disabled on error
             if (data.error) {
               this.addToConsole(`Error: ${data.error}`);
             }
@@ -2480,21 +2491,25 @@ public class ZipController {
         this.socket.on('connect_error', (error: any) => {
           this.addToConsole(`Connection error: ${error.message}`);
           this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Connection error occurred. Playground is disabled.';
+          this.isPlaygroundEnabled = false;
           this.isRunningAndDeploying = false;
         });
- 
+
         // Disconnection
         this.socket.on('disconnect', (reason: string) => {
           this.addToConsole(`Disconnected: ${reason}`);
           if (this.isRunningAndDeploying) {
             this.isRunningAndDeploying = false;
             this.deploymentStatus = 'error';
+            this.deploymentStatusMessage = 'Connection lost during deployment. Playground is disabled.';
+            this.isPlaygroundEnabled = false;
           }
-        });
-       
-      }).catch((error) => {
+        });      }).catch((error) => {
         this.addToConsole(`Failed to fetch datasource credentials: ${error.message}`);
         this.deploymentStatus = 'error';
+        this.deploymentStatusMessage = 'Failed to initialize deployment. Playground is disabled.';
+        this.isPlaygroundEnabled = false;
         this.isRunningAndDeploying = false;
       });
  
@@ -2840,8 +2855,40 @@ DELIVERABLES
     // TODO: Implement delete functionality
   }
 
+  /**
+   * Get tooltip message for playground button based on deployment status
+   */
+  getPlaygroundTooltipMessage(): string {
+    if (!this.hasGeneratedAgent) {
+      return 'Generate agent code first to enable playground';
+    }
+    
+    if (!this.isPlaygroundEnabled) {
+      if (this.isRunningAndDeploying) {
+        return 'Deployment in progress. Playground will be enabled after successful deployment.';
+      } else if (this.deploymentStatus === 'error') {
+        return 'Deployment failed. Run and Deploy successfully to enable playground.';
+      } else if (this.deploymentStatus === 'idle') {
+        return 'Run and Deploy the agent first to enable playground.';
+      }
+    }
+    
+    return 'Open playground to test your agent';
+  }
+
+  /**
+   * Check if playground button should be enabled
+   */
+  canOpenPlayground(): boolean {
+    return this.hasGeneratedAgent && this.isPlaygroundEnabled && !this.isRunningAndDeploying;
+  }
+
   // Playground methods
   openPlayground(): void {
+    if (!this.canOpenPlayground()) {
+      return;
+    }
+    
     // First fetch the playground URL from streaming services API
     this.fetchPlaygroundUrl().then(() => {
       this.showPlayground = true;

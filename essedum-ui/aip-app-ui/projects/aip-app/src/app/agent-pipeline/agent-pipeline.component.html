@@ -96,15 +96,27 @@
                               </button>
                               
                               <!-- Playground Button -->
-                              <button mat-raised-button class="playground-button"
+                              <button mat-raised-button 
+                                class="playground-button"
+                                [class.playground-disabled]="!canOpenPlayground()"
+                                [disabled]="!canOpenPlayground()"
                                 (click)="openPlayground()"
-                                matTooltip="Open Playground" matTooltipPosition="above">
+                                [title]="getPlaygroundTooltipMessage()">
                                 <mat-icon>smart_toy</mat-icon>
                               </button>
                             </div>
                           </div>
-
-                          <!-- GitHub Copilot Prompt Template (only show initially) -->
+                          
+          <!-- Minimal status message as separate row below buttons -->
+          <div class="playground-status-row" 
+               *ngIf="!canOpenPlayground() && deploymentStatusMessage">
+            <div class="playground-status-hint"
+                 [ngClass]="{
+                   'status-progress': deploymentStatus === 'running',
+                   'status-error': deploymentStatus === 'error',
+                   'status-idle': deploymentStatus === 'idle'
+                 }">{{ deploymentStatusMessage }}</div>
+          </div>                          <!-- GitHub Copilot Prompt Template (only show initially) -->
                           <div class="prompt-template-container"
                             *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
                             <div class="prompt-instructions">
