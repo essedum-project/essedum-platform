@@ -129,8 +129,13 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Removes '/api' suffix if present to get the base environment URL
    */
   private getEnvironmentUrl(): string {
-    // Remove '/api' suffix if present to get the base environment URL
-    return this.baseUrl.endsWith('/api') ? this.baseUrl.slice(0, -4) : this.baseUrl;
+    // Remove '/api/aip' or '/api' suffix if present to get the base environment URL
+    if (this.baseUrl.endsWith('/api/aip')) {
+      return this.baseUrl.slice(0, -8); // Remove '/api/aip'
+    } else if (this.baseUrl.endsWith('/api')) {
+      return this.baseUrl.slice(0, -4); // Remove '/api'
+    }
+    return this.baseUrl;
   }
 
 
