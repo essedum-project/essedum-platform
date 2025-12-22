@@ -124,6 +124,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     return localStorage.getItem('organisation') || 'leo1311';
   }
 
+  
   /**
    * Clean filename to ensure it's always a proper string without array brackets
    */
