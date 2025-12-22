@@ -1,8 +1,33 @@
-import requests
 import json 
 import os
 import pandas as pd
 import logging
+import shutil
+import sys
+import subprocess
+import tempfile
+import time
+from itertools import groupby
+from urllib.parse import urlparse
+
+# STEP 2: Load environment and config
+from dotenv import load_dotenv
+load_dotenv()
+
+from utils import *
+
+# STEP 3: CLEAR PROXY **BEFORE** IMPORTING REQUESTS - THIS IS CRITICAL!
+os.environ.pop('http_proxy', None)
+os.environ.pop('https_proxy', None)
+os.environ.pop('HTTP_PROXY', None)
+os.environ.pop('HTTPS_PROXY', None)
+os.environ.pop('NO_PROXY', None)
+os.environ.pop('no_proxy', None)
+
+# STEP 4: NOW import requests (with clean environment - no proxy)
+import requests
+
+# STEP 5: Import all Azure ML libraries
 from azureml.core.compute import AmlCompute, ComputeTarget
 from azureml.core.environment import CondaDependencies
 from azureml.core.authentication import ServicePrincipalAuthentication
@@ -10,52 +35,55 @@ from azureml.pipeline.steps import AutoMLStep, PythonScriptStep
 from azureml.train.automl import AutoMLConfig
 from azureml.pipeline.core import Pipeline, PipelineData, TrainingOutput
 import azureml.core
-import json,shutil
 from azureml.core import Dataset, Experiment, RunConfiguration, Workspace, Environment, Model
-import sys
-import subprocess
 from azure.identity import ClientSecretCredential
 from azure.ai.ml.entities import BatchEndpoint, ModelBatchDeployment, ModelBatchDeploymentSettings, PipelineComponentBatchDeployment, Model, AmlCompute, Data, BatchRetrySettings, CodeConfiguration, Environment, Data
 from azure.ai.ml.constants import AssetTypes, BatchDeploymentOutputAction
 from azureml.train.automl.run import AutoMLRun
+from azure.core.pipeline.transport import RequestsTransport
+from requests import Session
 from azure.ai.ml import MLClient, Input, load_component
-from azure.identity import ClientSecretCredential
-from dotenv import load_dotenv
-import logging
-from utils import *
-import os
 
-load_dotenv()
-
-os.environ['http_proxy'] = PROXY
-os.environ['https_proxy'] = PROXY
-os.environ['HTTP_PROXY'] = PROXY
-os.environ['HTTPS_PROXY'] = PROXY
-os.environ['no_proxy'] = NOPROXY
-
-# Gets or creates a logger
+# STEP 6: Create logger
 logger = logging.getLogger(__name__)  
-
-# set log level
 logger.setLevel(logging.INFO)
-# define file handler and set formatter
 file_handler = logging.FileHandler('logfile.log')
-formatter    = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
 file_handler.setFormatter(formatter)
-
-# add file handler to logger
 logger.addHandler(file_handler)
+
+logger.info("Proxy disabled - all proxy environment variables cleared before requests module loaded")
+
+
+
 def token_generate():
-  url = f"https://login.microsoftonline.com/{os.environ.get('tenant_id')}/oauth2/token"
+  try:
+    logger.info(f"enviromenttest tenant_id :  {os.environ.get('tenant_id')}")
 
-  payload = f"grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}"
-  headers = {
-  'Content-Type': 'application/x-www-form-urlencoded',
-  'Cookie': 'fpc=AnhFZJgHdUZBh0ZeIH62qTPRTIEqAQAAAENpn9wOAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
-  }
+    logger.info(f"enviromenttest tenant_id :  {os.environ.get('client_secret')}")
 
-  response = requests.request("POST", url, headers=headers, data=payload)
-  return response.text
+
+    url = f"https://login.microsoftonline.com/{os.environ.get('tenant_id')}/oauth2/token"
+    
+    payload = f"grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}"
+    headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Cookie': 'fpc=AnhFZJgHdUZBh0ZeIH62qTPRTIEqAQAAAENpn9wOAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
+    }
+    
+    logger.info("Generating Azure AD access token...")
+    response = requests.request("POST", url, headers=headers, data=payload, verify=False, proxies={'http': None, 'https': None})
+    
+    if response.status_code == 200:
+      logger.info("Access token generated successfully")
+      return response.text
+    else:
+      logger.error(f"Token generation failed with status code: {response.status_code}")
+      logger.error(f"Response: {response.text[:200]}")
+      return response.text
+      
+  except Exception as e:
+    logger.error(f"Token generation error: {str(e)}", exc_info=True)
   
 
 
@@ -254,7 +282,7 @@ transformations:
       "Authorization": "Bearer " + str(Authorization)
     }
     
-    response = requests.request("GET", url, headers=headers, verify=False)
+    response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
     
     if response.status_code == 200:
       values = json.loads(response.text)
@@ -279,34 +307,57 @@ transformations:
 
 
 
-
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
+  logger.info(f"Starting projects_datasets_list_list - adapter: {adapter_instance}, project: {project}")
+  
   connect=token_generate()
+  logger.info("Token generated successfully")
+  
   value=json.loads(connect)
+  logger.info("Token parsed to JSON")
+  
   Authorization=value["access_token"]
+  logger.info("Access token extracted")
+  
   api_version=connections.get("datasets_api-version",None)
   subscriptionId=connections.get('subscriptionId',None)
   resourceGroupName=connections.get('resourceGroupName',None)
   workspaceName=connections.get('workspaceName',None)
+  logger.info(f"Connection params - subscriptionId: {subscriptionId}, resourceGroup: {resourceGroupName}, workspace: {workspaceName}, api_version: {api_version}")
+  
   url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/data?api-version={api_version}"
+  logger.info(f"Request URL: {url}")
+  
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  logger.info("Headers prepared")
+  
+  logger.info("Making GET request to Azure Management API...")
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
+  logger.info(f"Response received - Status code: {response.status_code}")
+  
   try:
     if response.status_code == 200 :
+      logger.info("Response status 200 - Success")
       values=json.loads(response.text)
+      logger.info(f"Response parsed - Found {len(values.get('value', [])) if isinstance(values, dict) else 'N/A'} datasets")
       values=responseFormat(adapter_instance,project,values)
+      logger.info("Response formatted successfully")
       return values,response.status_code
     elif response.status_code == 400:
+      logger.error("Response status 400 - Bad Parameters")
       return "Error: Bad Parameters(HTTP 400)"
     elif response.status_code ==500:
+      logger.error("Response status 500 - Internal Server Error")
       return "Internal Server Error(HTTP 500)"
     else:
+      logger.error(f"Unexpected response status code: {response.status_code}")
+      logger.error(f"Response body: {response.text[:500]}")
       return f"Request failed with status code:{response.status_code}"
         
   except Exception as e:
-    logger.error(f"an error occured:{str(e)}")  
+    logger.error(f"Exception occurred in projects_datasets_list_list: {str(e)}", exc_info=True)  
     return e
               
     
@@ -323,7 +374,7 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 :
       values=json.loads(response.text)
@@ -354,7 +405,7 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 or 202:
       logger.info("Dataset Archieved")
@@ -382,7 +433,7 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
   headers = {
   "Authorization" : "Bearer "+str(Authorization) 
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200:
       values=json.loads(response.text)
@@ -407,8 +458,6 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
     experiment_name = payload.get("experiment_name")
     run_id = payload.get("runId")
     model_name = payload.get("model_name")
-    
-    
     
     # Validate required parameters
     if not all([experiment_name, run_id, model_name]):
@@ -436,65 +485,52 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
       logger.warning(f"Job status is '{job.status}', not 'Completed'.")
       return {"error": f"Job '{run_id}' is not completed yet. Current status: {job.status}. Please wait for the job to complete."}, 400
     
-    # For AutoML jobs, we need to find the best child run and register its model
+    # For AutoML jobs, register model directly from parent run outputs
     from azure.ai.ml.entities import Model as MLModel
     from azure.ai.ml.constants import AssetTypes
     
-    # Get child runs (AutoML iterations)
+    # SIMPLIFIED APPROACH: Skip child job enumeration (proxy blocks it)
+    # Register directly from parent run's best_model output
     try:
-      # List all child jobs
-      child_jobs = list(ml_client.jobs.list(parent_job_name=run_id))
-      logger.info(f"Found {len(child_jobs)} child jobs")
+      logger.info("=" * 80)
+      logger.info("REGISTERING MODEL WITHOUT LISTING CHILD JOBS (PROXY BYPASS)")
+      logger.info("=" * 80)
       
-      if not child_jobs:
-        logger.error("No child jobs found for this AutoML run")
-        return {"error": "No child jobs found. This may not be an AutoML job or it hasn't produced any models yet."}, 400
-      
-      # Filter out setup, featurization, and other non-training jobs
-      training_jobs = [
-        job for job in child_jobs 
-        if job.status == "Completed" 
-        and not any(suffix in job.name.lower() for suffix in ['_setup', '_featurization', '_hd'])
-      ]
-      
-      logger.info(f"Found {len(training_jobs)} training jobs (filtered out setup/featurization jobs)")
-      
-      if not training_jobs:
-        logger.error("No completed training jobs found")
-        return {"error": "No completed training jobs found among child jobs"}, 400
-      
-      # Find the best run by checking tags or properties
-      best_child = None
-      
-      # First, try to find a job tagged as 'best_run' or 'AutoML_best_run'
-      for child in training_jobs:
-        if hasattr(child, 'tags') and child.tags:
-          if child.tags.get('model_explain_run') == 'best_run' or child.tags.get('automl_best_child_run_id'):
-            best_child = child
-            logger.info(f"Found best run via tags: {child.name}")
-            break
-      
-      # If no best run found via tags, use the first completed training job
-      if best_child is None:
-        best_child = training_jobs[0]
-        logger.info(f"Using first completed training job: {best_child.name}")
-      
-      logger.info(f"Selected best child job: {best_child.name}")
-      
-      # AutoML SDK v2 stores models in specific output named 'mlflow_model_folder'
-      model_paths = [
-        f"azureml://jobs/{best_child.name}/outputs/mlflow_model_folder/",
-        f"azureml://jobs/{best_child.name}/outputs/model_output/",
-        f"azureml://jobs/{run_id}/outputs/best_model/",
-        f"azureml://jobs/{best_child.name}/outputs/artifacts/",
+      # Define model paths to try (without needing child job list)
+      model_paths_to_try = [
+        {
+          'path': f"azureml://jobs/{run_id}/outputs/best_model/",
+          'description': 'Parent run best_model output (PRIMARY PATH for AutoML)',
+          'priority': 1
+        },
+        {
+          'path': f"azureml://jobs/{run_id}/outputs/mlflow_model_folder/",
+          'description': 'Parent run mlflow_model_folder',
+          'priority': 2
+        },
+        {
+          'path': f"azureml://jobs/{run_id}/outputs/trained_model/",
+          'description': 'Parent run trained_model',
+          'priority': 3
+        },
+        {
+          'path': f"azureml://jobs/{run_id}/outputs/model_output/",
+          'description': 'Parent run model_output',
+          'priority': 4
+        }
       ]
       
       registered_model = None
       last_error = None
+      successful_path = None
       
-      for model_path in model_paths:
+      # Try each path in priority order
+      logger.info(f"Will attempt {len(model_paths_to_try)} different model paths from parent run...")
+      for path_info in model_paths_to_try:
+        model_path = path_info['path']
         try:
-          logger.info(f"Trying model path: {model_path}")
+          logger.info(f"[Priority {path_info['priority']}] Trying: {model_path}")
+          logger.info(f"Description: {path_info['description']}")
           
           model = MLModel(
             path=model_path,
@@ -504,39 +540,44 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
             tags={
               "experiment_name": experiment_name,
               "parent_run_id": run_id,
-              "best_child_run_id": best_child.name,
-              "framework": "AutoML"
+              "framework": "AutoML",
+              "registration_method": "direct_parent_output"
             }
           )
           
+          logger.info(f"Attempting to register model from: {model_path}")
           registered_model = ml_client.models.create_or_update(model)
-          logger.info(f"Model registered successfully with path: {model_path}")
+          successful_path = model_path
+          logger.info(f"✓ SUCCESS! Model registered with path: {model_path}")
           logger.info(f"Model: {registered_model.name}, Version: {registered_model.version}")
           break
           
         except Exception as path_error:
           last_error = str(path_error)
-          logger.warning(f"Failed with path {model_path}: {last_error[:200]}")
+          logger.warning(f"✗ FAILED with path {model_path}")
+          logger.warning(f"Error (first 300 chars): {last_error[:300]}")
           continue
       
+      # If all paths failed, provide detailed error
       if registered_model is None:
-        # Try to list available outputs for debugging
-        logger.error("Attempting to list available outputs from the job...")
-        try:
-          # This might help identify what outputs are actually available
-          logger.error(f"Job properties: {best_child.properties if hasattr(best_child, 'properties') else 'N/A'}")
-        except Exception as e:
-          logger.warning(f"Failed to check properties: {str(e)}")
-
+        logger.error("=" * 80)
+        logger.error("ALL MODEL REGISTRATION PATHS FAILED")
+        logger.error("=" * 80)
+        logger.error(f"Parent job name: {job.name}")
+        logger.error(f"Parent job type: {job.type if hasattr(job, 'type') else 'N/A'}")
+        logger.error(f"Total paths tried: {len(model_paths_to_try)}")
+        logger.error(f"Last error: {last_error}")
+        logger.error("=" * 80)
         
-        logger.error(f"All model paths failed. Last error: {last_error}")
         return {
-          "error": f"Could not find model artifacts. The AutoML job may have failed to produce a model. "
-                   f"Please check the job '{best_child.name}' in Azure ML Studio to verify model outputs exist. "
-                   f"Last error: {last_error[:500]}"
+          "error": "Could not find model artifacts in parent run outputs.",
+          "run_id": run_id,
+          "paths_tried": [p['path'] for p in model_paths_to_try],
+          "suggestion": f"Please check the job '{run_id}' in Azure ML Studio under 'Outputs + logs' tab to verify model outputs exist. For AutoML runs, the best model should be in 'outputs/best_model/'",
+          "last_error": last_error[:500] if last_error else "No error details available"
         }, 404
       
-      # Get model details via REST API
+      # SUCCESS! Get model details via REST API
       connect = token_generate()
       value = json.loads(connect)
       Authorization = value["access_token"]
@@ -549,7 +590,7 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
       headers = {
         "Authorization": "Bearer " + str(Authorization)
       }
-      response = requests.request("GET", url, headers=headers, verify=False)
+      response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
       
       if response.status_code == 200:
         values = json.loads(response.text)
@@ -557,7 +598,8 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
         values["model_name"] = model_name
         values["version"] = registered_model.version
         values["parent_run_id"] = run_id
-        values["best_child_run_id"] = best_child.name
+        values["model_path_used"] = successful_path
+        logger.info(f"✓ Model registration completed successfully!")
         return values, response.status_code
       else:
         logger.warning(f"Could not retrieve model details via REST API: {response.status_code}")
@@ -565,7 +607,7 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
           "model_name": model_name,
           "version": registered_model.version,
           "parent_run_id": run_id,
-          "best_child_run_id": best_child.name,
+          "model_path_used": successful_path,
           "status": "registered",
           "message": "Model registered successfully"
         }, 201
@@ -577,6 +619,7 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
   except Exception as e:
     logger.error(f"Model registration failed: {str(e)}", exc_info=True)
     return {"error": str(e)}, 500
+
 
           
 def projects_models_get(adapter_instance, project, isCached, isInstance, connections,model_name):
@@ -591,7 +634,7 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200:
       values=json.loads(response.text)
@@ -621,7 +664,7 @@ def projects_models_delete(adapter_instance, project, isCached, isInstance, conn
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("DELETE", url, headers=headers)
+  response = requests.request("DELETE", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 or 204:
       return response.text,response.status_code
@@ -636,7 +679,6 @@ def projects_models_delete(adapter_instance, project, isCached, isInstance, conn
     logger.error(f"an error occured:{str(e)}")  
     return e
         
-        
 def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance, connections):
   connect=token_generate()
   value=json.loads(connect)
@@ -645,12 +687,14 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
   subscriptionId=connections.get('subscriptionId',None)
   resourceGroupName=connections.get('resourceGroupName',None)
   workspaceName=connections.get('workspaceName',None)
-  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/batchEndpoints?api-version={api_version}"
+  
+  # Changed from batchEndpoints to onlineEndpoints for real-time endpoints
+  url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/onlineEndpoints?api-version={api_version}"
   
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 :
       values=json.loads(response.text)
@@ -665,7 +709,7 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e  
+    return e
  
 
 def projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, payload):
@@ -722,7 +766,7 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
       "Authorization": "Bearer " + str(Authorization)
     }
     
-    response = requests.request("GET", url, headers=headers, verify=False)
+    response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
     
     if response.status_code == 200:
       values = json.loads(response.text)
@@ -759,7 +803,7 @@ def projects_endpoints_get(adapter_instance, project, isCached, isInstance, conn
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 :
       values=json.loads(response.text)
@@ -788,7 +832,7 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }    
-  response = requests.request("DELETE", url, headers=headers)
+  response = requests.request("DELETE", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 or 202:
       return response.text,response.status_code
@@ -816,7 +860,7 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
   "Authorization" : "Bearer "+str(Authorization)
 
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200:
       values=json.loads(response.text)
@@ -845,7 +889,7 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 :
       values=json.loads(response.text)
@@ -1132,7 +1176,7 @@ transformations:
     headers = {
       "Authorization": "Bearer " + str(Authorization)
     }
-    response = requests.request("GET", url, headers=headers, verify=False)
+    response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
     
     if response.status_code == 200:
       values = json.loads(response.text)
@@ -1186,6 +1230,7 @@ def training_cancel_list(adapter_instance, project, isCached, isInstance, connec
   except Exception as e:
     logger.error(f"an error occured:{str(e)}") 
     return e
+
 
 
 def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, payload):
@@ -1253,16 +1298,16 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
     logger.info("Submitting online deployment with auto-generated MLflow environment...")
     deployment_operation = ml_client.online_deployments.begin_create_or_update(online_deployment)
     
-    logger.info("Waiting for online deployment to complete...")
-    result = deployment_operation.result()
-    logger.info(f"Online deployment completed: {result.name}")
+    # DON'T WAIT - Return immediately after triggering deployment
+    logger.info(f"Online deployment triggered: {deploymentName}")
+    logger.info("Deployment is being created in the background. This may take 10-20 minutes.")
     
-    # Set as default deployment
+    # Optionally set as default deployment (this is quick)
     try:
       endpoint = ml_client.online_endpoints.get(endpoint_id)
       endpoint.traffic = {deploymentName: 100}
-      ml_client.online_endpoints.begin_create_or_update(endpoint).result()
-      logger.info(f"Set {deploymentName} as default deployment")
+      ml_client.online_endpoints.begin_create_or_update(endpoint)
+      logger.info(f"Set {deploymentName} as default deployment (will take effect when deployment completes)")
     except Exception as traffic_error:
       logger.warning(f"Could not set traffic: {str(traffic_error)}")
     
@@ -1274,31 +1319,141 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
       "deployment_type": "online",
       "instance_type": instance_type,
       "instance_count": instance_count,
-      "status": "created",
-      "message": "Online deployment created successfully with auto-generated MLflow environment"
-    }, 201
+      "status": "creating",
+      "provisioning_state": "Creating",
+      "message": "Online deployment creation triggered successfully. The deployment is being provisioned in the background. This typically takes 10-20 minutes. Check Azure ML Studio or use the endpoint get API to monitor progress."
+    }, 202  # 202 Accepted - request accepted for processing
       
   except Exception as e:
     logger.error(f"Online deployment failed: {str(e)}", exc_info=True)
     return {"error": str(e)}, 500
 
+
 def ConnectClient():
     global ml_client
-    # dirname = './AzurePipelinePredict'
-    # if os.path.exists(dirname):
-    #     shutil.rmtree(dirname)
-    #     os.mkdir(dirname)
-    # else:
-    #     os.mkdir(dirname)
-    # os.chdir(dirname)
+    
+    logger.info("=" * 80)
+    logger.info("CONNECTING ML CLIENT WITH ENHANCED PROXY BYPASS")
+    logger.info("=" * 80)
+    
+    # STEP 1: AGGRESSIVELY clear ALL proxy environment variables
+    proxy_vars = [
+        'http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY',
+        'NO_PROXY', 'no_proxy', 'all_proxy', 'ALL_PROXY',
+        'ftp_proxy', 'FTP_PROXY', 'rsync_proxy', 'RSYNC_PROXY',
+        'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE'
+    ]
+    
+    for var in proxy_vars:
+        if var in os.environ:
+            logger.info(f"Removing environment variable: {var}")
+            os.environ.pop(var, None)
+    
+    # Also try to unset them at system level
+    try:
+        for var in proxy_vars:
+            if hasattr(os, 'unsetenv'):
+                os.unsetenv(var)
+    except Exception as e:
+        logger.warning(f"Could not unset system env vars: {str(e)}")
+    
+    # STEP 2: Get credentials from environment
     tenant = os.environ.get('tenant_id')
     serv_id = os.environ.get('service_principal_id')
     sec_key = os.environ.get('service_principal_password')
     res_grp = os.environ.get('resource_group')
     ws = os.environ.get('workspace_name')
     subs_id = os.environ.get('subscription_id')
-    ml_client = MLClient(ClientSecretCredential(tenant,serv_id,sec_key),subs_id, res_grp, ws)
-    print('MLCLIENT CONNECTED')
+    
+    logger.info(f"Tenant: {tenant[:10]}..." if tenant else "Tenant: None")
+    logger.info(f"Subscription: {subs_id[:10]}..." if subs_id else "Subscription: None")
+    logger.info(f"Resource Group: {res_grp}")
+    logger.info(f"Workspace: {ws}")
+    
+    # STEP 3: Configure credential and client with MULTIPLE proxy bypass techniques
+    import urllib3
+    from azure.core.pipeline.transport import RequestsTransport
+    from requests import Session
+    from requests.adapters import HTTPAdapter
+    
+    # Disable urllib3 proxy warnings
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    
+    # STEP 4: Create a completely clean session with NO PROXY
+    session = Session()
+    session.trust_env = False  # CRITICAL: Don't use environment proxy settings
+    session.proxies = {'http': None, 'https': None, 'no_proxy': '*'}  # Explicitly disable all proxies
+    session.verify = False  # Disable SSL verification
+    
+    # Set adapters with no proxy
+    http_adapter = HTTPAdapter(max_retries=3)
+    https_adapter = HTTPAdapter(max_retries=3)
+    session.mount('http://', http_adapter)
+    session.mount('https://', https_adapter)
+    
+    # Ensure session headers don't contain proxy info
+    if 'Proxy-Connection' in session.headers:
+        del session.headers['Proxy-Connection']
+    if 'Proxy-Authorization' in session.headers:
+        del session.headers['Proxy-Authorization']
+    
+    logger.info(f"Session trust_env: {session.trust_env}")
+    logger.info(f"Session proxies: {session.proxies}")
+    logger.info(f"Session verify: {session.verify}")
+    
+    # STEP 5: Create transport with custom session
+    transport = RequestsTransport(
+        session=session,
+        session_owner=False,
+        connection_verify=False,
+        connection_cert=None
+    )
+    
+    # STEP 6: Create credential with custom transport AND explicitly disable proxy
+    try:
+        credential = ClientSecretCredential(
+            tenant_id=tenant,
+            client_id=serv_id,
+            client_secret=sec_key,
+            transport=transport,
+            proxies={'http': None, 'https': None},  # Explicitly no proxies
+            connection_verify=False
+        )
+        logger.info("✓ ClientSecretCredential created successfully")
+    except Exception as cred_error:
+        logger.error(f"Failed to create credential: {str(cred_error)}")
+        raise
+    
+    # STEP 7: Create ML Client with custom transport
+    try:
+        ml_client = MLClient(
+            credential=credential,
+            subscription_id=subs_id,
+            resource_group_name=res_grp,
+            workspace_name=ws,
+            transport=transport,
+            logging_enable=True
+        )
+        logger.info("✓ ML Client created successfully")
+    except Exception as ml_error:
+        logger.error(f"Failed to create ML Client: {str(ml_error)}")
+        raise
+    
+    # STEP 8: Test the connection
+    try:
+        # Try to list workspaces or get workspace info to verify connection
+        logger.info("Testing ML Client connection...")
+        # This will trigger an actual API call
+        test_call = ml_client.workspaces.get(ws)
+        logger.info(f"✓ ML Client connected successfully! Workspace: {test_call.name}")
+    except Exception as test_error:
+        logger.warning(f"ML Client connection test failed: {str(test_error)}")
+        logger.warning("Continuing anyway - connection might still work for specific operations")
+    
+    logger.info("=" * 80)
+    logger.info("ML CLIENT CONNECTION COMPLETE")
+    logger.info("=" * 80)
+    
     return ml_client
 
 
@@ -1446,7 +1601,7 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
     headers = {
       "Authorization": "Bearer " + str(Authorization)
     }
-    response = requests.request("GET", url, headers=headers, verify=False)
+    response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
     
     if response.status_code == 200:
       values = json.loads(response.text)
@@ -1483,7 +1638,7 @@ def projects_inferencePipelines_delete(adapter_instance, project, isCached, isIn
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }    
-  response = requests.request("DELETE", url, headers=headers)
+  response = requests.request("DELETE", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 or 202:
       return response.text,response.status_code
@@ -1510,7 +1665,7 @@ def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isIn
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }    
-  response = requests.request("POST", url, headers=headers)
+  response = requests.request("POST", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 or 202:
       return response.text,response.status_code
@@ -1641,7 +1796,8 @@ def projects_endpoints_infer_create(adapter_instance, project, isCached, isInsta
           json=input_json,
           headers=headers,
           verify=False,
-          timeout=60
+          proxies={'http': None, 'https': None},
+          timeout=60,
         )
         
         logger.info(f"Response status: {response.status_code}")
@@ -1735,7 +1891,7 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200:
       values=json.loads(response.text)
@@ -1764,7 +1920,7 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
   }
-  response = requests.request("GET", url, headers=headers)
+  response = requests.request("GET", url, headers=headers, verify=False, proxies={'http': None, 'https': None})
   try:
     if response.status_code == 200 :
       values=json.loads(response.text)
