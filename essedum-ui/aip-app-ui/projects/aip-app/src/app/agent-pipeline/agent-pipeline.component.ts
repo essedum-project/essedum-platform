@@ -2439,18 +2439,16 @@ public class ZipController {
 	
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
-	this.socket = io(environmentUrl, {
+		  
+	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
 	  path: '/apps/builder-service/socket.io',
-	  transports: ['websocket', 'polling'], // Allow websocket but prevent WSS upgrade
+	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
 	  forceNew: true,
 	  rejectUnauthorized: false,
-	  withCredentials: true,
+	  withCredentials: true,         // optional; harmless if cookies are set
 	  reconnection: false,
-	  upgrade: false,                // Prevent protocol upgrade to WSS
-	  rememberUpgrade: false,        // Don't remember previous transport upgrades
-	  forceBase64: true,             // Force base64 encoding to stay on HTTP
-	}); 
+	});  
         // Connection successful
         this.socket.on('connect', () => {
           console.log('  Step 4: WebSocket connected! Preparing payload...');
