@@ -103,8 +103,7 @@ public class GitHubOAuthService {
             sessionToUser.put(sessionId, username);
             log.info("Linking session {} to application user: {}", sessionId, username);
         }
-
-        log.info("Client Id URL for session: {} (user: {})", clientId, clientSecret);
+        
         String authUrl = String.format("%s?client_id=%s&redirect_uri=%s&scope=%s&state=%s",
                 oauthConfig.getAuthorizationUri(),
                 clientId,

@@ -79,7 +79,7 @@ public class GitHubController {
     @GetMapping("/branches")
     public ResponseEntity<List<String>> getBranches(
             @RequestHeader(value = "Authorization", required = false) String token,
-            @RequestParam String repo,
+            @RequestParam("repo") String repo,
             HttpSession session) {
         try {
             String cleanToken = getToken(token, session);
