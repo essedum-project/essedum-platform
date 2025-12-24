@@ -194,8 +194,6 @@ async def call_essedum_api(payload: dict, session_info: dict | None = None) -> d
     headers.update({
         "Accept-Language": "en-US,en;q=0.9", 
         "Connection": "keep-alive",
-        "Origin": "https://langflow.az.ad.idemo-ppc.com",  # Production frontend origin
-        "Referer": "https://langflow.az.ad.idemo-ppc.com/flows",  # Production frontend referer
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
@@ -557,8 +555,6 @@ async def call_essedum_update_api(payload: dict, session_info: dict | None = Non
             
     # Add additional headers for production environment (same as create-native-file)
     headers.update({
-        "Origin": "https://langflow.az.ad.idemo-ppc.com",
-        "Referer": "https://langflow.az.ad.idemo-ppc.com/flows",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
@@ -666,8 +662,6 @@ async def call_essedum_create_native_api(
             
     # Add additional headers for production environment  
     headers.update({
-        "Origin": "https://langflow.az.ad.idemo-ppc.com",
-        "Referer": "https://langflow.az.ad.idemo-ppc.com/flows",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",

@@ -15,7 +15,7 @@ export function getAipApiUrl(endpoint: string): string {
   if (useAbsoluteUrls) {
     // For production deployment - use absolute URLs to call across domains
     // langflow.az.ad.idemo-ppc.com -> essedum.az.ad.idemo-ppc.com
-    const baseUrl = backendUrl || 'https://essedum.az.ad.idemo-ppc.com';
+    const baseUrl = backendUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     return `${baseUrl}/api/aip${cleanEndpoint}`;
   } else {

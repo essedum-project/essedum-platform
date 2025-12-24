@@ -344,9 +344,9 @@ const ExportModal = forwardRef(
                       token: access_token_lf,
                     });
 
-                    setSuccessData({ title: "Pipeline exported via Langflow Backend successfully" });
+                    setSuccessData({ title: "Agent flow exported via Langflow Backend successfully" });
                   } else {
-                    setSuccessData({ title: "Pipeline created via Langflow Backend successfully" });
+                    setSuccessData({ title: "Agent flow created via Langflow Backend successfully" });
                   }
                   
                   setOpen(false);
