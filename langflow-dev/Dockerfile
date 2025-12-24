@@ -76,6 +76,15 @@ USER user
 # Langflow runtime settings
 ENV LANGFLOW_HOST=0.0.0.0
 ENV LANGFLOW_PORT=7860
+
+# Essedum Configuration - Can be overridden by Kubernetes deployment
+ENV ESSEDUM_BACKEND_URL=""
+ENV LANGFLOW_FRONTEND_URL=""
+ENV VITE_ESSEDUM_BACKEND_URL=""
+ENV ESSEDUM_BACKEND_SERVICE_URL=""
+ENV ESSEDUM_AUTH_REQUIRED=true
+ENV ESSEDUM_TIMEOUT=30
+
 EXPOSE 7860
 
 # If you don't use Composio bundle, you can disable it to avoid import errors at startup:

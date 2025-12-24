@@ -2,14 +2,34 @@
 
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load .env file
+# By default, load_dotenv() looks for .env file in current directory or parent directories
+load_dotenv()
 
 
 class EssedumSettings:
     """Settings for Essedum API integration."""
     
     def __init__(self):
-        # Essedum API base URL - Update this to your actual Essedum backend URL  
-        self.base_url: str = "https://essedum.az.ad.idemo-ppc.com"  # Java backend is running on port 8087
+        # Essedum API base URL - Read from environment variable (required)
+        base_url = os.getenv("ESSEDUM_BACKEND_URL")
+        if not base_url:
+            raise ValueError(
+                "ESSEDUM_BACKEND_URL environment variable must be set. "
+                "Please check your .env file or set it as an environment variable."
+            )
+        self.base_url: str = base_url.rstrip('/')
+        
+        # Langflow frontend URL - Read from environment variable (required)
+        frontend_url = os.getenv("LANGFLOW_FRONTEND_URL")
+        if not frontend_url:
+            raise ValueError(
+                "LANGFLOW_FRONTEND_URL environment variable must be set. "
+                "Please check your .env file or set it as an environment variable."
+            )
+        self.frontend_url: str = frontend_url.rstrip('/')
         
         # Essedum API endpoints - Updated based on actual API structure
         self.create_pipeline_endpoint: str = "/api/aip/service/v1/streamingServices/add"  # Based on curl example
@@ -39,10 +59,13 @@ class EssedumSettings:
         self.role_name: Optional[str] = os.getenv("ESSEDUM_ROLE_NAME")
 
 
-# Global settings instance
-essedum_settings = EssedumSettings()
+# Global settings instance - lazy loaded
+_essedum_settings = None
 
 
 def get_essedum_settings() -> EssedumSettings:
-    """Get Essedum settings instance."""
-    return essedum_settings
+    """Get Essedum settings instance (lazy loaded)."""
+    global _essedum_settings
+    if _essedum_settings is None:
+        _essedum_settings = EssedumSettings()
+    return _essedum_settings
