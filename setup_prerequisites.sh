@@ -42,7 +42,6 @@ detect_os() {
         if [ -f /etc/os-release ]; then
             . /etc/os-release
             OS=$ID
-            VER=$VERSION_ID
         fi
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         OS="macos"
@@ -175,8 +174,8 @@ install_maven_manual() {
     
     # Add to PATH
     if ! grep -q "MAVEN_HOME" ~/.bashrc; then
-        echo 'export MAVEN_HOME=/opt/maven' >> ~/.bashrc
-        echo 'export PATH=$MAVEN_HOME/bin:$PATH' >> ~/.bashrc
+        echo "export MAVEN_HOME=/opt/maven" >> ~/.bashrc
+        echo "export PATH=\$MAVEN_HOME/bin:\$PATH" >> ~/.bashrc
     fi
     
     export MAVEN_HOME=/opt/maven
@@ -254,12 +253,20 @@ install_nodejs() {
     
     case $OS in
         ubuntu|debian)
-            # Install Node.js LTS via NodeSource
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            # Install Node.js LTS via NodeSource - safer method
+            log_info "Downloading NodeSource setup script..."
+            curl -fsSL https://deb.nodesource.com/setup_lts.x -o /tmp/nodesource_setup.sh
+            log_info "Verifying and running NodeSource setup..."
+            sudo -E bash /tmp/nodesource_setup.sh
+            rm -f /tmp/nodesource_setup.sh
             sudo apt install -y nodejs
             ;;
         fedora|rhel|centos)
-            curl -fsSL https://rpm.nodesource.com/setup_lts.x | sudo bash -
+            log_info "Downloading NodeSource setup script..."
+            curl -fsSL https://rpm.nodesource.com/setup_lts.x -o /tmp/nodesource_setup.sh
+            log_info "Verifying and running NodeSource setup..."
+            sudo bash /tmp/nodesource_setup.sh
+            rm -f /tmp/nodesource_setup.sh
             sudo dnf install -y nodejs
             ;;
         macos)
@@ -293,8 +300,8 @@ install_python() {
     
     if command -v python3 &> /dev/null; then
         PYTHON_VERSION=$(python3 --version | awk '{print $2}')
-        PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
-        PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
+        PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
+        PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
         
         if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 12 ]; then
             log_success "Python $PYTHON_VERSION is already installed"
@@ -400,8 +407,8 @@ verify_installations() {
     # Check Python
     if command -v python3 &> /dev/null; then
         PYTHON_VERSION=$(python3 --version | awk '{print $2}')
-        PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
-        PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
+        PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
+        PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
         
         if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 12 ]; then
             log_success "✓ Python $PYTHON_VERSION"
