@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Logs</title>
+    <link rel="stylesheet" href="{{cssUri}}">
+</head>
+<body>
+    <div class="title-jobs">
+        <span>Total Jobs: <span id="totalJobs">0</span></span>
+        <button class="refresh-btn" onclick="refresh()" title="Refresh">
+            🔄
+        </button>
+    </div>
+    
+    <div id="loadingContainer" class="loading">
+        Loading jobs...
+    </div>
+    
+    <div id="tableContainer" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Job Id</th>
+                    <th>Submitted By</th>
+                    <th>Submitted On</th>
+                    <th>Completed On</th>
+                    <th>Runtime</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                    <th>Output Artifacts</th>
+                </tr>
+            </thead>
+            <tbody id="jobsTableBody">
+            </tbody>
+        </table>
+        
+        <div class="pagination">
+            <button id="firstBtn" onclick="getJobs('First')">First</button>
+            <button id="prevBtn" onclick="getJobs('Prev')">&lt;&lt; Prev</button>
+            <button id="nextBtn" onclick="getJobs('Next')">Next &gt;&gt;</button>
+            <button id="lastBtn" onclick="getJobs('Last')">Last</button>
+        </div>
+    </div>
+    
+    <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
+</body>
+</html>

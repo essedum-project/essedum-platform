@@ -30,7 +30,7 @@
             <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
 
               <!-- Tabs (Show directly on view details) -->
-              <mat-tab-group disableRipple>
+              <mat-tab-group disableRipple (selectedTabChange)="onTabChange($event)">
 
                 <!-- Script Tab - Split View (Always visible) -->
                 <mat-tab label="Script" class="lfx-u-header-xl">
@@ -42,16 +42,39 @@
                         <div class="file-editor">
                           <div class="editor-header">
                             <div class="file-info">
-                              <mat-icon class="file-type-icon">description</mat-icon>
+                              <mat-icon class="file-type-icon">{{ pipelineMode === 'mcp' ? 'code' : 'description' }}</mat-icon>
                               <span class="file-name" [title]="scriptFileName">{{scriptFileName}}</span>
+                              <span *ngIf="isScriptModified" class="modified-indicator" 
+                                title="Configuration has unsaved changes">●</span>
+                            </div>
+                            <div class="editor-actions">
+                              <button mat-icon-button class="action-button save-button"
+                                [class.save-enabled]="isScriptModified" [class.save-disabled]="!isScriptModified"
+                                (click)="saveScriptConfiguration()" [disabled]="!isScriptModified"
+                                matTooltip="Save Configuration" matTooltipPosition="above">
+                                <mat-icon>save</mat-icon>
+                              </button>
                             </div>
                           </div>
                           <div class="code-editor" style="height: 400px; overflow: hidden;">
                             <div class="code-content" style="height: 100%; overflow-y: auto;">
                               <div style="height: max-content">
-                                <app-enl-code-editor id="ele" *ngIf="loadScript" [script]="script" [lang]="lang"
-                                  (scriptChange)="onScriptChange($event)" class="selector-764-48">
-                                </app-enl-code-editor>
+                                <!-- MCP Mode - JSON Editor -->
+                                <div *ngIf="pipelineMode === 'mcp'">
+                                  <textarea class="json-config-editor"
+                                    [ngModel]="getDisplayedJsonConfig()"
+                                    (ngModelChange)="onScriptContentChange($event)"
+                                    placeholder="MCP JSON Configuration..."
+                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                </div>
+                                <!-- Agent Mode - JSON Editor (converted from code editor) -->
+                                <div *ngIf="pipelineMode === 'agent'">
+                                  <textarea class="json-config-editor agent-config-editor"
+                                    [ngModel]="getScriptAsString()"
+                                    (ngModelChange)="onScriptContentChange($event)"
+                                    placeholder="Agent JSON Configuration..."
+                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -62,14 +85,27 @@
                       <div class="console-panel">
                         <div class="generate-agent-container">
                           <div class="generate-header">
-                            <h2>Generate ADK Agent</h2>
-                            <p>Build and package your agent for deployment</p>
+                            <div class="header-content">
+                              <h2>{{ pipelineMode === 'mcp' ? 'MCP Server Implementation' : 'Agent Implementation from Design' }}</h2>
+                              <p *ngIf="hasGeneratedAgent || hasExistingFiles()">Click on Run and Deploy to build the {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} access playground button</p>
+                              <p *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Please select LLM provider or upload files to generate {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} code</p>
+                            </div>
+                            <div class="header-actions">
+                              <button mat-icon-button 
+                                      class="refresh-button" 
+                                      (click)="loadAgentFiles()" 
+                                      matTooltip="Refresh to check for generated agent files" 
+                                      matTooltipPosition="above">
+                                <mat-icon>refresh</mat-icon>
+                              </button>
+                            </div>
                           </div>
 
                           <!-- LLM Selection and Generate Controls in same row -->
                           <div class="generate-controls-row">
-                            <!-- LLM Selection Dropdown -->
+                            <!-- LLM Selection Dropdown - Only show when no files exist -->
                             <div class="llm-selection-container"
+                              *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
                               [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
                               <div class="llm-selection-row">
                                 <label for="llm-select">Select LLM Provider</label>
@@ -83,26 +119,46 @@
                               </div>
                             </div>
 
-                            <!-- Action Buttons Container - Outside disabled LLM container -->
-                            <div class="action-buttons-container">
-                              <!-- Run and Deploy Button -->
+                            <!-- Action Buttons Container -->
+                            <div class="action-buttons-container" 
+                                 [class.full-width]="hasGeneratedAgent || hasExistingFiles()">
+                              
+                              <!-- Upload Button - Only show when no files exist yet -->
                               <button mat-raised-button 
-                                      class="run-deploy-button"
-                                      (click)="runAndDeploy()" 
-                                      [disabled]="!canRunAndDeploy()"
-                                      matTooltip="Run and Deploy Agent" 
+                                      class="upload-agent-button"
+                                      *ngIf="shouldShowUploadButton()"
+                                      (click)="openUploadDialog()" 
+                                      [disabled]="isUploadingFiles"
+                                      [matTooltip]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'" 
                                       matTooltipPosition="above">
-                                <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+                                <mat-icon>{{ isUploadingFiles ? 'hourglass_empty' : 'upload' }}</mat-icon>
+                                <span class="button-label">{{ isUploadingFiles ? 'Uploading...' : (pipelineMode === 'mcp' ? 'Upload MCP Files' : 'Upload Agent Files') }}</span>
                               </button>
                               
-                              <!-- Playground Button -->
+                              <!-- Run and Deploy Button - Only show when files exist -->
+                              <button mat-raised-button 
+                                      class="run-deploy-button"
+                                      *ngIf="shouldShowRunPlaygroundButtons()"
+                                      [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
+                                      (click)="runAndDeploy()" 
+                                      [disabled]="!canRunAndDeploy()"
+                                      [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : 'Run and Deploy Agent'" 
+                                      matTooltipPosition="above">
+                                <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">{{ isRunningAndDeploying ? 'Running & Deploying' : 'Run & Deploy' }}</span>
+                              </button>
+                              
+                              <!-- Playground Button - Only show when files exist -->
                               <button mat-raised-button 
                                 class="playground-button"
+                                *ngIf="shouldShowRunPlaygroundButtons()"
+                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
                                 [class.playground-disabled]="!canOpenPlayground()"
                                 [disabled]="!canOpenPlayground()"
                                 (click)="openPlayground()"
                                 [title]="getPlaygroundTooltipMessage()">
                                 <mat-icon>smart_toy</mat-icon>
+                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">Open Playground</span>
                               </button>
                             </div>
                           </div>
@@ -116,7 +172,7 @@
                    'status-error': deploymentStatus === 'error',
                    'status-idle': deploymentStatus === 'idle'
                  }">{{ deploymentStatusMessage }}</div>
-          </div>                          <!-- GitHub Copilot Prompt Template (only show initially) -->
+          </div>                          <!-- GitHub Copilot Instructions -->
                           <div class="prompt-template-container"
                             *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
                             <div class="prompt-instructions">
@@ -124,10 +180,12 @@
                               <ol>
                                 <li><strong>Install Visual Studio Code:</strong> Download and install VS Code</li>
                                 <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum" extension from the VS Code marketplace</li>
-                                <li><strong>Generate Agent:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent files</li>
+                                <li *ngIf="pipelineMode === 'agent'"><strong>Generate Agent:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent files</li>
+                                <li *ngIf="pipelineMode === 'mcp'"><strong>Upload MCP Files:</strong> Go to the Essedum Plugin and upload your MCP files from there</li>
                               </ol>
                             </div>
-                            <div class="prompt-template-header">
+                            <!-- Show prompt template only for agent mode -->
+                            <div *ngIf="pipelineMode === 'agent'" class="prompt-template-header">
                               <mat-icon>description</mat-icon>
                               <span>Copilot Prompt Template</span>
                               <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
@@ -135,8 +193,16 @@
                                 <mat-icon>content_copy</mat-icon>
                               </button>
                             </div>
-                            <div class="prompt-template-content">
+                            <div *ngIf="pipelineMode === 'agent'" class="prompt-template-content">
                               <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
+                            </div>
+                            <!-- MCP Upload Instructions -->
+                            <div *ngIf="pipelineMode === 'mcp'" class="mcp-upload-instructions">
+                              <div class="instruction-box">
+                                <mat-icon>cloud_upload</mat-icon>
+                                <h3>Upload MCP Files</h3>
+                                <p>Use the Essedum Plugin to upload your MCP server files and they will automatically appear here for deployment.</p>
+                              </div>
                             </div>
                           </div>
 
@@ -164,12 +230,16 @@
                                 <span class="console-text console-loading">Loading agent data...</span>
                               </div>
                             </div>
-                          </div> <!-- Auto-loading Information Message -->
-                          <div class="llm-selection-info" 
-                            *ngIf="!hasGeneratedAgent && !hasExistingFiles() && selectedLLM !== 'github-copilot'">
-                            <div class="selection-message">
-                              <mat-icon>info</mat-icon>
-                              <p>Agent data will be automatically loaded when available</p>
+                          </div> <!-- End console-container -->
+                          
+
+                          
+                          <!-- No Files Found Message (when no LLM is selected) -->
+                          <div class="no-files-info" 
+                            *ngIf="!hasGeneratedAgent && !hasExistingFiles() && !selectedLLM">
+                            <div class="no-files-message">
+                              <mat-icon>info_outline</mat-icon>
+                              <p>{{ pipelineMode === 'mcp' ? 'MCP server code is not yet generated. Please select an LLM provider or upload files to generate MCP server files, then click refresh to load them.' : 'Agent code is not yet generated. Please select an LLM provider or upload files to generate agent files, then click refresh to load them.' }}</p>
                             </div>
                           </div>
                         </div>
@@ -179,7 +249,7 @@
                 </mat-tab>
 
                 <!-- Essedum Codespace Tab (Only show after agent generation) -->
-                <mat-tab label="Essedum Codespace" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
+                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
                   <div class="tab-content mb-5">
 
                     <!-- File Structure -->
@@ -390,7 +460,7 @@
     <div class="playground-header">
       <div class="playground-title">
         <mat-icon>smart_toy</mat-icon>
-        <h2>{{ pipelineAlias || 'Agent Playground' }}</h2>
+        <h2>{{ pipelineAlias || (pipelineMode === 'mcp' ? 'MCP Playground' : 'Agent Playground') }}</h2>
       </div>
       <button mat-icon-button (click)="closePlayground()" class="close-button">
         <mat-icon>close</mat-icon>
@@ -588,6 +658,78 @@
           OK
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script Unsaved Changes Dialog -->
+<div class="unsaved-changes-overlay" *ngIf="showScriptUnsavedDialog" (click)="cancelScriptUnsavedDialog()">
+  <div class="unsaved-changes-popup" (click)="$event.stopPropagation()">
+    <div class="unsaved-changes-header">
+      <h3>Unsaved Configuration Changes</h3>
+      <button mat-icon-button (click)="cancelScriptUnsavedDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="unsaved-changes-content">
+      <p>You have unsaved changes in your {{pipelineMode === 'mcp' ? 'MCP' : 'Agent'}} configuration.</p>
+      <p>Do you want to save your changes before proceeding?</p>
+    </div>
+
+    <div class="unsaved-changes-footer">
+      <button mat-stroked-button (click)="discardScriptAndProceed()" class="cancel-btn">
+        Discard Changes
+      </button>
+      <button mat-raised-button color="primary" (click)="saveScriptAndProceed()" class="save-btn">
+        <mat-icon>save</mat-icon>
+        Save & Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Agent Files Dialog -->
+<div class="upload-overlay" *ngIf="showUploadDialog" (click)="closeUploadDialog()">
+  <div class="upload-dialog" (click)="$event.stopPropagation()">
+    <div class="upload-dialog-header">
+      <h3>{{ pipelineMode === 'mcp' ? 'Upload MCP Server Files' : 'Upload Agent Files' }}</h3>
+      <button mat-icon-button (click)="closeUploadDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="upload-dialog-content">
+      <p>Select a ZIP file containing your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} files to upload:</p>
+      
+      <div class="file-input-container">
+        <input type="file" 
+               #fileInput 
+               accept=".zip" 
+               (change)="onFileSelected($event)"
+               class="file-input"
+               id="zipFileInput">
+        <label for="zipFileInput" class="file-input-label">
+          <mat-icon>attachment</mat-icon>
+          <span>{{ selectedZipFile ? selectedZipFile.name : 'Choose ZIP file...' }}</span>
+        </label>
+      </div>
+    
+    </div>
+
+    <div class="upload-dialog-footer">
+      <button mat-stroked-button (click)="closeUploadDialog()" class="cancel-btn" [disabled]="isUploadingFiles">
+        Cancel
+      </button>
+      <button mat-raised-button 
+              color="primary" 
+              (click)="uploadAgentFiles()" 
+              class="upload-btn"
+              [disabled]="!selectedZipFile || isUploadingFiles">
+        <mat-icon *ngIf="isUploadingFiles">hourglass_empty</mat-icon>
+        <mat-icon *ngIf="!isUploadingFiles">upload</mat-icon>
+        {{ isUploadingFiles ? 'Uploading...' : 'Upload' }}
+      </button>
     </div>
   </div>
 </div>

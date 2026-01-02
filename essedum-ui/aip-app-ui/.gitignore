@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment files with production URLs (security - DO NOT COMMIT)
+/projects/aip-app/src/environments/environment.prod.ts

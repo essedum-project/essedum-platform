@@ -1,0 +1,730 @@
+/**
+ * Pipeline Agent Cards Styles
+ * 
+ * Dedicated stylesheet for Pipeline Agent interface matching the Pipeline cards design.
+ * 
+ * @fileoverview Styles for pipeline agent cards component
+ * @author Essedum AI Platform Team
+ * @version 1.0.21
+ */
+
+/* ================================
+   CSS CUSTOM PROPERTIES
+   ================================ */
+
+:root {
+    /* Layout and spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-xxl: 24px;
+    --spacing-xxxl: 32px;
+
+    /* Border radius */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+    --radius-xl: 16px;
+
+    /* Typography */
+    --font-size-xs: 10px;
+    --font-size-sm: 11px;
+    --font-size-md: 13px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-xxl: 20px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.4;
+    --line-height-relaxed: 1.6;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* Component specific */
+    --card-min-height: 140px;
+    --button-height: 28px;
+    --input-height: 28px;
+    --pagination-button-size: 24px;
+    --avatar-size: 48px;
+}
+
+/* ================================
+   BASE STYLES
+   ================================ */
+
+body {
+    font-family: var(--vscode-font-family), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: var(--spacing-lg);
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+    margin: 0;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    overflow: hidden;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+/* ================================
+   CONTAINER
+   ================================ */
+
+.container {
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* ================================
+   HEADER
+   ================================ */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.details-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--vscode-foreground);
+    margin: 0;
+}
+
+.header-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-icon {
+    cursor: pointer;
+    font-size: var(--font-size-xxl);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+    color: var(--vscode-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--spacing-xl);
+    min-height: var(--spacing-xl);
+}
+
+.refresh-icon:hover {
+    background-color: var(--vscode-list-hoverBackground);
+    transform: rotate(180deg);
+}
+
+.refresh-icon:active {
+    transform: rotate(180deg) scale(0.95);
+}
+
+/* ================================
+   SEARCH CONTAINER
+   ================================ */
+
+.search-container {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-md);
+    font-family: var(--vscode-font-family);
+    height: var(--input-height);
+    outline: none;
+    transition: border-color var(--transition-normal);
+}
+
+.search-input:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+}
+
+.search-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+/* ================================
+   BUTTON STYLES
+   ================================ */
+
+.btn {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: 1px solid transparent;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+    font-family: var(--vscode-font-family);
+    transition: all var(--transition-normal);
+    height: var(--button-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn:hover:not(:disabled) {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-1px);
+}
+
+.btn:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.btn-secondary {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border-color: var(--vscode-button-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.btn-icon {
+    background-color: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-foreground);
+    transition: background-color var(--transition-normal);
+}
+
+.btn-icon:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+/* ================================
+   LOADING STATES
+   ================================ */
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xxxl) var(--spacing-lg);
+    color: var(--vscode-descriptionForeground);
+    font-size: var(--font-size-md);
+    gap: var(--spacing-lg);
+}
+
+.spinner {
+    width: var(--spacing-xxxl);
+    height: var(--spacing-xxxl);
+    border: 3px solid var(--vscode-progressBar-background);
+    border-top-color: var(--vscode-button-background);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ================================
+   CARDS CONTAINER
+   ================================ */
+
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: var(--spacing-xs);
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+/* ================================
+   PIPELINE CARD STYLES
+   ================================ */
+
+.pipeline-card {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    min-height: var(--card-min-height);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-top: 12px;
+}
+
+.pipeline-card:hover {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.pipeline-card:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: 1px;
+}
+
+/* Pipeline Card Header */
+.pipeline-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.pipeline-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--vscode-editor-foreground);
+    line-height: 1.6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    margin: 0;
+}
+
+.pipeline-type-badge {
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+/* Pipeline Card Body */
+.pipeline-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.metadata-value {
+    color: var(--vscode-descriptionForeground);
+    font-size: var(--font-size-sm);
+}
+
+/* Pipeline Card Actions */
+.pipeline-card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: 8px;
+}
+
+.pipeline-action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    height: var(--button-height);
+}
+
+.pipeline-action-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-1px);
+}
+
+.pipeline-action-btn:active {
+    transform: translateY(0);
+}
+
+.action-icon {
+    font-size: var(--font-size-sm);
+    line-height: 1;
+}
+
+.action-text {
+    font-size: var(--font-size-sm);
+}
+
+/* Avatar Section */
+.pipeline-avatar-section {
+    flex-shrink: 0;
+}
+
+.pipeline-avatar {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.pipeline-avatar:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: scale(1.05);
+}
+
+/* ================================
+   STATUS BADGES
+   ================================ */
+
+.status-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+}
+
+.status-active {
+    background-color: var(--vscode-testing-iconPassed);
+    color: var(--vscode-editor-background);
+}
+
+.status-inactive {
+    background-color: var(--vscode-errorForeground);
+    color: var(--vscode-editor-background);
+}
+
+/* ================================
+   PAGINATION
+   ================================ */
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    border-top: 1px solid var(--vscode-panel-border);
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.pagination-info {
+    font-size: var(--font-size-sm);
+    color: var(--vscode-descriptionForeground);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pagination-pages {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.btn-pagination {
+    min-width: var(--pagination-button-size);
+    width: var(--pagination-button-size);
+    height: var(--pagination-button-size);
+    padding: 0;
+    font-size: var(--font-size-sm);
+    background-color: transparent;
+    color: var(--vscode-foreground);
+    border: 1px solid var(--vscode-panel-border);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
+}
+
+.btn-pagination.active {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border-color: var(--vscode-button-background);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-ellipsis {
+    padding: var(--spacing-xs);
+    color: var(--vscode-descriptionForeground);
+    font-size: var(--font-size-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xxxl) var(--spacing-lg);
+    color: var(--vscode-descriptionForeground);
+    font-size: var(--font-size-md);
+    gap: var(--spacing-md);
+    text-align: center;
+}
+
+.empty-state p {
+    margin: 0;
+    max-width: 400px;
+}
+
+/* ================================
+   DETAIL VIEW
+   ================================ */
+
+.details-view {
+    display: none;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.details-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.back-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.details-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-xs);
+}
+
+.details-info {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.info-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.info-section h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--vscode-foreground);
+}
+
+.pipeline-details-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.pipeline-details-info p {
+    margin: 0;
+    font-size: var(--font-size-md);
+    color: var(--vscode-foreground);
+    line-height: var(--line-height-relaxed);
+}
+
+.pipeline-details-info strong {
+    color: var(--vscode-descriptionForeground);
+    font-weight: var(--font-weight-medium);
+    margin-right: var(--spacing-sm);
+}
+
+/* ================================
+   SCROLLBAR STYLES
+   ================================ */
+
+.cards-container::-webkit-scrollbar,
+.details-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.cards-container::-webkit-scrollbar-track,
+.details-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cards-container::-webkit-scrollbar-thumb,
+.details-content::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover,
+.details-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.cards-container::-webkit-scrollbar-thumb:active,
+.details-content::-webkit-scrollbar-thumb:active {
+    background-color: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+@media (max-width: 768px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: min-content;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+}
+
+/* Action button grid layout */
+.action-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Button variants */
+.btn-primary-bg {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    min-height: 32px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-secondary-bg {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    min-height: 32px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+/* Action status message */
+.action-status {
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+    margin-top: 10px;
+}

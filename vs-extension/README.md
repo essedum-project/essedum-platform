@@ -15,7 +15,7 @@ This extension integrates VS Code with the Essedum AI Platform, providing seamle
 
 - Visual Studio Code version 1.103.0 or higher
 - Active Essedum AI Platform account
-- Network access to the Essedum AI Platform server (https://aiplatform.az.ad.idemo-ppc.com:8443)
+- Network access to the Essedum AI Platform server
 - Available port 8085 (configurable) for OAuth callback server
 
 ## Installation

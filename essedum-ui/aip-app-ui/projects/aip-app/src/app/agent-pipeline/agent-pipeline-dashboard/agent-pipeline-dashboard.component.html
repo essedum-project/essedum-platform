@@ -20,7 +20,7 @@
     </app-aip-filter>
 
 
-    <div class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll" aria-label="Agent Pipeline cards">
+    <div class="aip-card-container lfx-u-pad-b-40" id="containerDivForScroll" aria-label="Agent Pipelines cards">
       <div *ngFor="let agent of cards; trackBy: trackByCardId">
         <app-aip-card 
           [servicev1]="'agent'" 
@@ -40,16 +40,35 @@
 
 <div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
 
-  <!-- Header Section -->
-  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="false"
-    (search)="onSearch($event)" (refresh)="onRefresh()" >
+  <!-- Header Section - Keep Original Layout -->
+  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" 
+    [showAddButton]="true" 
+    (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
   </app-aip-header>
 
+  <!-- Pipeline Mode Toggle - Separate Section -->
+  <div class="pipeline-toggle-section">
+    <div class="pipeline-mode-toggle">
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'agent'"
+        (click)="switchToPipelineMode('agent')"
+        type="button">
+        Agent Pipelines
+      </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'mcp'"
+        (click)="switchToPipelineMode('mcp')"
+        type="button">
+        MCP Pipelines
+      </button>
+    </div>
+  </div>
+
   <!-- Filter Section -->
-  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedAgentPipelineTypeList]="{ 
-                        selectedPipelineAgentType: selectedPipelineAgentType
-                      }" (tagSelected)="onTagSelected($event)"
-    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+  <!-- <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedAgentPipelineTypeList]="getFilterConfig()" (tagSelected)="onTagSelected($event)"
+    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter> -->
 
 
   <!-- Loading State -->

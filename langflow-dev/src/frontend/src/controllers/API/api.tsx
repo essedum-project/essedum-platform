@@ -53,8 +53,9 @@ function ApiInterceptor() {
         // In production, use: localStorage.getItem('baseParentToken')
 
         // Check if this is an AIP API call (relative or absolute URL)
+        const essedumBackendURL = import.meta.env.VITE_ESSEDUM_BACKEND_URL;
         const isAipApi = url.includes('/api/aip') || 
-                        url.includes('essedum.az.ad.idemo-ppc.com/api/aip');
+                        url.includes(`${essedumBackendURL}/api/aip`);
 
         if (!isExternalURL(url) || isAipApi) {
           // Check if it's an AIP API (streaming services, file operations, etc.)
@@ -208,8 +209,9 @@ function ApiInterceptor() {
         const parentToken = localStorage.getItem("baseParentToken");
 
         // Check if this is an AIP API call (relative or absolute URL)
+        const essedumBackendURL = import.meta.env.VITE_ESSEDUM_BACKEND_URL;
         const isAipApi = config?.url?.includes('/api/aip') || 
-                        config?.url?.includes('essedum.az.ad.idemo-ppc.com/api/aip');
+                        config?.url?.includes(`${essedumBackendURL}/api/aip`);
 
         // Determine which token to use based on API type
         if (isAipApi) {

@@ -17,12 +17,17 @@ package com.lfn.common.app.service.impl;
 
 import com.lfn.common.app.service.GitStorageProvider;
 import com.lfn.common.app.web.rest.dto.FileContent;
+import com.lfn.common.app.web.rest.dto.PullResponse;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -37,6 +42,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -353,6 +359,120 @@ public class JGitProvider implements GitStorageProvider {
             } catch (IOException e) {
                 log.warn("Failed to delete temporary directory: {}", tempDir, e);
             }
+        }
+    }
+
+    @Override
+    public PullResponse pull(String remoteUrl, String branch, String localPath,
+                            String username, String token, boolean verifySsl) throws Exception {
+        Path targetDir;
+        boolean isTemporary = false;
+
+        // Determine target directory
+        if (localPath == null || localPath.isEmpty()) {
+            targetDir = Files.createTempDirectory("github-pull-");
+            isTemporary = true;
+            log.info("Created temporary directory for pull: {}", targetDir);
+        } else {
+            targetDir = new File(localPath).toPath();
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+            log.info("Using specified directory for pull: {}", targetDir);
+        }
+
+        File repoDir = targetDir.toFile();
+        PullResponse response = new PullResponse();
+
+        try {
+            // Configure SSL bypass if needed
+            if (!verifySsl) {
+                log.warn("SSL verification is disabled for Git operations - DO NOT USE IN PRODUCTION");
+                configureInsecureSSL();
+            }
+
+            log.info("Starting pull operation from: {}, branch: {}", remoteUrl, branch);
+
+            // Configure credentials
+            UsernamePasswordCredentialsProvider credentials =
+                new UsernamePasswordCredentialsProvider(username, token);
+
+            // Clone the repository
+            Git git = Git.cloneRepository()
+                .setURI(remoteUrl)
+                .setBranch(branch)
+                .setDirectory(repoDir)
+                .setCredentialsProvider(credentials)
+                .call();
+
+            log.info("Successfully cloned repository to: {}", targetDir);
+
+            try {
+                // Get the latest commit hash
+                Ref head = git.getRepository().exactRef("HEAD");
+                ObjectId headId = head.getObjectId();
+                RevCommit commit = git.getRepository().parseCommit(headId);
+                String commitHash = commit.getName();
+
+                log.info("Latest commit: {} - {}", commitHash, commit.getShortMessage());
+
+                // Read all files from the repository
+                List<FileContent> files = new ArrayList<>();
+                TreeWalk treeWalk = new TreeWalk(git.getRepository());
+                treeWalk.addTree(commit.getTree());
+                treeWalk.setRecursive(true);
+
+                while (treeWalk.next()) {
+                    String filePath = treeWalk.getPathString();
+
+                    // Skip .git directory files
+                    if (filePath.startsWith(".git/")) {
+                        continue;
+                    }
+
+                    File file = new File(repoDir, filePath);
+                    if (file.exists() && file.isFile()) {
+                        FileContent fileContent = new FileContent();
+                        fileContent.setPath(filePath);
+
+                        // Read file content
+                        String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                        fileContent.setContent(content);
+
+                        files.add(fileContent);
+                        log.debug("Read file: {}", filePath);
+                    }
+                }
+
+                treeWalk.close();
+                log.info("Read {} files from repository", files.size());
+
+                // Populate response
+                response.setLocalPath(targetDir.toString());
+                response.setBranch(branch);
+                response.setCommitHash(commitHash);
+                response.setFiles(files);
+
+            } finally {
+                git.close();
+            }
+
+            return response;
+
+        } catch (GitAPIException | IOException e) {
+            log.error("Pull operation failed: {}", e.getMessage(), e);
+
+            // Clean up temporary directory on failure
+            if (isTemporary) {
+                try {
+                    deleteDirectory(repoDir);
+                    log.info("Cleaned up temporary directory after failure: {}", targetDir);
+                } catch (IOException cleanupEx) {
+                    log.warn("Failed to delete temporary directory: {}", targetDir, cleanupEx);
+                }
+            }
+
+            throw new RuntimeException("Pull operation failed: " + e.getMessage(), e);
         }
     }
 }

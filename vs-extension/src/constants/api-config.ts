@@ -4,19 +4,14 @@
  */
 
 import * as https from 'https';
+import * as vscode from 'vscode';
+import { shouldBypassSSL, createHTTPSAgent as createConditionalHTTPSAgent } from '../utils/ssl-config.util';
+import * as ExtensionUtils from '../utils/extension-utils';
 
-// CRITICAL: Disable SSL verification globally for Node.js
-// This must be set before any HTTPS requests are made
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+const logger = ExtensionUtils.createLogger('APIConfig');
 
-// Additional SSL bypass for axios and other HTTP clients
-if (typeof global !== 'undefined') {
-    (global as any).GLOBAL_HTTPS_AGENT = {
-        rejectUnauthorized: false,
-        requestCert: false,
-        agent: false
-    };
-}
+// Note: SSL bypass is now conditional based on network selection
+// Use the ssl-config.util functions instead of setting global variables
 
 // Dynamic BASE_URL management
 let currentBaseUrl: string | null = null; // Start with null, will be set when user selects network
@@ -25,15 +20,15 @@ let currentBaseUrl: string | null = null; // Start with null, will be set when u
 export function getBaseUrl(): string {
     // If no URL is set yet, return a placeholder - this should only happen during initialization
     if (currentBaseUrl === null) {
-        console.warn('Base URL not set yet - network selection required');
-        return 'https://lfn.essedum.anuket.iol.unh.edu'; // This will cause obvious errors if used before network selection
+        logger.info('Base URL not set yet - network selection required');
+        return ''; // This will cause obvious errors if used before network selection
     }
     return currentBaseUrl;
 }
 
 export function setBaseUrl(newUrl: string): void {
     currentBaseUrl = newUrl;
-    console.log('Base URL updated to:', newUrl);
+    logger.info('Base URL updated to:', newUrl);
     // Clear any cached endpoint objects to force regeneration with new URL
     _endpointsCache = null;
 }
@@ -68,6 +63,13 @@ interface ApiEndpoints {
     FILE_READ: string;
     FILE_CREATE: string;
     FILE_UPLOAD: string;
+    FILE_UPDATE: string;
+    FILE_DELETE: string;
+    FOLDER_UPLOAD: string;
+    FOLDER_LIST: string;
+    FOLDER_UPDATE: string;
+    FOLDER_DELETE: string;
+    FOLDER_DOWNLOAD: string;
     EVENTS_TRIGGER: string;
     EVENTS_STATUS: string;
     FETCH_DATASOURCE: string;
@@ -105,6 +107,15 @@ export function getApiEndpoints(): ApiEndpoints {
         FILE_READ: `${baseUrl}/api/aip/file/read`,
         FILE_CREATE: `${baseUrl}/api/aip/file/create`,
         FILE_UPLOAD: `${baseUrl}/api/aip/file/upload`,
+        FILE_UPDATE: `${baseUrl}/api/aip/file/update`,
+        FILE_DELETE: `${baseUrl}/api/aip/file/delete`,
+        
+        // Folder operations
+        FOLDER_UPLOAD: `${baseUrl}/api/aip/folder/upload`,
+        FOLDER_LIST: `${baseUrl}/api/aip/folder/list`,
+        FOLDER_UPDATE: `${baseUrl}/api/aip/folder/update`,
+        FOLDER_DELETE: `${baseUrl}/api/aip/folder/delete`,
+        FOLDER_DOWNLOAD: `${baseUrl}/api/aip/folder/download`,
         
         // Event endpoints
         EVENTS_TRIGGER: `${apiBaseUrl}/events/trigger`,
@@ -142,22 +153,32 @@ export const DEFAULT_REQUEST_CONFIG = {
     }
 };
 
-// HTTPS Agent for bypassing SSL certificate issues
+/**
+ * Get HTTPS Agent with appropriate SSL configuration
+ * @param context - VS Code extension context for network detection
+ * @returns HTTPS Agent configured based on selected network
+ */
+export function getHTTPSAgent(context?: vscode.ExtensionContext): https.Agent {
+    return createConditionalHTTPSAgent(context);
+}
+
+// Legacy export for backward compatibility - uses default agent without context
+// WARNING: This may not work correctly without context. Use getHTTPSAgent(context) instead.
 export const HTTPS_AGENT = new https.Agent({
     rejectUnauthorized: false,
-    // Additional SSL bypass options
     checkServerIdentity: () => undefined,
     secureOptions: require('constants').SSL_OP_LEGACY_SERVER_CONNECT,
-    // More comprehensive SSL bypass
     secureProtocol: 'TLSv1_2_method',
     requestCert: false,
     keepAlive: true,
+    keepAliveMsecs: 60000,
     maxSockets: 10,
-    timeout: 30000
+    maxFreeSockets: 10,
+    timeout: 300000
 });
 
 // Create authenticated headers
-export function createAuthHeaders(token: string, role: any, projectId: string = '2', projectName: string = 'leo1311'): Record<string, string> {
+export function createAuthHeaders(token: string, role: any, projectId: string = '', projectName: string = ''): Record<string, string> {
     return {
         ...DEFAULT_REQUEST_CONFIG.headers,
         'Authorization': `Bearer ${token}`,
@@ -168,29 +189,17 @@ export function createAuthHeaders(token: string, role: any, projectId: string = 
     };
 }
 
-// Create axios config with SSL bypass
-export function createSecureAxiosConfig(token: string, role: any, additionalConfig: any = {}): any {
-    // Ensure Node.js SSL bypass is set
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
+// Create axios config with conditional SSL bypass based on network
+export function createSecureAxiosConfig(token: string, role: any, context?: vscode.ExtensionContext, additionalConfig: any = {}): any {
     const baseConfig = {
         ...DEFAULT_REQUEST_CONFIG,
         headers: createAuthHeaders(token, role),
-        httpsAgent: HTTPS_AGENT,
-        // Additional SSL bypass settings for axios
-        rejectUnauthorized: false,
-        requestCert: false,
-        agent: false,
-        // More axios-specific SSL bypass options
+        httpsAgent: getHTTPSAgent(context),
         maxRedirects: 5,
         validateStatus: function (status: number) {
-            return status >= 200 && status < 300; // default
+            return status >= 200 && status < 300;
         },
-        // Force HTTP adapter to ignore SSL
-        adapter: undefined, // Use default adapter but with our custom agent
-        // Additional SSL bypass flags
-        strictSSL: false,
-        secureOptions: require('constants').SSL_OP_LEGACY_SERVER_CONNECT
+        adapter: undefined
     };
     
     // Merge additional config, ensuring httpsAgent is not overridden
@@ -199,28 +208,23 @@ export function createSecureAxiosConfig(token: string, role: any, additionalConf
         ...additionalConfig
     };
     
-    // Ensure HTTPS agent is always set and SSL is bypassed
-    mergedConfig.httpsAgent = HTTPS_AGENT;
-    mergedConfig.rejectUnauthorized = false;
+    // Ensure HTTPS agent is always set with correct SSL config
+    mergedConfig.httpsAgent = getHTTPSAgent(context);
     
     return mergedConfig;
 }
 
-// Create a simple HTTPS agent for direct use
-export function createHTTPSAgent(): https.Agent {
-    return new https.Agent({
-        rejectUnauthorized: false,
-        checkServerIdentity: () => undefined,
-        secureOptions: require('constants').SSL_OP_LEGACY_SERVER_CONNECT
-    });
+// Create a simple HTTPS agent for direct use with conditional SSL
+export function createHTTPSAgent(context?: vscode.ExtensionContext): https.Agent {
+    return createConditionalHTTPSAgent(context);
 }
 
-// Simple axios request wrapper with guaranteed SSL bypass
-export async function makeSecureRequest(method: string, url: string, config: any = {}): Promise<any> {
+// Simple axios request wrapper with conditional SSL bypass
+export async function makeSecureRequest(method: string, url: string, context?: vscode.ExtensionContext, config: any = {}): Promise<any> {
     const axios = require('axios');
     
-    // Force SSL bypass for this specific request
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    // Use conditional SSL based on network
+    const bypass = shouldBypassSSL(context);
     
     // Extract token from config if provided
     const token = config.headers?.Authorization?.replace('Bearer ', '') || 
@@ -234,11 +238,11 @@ export async function makeSecureRequest(method: string, url: string, config: any
         'accept-language': 'en-US,en;q=0.9',
         'content-type': 'application/json',
         'priority': 'u=1, i',
-        'project': '2',
-        'projectname': 'leo1311',
+        'project': '',
+        'projectname': '',
         'referer': `${getBaseUrl()}/`,
         'roleid': '',
-        'rolename': 'IT Port',
+        'rolename': '',
         'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
@@ -246,7 +250,7 @@ export async function makeSecureRequest(method: string, url: string, config: any
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-        'x-requested-with': 'Leap'
+        'x-requested-with': ''
     };
     
     // Add authorization header if token is provided
@@ -257,8 +261,8 @@ export async function makeSecureRequest(method: string, url: string, config: any
     const requestConfig = {
         method: method,
         url: url,
-        httpsAgent: HTTPS_AGENT,
-        rejectUnauthorized: false,
+        httpsAgent: getHTTPSAgent(context),
+        rejectUnauthorized: !bypass,
         requestCert: false,
         agent: false,
         timeout: 30000,
@@ -269,11 +273,11 @@ export async function makeSecureRequest(method: string, url: string, config: any
         ...config
     };
     
-    console.log('Making secure request to:', url);
-    console.log('SSL bypass active:', process.env['NODE_TLS_REJECT_UNAUTHORIZED'] === '0');
-    console.log('Request headers being sent:', requestConfig.headers);
-    console.log('Token extracted:', token ? 'Token present' : 'No token');
-    console.log('Full request config:', { 
+    logger.info('Making secure request to:', url);
+    logger.info('SSL bypass active:', bypass);
+    logger.info('Request headers being sent:', requestConfig.headers);
+    logger.info('Token extracted:', token ? 'Token present' : 'No token');
+    logger.info('Full request config:', { 
         method: requestConfig.method, 
         url: requestConfig.url,
         params: requestConfig.params,
@@ -283,48 +287,46 @@ export async function makeSecureRequest(method: string, url: string, config: any
     return axios(requestConfig);
 }
 
-// Initialize global SSL bypass - call this at extension startup
-export function initializeSSLBypass(): void {
-    console.log('Initializing comprehensive SSL bypass...');
+// Initialize SSL configuration based on network - call this at extension startup
+export function initializeSSLBypass(context?: vscode.ExtensionContext): void {
+    logger.info('Initializing SSL configuration...');
     
-    // Set Node.js environment variables
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 'false';
-    process.env['PYTHONHTTPSVERIFY'] = '0';
+    const bypass = shouldBypassSSL(context);
     
-    // Override global HTTPS agent (use type assertion to bypass readonly)
-    if (typeof global !== 'undefined') {
-        (global as any).GLOBAL_AGENT = HTTPS_AGENT;
-        
-        // Override default HTTPS globalAgent using type assertion
-        try {
-            (https as any).globalAgent = HTTPS_AGENT;
-        } catch (e) {
-            console.log('Could not override global HTTPS agent, using per-request agents');
-        }
+    if (bypass) {
+        // Infosys network - bypass SSL
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        process.env['PYTHONHTTPSVERIFY'] = '0';
+        logger.info('SSL bypass enabled for Infosys network');
+    } else {
+        // LFN network - enforce SSL validation
+        delete process.env['NODE_TLS_REJECT_UNAUTHORIZED'];
+        delete process.env['PYTHONHTTPSVERIFY'];
+        logger.info('SSL validation enabled for LFN network');
     }
     
-    console.log('SSL bypass initialized - all HTTPS requests will ignore certificate validation');
+    logger.info('SSL configuration initialized');
 }
 
-// Set up axios defaults with SSL bypass
-export function setupAxiosDefaults(): void {
+// Set up axios defaults with conditional SSL
+export function setupAxiosDefaults(context?: vscode.ExtensionContext): void {
     const axios = require('axios');
+    const bypass = shouldBypassSSL(context);
     
     // Set default HTTPS agent for all axios requests
-    axios.defaults.httpsAgent = HTTPS_AGENT;
+    axios.defaults.httpsAgent = getHTTPSAgent(context);
     
-    // Set other SSL bypass defaults
+    // Set other SSL defaults based on network
     if (axios.defaults.https) {
-        axios.defaults.https.rejectUnauthorized = false;
+        axios.defaults.https.rejectUnauthorized = !bypass;
     }
     
-    // Add request interceptor to ensure SSL bypass on every request
+    // Add request interceptor to ensure correct SSL config on every request
     axios.interceptors.request.use(
         function (config: any) {
-            // Ensure SSL bypass on every request
-            config.httpsAgent = HTTPS_AGENT;
-            config.rejectUnauthorized = false;
+            // Ensure correct SSL config on every request
+            config.httpsAgent = getHTTPSAgent(context);
+            config.rejectUnauthorized = !bypass;
             config.requestCert = false;
             return config;
         },
@@ -333,5 +335,17 @@ export function setupAxiosDefaults(): void {
         }
     );
     
-    console.log('Axios defaults and interceptors configured with SSL bypass');
+    logger.info(`Axios defaults configured - SSL bypass: ${bypass}`);
+}
+
+/**
+ * Dynamic API URL constructors
+ * These functions construct API URLs using the current base URL
+ */
+export function getConfigApiUrl(): string {
+    return `${getBaseUrl()}/api/getConfigDetails`;
+}
+
+export function getUserInfoApiUrl(): string {
+    return `${getBaseUrl()}/api/userInfo`;
 }

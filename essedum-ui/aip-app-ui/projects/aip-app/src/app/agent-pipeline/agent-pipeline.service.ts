@@ -497,6 +497,56 @@ export class AgentPipelineService {
   };
 
   
+  
+  /**
+   * Upload agent files ZIP to backend
+   */
+  uploadAgentFilesZip(cname: string, organization: string, zipFile: File): Observable<any> {
+    const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null`;
+    
+    console.log('AgentPipelineService - Uploading ZIP file:', {
+      url,
+      cname,
+      organization,
+      fileName: zipFile.name,
+      fileSize: zipFile.size
+    });
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('zipFile', zipFile);
+
+    // Get auth token from localStorage or session storage
+    const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';
+    const roleId = localStorage.getItem('roleId') || '1';
+    const roleName = localStorage.getItem('roleName') || 'IT Portfolio Manager';
+
+    return this.http.post(url, formData, {
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7,hi;q=0.6',
+        'Authorization': `Bearer ${authToken}`,
+        'Connection': 'keep-alive',
+        'Project': '2',
+        'ProjectName': organization,
+        'X-Requested-With': 'Leap',
+        'charset': 'utf-8',
+        'roleId': roleId,
+        'roleName': roleName
+        // Don't set Content-Type - let the browser set it with multipart/form-data boundary
+      }
+    }).pipe(
+      map((response: any) => {
+        console.log('ZIP upload response:', response);
+        return response;
+      }),
+      catchError((error) => {
+        console.error('ZIP upload error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   /**
    * Upload agent files to MinIO
    */

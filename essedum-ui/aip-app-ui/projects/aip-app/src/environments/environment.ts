@@ -6,8 +6,7 @@ export const environment = {
   production: false,
   baseUrl: "/api/aip",
   datasetsUrl: '/api/aip',
-  langflowUrl: 'http://localhost:3000/',
-  langflowProdUrl: 'https://langflow.az.ad.idemo-ppc.com/'
+  langflowUrl: 'http://localhost:3000/'
 };
 
 

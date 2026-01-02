@@ -1,310 +1,488 @@
 /**
- * Pipeline Service
- * 
- * Centralized service for all pipeline-related API operations.
- * Follows best practices with proper error handling, configuration management,
- * and separation of concerns.
+ * Pipeline Service (VS Code Extension)
+ *
+ * Centralized, robust client for pipeline-related API operations.
+ * - Stronger typing (non-breaking public signatures)
+ * - Structured error handling
+ * - Optional retries with backoff
+ * - AbortSignal cancellation support
+ * - Safer logging and DRY SSL setup
  */
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { HttpParams } from "../interfaces/pipeline.interfaces";
-import { API_ENDPOINTS, getBaseUrl, createSecureAxiosConfig, HTTPS_AGENT, createHTTPSAgent, getApiEndpoints } from "../constants/api-config";
+
+import * as vscode from 'vscode';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HttpParams, ProjectInfo, RoleInfo } from '../interfaces/pipeline.interfaces';
+import { getBaseUrl, getHTTPSAgent, getApiEndpoints } from '../constants/api-config';
+import { STORAGE_KEYS } from '../constants/extension-constants';
+import { configureSSLEnvironment, shouldBypassSSL } from '../utils/ssl-config.util';
+import * as ExtensionUtils from '../utils/extension-utils';
+
+const logger = ExtensionUtils.createLogger('PipelineService');
+
+/** Normalized service error */
+export class ServiceError extends Error {
+  public code?: string;
+  public status?: number;
+  public details?: unknown;
+
+  constructor(message: string, opts?: { code?: string; status?: number; details?: unknown }) {
+    super(message);
+    this.name = 'ServiceError';
+    this.code = opts?.code;
+    this.status = opts?.status;
+    this.details = opts?.details;
+  }
+}
+
+/** Retry options */
+type RetryOptions = {
+  retries: number;              // total retry attempts
+  baseDelayMs: number;          // exponential backoff base delay
+  retryOnStatuses?: number[];   // defaults to [502, 503, 504]
+};
+
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export class PipelineService {
-  private _token: string;
-  private _project: any;
-  private _role:any;
-  private organization: string;
+  private context: vscode.ExtensionContext;
+  private _token = '';
+  private _project?: ProjectInfo;
+  private _role?: RoleInfo;
+  private organization = '';
+  private debug = false;
 
-  // Get dynamic API endpoints
-  private get API(): ReturnType<typeof getApiEndpoints> {
+  private get API() {
     return getApiEndpoints();
   }
 
-  constructor(token: string = "", role: any = "", project: any = "leo1311") {
-    this._token = token;
-    this._project = project;
-    this._role = role;
-    this.organization = project.name;
-    
-    // Debug logging to check what we're receiving
-    console.log('PipelineService constructor called with:');
-    console.log('Token present:', !!token);
-    console.log('Role:', role);
-    console.log('Project:', project);
-    console.log('Organization set to:', this.organization);
-    
-    // Ensure SSL bypass is active when service is created
-    this.ensureSSLBypass();
-  }
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+    this.refreshAuthData();
 
-  updateToken(token: string): void {
-    this._token = token;
+    // Initial SSL environment configuration (network-aware)
+    configureSSLEnvironment(this.context);
+
+    // Enable debug logging via user/workspace setting
+    const cfg = vscode.workspace.getConfiguration('pipeline');
+    this.debug = cfg.get<boolean>('debug', false);
   }
 
   /**
-   * Ensure SSL bypass is active for all requests
+   * Refresh authentication data from VS Code storage.
+   * Call this after login or whenever auth state changes.
    */
-  private ensureSSLBypass(): void {
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    console.log('PipelineService: SSL bypass ensured');
-  }
+  refreshAuthData(): void {
+    const state = this.context.globalState;
 
-  private buildHeaders(overrides: Record<string, string> = {}): Record<string, string> {
-    // Use default values if project/role data is missing or incomplete
-    const projectId = this._project?.id || '2';
-    const projectName = this._project?.name || 'leo1311';
-    const roleId = this._role?.id || '';
-    const roleName = this._role?.name || 'IT Port';
-    
-    const headers = {
-      accept: "application/json, text/plain, */*",
-      "accept-language": "en-US,en;q=0.9",
-      "content-type": "application/json",
-      priority: "u=1, i",
-      project: projectId,
-      projectname: projectName,
-      referer: `${getBaseUrl()}/`,
-      roleid: roleId,
-      rolename: roleName,
-      "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
-      "x-requested-with": "Leap",
-      ...(this._token ? { authorization: `Bearer ${this._token}` } : {}),
-      ...overrides,
-    };
-    
-    // Debug logging to see what headers we're building
-    console.log('PipelineService building headers:');
-    console.log('- project (id):', projectId, '(from:', this._project?.id, ')');
-    console.log('- projectname:', projectName, '(from:', this._project?.name, ')');
-    console.log('- roleid:', roleId, '(from:', this._role?.id, ')');
-    console.log('- rolename:', roleName, '(from:', this._role?.name, ')');
-    console.log('- token present:', !!this._token);
-    console.log('- referer:', `${getBaseUrl()}/`);
-    
-    return headers;
-  }
+    this._token = state.get<string>(STORAGE_KEYS.ACCESS_TOKEN) || '';
+    this._project = state.get<ProjectInfo>(STORAGE_KEYS.PROJECT);
+    this._role = state.get<RoleInfo>(STORAGE_KEYS.ROLE);
+    this.organization =
+      state.get<string>(STORAGE_KEYS.ORGANIZATION) ||
+      (typeof this._project === 'object'
+        ? (this._project?.name || this._project?.projectname || '')
+        : '');
 
-  private buildAxiosConfig(params?: HttpParams, overrides: Partial<AxiosRequestConfig> = {}): AxiosRequestConfig {
-    // Ensure SSL bypass is active for this request
-    this.ensureSSLBypass();
-    
-    return {
-      httpsAgent: HTTPS_AGENT, // Use the comprehensive HTTPS agent from api-config
-      timeout: 30000,
-      headers: this.buildHeaders(),
-      ...(params ? { params: { ...params, project: this.organization } } : {}),
-      ...overrides,
-    };
-  }
-
-  async getPipelinesCount(params: HttpParams): Promise<number> {
-    console.log('PipelineService: Getting pipelines count...');
-    console.log('SSL bypass status:', process.env['NODE_TLS_REJECT_UNAUTHORIZED']);
-    console.log('API endpoint:', this.API.PIPELINES_COUNT);
-    console.log('Request params:', params);
-    console.log('Token present:', !!this._token);
-    
-    const config = this.buildAxiosConfig(params);
-    console.log('Request config:', {
-      url: this.API.PIPELINES_COUNT,
-      hasHttpsAgent: !!config.httpsAgent,
-      timeout: config.timeout,
-      headers: Object.keys(config.headers || {})
-    });
-    
-    try {
-      const response = await axios.get(this.API.PIPELINES_COUNT, config);
-      console.log('Pipelines count request successful:', response.status);
-      return response.data ?? 0;
-    } catch (error: any) {
-      console.error('Pipelines count request failed:', error.message);
-      console.error('Error code:', error.code);
-      console.error('Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data
+    if (this.debug) {
+      logger.info('[PipelineService] Auth refreshed:', {
+        tokenPresent: !!this._token,
+        projectId: this._project?.id ?? this._project?.projectId,
+        projectName: this._project?.name ?? this._project?.projectname,
+        roleId: this._role?.id ?? this._role?.roleId,
+        roleName: this._role?.name ?? this._role?.rolename,
+        organization: this.organization,
       });
-      throw error;
     }
   }
 
-  async getPipelinesCards(params: HttpParams): Promise<any> {
-    const config = this.buildAxiosConfig(params);
-    const response = await axios.get(this.API.PIPELINES_LIST, config);
-    return response.data;
+  /**
+   * Build request headers (sanitized for logging).
+   */
+  private buildHeaders(overrides: Record<string, string> = {}): Record<string, string> {
+    // Always refresh auth data before building headers to get latest project/role info
+    const state = this.context.globalState;
+    this._token = state.get<string>(STORAGE_KEYS.ACCESS_TOKEN) || this._token;
+    this._project = state.get<ProjectInfo>(STORAGE_KEYS.PROJECT) || this._project;
+    this._role = state.get<RoleInfo>(STORAGE_KEYS.ROLE) || this._role;
+    const storedOrg = state.get<string>(STORAGE_KEYS.ORGANIZATION);
+    if (storedOrg) {
+      this.organization = storedOrg;
+    } else if (typeof this._project === 'object') {
+      this.organization = this._project?.name || this._project?.projectname || this.organization;
+    }
+
+    const projectId = this._project?.id ?? this._project?.projectId ?? '';
+    const projectName = this._project?.name ?? this._project?.projectname ?? this.organization ?? '';
+    const roleId = this._role?.id?.toString() ?? this._role?.roleId?.toString() ?? '';
+    const roleName = this._role?.name ?? this._role?.rolename ?? '';
+
+    const headers: Record<string, string> = {
+      accept: 'application/json, text/plain, */*',
+      'accept-language': 'en-US,en;q=0.9',
+      'content-type': 'application/json',
+      priority: 'u=1, i',
+      project: String(projectId || ''),
+      projectname: String(projectName || ''),
+      referer: `${getBaseUrl()}/`,
+      roleid: String(roleId || ''),
+      rolename: String(roleName || ''),
+      'user-agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+      'x-requested-with': 'Leap',
+      ...(this._token ? { 
+        'access-token': this._token,
+        authorization: `Bearer ${this._token}` 
+      } : {}),
+      ...overrides,
+    };
+
+    if (this.debug) {
+      logger.info('[PipelineService] Headers prepared:', {
+        project: headers.project,
+        projectname: headers.projectname,
+        roleid: headers.roleid,
+        rolename: headers.rolename,
+        hasAuth: !!headers.authorization,
+        referer: headers.referer,
+      });
+    }
+
+    return headers;
   }
 
-  async getStreamingService(pipelineName: string): Promise<AxiosResponse<any>> {
-    return axios.get(
-      `${this.API.STREAMING_SERVICES}/${pipelineName}/${this.organization}`,
-      this.buildAxiosConfig()
-    );
-  }
+  /**
+   * Build Axios config (centralized SSL & params).
+   * Supports AbortSignal for cancellation.
+   */
+  private buildAxiosConfig(
+    params?: HttpParams,
+    overrides: Partial<AxiosRequestConfig> = {},
+    signal?: AbortSignal
+  ): AxiosRequestConfig {
+    // Keep SSL configured per current network
+    configureSSLEnvironment(this.context);
 
-  async getStreamingServicesByName(name: string, org?: string): Promise<any> {
-    const organization = org || this.organization;
-    return axios.get(`/api/aip/service/v1/streamingServices/${name}/${organization}`, {
-      baseURL: getBaseUrl(),
-      ...this.buildAxiosConfig(),
-    });
-  }
+    const requestParams: Record<string, unknown> = params ? { ...params } : {};
+    
+    const baseHeaders = this.buildHeaders();
+    const overrideHeaders = overrides.headers as Record<string, string> | undefined;
+    
+    // Properly merge headers instead of replacing them
+    const mergedHeaders = overrideHeaders 
+      ? { ...baseHeaders, ...overrideHeaders }
+      : baseHeaders;
 
-  async updateStreamingService(payload: any): Promise<any> {
-    return axios.put(this.API.STREAMING_SERVICES_UPDATE, payload, {
-      ...this.buildAxiosConfig(),
-      validateStatus: (status) => status >= 200 && status < 300,
-    });
-  }
-
-  async getPipelineByName(pipelineName: string): Promise<AxiosResponse<any>> {
-    const urlParams = new URLSearchParams();
-    urlParams.append("name", pipelineName);
-    urlParams.append("org", this.organization);
-
-    return axios.get(this.API.PIPELINES_BY_NAME, {
-      ...createSecureAxiosConfig(this._token, this._role),
-      params: urlParams,
-      timeout: 30000,
-    });
-  }
-
-  async readPipelineFile(pipelineName: string, fileName: string): Promise<AxiosResponse<any>> {
-    return axios.get(
-      `${this.API.FILE_READ}/${pipelineName}/${this.organization}`,
-      {
-        ...createSecureAxiosConfig(this._token, this._role),
-        params: { file: fileName },
-        responseType: "arraybuffer",
-        timeout: 30000,
+    // Properly merge params - if override params exist, use them (allows empty object to override)
+    // Otherwise add project to base params
+    const overrideParams = overrides.params as Record<string, unknown> | undefined;
+    let mergedParams: Record<string, unknown>;
+    
+    if (overrideParams !== undefined) {
+      // Override params explicitly provided - merge base with override (override wins)
+      mergedParams = { ...requestParams, ...overrideParams };
+    } else {
+      // No override params - auto-add project to base params
+      if (!requestParams.project) {
+        requestParams.project = this.organization;
       }
+      mergedParams = requestParams;
+    }
+
+    const base: AxiosRequestConfig = {
+      httpsAgent: getHTTPSAgent(this.context),
+      timeout: 30000,
+      headers: mergedHeaders,
+      params: mergedParams,
+      withCredentials: true,
+      signal,
+    };
+
+    // Spread overrides but exclude headers and params since we already merged them
+    const { headers: _h, params: _p, ...restOverrides } = overrides;
+    const config = { ...base, ...restOverrides };
+
+    if (this.debug) {
+      logger.info('[PipelineService] Axios config:', {
+        timeout: config.timeout,
+        hasHttpsAgent: !!config.httpsAgent,
+        params: config.params,
+        headers: Object.keys((config.headers ?? {}) as Record<string, string>),
+      });
+    }
+
+    return config;
+  }
+
+  /**
+   * Internal helper to perform requests with retry/backoff.
+   */
+  private async requestWithRetry<T>(
+    method: 'get' | 'post' | 'put' | 'patch' | 'delete',
+    url: string,
+    config: AxiosRequestConfig,
+    body?: unknown,
+    retryOpts: RetryOptions = { retries: 2, baseDelayMs: 400, retryOnStatuses: [502, 503, 504] }
+  ): Promise<AxiosResponse<T>> {
+    let attempt = 0;
+    const { retries, baseDelayMs, retryOnStatuses } = retryOpts;
+
+    while (true) {
+      try {
+        if (method === 'get' || method === 'delete') {
+          return await axios[method]<T>(url, config);
+        }
+        return await axios[method]<T>(url, body, config);
+      } catch (err: any) {
+        const status = err?.response?.status as number | undefined;
+        const code = err?.code as string | undefined;
+
+        const isNetworkError =
+          !status && (code === 'ECONNABORTED' || code === 'ENOTFOUND' || code === 'ECONNRESET');
+
+        const shouldRetry =
+          attempt < retries &&
+          // eslint-disable-next-line eqeqeq
+          (isNetworkError || (status != null && retryOnStatuses?.includes(status)));
+
+        if (!shouldRetry) {
+          if (this.debug) {
+            console.error('[PipelineService] Request failed:', { url, method, status, code, message: err?.message });
+          }
+          throw new ServiceError(err?.message ?? 'Request failed', {
+            code,
+            status,
+            details: err?.response?.data ?? err,
+          });
+        }
+
+        attempt++;
+        const delay = baseDelayMs * Math.pow(2, attempt - 1);
+        if (this.debug) {
+          console.warn(`[PipelineService] Retry #${attempt} in ${delay}ms`, { url, method, status, code });
+        }
+        await sleep(delay);
+      }
+    }
+  }
+
+  /** ---------- Public API Methods (non-breaking signatures) ---------- */
+
+  async getPipelinesCount(params: HttpParams, signal?: AbortSignal): Promise<number> {
+    this.refreshAuthData();
+
+    if (this.debug) {
+      logger.info('[PipelineService] getPipelinesCount', {
+        sslBypass: shouldBypassSSL(this.context) ? 'DISABLED (Infosys)' : 'ENABLED (LFN)',
+        endpoint: this.API.PIPELINES_COUNT,
+        params,
+        tokenPresent: !!this._token,
+      });
+    }
+
+    const config = this.buildAxiosConfig(params, {}, signal);
+    const resp = await this.requestWithRetry<number>('get', this.API.PIPELINES_COUNT, config);
+    const value = typeof resp.data === 'number' ? resp.data : (resp.data as any)?.count ?? 0;
+    return value;
+  }
+
+  async getPipelinesCards(params: HttpParams, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const resp = await this.requestWithRetry<any>('get', this.API.PIPELINES_LIST, this.buildAxiosConfig(params, {}, signal));
+    return resp.data;
+  }
+
+  async getStreamingService(pipelineName: string, signal?: AbortSignal): Promise<AxiosResponse<any>> {
+    this.refreshAuthData();
+
+    const safeName = encodeURIComponent(pipelineName);
+    const safeOrg = encodeURIComponent(this.organization);
+    const url = `${this.API.STREAMING_SERVICES}/${safeName}/${safeOrg}`;
+
+    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, {}, signal));
+  }
+
+  async getStreamingServicesByName(name: string, org?: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const organization = org || this.organization;
+    const safeName = encodeURIComponent(name);
+    const safeOrg = encodeURIComponent(organization);
+    const url = `${this.API.STREAMING_SERVICES}/${safeName}/${safeOrg}`;
+
+    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, {}, signal));
+  }
+
+  async updateStreamingService(payload: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const config = this.buildAxiosConfig(undefined, {
+      validateStatus: (status) => status >= 200 && status < 300,
+    }, signal);
+
+    return this.requestWithRetry<any>('put', this.API.STREAMING_SERVICES_UPDATE, config, payload);
+  }
+
+  async getPipelineByName(pipelineName: string, signal?: AbortSignal): Promise<AxiosResponse<any>> {
+    this.refreshAuthData();
+
+    const url = this.API.PIPELINES_BY_NAME;
+    const config = this.buildAxiosConfig(
+      undefined,
+      { params: { name: pipelineName, org: this.organization } },
+      signal
+    );
+
+    return this.requestWithRetry<any>('get', url, config);
+  }
+
+  async readPipelineFile(pipelineName: string, fileName: string, signal?: AbortSignal): Promise<AxiosResponse<any>> {
+    this.refreshAuthData();
+
+    const safePipeline = encodeURIComponent(pipelineName);
+    const safeOrg = encodeURIComponent(this.organization);
+    const url = `${this.API.FILE_READ}/${safePipeline}/${safeOrg}`;
+
+    const config = this.buildAxiosConfig(
+      undefined,
+      { params: { file: fileName }, responseType: 'arraybuffer' },
+      signal
+    );
+
+    return this.requestWithRetry<any>('get', url, config);
+  }
+
+  async uploadScript(pipelineName: string, fileName: string, formData: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const safePipeline = encodeURIComponent(pipelineName);
+    const safeOrg = encodeURIComponent(this.organization);
+    const safeFile = encodeURIComponent(fileName);
+    const url = `${this.API.FILE_CREATE}/${safePipeline}/${safeOrg}/Python3?file=${safeFile}`;
+
+    // Don't set content-type at all - let axios handle it for FormData with proper boundary
+    const headersOverride: Record<string, string> = {
+      'content-type': ''  // Empty string to remove default application/json
+    };
+
+    // Explicitly set params to empty object in overrides to prevent auto-adding project
+    // (file parameter is already in URL, and project is in headers)
+    const config = this.buildAxiosConfig(
+      undefined,
+      {
+        headers: headersOverride,
+        params: {},  // Override params to be empty - no query parameters needed
+        timeout: 30000,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+      },
+      signal
+    );
+
+    // Remove the empty content-type header so axios can set the proper multipart/form-data boundary
+    if (config.headers && 'content-type' in config.headers) {
+      delete (config.headers as any)['content-type'];
+    }
+
+    return this.requestWithRetry<any>('post', url, config, formData);
+  }
+
+  async getJobRunTypes(signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const url = `${this.API.JOB_RUNTIME_TYPES}/${encodeURIComponent(this.organization)}`;
+    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, {}, signal));
+  }
+
+  async getAlternativeRunTypes(signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    return this.requestWithRetry<any>('get', this.API.DATASOURCES_RUNTIME, this.buildAxiosConfig(undefined, {}, signal));
+  }
+
+  async getDatasourceByName(name: string, org?: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const organization = org || this.organization;
+
+    return this.requestWithRetry<any>(
+      'get',
+      this.API.FETCH_DATASOURCE,
+      this.buildAxiosConfig(undefined, { params: { name, org: organization }, timeout: 30000 }, signal)
     );
   }
 
-  async uploadScript(pipelineName: string, fileName: string, formData: any): Promise<any> {
-    const url = `${this.API.FILE_CREATE}/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
-    
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.post(url, formData, {
-      headers: {
-        ...this.buildHeaders({ "Content-Type": "multipart/form-data" }),
-      },
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 30000,
-      maxBodyLength: Infinity,
-      maxContentLength: Infinity,
-    });
-  }
+  async runNativeScriptPipeline(pipelineName: string, runtime: string, requestBody: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
 
-  async getJobRunTypes(): Promise<any> {
-    return axios.get(`${this.API.JOB_RUNTIME_TYPES}/${this.organization}`, this.buildAxiosConfig());
-  }
+    const safePipeline = encodeURIComponent(pipelineName);
+    const safeOrg = encodeURIComponent(this.organization);
+    const safeRuntime = encodeURIComponent(runtime);
 
-  async getAlternativeRunTypes(): Promise<any> {
-    return axios.get(this.API.DATASOURCES_RUNTIME, this.buildAxiosConfig());
-  }
+    const url = `${this.API.PIPELINE_RUN}/NativeScript/${safePipeline}/${safeOrg}/${safeRuntime}`;
 
-  async getDatasourceByName(name: string, org?: string): Promise<any> {
-    const organization = org || this.organization;
-    
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.get(this.API.FETCH_DATASOURCE, {
-      params: { name, org: organization },
-      headers: this.buildHeaders(),
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 30000,
-    });
-  }
-
-  async runNativeScriptPipeline(pipelineName: string, runtime: string, requestBody: any): Promise<any> {
-    const url = `/api/aip/service/v1/pipeline/run-pipeline/NativeScript/${pipelineName}/${this.organization}/${runtime}`;
-    
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.post(url, requestBody, {
-      baseURL: getBaseUrl(),
-      headers: this.buildHeaders(),
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 60000,
-    });
+    return this.requestWithRetry<any>(
+      'post',
+      url,
+      this.buildAxiosConfig(undefined, { timeout: 60000 }, signal),
+      requestBody
+    );
   }
 
   async runPipeline(
     alias: string,
     cname: string,
     pipelineType: string,
-    isLocal: string = "REMOTE",
-    datasource: string = "",
-    params: string = "{}",
-    workerlogId: string = "undefined"
+    isLocal: string = 'REMOTE',
+    datasource: string = '',
+    params: string = '{}',
+    workerlogId: string = 'undefined',
+    signal?: AbortSignal
   ): Promise<any> {
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
+    this.refreshAuthData();
+
     const offset = new Date().getTimezoneOffset();
     const queryParams = new URLSearchParams({
-      offset: offset.toString(),
+      offset: String(offset),
       param: params,
       alias,
-      workerlogId: workerlogId || "undefined",
+      workerlogId: workerlogId || 'undefined',
     });
-    if (datasource) {queryParams.append("datasource", datasource);}
+    if (datasource) {queryParams.append('datasource', datasource);}
 
-    const url = `${this.API.PIPELINE_RUN}/${pipelineType}/${cname}/${this.organization}/${isLocal}?${queryParams.toString()}`;
-    return axios.get(url, {
-      headers: this.buildHeaders(),
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 60000,
-      responseType: "text",
-    });
+    const safeType = encodeURIComponent(pipelineType);
+    const safeCName = encodeURIComponent(cname);
+    const safeOrg = encodeURIComponent(this.organization);
+    const safeIsLocal = encodeURIComponent(isLocal);
+
+    const url = `${this.API.PIPELINE_RUN}/${safeType}/${safeCName}/${safeOrg}/${safeIsLocal}?${queryParams.toString()}`;
+
+    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, { timeout: 60000, responseType: 'text' }, signal));
   }
 
-  async triggerScriptEvent(eventType: string, payload: any): Promise<any> {
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.post(`/api/aip/service/v1/events/trigger/${eventType}`, payload, {
-      baseURL: getBaseUrl(),
-      headers: this.buildHeaders(),
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 60000,
-    });
+  async triggerScriptEvent(eventType: string, payload: any, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const safeEvent = encodeURIComponent(eventType);
+    const url = `${this.API.EVENTS_TRIGGER}/${safeEvent}`;
+
+    return this.requestWithRetry<any>('post', url, this.buildAxiosConfig(undefined, { timeout: 60000 }, signal), payload);
   }
 
-  async getEventStatus(eventId: string): Promise<any> {
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.get(`/api/aip/service/v1/events/status/${eventId}`, {
-      baseURL: getBaseUrl(),
-      headers: this.buildHeaders(),
-      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-      timeout: 10000,
-    });
+  async getEventStatus(eventId: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const safeEventId = encodeURIComponent(eventId);
+    const url = `${this.API.EVENTS_STATUS}/${safeEventId}`;
+
+    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, { timeout: 10000 }, signal));
   }
 
-  async savePipelineJson(pipelineName: string): Promise<any> {
-    // Force SSL bypass
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-    
-    return axios.post(
-      "/api/aip/service/v1/pipelines/save-json",
-      { name: pipelineName, organization: this.organization },
-      {
-        baseURL: getBaseUrl(),
-        headers: this.buildHeaders(),
-        httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
-        timeout: 30000,
-      }
-    );
+  async savePipelineJson(pipelineName: string, signal?: AbortSignal): Promise<any> {
+    this.refreshAuthData();
+
+    const body = { name: pipelineName, organization: this.organization };
+    return this.requestWithRetry<any>('post', this.API.PIPELINES_SAVE_JSON, this.buildAxiosConfig(undefined, { timeout: 30000 }, signal), body);
   }
 }
 
-
-// Export a singleton instance
-export const pipelineService = new PipelineService();

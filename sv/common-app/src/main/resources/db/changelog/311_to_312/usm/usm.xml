@@ -38,7 +38,7 @@
         <sqlCheck expectedResult="0">
             SELECT COUNT(*) 
             FROM usm_constant 
-            WHERE item_value LIKE '%AI Agent%' 
+            WHERE item_value LIKE '%Agent Designer%'
               AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311') 
               AND item = 'IT Portfolio Manager Side';
         </sqlCheck>
@@ -49,7 +49,7 @@
         ) VALUES (
             'IT Portfolio Manager Side',
             'leo1311',
-            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            '{"label":"Agent Designer","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'leo1311'),
             NULL
         );
@@ -61,7 +61,7 @@
         <sqlCheck expectedResult="0">
             SELECT COUNT(*) 
             FROM usm_constant 
-            WHERE item_value LIKE '%AI Agent%' 
+            WHERE item_value LIKE '%Agent Designer%'
               AND project_id = (SELECT id FROM usm_project WHERE name = 'core') 
               AND item = 'IT Portfolio Manager Side';
         </sqlCheck>
@@ -72,7 +72,7 @@
         ) VALUES (
             'IT Portfolio Manager Side',
             'core',
-            '{"label":"AI Agent","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
+            '{"label":"Agent Designer","altText":null,"icon":"th","url":"./aip/agent","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'core'),
             NULL
         );
@@ -84,7 +84,7 @@
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*)
                 FROM usm_constant
-                WHERE item_value LIKE '%Pipeline Agent%'
+                WHERE item_value LIKE '%Agent MCP Pipelines%'
                 AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311')
                 AND item = 'IT Portfolio Manager Side';
             </sqlCheck>
@@ -95,7 +95,7 @@
             ) VALUES (
             'IT Portfolio Manager Side',
             'leo1311',
-            '{"label":"Pipeline Agent","altText":null,"icon":"th","url":"./aip/agent-pipeline","children":[]}',
+            '{"label":"Agent MCP Pipelines","altText":null,"icon":"th","url":"./aip/agent-pipeline","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'leo1311'),
             NULL
             );
@@ -107,7 +107,7 @@
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*)
                 FROM usm_constant
-                WHERE item_value LIKE '%Pipeline Agent%'
+                WHERE item_value LIKE '%Agent MCP Pipelines%'
                 AND project_id = (SELECT id FROM usm_project WHERE name = 'core')
                 AND item = 'IT Portfolio Manager Side';
             </sqlCheck>
@@ -118,7 +118,53 @@
             ) VALUES (
             'IT Portfolio Manager Side',
             'core',
-            '{"label":"Pipeline Agent","altText":null,"icon":"th","url":"./aip/agent-pipeline","children":[]}',
+            '{"label":"Agent MCP Pipelines","altText":null,"icon":"th","url":"./aip/agent-pipeline","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'core'),
+            NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="3v2-usm-2026-2-jan" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM usm_constant
+                WHERE item_value LIKE '%Agent Directory%'
+                AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311')
+                AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+            ) VALUES (
+            'IT Portfolio Manager Side',
+            'leo1311',
+            '{"label":"Agent Directory","altText":null,"icon":"random","url":"./aip/agent-directory","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'leo1311'),
+            NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="3v2-usm-2026-26-jan-core" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM usm_constant
+                WHERE item_value LIKE '%Agent Directory%'
+                AND project_id = (SELECT id FROM usm_project WHERE name = 'core')
+                AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+            ) VALUES (
+            'IT Portfolio Manager Side',
+            'core',
+            '{"label":"Agent Directory","altText":null,"icon":"random","url":"./aip/agent-directory","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'core'),
             NULL
             );

@@ -16,6 +16,7 @@
 package com.lfn.common.app.service;
 
 import com.lfn.common.app.web.rest.dto.FileContent;
+import com.lfn.common.app.web.rest.dto.PullResponse;
 import java.util.List;
 
 /**
@@ -52,5 +53,20 @@ public interface GitStorageProvider {
      */
     void pushFileContents(List<FileContent> files, String remoteUrl, String branch,
                          String commitMessage, String username, String token, boolean verifySsl) throws Exception;
+
+    /**
+     * Pull (clone) code from remote Git repository
+     *
+     * @param remoteUrl Remote Git repository URL
+     * @param branch Branch name to pull from
+     * @param localPath Local path where to clone (if null, creates temp directory)
+     * @param username GitHub username
+     * @param token Personal Access Token
+     * @param verifySsl Whether to verify SSL certificates
+     * @return PullResponse containing local path, files, and commit information
+     * @throws Exception if pull operation fails
+     */
+    PullResponse pull(String remoteUrl, String branch, String localPath,
+                     String username, String token, boolean verifySsl) throws Exception;
 }
 
