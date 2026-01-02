@@ -1,0 +1,27 @@
+apiVersion: v1
+data:
+  Dockerfile: |+
+    # file: Dockerfile
+    FROM python:3.11-slim
+
+    # Set working directory
+    WORKDIR /app
+
+    # Copy everything from the build context (structure-agnostic)
+    # .dockerignore will ensure sensitive or unnecessary files are excluded
+    COPY . .
+
+    # If requirements.txt exists, install dependencies; otherwise, continue
+    # Using a conditional to avoid failing the build if requirements.txt is missing
+    RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; else echo "requirements.txt not found; skipping install"; fi
+
+    # Ensure Python unbuffered output
+    ENV PYTHONUNBUFFERED=1
+
+    CMD ["python", "src/main.py"]
+
+
+kind: ConfigMap
+metadata:
+  name: adk-dockerfile-template
+  namespace: aipns

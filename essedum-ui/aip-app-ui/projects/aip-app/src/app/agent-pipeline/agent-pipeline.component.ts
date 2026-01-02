@@ -2445,7 +2445,7 @@ public class ZipController {
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
 		  
-	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
+	this.socket = io('https://lfn.essedum.anuket.iol.unh.edu', {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
@@ -2460,10 +2460,9 @@ public class ZipController {
           // Trigger the pipeline immediately upon connection with fetched credentials
           const organization = this.getOrganization();
           const payload = {
-            minio_endpoint: 'http://100.78.49.20:9000',
             bucket_name: 'aiptest',
             file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-            target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+            target_image_tag: 'localhost:32000/test-adk-app:v1',
             deployment_name: 'runner-service',
             cname: this.currentCname ,
             organization: organization

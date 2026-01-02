@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-server-config
+  namespace: aipns
+data:
+  server.json: |
+    {
+      "scheme": "http",
+      "server_name": "l3afd-service",
+      "port": 7080,
+      "base_path": "/l3af/configs/v1",
+      "verify_tls": false,
+      "ca_cert": "",
+      "client_cert": "",
+      "client_key": "",
+      "call_method": "requests",
+      "default_values": {
+        "host_name": "essedum-2",
+        "iface": "enP1p1s0",
+        "ebpf_package_repo_url": "file:///srv/l3afd",
+        "artifact": "xdp-hello-program.tar.gz",
+        "version": "latest",
+        "object_file": "xdp_hello.bpf.o",
+        "entry_function_name": "xdp_hello",
+        "program_name": "xdp-hello-name",
+        "admin_status": "enabled",
+        "prog_type": "xdp",
+        "seq_id": 1
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: l3afd-service
+  namespace: aipns
+spec:
+  selector:
+    app: l3afd
+  ports:
+  - name: rest-api
+    port: 7080
+    targetPort: 7080
+    protocol: TCP
+  - name: metrics
+    port: 8898
+    targetPort: 8898
+    protocol: TCP
+  - name: debug
+    port: 8899
+    targetPort: 8899
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server
+  namespace: aipns
+  labels:
+    app: mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-server
+  template:
+    metadata:
+      labels:
+        app: mcp-server
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-2
+      containers:
+      - name: mcp-server
+        image: 10.200.111.174:5000/mcp-l3afd:v5
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        env:
+        - name: CONFIG_PATH
+          value: "/app/config/server.json"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: config
+        configMap:
+          name: mcp-server-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-server
+  namespace: aipns
+  labels:
+    app: mcp-server
+spec:
+  selector:
+    app: mcp-server
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  type: ClusterIP

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: buildkitd-config
+  namespace: aipns
+data:
+  buildkitd.toml: |
+    # Enable the OCI worker
+    [worker.oci]
+      enabled = true
+
+    # BuildKit gRPC address (matches your deploy args)
+    [grpc]
+      address = ["tcp://0.0.0.0:1234"]
+
+    # MicroK8s built-in registry Service (plain HTTP)
+    # IMPORTANT: For an HTTP registry, use `http = true` (not `insecure = true`).
+    [registry."registry.container-registry.svc.cluster.local:5000"]
+      http = true
+
+    # Optional: NodePort access (if you ever push to NODE_IP:32000 from a pod)
+    # [registry."10.200.111.200:32000"]
+    #   http = true
+
+    # Tweak HTTP timeouts for large layers
+    [http]
+      dial_timeout = "30s"
+      response_header_timeout = "30s"
+      idle_conn_timeout = "60s"
+
+    # Logging: keep it readable
+    [log]
+      format = "text"
+      level = "info"
+

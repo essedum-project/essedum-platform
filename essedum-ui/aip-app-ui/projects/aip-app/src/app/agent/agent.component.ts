@@ -15,7 +15,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
   constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl("https://langflow.az.ad.idemo-ppc.com/");;
+    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl("https://langflow.lfn.essedum.anuket.iol.unh.edu");
   }
 
   ngAfterViewInit(): void {
@@ -29,7 +29,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL("https://langflow.az.ad.idemo-ppc.com/").origin; } catch { return "https://langflow.az.ad.idemo-ppc.com/"; }
+      try { return new URL("https://langflow.lfn.essedum.anuket.iol.unh.edu").origin; } catch { return "https://langflow.lfn.essedum.anuket.iol.unh.edu"; }
     })();
 
     const postToIframe = () => {

@@ -1,0 +1,130 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aipns
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: buildkitd-config
+  namespace: aipns
+data:
+  buildkitd.toml: |
+    # Enable the OCI worker
+    [worker.oci]
+      enabled = true
+
+    # MicroK8s registry service inside the cluster.
+    # NOTE: This registry is HTTP (insecure) in typical MicroK8s setups.
+    [registry."registry.container-registry.svc.cluster.local:5000"]
+      insecure = true
+
+    # (Optional) If you ever address the registry via NodePort (NODE_IP:32000),
+    # uncomment and set your node IP; you can add multiple entries.
+    # [registry."10.200.111.200:32000"]
+    #   insecure = true
+
+    # Tweak HTTP timeouts for large layers
+    [http]
+      dial_timeout = "30s"
+      response_header_timeout = "30s"
+      idle_conn_timeout = "60s"
+
+    # Logging: keep it readable
+    [log]
+      format = "text"
+      level = "info"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildkitd
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildkitd
+  template:
+    metadata:
+      labels:
+        app: buildkitd
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        runAsNonRoot: false
+      containers:
+        - name: buildkitd
+          image: moby/buildkit:v0.13.2
+          args:
+            - --addr
+            - tcp://0.0.0.0:1234
+            - --config
+            - /etc/buildkit/buildkitd.toml
+          ports:
+            - containerPort: 1234
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: buildkitd-config
+              mountPath: /etc/buildkit
+              readOnly: true
+          resources:
+            requests:
+              cpu: "1"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            tcpSocket:
+              port: 1234
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: buildkitd-config
+          configMap:
+            name: buildkitd-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buildkitd
+  namespace: aipns
+spec:
+  selector:
+    app: buildkitd
+  ports:
+    - name: tcp
+      port: 1234
+      targetPort: 1234
+      protocol: TCP
+  type: ClusterIP
+---
+# Optional: restrict access to buildkitd only from your builder service pods.
+# Uncomment and adjust labels when you’re ready.
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: buildkitd-allow-builder
+#   namespace: aipns
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: buildkitd
+#   policyTypes:
+#     - Ingress
+#   ingress:
+#     - from:
+#         - namespaceSelector:
+#             matchLabels:
+#               kubernetes.io/metadata.name: aipns
+#           podSelector:
+#             matchLabels:
+#               app: builder-service   # <<< adjust to your builder service label
+#       ports:
+#         - protocol: TCP
+#           port: 1234
+

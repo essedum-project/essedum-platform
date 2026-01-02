@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app-example-com
+  namespace: default
+spec:
+  secretName: tls-app-example-com    # Secret used by Ingress
+  issuerRef:
+    name: lets-encrypt               # Matches ClusterIssuer name
+    kind: ClusterIssuer
+  commonName: app.example.com
+  dnsNames:
+    - app.example.com
+

@@ -1,7 +1,7 @@
 # Sample setup with keycloak
 security:
-  issuer-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM
-  jwk-set-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM/protocol/openid-connect/certs
+  issuer-uri: https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM
+  jwk-set-uri: https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM/protocol/openid-connect/certs
   clientId: essedum-45
   scope: email
   claim: email||admin

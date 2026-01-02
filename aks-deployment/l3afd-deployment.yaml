@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: l3afd-config
+  namespace: aipns
+data:
+  l3afd.cfg: |
+    [DEFAULT]
+
+    [l3afd]
+    pid-file: /var/run/l3afd.pid
+    datacenter: dummy
+    bpf-dir: /dev/shm
+    bpf-log-dir: 
+    kernel-major-version: 5
+    kernel-minor-version: 15
+    shutdown-timeout: 25s
+    http-client-timeout: 10s
+    max-ebpf-restart-count: 3
+    bpf-chaining-enabled: false
+    swagger-api-enabled: true
+    environment: DEV
+    BpfMapDefaultPath: /sys/fs/bpf
+    file-log-location: /var/log/l3afd.log
+    json-format-logs: true
+
+    [ebpf-repo]
+    url: file:///srv/l3afd	
+
+    [web]
+    metrics-addr: 0.0.0.0:8898
+    ebpf-poll-interval: 30s
+    n-metric-samples: 20
+
+    [xdp-root]
+    package-name: xdp-root
+    artifact: l3af_xdp_root.tar.gz
+    command: xdp_root
+    ingress-map-name: xdp_root_array
+    version: latest
+    object-file: xdp_root.bpf.o
+    entry-function-name: xdp_root
+
+    [tc-root]
+    package-name: tc-root
+    artifact: l3af_tc_root.tar.gz
+    ingress-map-name: tc_ingress_root_array
+    egress-map-name: tc_egress_root_array
+    command: tc_root
+    version: latest
+    ingress-object-file: tc_root_ingress.bpf.o
+    egress-object-file: tc_root_egress.bpf.o
+    ingress-entry-function-name: tc_ingress_root
+    egress-entry-function-name: tc_egress_root
+
+    [ebpf-chain-debug]
+    addr: 0.0.0.0:8899
+    enabled: true
+
+    [l3af-configs]
+    restapi-addr: 0.0.0.0:7080
+
+    [l3af-config-store]
+    filename: /var/l3afd/l3af-config.json
+
+    [mtls]
+    enabled: false
+
+    [graceful-restart]
+    time-to-restart: 7
+    basepath: /usr/local/l3afd
+    version-limit: 100
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: l3afd
+  namespace: aipns
+  labels:
+    app: l3afd
+spec:
+  selector:
+    matchLabels:
+      app: l3afd
+  template:
+    metadata:
+      labels:
+        app: l3afd
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: l3afd
+        image: 10.200.111.174:5000/l3afd:v8
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_RESOURCE
+            - SYS_PTRACE
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: bpf
+          mountPath: /sys/fs/bpf
+          mountPropagation: Bidirectional
+        - name: debug
+          mountPath: /sys/kernel/debug
+        - name: shm
+          mountPath: /dev/shm
+        - name: config
+          mountPath: /etc/l3afd
+          readOnly: true
+        - name: srv-l3afd
+          mountPath: /srv/l3afd
+      volumes:
+      - name: bpf
+        hostPath:
+          path: /sys/fs/bpf
+          type: DirectoryOrCreate
+      - name: debug
+        hostPath:
+          path: /sys/kernel/debug
+          type: Directory
+      - name: shm
+        hostPath:
+          path: /dev/shm
+          type: Directory
+      - name: config
+        configMap:
+          name: l3afd-config
+      - name: srv-l3afd
+        hostPath:
+          path: /srv/l3afd
+          type: DirectoryOrCreate
+      restartPolicy: Always
+      nodeSelector:
+        kubernetes.io/hostname: essedum-2

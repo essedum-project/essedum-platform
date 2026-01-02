@@ -1,0 +1,49 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: quay.io/minio/minio:latest
+        args:
+          - server
+          - /data
+        env:
+          - name: MINIO_ROOT_USER
+            value: "minioadmin"
+          - name: MINIO_ROOT_PASSWORD
+            value: "minioadmin123"
+        ports:
+          - containerPort: 9000
+        volumeMounts:
+          - name: minio-data
+            mountPath: /data
+      volumes:
+        - name: minio-data
+          emptyDir: {}   # Replace with PVC for persistence
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  namespace: aipns
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: 9000
+      targetPort: 9000
+  type: ClusterIP
+

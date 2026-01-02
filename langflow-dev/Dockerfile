@@ -78,10 +78,10 @@ ENV LANGFLOW_HOST=0.0.0.0
 ENV LANGFLOW_PORT=7860
 
 # Essedum Configuration - Can be overridden by Kubernetes deployment
-ENV ESSEDUM_BACKEND_URL=""
-ENV LANGFLOW_FRONTEND_URL=""
-ENV VITE_ESSEDUM_BACKEND_URL=""
-ENV ESSEDUM_BACKEND_SERVICE_URL=""
+ENV ESSEDUM_BACKEND_URL="https://lfn.essedum.anuket.iol.unh.edu"
+ENV LANGFLOW_FRONTEND_URL="https://langflow.lfn.essedum.anuket.iol.unh.edu"
+ENV VITE_ESSEDUM_BACKEND_URL="https://lfn.essedum.anuket.iol.unh.edu"
+ENV ESSEDUM_BACKEND_SERVICE_URL="http://essedum-backend-service.aipns.svc.cluster.local:8080"
 ENV ESSEDUM_AUTH_REQUIRED=true
 ENV ESSEDUM_TIMEOUT=30
 

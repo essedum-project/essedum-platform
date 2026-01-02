@@ -29,10 +29,6 @@ EXTRACT_DIR = "/tmp/source_code"
 #BUILDKIT_ADDR = os.getenv("BUILDKIT_ADDR", "tcp://buildkitd:1234")
 BUILDKIT_ADDR = "tcp://buildkitd.aipns.svc.cluster.local:1234"
 
-# Target architecture for deployed workloads (optional)
-# Set to "arm64", "amd64", or leave empty for no architecture constraint
-TARGET_ARCH = os.getenv("TARGET_ARCH", "arm64")
-
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
 
@@ -333,18 +329,11 @@ def create_deployment_object(name, image, namespace, secret_name=None):
         ),
     )
 
-    # Build pod spec with optional nodeSelector based on TARGET_ARCH
-    pod_spec_args = {
-        "containers": [container]
-    }
-    
-    # Add nodeSelector if TARGET_ARCH is specified
-    if TARGET_ARCH:
-        pod_spec_args["node_selector"] = {"kubernetes.io/arch": TARGET_ARCH}
-
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": name}),
-        spec=client.V1PodSpec(**pod_spec_args),
+        spec=client.V1PodSpec(
+            containers=[container],
+        ),
     )
 
 
@@ -361,6 +350,7 @@ def create_deployment_object(name, image, namespace, secret_name=None):
         spec=spec,
     )
     return deployment
+
 
 
 def find_existing_secret(k8s_core, namespace, candidates):

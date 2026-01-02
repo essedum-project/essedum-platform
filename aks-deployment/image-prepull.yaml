@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-prepull-mcp
+  namespace: aipns
+spec:
+  selector:
+    matchLabels:
+      app: image-prepull-mcp
+  template:
+    metadata:
+      labels:
+        app: image-prepull-mcp
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      initContainers:
+      - name: prepull
+        image: 10.200.111.174:5000/mcp-l3afd:v2
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'echo "Image pulled successfully" && sleep 5']
+      containers:
+      - name: pause
+        image: registry.k8s.io/pause:3.10
+        imagePullPolicy: IfNotPresent
