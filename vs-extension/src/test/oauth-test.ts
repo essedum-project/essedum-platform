@@ -4,32 +4,40 @@
  */
 
 import * as vscode from 'vscode';
-import { KeycloakAuthService, KeycloakConfig } from '../auth/keycloak-auth';
-import { OAuthAuthServer } from '../auth/oauth-auth-server';
+import { KeycloakAuthService, KeycloakConfig, OAuthAuthServer } from '../auth';
+import { environment } from '../config/environment';
+import * as ExtensionUtils from '../utils/extension-utils';
+
+const logger = ExtensionUtils.createLogger('OAuthTest');
 
 export async function testOAuthFlow(): Promise<void> {
-    console.log('🧪 Starting OAuth Authentication Test...');
+    logger.info('🧪 Starting OAuth Authentication Test...');
     
-    // Create a test configuration
+    // Create a test configuration using environment settings
     const testConfig: KeycloakConfig = {
-        issuerUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
-        clientId: 'essedum-45',
+        issuerUri: environment.networks.infosys.issuerUri,
+        clientId: environment.networks.infosys.clientId,
         scope: 'email'
     };
     
     try {
         // Create a mock extension context for testing
         const mockContext = {
+            extensionPath: vscode.extensions.getExtension('essedum.essedum-extension')?.extensionPath || __dirname,
+            globalState: {
+                get: async (key: string) => null,
+                update: async (key: string, value: any) => {}
+            },
             secrets: {
                 store: async (key: string, value: string) => {
-                    console.log(`📝 Mock: Storing secret ${key}`);
+                    logger.info(`📝 Mock: Storing secret ${key}`);
                 },
                 get: async (key: string) => {
-                    console.log(`🔍 Mock: Retrieving secret ${key}`);
+                    logger.info(`🔍 Mock: Retrieving secret ${key}`);
                     return null; // No existing tokens for fresh test
                 },
                 delete: async (key: string) => {
-                    console.log(`🗑️ Mock: Deleting secret ${key}`);
+                    logger.info(`🗑️ Mock: Deleting secret ${key}`);
                 }
             }
         } as any;
@@ -37,32 +45,32 @@ export async function testOAuthFlow(): Promise<void> {
         // Create the authentication service
         const authService = new KeycloakAuthService(testConfig, mockContext);
         
-        console.log('✅ Authentication service created successfully');
+        logger.info('✅ Authentication service created successfully');
         
         // Test 1: Check initial authentication status
-        console.log('\n🔍 Test 1: Checking initial authentication status...');
+        logger.info('\n🔍 Test 1: Checking initial authentication status...');
         const initialStatus = await authService.getAuthenticationStatus();
-        console.log('Initial status:', initialStatus);
+        logger.info('Initial status:', initialStatus);
         
         // Test 2: Check if token is valid (should be false initially)
-        console.log('\n🔍 Test 2: Checking token validity...');
+        logger.info('\n🔍 Test 2: Checking token validity...');
         const isValid = await authService.isTokenValid();
-        console.log('Token valid:', isValid);
+        logger.info('Token valid:', isValid);
         
         // Test 3: Try to get stored tokens (should be null initially)
-        console.log('\n🔍 Test 3: Checking stored tokens...');
+        logger.info('\n🔍 Test 3: Checking stored tokens...');
         const storedTokens = await authService.getStoredTokens();
-        console.log('Stored tokens:', storedTokens ? 'Found' : 'None');
+        logger.info('Stored tokens:', storedTokens ? 'Found' : 'None');
         
-        console.log('\n✅ OAuth Authentication Test completed successfully!');
-        console.log('\n📋 Test Results Summary:');
-        console.log(`   • Authentication service initialization: ✅ Success`);
-        console.log(`   • Initial authentication status: ${initialStatus.isAuthenticated ? '✅' : '❌'} ${initialStatus.isAuthenticated ? 'Authenticated' : 'Not authenticated'}`);
-        console.log(`   • Token validity check: ${isValid ? '✅' : '❌'} ${isValid ? 'Valid' : 'Invalid/Missing'}`);
-        console.log(`   • Stored tokens check: ${storedTokens ? '✅' : '❌'} ${storedTokens ? 'Found' : 'None found'}`);
+        logger.info('\n✅ OAuth Authentication Test completed successfully!');
+        logger.info('\n📋 Test Results Summary:');
+        logger.info(`   • Authentication service initialization: ✅ Success`);
+        logger.info(`   • Initial authentication status: ${initialStatus.isAuthenticated ? '✅' : '❌'} ${initialStatus.isAuthenticated ? 'Authenticated' : 'Not authenticated'}`);
+        logger.info(`   • Token validity check: ${isValid ? '✅' : '❌'} ${isValid ? 'Valid' : 'Invalid/Missing'}`);
+        logger.info(`   • Stored tokens check: ${storedTokens ? '✅' : '❌'} ${storedTokens ? 'Found' : 'None found'}`);
         
         // Note: We don't test the actual authentication flow here as it requires user interaction
-        console.log('\n📝 Note: To test the full OAuth flow, run the "Login to Essedum" command in VS Code');
+        logger.info('\n📝 Note: To test the full OAuth flow, run the "Login to Essedum" command in VS Code');
         
     } catch (error: any) {
         console.error('❌ OAuth Authentication Test failed:', error);
@@ -71,48 +79,52 @@ export async function testOAuthFlow(): Promise<void> {
 }
 
 export async function testOAuthServer(): Promise<void> {
-    console.log('🧪 Starting OAuth Server Test...');
+    logger.info('🧪 Starting OAuth Server Test...');
     
     try {
+        // Get extension context for testing
+        // Note: In actual tests, this should be injected or mocked
+        const mockExtensionPath = vscode.extensions.getExtension('essedum.essedum-extension')?.extensionPath || __dirname;
+        
         // Create OAuth server instance
-        const oauthServer = new OAuthAuthServer();
-        console.log('✅ OAuth server created successfully');
+        const oauthServer = new OAuthAuthServer(mockExtensionPath);
+        logger.info('✅ OAuth server created successfully');
         
         // Test PKCE generation
-        console.log('\n🔍 Testing PKCE generation...');
+        logger.info('\n🔍 Testing PKCE generation...');
         const pkce = oauthServer.generatePKCE();
-        console.log('PKCE Challenge generated:');
-        console.log(`   • Code Verifier length: ${pkce.codeVerifier.length} chars`);
-        console.log(`   • Code Challenge length: ${pkce.codeChallenge.length} chars`);
-        console.log(`   • Code Verifier format: ${/^[A-Za-z0-9_-]+$/.test(pkce.codeVerifier) ? '✅ Valid' : '❌ Invalid'}`);
-        console.log(`   • Code Challenge format: ${/^[A-Za-z0-9_-]+$/.test(pkce.codeChallenge) ? '✅ Valid' : '❌ Invalid'}`);
+        logger.info('PKCE Challenge generated:');
+        logger.info(`   • Code Verifier length: ${pkce.codeVerifier.length} chars`);
+        logger.info(`   • Code Challenge length: ${pkce.codeChallenge.length} chars`);
+        logger.info(`   • Code Verifier format: ${/^[A-Za-z0-9_-]+$/.test(pkce.codeVerifier) ? '✅ Valid' : '❌ Invalid'}`);
+        logger.info(`   • Code Challenge format: ${/^[A-Za-z0-9_-]+$/.test(pkce.codeChallenge) ? '✅ Valid' : '❌ Invalid'}`);
         
         // Test state generation
-        console.log('\n🔍 Testing state generation...');
+        logger.info('\n🔍 Testing state generation...');
         const state1 = oauthServer.generateState();
         const state2 = oauthServer.generateState();
-        console.log(`State 1: ${state1} (length: ${state1.length})`);
-        console.log(`State 2: ${state2} (length: ${state2.length})`);
-        console.log(`States unique: ${state1 !== state2 ? '✅ Yes' : '❌ No'}`);
+        logger.info(`State 1: ${state1} (length: ${state1.length})`);
+        logger.info(`State 2: ${state2} (length: ${state2.length})`);
+        logger.info(`States unique: ${state1 !== state2 ? '✅ Yes' : '❌ No'}`);
         
         // Test redirect URI
-        console.log('\n🔍 Testing redirect URI...');
+        logger.info('\n🔍 Testing redirect URI...');
         const redirectUri = oauthServer.getRedirectUri();
-        console.log(`Redirect URI: ${redirectUri}`);
-        console.log(`URI format: ${redirectUri.startsWith('http://localhost:') ? '✅ Valid' : '❌ Invalid'}`);
+        logger.info(`Redirect URI: ${redirectUri}`);
+        logger.info(`URI format: ${redirectUri.startsWith('http://localhost:') ? '✅ Valid' : '❌ Invalid'}`);
         
         // Test server status
-        console.log('\n🔍 Testing server status...');
+        logger.info('\n🔍 Testing server status...');
         const isRunning = oauthServer.isRunning();
-        console.log(`Server running: ${isRunning ? '✅ Yes' : '❌ No'}`);
+        logger.info(`Server running: ${isRunning ? '✅ Yes' : '❌ No'}`);
         
-        console.log('\n✅ OAuth Server Test completed successfully!');
-        console.log('\n📋 Test Results Summary:');
-        console.log(`   • OAuth server initialization: ✅ Success`);
-        console.log(`   • PKCE generation: ✅ Working`);
-        console.log(`   • State generation: ✅ Working`);
-        console.log(`   • Redirect URI: ✅ Valid`);
-        console.log(`   • Server status check: ✅ Working`);
+        logger.info('\n✅ OAuth Server Test completed successfully!');
+        logger.info('\n📋 Test Results Summary:');
+        logger.info(`   • OAuth server initialization: ✅ Success`);
+        logger.info(`   • PKCE generation: ✅ Working`);
+        logger.info(`   • State generation: ✅ Working`);
+        logger.info(`   • Redirect URI: ✅ Valid`);
+        logger.info(`   • Server status check: ✅ Working`);
         
     } catch (error: any) {
         console.error('❌ OAuth Server Test failed:', error);
@@ -124,26 +136,26 @@ export async function testOAuthServer(): Promise<void> {
  * Run all OAuth-related tests
  */
 export async function runAllOAuthTests(): Promise<void> {
-    console.log('🧪 Running All OAuth Tests...\n');
+    logger.info('🧪 Running All OAuth Tests...\n');
     
     try {
         await testOAuthServer();
-        console.log('\n' + '='.repeat(50) + '\n');
+        logger.info('\n' + '='.repeat(50) + '\n');
         await testOAuthFlow();
         
-        console.log('\n🎉 All OAuth tests completed successfully!');
-        console.log('\n🚀 The improved authentication system is ready to use!');
-        console.log('\n📋 Next Steps:');
-        console.log('   1. Restart VS Code to load the new authentication system');
-        console.log('   2. Run "Login to Essedum" command to test the OAuth flow');
-        console.log('   3. Verify that authentication works with your Keycloak server');
+        logger.info('\n🎉 All OAuth tests completed successfully!');
+        logger.info('\n🚀 The improved authentication system is ready to use!');
+        logger.info('\n📋 Next Steps:');
+        logger.info('   1. Restart VS Code to load the new authentication system');
+        logger.info('   2. Run "Login to Essedum" command to test the OAuth flow');
+        logger.info('   3. Verify that authentication works with your Keycloak server');
         
     } catch (error: any) {
         console.error('\n❌ OAuth test suite failed:', error);
-        console.log('\n🔧 Troubleshooting:');
-        console.log('   1. Check that all dependencies are installed');
-        console.log('   2. Verify TypeScript compilation completed successfully');
-        console.log('   3. Ensure VS Code version meets requirements (1.103.0+)');
-        console.log('   4. Check the VS Code Developer Console for additional error details');
+        logger.info('\n🔧 Troubleshooting:');
+        logger.info('   1. Check that all dependencies are installed');
+        logger.info('   2. Verify TypeScript compilation completed successfully');
+        logger.info('   3. Ensure VS Code version meets requirements (1.103.0+)');
+        logger.info('   4. Check the VS Code Developer Console for additional error details');
     }
 }

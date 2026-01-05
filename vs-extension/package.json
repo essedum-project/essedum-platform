@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "0.0.16",
+  "version": "1.0.22",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -32,6 +32,14 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "chatParticipants": [
+      {
+        "id": "claude-code",
+        "name": "Claude-Code",
+        "description": "AI coding assistant powered by Claude",
+        "isSticky": true
+      }
+    ],
     "commands": [
       {
         "command": "essedum.openSidebar",
@@ -76,6 +84,23 @@
       {
         "command": "essedum.debugUpload",
         "title": "Debug Upload Endpoints"
+      },
+      {
+        "command": "essedum.showNavigation",
+        "title": "Show Navigation Menu"
+      },
+      {
+        "command": "essedum.showPipeline",
+        "title": "Show Pipeline Screen"
+      },
+      {
+        "command": "essedum.showPipelineAgent",
+        "title": "Show Pipeline Agent Screen"
+      },
+      {
+        "command": "essedum.backToNavigation",
+        "title": "Back to Navigation",
+        "icon": "$(arrow-left)"
       }
     ],
     "menus": {
@@ -104,8 +129,13 @@
       "view/title": [
         {
           "command": "essedum.logout",
-          "when": "view == essedum-sidebar && essedum.isAuthenticated",
+          "when": "(view == essedum-sidebar || view == essedum-pipeline || view == essedum-pipeline-agent || view == essedum-navigation) && essedum.isAuthenticated",
           "group": "navigation@1"
+        },
+        {
+          "command": "essedum.backToNavigation",
+          "when": "(view == essedum-pipeline || view == essedum-pipeline-agent) && essedum.isAuthenticated",
+          "group": "navigation@2"
         }
       ]
     },
@@ -135,10 +165,31 @@
           "icon": "$(key)"
         },
         {
+          "id": "essedum-navigation",
+          "name": "Navigation",
+          "type": "webview",
+          "when": "essedum.isAuthenticated && essedum.showNavigation",
+          "icon": "$(home)"
+        },
+        {
+          "id": "essedum-pipeline",
+          "name": "Pipeline",
+          "type": "webview",
+          "when": "essedum.isAuthenticated && essedum.showPipeline",
+          "icon": "$(database)"
+        },
+        {
+          "id": "essedum-pipeline-agent",
+          "name": "Pipeline Agent",
+          "type": "webview",
+          "when": "essedum.isAuthenticated && essedum.showPipelineAgent",
+          "icon": "$(robot)"
+        },
+        {
           "id": "essedum-sidebar",
           "name": "Essedum AI Platform",
           "type": "webview",
-          "when": "essedum.isAuthenticated",
+          "when": "essedum.isAuthenticated && !essedum.showNavigation && !essedum.showPipeline && !essedum.showPipelineAgent",
           "icon": "$(home)"
         }
       ],
@@ -184,7 +235,7 @@
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
     "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "package": "webpack --mode production --devtool false",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
@@ -194,6 +245,7 @@
     "package-extension": "vsce package"
   },
   "devDependencies": {
+    "@types/archiver": "^7.0.0",
     "@types/crypto-js": "^4.2.2",
     "@types/form-data": "^2.2.1",
     "@types/mocha": "^10.0.10",
@@ -211,6 +263,8 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "adm-zip": "^0.5.10",
+    "archiver": "^7.0.1",
     "axios": "^1.6.7",
     "crypto-js": "^4.2.0",
     "form-data": "^4.0.4",

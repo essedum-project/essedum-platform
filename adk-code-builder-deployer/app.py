@@ -18,20 +18,15 @@ socketio = SocketIO(
     async_mode="eventlet",
     ping_interval=25,
     ping_timeout=60,
-    logger=True,           
-    engineio_logger=True   
+    logger=True,           # <--- add
+    engineio_logger=True   # <--- add
 )
 
 
 
 DOWNLOAD_DIR = "/tmp/downloads"
 EXTRACT_DIR = "/tmp/source_code"
-#BUILDKIT_ADDR = os.getenv("BUILDKIT_ADDR", "tcp://buildkitd:1234")
-BUILDKIT_ADDR = "tcp://buildkitd.aipns.svc.cluster.local:1234"
-
-# Target architecture for deployed workloads (optional)
-# Set to "arm64", "amd64", or leave empty for no architecture constraint
-TARGET_ARCH = os.getenv("TARGET_ARCH", "arm64")
+BUILDKIT_ADDR = os.getenv("BUILDKIT_ADDR", "tcp://buildkitd:1234")
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
@@ -66,10 +61,11 @@ def handle_pipeline_trigger(data):
     """
     Expected JSON 'data':
     {
-      "target_image_tag": "...",
-      "bucket_name": "...",
-      "file_path": "...",
+      "minio_endpoint": "...", "access_key": "...", "secret_key": "...",
+      "bucket_name": "...", "file_path": "...",
+      "target_image_tag": "acrreq0762935.azurecr.io/app:v1",
       "deployment_name": "runner-service",
+      "namespace": "aipns"   # optional
     }
     """
     try:
@@ -97,11 +93,14 @@ def handle_pipeline_trigger(data):
         deploy_name = data["deployment_name"]
         target_namespace = data.get("namespace", "aipns")
 
-        
-        base_repo = f"registry.container-registry.svc.cluster.local:5000/{deploy_name}"
+
+        base_repo = data["target_image_tag"].split(":")[0]  # e.g., acr.../test-adk-app
+        #tag  =  data["target_image_tag"].split(":")[1]
+        #if not acr_tag_exists("acrreq0762935.azurecr.io", base_repo, tag, "/root/.docker/config.json"):
+         #raise Exception(f"Push check failed: {image_tag} not present in ACR")
+
         uniq_tag  = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
-        push_image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., ...:v1-20251217-1905
-        deploy_image_tag = push_image_tag  # Use the same in-cluster registry for deployment
+        image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., ...:v1-20251217-1905
 
 
         # 3) UNZIP
@@ -170,27 +169,27 @@ def handle_pipeline_trigger(data):
         else:
              # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
              fallback_candidates = [
+                     data.get("secret_name"),
                      secret_name,
                      "adk-global-secrets",
                      ]
-             
-             fallback = find_existing_secret(k8s_core, target_namespace, fallback_candidates)
-             secret_to_use = fallback if fallback else None
-
 
         # 6) BUILD & PUSH (BuildKit)
-        log_to_client(f"Starting BuildKit for {push_image_tag}...", step="BUILD")
+        log_to_client(f"Starting BuildKit for {image_tag}...", step="BUILD")
 
-        
         cmd = [
-            "buildctl", "--addr", BUILDKIT_ADDR,
+            "buildctl",
+            "--addr",
+            BUILDKIT_ADDR,
             "build",
-            "--frontend", "dockerfile.v0",
-            "--local", f"context={build_context_path}",
-            "--local", f"dockerfile={build_context_path}",
+            "--frontend",
+            "dockerfile.v0",
+            "--local",
+            f"context={build_context_path}",
+            "--local",
+            f"dockerfile={build_context_path}",
             "--output",
-            # multiple names + allow HTTP registry push
-            f"type=image,name={push_image_tag},push=true,registry.insecure=true",
+            f"type=image,name={image_tag},push=true",
         ]
 
         process = subprocess.Popen(
@@ -207,13 +206,13 @@ def handle_pipeline_trigger(data):
         if return_code != 0:
             raise Exception("Buildctl failed. Check build logs.")
 
-        log_to_client("Build and Push to Registry Successful", step="BUILD")
+        log_to_client("Build and Push to ACR Registry Successful", step="BUILD")
 
         # 7) DEPLOY TO K8S
         secret_to_use = secret_name if has_secrets else None
 
         log_to_client(
-            f"Deploying {deploy_image_tag} to {deploy_name} in {target_namespace}...",
+            f"Deploying {image_tag} to {deploy_name} in {target_namespace}...",
             step="DEPLOY",
         )
 
@@ -230,7 +229,7 @@ def handle_pipeline_trigger(data):
                 "spec": {
                     "template": {
                         "spec": {
-                            "containers": [{"name": "app-container", "image": deploy_image_tag}]
+                            "containers": [{"name": "app-container", "image": image_tag}]
                         }
                     }
                 }
@@ -244,8 +243,8 @@ def handle_pipeline_trigger(data):
                 log_to_client(
                     "Deployment not found. Creating new deployment...", step="DEPLOY"
                 )
-                deployment_obj= create_deployment_object(
-                    deploy_name, deploy_image_tag, target_namespace, secret_to_use
+                deployment_obj = create_deployment_object(
+                    deploy_name, image_tag, target_namespace, secret_to_use
                 )
                 k8s_apps.create_namespaced_deployment(
                     namespace=target_namespace, body=deployment_obj
@@ -259,16 +258,9 @@ def handle_pipeline_trigger(data):
             k8s_core.read_namespaced_service(name=deploy_name, namespace=target_namespace)
             # Optional: patch to correct targetPort if needed
             k8s_core.patch_namespaced_service(
-                name=deploy_name, 
-                namespace=target_namespace,
-                body={
-                    "spec": {
-                        "ports": [
-                            {"name":"http","port":80,"targetPort":5000}
-                        ],
-                        "selector": {"app": deploy_name}
-                    }
-                }
+                name=deploy_name, namespace=target_namespace,
+                body={"spec": {"ports": [{"name":"http","port":80,"targetPort":5000}],
+                               "selector": {"app": deploy_name}}}
             )
 
         except client.exceptions.ApiException as e:
@@ -333,18 +325,12 @@ def create_deployment_object(name, image, namespace, secret_name=None):
         ),
     )
 
-    # Build pod spec with optional nodeSelector based on TARGET_ARCH
-    pod_spec_args = {
-        "containers": [container]
-    }
-    
-    # Add nodeSelector if TARGET_ARCH is specified
-    if TARGET_ARCH:
-        pod_spec_args["node_selector"] = {"kubernetes.io/arch": TARGET_ARCH}
-
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": name}),
-        spec=client.V1PodSpec(**pod_spec_args),
+        spec=client.V1PodSpec(
+            containers=[container],
+            image_pull_secrets=[client.V1LocalObjectReference(name="regcred")],  # << add
+        ),
     )
 
 
@@ -361,6 +347,7 @@ def create_deployment_object(name, image, namespace, secret_name=None):
         spec=spec,
     )
     return deployment
+
 
 
 def find_existing_secret(k8s_core, namespace, candidates):

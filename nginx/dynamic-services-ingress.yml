@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
-  - host: lfn.essedum.anuket.iol.unh.edu
+  - host: essedum.az.ad.idemo-ppc.com
     http:
       paths:
       - path: /apps(/|$)(.*)

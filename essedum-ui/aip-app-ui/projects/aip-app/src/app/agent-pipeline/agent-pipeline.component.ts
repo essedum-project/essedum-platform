@@ -18,6 +18,7 @@ import {
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
 import { StreamingServices } from '../streaming-services/streaming-service';
+import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import {
   DynamicParamsGrid,
   DynamicSecretsGrid,
@@ -93,7 +94,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   selectedAgent: AgentCard | null = null;
 
   // Card title
-  cardTitle = 'Agent Pipeline';
+  cardTitle = 'Agent Pipelines';
   lastRefreshedTime: Date | null = null;
 
   script: any[] = [];
@@ -123,6 +124,20 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   private getOrganization(): string {
     return localStorage.getItem('organisation') || 'leo1311';
   }
+  
+  /**
+   * Get consistent organization for both save and load operations
+   */
+  private getConsistentOrganization(): string {
+    // Priority: streamItem.organization > localStorage > default
+    const streamOrg = this.streamItem?.organization;
+    const localOrg = localStorage.getItem('organisation');
+    const defaultOrg = 'leo1311';
+    
+    const result = streamOrg || localOrg || defaultOrg;
+    
+    return result;
+  }
 
   /**
    * Get the environment URL from the injected baseUrl
@@ -150,7 +165,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Handle if fileName comes as an array
     if (Array.isArray(fileName)) {
       cleanName = fileName[0] || '';
-      console.log('   Filename was array, extracted first element:', cleanName);
     }
     
     // Handle string format
@@ -162,12 +176,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           const parsed = JSON.parse(cleanName);
           if (Array.isArray(parsed) && parsed.length > 0) {
             cleanName = parsed[0];
-            console.log('   Parsed filename from JSON array:', cleanName);
           }
         } catch (e) {
           // Manual cleanup if JSON parsing fails
           cleanName = cleanName.slice(1, -1).replace(/[\"\'\']/g, '').trim();
-          console.log('   Manually cleaned filename:', cleanName);
         }
       }
       
@@ -175,7 +187,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       cleanName = cleanName.replace(/[\"\'\']/g, '').trim();
     }
     
-    console.log('   Final cleaned filename:', { original: fileName, cleaned: cleanName });
     return cleanName;
   }
 
@@ -245,6 +256,45 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   useCustomCommit = false;
   commitMessage = '';
   isPushing = false;
+
+  // Upload agent files functionality
+  isUploadingFiles = false;
+  showUploadDialog = false;
+  selectedZipFile: File | null = null;
+
+  // MCP Pipeline Mode Support
+  pipelineMode: 'agent' | 'mcp' = 'agent';
+  mcpJsonConfig: string = '';
+  private hasLoadedApiContent: boolean = false; // Flag to track if API content has been loaded
+  
+  // Script modification tracking
+  isScriptModified = false;
+  originalScriptContent = '';
+
+  // Default MCP JSON configuration template
+  private defaultMcpConfig = {
+    "name": "sample-mcp-server",
+    "version": "1.0.0",
+    "description": "Sample MCP Server Configuration",
+    "tools": [
+      {
+        "name": "sample_tool",
+        "description": "A sample MCP tool",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input parameter for the tool"
+            }
+          },
+          "required": ["input"]
+        }
+      }
+    ],
+    "resources": [],
+    "prompts": []
+  };
 
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
@@ -335,6 +385,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   pendingAction: (() => void) | null = null;
   userModifiedLines: Set<number> = new Set();
   scrollContainer: HTMLElement | null = null;
+  
+  // Script unsaved changes dialog
+  showScriptUnsavedDialog = false;
+  pendingScriptAction: (() => void) | null = null;
+  
+  
 
   // Drag and Drop functionality
   isDragging = false;
@@ -370,7 +426,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private http: HttpClient
   ) {
-    console.log('AgentPipelineComponent constructor - baseUrl:', this.baseUrl);
+    // Don't initialize mcpJsonConfig here - let it be set by API data loading
   }
 
   ngOnInit(): void {
@@ -385,35 +441,48 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     // Check if we have router state data with card information
     const historyState = history.state;
-    console.log('History state:', historyState);
     const cardFromState = historyState?.card;
+    
+    // Set pipeline mode from navigation state if available
+    if (historyState?.pipelineMode) {
+      this.pipelineMode = historyState.pipelineMode;
+      
+      // Set cardTitle based on pipeline mode
+      this.cardTitle = this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+      
+      // DO NOT initialize MCP config here - let the API load the real data first
+      // Default config will only be set if API call fails
+    }
     
     if (cardFromState && cardFromState.name) {
       // This is a real pipeline card from dashboard - use its cname for auto-loading
-      console.log('Real pipeline card detected:', cardFromState);
-      console.log('Card name from state:', cardFromState.name);
-      console.log('cardName from route:', this.cardName);
-      
       this.currentCname = cardFromState.name; // Use the card name as cname
       this.viewMode = 'detail';
+      
+      // Reset loading flags and content state for new card
+      this.resetLoadingState();
+      
+      // Update MCP filename if in MCP mode now that we have the actual cname
+      if (this.pipelineMode === 'mcp') {
+        this.scriptFileName = `${this.currentCname}.json`;
+      }
       
       // Set pipeline alias for display
       if (historyState?.pipelineAlias) {
         this.pipelineAlias = historyState.pipelineAlias;
       }
       
-      console.log('About to call autoLoadAgentDataForPipelineCard with cname:', this.currentCname);
-      
       // Trigger auto-loading for real pipeline cards
       this.autoLoadAgentDataForPipelineCard();
     } else {
       // Fall back to old flow for hardcoded agent cards or when no state data
-      console.log('No card state found, falling back to old flow. cardName:', this.cardName);
+      
+      // Reset loading flags for new navigation
+      this.resetLoadingState();
       
       // Also try using cardName as currentCname for the new APIs
       if (this.cardName) {
         this.currentCname = this.cardName;
-        console.log('Using cardName as currentCname:', this.currentCname);
         this.autoLoadAgentDataForPipelineCard();
       } else {
         this.getStreamService();
@@ -421,12 +490,50 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
     
     this.getPipelineByName();
+    
+    // Add beforeunload protection for unsaved changes
+    window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+  }
+  
+  /**
+   * Handle browser navigation/refresh with unsaved changes
+   */
+  handleBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isScriptModified) {
+      event.preventDefault();
+      event.returnValue = 'You have unsaved changes in your configuration. Are you sure you want to leave?';
+      return event.returnValue;
+    }
+  }
+  
+  /**
+   * Generic method to check for unsaved changes before any navigation
+   */
+  checkUnsavedChanges(action: () => void): void {
+    if (this.isScriptModified) {
+      console.log('Unsaved changes detected, showing confirmation dialog');
+      this.showScriptUnsavedChangesDialog(action);
+    } else {
+      // No unsaved changes, proceed immediately
+      action();
+    }
   }
 
   getStreamService() {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+
+      // Update MCP filename if in MCP mode with actual stream item name
+      if (this.pipelineMode === 'mcp') {
+        const actualName = res.name || this.cardName || 'mcp-config';
+        this.scriptFileName = `${actualName}.json`;
+      }
+
+      // Load saved JSON file content for script tab only if not already loading
+      if (!this.isLoadingJsonFile) {
+        this.loadJsonFileForScript();
+      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
@@ -453,10 +560,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           this.changeLang(this.data.filetype);
         }
 
-        if (this.data.files && this.data.files.length > 0) {
-          //  Don't read files here - let buildFileStructure handle it
-          const cleanedFileName = this.cleanFileName(this.data.files[0]);
-          this.readFile(cleanedFileName);
+        if (this.data.files && this.data.files.length > 0 && !this.isLoadingJsonFile) {
+          //  Don't read files here if we're already loading JSON - let buildFileStructure handle it
+          // Only read if we haven't already loaded content via the JSON loading mechanism
+          if (!this.hasLoadedApiContent) {
+            const cleanedFileName = this.cleanFileName(this.data.files[0]);
+            // Ensure we use consistent filename generation
+            const expectedFilename = `${this.currentCname}_${this.organisation}.json`;
+            if (cleanedFileName === expectedFilename) {
+              this.readFile(cleanedFileName);
+            }
+          }
         }
 
         if (this.data.files == null || this.data.files == undefined) {
@@ -480,7 +594,66 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     });
   }
 
-  changeLang(type) {
+  /**
+   * Reset loading state for new card navigation
+   */
+  private resetLoadingState(): void {
+    this.isLoadingJsonFile = false;
+    this.hasLoadedApiContent = false;
+  }
+
+  /**
+   * Generate consistent filename for API calls
+   */
+  private generateConsistentFilename(): string {
+    return `${this.currentCname}_${this.organisation}.json`;
+  }
+
+  /**
+   * Handle pipeline mode change between Agent and MCP
+   */
+  onPipelineModeChange(event: any): void {
+    const newMode = event.value;
+    
+    // Update the card title based on mode
+    this.cardTitle = newMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+    
+    // For MCP mode, initialize JSON config if empty and no API content loaded
+    if (newMode === 'mcp' && !this.mcpJsonConfig.trim() && !this.hasLoadedApiContent) {
+      this.mcpJsonConfig = JSON.stringify(this.defaultMcpConfig, null, 2);
+      // Use the actual cname or cardName for filename
+      const actualName = this.currentCname || this.cardName || 'mcp-config';
+      this.scriptFileName = `${actualName}.json`;
+    }
+    // For agent mode, keep existing script functionality unchanged
+    else if (newMode === 'agent') {
+      this.scriptFileName = this.getOriginalScriptFileName();
+    }
+  }
+
+  /**
+   * Handle MCP JSON configuration changes
+   */
+  onMcpJsonChange(newConfig: string): void {
+    this.mcpJsonConfig = newConfig;
+    // Mark as modified if needed for save functionality
+    // You can add validation here if needed
+  }
+
+  /**
+   * Get the original script file name for agent mode
+   */
+  private getOriginalScriptFileName(): string {
+    if (this.data && this.data.files && this.data.files.length > 0) {
+      return this.cleanFileName(this.data.files[0]);
+    }
+    return 'script.py'; // default fallback
+  }
+
+  /**
+   * Change language based on file type for script editor
+   */
+  changeLang(type: string): void {
     switch (type) {
       case 'Python2':
       case 'Python3':
@@ -514,8 +687,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     params = params.set('org', this.organisation);
     this.service.getPipelineByName(params).subscribe((res) => {
       console.log('res', res);
-      this.cardTitle = 'Agent Pipeline';
+      // Set cardTitle based on current pipeline mode
+      this.cardTitle = this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+      console.log('Card title set in getPipelineByName to:', this.cardTitle);
       this.card = res[0];
+      
+      // Update MCP filename if in MCP mode with actual pipeline data
+      if (this.pipelineMode === 'mcp' && res && res[0]) {
+        const actualName = res[0].name || this.cardName || 'mcp-config';
+        this.scriptFileName = `${actualName}.json`;
+        console.log('MCP filename updated from getPipelineByName:', this.scriptFileName);
+      }
     });
   }
 
@@ -531,7 +713,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.service.message('Uploaded Successfully', 'success');
       this.uploader.clearQueue();
       const cleanedResponse = this.cleanFileName(response);
-      this.readFile(cleanedResponse);
+      // Only read file if we're not already loading and haven't loaded content from API
+      if (!this.isLoadingJsonFile && !this.hasLoadedApiContent) {
+        this.readFile(cleanedResponse);
+      }
     }
   }
 
@@ -547,6 +732,25 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   readFile(filename: string, retryCount = 0) {
+    // Prevent duplicate calls if we're already loading
+    if (this.isLoadingJsonFile) {
+      console.log('Already loading JSON file, skipping readFile call');
+      return;
+    }
+
+    // Ensure we use the consistent filename for the current card
+    const expectedFilename = this.generateConsistentFilename();
+    if (filename !== expectedFilename) {
+      console.log(
+        'Filename mismatch - expected:',
+        expectedFilename,
+        'got:',
+        filename,
+        'using expected filename instead'
+      );
+      filename = expectedFilename;
+    }
+
     console.log(
       'Reading file:',
       filename,
@@ -571,6 +775,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Set loading flag to prevent duplicate calls
+    this.isLoadingJsonFile = true;
+    
     // Encode filename to handle special characters
     const encodedFilename = encodeURIComponent(filename);
     this.scriptFileName = filename;
@@ -583,11 +790,13 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (resp) => {
+          this.isLoadingJsonFile = false; // Clear loading flag
           console.log('File read response received for:', filename);
           try {
             const textDecoder = new TextDecoder('utf-8');
             this.script = textDecoder.decode(resp).split('\n');
             this.loadScript = true;
+            this.hasLoadedApiContent = true; // Mark that we've loaded content from API
             console.log(
               'Successfully loaded script with',
               this.script.length,
@@ -616,6 +825,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
+          this.isLoadingJsonFile = false; // Clear loading flag
           console.error(
             'Error while reading file:',
             filename,
@@ -797,7 +1007,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               } else {
                 // Add delay before reading file to ensure it's available on the server
                 setTimeout(() => {
-                  this.readFile(firstPyFile.name); // readFile now handles cleaning internally
+                  // Only read file if we're not already loading and haven't loaded content from API
+                  if (!this.isLoadingJsonFile && !this.hasLoadedApiContent) {
+                    this.readFile(firstPyFile.name); // readFile now handles cleaning internally
+                  }
                 }, 1000);
               }
             } else {
@@ -837,6 +1050,21 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   navigateBack(): void {
     console.log('Navigating back to agent-pipeline dashboard');
+    
+    // Check for unsaved script changes
+    if (this.isScriptModified) {
+      console.log('Unsaved script changes detected, showing confirmation dialog');
+      this.showScriptUnsavedChangesDialog(() => {
+        this.performNavigateBack();
+      });
+      return;
+    }
+    
+    // No unsaved changes, navigate immediately
+    this.performNavigateBack();
+  }
+  
+  private performNavigateBack(): void {
     // Reset all state first
     this.resetToDashboardState();
     
@@ -868,6 +1096,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.deploymentStatus = 'idle'; // Reset deployment status
     this.deploymentStatusMessage = ''; // Clear status message
     this.isPlaygroundEnabled = false; // Disable playground
+    this.isScriptModified = false; // Reset script modification state
+    this.originalScriptContent = ''; // Clear original script content
     this.clearFileSelection();
     console.log('Reset state for dashboard navigation');
   }
@@ -884,8 +1114,57 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   onAdd(): void {
-    console.log('Add new agent pipeline');
-    // TODO: Implement add functionality
+    console.log('Opening pipeline creation dialog from agent detail view. Mode:', this.pipelineMode);
+    
+    if (this.pipelineMode === 'mcp') {
+      console.log('Opening MCP Pipelines creation dialog');
+      
+      // Open the pipeline creation dialog with MCP-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'mcp-pipeline', // MCP-specific interface type
+          type: 'mcpServer', // MCP-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('MCP Pipelines created:', result);
+          this.service.message('MCP Pipelines created successfully!', 'success');
+          // Navigate back to dashboard to see the new pipeline
+          this.navigateBack();
+        }
+      });
+    } else {
+      console.log('Opening Agent Pipelines creation dialog');
+      
+      // Open the pipeline creation dialog with Agent-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'pipeline-agent', // Agent-specific interface type
+          type: 'AIAgent', // Agent-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Agent Pipelines created:', result);
+          this.service.message('Agent Pipelines created successfully!', 'success');
+          // Navigate back to dashboard to see the new pipeline
+          this.navigateBack();
+        }
+      });
+    }
   }
 
   onTagSelected(tags: any): void {
@@ -1159,21 +1438,49 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     this.isLoadingFiles = true;
+    console.log('Loading files for cname:', this.currentCname, 'mode:', this.pipelineMode);
 
+    // Use the same API - the backend will handle the type differentiation
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (apiResponse) => {
-        console.log('Building file tree from API response:', apiResponse);
-        this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
-        this.expandAllFolders(this.fileSystemData); // Expand all folders by default
+        console.log('API response for files:', apiResponse);
+        
+        if (apiResponse && Array.isArray(apiResponse) && apiResponse.length > 0) {
+          // Files found - enable codespace tab
+          console.log('Files found, enabling codespace tab');
+          this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
+          this.expandAllFolders(this.fileSystemData);
+          
+          // Update state to show files exist
+          this.hasGeneratedAgent = true;
+          this.isJsonProcessed = true;
+          
+        } else {
+          // No files found
+          console.log('No files found, maintaining script tab only');
+          this.fileSystemData = [];
+          this.hasGeneratedAgent = false;
+          this.isJsonProcessed = false;
+          
+          // Show warning message
+          const warningResponse = {
+            status: 'warning',
+            message: `No ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files found`
+          };
+          this.service.messageService(warningResponse, 'No Data Found');
+        }
+        
         this.isLoadingFiles = false;
       },
       error: (error) => {
-        console.error('Error loading agent files:', error);
+        console.error('Error loading files:', error);
         this.isLoadingFiles = false;
         this.fileSystemData = [];
+        this.hasGeneratedAgent = false;
+        this.isJsonProcessed = false;
 
         // Show error message to user
-        alert(`Failed to load agent files: ${error.message}`);
+        console.warn(`Failed to load ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files: ${error.message || 'Unknown error'}`);
       },
     });
   }
@@ -1188,7 +1495,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     console.log('Refreshing file structure for container:', this.currentCname);
     this.loadAgentFiles();
   }
-  
   // Track user modifications for neon green highlighting
   onUserContentChange(newContent: string): void {
     this.isUserModifiedContent = true;
@@ -1473,6 +1779,81 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       console.error('Failed to save file before proceeding:', error);
       // Don't proceed if save failed
     }
+  }
+  
+  /**
+   * Show script unsaved changes dialog
+   */
+  showScriptUnsavedChangesDialog(action: () => void): void {
+    this.showScriptUnsavedDialog = true;
+    this.pendingScriptAction = action;
+  }
+  
+  /**
+   * Cancel script unsaved dialog
+   */
+  cancelScriptUnsavedDialog(): void {
+    this.showScriptUnsavedDialog = false;
+    this.pendingScriptAction = null;
+  }
+  
+  /**
+   * Save script and proceed with pending action
+   */
+  async saveScriptAndProceed(): Promise<void> {
+    try {
+      await this.saveScriptConfiguration();
+      this.showScriptUnsavedDialog = false;
+      if (this.pendingScriptAction) {
+        this.pendingScriptAction();
+        this.pendingScriptAction = null;
+      }
+    } catch (error) {
+      console.error('Error saving script configuration:', error);
+    }
+  }
+  
+  /**
+   * Discard script changes and proceed
+   */
+  discardScriptAndProceed(): void {
+    console.log('Discarding script changes and continuing...');
+    
+    // Restore original content
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = this.originalScriptContent;
+    } else {
+      this.script = this.originalScriptContent.split('\n');
+    }
+    
+    this.isScriptModified = false;
+    this.showScriptUnsavedDialog = false;
+    
+    if (this.pendingScriptAction) {
+      this.pendingScriptAction();
+      this.pendingScriptAction = null;
+    }
+  }
+
+  onTabChange(event: any): void {
+    console.log('Tab change requested to index:', event.index);
+    
+    // Check for unsaved script changes before switching tabs
+    if (this.isScriptModified) {
+      console.log('Unsaved script changes detected during tab switch');
+      // Prevent the tab change by reverting to current tab
+      event.source.selectedIndex = event.source.selectedIndex;
+      
+      this.showScriptUnsavedChangesDialog(() => {
+        // After saving or discarding, allow the tab change
+        setTimeout(() => {
+          event.source.selectedIndex = event.index;
+        }, 100);
+      });
+      return;
+    }
+    
+    console.log(`Tab switched to index: ${event.index}`);
   }
 
   // Simulate byte array response from API
@@ -2352,7 +2733,7 @@ public class ZipController {
    * - Enabled when Essedum Codespace tab is visible (hasGeneratedAgent is true)
    */
   canRunAndDeploy(): boolean {
-    return this.hasGeneratedAgent && !this.isRunningAndDeploying;
+    return this.shouldShowRunPlaygroundButtons() && !this.isRunningAndDeploying;
   }
 
   /**
@@ -2365,14 +2746,73 @@ public class ZipController {
 
     this.isRunningAndDeploying = true;
     this.deploymentStatus = 'running';
-    this.deploymentStatusMessage = 'Deployment in progress...';
+    this.deploymentStatusMessage = 'Pushing files to MinIO...';
     this.isPlaygroundEnabled = false; // Disable playground during deployment
     
     // Clear previous console output - console only shows WebSocket data during deployment
     this.consoleOutput = [];
+    this.addToConsole('Starting deployment process...');
+    this.addToConsole('Step 1: Pushing files to MinIO storage...');
     
-    // Initialize WebSocket connection
-    this.initializeWebSocket();
+    // ALWAYS call pushToMinio first before WebSocket APIs
+    this.pushToMinioThenDeploy();
+  }
+
+  /**
+   * Push to MinIO first, then start WebSocket deployment pipeline
+   */
+  private pushToMinioThenDeploy(): void {
+    if (!this.currentCname) {
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'No container name available for deployment';
+      this.isRunningAndDeploying = false;
+      return;
+    }
+    
+    // Get organization from localStorage or use default
+    const organization = localStorage.getItem('organisation') || 'leo1311';
+    
+    console.log('Step 1: Pushing to MinIO before WebSocket deployment:', {
+      cname: this.currentCname,
+      organization: organization
+    });
+    
+    // Call the MinIO upload API first
+    this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
+      next: (response) => {
+        console.log('MinIO push successful, proceeding to WebSocket deployment:', response);
+        this.addToConsole(' Files successfully pushed to MinIO storage');
+        this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+        
+        // Update status message and proceed to WebSocket
+        this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
+        
+        // Now initialize WebSocket connection for deployment
+        this.initializeWebSocket();
+      },
+      error: (error) => {
+        console.error('MinIO push failed, cannot proceed with deployment:', error);
+        
+        // Check if this is a parsing error with 200 status (success but unparseable response)
+        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
+            (error.message?.includes('parsing') || error.error?.text)) {
+          console.log('API returned 200 but response parsing failed - treating as success and proceeding');
+          this.addToConsole('✓ Files successfully pushed to MinIO storage (response parsing issue ignored)');
+          this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+          
+          // Proceed with deployment since the push was actually successful
+          this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
+          this.initializeWebSocket();
+        } else {
+          // Real error - stop deployment
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
+          this.addToConsole('✗ Failed to push files to MinIO storage');
+          this.addToConsole(`Error: ${error.message || 'Unknown error'}`);
+          this.isRunningAndDeploying = false;
+        }
+      }
+    });
   }
 
   /**
@@ -2445,7 +2885,7 @@ public class ZipController {
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
 		  
-	this.socket = io('https://lfn.essedum.anuket.iol.unh.edu', {
+	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
@@ -2456,23 +2896,63 @@ public class ZipController {
 	});  
         // Connection successful
         this.socket.on('connect', () => {
-          console.log('  Step 4: WebSocket connected! Preparing payload...');
-          // Trigger the pipeline immediately upon connection with fetched credentials
+          console.log('  Step 4: WebSocket connected! Fetching deployment alias...');
+          // First fetch the streaming service to get the alias for deployment_name
           const organization = this.getOrganization();
-          const payload = {
-            bucket_name: 'aiptest',
-            file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-            target_image_tag: 'localhost:32000/test-adk-app:v1',
-            deployment_name: 'runner-service',
-            cname: this.currentCname ,
-            organization: organization
-       
-          };
-         
-          console.log('  Step 5: Sending start_pipeline event with payload:', payload);
-          this.addToConsole(`Starting pipeline with file path: ${payload.file_path}`);
-          this.socket?.emit('start_pipeline', payload);
-          console.log('  Step 6: start_pipeline event emitted to WebSocket');
+          const streamingServiceUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+          
+          console.log('  Step 4.1: Fetching streaming service alias from:', streamingServiceUrl);
+          this.addToConsole(`Fetching deployment configuration...`);
+          
+          this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
+            console.log('  Step 4.2: Streaming service response:', streamingResponse);
+            
+            // Extract alias from the response
+            const deploymentAlias = streamingResponse?.alias || 'runner-service'; // fallback to default
+            console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
+            
+            // Now prepare payload with dynamic deployment_name
+            const apiParams = this.getApiParametersForMode();
+            
+            const payload = {
+              minio_endpoint: 'http://100.78.49.20:9000',
+              bucket_name: 'aiptest',
+              file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
+              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              deployment_name: deploymentAlias, // Dynamic value from API
+              cname: this.currentCname,
+              organization: organization,
+              type: apiParams.type,
+              interface: apiParams.interface
+            };
+           
+            console.log('  Step 5: Sending start_pipeline event with dynamic payload:', payload);
+            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentAlias}`);
+            this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
+            this.socket?.emit('start_pipeline', payload);
+            console.log('  Step 6: start_pipeline event emitted to WebSocket');
+          }).catch((error) => {
+            console.error('  ERROR: Failed to fetch streaming service alias:', error);
+            this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
+            
+            // Use fallback deployment_name if API call fails
+            const apiParams = this.getApiParametersForMode();
+            const fallbackPayload = {
+              minio_endpoint: 'http://100.78.49.20:9000',
+              bucket_name: 'aiptest',
+              file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
+              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              deployment_name: 'runner-service', // fallback value
+              cname: this.currentCname,
+              organization: organization,
+              type: apiParams.type,
+              interface: apiParams.interface
+            };
+            
+            console.log('  Step 5 (Fallback): Using fallback payload due to API error:', fallbackPayload);
+            this.addToConsole(`Using fallback deployment name: runner-service`);
+            this.socket?.emit('start_pipeline', fallbackPayload);
+          });
         });
  
         // Pipeline update events (high-level steps)
@@ -2670,6 +3150,129 @@ public class ZipController {
         }
       }
     });
+  }
+
+  /**
+   * Open file upload dialog for agent files
+   */
+  openUploadDialog(): void {
+    this.showUploadDialog = true;
+    this.selectedZipFile = null;
+  }
+
+  /**
+   * Close upload dialog and reset state
+   */
+  closeUploadDialog(): void {
+    this.showUploadDialog = false;
+    this.selectedZipFile = null;
+  }
+
+  /**
+   * Handle file selection in upload dialog
+   */
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.zip')) {
+      this.selectedZipFile = file;
+      console.log('Selected zip file:', file.name, 'Size:', file.size);
+    } else {
+      this.service.message('Please select a valid ZIP file', 'error');
+      this.selectedZipFile = null;
+    }
+  }
+
+  /**
+   * Upload selected zip file to server
+   */
+  uploadAgentFiles(): void {
+    if (!this.selectedZipFile || !this.currentCname) {
+      this.service.message('Please select a ZIP file', 'error');
+      return;
+    }
+
+    this.isUploadingFiles = true;
+    const organization = this.getOrganization();
+
+    console.log('Uploading files:', {
+      cname: this.currentCname,
+      organization: organization,
+      fileName: this.selectedZipFile.name,
+      fileSize: this.selectedZipFile.size,
+      mode: this.pipelineMode
+    });
+
+    // Call the upload API - the service should handle MCP vs Agent differentiation
+    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile).subscribe({
+      next: (response) => {
+        console.log('Upload successful:', response);
+        this.service.message(
+          `${this.pipelineMode === 'mcp' ? 'MCP server' : 'Agent'} files uploaded successfully!`, 
+          'success'
+        );
+        
+        // Close upload dialog
+        this.closeUploadDialog();
+        
+        // Enable codespace and load files
+        this.hasGeneratedAgent = true;
+        
+        // Load the uploaded files
+        setTimeout(() => {
+          this.loadAgentFiles();
+        }, 1000);
+        
+        this.isUploadingFiles = false;
+      },
+      error: (error) => {
+        console.error('Upload failed:', error);
+        let errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
+        
+        if (error?.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          }
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        
+        this.service.message(errorMessage, 'error');
+        this.isUploadingFiles = false;
+      }
+    });
+  }
+
+  /**
+   * Check if upload button should be shown (when no files exist yet)
+   */
+  shouldShowUploadButton(): boolean {
+    return !this.hasGeneratedAgent && !this.isLoadingFiles;
+  }
+
+  /**
+   * Get API parameters based on current pipeline mode
+   */
+  private getApiParametersForMode(): { type: string; interface: string } {
+    if (this.pipelineMode === 'mcp') {
+      return {
+        type: 'mcpServer',
+        interface: 'mcp-pipeline'
+      };
+    } else {
+      return {
+        type: 'AIAgent',
+        interface: 'pipeline-agent'
+      };
+    }
+  }
+
+  /**
+   * Check if run and playground buttons should be shown (only when files exist)
+   */
+  shouldShowRunPlaygroundButtons(): boolean {
+    return this.hasGeneratedAgent && this.fileSystemData && this.fileSystemData.length > 0;
   }
 
   // Methods removed - auto-loading enabled when viewing details
@@ -2956,7 +3559,7 @@ DELIVERABLES
    * Check if playground button should be enabled
    */
   canOpenPlayground(): boolean {
-    return this.hasGeneratedAgent && this.isPlaygroundEnabled && !this.isRunningAndDeploying;
+    return this.shouldShowRunPlaygroundButtons() && this.isPlaygroundEnabled && !this.isRunningAndDeploying;
   }
 
   // Playground methods
@@ -3347,12 +3950,14 @@ DELIVERABLES
     this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
     
-    // Ensure script content is empty for new agents - no placeholders
-    if (!this.loadScript || !this.script || this.script.length === 0) {
+    // Ensure script content is empty for new agents - but don't override API content
+    if (!this.hasLoadedApiContent && (!this.loadScript || !this.script || this.script.length === 0)) {
       this.script = [];
       this.scriptFileName = '';
       this.loadScript = true;
-      console.log('Set empty script content for new agent');
+      console.log('Set empty script content for new agent (no API content loaded)');
+    } else if (this.hasLoadedApiContent) {
+      console.log('Preserving API content during reset - not overriding script array');
     }
     
     console.log(
@@ -3388,6 +3993,9 @@ DELIVERABLES
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
+    
+    // THEN load JSON file from API for script tab (after reset)
+    this.loadJsonFileForScript();
 
     // Only call folder list API to check existence
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
@@ -3425,11 +4033,11 @@ DELIVERABLES
     console.log('Auto-loading pipeline agent data for cname:', this.currentCname);
     this.isLoadingFiles = true;
     
-    // Always load JSON file from API for script tab
-    this.loadJsonFileForScript();
-    
     // Reset state first
     this.resetToInitialStateForNewAgent();
+    
+    // THEN load JSON file from API for script tab (after reset)
+    this.loadJsonFileForScript();
 
     // Call folder list API first - using the cname as both cname and filename for the API
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
@@ -3461,96 +4069,539 @@ DELIVERABLES
     });
   }
 
-  // Load JSON file from API for script tab
+  // Add flag to prevent multiple simultaneous API calls
+  private isLoadingJsonFile = false;
+
+  // Load JSON file from API for script tab - ALWAYS call read API first
   private loadJsonFileForScript(): void {
-    // Ensure we have organisation from localStorage
-    if (!this.organisation) {
-      this.organisation = this.getOrganization();
+    // Prevent multiple simultaneous calls
+    if (this.isLoadingJsonFile) {
+      return;
     }
+
+    let orgToUse = this.getConsistentOrganization();
+    this.organisation = orgToUse;
     
-    if (!this.currentCname || !this.organisation) {
-      console.log('Missing required data for JSON file loading:', {
-        cname: this.currentCname,
-        organisation: this.organisation,
-        localStorage: localStorage.getItem('organisation')
-      });
-      // Show empty editor when no valid data found
+    if (!this.currentCname || !orgToUse) {
       this.script = [];
       this.scriptFileName = '';
       this.loadScript = true;
       return;
     }
 
-    // Create and clean the filename
-    const rawJsonFileName = `${this.currentCname}_${this.organisation}.json`;
-    const jsonFileName = this.cleanFileName(rawJsonFileName);
+    // Create consistent filename using the same method as other API calls
+    const jsonFileName = this.generateConsistentFilename();
     
-    console.log(' Making API call to read JSON file:', {
+    if (!this.currentCname || !orgToUse || !jsonFileName) {
+      this.script = [];
+      this.scriptFileName = jsonFileName || 'config.json';
+      this.loadScript = true;
+      return;
+    }
+    
+    // Set loading flag to prevent multiple calls
+    this.isLoadingJsonFile = true;
+    
+    console.log('🔍 Always calling read API first for script tab:', {
+      endpoint: `${this.baseUrl}/api/aip/file/create/${this.currentCname}/${orgToUse}/json?file=${jsonFileName}`,
       cname: this.currentCname,
-      organisation: this.organisation,
-      rawFileName: rawJsonFileName,
-      cleanedFileName: jsonFileName,
-      expectedUrl: `api/aip/file/read/${this.currentCname}/${this.organisation}?file=${jsonFileName}`
+      organization: orgToUse,
+      fileName: jsonFileName,
+      mode: this.pipelineMode
     });
     
-    this.service.readNativeFile(this.currentCname, this.organisation, jsonFileName).subscribe({
+    // ALWAYS call read API first - show whatever comes from API
+    this.service.readNativeFile(this.currentCname, orgToUse, jsonFileName).subscribe({
       next: (response) => {
-        console.log(' JSON file API response received:', {
-          responseType: typeof response,
-          isArrayBuffer: response instanceof ArrayBuffer,
-          responseLength: response instanceof ArrayBuffer ? response.byteLength : (typeof response === 'string' ? response.length : 'unknown')
-        });
+        this.isLoadingJsonFile = false; // Clear loading flag
         
         try {
-          // Convert arraybuffer response to string
           let jsonString = '';
           if (response instanceof ArrayBuffer) {
             const decoder = new TextDecoder('utf-8');
             jsonString = decoder.decode(response);
-            console.log('Decoded ArrayBuffer to string:', jsonString.substring(0, 200) + '...');
           } else if (typeof response === 'string') {
             jsonString = response;
-            console.log('Response is already string:', jsonString.substring(0, 200) + '...');
           } else {
             throw new Error('Invalid response format: ' + typeof response);
           }
           
+          console.log('📋 API returned content:', {
+            fileName: jsonFileName,
+            contentLength: jsonString.length,
+            hasContent: jsonString.trim().length > 0,
+            contentPreview: jsonString.substring(0, 100) + '...'
+          });
+          
+          // Always show what comes from API - even if empty or invalid
           this.script = jsonString.split('\n');
           this.scriptFileName = jsonFileName;
           this.loadScript = true;
-          console.log('Script tab updated with API JSON content, lines:', this.script.length);
+          this.originalScriptContent = jsonString;
+          this.isScriptModified = false;
+          this.hasLoadedApiContent = true; // Mark that we successfully loaded API content
+          
+          // For MCP mode, set the JSON config from API data
+          if (this.pipelineMode === 'mcp') {
+            this.mcpJsonConfig = jsonString;
+          }
+          
+          console.log('✅ Successfully loaded and displayed API content:', jsonFileName);
+          
+          if (this.cdr) {
+            this.cdr.detectChanges();
+          }
+          
+          if (this.pipelineMode === 'mcp') {
+            setTimeout(() => {
+              if (this.cdr) {
+                this.cdr.markForCheck();
+                this.cdr.detectChanges();
+              }
+            }, 100);
+          }
         } catch (error) {
-          console.error(' Error processing JSON response:', error);
-          // Show error message instead of fallback
-          this.script = ['Error: Could not load configuration file', 'File may not exist or server is unavailable', ''];
-          this.scriptFileName = 'Error - ' + jsonFileName;
+          console.error('Error processing API response:', error);
+          // Even on error, show empty content from API instead of defaults
+          this.script = [];
+          this.scriptFileName = jsonFileName;
           this.loadScript = true;
+          this.originalScriptContent = '';
+          this.isScriptModified = false;
+          
+          if (this.pipelineMode === 'mcp') {
+            this.mcpJsonConfig = '';
+          }
+          
+          if (this.cdr) {
+            this.cdr.detectChanges();
+          }
         }
       },
       error: (error) => {
-        console.error('Failed to load JSON file from API:', {
-          error: error,
+        this.isLoadingJsonFile = false; // Clear loading flag
+        
+        console.log('📄 Read API response (file not found):', {
           status: error.status,
-          message: error.message,
-          url: error.url
+          fileName: jsonFileName,
+          message: 'File does not exist yet - showing empty content for viewing'
         });
-        // Show error message instead of fallback
-        this.script = [
-          'Error: Could not load configuration file',
-          `Failed to load: ${jsonFileName}`,
-          '',
-          'Possible reasons:',
-          '- File does not exist on server',
-          '- Network connection issue', 
-          '- Server is unavailable',
-          '',
-          'Please check your network connection and try again.'
-        ];
-        this.scriptFileName = 'Error - Configuration Not Found';
+        
+        // For view details: show empty content when file doesn't exist
+        // Default configs are ONLY used during new card creation flow
+        this.script = [];
+        this.scriptFileName = jsonFileName;
         this.loadScript = true;
-        console.log('Showing error message instead of fallback content');
+        this.originalScriptContent = '';
+        this.isScriptModified = false;
+        
+        if (this.pipelineMode === 'mcp') {
+          this.mcpJsonConfig = '';
+        }
+        
+        if (this.cdr) {
+          this.cdr.detectChanges();
+        }
+        
+        console.log('📝 Showing empty script content - file not found in API');
       }
     });
+  }
+
+  /**
+   * Use default configuration ONLY for new card creation flow
+   * This should NOT be called during view details navigation
+   */
+  private useDefaultConfigurationForNewCard(fileName: string, defaultConfig: any): void {
+    console.log('🆕 Using default configuration for NEW CARD creation:', fileName);
+    const configString = JSON.stringify(defaultConfig, null, 2);
+    this.script = configString.split('\n');
+    this.scriptFileName = fileName;
+    this.loadScript = true;
+    this.originalScriptContent = configString;
+    this.isScriptModified = false;
+    
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = configString;
+    }
+    
+    if (this.cdr) {
+      this.cdr.detectChanges();
+    }
+    
+    console.log('📝 Set default configuration for new card creation flow');
+  }
+
+  /**
+   * Handle script content changes
+   */
+  onScriptContentChange(newContent: string): void {
+    this.script = newContent.split('\n');
+    
+    // Always update both script and mcpJsonConfig to keep them in sync
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = newContent;
+    }
+    
+    // Update the modification flag
+    this.isScriptModified = newContent !== this.originalScriptContent;
+    
+    console.log('Script content changed, isModified:', this.isScriptModified);
+  }
+
+  /**
+   * Get script content as string for agent mode
+   */
+  getScriptAsString(): string {
+    return this.script ? this.script.join('\n') : '';
+  }
+
+  /**
+   * Get the JSON config that should be displayed - ALWAYS prioritizes API data
+   * Empty content when no API data exists (for view details)
+   */
+  getDisplayedJsonConfig(): string {
+    // If we have loaded API content, always use mcpJsonConfig
+    if (this.hasLoadedApiContent && this.mcpJsonConfig && this.mcpJsonConfig.trim() !== '') {
+      console.log('📖 Displaying API content from read call');
+      return this.mcpJsonConfig;
+    }
+    
+    // If mcpJsonConfig is set (user edited content), use that
+    if (this.mcpJsonConfig && this.mcpJsonConfig.trim() !== '') {
+      return this.mcpJsonConfig;
+    }
+    
+    // For view details: show empty content when no API data exists
+    // Default templates are ONLY used during new card creation
+    console.log('📄 No API content found - showing empty content for view details');
+    return '';
+  }
+
+  /**
+   * Save script configuration to server
+   */
+  async saveScriptConfiguration(): Promise<void> {
+    if (!this.isScriptModified) {
+      return;
+    }
+
+    if (!this.streamItem) {
+      try {
+        await this.loadStreamItemForSave();
+      } catch (error) {
+        this.service.message('Unable to save: pipeline information not available', 'error');
+        return;
+      }
+    }
+
+    if (!this.streamItem) {
+      this.service.message('Unable to save: pipeline information not available', 'error');
+      return;
+    }
+
+    try {
+      console.log('Saving script configuration for:', {
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        mode: this.pipelineMode,
+        organization: this.streamItem.organization
+      });
+
+      // Get current content
+      const currentContent = this.pipelineMode === 'mcp' ? this.mcpJsonConfig : this.getScriptAsString();
+      
+      // Use consistent organization method
+      const orgToUse = this.getConsistentOrganization();
+      
+      // Create the filename for the JSON content
+      const fileName = this.pipelineMode === 'mcp' 
+        ? `${this.currentCname}_${orgToUse}.json`
+        : `${this.currentCname}_${orgToUse}.json`;
+
+      console.log('💾 Save configuration details:', {
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        mode: this.pipelineMode,
+        orgToUse: orgToUse,
+        fileName: fileName,
+        contentLength: currentContent.length,
+        contentPreview: currentContent.substring(0, 100) + '...'
+      });
+
+      // Prepare the update payload
+      const updatePayload = {
+        lastmodifiedby: sessionStorage.getItem('username') || sessionStorage.getItem('user') || 'user',
+        lastmodifieddate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        alias: this.streamItem.alias,
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        description: this.streamItem.description,
+        json_content: JSON.stringify({
+          elements: [{
+            attributes: {
+              filetype: 'json',
+              files: [fileName]
+            }
+          }]
+        }),
+        type: this.streamItem.type,
+        organization: orgToUse,
+        interfacetype: this.streamItem.interfacetype,
+        is_template: this.streamItem.is_template || false
+      };
+
+      console.log('Update payload:', updatePayload);
+
+      // First: Call the update API
+      await this.updateStreamingService(updatePayload);
+      
+      // Second: Upload the JSON file using the create API
+      await this.uploadJsonFile(currentContent, fileName);
+      
+      // Mark as saved
+      this.originalScriptContent = currentContent;
+      this.isScriptModified = false;
+      
+      // Show success message
+      this.service.message(`${this.pipelineMode.toUpperCase()} configuration saved and file uploaded successfully!`, 'success');
+      
+      console.log('🎉 Configuration saved and uploaded successfully:', {
+        fileName: fileName,
+        organization: orgToUse,
+        mode: this.pipelineMode,
+        cid: this.streamItem.cid
+      });
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      this.service.message('Failed to save configuration. Please try again.', 'error');
+    }
+  }
+  
+  /**
+   * Upload JSON file using the service's createNativeFile method
+   */
+  private async uploadJsonFile(content: string, fileName: string): Promise<any> {
+    if (!this.streamItem) {
+      throw new Error('StreamItem not available for file upload');
+    }
+
+    // Use consistent organization
+    const orgToUse = this.getConsistentOrganization();
+    
+    // Ensure content is valid JSON string for JSON files
+    let processedContent = content;
+    try {
+      // If content is not empty, validate it's proper JSON
+      if (content && content.trim()) {
+        // Try to parse and stringify to ensure valid JSON format
+        const jsonObj = JSON.parse(content);
+        processedContent = JSON.stringify(jsonObj, null, 2);
+      } else {
+        // If empty content, use empty JSON object
+        processedContent = '{}';
+      }
+    } catch (jsonError) {
+      console.warn('Content is not valid JSON, using as-is:', jsonError);
+      // Use content as-is if it's not JSON
+      processedContent = content || '{}';
+    }
+    
+    console.log('📤 Uploading JSON file using service method (with form-data):', {
+      cname: this.streamItem.name,
+      organization: orgToUse,
+      fileName: fileName,
+      filetype: 'json',
+      originalContentLength: content.length,
+      processedContentLength: processedContent.length,
+      contentPreview: processedContent.substring(0, 100) + '...'
+    });
+
+
+      // Get auth token to verify it exists
+      const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
+      console.log('🔑 Auth token present for file upload:', !!authToken);
+
+
+      // Use the corrected service method which now handles form-data properly
+      const response = await this.service.createNativeFile(
+        this.streamItem.name,  // cname
+        orgToUse,             // org
+        fileName,             // file
+        'json',               // filetype
+        processedContent      // script content
+      ).toPromise();
+
+      console.log('✅ JSON file uploaded successfully using service (form-data):', response);
+      return response;
+      
+   
+  }
+  
+  /**
+   * Load streamItem if not available
+   */
+  private async loadStreamItemForSave(): Promise<void> {
+    if (!this.currentCname) {
+      throw new Error('No cname available');
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.service.getStreamingServicesByName(this.currentCname).subscribe({
+        next: (res) => {
+          console.log('Loaded streamItem for save:', res);
+          this.streamItem = res;
+          resolve();
+        },
+        error: (error) => {
+          console.error('Failed to load streamItem for save:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  /**
+   * Update streaming service via API
+   */
+  private async updateStreamingService(payload: any): Promise<any> {
+    const url = `${this.baseUrl}/service/v1/streamingServices/update`;
+    
+    // Get auth token from session/localStorage
+    const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
+    
+    const headers = {
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Authorization': authToken ? `Bearer ${authToken}` : '',
+      'Connection': 'keep-alive',
+      'Content-Type': 'application/json',
+      'Origin': window.location.origin,
+      'Project': sessionStorage.getItem('projectId') || '2',
+      'ProjectName': sessionStorage.getItem('organization') || 'leo1311',
+      'Referer': window.location.href,
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-origin',
+      'User-Agent': navigator.userAgent,
+      'X-Requested-With': 'Leap',
+      'roleId': sessionStorage.getItem('roleId') || '1',
+      'roleName': sessionStorage.getItem('roleName') || 'IT Portfolio Manager'
+    };
+
+    console.log('Making PUT request to:', url);
+    console.log('Headers:', headers);
+    console.log('Payload:', payload);
+
+    try {
+      const response = await this.http.put(url, payload, { headers }).toPromise();
+      console.log('Update API response:', response);
+      return response;
+    } catch (error) {
+      console.error('Update API error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get default MCP configuration
+   * ⚠️ ONLY use this for NEW CARD CREATION workflow, not for view details
+   */
+  private getDefaultMcpConfig(): any {
+    return {
+      "name": this.currentCname || "sample-mcp-server",
+      "version": "1.0.0",
+      "description": "MCP Server Configuration",
+      "mcpServers": {
+        [this.currentCname || "server"]: {
+          "command": "python",
+          "args": ["-m", "mcp_server"],
+          "description": `MCP Server for ${this.currentCname}`,
+          "version": "1.0.0",
+          "tools": [],
+          "resources": []
+        }
+      },
+      "metadata": {
+        "createdBy": "AIP MCP Pipeline Generator",
+        "createdAt": new Date().toISOString(),
+        "pipelineName": this.currentCname,
+        "organization": this.organisation
+      }
+    };
+  }
+
+  /**
+   * Initialize default configuration for NEW CARD creation workflow
+   * This method should ONLY be called when creating a brand new card
+   */
+  private initializeDefaultConfigForNewCard(): void {
+    if (!this.currentCname) {
+      return;
+    }
+    
+    const jsonFileName = this.generateConsistentFilename();
+    let defaultConfig: any;
+    
+    if (this.pipelineMode === 'mcp') {
+      defaultConfig = this.getDefaultMcpConfig();
+    } else {
+      defaultConfig = this.getDefaultAgentConfig();
+    }
+    
+    this.useDefaultConfigurationForNewCard(jsonFileName, defaultConfig);
+    
+    console.log('🆕 Initialized default configuration for new card creation');
+  }
+
+  /**
+   * Get default Agent configuration
+   * ⚠️ ONLY use this for NEW CARD CREATION workflow, not for view details
+   */
+  private getDefaultAgentConfig(): any {
+    return {
+      "name": this.currentCname || "sample-agent",
+      "version": "1.0.0",
+      "description": "AI Agent Configuration",
+      "agent": {
+        "name": this.currentCname || "agent",
+        "type": "AIAgent",
+        "interface": "pipeline-agent",
+        "model": {
+          "provider": "openai",
+          "model_name": "gpt-3.5-turbo",
+          "temperature": 0.7,
+          "max_tokens": 1000
+        },
+        "tools": [
+          {
+            "name": "sample_tool",
+            "description": "A sample tool for the agent",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "Input parameter for the tool"
+                }
+              },
+              "required": ["input"]
+            }
+          }
+        ],
+        "memory": {
+          "type": "conversation",
+          "max_history": 10
+        },
+        "system_prompt": `You are ${this.currentCname || 'an AI agent'}, created to assist users with various tasks.`
+      },
+      "metadata": {
+        "createdBy": "AIP Agent Pipeline Generator",
+        "createdAt": new Date().toISOString(),
+        "pipelineName": this.currentCname,
+        "organization": this.organisation
+      }
+    };
   }
 
   // Call the upload API for pipeline cards
@@ -3558,6 +4609,9 @@ DELIVERABLES
    * Component cleanup
    */
   ngOnDestroy(): void {
+    // Remove event listener to prevent memory leaks
+    window.removeEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+    
     // Clean up WebSocket connection
     this.disconnectWebSocket();
   }

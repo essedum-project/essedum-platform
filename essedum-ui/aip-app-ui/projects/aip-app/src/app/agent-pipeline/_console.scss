@@ -10,6 +10,40 @@
 .console-panel .generate-header {
   margin-bottom: 12px;
   flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.console-panel .generate-header .header-content {
+  flex: 1;
+}
+
+.console-panel .generate-header .header-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.console-panel .generate-header .refresh-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 1px solid #e0e0e0;
+  color: #666;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #f5f5f5;
+    color: #333;
+    border-color: #ccc;
+  }
+  
+  mat-icon {
+    font-size: 20px;
+  }
 }
 
 .console-panel .generate-header h2 {
@@ -105,6 +139,13 @@
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  
+  // Full width when LLM dropdown is hidden
+  &.full-width {
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+  }
 }
 
 // Run and Deploy Button styles - Clean independent styling
@@ -123,6 +164,22 @@
   color: white !important;
   transition: all 0.3s ease;
   outline: none !important;
+  
+  // Rectangular button style with text labels
+  &.rectangular-button {
+    width: auto;
+    min-width: 180px !important;
+    height: 48px;
+    border-radius: 8px !important;
+    padding: 0 20px;
+    gap: 8px;
+    
+    .button-label {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
   
   &:not(:disabled) {
     background-color: #1976D2 !important;
@@ -170,6 +227,22 @@
   transition: all 0.3s ease;
   outline: none !important;
   cursor: pointer !important;
+  
+  // Rectangular button style with text labels
+  &.rectangular-button {
+    width: auto;
+    min-width: 180px !important;
+    height: 48px;
+    border-radius: 8px !important;
+    padding: 0 20px;
+    gap: 8px;
+    
+    .button-label {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
   
   &:not(:disabled) {
     background-color: #1976D2 !important;
@@ -321,4 +394,34 @@
   font-size: $font-md;
   margin: 0;
   font-weight: 500;
+}
+
+// ===========================================
+// NO FILES INFO MESSAGE
+// ===========================================
+.no-files-info {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+}
+
+.no-files-info .no-files-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.no-files-info .no-files-message mat-icon {
+  color: #856404;
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.no-files-info .no-files-message p {
+  color: #856404;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.4;
 }

@@ -17,6 +17,8 @@ package com.lfn.common.app.service;
 
 import com.lfn.common.app.exception.GitOperationException;
 import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
+import com.lfn.common.app.web.rest.dto.PullRequest;
+import com.lfn.common.app.web.rest.dto.PullResponse;
 import com.lfn.common.app.web.rest.dto.PushRequest;
 import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHRepository;
@@ -221,6 +223,48 @@ public class GitHubIntegrationService {
         } catch (Exception e) {
             log.error("Token verification failed: {}", e.getMessage(), e);
             return false;
+        }
+    }
+
+    /**
+     * Pull (clone) code from GitHub repository
+     *
+     * @param request Pull request containing repo URL, branch, and optional local path
+     * @param token GitHub Personal Access Token
+     * @param username GitHub username
+     * @return PullResponse containing local path, files, and commit information
+     * @throws Exception if pull fails
+     */
+    public PullResponse pullFromGitHub(PullRequest request, String token, String username) throws Exception {
+        try {
+            log.info("Starting pull from GitHub - Repo: {}, Branch: {}",
+                     request.getRepoUrl(), request.getBranch());
+
+            // Validate inputs
+            if (request.getRepoUrl() == null || request.getRepoUrl().isEmpty()) {
+                throw new IllegalArgumentException("Repository URL is required");
+            }
+            if (request.getBranch() == null || request.getBranch().isEmpty()) {
+                throw new IllegalArgumentException("Branch name is required");
+            }
+
+            // Pull from GitHub
+            PullResponse response = gitStorageProvider.pull(
+                request.getRepoUrl(),
+                request.getBranch(),
+                request.getLocalPath(),
+                username,
+                token,
+                verifySsl
+            );
+
+            log.info("Successfully pulled from GitHub - Repo: {}, Branch: {}, Files: {}",
+                     request.getRepoUrl(), request.getBranch(), response.getFiles().size());
+
+            return response;
+        } catch (Exception e) {
+            log.error("Error pulling from GitHub: {}", e.getMessage(), e);
+            throw new GitOperationException("Failed to pull from GitHub", e);
         }
     }
 }

@@ -11,6 +11,18 @@ export interface PipelineCard {
     [key: string]: any;
 }
 
+/**
+ * Interface for ADK file structure
+ */
+export interface AdkFile {
+    id: number;
+    cname: string;
+    organization: string;
+    filename: string;
+    filePath: string;
+    filescript: string;
+}
+
 export interface ScriptFile {
     fileName: string;
     content: string;
@@ -111,4 +123,19 @@ export interface PipelineServiceConfig {
     defaultOrganization: string;
     defaultProjectId: string;
     defaultProjectName: string;
+}
+
+/** Domain types (adjust to your backend as needed) */
+export interface ProjectInfo {
+  id?: string | number;
+  projectId?: string | number;
+  name?: string;
+  projectname?: string;
+}
+
+export interface RoleInfo {
+  id?: string | number;
+  roleId?: string | number;
+  name?: string;
+  rolename?: string;
 }

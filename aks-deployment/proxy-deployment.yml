@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: proxy
-        image: localhost:32000/proxy-service:latest
+        image: acrreq0762935.azurecr.io/proxy-service:v2
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -40,6 +40,8 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
+      imagePullSecrets:
+      - name: regcred   # if your cluster needs ACR pull creds; remove if not required
 
 ---
 

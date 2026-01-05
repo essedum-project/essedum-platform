@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-agent',
@@ -7,15 +8,16 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./agent.component.scss'],
 })
 export class AgentComponent implements OnInit, AfterViewInit {
-  // Embedded Langflow interface URL
+  // Embedded Langflow interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
+  private readonly langflowUrl = environment.langflowUrl;
 
   @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
 
   constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl("https://langflow.lfn.essedum.anuket.iol.unh.edu");
+    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.langflowUrl);
   }
 
   ngAfterViewInit(): void {
@@ -29,7 +31,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL("https://langflow.lfn.essedum.anuket.iol.unh.edu").origin; } catch { return "https://langflow.lfn.essedum.anuket.iol.unh.edu"; }
+      try { return new URL(this.langflowUrl).origin; } catch { return this.langflowUrl; }
     })();
 
     const postToIframe = () => {

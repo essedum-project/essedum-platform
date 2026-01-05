@@ -3,6 +3,7 @@
 out/**
 node_modules/**
 src/**
+essedum/**
 .gitignore
 .yarnrc
 webpack.config.js
@@ -11,3 +12,5 @@ webpack.config.js
 **/*.map
 **/*.ts
 **/.vscode-test.*
+dist/*.map
+dist/**/*.map

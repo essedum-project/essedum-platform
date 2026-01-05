@@ -752,7 +752,44 @@ public class ICIPMlopsController {
 		}
 	}
 
+
     @PostMapping("/models/register")
+    public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
+                                                 @RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
+        if (fedModeldto.getId() != null) {
+            fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
+            fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
+
+        } else {
+            fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
+            fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
+        }
+        fedModeldto.setOrganisation(project);
+        ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
+        logger.info("Request for RegisterModel: ");
+        try {
+            List<ICIPMLFederatedModelDTO> fedModels = fedModelService
+                    .getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
+            if (fedModels != null && fedModels.size() > 0) {
+                if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
+                    return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
+                            HttpStatus.BAD_REQUEST);
+                else if (fedModeldto.getId() != null && fedModels.size() == 1
+                        && !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
+                    return new ResponseEntity<>(
+                            "Another Model with name '" + fedModeldto.getName() + "' already exists",
+                            HttpStatus.BAD_REQUEST);
+                }
+            }
+            ICIPMLFederatedModel response = fedModelService.savemodel(federatedModetToAdd);
+            return ResponseEntity.status(201).body(new JSONObject(response).toString());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/models/registers")
     public ResponseEntity<String> modelRegister(@RequestBody String endpointsdeploybody,
                                                        @RequestParam(name = "adapter_instance", required = true) String adapterInstance,
                                                        @RequestParam(name = "project", required = true) String project,

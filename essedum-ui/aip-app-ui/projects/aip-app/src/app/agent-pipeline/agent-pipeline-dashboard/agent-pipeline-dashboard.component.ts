@@ -320,7 +320,7 @@ import { HttpParams } from '@angular/common/http';
 import { TagsService } from '../../services/tags.service';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
-//import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
+import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
 
 @Component({
   selector: 'app-agent-pipeline-dashboard',
@@ -329,8 +329,13 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 })
 export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   // Constants
-  readonly CARD_TITLE = 'Agent Pipeline';
+  get CARD_TITLE() {
+    return this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+  }
   readonly SERVICE_V1 = 'pipelineagent';
+
+  // Pipeline Mode Support
+  pipelineMode: 'agent' | 'mcp' = 'agent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -538,15 +543,22 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   }
 
   private buildHttpParams(): HttpParams {
+    const apiParams = this.getApiParametersForMode();
+    
     let params = new HttpParams()
       .set('page', this.pageNumber.toString())
       .set('size', this.pageSize.toString())
       .set('project', this.organization)
       .set('isCached', 'true')
       .set('adapter_instance', 'internal')    
-      .set('interfacetype', 'pipeline-agent');
+      .set('interfacetype', apiParams.interfacetype);
 
-    if (this.selectedPipelineAgentType.length >= 1) {
+    // Add type parameter for MCP mode
+    if (apiParams.type) {
+      params = params.set('type', apiParams.type);
+    }
+    // For agent mode, add existing type filter if selected
+    else if (this.selectedPipelineAgentType.length >= 1) {
       params = params.set('type', this.selectedPipelineAgentType.toString());
     }
 
@@ -697,9 +709,66 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     this.ngOnInit();
   }
 
+  onAdd(): void {
+    if (this.pipelineMode === 'mcp') {
+      console.log('Opening MCP Pipelines creation dialog');
+      
+      // Open the pipeline creation dialog with MCP-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'mcp-pipeline', // MCP-specific interface type
+          type: 'mcpServer', // MCP-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('MCP Pipelines created:', result);
+          this.service.message('MCP Pipelines created successfully!', 'success');
+          // Refresh the cards to show the new MCP pipeline
+          this.refresh();
+        }
+      });
+    } else {
+      console.log('Opening Agent Pipelines creation dialog');
+      
+      // Open the pipeline creation dialog with Agent-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'pipeline-agent', // Agent-specific interface type
+          type: 'AIAgent', // Agent-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Agent Pipelines created:', result);
+          this.service.message('Agent Pipelines created successfully!', 'success');
+          // Refresh the cards to show the new agent pipeline
+          this.refresh();
+        }
+      });
+    }
+  }
+
   onTagSelected(event: any): void {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
-    this.selectedPipelineAgentType = event.getSelectedAdapterType();
+    
+    // Only update pipeline agent type for agent mode, not for MCP mode
+    if (this.pipelineMode !== 'mcp') {
+      this.selectedPipelineAgentType = event.getSelectedAdapterType();
+    }
+    
     this.pageNumber = 1;
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
@@ -723,20 +792,38 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: 'Pipeline Agent',
+          cardTitle: this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Pipeline Agent',
           pipelineAlias: this.streamItem.alias,
           streamItem: this.streamItem,
           card: card,
+          pipelineMode: this.pipelineMode // Pass the current mode to detail view
         },
         relativeTo: this.route,
       };
-      if (this.streamItem.type === 'AIAgent') {
+      
+      // Navigate for both Agent and MCP pipeline types
+      if (this.streamItem.type === 'AIAgent' || 
+          this.streamItem.type === 'mcpServer' || 
+          this.streamItem.type === 'NativeScript' ||
+          this.pipelineMode === 'mcp' ||
+          (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
+        console.log('Navigating to view details for:', {
+          type: this.streamItem.type,
+          interfacetype: this.streamItem.interfacetype,
+          mode: this.pipelineMode,
+          name: card.name
+        });
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
+      } else {
+        console.log('Navigation blocked - unsupported combination:', {
+          type: this.streamItem.type,
+          interfacetype: this.streamItem.interfacetype,
+          mode: this.pipelineMode
+        });
       }
     });
   }
 
- 
   deletePipeline(cid: string): void {
     try {
       const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
@@ -776,6 +863,71 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       this.pageChanged.emit(this.pageNumber);
       this.initializePagination();
       this.getCards();
+    }
+  }
+
+  /**
+   * Handle pipeline mode change between Agent and MCP pipelines
+   */
+  onPipelineModeChange(event: any): void {
+    const newMode = event.value;
+    console.log('Dashboard pipeline mode changed to:', newMode);
+    
+    // Reset pagination when switching modes
+    this.pageNumber = 1;
+    
+    // Clear current data and reload with new mode
+    this.cards = [];
+    this.filteredCards = [];
+    this.loading = true;
+    
+    // Refresh data with new mode
+    this.refresh();
+  }
+
+  /**
+   * Switch to specific pipeline mode - simplified method
+   */
+  switchToPipelineMode(mode: 'agent' | 'mcp'): void {
+    console.log('Switching to pipeline mode:', mode);
+    console.log('Current mode before switch:', this.pipelineMode);
+    
+    if (this.pipelineMode !== mode) {
+      this.pipelineMode = mode;
+      
+      console.log('Mode changed to:', this.pipelineMode);
+      
+      // Reset pagination when switching modes
+      this.pageNumber = 1;
+      
+      // Clear current data and reload with new mode
+      this.cards = [];
+      this.filteredCards = [];
+      this.loading = true;
+      
+      // Show loading message
+      console.log('Loading', mode, 'pipelines...');
+      
+      // Refresh data with new mode
+      this.refresh();
+    } else {
+      console.log('Same mode clicked, no change needed');
+    }
+  }
+
+  /**
+   * Get API parameters based on current pipeline mode
+   */
+  private getApiParametersForMode(): { type?: string; interfacetype: string } {
+    if (this.pipelineMode === 'mcp') {
+      return {
+        type: 'mcpServer',
+        interfacetype: 'mcp-pipeline'
+      };
+    } else {
+      return {
+        interfacetype: 'pipeline-agent'
+      };
     }
   }
 

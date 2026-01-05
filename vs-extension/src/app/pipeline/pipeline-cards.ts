@@ -11,7 +11,7 @@
  * 
  * @fileoverview Main pipeline cards webview provider
  * @author Essedum AI Platform Team
- * @version 1.0.0
+ * @version 1.0.21
  */
 
 // ================================
@@ -19,7 +19,6 @@
 // ================================
 
 import * as vscode from 'vscode';
-import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
@@ -33,56 +32,17 @@ import { PipelineService } from '../../services/pipeline.service';
 // Constants and utility imports
 import {
     PIPELINE_CONFIG,
-    UI_TEXT,
-    WEBVIEW_COMMANDS,
-    CSS_CLASSES,
-    FILE_TYPES,
-    SCRIPT_TEMPLATES,
-    FORM_DATA_HEADERS,
     getLanguageFromExtension,
-    isLocalRuntime
 } from '../../constants/pipeline-constants';
 
-import {
-    formatDate,
-    formatFullDate,
-    toTitleCase,
-    truncateText,
-    sanitizeHtml,
-    getUserAvatarLetter,
-    postToWebview,
-    showWebviewLoading,
-    updateWebviewCards,
-    getUserFriendlyErrorMessage,
-    logError,
-    handleAsyncOperation,
-    getFileInfo,
-    createEssedumFileUri,
-    validateScriptContent,
-    calculatePagination,
-    createExecutionParams,
-    debounce,
-    getStoredValue,
-    setStoredValue,
-    normalizeRuntime
-} from '../../constants/pipeline-utils';
 import { getBaseUrl } from '../../constants/api-config';
+import * as ExtensionUtils from '../../utils/extension-utils';
 
 // ================================
-// TYPES AND INTERFACES
+// LOGGER
 // ================================
 
-interface PaginationInfo {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    pageSize: number;
-}
-
-interface WebviewMessage {
-    command: string;
-    [key: string]: any;
-}
+const logger = ExtensionUtils.createLogger('PipelineCards');
 
 // ================================
 // MAIN CLASS DEFINITION
@@ -106,7 +66,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _token: string = '';
 
     private project: any;
-    private role:any;
+    private role: any;
     /** Authentication state */
     private _isAuthenticated: boolean = false;
 
@@ -163,13 +123,16 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
         this.project = _context.globalState.get('project');
-        this.organization = this.project?.name;
+        // Prioritize dedicated organization key, fallback to project name
+        this.organization = _context.globalState.get('organization') as string || this.project?.name || '';
         this.role = _context.globalState.get('role');
         this._authService = authService;
         this._fileProvider = fileProvider;
-        this._pipelineService = pipelineService || new PipelineService(token, this.organization);
+        this._pipelineService = pipelineService || new PipelineService(_context);
 
-        console.log(`${this.logPrefix} Pipeline Cards Provider initialized`);
+        logger.info(`${this.logPrefix} Pipeline Cards Provider initialized`);
+        logger.info(`${this.logPrefix} Organization:`, this.organization);
+        logger.info(`${this.logPrefix} Project:`, this.project);
     }
 
     // ================================
@@ -183,14 +146,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     public updateToken(token: string): void {
         this._token = token;
         this._isAuthenticated = !!token && token.trim().length > 0;
-        console.log(`${this.logPrefix} Token updated, authenticated:`, this._isAuthenticated);
+        logger.info(`${this.logPrefix} Token updated, authenticated:`, this._isAuthenticated);
 
         // Update the authentication context when token changes
         vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', this._isAuthenticated);
 
-        // Update token in pipeline service
+        // Refresh auth data in pipeline service from VS Code storage
         if (this._pipelineService) {
-            this._pipelineService.updateToken(token);
+            this._pipelineService.refreshAuthData();
         }
 
         // Update token in file provider as well
@@ -212,12 +175,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
      * @param token - New authentication token
      */
     public async onTokenUpdated(token: string): Promise<void> {
-        console.log(`${this.logPrefix} External token update received`);
+        logger.info(`${this.logPrefix} External token update received`);
         this.updateToken(token);
-        
+
         // If we now have a valid token and the view is showing auth required, switch to main view
         if (this._isAuthenticated && this._view) {
-            console.log(`${this.logPrefix} Token update successful, switching to main view`);
+            logger.info(`${this.logPrefix} Token update successful, switching to main view`);
             await this.returnToMainView();
         }
     }
@@ -298,7 +261,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     case 'triggerLogin':
                         // Trigger fresh Keycloak authentication
                         try {
-                            console.log('triggerLogin command received, forcing fresh Keycloak authentication...');
+                            logger.info('triggerLogin command received, forcing fresh Keycloak authentication...');
 
                             // Show authentication progress in webview
                             if (this._view) {
@@ -312,31 +275,31 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
                             // Force fresh authentication through the auth service
                             if (this._authService) {
-                                console.log('Using auth service for fresh authentication');
+                                logger.info('Using auth service for fresh authentication');
                                 const tokens = await this._authService.forceAuthentication();
-                                console.log('Fresh authentication successful, updating token');
+                                logger.info('Fresh authentication successful, updating token');
                                 this.updateToken(tokens.access_token);
                                 authSuccessful = true;
                             } else {
-                                console.log('No auth service available, using command execution');
+                                logger.info('No auth service available, using command execution');
                                 // Fallback to command execution if auth service not available
                                 await vscode.commands.executeCommand('essedum.login');
 
                                 // After command execution, we need to wait and check for token updates
                                 // The external command might update the token in the context, so we need to retrieve it
-                                console.log('Waiting for external authentication to complete...');
-                                
+                                logger.info('Waiting for external authentication to complete...');
+
                                 // Wait a moment for the command to complete and token to be set
                                 await new Promise(resolve => setTimeout(resolve, 2000));
-                                
+
                                 // Try to get the updated token from the context
                                 const updatedToken = this._context.globalState.get('accessToken') as string;
                                 if (updatedToken && updatedToken.trim().length > 0) {
-                                    console.log('Found updated token in context, updating component token');
+                                    logger.info('Found updated token in context, updating component token');
                                     this.updateToken(updatedToken);
                                     authSuccessful = true;
                                 } else {
-                                    console.log('No token found after external authentication');
+                                    logger.info('No token found after external authentication');
                                     throw new Error('Authentication completed but no valid token was found');
                                 }
                             }
@@ -386,20 +349,25 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
      * Load initial content based on authentication state
      */
     public async loadInitialContent(): Promise<void> {
-        console.log(`${this.logPrefix} Loading initial content, current auth state: ${this._isAuthenticated}`);
-        
+        logger.info(`${this.logPrefix} Loading initial content, current auth state: ${this._isAuthenticated}`);
+
+        // Refresh organization and project from storage
+        this.project = this._context.globalState.get('project');
+        this.organization = this._context.globalState.get('organization') as string || this.project?.name || '';
+        logger.info(`${this.logPrefix} Organization refreshed:`, this.organization);
+
         // Check if we have a valid token, with fallback to context
         if (!this._isAuthenticated) {
-            console.log('Not authenticated, checking context for token...');
+            logger.info('Not authenticated, checking context for token...');
             const contextToken = this._context.globalState.get('accessToken') as string;
             if (contextToken && contextToken.trim().length > 0) {
-                console.log('Found valid token in context, updating component state');
+                logger.info('Found valid token in context, updating component state');
                 this.updateToken(contextToken);
             }
         }
 
         if (this._isAuthenticated) {
-            console.log('Authenticated, loading main pipeline interface');
+            logger.info('Authenticated, loading main pipeline interface');
             // Load main pipeline interface
             if (this._view) {
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
@@ -407,7 +375,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 setTimeout(() => this.getCards(), 100);
             }
         } else {
-            console.log('Not authenticated, showing authentication required page');
+            logger.info('Not authenticated, showing authentication required page');
             // Show authentication required page
             this.showAuthenticationRequired();
         }
@@ -551,7 +519,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         loginBtn.textContent = '🔄 Authenticating...';
                         loginBtn.disabled = true;
                         
-                        console.log('Starting authentication flow...');
+                        logger.info('Starting authentication flow...');
                         
                         // Trigger the login command
                         vscode.postMessage({ 
@@ -611,19 +579,26 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     private async getCards(): Promise<void> {
-        console.log(`${this.logPrefix} getCards called, token length: ${this._token ? this._token.length : 0}`);
-        
+        logger.info(`${this.logPrefix} getCards called, token length: ${this._token ? this._token.length : 0}`);
+
+        // Refresh organization and project from storage before making API calls
+        this.project = this._context.globalState.get('project');
+        this.organization = this._context.globalState.get('organization') as string || this.project?.name || '';
+        this.role = this._context.globalState.get('role');
+        logger.info(`${this.logPrefix} Organization for API calls:`, this.organization);
+        logger.info(`${this.logPrefix} Project:`, this.project);
+
         // Check authentication before proceeding - with fallback token check
         if (!this._isAuthenticated) {
-            console.log('Not authenticated, checking for token in context...');
-            
+            logger.info('Not authenticated, checking for token in context...');
+
             // Try to get token from global state as a fallback
             const contextToken = this._context.globalState.get('accessToken') as string;
             if (contextToken && contextToken.trim().length > 0) {
-                console.log('Found valid token in context, updating component state');
+                logger.info('Found valid token in context, updating component state');
                 this.updateToken(contextToken);
             } else {
-                console.log('No valid token found, showing authentication required page');
+                logger.info('No valid token found, showing authentication required page');
                 this.showAuthenticationRequired();
                 return;
             }
@@ -631,7 +606,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
         // Double-check we're now authenticated
         if (!this._isAuthenticated) {
-            console.log('Still not authenticated after checking context, showing auth page');
+            logger.info('Still not authenticated after checking context, showing auth page');
             this.showAuthenticationRequired();
             return;
         }
@@ -641,11 +616,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
             try {
                 const isValidToken = await this._authService.isTokenValid();
                 if (!isValidToken) {
-                    console.log('Token is invalid or expired, checking authentication status...');
+                    logger.info('Token is invalid or expired, checking authentication status...');
                     const authStatus = await this._authService.getAuthenticationStatus();
 
                     if (!authStatus.isAuthenticated) {
-                        console.log('Token expired, showing authentication required page');
+                        logger.info('Token expired, showing authentication required page');
                         this._isAuthenticated = false;
                         this.showAuthenticationRequired();
                         return;
@@ -654,7 +629,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     // If we reach here, the token was refreshed automatically
                     const newToken = await this._authService.getAccessToken();
                     this.updateToken(newToken);
-                    console.log('Token refreshed successfully, proceeding with API calls');
+                    logger.info('Token refreshed successfully, proceeding with API calls');
                 }
             } catch (error) {
                 console.error('Error checking token validity:', error);
@@ -676,7 +651,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
                 // If total count is small (like <= 20), fetch all and do client-side pagination
                 if (this.totalCount <= 20) {
-                    console.log('Small dataset detected, using client-side pagination');
+                    logger.info('Small dataset detected, using client-side pagination');
 
                     // Fetch all cards with a larger page size to get all data for client-side pagination
                     const allParams = { ...params, size: this.totalCount.toString(), page: '1' };
@@ -699,13 +674,13 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
                     // For testing: ensure we always have at least 2 pages if we have more than 3 cards
                     if (this.totalCount > this.pageSize) {
-                        console.log('Multiple pages detected - pagination will be shown');
+                        logger.info('Multiple pages detected - pagination will be shown');
                     }
 
-                    console.log(`Client-side pagination: ${this.totalCount} total cards, ${this.totalPages} pages`);
+                    logger.info(`Client-side pagination: ${this.totalCount} total cards, ${this.totalPages} pages`);
                 } else {
                     // Use server-side pagination for larger datasets
-                    console.log('Large dataset detected, using server-side pagination');
+                    logger.info('Large dataset detected, using server-side pagination');
                     const response = await this._pipelineService.getPipelinesCards(params);
 
                     if (response && response.length) {
@@ -751,8 +726,8 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
             this.cards = this.allCards; // Keep all cards for reference
 
-            console.log(`Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total cards`);
-            console.log(`Total pages: ${this.totalPages}`);
+            logger.info(`Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total cards`);
+            logger.info(`Total pages: ${this.totalPages}`);
 
             this.loading = false;
 
@@ -818,14 +793,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         let params: HttpParams = {
             page: this.pageNumber.toString(),
             size: this.pageSize.toString(),
-            project:'leo1311',
+            project: this.organization,
             isCached: 'true',  // Enable caching for better performance
             adapter_instance: 'internal',
             interfacetype: 'pipeline',
             cloud_provider: 'internal'
         };
 
-        console.log(`Building HTTP params - Page: ${this.pageNumber}, Size: ${this.pageSize}`);
+        logger.info(`Building HTTP params - Page: ${this.pageNumber}, Size: ${this.pageSize}`);
 
         if (this.selectedAdapterType.length >= 1) {
             params.type = this.selectedAdapterType.toString();
@@ -932,7 +907,7 @@ if __name__ == "__main__":
     }
 
     private async fetchPipelineScripts(pipelineName: string): Promise<PipelineScript> {
-        console.log(`Fetching scripts for pipeline: ${pipelineName}`);
+        logger.info(`Fetching scripts for pipeline: ${pipelineName}`);
 
         try {
 
@@ -942,17 +917,17 @@ if __name__ == "__main__":
 
             // Step 1: Get streaming service by name 
             try {
-                console.log('Fetching streaming service details...');
+                logger.info('Fetching streaming service details...');
                 const streamingServiceResponse = await this._pipelineService.getStreamingService(pipelineName);
 
                 streamingService = streamingServiceResponse.data;
-                console.log('Streaming service response:', streamingService);
+                logger.info('Streaming service response:', streamingService);
             } catch (serviceError: any) {
-                console.log('Streaming service fetch failed, trying pipeline by name...', serviceError.message);
+                logger.info('Streaming service fetch failed, trying pipeline by name...', serviceError.message);
 
                 // Step 2: Try getting pipeline by name if streaming service fails 
                 try {
-                    console.log('Fetching pipeline by name...');
+                    logger.info('Fetching pipeline by name...');
                     const urlParams = new URLSearchParams();
                     urlParams.append('name', pipelineName);
                     urlParams.append('org', this.organization);
@@ -960,9 +935,9 @@ if __name__ == "__main__":
                     const pipelineResponse = await this._pipelineService.getPipelineByName(pipelineName);
 
                     pipelineData = pipelineResponse.data && pipelineResponse.data.length > 0 ? pipelineResponse.data[0] : null;
-                    console.log('Pipeline by name response:', pipelineData);
+                    logger.info('Pipeline by name response:', pipelineData);
                 } catch (pipelineError: any) {
-                    console.log('Pipeline by name also failed:', pipelineError.message);
+                    logger.info('Pipeline by name also failed:', pipelineError.message);
                 }
             }
 
@@ -976,35 +951,45 @@ if __name__ == "__main__":
                     const contentStr = streamingService.jsonContent || streamingService.json_content;
                     if (contentStr) {
                         jsonContent = JSON.parse(contentStr);
-                        console.log('Parsed JSON content:', jsonContent);
+                        logger.info('Parsed JSON content:', jsonContent);
 
                         // Extract files from elements[0].attributes.files 
                         if (jsonContent.elements && jsonContent.elements[0] && jsonContent.elements[0].attributes) {
                             const attributes = jsonContent.elements[0].attributes;
                             if (attributes.files && Array.isArray(attributes.files)) {
-                                fileList = attributes.files;
-                                console.log('Found files in JSON:', fileList);
+                                // Handle two formats:
+                                // Format 1: files is already an array of strings ["file1.py", "file2.py"]
+                                // Format 2: files is an array with a JSON string ["[\"file1.py\",\"file2.py\"]"]
+                                if (attributes.files.length > 0 && typeof attributes.files[0] === 'string' && attributes.files[0].startsWith('[')) {
+                                    // Format 2: Parse the JSON string inside the array
+                                    fileList = JSON.parse(attributes.files[0]);
+                                    logger.info('Found files in JSON (Format 2 - parsed string):', fileList);
+                                } else {
+                                    // Format 1: Use the array directly
+                                    fileList = attributes.files;
+                                    logger.info('Found files in JSON (Format 1 - direct array):', fileList);
+                                }
                             }
                         }
                     }
                 } catch (parseError) {
-                    console.log('Failed to parse JSON content:', parseError);
+                    logger.info('Failed to parse JSON content:', parseError);
                 }
             }
 
             // Step 4: Read actual files using the native file API
             if (fileList.length > 0) {
-                console.log('Reading files from JSON content...');
+                logger.info('Reading files from JSON content...');
 
                 for (const fileName of fileList) {
                     try {
-                        console.log(`Reading file from JSON list: ${fileName}`);
+                        logger.info(`Reading file from JSON list: ${fileName}`);
 
                         //  readNativeFile method
                         const response = await this._pipelineService.readPipelineFile(pipelineName, fileName);
 
                         if (response.data) {
-                            console.log(`Successfully read file: ${fileName}`);
+                            logger.info(`Successfully read file: ${fileName}`);
 
                             // Convert arraybuffer to text using TextDecoder 
                             const textDecoder = new TextDecoder('utf-8');
@@ -1022,16 +1007,16 @@ if __name__ == "__main__":
                                 language: language
                             });
 
-                            console.log(`File ${fileName} decoded successfully, content length: ${fileContent.length}`);
+                            logger.info(`File ${fileName} decoded successfully, content length: ${fileContent.length}`);
                         }
                     } catch (fileError: any) {
-                        console.log(`File ${fileName} not found or error reading:`, fileError.response?.status || fileError.message);
+                        logger.info(`File ${fileName} not found or error reading:`, fileError.response?.status || fileError.message);
                         // Continue trying other files
                     }
                 }
             } else {
                 // Step 5: Fallback to common file names if no files found in JSON
-                console.log('No files in JSON content, trying common file names...');
+                logger.info('No files in JSON content, trying common file names...');
 
                 const possibleFiles = [
                     `${pipelineName}.py`,           // Main script file
@@ -1045,13 +1030,13 @@ if __name__ == "__main__":
 
                 for (const fileName of possibleFiles) {
                     try {
-                        console.log(`Attempting to read file: ${fileName}`);
+                        logger.info(`Attempting to read file: ${fileName}`);
 
                         //  readNativeFile method
                         const response = await this._pipelineService.readPipelineFile(pipelineName, fileName);
 
                         if (response.data) {
-                            console.log(`Successfully read file: ${fileName}`);
+                            logger.info(`Successfully read file: ${fileName}`);
 
                             // Convert arraybuffer to text using TextDecoder
                             const textDecoder = new TextDecoder('utf-8');
@@ -1069,10 +1054,10 @@ if __name__ == "__main__":
                                 language: language
                             });
 
-                            console.log(`File ${fileName} decoded successfully, content length: ${fileContent.length}`);
+                            logger.info(`File ${fileName} decoded successfully, content length: ${fileContent.length}`);
                         }
                     } catch (fileError: any) {
-                        console.log(`File ${fileName} not found or error reading:`, fileError.response?.status || fileError.message);
+                        logger.info(`File ${fileName} not found or error reading:`, fileError.response?.status || fileError.message);
                         // Continue trying other files
                     }
                 }
@@ -1080,7 +1065,7 @@ if __name__ == "__main__":
 
             // If no files were found, create a placeholder script
             if (files.length === 0) {
-                console.log('No native files found, creating placeholder script...');
+                logger.info('No native files found, creating placeholder script...');
 
                 const fileName = `${pipelineName}.py`;
                 files.push({
@@ -1120,20 +1105,20 @@ if __name__ == "__main__":
             // Fetch run types 
             let runTypesResponse: any = null;
             try {
-                console.log('Fetching run types...');
+                logger.info('Fetching run types...');
 
                 // Try the job run types endpoint 
                 runTypesResponse = await this._pipelineService.getJobRunTypes();
-                console.log('Run types response:', runTypesResponse.data);
+                logger.info('Run types response:', runTypesResponse.data);
             } catch (runTypesError: any) {
-                console.log('Job run types endpoint failed, trying alternative...');
+                logger.info('Job run types endpoint failed, trying alternative...');
 
                 try {
                     // Try alternative endpoint
                     runTypesResponse = await this._pipelineService.getAlternativeRunTypes();
-                    console.log('Alternative run types response:', runTypesResponse.data);
+                    logger.info('Alternative run types response:', runTypesResponse.data);
                 } catch (altError: any) {
-                    console.log('Failed to fetch run types from both endpoints, using defaults:', altError.message);
+                    logger.info('Failed to fetch run types from both endpoints, using defaults:', altError.message);
                     // Provide default run types if API fails
                     runTypesResponse = {
                         data: [
@@ -1145,7 +1130,7 @@ if __name__ == "__main__":
                 }
             }
 
-            console.log(`Successfully prepared ${files.length} script files for pipeline ${pipelineName}`);
+            logger.info(`Successfully prepared ${files.length} script files for pipeline ${pipelineName}`);
 
             return {
                 pipelineName: pipelineName,
@@ -1175,7 +1160,7 @@ if __name__ == "__main__":
             console.error('Processed error message:', errorMessage);
 
             // Return mock data instead of throwing error to allow user to see the interface
-            console.log('Returning mock data due to API failure');
+            logger.info('Returning mock data due to API failure');
             return {
                 pipelineName: pipelineName,
                 files: [{
@@ -1225,13 +1210,25 @@ if __name__ == "__main__":
     }
 
     /**
+     * Validate if string is valid JSON
+     */
+    private isValidJson(str: string): boolean {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
      * Updates query parameters for filtering and pagination
      * @param pageNumber - Current page number
      * @param filter - Search filter
      * @param adapterType - Adapter type filter
      */
     private updateQueryParam(pageNumber: number, filter: string, adapterType: string): void {
-        console.log(`${this.logPrefix} Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
+        logger.info(`${this.logPrefix} Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
     }
 
     public goToPage(page: number): void {
@@ -1271,7 +1268,7 @@ if __name__ == "__main__":
             // Ensure we always have correct pagination info
             const actualTotalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
 
-            console.log('Updating webview with:', {
+            logger.info('Updating webview with:', {
                 cards: this.filteredCards.length,
                 currentPage: this.pageNumber,
                 totalPages: actualTotalPages,
@@ -1391,17 +1388,26 @@ if __name__ == "__main__":
         // Open the document using the Essedum scheme
         const doc = await vscode.workspace.openTextDocument(uri);
 
-        await vscode.window.showTextDocument(doc, {
-            viewColumn: vscode.ViewColumn.One,
-            preserveFocus: false
-        });
+        // Check if this is a notebook file and open in notebook editor
+        if (scriptFile.fileName.endsWith('.ipynb')) {
+            logger.info('📓 Opening .ipynb file in notebook editor...');
+            await vscode.commands.executeCommand('vscode.openWith', uri, 'jupyter-notebook', {
+                viewColumn: vscode.ViewColumn.One,
+                preserveFocus: false
+            });
+        } else {
+            await vscode.window.showTextDocument(doc, {
+                viewColumn: vscode.ViewColumn.One,
+                preserveFocus: false
+            });
+        }
 
         // Find the pipeline for auto-save functionality
         const pipeline = this.allCards.find((card: PipelineCard) =>
             this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
 
         if (pipeline) {
-            console.log('🔧 Setting up auto-save for Essedum file:', scriptFile.fileName);
+            logger.info('🔧 Setting up auto-save for Essedum file:', scriptFile.fileName);
 
             // Update script state initially
             const scriptLines = scriptFile.content.split('\n');
@@ -1410,7 +1416,7 @@ if __name__ == "__main__":
             // Set up auto-save functionality - listen for document changes
             const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
                 if (event.document === doc) {
-                    console.log('📝 Essedum file content changed, triggering onScriptChange...');
+                    logger.info('📝 Essedum file content changed, triggering onScriptChange...');
 
                     // Get updated content and split into lines 
                     const updatedContent = event.document.getText();
@@ -1419,27 +1425,27 @@ if __name__ == "__main__":
                     // Call onScriptChange 
                     this.onScriptChange(updatedLines);
 
-                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                    logger.info('✅ Script state updated with', this.script.length, 'lines');
                 }
             });
 
             // Set up save listener - automatically upload when user saves
             const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
                 if (savedDocument === doc) {
-                    console.log('💾 📥 ESSEDUM FILE SAVE EVENT - Auto-uploading script changes...');
+                    logger.info('💾 📥 ESSEDUM FILE SAVE EVENT - Auto-uploading script changes...');
 
                     try {
                         // Get the saved content and update scriptContent
                         const savedContent = savedDocument.getText();
                         const savedLines = savedContent.split('\n');
 
-                        console.log('📝 Saved Essedum file content length:', savedContent.length);
-                        console.log('📝 Saved lines count:', savedLines.length);
+                        logger.info('📝 Saved Essedum file content length:', savedContent.length);
+                        logger.info('📝 Saved lines count:', savedLines.length);
 
                         // Update script state - this will set this.scriptContent
                         this.onScriptChange(savedLines);
 
-                        console.log('📤 Auto-uploading Essedum file:', scriptFile.fileName);
+                        logger.info('📤 Auto-uploading Essedum file:', scriptFile.fileName);
 
                         // Auto-upload 
                         await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName);
@@ -1459,12 +1465,56 @@ if __name__ == "__main__":
                 }
             });
 
+            // Set up notebook save listener for .ipynb files
+            const notebookSaveDisposable = vscode.workspace.onDidSaveNotebookDocument(async (savedNotebook) => {
+                // Check if this notebook corresponds to our document URI
+                if (savedNotebook.uri.toString() === doc.uri.toString()) {
+                    logger.info('💾 📓 NOTEBOOK SAVE EVENT - Auto-uploading notebook changes...');
+
+                    try {
+                        // For .ipynb files, save the full notebook JSON structure
+                        // IMPORTANT: Read from file provider's internal storage (most up-to-date)
+                        const notebookJson = this._fileProvider!.getFileContent(doc.uri);
+
+                        if (!notebookJson) {
+                            throw new Error('Could not read notebook content from file provider');
+                        }
+
+                        logger.info('📓 Saving full notebook JSON structure');
+                        logger.info('📝 Notebook JSON length:', notebookJson.length);
+                        logger.info('📝 First 500 chars:', notebookJson.substring(0, 500));
+
+                        // For notebooks, we need to update scriptContent with the full JSON
+                        const savedLines = notebookJson.split('\n');
+                        this.onScriptChange(savedLines);
+
+                        logger.info('📤 Auto-uploading notebook file:', scriptFile.fileName);
+
+                        // Auto-upload the full notebook JSON
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName);
+
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Notebook changes auto-uploaded successfully to ${scriptFile.fileName}!`
+                        );
+
+                        // Update stream item and save
+                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+
+                    } catch (error: any) {
+                        console.error('❌ Notebook auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Notebook auto-upload failed: ${error.message}`);
+                    }
+                }
+            });
+
             // Clean up listeners when document is closed
             const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
                 if (closedDocument === doc) {
-                    console.log('📄 Essedum file editor closed, cleaning up listeners');
+                    logger.info('📄 Essedum file editor closed, cleaning up listeners');
                     changeDisposable.dispose();
                     saveDisposable.dispose();
+                    notebookSaveDisposable.dispose();
                     closeDisposable.dispose();
                 }
             });
@@ -1487,18 +1537,28 @@ if __name__ == "__main__":
             language: scriptFile.language
         });
 
-        // Show the document in the main editor (column one)
-        await vscode.window.showTextDocument(doc, {
-            viewColumn: vscode.ViewColumn.One,
-            preserveFocus: false
-        });
+        // Check if this is a notebook file and open in notebook editor
+        if (scriptFile.fileName.endsWith('.ipynb')) {
+            logger.info('📓 Opening .ipynb file in notebook editor...');
+            // For untitled notebooks, we need to save first then open in notebook editor
+            await vscode.commands.executeCommand('vscode.openWith', doc.uri, 'jupyter-notebook', {
+                viewColumn: vscode.ViewColumn.One,
+                preserveFocus: false
+            });
+        } else {
+            // Show the document in the main editor (column one)
+            await vscode.window.showTextDocument(doc, {
+                viewColumn: vscode.ViewColumn.One,
+                preserveFocus: false
+            });
+        }
 
         // Find the pipeline for auto-save functionality
         const pipeline = this.allCards.find((card: PipelineCard) =>
             this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
 
         if (pipeline) {
-            console.log('🔧 Setting up auto-save for script:', scriptFile.fileName);
+            logger.info('🔧 Setting up auto-save for script:', scriptFile.fileName);
 
             // Update script state initially
             const scriptLines = scriptFile.content.split('\n');
@@ -1507,7 +1567,7 @@ if __name__ == "__main__":
             // Set up auto-save functionality - listen for document changes
             const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
                 if (event.document === doc) {
-                    console.log('📝 Script content changed, triggering onScriptChange...');
+                    logger.info('📝 Script content changed, triggering onScriptChange...');
 
                     // Get updated content and split into lines 
                     const updatedContent = event.document.getText();
@@ -1516,22 +1576,22 @@ if __name__ == "__main__":
                     // Call onScriptChange 
                     this.onScriptChange(updatedLines);
 
-                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                    logger.info('✅ Script state updated with', this.script.length, 'lines');
                 }
             });
 
             // Set up save listener - automatically upload when user saves
             const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
                 if (savedDocument === doc) {
-                    console.log('💾 📥 SAVE EVENT TRIGGERED - Auto-uploading script changes...');
+                    logger.info('💾 📥 SAVE EVENT TRIGGERED - Auto-uploading script changes...');
 
                     try {
                         // Get the saved content and update scriptContent
                         const savedContent = savedDocument.getText();
                         const savedLines = savedContent.split('\n');
 
-                        console.log('📝 Saved content length:', savedContent.length);
-                        console.log('📝 Saved lines count:', savedLines.length);
+                        logger.info('📝 Saved content length:', savedContent.length);
+                        logger.info('📝 Saved lines count:', savedLines.length);
 
                         // Update script state - this will set this.scriptContent
                         this.onScriptChange(savedLines);
@@ -1539,7 +1599,7 @@ if __name__ == "__main__":
                         // Use the original filename or generate one
                         const scriptFileName = scriptFile.fileName || `${pipeline.name}_${this.organization}.py`;
 
-                        console.log('📤 About to upload file:', scriptFileName);
+                        logger.info('📤 About to upload file:', scriptFileName);
 
                         // Auto-upload 
                         await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
@@ -1559,12 +1619,66 @@ if __name__ == "__main__":
                 }
             });
 
+            // Set up notebook save listener for .ipynb files
+            const notebookSaveDisposable = vscode.workspace.onDidSaveNotebookDocument(async (savedNotebook) => {
+                // Check if this notebook corresponds to our document URI
+                if (savedNotebook.uri.toString() === doc.uri.toString()) {
+                    logger.info('💾 📓 NOTEBOOK SAVE EVENT - Auto-uploading notebook changes...');
+
+                    try {
+                        // For .ipynb files, save the full notebook JSON structure
+                        // Get the raw notebook content (full JSON structure)
+                        const currentDoc = await vscode.workspace.openTextDocument(doc.uri);
+                        const notebookJson = currentDoc.getText();
+
+                        logger.info('📓 Saving full notebook JSON structure');
+                        logger.info('📝 Notebook JSON length:', notebookJson.length);
+                        logger.info('📝 Cell count from NotebookDocument:', savedNotebook.cellCount);
+                        logger.info('📝 Is valid JSON?', this.isValidJson(notebookJson));
+                        logger.info('📝 First 500 chars:', notebookJson.substring(0, 500));
+                        logger.info('📝 Last 200 chars:', notebookJson.substring(notebookJson.length - 200));
+
+                        // Validate that we have actual notebook JSON, not just Python code
+                        if (!notebookJson.includes('"cells"') || !notebookJson.includes('"nbformat"')) {
+                            console.error('⚠️ WARNING: Content does not appear to be valid notebook JSON!');
+                            console.error('Content preview:', notebookJson.substring(0, 1000));
+                        }
+
+                        // For notebooks, we need to update scriptContent with the full JSON
+                        const savedLines = notebookJson.split('\n');
+                        this.onScriptChange(savedLines);
+
+                        // Use the original filename or generate one
+                        const scriptFileName = scriptFile.fileName || `${pipeline.name}_${this.organization}.py`;
+
+                        logger.info('📤 About to upload notebook file:', scriptFileName);
+                        logger.info('📤 Content to upload length:', this.scriptContent.length);
+
+                        // Auto-upload the full notebook JSON
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
+
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Notebook changes auto-uploaded successfully to ${scriptFileName}!`
+                        );
+
+                        // Update stream item and save
+                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFileName);
+
+                    } catch (error: any) {
+                        console.error('❌ Notebook auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Notebook auto-upload failed: ${error.message}`);
+                    }
+                }
+            });
+
             // Clean up listeners when document is closed
             const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
                 if (closedDocument === doc) {
-                    console.log('📄 Script editor closed, cleaning up listeners');
+                    logger.info('📄 Script editor closed, cleaning up listeners');
                     changeDisposable.dispose();
                     saveDisposable.dispose();
+                    notebookSaveDisposable.dispose();
                     closeDisposable.dispose();
                 }
             });
@@ -1583,7 +1697,7 @@ if __name__ == "__main__":
         try {
 
             const response = await this._pipelineService.getStreamingServicesByName(name, organization);
-            console.log('Streaming service retrieved:', response.data);
+            logger.info('Streaming service retrieved:', response.data);
             return response.data;
         } catch (error: any) {
             console.error('Failed to get streaming service:', error);
@@ -1593,7 +1707,7 @@ if __name__ == "__main__":
 
     private async saveJson(streamItem: any, run: boolean = false): Promise<void> {
         try {
-            console.log('Saving JSON for stream item:', streamItem.name);
+            logger.info('Saving JSON for stream item:', streamItem.name);
 
             // Parse and clean up JSON content 
             let jsonContent = streamItem.json_content;
@@ -1632,7 +1746,7 @@ if __name__ == "__main__":
             await this.updateStreamingService(streamItem);
 
             if (run) {
-                console.log('JSON saved successfully for pipeline run');
+                logger.info('JSON saved successfully for pipeline run');
             }
 
         } catch (error: any) {
@@ -1645,22 +1759,26 @@ if __name__ == "__main__":
 
     private async generateScript(streamItem: any, selectedRunType: any): Promise<any> {
         try {
-            console.log('Generating script for:', streamItem.name);
+            logger.info('Generating script for:', streamItem.name);
+
+            // Ensure organization is current before generating filenames
+            this.organization = this._context.globalState.get('organization') as string || this.project?.name || '';
+            logger.info('Organization for script generation:', this.organization);
 
             // Step 1: Create/upload script file FIRST (matching browser behavior)
             // Use edited script content if available, otherwise generate fresh content
-            console.log('🔧 Preparing script content for pipeline:', streamItem.name);
-            console.log('🔍 DEBUG: Script state check:');
-            console.log('🔍   this.scriptContent exists?', !!this.scriptContent);
-            console.log('🔍   this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
-            console.log('🔍   this.script exists?', !!this.script);
-            console.log('🔍   this.script length:', this.script ? this.script.length : 'undefined');
+            logger.info('🔧 Preparing script content for pipeline:', streamItem.name);
+            logger.info('🔍 DEBUG: Script state check:');
+            logger.info('🔍   this.scriptContent exists?', !!this.scriptContent);
+            logger.info('🔍   this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
+            logger.info('🔍   this.script exists?', !!this.script);
+            logger.info('🔍   this.script length:', this.script ? this.script.length : 'undefined');
 
             if (this.scriptContent && this.scriptContent.length > 0) {
-                console.log('🔍   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
+                logger.info('🔍   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
             }
             if (this.script && this.script.length > 0) {
-                console.log('🔍   script[0] preview:', this.script[0].substring(0, 100) + '...');
+                logger.info('🔍   script[0] preview:', this.script[0].substring(0, 100) + '...');
             }
 
             let scriptContent: string;
@@ -1668,26 +1786,34 @@ if __name__ == "__main__":
             if (this.scriptContent && this.scriptContent.length > 0) {
                 // User has saved script content - use it
                 scriptContent = this.scriptContent;
-                console.log('� ✅ Using saved script content from editor');
-                console.log('� Saved script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                logger.info('� ✅ Using saved script content from editor');
+                logger.info('� Saved script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
             } else if (this.script && this.script.length > 0) {
                 // User has edited the script and it's still in memory - use it
                 scriptContent = this.script.join('\n');
-                console.log('📝 ✅ Using current this.script content from active editing session');
-                console.log('📊 Current script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                logger.info('📝 ✅ Using current this.script content from active editing session');
+                logger.info('📊 Current script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
             } else {
                 // No edited content - generate fresh script
-                console.log('� Generating fresh script content for pipeline:', streamItem.name);
+                logger.info('� Generating fresh script content for pipeline:', streamItem.name);
                 scriptContent = await this.generatePipelineScript(streamItem.name);
-                console.log('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                logger.info('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
             }
 
             const fileName = `${streamItem.name}_${this.organization}.py`;
-            console.log('📤 Creating script file FIRST:', fileName);
-            await this.createScriptFile(streamItem.name, scriptContent, fileName);
+            logger.info('📤 Creating script file FIRST:', fileName);
+            
+            // Create FormData for upload
+            const formData = new FormData();
+            formData.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
+                filename: 'blob',
+                contentType: 'text/plain'
+            });
+            
+            await this._pipelineService.uploadScript(streamItem.name, fileName, formData);
 
             // Step 2: Save JSON 
-            console.log('💾 Saving JSON for streaming service...');
+            logger.info('💾 Saving JSON for streaming service...');
             await this.saveJson(streamItem, true);
 
             // Step 3: Check for connection nodes and update datasources if needed
@@ -1732,7 +1858,7 @@ if __name__ == "__main__":
             }
 
             // Step 4: Execute pipeline directly (matching browser behavior)
-            console.log('🚀 Executing pipeline:', streamItem.name);
+            logger.info('🚀 Executing pipeline:', streamItem.name);
 
             // Extract parameters from selectedRunType
             const isLocal = selectedRunType.type === 'Local' ? 'true' : 'false';
@@ -1740,7 +1866,7 @@ if __name__ == "__main__":
             const datasource = selectedRunType.dsName || selectedRunType.dsAlias || '';
             const alias = streamItem.alias || streamItem.name;
 
-            console.log('🎯 Pipeline execution parameters:', {
+            logger.info('🎯 Pipeline execution parameters:', {
                 alias: alias,
                 name: streamItem.name,
                 type: streamItem.type || 'NativeScript',
@@ -1759,7 +1885,7 @@ if __name__ == "__main__":
                 'undefined'
             );
 
-            console.log('✅ Pipeline execution completed:', executionResult);
+            logger.info('✅ Pipeline execution completed:', executionResult);
             return executionResult;
 
         } catch (error: any) {
@@ -1770,342 +1896,17 @@ if __name__ == "__main__":
 
     private async generatePipelineScript(pipelineName: string): Promise<string> {
         // Generate the exact Python script content from your curl example
-        const generatedScript = `import os
-import json
-import requests
-import shutil
-import boto3
-import stat
-import sys
-import logging as logger
-
-logger.basicConfig(level=logger.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%y/%m/%d %H:%M:%S')
- 
-arguments = sys.argv
-argsDict = {}
-for arg in arguments:
-    try:
-        argsDict[arg.split(':')[0]] = (':').join(arg.split(':')[1:])
-    except IndexError as e:
-        logger.error(f"Invalid argument format: {arg}. Error: {str(e)}")
-        continue
-
-dataset_details = json.loads(argsDict.get("dataset"))
-
-def parse_nested_json(obj):
-    print();
-    if isinstance(obj, str):
-        try:
-            parsed = json.loads(obj)
-            return parse_nested_json(parsed)
-        except (json.JSONDecodeError, TypeError):
-            return obj
-    elif isinstance(obj, dict):
-        return {k: parse_nested_json(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [parse_nested_json(elem) for elem in obj]
-    else:
-        return obj
-        
-
-parsed_data_details = parse_nested_json(dataset_details)
-
-
-
-datasetid_param = parsed_data_details.get("name")
-org_param = parsed_data_details.get("organization")
-
-
-def s3_download_data(end_point_url,access_key,secret_key,bucket, obj_key, local_path):
-
-    \"""
-
-    Download a folder from S3 to a local path.
-
-    \"""
-
-    session = boto3.session.Session()
-
-    s3c = session.client(
-
-        aws_access_key_id=access_key,
-
-        aws_secret_access_key=secret_key,
-
-        endpoint_url=end_point_url,
-
-        service_name="s3",
-
-        use_ssl=False,
-
-    )    
-
-    resource = boto3.resource(
-
-        aws_access_key_id=access_key,
-
-        aws_secret_access_key=secret_key,
-
-        endpoint_url=end_point_url,
-
-        service_name="s3",
-
-        use_ssl=False,
-        )
-    # List all objects in the folder
-
-    response = s3c.list_objects_v2(Bucket=bucket, Prefix=obj_key)
-
-    objects = response.get('Contents', [])
-
-    for obj in objects:
-
-        key = obj['Key']
-        # if key == "icets-sv":
-        print("Downloading file: ", key)
-        file_path = os.path.join(local_path, key)
-        try:
-            if not os.path.exists(os.path.dirname(file_path)):
-                os.makedirs(os.path.dirname(file_path))
-            if not obj.get('Key').endswith('/'):
-                resource.meta.client.download_file(bucket, obj.get('Key'), file_path)
-                print(f"Downloaded {key} to {file_path}")
-        except PermissionError as e:
-            print(f"PermissionError: {e} - Skipping {key}")    
-    return file_path    
-            
-def DatasetExtractor():    #python-script Data
-
-    #get dataset configurations 
-
-    #  = getdatasetconfig(dataset_id=datasetid_param, organization=org_param)   
-
-    dataset_type = parsed_data_details['datasource']['type']  
-
-    print("dataset_type",dataset_type)
-
-    if dataset_type == 'S3':
-
-        connection_dict = parsed_data_details['datasource']['connectionDetails']
-
-        print("Fetched Connection Details")
-
-        s3_access_key = connection_dict['accessKey']
-
-        s3_secret_key = connection_dict['secretKey']
-
-        s3_end_point_url = connection_dict['url'] 
-
-        attribute = parsed_data_details['attributes']
-
-        bucket = attribute['bucket']               
-        path = attribute['path']   
-
-        obj_key = attribute['object']  
-
-        key = f'{path}/{obj_key}'
-
-        local_path = "/home/useradmin/py-job-executer/tmp/sample_linear"
-
-        def on_rm_error(func, path, exc_info):
-
-            if not os.access(path, os.W_OK):
-
-                os.chmod(path, stat.S_IWUSR)
-
-                func(path)
-
-            else:
-
-                raise
-
-        if os.path.exists(local_path):
-
-            shutil.rmtree(local_path, onerror=on_rm_error)
-
-        if not os.path.exists(local_path):
-
-            os.makedirs(local_path)
-
-        os.listdir(local_path)
-        
-        file_path = s3_download_data(end_point_url = s3_end_point_url, access_key = s3_access_key, secret_key=s3_secret_key, bucket = bucket, obj_key = key, local_path = local_path)
-        return file_path
-    else:
-        print("Type not supported...")
-    return local_path
-    
-    
-
-saved_path = DatasetExtractor()
-print(saved_path)
-
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-import joblib
-from pathlib import Path
-
-
-
-full_path = Path(saved_path)
-parent_path = full_path.parent
-
-# Read data from CSV file
-data = pd.read_csv(saved_path)
-X = data[['YearsExperience']]  # Replace with your feature columns
-y = data['Salary']  # Replace with your target column
-
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Create and train the model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# Save the model to a file
-joblib.dump(model, os.path.join(parent_path, "salary_linear_regression_model.pkl"))
-
-print("Model saved to 'salary_linear_regression_model.pkl'")
-
-
-import boto3
-
-import uuid
-
-import os
-
-from botocore.client import Config
-
-from pathlib import Path
-
-import requests
-
-import json
- 
- 
- 
-
- 
-def upload_model(bucket_name, model_name, folder_name):
-
-    \"""
-
-    model_name: name of the model that saved.
-
-    folder_name: Name of the folder to be created inside bucket.
-
-    Returns:
-
-    Uploaded path of the model to s3.
-
-    \"""
-
-    datasource_details = parsed_data_details.get("datasource")
-
-    connection_details = datasource_details.get('connectionDetails')
-
-
-    access_key = connection_details['accessKey']
-
-    secret_key = connection_details['secretKey']
-
-    region = connection_details['Region']
-
-    endpoint_url = connection_details['url']
-
-    current_file_path = os.path.join(parent_path, "salary_linear_regression_model.pkl")
-
-    unique_id = str(uuid.uuid4())
- 
-    _, file_extension = os.path.splitext(model_name)
- 
-    new_model_file_name = f"{os.path.splitext(model_name)[0]}_{unique_id}{file_extension}"
- 
-    s3_key = f"{folder_name.rstrip('/')}/{new_model_file_name}"
- 
-    s3 = boto3.client('s3',
-
-                      endpoint_url = endpoint_url,
-
-                      region_name = region,
-
-                      aws_access_key_id = access_key,
-
-                      aws_secret_access_key = secret_key,
-
-                      config = Config(signature_version = "s3v4")
-
-                      )
-
-    try:
-
-        with open(current_file_path, 'rb') as script_file:
-
-            s3.upload_fileobj(script_file, bucket_name, s3_key)
-
-        model_headers = {'access-token': 'aec127c2-c984-33f6-9a3a-355xd1dof097', 'project': '2', 'Content-Type': 'application/json'}
-
-        payload = {
-
-                        "Model Name": model_name,
-
-                        "Version": "1",
-
-                        "Container ImageUri": folder_name,
-
-                        "Storage Type": "s3",
-
-                        "Storage Uri": s3_key
-
-                    }
-
-        model_card = "https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/models/register?project=leo1311&isCached=true&adapter_instance=local"
-
-        try:
-
-            model_response = requests.post(url = model_card, headers=model_headers, json=payload, verify=False)
-
-        except Exception as e:
-
-            print("Got Exception when registering model.", {e})
- 
-        print(f"Script uploaded to minio://aipmodels/{s3_key}")
- 
-        file = Path(model_name)
-
-        if file.exists():
-
-            file.unlink()
-
-            print("deleted in local")
-
-    except Exception as e:
-
-        print(f"Failed to upload and Got an exception:{e}")
- 
-    return s3_key
- 
- 
-uploaded_path = upload_model('aipmodels','salary_linear_regression_model', "models/linear")
-
-print(f"The model got uploaded {uploaded_path} here")
-
-
-
-
-
+        const generatedScript = `print(f"Starting the script for pipeline: ${pipelineName}")
  `;
 
-        console.log('Script generated for pipeline:', pipelineName);
+        logger.info('Script generated for pipeline:', pipelineName);
         return generatedScript;
     }
 
 
     private async updateStreamingService(streamItem: any): Promise<void> {
         try {
-            console.log('Updating streaming service:', streamItem.name);
+            logger.info('Updating streaming service:', streamItem.name);
 
             // Build the exact payload structure from the working curl command
             let jsonContent = streamItem.json_content;
@@ -2159,12 +1960,12 @@ print(f"The model got uploaded {uploaded_path} here")
                 is_app: streamItem.is_app || false
             };
 
-            console.log('Request payload:', JSON.stringify(requestBody, null, 2));
+            logger.info('Request payload:', JSON.stringify(requestBody, null, 2));
 
             // Make the API call with absolute URL
             const response = await this._pipelineService.updateStreamingService(requestBody);
 
-            console.log('Streaming service update response:', {
+            logger.info('Streaming service update response:', {
                 status: response.status,
                 statusText: response.statusText,
                 data: response.data,
@@ -2205,19 +2006,19 @@ print(f"The model got uploaded {uploaded_path} here")
 
     // Handle script content changes - save to scriptContent property
     private onScriptChange(scriptLines: string[]): void {
-        console.log('📝 🔄 onScriptChange called with', scriptLines.length, 'lines');
-        console.log('📝 First 3 lines preview:');
+        logger.info('📝 🔄 onScriptChange called with', scriptLines.length, 'lines');
+        logger.info('📝 First 3 lines preview:');
         scriptLines.slice(0, 3).forEach((line, index) => {
-            console.log(`  ${index + 1}: ${line.substring(0, 80)}${line.length > 80 ? '...' : ''}`);
+            logger.info(`  ${index + 1}: ${line.substring(0, 80)}${line.length > 80 ? '...' : ''}`);
         });
 
         this.script = scriptLines;
         this.scriptContent = scriptLines.join('\n');
 
-        console.log('📝 ✅ onScriptChange completed:');
-        console.log('📝   this.script.length:', this.script.length);
-        console.log('📝   this.scriptContent.length:', this.scriptContent.length);
-        console.log('�   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
+        logger.info('📝 ✅ onScriptChange completed:');
+        logger.info('📝   this.script.length:', this.script.length);
+        logger.info('📝   this.scriptContent.length:', this.scriptContent.length);
+        logger.info('�   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
 
         // Log specific changes that indicate user editing
         if (this.script.length > 0) {
@@ -2228,9 +2029,9 @@ print(f"The model got uploaded {uploaded_path} here")
                 line.includes('Starting the script')
             );
             if (hasCustomChanges) {
-                console.log('✅ onScriptChange: Detected user customizations in script content');
+                logger.info('✅ onScriptChange: Detected user customizations in script content');
             } else {
-                console.log('⚠️ onScriptChange: No user customizations detected');
+                logger.info('⚠️ onScriptChange: No user customizations detected');
             }
         }
     }
@@ -2238,7 +2039,7 @@ print(f"The model got uploaded {uploaded_path} here")
     // Edit script functionality - opens script content in VS Code editor with auto-save
     private async editScript(cardId: string, fileName: string, currentContent: string): Promise<void> {
         try {
-            console.log('🔧 Opening script for editing with auto-save:', fileName);
+            logger.info('🔧 Opening script for editing with auto-save:', fileName);
 
             // Find the pipeline by cardId
             const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
@@ -2251,7 +2052,7 @@ print(f"The model got uploaded {uploaded_path} here")
             if (currentContent && currentContent !== 'Generated script content will be loaded...') {
                 scriptContent = currentContent;
             } else {
-                console.log('🔄 Generating fresh script content for editing...');
+                logger.info('🔄 Generating fresh script content for editing...');
                 scriptContent = await this.generatePipelineScript(pipeline.name);
             }
 
@@ -2271,7 +2072,7 @@ print(f"The model got uploaded {uploaded_path} here")
             // Set up auto-save functionality - listen for document changes
             const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
                 if (event.document === document) {
-                    console.log('📝 Script content changed, triggering onScriptChange...');
+                    logger.info('📝 Script content changed, triggering onScriptChange...');
 
                     // Get updated content and split into lines 
                     const updatedContent = event.document.getText();
@@ -2280,40 +2081,40 @@ print(f"The model got uploaded {uploaded_path} here")
                     // Call onScriptChange 
                     this.onScriptChange(updatedLines);
 
-                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                    logger.info('✅ Script state updated with', this.script.length, 'lines');
                 }
             });
 
             // Set up save listener - automatically upload when user saves
             const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
                 if (savedDocument === document) {
-                    console.log('💾 📥 SAVE EVENT TRIGGERED - Document saved, auto-uploading script changes...');
-                    console.log('📄 Saved document URI:', savedDocument.uri.toString());
-                    console.log('📄 Target document URI:', document.uri.toString());
-                    console.log('📄 URIs match:', savedDocument.uri.toString() === document.uri.toString());
+                    logger.info('💾 📥 SAVE EVENT TRIGGERED - Document saved, auto-uploading script changes...');
+                    logger.info('📄 Saved document URI:', savedDocument.uri.toString());
+                    logger.info('📄 Target document URI:', document.uri.toString());
+                    logger.info('📄 URIs match:', savedDocument.uri.toString() === document.uri.toString());
 
                     try {
                         // Get the saved content and update scriptContent
                         const savedContent = savedDocument.getText();
                         const savedLines = savedContent.split('\n');
 
-                        console.log('📝 Saved content length:', savedContent.length);
-                        console.log('📝 Saved lines count:', savedLines.length);
-                        console.log('📝 First 200 chars of saved content:', savedContent.substring(0, 200) + '...');
+                        logger.info('📝 Saved content length:', savedContent.length);
+                        logger.info('📝 Saved lines count:', savedLines.length);
+                        logger.info('📝 First 200 chars of saved content:', savedContent.substring(0, 200) + '...');
 
                         // Update script state - this will set this.scriptContent
                         this.onScriptChange(savedLines);
 
-                        console.log('📊 After onScriptChange:');
-                        console.log('📊   this.scriptContent length:', this.scriptContent.length);
-                        console.log('📊   this.script length:', this.script.length);
-                        console.log('📊   scriptContent preview:', this.scriptContent.substring(0, 200) + '...');
+                        logger.info('📊 After onScriptChange:');
+                        logger.info('📊   this.scriptContent length:', this.scriptContent.length);
+                        logger.info('📊   this.script length:', this.script.length);
+                        logger.info('📊   scriptContent preview:', this.scriptContent.substring(0, 200) + '...');
 
                         // Generate filename with timestamp
                         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                         const scriptFileName = `${pipeline.name}_${this.organization}.py`;
 
-                        console.log('📤 About to upload file:', scriptFileName);
+                        logger.info('📤 About to upload file:', scriptFileName);
 
                         // Auto-upload 
                         await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
@@ -2323,26 +2124,87 @@ print(f"The model got uploaded {uploaded_path} here")
                             `✅ Script changes auto-uploaded successfully to ${scriptFileName}!`
                         );
 
-                        // Update stream item and save 
-                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFileName);
+                        // Don't update streaming service on auto-save - only upload the file
+                        // Streaming service metadata will be updated when pipeline is executed
+                        logger.info('✅ File uploaded successfully, streaming service will be updated on pipeline run');
 
                     } catch (error: any) {
                         console.error('❌ Auto-upload failed:', error);
                         vscode.window.showErrorMessage(`Auto-upload failed: ${error.message}`);
                     }
                 } else {
-                    console.log('📄 ⚠️ Save event for different document, ignoring...');
-                    console.log('📄 Saved document URI:', savedDocument.uri.toString());
-                    console.log('📄 Target document URI:', document.uri.toString());
+                    logger.info('📄 ⚠️ Save event for different document, ignoring...');
+                    logger.info('📄 Saved document URI:', savedDocument.uri.toString());
+                    logger.info('📄 Target document URI:', document.uri.toString());
+                }
+            });
+
+            // Set up notebook save listener for .ipynb files
+            const notebookSaveDisposable = vscode.workspace.onDidSaveNotebookDocument(async (savedNotebook) => {
+                // Check if this notebook corresponds to our document URI
+                if (savedNotebook.uri.toString() === document.uri.toString()) {
+                    logger.info('💾 📓 NOTEBOOK SAVE EVENT - Auto-uploading notebook changes...');
+                    logger.info('📄 Saved notebook URI:', savedNotebook.uri.toString());
+                    logger.info('📄 Target document URI:', document.uri.toString());
+
+                    try {
+                        // For .ipynb files, save the full notebook JSON structure
+                        // Get the raw notebook content (full JSON structure)
+                        const currentDoc = await vscode.workspace.openTextDocument(document.uri);
+                        const notebookJson = currentDoc.getText();
+
+                        logger.info('📓 Saving full notebook JSON structure');
+                        logger.info('📝 Notebook JSON length:', notebookJson.length);
+                        logger.info('📝 Cell count from NotebookDocument:', savedNotebook.cellCount);
+                        logger.info('📝 Is valid JSON?', this.isValidJson(notebookJson));
+                        logger.info('📝 First 500 chars:', notebookJson.substring(0, 500));
+                        logger.info('📝 Last 200 chars:', notebookJson.substring(notebookJson.length - 200));
+
+                        // Validate that we have actual notebook JSON, not just Python code
+                        if (!notebookJson.includes('"cells"') || !notebookJson.includes('"nbformat"')) {
+                            console.error('⚠️ WARNING: Content does not appear to be valid notebook JSON!');
+                            console.error('Content preview:', notebookJson.substring(0, 1000));
+                        }
+
+                        // For notebooks, we need to update scriptContent with the full JSON
+                        const savedLines = notebookJson.split('\n');
+                        this.onScriptChange(savedLines);
+
+                        logger.info('📊 After onScriptChange:');
+                        logger.info('📊   this.scriptContent length:', this.scriptContent.length);
+                        logger.info('📊   this.script length:', this.script.length);
+
+                        const scriptFileName = `${pipeline.name}_${this.organization}.py`;
+
+                        logger.info('📤 About to upload notebook file:', scriptFileName);
+                        logger.info('📤 Content to upload length:', this.scriptContent.length);
+
+                        // Auto-upload the full notebook JSON
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
+
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Notebook changes auto-uploaded successfully to ${scriptFileName}!`
+                        );
+
+                        // Don't update streaming service on auto-save - only upload the file
+                        // Streaming service metadata will be updated when pipeline is executed
+                        logger.info('✅ Notebook uploaded successfully, streaming service will be updated on pipeline run');
+
+                    } catch (error: any) {
+                        console.error('❌ Notebook auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Notebook auto-upload failed: ${error.message}`);
+                    }
                 }
             });
 
             // Clean up listeners when document is closed
             const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
                 if (closedDocument === document) {
-                    console.log('📄 Script editor closed, cleaning up listeners');
+                    logger.info('📄 Script editor closed, cleaning up listeners');
                     changeDisposable.dispose();
                     saveDisposable.dispose();
+                    notebookSaveDisposable.dispose();
                     closeDisposable.dispose();
                 }
             });
@@ -2361,7 +2223,7 @@ print(f"The model got uploaded {uploaded_path} here")
     // Update stream item after file upload 
     private async updateStreamItemAfterFileUpload(pipeline: PipelineCard, fileName: string): Promise<void> {
         try {
-            console.log('🔄 Updating stream item after file upload...');
+            logger.info('🔄 Updating stream item after file upload...');
 
             // update data.files[0], arguments, etc.
             const streamItem = {
@@ -2370,7 +2232,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 json_content: JSON.stringify({
                     elements: [{
                         attributes: {
-                            files: [fileName],
+                            files: [fileName[0]],
                             filetype: 'Python3',
                             arguments: {},
                             usedSecrets: []
@@ -2381,12 +2243,12 @@ print(f"The model got uploaded {uploaded_path} here")
                 })
             };
 
-            console.log('📊 Stream item to update:', streamItem);
+            logger.info('📊 Stream item to update:', streamItem);
 
             // Call the update streaming service API
             await this.updateStreamingService(streamItem);
 
-            console.log('✅ Stream item updated successfully');
+            logger.info('✅ Stream item updated successfully');
 
         } catch (error: any) {
             console.error('❌ Failed to update stream item:', error);
@@ -2397,7 +2259,7 @@ print(f"The model got uploaded {uploaded_path} here")
     // Save script functionality - uploads modified script content 
     private async saveScript(cardId: string, fileName: string, content: string): Promise<void> {
         try {
-            console.log('💾 Saving script:', fileName);
+            logger.info('💾 Saving script:', fileName);
 
             // Find the pipeline by cardId
             const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
@@ -2429,29 +2291,29 @@ print(f"The model got uploaded {uploaded_path} here")
      */
     private async createNativeFileWithFormData(pipelineName: string, fileName: string): Promise<any> {
         try {
-            console.log('🚀 Starting createNativeFileWithFormData...');
-            console.log('📁 Pipeline Name:', pipelineName);
-            console.log('📄 File Name:', fileName);
-            console.log('📝 this.script lines count:', this.script.length);
-            console.log('📝 this.scriptContent length:', this.scriptContent.length);
+            logger.info('🚀 Starting createNativeFileWithFormData...');
+            logger.info('📁 Pipeline Name:', pipelineName);
+            logger.info('📄 File Name:', fileName);
+            logger.info('📝 this.script lines count:', this.script.length);
+            logger.info('📝 this.scriptContent length:', this.scriptContent.length);
 
             // Check if script content exists - prefer scriptContent over script lines
             let scriptToUpload: string;
             if (this.scriptContent && this.scriptContent.length > 0) {
                 scriptToUpload = this.scriptContent;
-                console.log('✅ Using this.scriptContent (preferred)');
+                logger.info('✅ Using this.scriptContent (preferred)');
             } else if (this.script && this.script.length > 0) {
                 scriptToUpload = this.script.join('\n');
-                console.log('⚠️ Falling back to this.script.join()');
+                logger.info('⚠️ Falling back to this.script.join()');
             } else {
                 throw new Error('No script content available. Please ensure script is loaded first.');
             }
 
             // Debug: Print script content details
-            console.log('📊 Script content to upload (first 500 chars):');
-            console.log(scriptToUpload.substring(0, 500));
-            console.log('📏 Total script length:', scriptToUpload.length);
-            console.log('📝 Number of lines in scriptToUpload:', scriptToUpload.split('\n').length);
+            logger.info('📊 Script content to upload (first 500 chars):');
+            logger.info(scriptToUpload.substring(0, 500));
+            logger.info('📏 Total script length:', scriptToUpload.length);
+            logger.info('📝 Number of lines in scriptToUpload:', scriptToUpload.split('\n').length);
 
             // Script list to file 
             const formData = new FormData();
@@ -2462,8 +2324,8 @@ print(f"The model got uploaded {uploaded_path} here")
                 contentType: 'text/plain'
             });
 
-            console.log('✅ FormData created successfully');
-           
+            logger.info('✅ FormData created successfully');
+
 
             // Headers matching the exact working curl command
             const headers = {
@@ -2491,24 +2353,24 @@ print(f"The model got uploaded {uploaded_path} here")
 
             const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
-            console.log('🌐 API URL:', url);
-            console.log('🔑 Authorization token length:', this._token?.length || 0);
-            console.log('📋 Request headers:');
+            logger.info('🌐 API URL:', url);
+            logger.info('🔑 Authorization token length:', this._token?.length || 0);
+            logger.info('📋 Request headers:');
             Object.keys(headers).forEach(key => {
                 if (key !== 'authorization') {
-                    console.log(`  ${key}: ${(headers as any)[key]}`);
+                    logger.info(`  ${key}: ${(headers as any)[key]}`);
                 } else {
-                    console.log(`  ${key}: Bearer [REDACTED_${this._token?.length || 0}_CHARS]`);
+                    logger.info(`  ${key}: Bearer [REDACTED_${this._token?.length || 0}_CHARS]`);
                 }
             });
 
-            console.log('📤 Sending POST request to upload script...');
+            logger.info('📤 Sending POST request to upload script...');
             const response = await this._pipelineService.uploadScript(pipelineName, fileName, formData);
 
-            console.log('✅ Native file created successfully !');
-            console.log('📊 Response Status:', response.status);
-            console.log('📋 Response Data:', response.data);
-            console.log('📈 Response Headers:', response.headers);
+            logger.info('✅ Native file created successfully !');
+            logger.info('📊 Response Status:', response.status);
+            logger.info('📋 Response Data:', response.data);
+            logger.info('📈 Response Headers:', response.headers);
             return response.data;
 
         } catch (error: any) {
@@ -2538,85 +2400,7 @@ print(f"The model got uploaded {uploaded_path} here")
         }
     }
 
-    /**
-     * Upload/create script file to server - missing API from browser calls
-     * API: /api/aip/file/create/{pipelineName}/{org}/Python3
-     */
-    private async createScriptFile(pipelineName: string, scriptContent: string, fileName: string): Promise<any> {
-        try {
-            console.log('🚀 Starting createScriptFile API call...');
-            console.log('📁 Pipeline Name:', pipelineName);
-            console.log('📄 File Name:', fileName);
-            console.log('📏 Script Content Length:', scriptContent.length);
 
-
-
-            // Create FormData for multipart/form-data request
-            const form = new FormData();
-
-            // Add the script file as blob (matching browser behavior)
-            form.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
-                filename: 'blob',
-                contentType: 'text/plain'
-            });
-
-            const headers = {
-                'accept': 'application/json, text/plain, */*',
-                'accept-language': 'en-US,en;q=0.9',
-                'authorization': `Bearer ${this._token}`,
-                'origin': getBaseUrl(),
-                'priority': 'u=1, i',
-                'project': this.project.id,
-                'projectname': this.project.name,
-                'referer': `${getBaseUrl()}/`,
-                'roleid': this.role.id,
-                'rolename': this.role.name,
-                'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"Windows"',
-                'sec-fetch-dest': 'empty',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-                'x-requested-with': 'Leap',
-                ...form.getHeaders()
-            };
-
-            const url = `${getBaseUrl()}/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
-
-            console.log('🌐 API URL:', url);
-            console.log('📋 Headers:', JSON.stringify(headers, null, 2));
-            console.log('📄 Script content being uploaded (length):', scriptContent.length);
-            console.log('📊 Script preview (first 300 chars):', scriptContent.substring(0, 300) + '...');
-            const response = await this._pipelineService.uploadScript(pipelineName, fileName, form);
-
-            console.log('✅ Script file created successfully!');
-            console.log('📊 Response Status:', response.status);
-            console.log('📋 Response Data:', response.data);
-            return response.data;
-
-        } catch (error: any) {
-            console.error('❌ Failed to create script file:', error);
-
-            let errorMessage = 'Failed to create script file';
-            if (error.response) {
-                console.error('📋 File creation error details:', {
-                    status: error.response.status,
-                    statusText: error.response.statusText,
-                    data: error.response.data
-                });
-                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
-            } else if (error.request) {
-                console.error('🌐 Request error:', error.request);
-                errorMessage = 'Network error - could not reach the server';
-            } else {
-                console.error('⚙️ Setup error:', error.message);
-                errorMessage = `Request setup error: ${error.message}`;
-            }
-
-            throw new Error(errorMessage);
-        }
-    }
 
     //  runPipeline method 
     private async runPipeline(
@@ -2628,15 +2412,11 @@ print(f"The model got uploaded {uploaded_path} here")
         params: string = '{}',
         workerlogId: string = 'undefined'
     ): Promise<any> {
-        console.log('🔥 Starting runPipeline API call...');
-        console.log('📋 Parameters:', { alias, cname, pipelineType, isLocal, datasource, params, workerlogId });
+        logger.info('🔥 Starting runPipeline API call...');
+        logger.info('📋 Parameters:', { alias, cname, pipelineType, isLocal, datasource, params, workerlogId });
 
         const org = this.organization;
         const offset = new Date().getTimezoneOffset();
-
-        const httpsAgent = new https.Agent({
-            rejectUnauthorized: false
-        });
 
         // Headers matching your exact curl request
         const headers = {
@@ -2679,15 +2459,15 @@ print(f"The model got uploaded {uploaded_path} here")
 
         const fullUrl = `${baseUrl}?${queryParams.toString()}`;
 
-        console.log('🌐 Full API URL:', fullUrl);
-        console.log('📋 Request Headers:', JSON.stringify(headers, null, 2));
+        logger.info('🌐 Full API URL:', fullUrl);
+        logger.info('📋 Request Headers:', JSON.stringify(headers, null, 2));
 
         try {
             const response = await this._pipelineService.runPipeline(alias, cname, pipelineType, isLocal, datasource, params, workerlogId);
 
-            console.log('✅ Pipeline execution successful!');
-            console.log('📊 Response Status:', response.status);
-            console.log('📋 Response Data:', response.data);
+            logger.info('✅ Pipeline execution successful!');
+            logger.info('📊 Response Status:', response.status);
+            logger.info('📋 Response Data:', response.data);
             return response.data;
 
         } catch (error: any) {
@@ -2717,14 +2497,14 @@ print(f"The model got uploaded {uploaded_path} here")
 
         const pipelineName = card.alias || card.name;
 
-        console.log('🚀 runPipelineScript called for:', pipelineName);
-        console.log('🔍 runPipelineScript: DEBUG - Checking script state at start...');
-        console.log('🔍 runPipelineScript: this.script exists?', !!this.script);
-        console.log('🔍 runPipelineScript: this.script length:', this.script ? this.script.length : 'undefined');
-        console.log('🔍 runPipelineScript: this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
+        logger.info('🚀 runPipelineScript called for:', pipelineName);
+        logger.info('🔍 runPipelineScript: DEBUG - Checking script state at start...');
+        logger.info('🔍 runPipelineScript: this.script exists?', !!this.script);
+        logger.info('🔍 runPipelineScript: this.script length:', this.script ? this.script.length : 'undefined');
+        logger.info('🔍 runPipelineScript: this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
 
         if (this.script && this.script.length > 0) {
-            console.log('🔍 runPipelineScript: First line of this.script:', this.script[0].substring(0, 100));
+            logger.info('🔍 runPipelineScript: First line of this.script:', this.script[0].substring(0, 100));
         }
 
         try {
@@ -2878,34 +2658,34 @@ print(f"The model got uploaded {uploaded_path} here")
      */
     private async returnToMainView(): Promise<void> {
         try {
-            console.log('Returning to main pipeline view...');
+            logger.info('Returning to main pipeline view...');
 
             // Double-check authentication state and try to get token from context if needed
             if (!this._isAuthenticated) {
-                console.log('Warning: returnToMainView called but not authenticated, checking context...');
-                
+                logger.info('Warning: returnToMainView called but not authenticated, checking context...');
+
                 // Try to get token from global state as a fallback
                 const contextToken = this._context.globalState.get('accessToken') as string;
                 if (contextToken && contextToken.trim().length > 0) {
-                    console.log('Found valid token in context, updating component state');
+                    logger.info('Found valid token in context, updating component state');
                     this.updateToken(contextToken);
                 } else {
-                    console.log('No valid token found in context either, cannot proceed');
+                    logger.info('No valid token found in context either, cannot proceed');
                     return;
                 }
             }
 
             // Verify we're now authenticated
             if (!this._isAuthenticated) {
-                console.log('Still not authenticated after checking context, aborting main view load');
+                logger.info('Still not authenticated after checking context, aborting main view load');
                 return;
             }
 
-            console.log('Authentication confirmed, proceeding with main view setup');
+            logger.info('Authentication confirmed, proceeding with main view setup');
 
             // Update authentication context to ensure logout button appears
             await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', true);
-            console.log('Authentication context updated to true');
+            logger.info('Authentication context updated to true');
 
             // Reset the view state
             this.pageNumber = 1;
@@ -2915,12 +2695,12 @@ print(f"The model got uploaded {uploaded_path} here")
 
             // Update the webview to show the main HTML template
             if (this._view) {
-                console.log('Updating webview HTML to main template');
+                logger.info('Updating webview HTML to main template');
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
                 // Wait a moment for the webview to load, then get cards
                 setTimeout(async () => {
-                    console.log('Loading cards after HTML update');
+                    logger.info('Loading cards after HTML update');
                     await this.getCards();
                 }, 500);
             }
@@ -2982,7 +2762,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 
                 function loginAgain() {
                     try {
-                        console.log('Login button clicked, starting fresh Keycloak authentication...');
+                        logger.info('Login button clicked, starting fresh Keycloak authentication...');
                         
                         const button = document.getElementById('loginBtn');
                         button.textContent = '🔄 Starting fresh authentication...';
@@ -3011,7 +2791,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     console.error('VS Code API not available');
                     document.getElementById('loginBtn').textContent = 'VS Code API Error - Use Command Palette';
                 } else {
-                    console.log('VS Code API is available');
+                    logger.info('VS Code API is available');
                 }
             </script>
         </body>
@@ -3034,7 +2814,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
                     progress.report({ increment: 30, message: 'Pipeline JSON saved, generating script...' });
                 } catch (saveError) {
-                    console.log('Save JSON failed, continuing with direct generation...', saveError);
+                    logger.info('Save JSON failed, continuing with direct generation...', saveError);
                     progress.report({ increment: 20, message: 'Proceeding with script generation...' });
                 }
 
@@ -3069,7 +2849,7 @@ print(f"The model got uploaded {uploaded_path} here")
                         });
 
                     } catch (statusError) {
-                        console.log('Status check failed, continuing...', statusError);
+                        logger.info('Status check failed, continuing...', statusError);
                     }
 
                     attempts++;
@@ -3130,10 +2910,10 @@ print(f"The model got uploaded {uploaded_path} here")
         try {
             // Set current pipeline name for auto-save functionality
             this._currentPipelineName = card.name;
-            console.log('🔧 Set current pipeline for auto-save:', this._currentPipelineName);
+            logger.info('🔧 Set current pipeline for auto-save:', this._currentPipelineName);
 
             const scripts = await this.fetchPipelineScripts(card.name);
-            console.log('Fetched Scripts:', scripts);
+            logger.info('Fetched Scripts:', scripts);
             if (scripts && scripts.files && scripts.files[fileIndex]) {
                 await this.openScriptInEditor(scripts.files[fileIndex]);
             } else {
@@ -3149,22 +2929,22 @@ print(f"The model got uploaded {uploaded_path} here")
      */
     private async handleLogout(): Promise<void> {
         try {
-            console.log('Starting logout process...');
+            logger.info('Starting logout process...');
 
             // Clear stored tokens and authentication state
             if (this._authService) {
                 await this._authService.logout();
-                console.log('Auth service logout completed');
+                logger.info('Auth service logout completed');
             }
 
             // Execute the logout command to clear tokens from SecretStorage
             await vscode.commands.executeCommand('essedum.logout');
-            console.log('Logout command executed');
+            logger.info('Logout command executed');
 
             // Update the webview to show logout page
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
-                console.log('Logout HTML displayed');
+                logger.info('Logout HTML displayed');
             }
 
             // Clear internal state
@@ -3184,3 +2964,4 @@ print(f"The model got uploaded {uploaded_path} here")
         }
     }
 }
+

@@ -10,7 +10,7 @@
  * 
  * @fileoverview Centralized constants for pipeline-related components
  * @author Essedum AI Platform Team
- * @version 1.0.0
+ * @version 1.0.21
  */
 
 import { get } from "axios";
@@ -31,7 +31,7 @@ export const PIPELINE_CONFIG = {
     INITIAL_PAGE: 1,
     
     /** Default organization name */
-    DEFAULT_ORGANIZATION: 'leo1311',
+    DEFAULT_ORGANIZATION: '',
     
     /** Default runtime type for pipeline execution */
     DEFAULT_RUNTIME: 'REMOTE',

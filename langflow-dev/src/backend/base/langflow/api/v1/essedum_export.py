@@ -45,7 +45,7 @@ class EssedumExportRequest(BaseModel):
 
 
 class EssedumCreatePipelineRequest(BaseModel):
-    """Request model for creating pipeline via Langflow->Essedum."""
+    """Request model for creating agent pipeline via Langflow->Essedum."""
     alias: str | None = None
     description: str | None = None
     type: str | None = None
@@ -61,7 +61,7 @@ class EssedumCreatePipelineRequest(BaseModel):
 
 
 class EssedumUpdatePipelineRequest(BaseModel):
-    """Request model for updating pipeline via Langflow->Essedum."""
+    """Request model for updating agent pipeline via Langflow->Essedum."""
     cid: int
     alias: str | None = None
     name: str | None = None
@@ -96,15 +96,15 @@ async def export_to_essedum(
     current_user: CurrentActiveUser,
 ) -> EssedumExportResponse:
     """
-    Export a Langflow flow to Essedum platform.
+    Export a agent flow to Essedum platform.
     
     This endpoint:
     1. Retrieves the flow from Langflow database
-    2. Calls the Essedum Java backend API to create the pipeline
+    2. Calls the Essedum Java backend API to create the agent pipeline
     3. Returns the result
     """
     try:
-        # Get the flow from database
+        # Get the agent flow from database
         flow = session.get(Flow, request.flow_id)
         if not flow:
             raise HTTPException(
@@ -279,11 +279,11 @@ async def create_pipeline_via_langflow(
     current_user: CurrentActiveUser,
 ) -> EssedumExportResponse:
     """
-    Create pipeline in Essedum via Langflow backend.
+    Create agent pipeline in Essedum via Langflow backend.
     This is used by EXPORT_LANG_ESSEDUM button -> create functionality.
     """
     try:
-        logger.info(f"Received create-pipeline request: {request.dict()}")
+        logger.info(f"Received create-agent-pipeline request: {request.dict()}")
         logger.info(f"Current user: {current_user.id if current_user else 'None'}")
         # Prepare payload for Essedum API similar to frontend create_pipeline
         # Convert json_content to string if it's an object (Java backend expects string)
@@ -346,7 +346,7 @@ async def create_pipeline_via_langflow(
         
         return EssedumExportResponse(
             success=True,
-            message="Pipeline created in Essedum via Langflow successfully",
+            message="Agent Pipeline created in Essedum successfully",
             essedum_response=essedum_response
         )
         
@@ -359,7 +359,7 @@ async def create_pipeline_via_langflow(
             detail=f"Validation error: {str(exc)}"
         ) from exc
     except Exception as exc:
-        logger.error(f"Error creating pipeline in Essedum via Langflow: {exc}")
+        logger.error(f"Error creating agent pipeline in Essedum via Langflow: {exc}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(exc)}"
@@ -402,7 +402,7 @@ async def update_pipeline_via_langflow(
     current_user: CurrentActiveUser,
 ) -> EssedumExportResponse:
     """
-    Update pipeline in Essedum via Langflow backend.
+    Update agent pipeline in Essedum via langflow's backend.
     This is used by EXPORT_LANG_ESSEDUM button -> update functionality.
     """
     try:
@@ -455,14 +455,14 @@ async def update_pipeline_via_langflow(
         
         return EssedumExportResponse(
             success=True,
-            message="Pipeline updated in Essedum via Langflow successfully",
+            message="Agent Pipeline updated to Essedum",
             essedum_response=essedum_response
         )
         
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error(f"Error updating pipeline in Essedum via Langflow: {exc}")
+        logger.error(f"Error updating agent pipeline to Essedum: {exc}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(exc)}"
@@ -502,14 +502,14 @@ async def create_native_file_via_langflow(
         
         return EssedumExportResponse(
             success=True,
-            message="Native file created in Essedum via Langflow successfully",
+            message="Native file created in Essedum successfully",
             essedum_response=essedum_response
         )
         
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error(f"Error creating native file in Essedum via Langflow: {exc}")
+        logger.error(f"Error creating native file in Essedum : {exc}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(exc)}"

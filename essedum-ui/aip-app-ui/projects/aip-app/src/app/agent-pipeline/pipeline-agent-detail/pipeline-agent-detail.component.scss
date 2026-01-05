@@ -232,20 +232,23 @@
       align-items: center;
       gap: 12px;
       padding: 16px;
-      background: #0a142f;
-      color: white;
+      background: #0a142f !important; // Force dark background
+      color: white !important; // Force white text
       flex-shrink: 0;
       
       mat-icon {
         font-size: 24px;
         width: 24px;
         height: 24px;
+        color: white !important; // Force white icon
       }
       
       h3 {
         margin: 0;
         font-size: 16px;
         font-weight: 500;
+        background: transparent !important; // Force transparent background on h3
+        color: white !important; // Force white text on h3
       }
     }
   }
@@ -481,8 +484,8 @@
 }
 
 .file-explorer {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: #2d2d2d;
+  border: 1px solid #2d2d2d;
   border-radius: 8px;
   overflow: hidden;
   
@@ -568,13 +571,14 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: #0a142f;
-    color: white;
+    background: #0a142f !important; // Force dark background
+    color: white !important; // Force white text
     
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
+      color: white !important; // Force white icon
     }
     
     h3 {
@@ -582,6 +586,8 @@
       font-size: 16px;
       font-weight: 500;
       flex: 1;
+      background: transparent !important; // Force transparent background on h3
+      color: white !important; // Force white text on h3
     }
   }
 }
@@ -591,8 +597,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
-  border: 2px dashed #e0e0e0;
+  background: #2d2d2d;
+  border: 2px dashed #2d2d2d;
   border-radius: 8px;
   min-height: 500px;
   

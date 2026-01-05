@@ -29,7 +29,7 @@ export class Services {
     private customSnackbar: AipSnackbarCustomService,
 
 
-  ) {}
+  ) { }
 
 
   getMlTags(): Observable<any> {
@@ -1120,7 +1120,7 @@ export class Services {
 
     return this.https.get('/api/aip/service/v1/models/fileData', {
       params,
-      responseType:'blob'
+      responseType: 'blob'
     });
   }
 
@@ -1606,29 +1606,58 @@ export class Services {
   //read native file
   readNativeFile(cname, org, filename): Observable<any> {
     const apiUrl = this.baseUrl + '/file/read/' + cname + '/' + org;
-    
+
+    // Get required values for headers
+    const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
+    const roleId = localStorage.getItem('roleId') || '1';
+    const roleName = localStorage.getItem('roleName') || 'IT Portfolio Manager';
+    const projectName = localStorage.getItem('projectName') || org;
+
     console.log('Making API call to read native file:', {
       cname,
-      org, 
+      org,
       filename,
       baseUrl: this.baseUrl,
       url: apiUrl,
-      fullUrl: apiUrl + '?file=' + filename
+      fullUrl: apiUrl + '?file=' + filename,
+      authToken: authToken ? 'Bearer ' + authToken.substring(0, 20) + '...' : 'No token',
+      roleId,
+      roleName,
+      projectName
     });
-    
+
+    // Prepare headers similar to successful curl
+    const headers = new HttpHeaders({
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Authorization': `Bearer ${authToken}`,
+      'Connection': 'keep-alive',
+      'Content-Type': 'application/json',
+      'Project': '2',
+      'ProjectName': projectName,
+      'X-Requested-With': 'Leap',
+      'charset': 'utf-8',
+      'roleId': roleId,
+      'roleName': roleName,
+      'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"'
+    });
+
     return this.https.get(apiUrl, {
       params: { file: filename },
       responseType: 'arraybuffer',
-      // Add headers to improve error handling
+      headers: headers,
       observe: 'body',
       reportProgress: false
     }).pipe(
       catchError((error) => {
-        console.error('API Error in readNativeFile:', {
+        console.error('❌ API Error in readNativeFile:', {
           status: error.status,
           statusText: error.statusText,
           url: error.url,
-          message: error.message
+          message: error.message,
+          error: error.error
         });
         return throwError(error);
       })
@@ -1663,17 +1692,39 @@ export class Services {
 
   //create native-file
   createNativeFile(cname, org, file, filetype, script): Observable<any> {
-    let headers = new HttpHeaders();
-    headers.append('Accept', 'application/json');
-    headers.append(
-      'Content-Type',
-      'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
-    );
+    // Get auth token from session/localStorage
+    const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
 
+    // Create form data with the content as a file - API expects 'scriptFile' key
+    const formData = new FormData();
+    const blob = new Blob([script], { type: filetype === 'json' ? 'application/json' : 'text/plain' });
+    formData.append('scriptFile', blob, file);
+
+    // Set headers matching the working curl format - don't set Content-Type for form-data
+    const headers = new HttpHeaders({
+      'Accept': 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Authorization': authToken ? `Bearer ${authToken}` : '',
+      'Connection': 'keep-alive',
+      'Origin': window.location.origin,
+      'Project': sessionStorage.getItem('projectId') || '2',
+      'ProjectName': sessionStorage.getItem('organization') || org,
+      'Referer': window.location.href,
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-origin',
+      'User-Agent': navigator.userAgent,
+      'X-Requested-With': 'Leap',
+      'roleId': sessionStorage.getItem('roleId') || '1',
+      'roleName': sessionStorage.getItem('roleName') || 'IT Portfolio Manager'
+      // Don't set Content-Type - let browser set it for form-data with boundary
+    });
+
+    // Use the correct API URL structure matching working curl
     return this.https
       .post(
         this.dataUrl + '/file/create/' + cname + '/' + org + '/' + filetype,
-        script,
+        formData,
         {
           params: { file: file },
           headers: headers,
@@ -1684,6 +1735,17 @@ export class Services {
       .pipe(
         map((response) => {
           return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          console.error('❌ createNativeFile service error:', {
+            status: err.status,
+            statusText: err.statusText,
+            url: err.url,
+            message: err.message
+          });
+          return this.handleError(err);
         })
       );
   }
@@ -3849,7 +3911,7 @@ export class Services {
         return this.handleError(err);
       }));
   }
- 
+
   fetchModelDetails(id: any): Observable<any> {
     let param = new HttpParams()
       .set('modelid', id)

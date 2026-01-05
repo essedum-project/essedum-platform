@@ -2,6 +2,8 @@ package com.lfn.common.app.controller;
 
 import com.lfn.common.app.service.GitHubOAuthService;
 import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
+import com.lfn.common.app.web.rest.dto.PullRequest;
+import com.lfn.common.app.web.rest.dto.PullResponse;
 import com.lfn.common.app.web.rest.dto.PushRequest;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import lombok.extern.slf4j.Slf4j;
@@ -124,6 +126,28 @@ public class GitHubController {
         } catch (Exception e) {
             log.error("Error verifying token", e);
             return ResponseEntity.ok(false);
+        }
+    }
+
+    @PostMapping("/pull")
+    public ResponseEntity<PullResponse> pullFromGitHub(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "X-GitHub-Username", required = false) String username,
+            @RequestBody PullRequest request,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+
+            // Get username from OAuth if not provided
+            if (username == null || username.isEmpty()) {
+                username = oauthService.getGitHubUsername(cleanToken);
+            }
+
+            PullResponse response = gitHubIntegrationService.pullFromGitHub(request, cleanToken, username);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error pulling from GitHub", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
