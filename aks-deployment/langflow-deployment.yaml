@@ -12,6 +12,8 @@ data:
   LANGFLOW_SUPERUSER_PASSWORD: "admin123"
   # MCP server URL for integration
   MCP_SERVER_URL: "http://mcp-server:8000"
+  # Essedum backend URL - use internal service
+  ESSEDUM_BACKEND_URL: "http://essedum-backend-service.aipns.svc.cluster.local:8080"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -32,7 +34,7 @@ spec:
     spec:
       containers:
       - name: langflow
-        image: localhost:32000/langflow:latest
+        image: localhost:5000/langflow-custom-essedum:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 7860
@@ -45,6 +47,11 @@ spec:
           value: "0.0.0.0"
         - name: LANGFLOW_PORT
           value: "7860"
+        - name: ESSEDUM_BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: langflow-config
+              key: ESSEDUM_BACKEND_URL
         volumeMounts:
         - name: langflow-data
           mountPath: /app/data

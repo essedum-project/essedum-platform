@@ -345,7 +345,7 @@ export class LoginScreenProvider implements vscode.WebviewViewProvider {
                                 </div>
                                 <div id="lfnInfo" style="display: none;">
                                     <strong>LFN Network</strong><br>
-                                    Server: login.lfn.essedum.anuket.iol.unh.edu<br>
+                                    Server: login.essedum-lfn.infosys.com<br>
                                     For Linux Foundation Networking users
                                 </div>
                             </div>

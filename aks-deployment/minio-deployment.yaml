@@ -32,7 +32,8 @@ spec:
             mountPath: /data
       volumes:
         - name: minio-data
-          emptyDir: {}   # Replace with PVC for persistence
+          persistentVolumeClaim:
+            claimName: minio-pvc
 ---
 apiVersion: v1
 kind: Service

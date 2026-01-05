@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: pyjob-executor-container
-        image: 10.200.111.174:5000/pyjob-excecutor:latest # Updated to use the ACR image
+        image: localhost:5000/essedum-pyjob-executor:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000 # Flask app listens on port 5000

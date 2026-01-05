@@ -34,7 +34,7 @@ spec:
             - name: KC_HTTPS_ENABLED
               value: "true"
             - name: KC_HOSTNAME
-              value: "login.lfn.essedum.anuket.iol.unh.edu"
+              value: "login.essedum-lfn.infosys.com"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "true"
             - name: KC_HTTPS_CERTIFICATE_FILE
@@ -44,14 +44,24 @@ spec:
             - name: KC_DB
               value: mysql
             - name: KC_DB_URL
-              value: "jdbc:mysql://mysql:3306/keycloak"
+              value: "jdbc:mysql://mysql.aipns.svc.cluster.local:3306/keycloak"
             - name: KC_DB_USERNAME
               value: "root"
             - name: KC_DB_PASSWORD
               value: "password"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "/"
+            - name: KC_SPI_X_FRAME_OPTIONS_SAMESITE
+              value: "None"
+            - name: JAVA_OPTS_APPEND
+              value: "-Dkeycloak.frontendUrl=https://login.essedum-lfn.infosys.com"
           ports:
             - containerPort: 8443
               protocol: TCP
+              name: https
+            - containerPort: 8180
+              protocol: TCP
+              name: http
 
           volumeMounts:
             - name: tls-cert
@@ -73,7 +83,12 @@ spec:
   selector:
     app: keycloak
   ports:
-    - protocol: TCP
+    - name: https
+      protocol: TCP
       port: 8443
       targetPort: 8443
+    - name: http
+      protocol: TCP
+      port: 8180
+      targetPort: 8180
   type: LoadBalancer

@@ -106,6 +106,9 @@ public class ApplicationConfigResource {
 	@Value("${security.issuer-uri:#{null}}")
 	private String issuerUri;
 
+	@Value("${security.frontend-issuer-uri:#{null}}")
+	private String frontendIssuerUri;
+
 	@Value("${security.clientId:#{null}}")
 	private String clientId;
 
@@ -230,7 +233,8 @@ public class ApplicationConfigResource {
 		configDTO.setCalendar(Boolean.valueOf(calendar));
 		configDTO.setDstFlag(dstFlag);		
 		configDTO.setEpochChatUrl(epochChatUrl);
-		configDTO.setIssuerUri(issuerUri);
+		// Use frontend-specific issuer URI if available, otherwise fall back to issuer-uri
+		configDTO.setIssuerUri(frontendIssuerUri != null ? frontendIssuerUri : issuerUri);
 		configDTO.setClientId(clientId);
 		configDTO.setShowProfileIcon(showProfileIcon);
 		configDTO.setScope(scope);

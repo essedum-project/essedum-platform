@@ -15,8 +15,20 @@ spec:
     spec:
       containers:
       - name: essedum-backend
-        image: 10.200.111.174:5000/essedum_app_backend:latest
+        image: localhost:5000/essedum_app_backend:latest
         imagePullPolicy: Always
+        env:
+        # IMPORTANT: issuer-uri must match JWT token's "iss" claim (external URL)
+        # jwk-set-uri can use internal service for faster key fetching
+        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+          value: "https://login.essedum-lfn.infosys.com/realms/ESSEDUM"
+        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+          value: "http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs"
+        # Enable debug logging for OAuth troubleshooting (remove after fixing)
+        - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY
+          value: "DEBUG"
+        - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY_OAUTH2
+          value: "DEBUG"
         ports:
         - containerPort: 8082
 ---

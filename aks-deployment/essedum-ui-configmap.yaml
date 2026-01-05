@@ -47,8 +47,30 @@ data:
         root /app/ui/aip;
         error_page    404    /404.html;
 
+        # Add CORS headers for all requests
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Accept" always;
+
+        # Serve static files with proper MIME types and caching
+        location ~* \.(js|mjs)$ {
+          try_files $uri =404;
+          add_header Content-Type "application/javascript" always;
+          add_header Access-Control-Allow-Origin "*" always;
+          expires 1y;
+          add_header Cache-Control "public, immutable";
+        }
+
+        location ~* \.(css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json)$ {
+          try_files $uri =404;
+          add_header Access-Control-Allow-Origin "*" always;
+          expires 1y;
+          add_header Cache-Control "public, immutable";
+        }
+
         location / {
-          autoindex on;
+          try_files $uri $uri/ /index.html;
+          add_header Access-Control-Allow-Origin "*" always;
         }
       }
 
@@ -56,10 +78,33 @@ data:
         listen        8084;
         server_name   localhost;
         root /app/ui/common;
+        index index.html;
         error_page    404    /404.html;
 
+        # Proxy to aip-app (must come before regex locations)
+        location ^~ /aipui/ {
+          proxy_pass http://localhost:8082/;
+          proxy_http_version 1.1;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          
+          # Add CORS headers
+          add_header Access-Control-Allow-Origin "*" always;
+          add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+          add_header Access-Control-Allow-Headers "Content-Type, Accept" always;
+        }
+
+        # Serve static files directly, return 404 if not found
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json)$ {
+          try_files $uri =404;
+          expires 1y;
+          add_header Cache-Control "public, immutable";
+        }
+
         location / {
-          autoindex on;
+          try_files $uri $uri/ /index.html;
         }
 
         # Use FQDN for backend service to avoid 'host not found'
@@ -70,27 +115,15 @@ data:
           add_header Access-Control-Allow-Origin "*";
           add_header Access-Control-Allow-Methods "GET, PUT, POST";
           add_header Access-Control-Allow-Headers "X-Custom-Software, X-My-Custom";
-          proxy_set_header Host $host:$server_port;
+          proxy_set_header Host $host;
           proxy_set_header X-Forwarded-Proto $scheme;
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          add_header Content-Security-Policy upgrade-insecure-requests;
+
         }
 
         location ^~ /cip/api {
           rewrite ^/cip/api/(.*)$ /api/$1 last;
-        }
-
-        location /aipui/{
-          proxy_pass http://localhost:8082/;
-          add_header Access-Control-Allow-Origin "*";
-          add_header Access-Control-Allow-Methods "GET, PUT, POST";
-          add_header Access-Control-Allow-Headers "X-Custom-Software, X-My-Custom";
-          proxy_set_header Host $host:$server_port;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          add_header Content-Security-Policy upgrade-insecure-requests;
         }
 
         error_page  500 502 503 504 404 /50x.html;
