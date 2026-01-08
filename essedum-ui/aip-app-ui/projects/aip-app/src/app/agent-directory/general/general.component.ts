@@ -134,62 +134,79 @@ export class GeneralComponent implements OnInit, OnChanges {
   }
 
   private populateFromAgentData(): void {
-    // Use agentData if provided, otherwise keep defaults
-    if (this.agentData) {
-      this.name = this.agentData.name || this.name;
-      this.alias = this.agentData.alias || this.alias;
-      this.type = this.agentData.type || this.type;
-      this.description = this.agentData.description || this.description;
-      this.cid = this.agentData.cid || this.cid;
-      this.version = this.agentData.version || this.version;
-      this.creator = this.agentData.creator || this.creator;
-      this.organization = this.agentData.organization || this.organization;
-      this.modules = this.agentData.modules || [];
-      this.skills = (this.agentData.skills || []).map((skill: any) =>
-        typeof skill === 'string' ? { name: skill } : skill
-      );
-      this.domains = this.agentData.domains || [];
-      this.locators = this.agentData.locators || [];
-      this.syncs = this.agentData.syncs || [];
-      this.publications = this.agentData.publications || [];
-      this.extensions = this.agentData.extensions || [];
-      this.selectors = this.agentData.selectors || [];
-      this.signatures = this.agentData.signatures || [];
-
-      // MCP-specific data - check for both 'MCP' and 'mcpServer'
-      if (
-        this.agentData.type === 'MCP' ||
-        this.agentData.type === 'mcpServer'
-      ) {
-        this.tools = this.agentData.tools || [];
-        this.resources = this.agentData.resources || [];
-        this.prompts = this.agentData.prompts || [];
-      }
-
-      // JSON Model - show as is without creating defaults
-      let jsonModelData = this.agentData.extras_json;
-
-      if (jsonModelData) {
-        if (typeof jsonModelData === 'string') {
-          try {
-            this.jsonModel = JSON.parse(jsonModelData);
-          } catch (e) {
-            console.error('Error parsing JSON model:', e);
-            this.jsonModel = { raw: jsonModelData };
-          }
-        } else {
-          this.jsonModel = jsonModelData;
-        }
-      } else {
-        // Keep as null/empty if no data
-        this.jsonModel = null;
-      }
-    } else {
-      // Keep as null/empty if no agentData
+    if (!this.agentData) {
       this.jsonModel = null;
+    } else {
+      this.populateBasicFields();
+      this.populateArrayFields();
+      this.populateMcpFields();
+      this.populateJsonModel();
     }
 
-    // Convert JSON model to string for editor only if exists
+    this.updateJsonModelStrings();
+    this.filteredTools = [...this.tools];
+    this.getAllListOfAgentMcpPipeline();
+  }
+
+  private populateBasicFields(): void {
+    this.name = this.agentData.name || this.name;
+    this.alias = this.agentData.alias || this.alias;
+    this.type = this.agentData.type || this.type;
+    this.description = this.agentData.description || this.description;
+    this.cid = this.agentData.cid || this.cid;
+    this.version = this.agentData.version || this.version;
+    this.creator = this.agentData.creator || this.creator;
+    this.organization = this.agentData.organization || this.organization;
+  }
+
+  private populateArrayFields(): void {
+    this.modules = this.agentData.modules || [];
+    this.skills = (this.agentData.skills || []).map((skill: any) =>
+      typeof skill === 'string' ? { name: skill } : skill
+    );
+    this.domains = this.agentData.domains || [];
+    this.locators = this.agentData.locators || [];
+    this.syncs = this.agentData.syncs || [];
+    this.publications = this.agentData.publications || [];
+    this.extensions = this.agentData.extensions || [];
+    this.selectors = this.agentData.selectors || [];
+    this.signatures = this.agentData.signatures || [];
+  }
+
+  private populateMcpFields(): void {
+    const isMcpType = this.agentData.type === 'MCP' || this.agentData.type === 'mcpServer';
+    if (isMcpType) {
+      this.tools = this.agentData.tools || [];
+      this.resources = this.agentData.resources || [];
+      this.prompts = this.agentData.prompts || [];
+    }
+  }
+
+  private populateJsonModel(): void {
+    const jsonModelData = this.agentData.extras_json;
+    
+    if (!jsonModelData) {
+      this.jsonModel = null;
+      return;
+    }
+
+    if (typeof jsonModelData === 'string') {
+      this.jsonModel = this.parseJsonString(jsonModelData);
+    } else {
+      this.jsonModel = jsonModelData;
+    }
+  }
+
+  private parseJsonString(data: string): any {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      console.error('Error parsing JSON model:', e);
+      return { raw: data };
+    }
+  }
+
+  private updateJsonModelStrings(): void {
     if (this.jsonModel) {
       this.jsonModelString = JSON.stringify(this.jsonModel, null, 2);
       this.jsonModelLines = [this.jsonModelString];
@@ -197,10 +214,6 @@ export class GeneralComponent implements OnInit, OnChanges {
       this.jsonModelString = '';
       this.jsonModelLines = [];
     }
-
-    // Initialize filtered tools
-    this.filteredTools = [...this.tools];
-    this.getAllListOfAgentMcpPipeline();
   }
 
   // Search tools by name

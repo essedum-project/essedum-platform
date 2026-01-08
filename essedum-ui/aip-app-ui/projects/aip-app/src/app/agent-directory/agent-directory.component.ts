@@ -91,30 +91,24 @@ export class AgentDirectoryComponent implements OnInit, OnChanges {
   onResize(event) {
     this.updatePageSize();
   }
+
+  private getPageSizeConfig(width: number): { itemsPerPage: number[], defaultSize: number } {
+    const configs = [
+      { min: 2500, max: Infinity, itemsPerPage: [16,32,48,64,80,96], defaultSize: 16 }, // xl
+      { min: 1440, max: 2500, itemsPerPage: [10, 20, 40, 60, 80, 100], defaultSize: 10 }, // lg
+      { min: 1024, max: 1440, itemsPerPage: [8, 16, 32, 48, 64, 80], defaultSize: 8 }, // md
+      { min: 768, max: 1024, itemsPerPage: [6, 9, 18, 36, 54, 72], defaultSize: 6 }, // sm
+      { min: 0, max: 768, itemsPerPage: [4,8,12,16,20,24], defaultSize: 4 } // xs
+    ];
+    
+    return configs.find(config => width > config.min && width <= config.max) || configs[configs.length - 1];
+  }
+
   updatePageSize() {
-    this.pageSize=0;
-    if (window.innerWidth > 2500) {
-      this.itemsPerPage = [16,32,48,64,80,96];
-      this.pageSize = this.pageSize || 16; // xl
-    //  this.getCards(this.pageNumber,this.pageSize);
-    }
-    else if (window.innerWidth > 1440 && window.innerWidth <= 2500) {
-      this.itemsPerPage = [10, 20, 40, 60, 80, 100];
-      this.pageSize = this.pageSize || 10; // lg
-   //   this.getCards(this.pageNumber,this.pageSize);
-    } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-      this.itemsPerPage = [8, 16, 32, 48, 64, 80];
-      this.pageSize = this.pageSize || 8; //md
-  //    this.getCards(this.pageNumber,this.pageSize);
-    } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
-      this.itemsPerPage = [6, 9, 18, 36, 54, 72];
-      this.pageSize = this.pageSize || 6; //sm
-      // this.getCards(this.pageNumber,this.pageSize);
-    } else if (window.innerWidth < 768 ) {
-      this.itemsPerPage = [4,8,12,16,20,24];
-      this.pageSize = this.pageSize || 4; //xs
-   //   this.getCards(this.pageNumber,this.pageSize);
-    }
+    this.pageSize = 0;
+    const config = this.getPageSizeConfig(window.innerWidth);
+    this.itemsPerPage = config.itemsPerPage;
+    this.pageSize = this.pageSize || config.defaultSize;
   }
 
   ngOnInit(): void {

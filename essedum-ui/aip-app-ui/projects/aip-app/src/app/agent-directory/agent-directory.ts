@@ -36,37 +36,43 @@ export class AgentDirectory {
 
   constructor(json?: any) {
     if (json != null) {
-      this.id = json.id ? json.id : 0;
-      this.alias = json.alias;
-      this.name = json.name;
-      this.type = json.type;
-      this.description = json.description;
-      this.connectionDetails = json.connectionDetails;
-      this.organization = json.organization;
-      this.lastmodifiedby = json.lastmodifiedby;
-      this.lastmodifieddate = json.lastmodifieddate;
-      this.category = json.category;
-      this.extras_json = json.extras;
-      this.interfacetype = json.interfacetype;
-      
-      // OASF Fields
-      this.version = json.version || '1.0.0';
-      this.cid = json.cid || '';
-      this.previous_record_cid = json.previous_record_cid || '';
-      this.creator = json.creator || '';
-      this.modules = json.modules || [];
-      this.skills = json.skills || [];
-      this.domains = json.domains || [];
-      this.locators = json.locators || [];
-      this.syncs = json.syncs || [];
-      this.publications = json.publications || [];
-      this.extensions = json.extensions || [];
-      this.selectors = json.selectors || [];
-      this.signatures = json.signatures || [];
-      this.tools = json.tools || [];
-      this.resources = json.resources || [];
-      this.prompts = json.prompts || [];
+      this.initializeBasicFields(json);
+      this.initializeOasfFields(json);
     }
+  }
+
+  private initializeBasicFields(json: any): void {
+    this.id = json.id ? json.id : 0;
+    this.alias = json.alias;
+    this.name = json.name;
+    this.type = json.type;
+    this.description = json.description;
+    this.connectionDetails = json.connectionDetails;
+    this.organization = json.organization;
+    this.lastmodifiedby = json.lastmodifiedby;
+    this.lastmodifieddate = json.lastmodifieddate;
+    this.category = json.category;
+    this.extras_json = json.extras;
+    this.interfacetype = json.interfacetype;
+  }
+
+  private initializeOasfFields(json: any): void {
+    this.version = json.version || '1.0.0';
+    this.cid = json.cid || '';
+    this.previous_record_cid = json.previous_record_cid || '';
+    this.creator = json.creator || '';
+    this.modules = json.modules || [];
+    this.skills = json.skills || [];
+    this.domains = json.domains || [];
+    this.locators = json.locators || [];
+    this.syncs = json.syncs || [];
+    this.publications = json.publications || [];
+    this.extensions = json.extensions || [];
+    this.selectors = json.selectors || [];
+    this.signatures = json.signatures || [];
+    this.tools = json.tools || [];
+    this.resources = json.resources || [];
+    this.prompts = json.prompts || [];
   }
 
   // Utils
