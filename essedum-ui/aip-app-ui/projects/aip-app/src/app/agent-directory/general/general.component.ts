@@ -149,36 +149,31 @@ export class GeneralComponent implements OnInit, OnChanges {
   }
 
   private populateBasicFields(): void {
-    this.name = this.agentData.name || this.name;
-    this.alias = this.agentData.alias || this.alias;
-    this.type = this.agentData.type || this.type;
-    this.description = this.agentData.description || this.description;
-    this.cid = this.agentData.cid || this.cid;
-    this.version = this.agentData.version || this.version;
-    this.creator = this.agentData.creator || this.creator;
-    this.organization = this.agentData.organization || this.organization;
+    const fields = ['name', 'alias', 'type', 'description', 'cid', 'version', 'creator', 'organization'];
+    fields.forEach(field => {
+      this[field] = this.agentData[field] ?? this[field];
+    });
   }
 
   private populateArrayFields(): void {
-    this.modules = this.agentData.modules || [];
-    this.skills = (this.agentData.skills || []).map((skill: any) =>
+    this.skills = (this.agentData.skills ?? []).map((skill: any) =>
       typeof skill === 'string' ? { name: skill } : skill
     );
-    this.domains = this.agentData.domains || [];
-    this.locators = this.agentData.locators || [];
-    this.syncs = this.agentData.syncs || [];
-    this.publications = this.agentData.publications || [];
-    this.extensions = this.agentData.extensions || [];
-    this.selectors = this.agentData.selectors || [];
-    this.signatures = this.agentData.signatures || [];
+    
+    const arrayFields = ['modules', 'domains', 'locators', 'syncs', 'publications', 
+                         'extensions', 'selectors', 'signatures'];
+    arrayFields.forEach(field => {
+      this[field] = this.agentData[field] ?? [];
+    });
   }
 
   private populateMcpFields(): void {
     const isMcpType = this.agentData.type === 'MCP' || this.agentData.type === 'mcpServer';
     if (isMcpType) {
-      this.tools = this.agentData.tools || [];
-      this.resources = this.agentData.resources || [];
-      this.prompts = this.agentData.prompts || [];
+      const mcpFields = ['tools', 'resources', 'prompts'];
+      mcpFields.forEach(field => {
+        this[field] = this.agentData[field] ?? [];
+      });
     }
   }
 

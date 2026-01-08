@@ -57,22 +57,21 @@ export class AgentDirectory {
   }
 
   private initializeOasfFields(json: any): void {
-    this.version = json.version || '1.0.0';
-    this.cid = json.cid || '';
-    this.previous_record_cid = json.previous_record_cid || '';
-    this.creator = json.creator || '';
-    this.modules = json.modules || [];
-    this.skills = json.skills || [];
-    this.domains = json.domains || [];
-    this.locators = json.locators || [];
-    this.syncs = json.syncs || [];
-    this.publications = json.publications || [];
-    this.extensions = json.extensions || [];
-    this.selectors = json.selectors || [];
-    this.signatures = json.signatures || [];
-    this.tools = json.tools || [];
-    this.resources = json.resources || [];
-    this.prompts = json.prompts || [];
+    this.version = this.getValueOrDefault(json.version, '1.0.0');
+    this.cid = this.getValueOrDefault(json.cid, '');
+    this.previous_record_cid = this.getValueOrDefault(json.previous_record_cid, '');
+    this.creator = this.getValueOrDefault(json.creator, '');
+    
+    const arrayFields = ['modules', 'skills', 'domains', 'locators', 'syncs', 
+                         'publications', 'extensions', 'selectors', 'signatures', 
+                         'tools', 'resources', 'prompts'];
+    arrayFields.forEach(field => {
+      this[field] = this.getValueOrDefault(json[field], []);
+    });
+  }
+
+  private getValueOrDefault<T>(value: T, defaultValue: T): T {
+    return value !== undefined && value !== null ? value : defaultValue;
   }
 
   // Utils
