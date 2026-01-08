@@ -232,6 +232,19 @@ public interface ICIPStreamingServicesRepository extends JpaRepository<ICIPStrea
 	
 	Long getPipelinesCountByTypeandOrgForApps(List<String> project, String query, String type,String interfacetype);
 
+	/**
+	 * Get pipelines for agent directory by organization and interface type.
+	 * Fetches pipelines from mlpipeline table filtered by organization and optionally by interface type.
+	 *
+	 * @param organization the organization
+	 * @param pageable the pagination information
+	 * @param interfacetype the interface type filter (optional)
+	 * @return the list of pipelines
+	 */
+	List<ICIPStreamingServices2DTO> getPipelinesForAgentDirectory(
+			@Param("organization") String organization,
+			@Param("interfacetype") String interfacetype);
+
 	ICIPStreamingServices getTemplateByName(String name, String org);
 
 	List<ICIPStreamingServices2DTO> getAllTemplatesByTypeandOrg(String project, Pageable paginate, String query,

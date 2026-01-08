@@ -10,6 +10,12 @@ export class TagEventDTO{
     selectedMlInstanceConnectionType: string[] = [];
     selectedDatasetTopicType: string[] = [];
     selectedModelDatasource: string[] = [];
+    selectedAgentSkills: string[] = [];
+    selectedAgentLocatorTypes: string[] = [];
+    selectedAgentModules: string[] = [];
+    selectedAgentAllTypes: string[] = [];
+    agentCreationDateFrom: Date | null = null;
+    agentCreationDateTo: Date | null = null;
 
     constructor(
         selectedTagList: any[] = [],
@@ -22,7 +28,13 @@ export class TagEventDTO{
         selectedMlInstanceAdapterType: string[] = [],
         selectedMlInstanceConnectionType: string[] = [],
         selectedDatasetTopicType: string[] = [],
-        selectedModelDatasource: string[] = []
+        selectedModelDatasource: string[] = [],
+        selectedAgentSkills: string[] = [],
+        selectedAgentLocatorTypes: string[] = [],
+        selectedAgentModules: string[] = [],
+        selectedAgentAllTypes: string[] = [],
+        agentCreationDateFrom: Date | null = null,
+        agentCreationDateTo: Date | null = null
     ) {
         this.selectedAdapterInstance = selectedAdapterInstance;
         this.selectedAdapterType = selectedAdapterType;
@@ -35,6 +47,12 @@ export class TagEventDTO{
         this.selectedMlInstanceConnectionType = selectedMlInstanceConnectionType;
         this.selectedDatasetTopicType = selectedDatasetTopicType;
         this.selectedModelDatasource = selectedModelDatasource;
+        this.selectedAgentSkills = selectedAgentSkills;
+        this.selectedAgentLocatorTypes = selectedAgentLocatorTypes;
+        this.selectedAgentModules = selectedAgentModules;
+        this.selectedAgentAllTypes = selectedAgentAllTypes;
+        this.agentCreationDateFrom = agentCreationDateFrom;
+        this.agentCreationDateTo = agentCreationDateTo;
     }
 
     getSelectedTagList(){return this.selectedTagList;}
@@ -50,6 +68,12 @@ export class TagEventDTO{
     getSelectedModelDatasource(): string[] {
         return this.selectedModelDatasource || [];
     }
+    getSelectedAgentSkills() { return this.selectedAgentSkills; }
+    getSelectedAgentLocatorTypes() { return this.selectedAgentLocatorTypes; }
+    getSelectedAgentModules() { return this.selectedAgentModules; }
+    getSelectedAgentAllTypes() { return this.selectedAgentAllTypes; }
+    getAgentCreationDateFrom() { return this.agentCreationDateFrom; }
+    getAgentCreationDateTo() { return this.agentCreationDateTo; }
     setSelectedTagList(selectedTagList){this.selectedTagList=selectedTagList;}
     setSelectedAdapterType(selectedAdapterType){this.selectedAdapterType=selectedAdapterType;}
     setSelectedAdapterInstance(selectedAdapterInstance){this.selectedAdapterInstance=selectedAdapterInstance;}
@@ -61,4 +85,10 @@ export class TagEventDTO{
     setSelectedMlInstanceConnectionType(selectedMlInstanceConnectionType) { this.selectedMlInstanceConnectionType=selectedMlInstanceConnectionType; }
     setSelectedDatasetTopicType(selectedDatasetTopicType) { this.selectedDatasetTopicType=selectedDatasetTopicType; }
     setSelectedModelDatasource(selectedModelDatasource) { this.selectedModelDatasource=selectedModelDatasource; }
+    setSelectedAgentSkills(selectedAgentSkills) { this.selectedAgentSkills = selectedAgentSkills; }
+    setSelectedAgentLocatorTypes(selectedAgentLocatorTypes) { this.selectedAgentLocatorTypes = selectedAgentLocatorTypes; }
+    setSelectedAgentModules(selectedAgentModules) { this.selectedAgentModules = selectedAgentModules; }
+    setSelectedAgentAllTypes(selectedAgentAllTypes) { this.selectedAgentAllTypes = selectedAgentAllTypes; }
+    setAgentCreationDateFrom(agentCreationDateFrom) { this.agentCreationDateFrom = agentCreationDateFrom; }
+    setAgentCreationDateTo(agentCreationDateTo) { this.agentCreationDateTo = agentCreationDateTo; }
 }
