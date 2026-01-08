@@ -1,0 +1,803 @@
+<div class="agent-edit-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" (click)="navigateBack()" (mouseenter)="isBackHovered = true"
+                (mouseleave)="isBackHovered = false">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h1 class="page-title">{{ editView ? 'Edit Agent Directory' : 'Create Agent Directory' }} :
+                {{agentData.alias}} </h1>
+        </div>
+        <div class="header-actions">
+            <button class="cancel-btn" (click)="cancel()">
+                Cancel
+            </button>
+            <button class="save-btn" (click)="updateAgent()">
+                {{ editView ? 'Update' : 'Create' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Main Content -->
+        <div class="main-content col-md-8">
+
+            <!-- Basic Information Section -->
+            <div id="basic" class="section-card">
+                <h2 class="section-title">Basic Information <span class="required-badge">Required</span></h2>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput [(ngModel)]="agentData.alias" placeholder="Enter agent name" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Version</mat-label>
+                    <input matInput [(ngModel)]="agentData.version" placeholder="e.g., 1.0.0" >
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Type</mat-label>
+                    <mat-select disabled [(ngModel)]="agentData.type" required>
+                        <mat-option *ngFor="let option of options" [value]="option.value">
+                            {{ option.value }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label *ngIf="agentData.type==='AIAgent'">Assigned Agent Pipeline</mat-label>
+                    <mat-label *ngIf="agentData.type==='mcpServer'">Assigned MCP Pipeline</mat-label>
+
+                    <input matInput disabled [(ngModel)]="assignedAgentMcpPipeline" placeholder="">
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput [(ngModel)]="agentData.description" placeholder="Enter description"
+                        rows="3"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Creator</mat-label>
+                    <input matInput disabled [(ngModel)]="agentData.creator" placeholder="Enter creator name">
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Organization</mat-label>
+                    <input matInput disabled [(ngModel)]="agentData.organization" placeholder="Enter organization name">
+                </mat-form-field>
+            </div>
+
+            <!-- CID Section -->
+            <div id="cid" class="section-card">
+                <h2 class="section-title">CID</h2>
+
+                <div class="cid-field-group">
+                    <mat-form-field appearance="fill" class="cid-input">
+                        <mat-label>Content Identifier</mat-label>
+                        <input matInput disabled [(ngModel)]="agentData.cid" readonly>
+                    </mat-form-field>
+                   
+                    <button class="icon-btn" (click)="copyToClipboard(agentData.cid)" title="Copy CID">
+                        <mat-icon>content_copy</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- JSON Model Section -->
+            <div id="json-model" class="section-card">
+                <h2 class="section-title">JSON Model</h2>
+
+                <app-enl-code-editor id="ele" [script]="script" [lang]="lang" (scriptChange)="onScriptChange($event)"
+                    style="height: 100%; width: 100%;">
+                </app-enl-code-editor>
+            </div>
+
+            <!-- Modules Section -->
+            <div id="modules" class="section-card">
+                <h2 class="section-title">
+                    Modules
+                    <span class="count">{{ agentData.modules.length }}</span>
+                </h2>
+
+                <div class="add-item-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Module Name</mat-label>
+                        <input matInput [(ngModel)]="newModuleName" placeholder="Enter module name"
+                            (keyup.enter)="addModule()">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addModule()">
+                        <mat-icon>add</mat-icon>
+                        Add Module
+                    </button>
+                </div>
+
+                <div class="items-list" *ngIf="agentData.modules.length > 0">
+                    <div *ngFor="let module of agentData.modules; let i = index" class="item-chip">
+                        <span>{{ module.name }}</span>
+                        <button class="remove-icon-btn" (click)="removeModule(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.modules.length === 0">
+                    <p>No modules added yet</p>
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'" id="skills" class="section-card">
+                <h2 class="section-title">
+                    Skills
+                    <span class="count">{{ agentData.skills.length }}</span>
+                </h2>
+
+                <div class="add-item-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Skill Name</mat-label>
+                        <input matInput [(ngModel)]="newSkillName" placeholder="Enter skill name"
+                            (keyup.enter)="addSkill()">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addSkill()">
+                        <mat-icon>add</mat-icon>
+                        Add Skill
+                    </button>
+                </div>
+
+                <div class="items-list" *ngIf="agentData.skills.length > 0">
+                    <div *ngFor="let skill of agentData.skills; let i = index" class="item-chip skill-badge">
+                        <span>{{ skill.name }}</span>
+                        <button class="remove-icon-btn" (click)="removeSkill(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.skills.length === 0">
+                    <p>No skills added yet</p>
+                </div>
+            </div>
+
+            <!-- Domains Section -->
+            <div id="domains" class="section-card">
+                <h2 class="section-title">
+                    Domains
+                    <span class="count">{{ agentData.domains.length }}</span>
+                </h2>
+
+                <div class="add-item-row domain-add-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Domain Name</mat-label>
+                        <input matInput [(ngModel)]="newDomainName" placeholder="Enter domain name">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Description</mat-label>
+                        <input matInput [(ngModel)]="newDomainDescription" placeholder="Domain description"
+                            (keyup.enter)="addDomain()">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addDomain()">
+                        <mat-icon>add</mat-icon>
+                        Add Domain
+                    </button>
+                </div>
+
+                <div *ngFor="let domain of agentData.domains; let i = index" class="domain-item">
+                    <div class="domain-header">
+                        <h4>{{ domain.name }}</h4>
+                        <button class="icon-btn-small" (click)="removeDomain(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                    <p class="domain-desc">{{ domain.description }}</p>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.domains.length === 0">
+                    <p>No domains added yet</p>
+                </div>
+            </div>
+
+            <!-- Locators Section -->
+            <div id="locators" class="section-card">
+                <h2 class="section-title">
+                    Locators
+                    <span class="count">{{ agentData.locators.length }}</span>
+                </h2>
+
+                <div class="add-item-row locator-add-row">
+                    <mat-form-field appearance="fill" class="locator-type-field">
+                        <mat-label>Type</mat-label>
+                        <mat-select [(ngModel)]="newLocatorType">
+                            <mat-option *ngFor="let option of locatorTypeOptions" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>URL</mat-label>
+                        <input matInput [(ngModel)]="newLocatorUrl" placeholder="Enter URL"
+                            (keyup.enter)="addLocator()">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addLocator()">
+                        <mat-icon>add</mat-icon>
+                        Add Locator
+                    </button>
+                </div>
+
+                <table class="edit-table" *ngIf="agentData.locators.length > 0">
+                    <thead>
+                        <tr>
+                            <th *ngFor="let header of locatorsHeaders"
+                                [attr.width]="header.key === 'actions' ? '50' : null">
+                                {{ header.label }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let locator of agentData.locators; let i = index">
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <mat-select [(ngModel)]="locator.locator_type">
+                                        <mat-option *ngFor="let option of locatorTypeOptions" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="locator.url">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <button class="icon-btn-small" (click)="removeLocator(i)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="empty-state" *ngIf="agentData.locators.length === 0">
+                    <p>No locators added yet</p>
+                </div>
+            </div>
+
+            <!-- Syncs Section -->
+            <div id="syncs" class="section-card">
+                <h2 class="section-title">
+                    Syncs
+                    <span class="count">{{ agentData.syncs.length }}</span>
+                </h2>
+
+                <div class="add-item-row sync-add-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Target</mat-label>
+                        <input matInput [(ngModel)]="newSyncTarget" placeholder="e.g., production-cluster">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="sync-frequency-field">
+                        <mat-label>Frequency</mat-label>
+                        <mat-select [(ngModel)]="newSyncFrequency">
+                            <mat-option *ngFor="let option of syncFrequencyOptions" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addSync()">
+                        <mat-icon>add</mat-icon>
+                        Add Sync
+                    </button>
+                </div>
+
+                <table class="edit-table" *ngIf="agentData.syncs.length > 0">
+                    <thead>
+                        <tr>
+                            <th *ngFor="let header of syncsHeaders"
+                                [attr.width]="header.key === 'actions' ? '50' : null">
+                                {{ header.label }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let sync of agentData.syncs; let i = index">
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="sync.target">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <mat-select [(ngModel)]="sync.frequency">
+                                        <mat-option *ngFor="let option of syncFrequencyOptions" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>{{ sync.last_sync | date:'short' }}</td>
+                            <td>
+                                <button class="icon-btn-small" (click)="removeSync(i)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="empty-state" *ngIf="agentData.syncs.length === 0">
+                    <p>No syncs configured yet</p>
+                </div>
+            </div>
+
+            <!-- Publications Section -->
+            <div id="publications" class="section-card">
+                <h2 class="section-title">
+                    Publications
+                    <span class="count">{{ agentData.publications.length }}</span>
+                </h2>
+
+                <div class="add-item-row publication-add-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Channel</mat-label>
+                        <input matInput [(ngModel)]="newPublicationChannel" placeholder="e.g., GitHub Registry">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="publication-status-field">
+                        <mat-label>Status</mat-label>
+                        <mat-select [(ngModel)]="newPublicationStatus">
+                            <mat-option *ngFor="let option of publicationStatusOptions" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addPublication()">
+                        <mat-icon>add</mat-icon>
+                        Add Publication
+                    </button>
+                </div>
+
+                <table class="edit-table" *ngIf="agentData.publications.length > 0">
+                    <thead>
+                        <tr>
+                            <th *ngFor="let header of publicationsHeaders"
+                                [attr.width]="header.key === 'actions' ? '50' : null">
+                                {{ header.label }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let publication of agentData.publications; let i = index">
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="publication.channel">
+                                </mat-form-field>
+                            </td>
+                            <td>{{ publication.published_date | date:'shortDate' }}</td>
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <mat-select [(ngModel)]="publication.status">
+                                        <mat-option *ngFor="let option of publicationStatusOptions"
+                                            [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <button class="icon-btn-small" (click)="removePublication(i)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="empty-state" *ngIf="agentData.publications.length === 0">
+                    <p>No publications added yet</p>
+                </div>
+            </div>
+
+            <!-- Extensions Section -->
+            <div id="extensions" class="section-card">
+                <h2 class="section-title">
+                    Extensions <span class="info-badge">Custom Metadata</span>
+                    <span class="count">{{ agentData.extensions.length }}</span>
+                </h2>
+
+                <div class="add-item-row extension-add-row">
+                    <mat-form-field appearance="fill" class="extension-key-field">
+                        <mat-label>Key</mat-label>
+                        <input matInput [(ngModel)]="newExtensionKey" placeholder="e.g., deployment_region">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="extension-value-field">
+                        <mat-label>Value</mat-label>
+                        <input matInput [(ngModel)]="newExtensionValue" placeholder="e.g., us-east-1">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Description</mat-label>
+                        <input matInput [(ngModel)]="newExtensionDescription" placeholder="Optional description">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addExtension()">
+                        <mat-icon>add</mat-icon>
+                        Add Extension
+                    </button>
+                </div>
+
+                <table class="edit-table" *ngIf="agentData.extensions.length > 0">
+                    <thead>
+                        <tr>
+                            <th *ngFor="let header of extensionsHeaders"
+                                [attr.width]="header.key === 'actions' ? '50' : null">
+                                {{ header.label }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let extension of agentData.extensions; let i = index">
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="extension.key">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="extension.value">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="fill" class="table-field">
+                                    <input matInput [(ngModel)]="extension.description">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <button class="icon-btn-small" (click)="removeExtension(i)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="empty-state" *ngIf="agentData.extensions.length === 0">
+                    <p>No extensions added yet</p>
+                </div>
+            </div>
+
+            <!-- Selectors Section -->
+            <div id="selectors" class="section-card">
+                <h2 class="section-title">
+                    Selectors <span class="info-badge">Tags/Filters for Routing</span>
+                    <span class="count">{{ agentData.selectors.length }}</span>
+                </h2>
+
+                <div class="add-item-row selector-add-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Key</mat-label>
+                        <input matInput [(ngModel)]="newSelectorKey" placeholder="e.g., environment">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Value</mat-label>
+                        <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
+                            (keyup.enter)="addSelector()">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addSelector()">
+                        <mat-icon>add</mat-icon>
+                        Add Selector
+                    </button>
+                </div>
+
+                <div class="items-list" *ngIf="agentData.selectors.length > 0">
+                    <div *ngFor="let selector of agentData.selectors; let i = index" class="item-chip selector-badge">
+                        <span><strong>{{ selector.key }}:</strong> {{ selector.value }}</span>
+                        <button class="remove-icon-btn" (click)="removeSelector(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.selectors.length === 0">
+                    <p>No selectors added yet</p>
+                </div>
+            </div>
+
+            <!-- Signatures Section -->
+            <div id="signatures" class="section-card">
+                <h2 class="section-title">
+                    Signatures <span class="info-badge">Cryptographic Verification</span>
+                    <span class="count">{{ agentData.signatures.length }}</span>
+                </h2>
+
+                <div class="add-item-row signature-add-row">
+                    <mat-form-field appearance="fill" class="signature-algorithm-field">
+                        <mat-label>Algorithm</mat-label>
+                        <mat-select [(ngModel)]="newSignatureAlgorithm">
+                            <mat-option *ngFor="let option of signatureAlgorithmOptions" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Signature Value</mat-label>
+                        <input matInput [(ngModel)]="newSignatureValue" placeholder="Enter signature value">
+                    </mat-form-field>
+                    <button class="add-btn" (click)="addSignature()">
+                        <mat-icon>add</mat-icon>
+                        Add Signature
+                    </button>
+                </div>
+
+                <div *ngFor="let signature of agentData.signatures; let i = index" class="signature-item">
+                    <div class="signature-header">
+                        <h4>{{ signature.algorithm }}</h4>
+                        <button class="icon-btn-small" (click)="removeSignature(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Signature Value</mat-label>
+                        <textarea matInput [(ngModel)]="signature.value" rows="2"></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Certificate (Optional)</mat-label>
+                        <textarea matInput [(ngModel)]="signature.certificate" rows="3"></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.signatures.length === 0">
+                    <p>No signatures added yet</p>
+                </div>
+            </div>
+
+            <!-- Tools Section -->
+            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="tools" class="section-card">
+                <h2 class="section-title">
+                    Tools
+                    <span class="count">{{ agentData.tools?.length || 0 }}</span>
+                </h2>
+
+                <div class="button-row-right">
+                    <button class="add-btn" (click)="addTool()">
+                        <mat-icon>add</mat-icon>
+                        Add Tool
+                    </button>
+                </div>
+
+                <div *ngFor="let tool of agentData.tools || []; let i = index" class="tool-edit-item">
+                    <div class="tool-header">
+                        <h3>Tool {{ i + 1 }}</h3>
+                        <button class="icon-btn-small" (click)="removeTool(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Tool Name</mat-label>
+                        <input matInput [(ngModel)]="tool.name" placeholder="Enter tool name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput [(ngModel)]="tool.description" placeholder="Enter tool description"
+                            rows="2"></textarea>
+                    </mat-form-field>
+
+                    <div class="parameters-section">
+                        <div class="subsection-header">
+                            <h4>Parameters</h4>
+                            <button class="add-btn-small" (click)="addParameter(i)">
+                                <mat-icon>add</mat-icon>
+                                Add Parameter
+                            </button>
+                        </div>
+
+                        <table class="edit-table" *ngIf="tool.parameters && tool.parameters.length > 0">
+                            <thead>
+                                <tr>
+                                    <th *ngFor="let header of parametersHeaders"
+                                        [attr.width]="header.key === 'actions' ? '50' : null">
+                                        {{ header.label }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let param of tool.parameters; let j = index">
+                                    <td>
+                                        <mat-form-field appearance="fill" class="table-field">
+                                            <input matInput [(ngModel)]="param.name" placeholder="Parameter name">
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="fill" class="table-field">
+                                            <mat-select [(ngModel)]="param.type">
+                                                <mat-option value="string">string</mat-option>
+                                                <mat-option value="number">number</mat-option>
+                                                <mat-option value="boolean">boolean</mat-option>
+                                                <mat-option value="array">array</mat-option>
+                                                <mat-option value="object">object</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                    <td>
+                                        <mat-form-field appearance="fill" class="table-field">
+                                            <input matInput [(ngModel)]="param.description" placeholder="Description">
+                                        </mat-form-field>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <mat-checkbox [(ngModel)]="param.required"></mat-checkbox>
+                                    </td>
+                                    <td>
+                                        <button class="icon-btn-small" (click)="removeParameter(i, j)">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="empty-state-small" *ngIf="!tool.parameters || tool.parameters.length === 0">
+                            <p>No parameters defined</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider thin" *ngIf="i < (agentData.tools?.length || 0) - 1"></div>
+                </div>
+
+                <div class="empty-state" *ngIf="(agentData.tools?.length || 0) === 0">
+                    <p>No tools added yet</p>
+                </div>
+            </div>
+
+            <!-- Resources Section -->
+            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="resources"
+                class="section-card">
+                <h2 class="section-title">
+                    Resources
+                    <span class="count">{{ agentData.resources?.length || 0 }}</span>
+                </h2>
+
+                <div class="button-row-right">
+                    <button class="add-btn" (click)="addResource()">
+                        <mat-icon>add</mat-icon>
+                        Add Resource
+                    </button>
+                </div>
+
+                <div *ngFor="let resource of agentData.resources || []; let i = index" class="resource-edit-item">
+                    <div class="resource-header">
+                        <h3>Resource {{ i + 1 }}</h3>
+                        <button class="icon-btn-small" (click)="removeResource(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="resource.name" placeholder="Enter resource name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput [(ngModel)]="resource.description" placeholder="Enter description"
+                            rows="2"></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>URL</mat-label>
+                        <input matInput [(ngModel)]="resource.url" placeholder="Enter URL">
+                    </mat-form-field>
+
+                    <div class="section-divider thin" *ngIf="i < (agentData.resources?.length || 0) - 1"></div>
+                </div>
+
+                <div class="empty-state" *ngIf="(agentData.resources?.length || 0) === 0">
+                    <p>No resources added yet</p>
+                </div>
+            </div>
+
+            <!-- Prompts Section -->
+            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="prompts" class="section-card">
+                <h2 class="section-title">
+                    Prompts
+                    <span class="count">{{ agentData.prompts?.length || 0 }}</span>
+                </h2>
+
+                <div class="button-row-right">
+                    <button class="add-btn" (click)="addPrompt()">
+                        <mat-icon>add</mat-icon>
+                        Add Prompt
+                    </button>
+                </div>
+
+                <div *ngFor="let prompt of agentData.prompts || []; let i = index" class="prompt-edit-item">
+                    <div class="prompt-header">
+                        <h3>Prompt {{ i + 1 }}</h3>
+                        <button class="icon-btn-small" (click)="removePrompt(i)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="prompt.name" placeholder="Enter prompt name">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput [(ngModel)]="prompt.description" placeholder="Enter prompt description"
+                            rows="3"></textarea>
+                    </mat-form-field>
+
+                    <div class="section-divider thin" *ngIf="i < (agentData.prompts?.length || 0) - 1"></div>
+                </div>
+
+                <div class="empty-state" *ngIf="(agentData.prompts?.length || 0) === 0">
+                    <p>No prompts added yet</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Side Navigation -->
+        <div class="side-nav col-md-4">
+            <nav>
+                <a (click)="scrollToSection('basic')" [class.active]="activeSection === 'basic'" class="nav-item">
+                    Basic Information <span class="required-indicator">*</span>
+                </a>
+                <a (click)="scrollToSection('json-model')" [class.active]="activeSection === 'json-model'"
+                    class="nav-item">
+                    JSON Model
+                </a>
+                <a (click)="scrollToSection('modules')" [class.active]="activeSection === 'modules'" class="nav-item">
+                    Modules
+                </a>
+                <a *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'"
+                    (click)="scrollToSection('skills')" [class.active]="activeSection === 'skills'" class="nav-item">
+                    Skills
+                </a>
+                <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
+                    Domains
+                </a>
+                <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
+                    Locators
+                </a>
+                <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
+                    Syncs
+                </a>
+                <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
+                    class="nav-item">
+                    Publications
+                </a>
+                <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'"
+                    class="nav-item">
+                    Extensions
+                </a>
+                <a (click)="scrollToSection('selectors')" [class.active]="activeSection === 'selectors'"
+                    class="nav-item">
+                    Selectors
+                </a>
+                <a (click)="scrollToSection('signatures')" [class.active]="activeSection === 'signatures'"
+                    class="nav-item">
+                    Signatures
+                </a>
+                <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
+                    (click)="scrollToSection('tools')" [class.active]="activeSection === 'tools'" class="nav-item">
+                    Tools
+                </a>
+                <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
+                    (click)="scrollToSection('resources')" [class.active]="activeSection === 'resources'"
+                    class="nav-item">
+                    Resources
+                </a>
+                <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
+                    (click)="scrollToSection('prompts')" [class.active]="activeSection === 'prompts'" class="nav-item">
+                    Prompts
+                </a>
+            </nav>
+        </div>
+    </div>
+</div>

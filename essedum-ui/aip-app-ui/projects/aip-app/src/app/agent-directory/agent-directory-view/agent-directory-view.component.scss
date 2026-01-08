@@ -1,0 +1,202 @@
+.tab-content {
+  width: 100%;
+  background-color: white;
+  // border: 1px solid;
+  min-height: 50vh;
+}
+
+.controls {
+  color: #fff;
+  margin-right: 10px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin-bottom: 15px;
+  justify-content: flex-start;
+}
+
+.controls i {
+  background-color: #045d97;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 4px;
+  padding: 4px;
+  justify-content: flex-start;
+}
+
+.fs {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #0094ff;
+}
+
+::ng-deep .mat-mdc-tab-label-container {
+  display: flex;
+  flex-grow: 0;
+  overflow: hidden;
+}
+
+::ng-deep
+  .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs
+  > .mat-mdc-tab-header
+  .mat-mdc-tab {
+  flex-grow: 0 !important;
+}
+
+::ng-deep .mat-mdc-tab-list {
+  flex-grow: 0 !important;
+}
+
+// File Explorer Styles
+.file-explorer-container {
+  font-family: 'Roboto', sans-serif;
+  
+  .file-explorer-panel {
+    .file-explorer-header {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .file-tree {
+      .mat-tree-node {
+        transition: all 0.2s ease;
+        border-radius: 4px;
+        margin: 1px 0;
+        
+        &:hover {
+          background-color: #f5f5f5 !important;
+        }
+        
+        &.selected-file {
+          background-color: #e3f2fd !important;
+          border-left: 3px solid #2196f3 !important;
+          
+          span {
+            color: #2196f3 !important;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+  
+  .code-editor-panel {
+    .code-editor-header {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+  }
+}
+
+// Global tree styles for file explorer
+::ng-deep .file-tree {
+  .mat-tree {
+    background: transparent;
+  }
+  
+  .mat-tree-node {
+    min-height: 32px !important;
+    padding-left: 12px !important;
+    
+    &:hover {
+      background-color: #f5f5f5 !important;
+    }
+  }
+  
+  .selected-file {
+    background-color: #e3f2fd !important;
+    border-left: 3px solid #2196f3 !important;
+  }
+}
+
+// Notebook placeholder styling
+.notebook-placeholder {
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  margin: 20px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #c0c0c0;
+    background-color: #f0f0f0 !important;
+  }
+  
+  h3 {
+    font-weight: 500;
+  }
+  
+  button {
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.text-muted{
+  color:rgb(158, 156, 156);
+  font-size: 16px;
+}
+
+.d-inline-block{
+  color:#0052cc;
+}
+
+// .bg-primary{
+//   color:#0052cc !important;
+// }
+
+/* Locators Table */
+.locators-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: #f9fafb;
+    
+    th {
+      font: normal normal 500 14px/20px Roboto;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      color: #555555;
+      border-bottom: 1px solid #e5e7eb;
+
+      .info-icon {
+        margin-left: 0.25rem;
+        color: #9ca3af;
+        cursor: help;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #f3f4f6;
+
+      &:hover {
+        background: #f9fafb;
+      }
+    }
+
+    td {
+      padding: 1rem;
+      font: normal normal normal 14px/20px Roboto;
+      color: #374151;
+    }
+  }
+
+  .url-link {
+    color: #0094ff;
+    text-decoration: none;
+    font: normal normal normal 14px/20px Roboto;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
