@@ -387,3 +387,6 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 
 INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-agent-directory-unregistered');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/pipelines/unregistered/.*', 'GET', 0, 'cip-get-api-agent-directory-unregistered', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-agent-directory-unregistered' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-search');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/search', 'GET', 0, 'cip-post-api-agent-directory-search', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-search' limit 1;

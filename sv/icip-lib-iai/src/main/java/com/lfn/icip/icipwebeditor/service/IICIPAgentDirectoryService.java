@@ -17,6 +17,8 @@ package com.lfn.icip.icipwebeditor.service;
 
 import com.lfn.icip.icipwebeditor.model.AgentDirectory;
 import com.lfn.icip.icipwebeditor.model.dto.AgentDirectoryDTO;
+import com.lfn.icip.icipwebeditor.model.dto.AgentSearchRequestDTO;
+import com.lfn.icip.icipwebeditor.model.dto.AgentSearchResponseDTO;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import org.springframework.data.domain.Pageable;
 
@@ -67,7 +69,7 @@ public interface IICIPAgentDirectoryService {
      * @return the list of agent directories
      */
     List<AgentDirectory> getAllAgentsByTypeAndOrg(String project, Pageable paginate, String query,
-                                                   String type, String interfacetype);
+                                                  String type, String interfacetype);
 
     /**
      * Gets the count of agents by type and organization.
@@ -99,4 +101,15 @@ public interface IICIPAgentDirectoryService {
      * @return the agent directory DTO
      */
     AgentDirectoryDTO convertToDTO(AgentDirectory agentDirectory);
+
+    /**
+     * Search agents by skills, locators, domains, and modules.
+     * Implements OR-based matching with configurable threshold (min_match_score).
+     * Supports hierarchical prefix matching for skills, domains, and modules.
+     * Supports exact matching for locators.
+     *
+     * @param searchRequest the search request containing queries and filters
+     * @return the search response with matching agents and their scores
+     */
+    AgentSearchResponseDTO searchAgents(AgentSearchRequestDTO searchRequest);
 }

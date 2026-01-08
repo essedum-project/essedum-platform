@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.icip.icipwebeditor.model.AgentDirectory;
 import com.lfn.icip.icipwebeditor.model.dto.AgentDirectoryDTO;
+import com.lfn.icip.icipwebeditor.model.dto.AgentSearchRequestDTO;
+import com.lfn.icip.icipwebeditor.model.dto.AgentSearchResponseDTO;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.lfn.icip.icipwebeditor.repository.ICIPStreamingServicesRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentDirectoryService;
@@ -67,7 +69,7 @@ public class ICIPAgentDirectoryController {
     @Autowired
     private IICIPAgentDirectoryService agentDirectoryService;
 
-    /** The streaming services
+    /** The streaming services service. */
     @Autowired
     private IICIPStreamingServiceService streamingServicesService;
 
@@ -164,14 +166,19 @@ public class ICIPAgentDirectoryController {
     /**
      * List agents with pagination and filtering.
      * Similar to /pipelines/training/list but for agent directory.
+     *
      * Query parameters expected:
      * - page: Page number (1-based, default: 1)
      * - size: Page size (default: 8)
      * - project: Organization/project name (required)
      * - isCached: Whether to use cached data (required, should be true for internal)
      * - adapter_instance: Adapter instance (should be "internal" for agent directory)
+     * - interfacetype: Interface type filter (e.g., "pipeline-agent")
      * - type: Type filter (optional)
      * - query: Search query (optional)
+     *
+     * Example: /agent-directory/list?page=1&size=8&project=leo1311&isCached=true&adapter_instance=internal&interfacetype=pipeline-agent
+     *
      * @param adapterInstance the adapter instance
      * @param type the type filter
      * @param project the project/organization
@@ -230,6 +237,10 @@ public class ICIPAgentDirectoryController {
      * - project: Organization/project name (required)
      * - isCached: Whether to use cached data (required, should be true for internal)
      * - query: Search query (optional)
+     * - interfacetype: Interface type filter (e.g., "pipeline-agent")
+     *
+     * Example: /agent-directory/count?adapter_instance=internal&project=leo1311&isCached=true&interfacetype=pipeline-agent
+     *
      * @param adapterInstance the adapter instance
      * @param type the type filter
      * @param project the project/organization
@@ -302,5 +313,57 @@ public class ICIPAgentDirectoryController {
                 unregisteredPipelines.size(), org);
 
         return ResponseEntity.status(200).body(response);
+    }
+
+    /**
+     * Search agents by skills, locators, domains, and modules.
+     * Implements OR-based matching with configurable threshold (min_match_score).
+     * Supports hierarchical prefix matching for skills, domains, and modules.
+     * Supports exact matching for locators.
+     *
+     * Request body example:
+     * {
+     *   "queries": [
+     *     { "type": "SKILL", "value": "AI" },
+     *     { "type": "LOCATOR", "value": "docker-image" },
+     *     { "type": "DOMAIN", "value": "research" }
+     *   ],
+     *   "min_match_score": 1,
+     *   "limit": 10,
+     *   "organization": "leo1311"
+     * }
+     *
+     * Response example:
+     * {
+     *   "results": [
+     *     {
+     *       "recordRef": 123,
+     *       "matchQueries": [
+     *         { "type": "SKILL", "value": "AI" },
+     *         { "type": "DOMAIN", "value": "research" }
+     *       ],
+     *       "matchScore": 2,
+     *       "agent": { ... agent details ... }
+     *     }
+     *   ],
+     *   "totalCount": 5
+     * }
+     *
+     * @param searchRequest the search request containing queries and filters
+     * @return the response entity with search results
+     */
+    @PostMapping("/search")
+    public ResponseEntity<AgentSearchResponseDTO> searchAgents(
+            @RequestBody AgentSearchRequestDTO searchRequest) {
+
+        logger.info("Search agents request received with {} queries",
+                searchRequest.getQueries() != null ? searchRequest.getQueries().size() : 0);
+
+        AgentSearchResponseDTO response = agentDirectoryService.searchAgents(searchRequest);
+
+        logger.info("Search completed. Returning {} results out of {} total matches",
+                response.getResults().size(), response.getTotalCount());
+
+        return ResponseEntity.ok(response);
     }
 }
