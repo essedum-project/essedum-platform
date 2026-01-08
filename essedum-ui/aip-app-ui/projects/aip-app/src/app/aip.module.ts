@@ -147,6 +147,7 @@ import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { PlaygroundTabComponent } from './agent-pipeline/playground-tab/playground-tab.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
 
@@ -252,6 +253,7 @@ PipelineAgentDetailComponent,
     AgentComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
+    PlaygroundTabComponent,
     GitHubPushComponent,
     AgentComponent
   ],

@@ -1,0 +1,257 @@
+// Playground Tab Styling - Matches the original tab styling
+.tab-content {
+  width: 100%;
+  padding: 0;
+}
+
+.playground-tab-container {
+  width: 100%;
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+.playground-section {
+  width: 100%;
+  max-width: 100%;
+}
+
+// Header Styling
+.playground-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  .playground-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #0a142f;
+    margin: 0 0 8px 0;
+  }
+  
+  .playground-subtitle {
+    font-size: 14px;
+    color: #737373;
+    margin: 0;
+  }
+}
+
+// Controls Styling
+.playground-controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    text-transform: none;
+    transition: all 0.3s ease;
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+    
+    .button-label {
+      font-weight: 500;
+    }
+  }
+  
+  .run-deploy-button {
+    background-color: #0094ff;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background-color: #0078cc;
+      box-shadow: 0 2px 8px rgba(0, 148, 255, 0.3);
+    }
+    
+    &:disabled {
+      background-color: #e0e0e0;
+      color: #9e9e9e;
+      cursor: not-allowed;
+    }
+  }
+  
+  .playground-button {
+    background-color: #4caf50;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background-color: #45a049;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+    
+    &.playground-disabled,
+    &:disabled {
+      background-color: #e0e0e0;
+      color: #9e9e9e;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Status Message Styling
+.playground-status-row {
+  margin-bottom: 20px;
+  
+  .playground-status-hint {
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &.status-idle {
+      background-color: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+    
+    &.status-progress {
+      background-color: #cfe2ff;
+      color: #084298;
+      border-left: 4px solid #0d6efd;
+      
+      &::before {
+        content: '⏳';
+        font-size: 16px;
+      }
+    }
+    
+    &.status-error {
+      background-color: #f8d7da;
+      color: #842029;
+      border-left: 4px solid #dc3545;
+      
+      &::before {
+        content: '⚠';
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+// Console Container Styling - Matches original
+.console-container {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .console-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #3e3e3e;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #4caf50;
+    }
+    
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+  }
+  
+  .console-output {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #2d2d2d;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #4e4e4e;
+      border-radius: 4px;
+      
+      &:hover {
+        background: #5e5e5e;
+      }
+    }
+    
+    .console-line {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 4px;
+      color: #d4d4d4;
+      
+      .console-prompt {
+        color: #4caf50;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+      
+      .console-text {
+        flex: 1;
+        word-break: break-word;
+        
+        &.console-loading {
+          color: #ffc107;
+          font-style: italic;
+          
+          &::after {
+            content: '...';
+            animation: dots 1.5s steps(3, end) infinite;
+          }
+        }
+      }
+    }
+    
+    .console-empty {
+      color: #9e9e9e;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+  }
+}
+
+@keyframes dots {
+  0%, 20% {
+    content: '.';
+  }
+  40% {
+    content: '..';
+  }
+  60%, 100% {
+    content: '...';
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .playground-controls {
+    flex-direction: column;
+    
+    .action-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
