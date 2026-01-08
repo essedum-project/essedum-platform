@@ -204,6 +204,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   dynamicJsonContent: any;
   dynamicFileName: any;
   relatedloaded = false;
+  
+  // Builder Tab Visibility Control
+  shouldShowBuilderTab = false; // Show builder tab by default, hide only if created_source is user_defined
 
   
   // Console output for Generate adk Agent
@@ -523,6 +526,24 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+
+      // Check created_source in json_content to determine Builder tab visibility
+      this.shouldShowBuilderTab = false; // Default to showing the tab
+      try {
+        if (res.json_content) {
+          const jsonContent = JSON.parse(res.json_content);
+          if (jsonContent.created_source === 'user_defined') {
+            this.shouldShowBuilderTab = false; // Hide builder tab if user_defined
+            console.log('Builder tab hidden: created_source is user_defined');
+          } else {
+                  this.shouldShowBuilderTab = true;
+            console.log('Builder tab shown: created_source is not user_defined or missing');
+          }
+        }
+      } catch (e) {
+        console.warn('Could not parse json_content for created_source check:', e);
+        // On error, default to showing the tab
+      }
 
       // Update MCP filename if in MCP mode with actual stream item name
       if (this.pipelineMode === 'mcp') {

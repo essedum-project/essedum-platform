@@ -32,8 +32,10 @@
               <!-- Tabs (Show directly on view details) -->
               <mat-tab-group disableRipple (selectedTabChange)="onTabChange($event)">
 
-                <!-- Agent/MCP Builder Tab - Split View (Always visible) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" class="lfx-u-header-xl">
+                <!-- Agent/MCP Builder Tab - Split View (Conditionally visible based on created_source) -->
+                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" 
+                         class="lfx-u-header-xl"
+                         *ngIf="shouldShowBuilderTab">
                   <div class="tab-content mb-5">
                     <div class="script-split-container">
 
