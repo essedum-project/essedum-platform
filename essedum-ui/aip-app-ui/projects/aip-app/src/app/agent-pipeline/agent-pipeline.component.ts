@@ -206,7 +206,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   relatedloaded = false;
   
   // Builder Tab Visibility Control
-  shouldShowBuilderTab = false; // Show builder tab by default, hide only if created_source is user_defined
+  // Default: HIDDEN (false). Show only when created_source is NOT 'user_defined'
+  shouldShowBuilderTab = false;
 
   
   // Console output for Generate adk Agent
@@ -527,23 +528,58 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
 
-      // Check created_source in json_content to determine Builder tab visibility
-      this.shouldShowBuilderTab = false; // Default to showing the tab
+      // ============================================================================
+      // Builder Tab Visibility Logic
+      // ============================================================================
+      // DEFAULT: HIDDEN (false)
+      // SHOW: Only when created_source is NOT 'user_defined' (missing, null, empty, or other value)
+      // HIDE: When created_source === 'user_defined'
+      // ============================================================================
+      
+      this.shouldShowBuilderTab = false; // Start hidden
+      
+      console.log('🔍 Checking Builder tab visibility for:', this.cardName);
+      console.log('📦 Raw json_content:', res.json_content);
+      
       try {
-        if (res.json_content) {
+        if (!res.json_content || res.json_content.trim() === '') {
+          // No json_content or empty string → SHOW tab (langflow/other source)
+          this.shouldShowBuilderTab = true;
+          console.log('✅ Builder tab VISIBLE: json_content is empty/missing (langflow/other)');
+        } else {
+          // Parse json_content
           const jsonContent = JSON.parse(res.json_content);
-          if (jsonContent.created_source === 'user_defined') {
-            this.shouldShowBuilderTab = false; // Hide builder tab if user_defined
-            console.log('Builder tab hidden: created_source is user_defined');
+          console.log('📋 Parsed json_content:', JSON.stringify(jsonContent, null, 2));
+          console.log('🔑 Keys in json_content:', Object.keys(jsonContent));
+          
+          // Check created_source field
+          if (jsonContent.hasOwnProperty('created_source')) {
+            const sourceValue = jsonContent.created_source;
+            console.log('🏷️ created_source field found, value:', sourceValue, 'type:', typeof sourceValue);
+            
+            if (sourceValue === 'user_defined') {
+              // Explicitly user_defined → HIDE tab
+              this.shouldShowBuilderTab = false;
+              console.log('❌ Builder tab HIDDEN: created_source === "user_defined"');
+            } else {
+              // Has created_source but NOT user_defined → SHOW tab
+              this.shouldShowBuilderTab = true;
+              console.log('✅ Builder tab VISIBLE: created_source is "' + sourceValue + '" (not user_defined)');
+            }
           } else {
-                  this.shouldShowBuilderTab = true;
-            console.log('Builder tab shown: created_source is not user_defined or missing');
+            // No created_source field → SHOW tab (langflow/other source)
+            this.shouldShowBuilderTab = true;
+            console.log('✅ Builder tab VISIBLE: created_source field missing (langflow/other)');
           }
         }
       } catch (e) {
-        console.warn('Could not parse json_content for created_source check:', e);
-        // On error, default to showing the tab
+        // Parse error → SHOW tab (fail-safe)
+        this.shouldShowBuilderTab = true;
+        console.error('⚠️ Error parsing json_content, showing Builder tab as fail-safe:', e);
+        console.error('Raw content that failed:', res.json_content);
       }
+      
+      console.log('🎯 Final decision: shouldShowBuilderTab =', this.shouldShowBuilderTab);
 
       // Update MCP filename if in MCP mode with actual stream item name
       if (this.pipelineMode === 'mcp') {
@@ -562,56 +598,85 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       if (this.router.url.includes('preview')) {
         this.pipelineAlias = this.streamItem.alias;
       }
+    });
+  }
+
+  /**
+   * Check Builder Tab Visibility - Separate method to be called from multiple places
+   * This fetches the streaming service and checks created_source flag
+   */
+  private checkBuilderTabVisibility(): void {
+    if (!this.currentCname) {
+      console.warn('⚠️ Cannot check Builder tab visibility: no cname available');
+      return;
+    }
+
+    console.log('🔍 Fetching streaming service to check Builder tab visibility for:', this.currentCname);
     
-      try {
-        if (this.streamItem.json_content) {
-          this.dynamicEnvArray = JSON.parse(
-            this.streamItem.json_content
-          ).environment;
-          
-        }
-        this.data = JSON.parse(
-          this.streamItem.json_content
-        ).elements[0].attributes;
-        this.dynamicEnvArray = JSON.parse(
-          this.streamItem.json_content
-        ).environment;
+    this.service.getStreamingServicesByName(this.currentCname).subscribe({
+      next: (res) => {
+        // Store streamItem for later use
+        this.streamItem = res;
+        this.pipelineAlias = res.alias;
 
-        if (this.data.filetype) {
-          this.changeLang(this.data.filetype);
-        }
-
-        if (this.data.files && this.data.files.length > 0 && !this.isLoadingJsonFile) {
-          //  Don't read files here if we're already loading JSON - let buildFileStructure handle it
-          // Only read if we haven't already loaded content via the JSON loading mechanism
-          if (!this.hasLoadedApiContent) {
-            const cleanedFileName = this.cleanFileName(this.data.files[0]);
-            // Ensure we use consistent filename generation
-            const expectedFilename = `${this.currentCname}_${this.organisation}.json`;
-            if (cleanedFileName === expectedFilename) {
-              this.readFile(cleanedFileName);
+        // ============================================================================
+        // Builder Tab Visibility Logic
+        // ============================================================================
+        // DEFAULT: HIDDEN (false)
+        // SHOW: Only when created_source is NOT 'user_defined' (missing, null, empty, or other value)
+        // HIDE: When created_source === 'user_defined'
+        // ============================================================================
+        
+        this.shouldShowBuilderTab = false; // Start hidden
+        
+        console.log('🔍 Checking Builder tab visibility for:', this.currentCname);
+        console.log('📦 Raw json_content:', res.json_content);
+        
+        try {
+          if (!res.json_content || res.json_content.trim() === '') {
+            // No json_content or empty string → SHOW tab (langflow/other source)
+            this.shouldShowBuilderTab = true;
+            console.log('✅ Builder tab VISIBLE: json_content is empty/missing (langflow/other)');
+          } else {
+            // Parse json_content
+            const jsonContent = JSON.parse(res.json_content);
+            console.log('📋 Parsed json_content:', JSON.stringify(jsonContent, null, 2));
+            console.log('🔑 Keys in json_content:', Object.keys(jsonContent));
+            
+            // Check created_source field
+            if (jsonContent.hasOwnProperty('created_source')) {
+              const sourceValue = jsonContent.created_source;
+              console.log('🏷️ created_source field found, value:', sourceValue, 'type:', typeof sourceValue);
+              
+              if (sourceValue === 'user_defined') {
+                // Explicitly user_defined → HIDE tab
+                this.shouldShowBuilderTab = false;
+                console.log('❌ Builder tab HIDDEN: created_source === "user_defined"');
+              } else {
+                // Has created_source but NOT user_defined → SHOW tab
+                this.shouldShowBuilderTab = true;
+                console.log('✅ Builder tab VISIBLE: created_source is "' + sourceValue + '" (not user_defined)');
+              }
+            } else {
+              // No created_source field → SHOW tab (langflow/other source)
+              this.shouldShowBuilderTab = true;
+              console.log('✅ Builder tab VISIBLE: created_source field missing (langflow/other)');
             }
           }
+        } catch (e) {
+          // Parse error → SHOW tab (fail-safe)
+          this.shouldShowBuilderTab = true;
+          console.error('⚠️ Error parsing json_content, showing Builder tab as fail-safe:', e);
+          console.error('Raw content that failed:', res.json_content);
         }
-
-        if (this.data.files == null || this.data.files == undefined) {
-          this.data['files'] = [];
-          this.loadScript = true;
-        }
-
-        // Build file structure for code explorer
-        this.buildFileStructure();
-      } catch (e) {
-        this.loadScript = true;
-        console.error('no attribute found in json[element0]');
+        
+        console.log('🎯 Final decision: shouldShowBuilderTab =', this.shouldShowBuilderTab);
+      },
+      error: (error) => {
+        console.error('❌ Error fetching streaming service for Builder tab check:', error);
+        // On error, default to showing the tab (fail-safe)
+        this.shouldShowBuilderTab = true;
       }
-      this.uploader.onErrorItem = (item, response, status, headers) =>
-        this.onErrorItem(item, response, status, headers);
-      this.uploader.onSuccessItem = (item, response, status, headers) =>
-        this.onSuccessItem(item, response, status, headers);
-      //this.getRelatedComponent();
-
-      this.linkAuth = true;
     });
   }
 
@@ -1064,6 +1129,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Trigger change detection
     this.cdr.detectChanges();
   }
+
 
   onScriptChange(newContent: string): void {
     console.log('Script content changed, length:', newContent.length);
@@ -4054,6 +4120,9 @@ DELIVERABLES
     console.log('Auto-loading pipeline agent data for cname:', this.currentCname);
     this.isLoadingFiles = true;
     
+    // CRITICAL: Load streaming service FIRST to check created_source for Builder tab visibility
+    this.checkBuilderTabVisibility();
+    
     // Reset state first
     this.resetToInitialStateForNewAgent();
     
@@ -4350,7 +4419,18 @@ DELIVERABLES
         contentPreview: currentContent.substring(0, 100) + '...'
       });
 
-      // Prepare the update payload
+      // Preserve original json_content from API response (including created_source flag)
+      let originalJsonContent = {};
+      try {
+        if (this.streamItem.json_content) {
+          originalJsonContent = JSON.parse(this.streamItem.json_content);
+          console.log('Preserved original json_content fields:', Object.keys(originalJsonContent));
+        }
+      } catch (e) {
+        console.warn('Could not parse original json_content:', e);
+      }
+
+      // Prepare the update payload - preserve created_source if it exists
       const updatePayload = {
         lastmodifiedby: sessionStorage.getItem('username') || sessionStorage.getItem('user') || 'user',
         lastmodifieddate: new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -4359,6 +4439,7 @@ DELIVERABLES
         name: this.streamItem.name,
         description: this.streamItem.description,
         json_content: JSON.stringify({
+          ...originalJsonContent, // Preserve created_source and other original fields
           elements: [{
             attributes: {
               filetype: 'json',
@@ -4372,7 +4453,7 @@ DELIVERABLES
         is_template: this.streamItem.is_template || false
       };
 
-      console.log('Update payload:', updatePayload);
+      console.log('Update payload (with preserved created_source):', updatePayload);
 
       // First: Call the update API
       await this.updateStreamingService(updatePayload);

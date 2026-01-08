@@ -146,11 +146,13 @@
                             </div>
                             <div class="header-right">
                               <!-- Upload ZIP Files Button - Only show when no files exist -->
-                              <button mat-icon-button class="upload-files-button" 
+                              <button mat-raised-button class="upload-files-button" 
                                       *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
                                       (click)="openUploadDialog()"
+                                      color="primary"
                                       [title]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'">
                                 <mat-icon>upload_file</mat-icon>
+                                <span style="margin-left: 8px;">Upload Files</span>
                               </button>
                               <!-- MinIO Upload Button -->
                               <button mat-icon-button class="upload-button" 
