@@ -942,4 +942,507 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
 
 	</sql>
 	</changeSet>
-</databaseChangeLog> 
+
+    <!-- Agent Directory Schema - Start -->
+
+    <!-- Main agent_directory table -->
+    <changeSet id="3v0-cip-147" author="Essedum">
+        <createTable tableName="agent_directory">
+            <column name="cid" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pipeline_id" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="alias" type="VARCHAR(128)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="connection_details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="organization" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_modified_by" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_modified_date" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="category" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="interface_type" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creator" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="extras_json" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="agent_directory"
+                             columnNames="alias"
+                             constraintName="uk_agent_directory_alias"/>
+
+        <createIndex tableName="agent_directory" indexName="idx_agent_directory_name">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex tableName="agent_directory" indexName="idx_agent_directory_type">
+            <column name="type"/>
+        </createIndex>
+
+        <createIndex tableName="agent_directory" indexName="idx_agent_directory_category">
+            <column name="category"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="agent_directory"
+                                 baseColumnNames="pipeline_id"
+                                 constraintName="fk_mlpipeline_entity"
+                                 referencedTableName="mlpipeline"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- modules table -->
+    <changeSet id="3v0-cip-148" author="Essedum">
+        <createTable tableName="modules">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="modules"
+                             columnNames="entity_id, name"
+                             constraintName="uk_modules_entity_name"/>
+
+        <addForeignKeyConstraint baseTableName="modules"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_modules_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- skills table -->
+    <changeSet id="3v0-cip-149" author="Essedum">
+        <createTable tableName="skills">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="skills"
+                             columnNames="entity_id, name"
+                             constraintName="uk_skills_entity_name"/>
+
+        <addForeignKeyConstraint baseTableName="skills"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_skills_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- domains table -->
+    <changeSet id="3v0-cip-150" author="Essedum">
+        <createTable tableName="domains">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="domains"
+                             columnNames="entity_id, name"
+                             constraintName="uk_domains_entity_name"/>
+
+        <addForeignKeyConstraint baseTableName="domains"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_domains_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- locators table -->
+    <changeSet id="3v0-cip-151" author="Essedum">
+        <createTable tableName="locators">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locator_type" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="url" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="locators" indexName="idx_locators_type">
+            <column name="locator_type"/>
+        </createIndex>
+
+        <createIndex tableName="locators" indexName="idx_locators_url">
+            <column name="url"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="locators"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_locators_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- syncs table -->
+    <changeSet id="3v0-cip-152" author="Essedum">
+        <createTable tableName="syncs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="frequency" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_sync" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="syncs"
+                             columnNames="entity_id, target"
+                             constraintName="uk_syncs_entity_target"/>
+
+        <createIndex tableName="syncs" indexName="idx_syncs_frequency">
+            <column name="frequency"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="syncs"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_syncs_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- publications table -->
+    <changeSet id="3v0-cip-153" author="Essedum">
+        <createTable tableName="publications">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="published_date" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="publications"
+                             columnNames="entity_id, channel, published_date"
+                             constraintName="uk_publications_entity_channel_date"/>
+
+        <createIndex tableName="publications" indexName="idx_publications_status">
+            <column name="status"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="publications"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_publications_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- extensions table -->
+    <changeSet id="3v0-cip-154" author="Essedum">
+        <createTable tableName="extensions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ext_key" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ext_value" type="VARCHAR(1024)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="extensions"
+                             columnNames="entity_id, ext_key"
+                             constraintName="uk_extensions_entity_key"/>
+
+        <addForeignKeyConstraint baseTableName="extensions"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_extensions_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- selectors table -->
+    <changeSet id="3v0-cip-155" author="Essedum">
+        <createTable tableName="selectors">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sel_key" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sel_value" type="VARCHAR(1024)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="selectors"
+                             columnNames="entity_id, sel_key"
+                             constraintName="uk_selectors_entity_key"/>
+
+        <addForeignKeyConstraint baseTableName="selectors"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_selectors_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- signatures table -->
+    <changeSet id="3v0-cip-156" author="Essedum">
+        <createTable tableName="signatures">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="algorithm" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="value" type="VARCHAR(512)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="certificate" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="signatures"
+                             columnNames="entity_id, algorithm, value"
+                             constraintName="uk_signatures_entity_alg_value"/>
+
+        <addForeignKeyConstraint baseTableName="signatures"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_signatures_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- tools table -->
+    <changeSet id="3v0-cip-157" author="Essedum">
+        <createTable tableName="tools">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="tools"
+                             columnNames="entity_id, name"
+                             constraintName="uk_tools_entity_name"/>
+
+        <addForeignKeyConstraint baseTableName="tools"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_tools_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- tool_parameters table -->
+    <changeSet id="3v0-cip-158" author="Essedum">
+        <createTable tableName="tool_parameters">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tool_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="param_type" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="tool_parameters"
+                             columnNames="tool_id, name"
+                             constraintName="uk_tool_params_tool_name"/>
+
+        <addForeignKeyConstraint baseTableName="tool_parameters"
+                                 baseColumnNames="tool_id"
+                                 constraintName="fk_tool_params_tool"
+                                 referencedTableName="tools"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- resources table -->
+    <changeSet id="3v0-cip-159" author="Essedum">
+        <createTable tableName="resources">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="url" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="resources"
+                             columnNames="entity_id, name"
+                             constraintName="uk_resources_entity_name"/>
+
+        <createIndex tableName="resources" indexName="idx_resources_url">
+            <column name="url"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="resources"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_resources_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <!-- prompts table -->
+    <changeSet id="3v0-cip-160" author="Essedum">
+        <createTable tableName="prompts">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="prompts"
+                             columnNames="entity_id, name"
+                             constraintName="uk_prompts_entity_name"/>
+
+        <addForeignKeyConstraint baseTableName="prompts"
+                                 baseColumnNames="entity_id"
+                                 constraintName="fk_prompts_entity"
+                                 referencedTableName="agent_directory"
+                                 referencedColumnNames="cid"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+
+</databaseChangeLog>

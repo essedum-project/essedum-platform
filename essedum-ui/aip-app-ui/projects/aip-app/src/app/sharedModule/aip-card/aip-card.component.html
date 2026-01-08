@@ -2,19 +2,38 @@
     (mouseenter)="card.hover = true" (mouseleave)="card.hover = false">
     <!-- Card category header -->
     <div class="d-flex align-items-center justify-content-between lfx-u-mar-b-8">
-        <div class="d-flex align-items-center card-category">
+        <div class="d-flex align-items-center card-category" *ngIf="servicev1 === 'connections'">
             <div class="lfx-u-header-sm lfx-u-text-primary-80">
                 {{ getCategory() | uppercase }}
             </div>
         </div>
-        <div *ngIf="servicev1 === 'model'" style="display: flex; align-items: center; gap: 6px">
+        <div class="d-flex align-items-center card-category" *ngIf="servicev1 === 'agent-directory'">
+            <img id="imgid" *ngIf="servicev1 === 'agent-directory' && (getCategory() | uppercase) === 'AGENT'"
+                src="assets/img/ai-agent-mini.jpg" alt="AI Agent Icon"
+                style="height: 24px !important; width: 24px !important;" />
+            <img id="imgid" *ngIf="servicev1 === 'agent-directory' && (getCategory() | uppercase) === 'MCPSERVER'"
+                src="assets/img/Designer.jpg" alt="MCPSERVER Server Icon"
+                style="height: 24px !important; width: 24px !important;" />
+
+            <div class="lfx-u-header-sm lfx-u-text-primary-80">
+                {{ getCategory() | uppercase }}
+            </div>
+        </div>
+
+        <div *ngIf="servicev1 === 'model' " style="display: flex; align-items: center; gap: 6px">
             <span class="lfx-c-badge">
                 <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onModelDownload(card)"
                     style="font-size: 18px; line-height: 1" class="header-action-icon"
                     style="justify-content: flex-end">download</mat-icon>
             </span>
         </div>
-
+        <!-- <div *ngIf="servicev1 === 'agent-directory'" style="display: flex; align-items: center; gap: 6px">
+            <span class="lfx-c-badge">
+                <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onModelDownload(card)"
+                    style="font-size: 18px; line-height: 1" class="header-action-icon"
+                    style="justify-content: flex-end">download</mat-icon>
+            </span>
+        </div> -->
         <div *ngIf="servicev1 === 'Datasets'">
             <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)"
                 class="header-action-icon" style="justify-content: flex-end">visibility</mat-icon>
@@ -42,33 +61,13 @@
 
     <!-- Agent card content -->
     <mat-card-content *ngIf="servicev1 === 'agent'" class="agent-card-content">
-        <!-- <p class="text-body-md text-neutral aip-desc-ellipsis">
-            {{ card.description }}
-        </p> -->
-        <!-- <div class="agent-metadata">
-            <div class="metadata-item">
-                <span class="metadata-label">Status:</span>
-                <span class="metadata-value" [ngClass]="'status-' + card.status?.toLowerCase()">{{ card.status }}</span>
-            </div>
-            <div class="metadata-item" *ngIf="card.lastmodifiedon">
-                <span class="metadata-label">Modified:</span>
-                <span class="metadata-value">{{ card.lastmodifiedon | date:'shortDate' }}</span>
-            </div>
-        </div> -->
-        <!-- <div class="agent-tags" *ngIf="card.tags && card.tags.length > 0">
-            <span class="tag" *ngFor="let tag of card.tags">{{ tag }}</span>
-        </div> -->
+     
+      
     </mat-card-content>
 
-    <!-- <mat-card-content>
-                <p class="text-body-md text-neutral aip-desc-ellipsis">
-                  {{ card.description }}
-                </p>
-              </mat-card-content> -->
 
-    <!-- Card actions -->
 
-    <mat-card-actions *ngIf="servicev1 !== 'Datasets'"
+    <mat-card-actions *ngIf="servicev1 !== 'Datasets' && servicev1 !== 'agent-directory'"
         class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
         <div class="button-placeholder">
             <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
@@ -132,7 +131,7 @@
         <button *ngIf="deleteAuth" mat-icon-button [matTooltip]="'Delete'" matTooltipPosition="above"
             (click)="onDelete(card.name)">
             <mat-icon class="action-icon">delete</mat-icon>
-        </button>
+        </button>       
     </mat-card-actions>
 
     <!-- Agent Actions - same style as other cards -->
@@ -178,4 +177,64 @@
             </mat-menu>
         </div>
     </mat-card-actions>
+
+
+    <!-- Agent directory Actions - same style as other cards -->
+    <mat-card-actions *ngIf="servicev1 === 'agent-directory'"
+        class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
+        <div class="d-flex align-items-center" style="gap:8px;"
+            *ngIf="servicev1 === 'agent-directory' && (getCategory() | uppercase) === 'MCPSERVER'">
+
+            <div class="d-flex align-items-center" style="gap:1px; color:#6b7280;" matTooltip="Tools" matTooltipPosition="above">
+                <img id="Tools" src="assets/img/tools_icon.jpg" alt="tools Icon"
+                style="height: 24px !important; width: 28px !important;" />
+                <span class="small-count">{{ getToolsCount() }}</span>
+            </div>
+
+            <div class="d-flex align-items-center" style="gap:2px; color:#6b7280;" matTooltip="Resources" matTooltipPosition="above">
+                  <img id="Resources" src="assets/img/resources_icon.jpg" alt="Resources Icon"
+                style="height: 24px !important; width: 28px !important;" />
+                <span class="small-count">{{ getResourcesCount() }}</span>
+            </div>
+
+            <div class="d-flex align-items-center" style="gap:2px; color:#6b7280;" matTooltip="Prompts" matTooltipPosition="above">
+                    <img id="prompts" src="assets/img/prompts_icon.jpg" alt="prompts Icon"
+                style="height: 24px !important; width: 28px !important;" />
+                <span class="small-count">{{ getPromptsCount() }}</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center flex-wrap" style="gap:8px;"
+            *ngIf="servicev1 === 'agent-directory' && (getCategory() | uppercase) === 'AGENT'">
+            <div *ngFor="let skill of getSkills() | slice:0:3" 
+                class="skill-badge" 
+                style="background:#eff6ff; color:#0052cc; padding:0.25rem 0.75rem; border-radius:6px; font-size:10px; white-space:nowrap;">
+               {{ skill.name | titlecase }}
+            </div>
+            <ng-container *ngIf="(getSkills()?.length || 0) > 3">
+                <div class="skill-badge" style="background:#f3f4f6; color:#0052cc; padding:0.25rem 0.75rem; border-radius:6px; font-size:10px;">
+                +{{ getSkills()?.length - 3 }}
+                </div>
+            </ng-container>
+        </div>
+          <div class="dropdown d-inline-block float-end">
+            <mat-icon class="aip-cursor aip-more-actions-icon" [matMenuTriggerFor]="menu"
+                style="font-size: 24px; padding: 0px; color: #a5aaad; font-weight: 300"
+                [ngStyle]="{ color: isMenuHovered ? '#0094ff' : '#737373' }" (mouseenter)="isMenuHovered = true"
+                (mouseleave)="isMenuHovered = false" (click)="$event.stopPropagation()">
+                more_vert
+            </mat-icon>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngIf="editAuth"  (click)="onEdit(); $event.stopPropagation()">
+                    <mat-icon class="aip-menu-icon">edit</mat-icon>
+                    Edit
+                </button>
+                <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete(); $event.stopPropagation()">
+                    <mat-icon class="aip-menu-delete">delete</mat-icon>
+                    Delete
+                </button>
+            </mat-menu>
+        </div>
+    </mat-card-actions>
+
+
 </mat-card>

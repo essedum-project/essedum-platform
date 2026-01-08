@@ -489,7 +489,7 @@
               </div>
               <ng-template #elseBlockDefault>
                 <div class="mb-4"
-                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS) || (servicev1 === ServiceType.MODEL))">
+                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS) || (servicev1 === ServiceType.MODEL) || (servicev1 === ServiceType.AGENT_DIRECTORY))">
                   <div class="filter-options">
 
                     <!-- Type -->
@@ -659,6 +659,159 @@
                   </div>
                 </div>
 
+                <!-- Agent Directory Filters -->
+                <div class="mb-4" *ngIf="servicev1 === ServiceType.AGENT_DIRECTORY">
+                  <div class="filter-options">
+                    <!-- Agent Skills Filter -->
+                    <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>Agent Skills</label>
+                        <mat-select multiple [id]="'agent-skills-select-' + (servicev1 || 'default') + '-agent-directory'"
+                          aria-labelledby="agent-skills-label" placeholder="All">
+                          <mat-option *ngFor="let option of agentSkillsList" [value]="option"
+                            (onSelectionChange)="agentSkillSelected(option)">
+                            {{ option.label }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedAgentSkills?.length > 0">
+                      <mat-chip-set [id]="'agent-skills-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected Agent Skills">
+                        <mat-chip *ngFor="let skill of selectedAgentSkills" removable="true"
+                          (removed)="removeAgentSkill(skill)">
+                          {{ skill }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- Locator Types Filter -->
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>Locator Types</label>
+                        <mat-select multiple [id]="'locator-types-select-' + (servicev1 || 'default') + '-agent-directory'"
+                          aria-labelledby="locator-types-label" placeholder="All">
+                          <mat-option *ngFor="let option of agentLocatorTypesList" [value]="option"
+                            (onSelectionChange)="agentLocatorTypeSelected(option)">
+                            {{ option.label }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedAgentLocatorTypes?.length > 0">
+                      <mat-chip-set [id]="'locator-types-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected Locator Types">
+                        <mat-chip *ngFor="let locatorType of selectedAgentLocatorTypes" removable="true"
+                          (removed)="removeAgentLocatorType(locatorType)">
+                          {{ locatorType }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- Modules Filter -->
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>Modules</label>
+                        <mat-select multiple [id]="'modules-select-' + (servicev1 || 'default') + '-agent-directory'"
+                          aria-labelledby="modules-label" placeholder="All">
+                          <mat-option *ngFor="let option of agentModulesList" [value]="option"
+                            (onSelectionChange)="agentModuleSelected(option)">
+                            {{ option.label }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedAgentModules?.length > 0">
+                      <mat-chip-set [id]="'modules-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected Modules">
+                        <mat-chip *ngFor="let module of selectedAgentModules" removable="true"
+                          (removed)="removeAgentModule(module)">
+                          {{ module }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- All Types Filter -->
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>All Types</label>
+                        <mat-select [id]="'all-types-select-' + (servicev1 || 'default') + '-agent-directory'"
+                          (selectionChange)="agentAllTypeSelected($event.value)" aria-labelledby="all-types-label"
+                          placeholder="All">
+                          <mat-option *ngIf="selectedAgentAllTypes?.length > 0" value=""
+                            (click)="clearAllFilters('agentAllTypes')">
+                            All
+                          </mat-option>
+                          <ng-container *ngFor="let option of agentAllTypesList">
+                            <mat-option *ngIf="!option.selected" [value]="option">
+                              {{ option.label }}
+                            </mat-option>
+                          </ng-container>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedAgentAllTypes?.length > 0">
+                      <mat-chip-set [id]="'all-types-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected All Types">
+                        <mat-chip *ngFor="let type of selectedAgentAllTypes" removable="true"
+                          (removed)="removeAgentAllType(type)">
+                          {{ type }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+
+                  <!-- Creation Date Filter -->
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <label class="filter-label">Creation Date</label>
+                      <div class="date-range-container">
+                        <mat-form-field appearance="fill" class="date-field">
+                          <mat-label>From</mat-label>
+                          <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="agentCreationDateFrom"
+                            (dateChange)="onDateChange()" placeholder="MM/DD/YYYY">
+                          <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                          <mat-datepicker #pickerFrom></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="date-field">
+                          <mat-label>To</mat-label>
+                          <input matInput [matDatepicker]="pickerTo" [(ngModel)]="agentCreationDateTo"
+                            (dateChange)="onDateChange()" placeholder="MM/DD/YYYY">
+                          <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                          <mat-datepicker #pickerTo></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <div class="selected-items" *ngIf="agentCreationDateFrom || agentCreationDateTo">
+                      <mat-chip-set [id]="'creation-date-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected Date Range">
+                        <mat-chip removable="true" (removed)="clearAllFilters(FilterType.AGENT_CREATION_DATE)">
+                          {{ agentCreationDateFrom ? (agentCreationDateFrom | date:'MM/dd/yyyy') : 'Any' }} - 
+                          {{ agentCreationDateTo ? (agentCreationDateTo | date:'MM/dd/yyyy') : 'Any' }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+                  </div>
+                </div>
               </ng-template>
             </ng-template>
           </ng-template>

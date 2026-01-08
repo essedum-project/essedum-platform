@@ -296,5 +296,25 @@ public interface ICIPStreamingServicesRepositoryMYSQL extends ICIPStreamingServi
 
 	@Query(value="SELECT * from mlpipeline p1 WHERE p1.name=:name AND p1.organization=:org",nativeQuery = true)
 	List<ICIPStreamingServices2DTO> getPipelineByNameAndOrg(@Param("name")String name,@Param("org")String org);
-	
+
+	/**
+	 * Get pipelines for agent directory by organization and interface type.
+	 * Fetches pipelines from mlpipeline table filtered by organization and optionally by interface type.
+	 * Excludes templates (is_template IS FALSE) and includes all non-deleted pipelines.
+	 *
+	 * @param organization the organization
+	 * @param interfacetype the interface type filter (optional)
+	 * @return the list of pipelines
+	 */
+	@Query(value = "SELECT * FROM mlpipeline p1 WHERE "
+			+ "p1.organization = :organization "
+			+ "AND p1.is_template IS FALSE "
+			+ "AND p1.deleted = 0 "
+			+ "AND (:interfacetype IS NULL OR p1.interfacetype = :interfacetype) "
+			+ "ORDER BY p1.created_date DESC", nativeQuery = true)
+	List<ICIPStreamingServices2DTO> getPipelinesForAgentDirectory(
+			@Param("organization") String organization,
+			@Param("interfacetype") String interfacetype);
+
 }
+
