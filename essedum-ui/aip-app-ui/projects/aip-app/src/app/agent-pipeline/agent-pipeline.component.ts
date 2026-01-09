@@ -2879,7 +2879,7 @@ public class ZipController {
       },
       error: (error) => {
         console.error('MinIO push failed, cannot proceed with deployment:', error);
-        
+
         // Check if this is a parsing error with 200 status (success but unparseable response)
         if (error.status === 200 && error.name === 'HttpErrorResponse' && 
             (error.message?.includes('parsing') || error.error?.text)) {
@@ -2972,7 +2972,7 @@ public class ZipController {
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
 		  
-	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
+	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
