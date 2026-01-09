@@ -411,6 +411,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 				File localFilePath = new File(uploadFile);
 				BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 				AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
+						.withPathStyleAccessEnabled(true)  // Enable path-style access for MinIO compatibility
 						.withEndpointConfiguration(
 								new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
 						.withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
@@ -528,7 +529,9 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 				clientConfiguration.getApacheHttpClientConfig().setSslSocketFactory(factory);
 				System.setProperty(SDKGlobalConfiguration.DISABLE_CERT_CHECKING_SYSTEM_PROPERTY, "true");
 				TransferManager xfer_mgr = TransferManagerBuilder.standard().withS3Client(AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
-						.withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP)).withCredentials(new AWSStaticCredentialsProvider(credentials)).withEndpointConfiguration(
+						.withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP))
+						.withPathStyleAccessEnabled(true)  // Enable path-style access for MinIO compatibility
+						.withCredentials(new AWSStaticCredentialsProvider(credentials)).withEndpointConfiguration(
 								new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region)).build()).build();
 
 				try {
@@ -719,20 +722,11 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 				BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 				AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.AP_SOUTH_1)
 						.withCredentials(new AWSStaticCredentialsProvider(credentials))
-						.build();
-				try {
-					TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
-					File dir = new File(localFilePath);
-
-
-
-					MultipleFileDownload download = transferManager.downloadDirectory(bucketName, prefix, dir);
-					download.waitForCompletion();
-
-
-
-					//System.out.println("All logs downloaded successfully to " + localFolder);
-					return(localFilePath);
+					.withPathStyleAccessEnabled(true)
+					.build();
+			try {
+				TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
+				File dir = new File(localFilePath);
 				} catch (Exception e) {
 					logger.error("Error Message:    " + e.getMessage());
 				}

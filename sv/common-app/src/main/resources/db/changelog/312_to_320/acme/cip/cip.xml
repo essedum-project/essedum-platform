@@ -405,7 +405,7 @@ VALUES (
         },
         \"servers\": [
             {
-                \"url\": \"https://essedum.az.ad.idemo-ppc.com/\"
+                \"url\": \"https://essedum-lfn.infosys.com/\"
             }
         ],
         \"security\": [
@@ -574,7 +574,7 @@ VALUES (
         },
         \"servers\": [
             {
-                \"url\": \"https://essedum.az.ad.idemo-ppc.com/\"
+                \"url\": \"https://essedum-lfn.infosys.com/\"
             }
         ],
         \"security\": [

@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @RestController
 @Timed
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "http://localhost:8087",
-        "https://langflow.az.ad.idemo-ppc.com", "https://essedum.az.ad.idemo-ppc.com"},
+        "https://langflow.essedum-lfn.infosys.com", "https://essedum-lfn.infosys.com"},
         allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
         allowCredentials = "true",
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})

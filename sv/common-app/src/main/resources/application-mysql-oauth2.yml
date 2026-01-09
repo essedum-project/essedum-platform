@@ -9,9 +9,9 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://mysql-local:3306/telemetrydb
-    username: root
-    password: password
+    jdbcurl: ${TELEMETRY_DATASOURCE_JDBCURL:jdbc:mysql://mysql:3306/telemetrydb}
+    username: ${TELEMETRY_DATASOURCE_USERNAME:root}
+    password: ${TELEMETRY_DATASOURCE_PASSWORD:password}
  
 config:
   active-profiles: mysql,oauth2,btf,dbconstants,vault
@@ -19,9 +19,9 @@ config:
   #static-locations: file:/D:/common-app/
   static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
   
-  datasourceurl: jdbc:mysql://mysql-local:3306
-  datasourceuser: root
-  datasourcepass: password
+  datasourceurl: ${CONFIG_DATASOURCEURL:jdbc:mysql://mysql:3306}
+  datasourceuser: ${CONFIG_DATASOURCEUSER:root}
+  datasourcepass: ${CONFIG_DATASOURCEPASS:password}
   essedumcoredb: essedum_coredb
   essedumquartzdb: essedum_quartzdb
   
@@ -76,6 +76,7 @@ spring:
       static-locations: ${config.static-locations}
   liquibase:
     enabled: true
+    validate-on-migrate: false
     contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
  
     change-log: "classpath:db/changelog/master.xml"
@@ -287,6 +288,7 @@ model:
 quartz:
     liquibase:
         enabled: true
+        validate-on-migrate: false
         change-log: "classpath:db/changelog/quartz.xml"
     datasource:
         type: com.zaxxer.hikari.HikariDataSource

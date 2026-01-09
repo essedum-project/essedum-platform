@@ -1,7 +1,10 @@
 # Sample setup with keycloak
+# Backend uses external HTTPS URL for issuer validation (must match JWT iss claim)
+# But uses internal HTTP URL for fetching JWK keys (faster, no external DNS lookup)
 security:
-  issuer-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM
-  jwk-set-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM/protocol/openid-connect/certs
+  issuer-uri: https://login.essedum-lfn.infosys.com/realms/ESSEDUM
+  jwk-set-uri: http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs
+  frontend-issuer-uri: https://login.essedum-lfn.infosys.com/realms/ESSEDUM
   clientId: essedum-45
   scope: email
   claim: email||admin
