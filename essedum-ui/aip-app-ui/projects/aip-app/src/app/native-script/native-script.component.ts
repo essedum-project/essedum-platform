@@ -1196,7 +1196,11 @@ export class NativeScriptComponent implements OnInit, OnChanges {
               this.data = jsonContent.elements[0].attributes;
               this.dynamicEnvArray = jsonContent.environment || [];
               this.defaultRuntimeFromDB = jsonContent.default_runtime;
-              this.selectedRunType = this.defaultRuntimeFromDB;
+              // Only update selectedRunType if it's not already set (i.e., during initial load)
+              // This prevents overwriting the user's current selection when refreshing after actions like run/save
+              if (!this.selectedRunType) {
+                this.selectedRunType = this.defaultRuntimeFromDB;
+              }
               
               console.log('Updated component data after refresh:', {
                 files: this.data.files,
