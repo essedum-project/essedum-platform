@@ -24,3 +24,8 @@ export interface PushRequest {
   commitMessage: string;
   files: any;
 }
+
+export interface PullRequest {
+  repoUrl: string;
+  branch: string;
+}
