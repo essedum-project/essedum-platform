@@ -147,6 +147,25 @@ export class AgentDirectoryEditComponent implements OnInit {
     { key: 'actions', label: 'Actions' },
   ];
 
+  // Section titles
+  sectionTitles = {
+    basic: 'Basic Information',
+    cid: 'CID',
+    jsonModel: 'JSON Model',
+    modules: 'Modules',
+    skills: 'Skills',
+    selectors: 'Selectors',
+    domains: 'Domains',
+    locators: 'Locators',
+    syncs: 'Syncs',
+    publications: 'Publications',
+    extensions: 'Extensions',
+    signatures: 'Signatures',
+    tools: 'Tools',
+    resources: 'Resources',
+    prompts: 'Prompts'
+  };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,

@@ -107,6 +107,29 @@ export class GeneralComponent implements OnInit, OnChanges {
     { key: 'description', label: 'Description' },
   ];
 
+  resourcesHeaders = [
+    { key: 'name', label: 'Name' },
+    { key: 'description', label: 'Description' },
+    { key: 'url', label: 'URL' },
+  ];
+
+  // Section titles
+  sectionTitles = {
+    about: 'About',
+    modules: 'Modules',
+    skills: 'Skills',
+    selectors: 'Selectors',
+    domains: 'Domains',
+    locators: 'Locators',
+    syncs: 'Syncs',
+    publications: 'Publications',
+    extensions: 'Extensions',
+    tools: 'Tools',
+    resources: 'Resources',
+    signatures: 'Signatures',
+    prompts: 'Prompts'
+  };
+
   // Search and filter
   toolSearchQuery = '';
   filteredTools: any[] = [];

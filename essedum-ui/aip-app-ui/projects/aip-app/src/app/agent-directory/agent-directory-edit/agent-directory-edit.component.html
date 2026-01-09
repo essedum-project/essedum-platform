@@ -25,7 +25,7 @@
 
             <!-- Basic Information Section -->
             <div id="basic" class="section-card">
-                <h2 class="section-title">Basic Information <span class="required-badge">Required</span></h2>
+                <h2 class="section-title">{{ sectionTitles.basic }} <span class="required-badge">Required</span></h2>
 
                 <mat-form-field appearance="fill" class="full-width">
                     <mat-label>Name</mat-label>
@@ -74,7 +74,7 @@
 
             <!-- CID Section -->
             <div id="cid" class="section-card">
-                <h2 class="section-title">CID</h2>
+                <h2 class="section-title">{{ sectionTitles.cid }}</h2>
 
                 <div class="cid-field-group">
                     <mat-form-field appearance="fill" class="cid-input">
@@ -90,7 +90,7 @@
 
             <!-- JSON Model Section -->
             <div id="json-model" class="section-card">
-                <h2 class="section-title">JSON Model</h2>
+                <h2 class="section-title">{{ sectionTitles.jsonModel }}</h2>
 
                 <app-enl-code-editor id="ele" [script]="script" [lang]="lang" (scriptChange)="onScriptChange($event)"
                     style="height: 100%; width: 100%;">
@@ -101,7 +101,7 @@
             <div id="modules" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Modules
+                        {{ sectionTitles.modules }}
                         <span class="count">{{ agentData.modules.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addModule()">
@@ -136,7 +136,7 @@
             <div *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'" id="skills" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Skills
+                        {{ sectionTitles.skills }}
                         <span class="count">{{ agentData.skills.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addSkill()">
@@ -167,11 +167,50 @@
                 </div>
             </div>
 
+            <!-- Selectors Section -->
+            <div id="selectors" class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        {{ sectionTitles.selectors }} <span class="info-badge">Tags/Filters for Routing</span>
+                        <span class="count">{{ agentData.selectors.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addSelector()">
+                        <mat-icon>add</mat-icon>
+                        Add Selector
+                    </button>
+                </div>
+
+                <div class="add-item-row selector-add-row">
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Key</mat-label>
+                        <input matInput [(ngModel)]="newSelectorKey" placeholder="e.g., environment">
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="flex-grow">
+                        <mat-label>Value</mat-label>
+                        <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
+                            (keyup.enter)="addSelector()">
+                    </mat-form-field>
+                </div>
+
+                <div class="items-list" *ngIf="agentData.selectors.length > 0">
+                    <div *ngFor="let selector of agentData.selectors; let i = index" class="item-chip selector-badge">
+                        <span><strong>{{ selector.key }}:</strong> {{ selector.value }}</span>
+                        <button class="remove-icon-btn" (click)="removeSelector(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="agentData.selectors.length === 0">
+                    <p>No selectors added yet</p>
+                </div>
+            </div>
+
             <!-- Domains Section -->
             <div id="domains" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Domains
+                        {{ sectionTitles.domains }}
                         <span class="count">{{ agentData.domains.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addDomain()">
@@ -212,7 +251,7 @@
             <div id="locators" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Locators
+                        {{ sectionTitles.locators }}
                         <span class="count">{{ agentData.locators.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addLocator()">
@@ -280,7 +319,7 @@
             <div id="syncs" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Syncs
+                        {{ sectionTitles.syncs }}
                         <span class="count">{{ agentData.syncs.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addSync()">
@@ -348,7 +387,7 @@
             <div id="publications" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Publications
+                        {{ sectionTitles.publications }}
                         <span class="count">{{ agentData.publications.length }}</span>
                     </h2>
                     <button class="add-btn" (click)="addPublication()">
@@ -481,45 +520,6 @@
                 </div>
             </div>
 
-            <!-- Selectors Section -->
-            <div id="selectors" class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        Selectors <span class="info-badge">Tags/Filters for Routing</span>
-                        <span class="count">{{ agentData.selectors.length }}</span>
-                    </h2>
-                    <button class="add-btn" (click)="addSelector()">
-                        <mat-icon>add</mat-icon>
-                        Add Selector
-                    </button>
-                </div>
-
-                <div class="add-item-row selector-add-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Key</mat-label>
-                        <input matInput [(ngModel)]="newSelectorKey" placeholder="e.g., environment">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Value</mat-label>
-                        <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
-                            (keyup.enter)="addSelector()">
-                    </mat-form-field>
-                </div>
-
-                <div class="items-list" *ngIf="agentData.selectors.length > 0">
-                    <div *ngFor="let selector of agentData.selectors; let i = index" class="item-chip selector-badge">
-                        <span><strong>{{ selector.key }}:</strong> {{ selector.value }}</span>
-                        <button class="remove-icon-btn" (click)="removeSelector(i)">
-                            <mat-icon>close</mat-icon>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="empty-state" *ngIf="agentData.selectors.length === 0">
-                    <p>No selectors added yet</p>
-                </div>
-            </div>
-
             <!-- Signatures Section -->
             <div id="signatures" class="section-card">
                 <div class="section-header">
@@ -576,7 +576,7 @@
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="tools" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Tools
+                        {{ sectionTitles.tools }}
                         <span class="count">{{ agentData.tools?.length || 0 }}</span>
                     </h2>
                     <button class="add-btn" (click)="addTool()">
@@ -675,7 +675,7 @@
                 class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Resources
+                        {{ sectionTitles.resources }}
                         <span class="count">{{ agentData.resources?.length || 0 }}</span>
                     </h2>
                     <button class="add-btn" (click)="addResource()">
@@ -720,7 +720,7 @@
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="prompts" class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">
-                        Prompts
+                        {{ sectionTitles.prompts }}
                         <span class="count">{{ agentData.prompts?.length || 0 }}</span>
                     </h2>
                     <button class="add-btn" (click)="addPrompt()">
@@ -762,56 +762,56 @@
         <div class="side-nav col-md-4">
             <nav>
                 <a (click)="scrollToSection('basic')" [class.active]="activeSection === 'basic'" class="nav-item">
-                    Basic Information <span class="required-indicator">*</span>
+                    {{ sectionTitles.basic }} <span class="required-indicator">*</span>
                 </a>
                 <a (click)="scrollToSection('json-model')" [class.active]="activeSection === 'json-model'"
                     class="nav-item">
-                    JSON Model
+                    {{ sectionTitles.jsonModel }}
                 </a>
                 <a (click)="scrollToSection('modules')" [class.active]="activeSection === 'modules'" class="nav-item">
-                    Modules
+                    {{ sectionTitles.modules }}
                 </a>
                 <a *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'"
                     (click)="scrollToSection('skills')" [class.active]="activeSection === 'skills'" class="nav-item">
-                    Skills
-                </a>
-                <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
-                    Domains
-                </a>
-                <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
-                    Locators
-                </a>
-                <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
-                    Syncs
-                </a>
-                <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
-                    class="nav-item">
-                    Publications
-                </a>
-                <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'"
-                    class="nav-item">
-                    Extensions
+                    {{ sectionTitles.skills }}
                 </a>
                 <a (click)="scrollToSection('selectors')" [class.active]="activeSection === 'selectors'"
                     class="nav-item">
-                    Selectors
+                    {{ sectionTitles.selectors }}
+                </a>
+                <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
+                    {{ sectionTitles.domains }}
+                </a>
+                <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
+                    {{ sectionTitles.locators }}
+                </a>
+                <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
+                    {{ sectionTitles.syncs }}
+                </a>
+                <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
+                    class="nav-item">
+                    {{ sectionTitles.publications }}
+                </a>
+                <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'"
+                    class="nav-item">
+                    {{ sectionTitles.extensions }}
                 </a>
                 <a (click)="scrollToSection('signatures')" [class.active]="activeSection === 'signatures'"
                     class="nav-item">
-                    Signatures
+                    {{ sectionTitles.signatures }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('tools')" [class.active]="activeSection === 'tools'" class="nav-item">
-                    Tools
+                    {{ sectionTitles.tools }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('resources')" [class.active]="activeSection === 'resources'"
                     class="nav-item">
-                    Resources
+                    {{ sectionTitles.resources }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('prompts')" [class.active]="activeSection === 'prompts'" class="nav-item">
-                    Prompts
+                    {{ sectionTitles.prompts }}
                 </a>
             </nav>
         </div>
