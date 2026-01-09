@@ -240,14 +240,6 @@ public interface IICIPStreamingServiceService {
 	List<ICIPStreamingServices2DTO> getAllPipelines();
 
 	/**
-	 * Gets the all pipelines by org.
-	 *
-	 * @param org the org
-	 * @return the all pipelines by org
-	 */
-	List<ICIPStreamingServices2DTO> getAllPipelinesByOrg(String org);
-
-	/**
 	 * Gets the all pipelines by type.
 	 *
 	 * @param type the type
@@ -263,6 +255,15 @@ public interface IICIPStreamingServiceService {
 	 * @return the all pipeline names by org
 	 */
 	List<NameAndAliasDTO> getAllPipelineNamesByOrg(String org);
+
+    /**
+     * Gets the all pipelines by type.
+     *
+     * @param type the type
+     * @param org  the org
+     * @return the all pipelines by type
+     */
+    List<ICIPStreamingServices2DTO> getAllPipelinesByOrg(String org);
 
 	/**
 	 * Gets the all pipelines by type and group.

@@ -25,6 +25,7 @@ import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
+import { AgentDirectoryService } from './agent-directory/agent-directory.service';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
@@ -147,8 +148,14 @@ import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PlaygroundTabComponent } from './agent-pipeline/playground-tab/playground-tab.component';
 import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
+import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
+import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory-create/agent-directory-create.component';
+import { GeneralComponent } from './agent-directory/general/general.component';
+import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
 
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -252,8 +259,14 @@ PipelineAgentDetailComponent,
     AgentComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
+    PlaygroundTabComponent,
     GitHubPushComponent,
-    AgentComponent
+   
+
+    AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
+    AgentDirectoryCreateComponent,
+    GeneralComponent,AgentDirectoryEditComponent
+
   ],
   imports: [
     CommonModule,
@@ -330,6 +343,7 @@ PipelineAgentDetailComponent,
     EventsService,
     JobsService,
     SchemaRegistryService,
+    AgentDirectoryService,
     encKey,
     DashConstantService,
     SchemaRelationshipService,

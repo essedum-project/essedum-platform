@@ -39,6 +39,10 @@ import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.componen
 import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 
+import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
+import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
+import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
+
 
 const routes: Routes = [
   {
@@ -115,6 +119,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'agent-directory',
+        children: [
+          { path: '', component: AgentDirectoryComponent },
+         { path: 'create', component: DatasourceConfigComponent },
+          { path: 'view/:name', component: AgentDirectoryViewComponent },
+          { path: 'edit/:name', component: AgentDirectoryEditComponent },
+          { path: 'add', component: AgentDirectoryEditComponent }
+        
+        ]
+      },
+
+      {
         path: 'datasets',
         children: [
           { path: '', component: DatasetByNameComponent },
@@ -149,7 +165,7 @@ const routes: Routes = [
           { path: '', component: AdapterComponent },
           { path: 'create', component: AdapterCreateEditComponent },
           { path: ':adapter', component: AdapterDescriptionComponent },
-        ],
+         ],
       },
       {
         path: 'instances',
