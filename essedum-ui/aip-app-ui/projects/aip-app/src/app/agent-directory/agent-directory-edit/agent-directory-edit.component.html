@@ -99,10 +99,16 @@
 
             <!-- Modules Section -->
             <div id="modules" class="section-card">
-                <h2 class="section-title">
-                    Modules
-                    <span class="count">{{ agentData.modules.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Modules
+                        <span class="count">{{ agentData.modules.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addModule()">
+                        <mat-icon>add</mat-icon>
+                        Add Module
+                    </button>
+                </div>
 
                 <div class="add-item-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -110,10 +116,6 @@
                         <input matInput [(ngModel)]="newModuleName" placeholder="Enter module name"
                             (keyup.enter)="addModule()">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addModule()">
-                        <mat-icon>add</mat-icon>
-                        Add Module
-                    </button>
                 </div>
 
                 <div class="items-list" *ngIf="agentData.modules.length > 0">
@@ -132,10 +134,16 @@
 
             <!-- Skills Section -->
             <div *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'" id="skills" class="section-card">
-                <h2 class="section-title">
-                    Skills
-                    <span class="count">{{ agentData.skills.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Skills
+                        <span class="count">{{ agentData.skills.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addSkill()">
+                        <mat-icon>add</mat-icon>
+                        Add Skill
+                    </button>
+                </div>
 
                 <div class="add-item-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -143,10 +151,6 @@
                         <input matInput [(ngModel)]="newSkillName" placeholder="Enter skill name"
                             (keyup.enter)="addSkill()">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addSkill()">
-                        <mat-icon>add</mat-icon>
-                        Add Skill
-                    </button>
                 </div>
 
                 <div class="items-list" *ngIf="agentData.skills.length > 0">
@@ -165,10 +169,16 @@
 
             <!-- Domains Section -->
             <div id="domains" class="section-card">
-                <h2 class="section-title">
-                    Domains
-                    <span class="count">{{ agentData.domains.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Domains
+                        <span class="count">{{ agentData.domains.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addDomain()">
+                        <mat-icon>add</mat-icon>
+                        Add Domain
+                    </button>
+                </div>
 
                 <div class="add-item-row domain-add-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -180,10 +190,7 @@
                         <input matInput [(ngModel)]="newDomainDescription" placeholder="Domain description"
                             (keyup.enter)="addDomain()">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addDomain()">
-                        <mat-icon>add</mat-icon>
-                        Add Domain
-                    </button>
+                    
                 </div>
 
                 <div *ngFor="let domain of agentData.domains; let i = index" class="domain-item">
@@ -203,10 +210,16 @@
 
             <!-- Locators Section -->
             <div id="locators" class="section-card">
-                <h2 class="section-title">
-                    Locators
-                    <span class="count">{{ agentData.locators.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Locators
+                        <span class="count">{{ agentData.locators.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addLocator()">
+                        <mat-icon>add</mat-icon>
+                        Add Locator
+                    </button>
+                </div>
 
                 <div class="add-item-row locator-add-row">
                     <mat-form-field appearance="fill" class="locator-type-field">
@@ -222,10 +235,6 @@
                         <input matInput [(ngModel)]="newLocatorUrl" placeholder="Enter URL"
                             (keyup.enter)="addLocator()">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addLocator()">
-                        <mat-icon>add</mat-icon>
-                        Add Locator
-                    </button>
                 </div>
 
                 <table class="edit-table" *ngIf="agentData.locators.length > 0">
@@ -269,10 +278,16 @@
 
             <!-- Syncs Section -->
             <div id="syncs" class="section-card">
-                <h2 class="section-title">
-                    Syncs
-                    <span class="count">{{ agentData.syncs.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Syncs
+                        <span class="count">{{ agentData.syncs.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addSync()">
+                        <mat-icon>add</mat-icon>
+                        Add Sync
+                    </button>
+                </div>
 
                 <div class="add-item-row sync-add-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -287,10 +302,6 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <button class="add-btn" (click)="addSync()">
-                        <mat-icon>add</mat-icon>
-                        Add Sync
-                    </button>
                 </div>
 
                 <table class="edit-table" *ngIf="agentData.syncs.length > 0">
@@ -335,10 +346,16 @@
 
             <!-- Publications Section -->
             <div id="publications" class="section-card">
-                <h2 class="section-title">
-                    Publications
-                    <span class="count">{{ agentData.publications.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Publications
+                        <span class="count">{{ agentData.publications.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addPublication()">
+                        <mat-icon>add</mat-icon>
+                        Add Publication
+                    </button>
+                </div>
 
                 <div class="add-item-row publication-add-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -353,10 +370,6 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <button class="add-btn" (click)="addPublication()">
-                        <mat-icon>add</mat-icon>
-                        Add Publication
-                    </button>
                 </div>
 
                 <table class="edit-table" *ngIf="agentData.publications.length > 0">
@@ -402,10 +415,16 @@
 
             <!-- Extensions Section -->
             <div id="extensions" class="section-card">
-                <h2 class="section-title">
-                    Extensions <span class="info-badge">Custom Metadata</span>
-                    <span class="count">{{ agentData.extensions.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Extensions <span class="info-badge">Custom Metadata</span>
+                        <span class="count">{{ agentData.extensions.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addExtension()">
+                        <mat-icon>add</mat-icon>
+                        Add Extension
+                    </button>
+                </div>
 
                 <div class="add-item-row extension-add-row">
                     <mat-form-field appearance="fill" class="extension-key-field">
@@ -420,10 +439,6 @@
                         <mat-label>Description</mat-label>
                         <input matInput [(ngModel)]="newExtensionDescription" placeholder="Optional description">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addExtension()">
-                        <mat-icon>add</mat-icon>
-                        Add Extension
-                    </button>
                 </div>
 
                 <table class="edit-table" *ngIf="agentData.extensions.length > 0">
@@ -468,10 +483,16 @@
 
             <!-- Selectors Section -->
             <div id="selectors" class="section-card">
-                <h2 class="section-title">
-                    Selectors <span class="info-badge">Tags/Filters for Routing</span>
-                    <span class="count">{{ agentData.selectors.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Selectors <span class="info-badge">Tags/Filters for Routing</span>
+                        <span class="count">{{ agentData.selectors.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addSelector()">
+                        <mat-icon>add</mat-icon>
+                        Add Selector
+                    </button>
+                </div>
 
                 <div class="add-item-row selector-add-row">
                     <mat-form-field appearance="fill" class="flex-grow">
@@ -483,10 +504,6 @@
                         <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
                             (keyup.enter)="addSelector()">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addSelector()">
-                        <mat-icon>add</mat-icon>
-                        Add Selector
-                    </button>
                 </div>
 
                 <div class="items-list" *ngIf="agentData.selectors.length > 0">
@@ -505,10 +522,16 @@
 
             <!-- Signatures Section -->
             <div id="signatures" class="section-card">
-                <h2 class="section-title">
-                    Signatures <span class="info-badge">Cryptographic Verification</span>
-                    <span class="count">{{ agentData.signatures.length }}</span>
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Signatures <span class="info-badge">Cryptographic Verification</span>
+                        <span class="count">{{ agentData.signatures.length }}</span>
+                    </h2>
+                    <button class="add-btn" (click)="addSignature()">
+                        <mat-icon>add</mat-icon>
+                        Add Signature
+                    </button>
+                </div>
 
                 <div class="add-item-row signature-add-row">
                     <mat-form-field appearance="fill" class="signature-algorithm-field">
@@ -523,10 +546,6 @@
                         <mat-label>Signature Value</mat-label>
                         <input matInput [(ngModel)]="newSignatureValue" placeholder="Enter signature value">
                     </mat-form-field>
-                    <button class="add-btn" (click)="addSignature()">
-                        <mat-icon>add</mat-icon>
-                        Add Signature
-                    </button>
                 </div>
 
                 <div *ngFor="let signature of agentData.signatures; let i = index" class="signature-item">
@@ -555,12 +574,11 @@
 
             <!-- Tools Section -->
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="tools" class="section-card">
-                <h2 class="section-title">
-                    Tools
-                    <span class="count">{{ agentData.tools?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Tools
+                        <span class="count">{{ agentData.tools?.length || 0 }}</span>
+                    </h2>
                     <button class="add-btn" (click)="addTool()">
                         <mat-icon>add</mat-icon>
                         Add Tool
@@ -655,12 +673,11 @@
             <!-- Resources Section -->
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="resources"
                 class="section-card">
-                <h2 class="section-title">
-                    Resources
-                    <span class="count">{{ agentData.resources?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Resources
+                        <span class="count">{{ agentData.resources?.length || 0 }}</span>
+                    </h2>
                     <button class="add-btn" (click)="addResource()">
                         <mat-icon>add</mat-icon>
                         Add Resource
@@ -701,12 +718,11 @@
 
             <!-- Prompts Section -->
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="prompts" class="section-card">
-                <h2 class="section-title">
-                    Prompts
-                    <span class="count">{{ agentData.prompts?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        Prompts
+                        <span class="count">{{ agentData.prompts?.length || 0 }}</span>
+                    </h2>
                     <button class="add-btn" (click)="addPrompt()">
                         <mat-icon>add</mat-icon>
                         Add Prompt
