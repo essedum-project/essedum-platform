@@ -186,6 +186,10 @@ export class PipelineCreateComponent implements OnInit {
             }
           }
         }
+        // For new pipeline creation from add button ONLY for pipeline-agent or mcp-pipeline
+        else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
+          newCanvas.json_content = JSON.stringify({ 'created_source': 'user_defined' });
+        }
 
         if (this.importedJson) {
           newCanvas.json_content = this.importedJson;
@@ -431,8 +435,19 @@ export class PipelineCreateComponent implements OnInit {
     console.log('MCP Configuration:', mcpConfig);
     console.log('Dynamic filename:', dynamicFilename);
     
-    // Update the pipeline's json_content with the MCP configuration
+    // Preserve original json_content from add API response (created_source flag)
+    let originalJsonContent = {};
+    try {
+      if (pipelineData.json_content) {
+        originalJsonContent = JSON.parse(pipelineData.json_content);
+      }
+    } catch (e) {
+      console.warn('Could not parse original json_content:', e);
+    }
+    
+    // Update the pipeline's json_content with the MCP configuration, preserving created_source
     pipelineData.json_content = JSON.stringify({
+      ...originalJsonContent,
       elements: [{
         type: 'mcpServer',
         name: pipelineData.name,
@@ -511,8 +526,19 @@ export class PipelineCreateComponent implements OnInit {
     console.log('Agent Configuration:', agentConfig);
     console.log('Dynamic filename:', dynamicFilename);
     
-    // Update the pipeline's json_content with the Agent configuration
+    // Preserve original json_content from add API response (created_source flag)
+    let originalJsonContent = {};
+    try {
+      if (pipelineData.json_content) {
+        originalJsonContent = JSON.parse(pipelineData.json_content);
+      }
+    } catch (e) {
+      console.warn('Could not parse original json_content:', e);
+    }
+    
+    // Update the pipeline's json_content with the Agent configuration, preserving created_source
     pipelineData.json_content = JSON.stringify({
+      ...originalJsonContent,
       elements: [{
         type: 'AIAgent',
         name: pipelineData.name,
