@@ -593,12 +593,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       }
 
       // Script list to file
-      const formData: FormData = new FormData();
-      let script = this.script.join('\n');
-      let scriptFile = new Blob([script], { type: 'text/plain' });
-      formData.set('scriptFile', scriptFile);
-      
-      // Determine the specific file being edited
+      // Determine the specific file being edited first
       let targetFileName: string;
       
       if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
@@ -611,13 +606,23 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         console.log('Generated default filename:', targetFileName);
       }
       
+      // Get the script content as a string
+      let scriptContent = this.script.join('\n');
+      
+      console.log('💾 Saving script file:', {
+        fileName: targetFileName,
+        contentLength: scriptContent.length,
+        contentPreview: scriptContent.substring(0, 100) + '...'
+      });
+      
+      // Pass the script content string directly - service will create FormData
       this.service
         .createNativeFile(
           pname,
           this.streamItem.organization,
           targetFileName, // Use specific filename instead of files array
           this.data.filetype,
-          formData
+          scriptContent  // Pass content string, not FormData
         )
         .subscribe({
           next: (response) => {
