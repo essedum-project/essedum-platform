@@ -428,20 +428,80 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
 
     private void updateModules(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getModules() != null) {
-            // Remove modules not in DTO
+            // Remove modules not in DTO (compare by ID if present, otherwise by name)
             agentDirectory.getModules().removeIf(existing ->
-                dto.getModules().stream().noneMatch(dtoModule -> dtoModule.getName().equals(existing.getName()))
+                    dto.getModules().stream().noneMatch(dtoModule -> {
+                        // If DTO has ID, match by ID
+                        if (dtoModule.getId() != null && existing.getId() != null) {
+                            return dtoModule.getId().equals(existing.getId());
+                        }
+                        // Otherwise match by name
+                        return dtoModule.getName() != null && dtoModule.getName().equals(existing.getName());
+                    })
             );
+            // CASE 1, 2, 3: Check for duplicate module names within the incoming DTO
+            // Count occurrences of each module name in the DTO
+            java.util.Map<String, Long> nameCountMap = dto.getModules().stream()
+                .filter(m -> m.getName() != null)
+                .collect(Collectors.groupingBy(
+                    com.lfn.icip.icipwebeditor.model.dto.AgentModuleDTO::getName,
+                    Collectors.counting()
+                ));
+
+            // Check if any name appears more than once
+            nameCountMap.forEach((name, count) -> {
+                if (count > 1) {
+                    throw new IllegalArgumentException("Duplicate module name found: '" + name + "'. Each module must have a unique name.");
+                }
+            });
+
+            // CASE 2 & 3: Check for modules with same name but different IDs within the DTO
+            for (int i = 0; i < dto.getModules().size(); i++) {
+                com.lfn.icip.icipwebeditor.model.dto.AgentModuleDTO module1 = dto.getModules().get(i);
+                if (module1.getName() == null) continue;
+
+                for (int j = i + 1; j < dto.getModules().size(); j++) {
+                    com.lfn.icip.icipwebeditor.model.dto.AgentModuleDTO module2 = dto.getModules().get(j);
+                    if (module2.getName() == null) continue;
+
+                    // If names are equal but IDs are different (or one is null), it's a duplicate
+                    if (module1.getName().equals(module2.getName())) {
+                        boolean differentIds = (module1.getId() != null && module2.getId() != null &&
+                                              !module1.getId().equals(module2.getId())) ||
+                                             (module1.getId() == null && module2.getId() != null) ||
+                                             (module1.getId() != null && module2.getId() == null);
+
+                        if (differentIds || (module1.getId() == null && module2.getId() == null)) {
+                            throw new IllegalArgumentException("Duplicate module name found: '" + module1.getName() + "'. Each module must have a unique name.");
+                        }
+                    }
+                }
+            }
+
+
 
             // Add or update modules
             dto.getModules().forEach(moduleDTO -> {
-                AgentModule existing = agentDirectory.getModules().stream()
-                    .filter(m -> m.getName().equals(moduleDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                AgentModule existing = null;
+
+                // Try to find existing module by ID first
+                if (moduleDTO.getId() != null) {
+                    existing = agentDirectory.getModules().stream()
+                        .filter(m -> m.getId() != null && m.getId().equals(moduleDTO.getId()))
+                        .findFirst()
+                        .orElse(null);
+                }
+
+                // If not found by ID, try by name
+                if (existing == null) {
+                    existing = agentDirectory.getModules().stream()
+                        .filter(m -> m.getName() != null && m.getName().equals(moduleDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
+                }
 
                 if (existing != null) {
-                    // Update existing module (name is already set, update other fields if any)
+                    // Update existing module
                     existing.setName(moduleDTO.getName());
                 } else {
                     // Add new module

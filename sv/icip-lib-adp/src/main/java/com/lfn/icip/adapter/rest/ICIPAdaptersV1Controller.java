@@ -38,7 +38,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -113,19 +112,5 @@ public class ICIPAdaptersV1Controller {
 		return iCIPAdaptersV1Service.getPostDataForFile(org, specname, methodname, headers, params, file);
 	}
 
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred");
-		return new ResponseEntity<>("There is an application error, please contact the application admin",
-				new HttpHeaders(), apiError.getStatus());
-	}
 
 }

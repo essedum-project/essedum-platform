@@ -1,11 +1,13 @@
 package com.lfn.common.app.controller;
 
+import com.lfn.common.app.exception.GitHubAuthenticationException;
+import com.lfn.common.app.service.GitHubIntegrationService;
 import com.lfn.common.app.service.GitHubOAuthService;
 import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
 import com.lfn.common.app.web.rest.dto.PullRequest;
 import com.lfn.common.app.web.rest.dto.PullResponse;
 import com.lfn.common.app.web.rest.dto.PushRequest;
-import com.lfn.common.app.service.GitHubIntegrationService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @Slf4j
@@ -62,34 +63,24 @@ public class GitHubController {
             }
         }
 
-        throw new IllegalArgumentException("No GitHub authentication found. Please login with GitHub OAuth or provide a GitHub PAT token.");
+        throw new GitHubAuthenticationException("No GitHub authentication found. Please login with GitHub OAuth or provide a GitHub PAT token.");
     }
 
     @GetMapping("/repos")
     public ResponseEntity<List<GitHubRepoInfo>> getRepositories(
             @RequestHeader(value = "Authorization", required = false) String token,
-            HttpSession session) {
-        try {
-            String cleanToken = getToken(token, session);
-            return ResponseEntity.ok(gitHubIntegrationService.fetchRepositories(cleanToken));
-        } catch (Exception e) {
-            log.error("Error fetching repositories", e);
-            return ResponseEntity.internalServerError().build();
-        }
+            HttpSession session) throws Exception {
+        String cleanToken = getToken(token, session);
+        return ResponseEntity.ok(gitHubIntegrationService.fetchRepositories(cleanToken));
     }
 
     @GetMapping("/branches")
     public ResponseEntity<List<String>> getBranches(
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam("repo") String repo,
-            HttpSession session) {
-        try {
-            String cleanToken = getToken(token, session);
-            return ResponseEntity.ok(gitHubIntegrationService.fetchBranches(cleanToken, repo));
-        } catch (Exception e) {
-            log.error("Error fetching branches", e);
-            return ResponseEntity.internalServerError().build();
-        }
+            HttpSession session) throws Exception {
+        String cleanToken = getToken(token, session);
+        return ResponseEntity.ok(gitHubIntegrationService.fetchBranches(cleanToken, repo));
     }
 
     @PostMapping("/push")
@@ -97,22 +88,16 @@ public class GitHubController {
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody PushRequest request,
-            HttpSession session) {
-        try {
-            String cleanToken = getToken(token, session);
+            HttpSession session) throws Exception {
+        String cleanToken = getToken(token, session);
 
-            // Get username from OAuth if not provided
-            if (username == null || username.isEmpty()) {
-                username = oauthService.getGitHubUsername(cleanToken);
-            }
-
-            gitHubIntegrationService.pushToGitHub(request, cleanToken, username);
-            return ResponseEntity.ok("Successfully pushed to GitHub");
-        } catch (Exception e) {
-            log.error("Error pushing to GitHub", e);
-            return ResponseEntity.internalServerError()
-                    .body("Failed to push: " + e.getMessage());
+        // Get username from OAuth if not provided
+        if (username == null || username.isEmpty()) {
+            username = oauthService.getGitHubUsername(cleanToken);
         }
+
+        gitHubIntegrationService.pushToGitHub(request, cleanToken, username);
+        return ResponseEntity.ok("Successfully pushed to GitHub");
     }
 
     @PostMapping("/verify-token")
@@ -123,8 +108,9 @@ public class GitHubController {
             String cleanToken = getToken(token, session);
             boolean isValid = gitHubIntegrationService.verifyToken(cleanToken);
             return ResponseEntity.ok(isValid);
-        } catch (Exception e) {
-            log.error("Error verifying token", e);
+        } catch (GitHubAuthenticationException e) {
+            // For verify-token endpoint, return false instead of throwing exception
+            log.debug("Token verification failed: {}", e.getMessage());
             return ResponseEntity.ok(false);
         }
     }
