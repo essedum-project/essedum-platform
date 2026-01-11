@@ -779,6 +779,39 @@
                   <!-- Creation Date Filter -->
                   <!-- <div class="filter-group">
                     <div class="filter-control">
+                      <mat-form-field appearance="fill">
+                        <mat-label>From Date</mat-label>
+                        <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="agentCreationDateFrom"
+                          (dateChange)="onDateChange()" placeholder="Select from date">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFrom></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                      <mat-form-field appearance="fill">
+                        <mat-label>To Date</mat-label>
+                        <input matInput [matDatepicker]="pickerTo" [(ngModel)]="agentCreationDateTo"
+                          (dateChange)="onDateChange()" placeholder="Select to date">
+                        <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerTo></mat-datepicker>
+                      </mat-form-field>
+
+                    <div class="selected-items" *ngIf="agentCreationDateFrom || agentCreationDateTo">
+                      <mat-chip-set [id]="'creation-date-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
+                        aria-label="Selected Date Range">
+                        <mat-chip removable="true" (removed)="clearAllFilters(FilterType.AGENT_CREATION_DATE)">
+                          <span *ngIf="agentCreationDateFrom">{{ agentCreationDateFrom | date:'MM/dd/yyyy' }}</span>
+                          <span *ngIf="agentCreationDateFrom && agentCreationDateTo"> - </span>
+                          <span *ngIf="agentCreationDateTo">{{ agentCreationDateTo | date:'MM/dd/yyyy' }}</span>
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div> -->
+                  
+                  <!-- Creation Date Filter -->
+                   <div class="filter-group">
+                    <div class="filter-control">
                       <label class="filter-label">Creation Date</label>
                       <div class="date-range-container">
                         <mat-form-field appearance="fill" class="date-field">
@@ -788,7 +821,6 @@
                           <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
                           <mat-datepicker #pickerFrom></mat-datepicker>
                         </mat-form-field>
-
                         <mat-form-field appearance="fill" class="date-field">
                           <mat-label>To</mat-label>
                           <input matInput [matDatepicker]="pickerTo" [(ngModel)]="agentCreationDateTo"
@@ -798,7 +830,6 @@
                         </mat-form-field>
                       </div>
                     </div>
-
                     <div class="selected-items" *ngIf="agentCreationDateFrom || agentCreationDateTo">
                       <mat-chip-set [id]="'creation-date-chip-set-' + (servicev1 || 'default') + '-agent-directory'"
                         aria-label="Selected Date Range">
@@ -809,9 +840,9 @@
                         </mat-chip>
                       </mat-chip-set>
                     </div>
-                  </div> -->
                   </div>
                 </div>
+              </div>
               </ng-template>
             </ng-template>
           </ng-template>

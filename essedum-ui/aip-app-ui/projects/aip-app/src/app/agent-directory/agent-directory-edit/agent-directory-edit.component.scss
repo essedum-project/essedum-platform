@@ -109,12 +109,92 @@
   margin-bottom: 2.4rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.6rem;
+}
+
+.section-header-with-collapse {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+  width: 100%;
+  gap: 1.2rem;
+
+  .section-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .add-btn {
+    margin-bottom: 0;
+    margin-left: auto;
+  }
+}
+
+.section-title {
+  font: normal normal 600 14px/20px Roboto;
+  color: #000000;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.section-title-hoverable {
+  font: normal normal 600 14px/20px Roboto;
+  color: #000000;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: color 0.3s, transform 0.3s;
+  cursor: pointer;
+}
+
+.collapse-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+
+  mat-icon {
+    color: #0052cc;
+    font-size: 2.4rem;
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  &:hover {
+    background-color: #f0f4f8;
+  }
+}
+
+.section-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .section-title {
@@ -254,6 +334,13 @@
   }
 }
 
+.section-actions-row {
+  margin-bottom: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .add-btn-small {
   background: #0052cc;
   color: #ffffff;
@@ -355,6 +442,60 @@
   }
 }
 
+// Bootstrap table styles for Syncs section (matching Parameters tab design)
+.sync-params-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.6rem;
+
+  .table-header-title {
+    text-align: left;
+    font: normal normal 600 13px/19px Roboto;
+    letter-spacing: 0px;
+    color: #555555;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+
+  tbody {
+    tr {
+      border: 1px solid #dee2e6;
+    }
+
+    td {
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      vertical-align: middle;
+
+      .form-control {
+        width: 100%;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 6px 12px;
+        font: normal normal normal 14px/20px Roboto;
+        color: #000000;
+        background-color: #ffffff;
+
+        &:focus {
+          outline: none;
+          border-color: #0052cc;
+          box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.25);
+        }
+      }
+
+      select.form-control {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+        appearance: none;
+      }
+    }
+  }
+}
+
 .edit-table {
   width: 100%;
   border-collapse: collapse;
@@ -375,10 +516,6 @@
   tbody {
     tr {
       border-bottom: 1px solid #e9ecef;
-
-      &:hover {
-        background: #f8f9fa;
-      }
     }
 
     td {
@@ -402,7 +539,6 @@
 .prompt-edit-item {
   margin-bottom: 2.4rem;
   padding: 1.6rem;
-  background: #f8f9fa;
   border-radius: 8px;
 
   &:last-child {
@@ -500,30 +636,173 @@
     }
   }
 
+  // Input element styles
+  .mat-mdc-input-element {
+    background-color: #f7f7f7ed !important;
+    border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+  }
+
+  // Remove mdc-text-field__input class effects ONLY when disabled (but keep input visible)
+  .mdc-text-field--disabled {
+    .mdc-text-field__input:not(.mat-mdc-input-element) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+  }
+
+  // Disabled fields styling - ensure text is VISIBLE
+  .mat-mdc-input-element:disabled,
+  .mat-mdc-select-disabled .mat-mdc-select {
+    background-color: #f7f7f7ed !important;
+    color: #000000 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #000000 !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  input:disabled,
+  input[disabled],
+  select:disabled,
+  select[disabled] {
+    background-color: #f7f7f7ed !important;
+    color: #000000 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  .mat-mdc-select-disabled {
+    background-color: #f7f7f7ed !important;
+  }
+
+  .mdc-text-field--disabled {
+    background-color: #f7f7f7ed !important;
+  }
+
   .mat-mdc-form-field input.mat-mdc-input-element {
-    font: normal normal normal 16px / 24px Roboto !important;
-    color: #737373 !important;
+    text-align: left;
+    font: normal normal normal 16px/24px Roboto !important;
+    letter-spacing: 0px;
+    color: #000000 !important;
+    opacity: 1;
+    margin-left: 4px !important;
   }
 
   .mat-mdc-form-field textarea.mat-mdc-input-element {
-    font: normal normal normal 16px / 24px Roboto !important;
-    color: #737373 !important;
+    text-align: left;
+    font: normal normal normal 16px/24px Roboto !important;
+    letter-spacing: 0px;
+    color: #000000 !important;
+    opacity: 1;
+    margin-left: 4px !important;
+    background-color: #f7f7f7ed !important;
+    resize: none !important; // Remove resize handle
   }
 
+  // Label styles
   mat-label {
-    font: normal normal 500 14px/18px Roboto !important;
-    color: #000000 !important;
+    text-align: left;
+    font: normal normal normal 12px/18px Roboto !important;
+    letter-spacing: 0px;
+    color: #555555 !important;
+    opacity: 1;
+  }
+
+  // Select styles
+  .mat-mdc-select {
+    background-color: #f7f7f7ed !important;
+    border-radius: 4px !important;
+    margin-left: 4px !important;
+  }
+
+  // Tool-params override - WHITE background and remove mat-mdc-form-field effects
+  .tool-params {
+    .mat-mdc-form-field {
+      .mat-mdc-form-field-wrapper {
+        padding-bottom: 0 !important;
+      }
+    }
+    
+    .mat-mdc-input-element {
+      background-color: #ffffff !important;
+    }
+    
+    .mat-mdc-select {
+      background-color: #ffffff !important;
+    }
   }
 
   .mat-mdc-select-value {
-    font: normal normal normal 16px / 24px Roboto !important;
-    color: #737373 !important;
+    text-align: left;
+    font: normal normal normal 16px/24px Roboto !important;
+    letter-spacing: 0px;
+    color: #000000 !important;
+    opacity: 1;
   }
 
+  // Placeholder styles
   .mat-mdc-form-field input.mat-mdc-input-element::placeholder,
   .mat-mdc-form-field textarea.mat-mdc-input-element::placeholder {
-    font: normal normal normal 16px / 24px Roboto !important;
     color: #737373 !important;
+    text-align: left;
+    font: normal normal normal 16px/24px Roboto !important;
+    letter-spacing: 0px;
+    text-transform: capitalize;
+    opacity: 1;
+  }
+
+  // Remove default arrow from select
+  .mat-mdc-select-arrow {
+    display: none !important;
+  }
+
+  .mat-mdc-select-trigger {
+    position: relative;
+  }
+
+  .mat-mdc-select-trigger::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-image: url("/assets/images/Accordion_open.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+  }
+
+  // Border bottom removal for text field
+  .mdc-text-field {
+    border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+    all: unset;
+  }
+
+  // Remove underline from form fields
+  .mat-mdc-form-field-underline {
+    display: none !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  // Remove ripple and focus underline
+  .mat-mdc-form-field-focus-overlay {
+    display: none !important;
+  }
+
+  .mdc-line-ripple {
+    display: none !important;
+  }
+
+  .mdc-line-ripple::before,
+  .mdc-line-ripple::after {
+    display: none !important;
   }
 }
 
@@ -718,7 +997,6 @@
 }
 
 .signature-item {
-  background: #f8f9fa;
   padding: 1.6rem;
   border-radius: 8px;
   margin-bottom: 1.6rem;
@@ -744,4 +1022,8 @@
     left: 0;
     right: 0;
     padding:0 !important;
+    }
+
+    .tool-params{
+   background-color: white;
     }
