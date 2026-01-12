@@ -188,24 +188,44 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
         try {
             // Validate input
             if (cid == null) {
+                logger.error("Delete operation failed - Agent CID is null");
                 throw new IllegalArgumentException("Agent cid cannot be null");
             }
 
-            logger.info("Deleting agent directory with cid: {}", cid);
+            logger.info("Service layer - Deleting agent directory with cid: {}", cid);
 
             // Check if agent exists before deleting
             if (!agentDirectoryRepository.existsById(cid)) {
+                logger.warn("Delete operation failed - Agent with CID {} does not exist in database", cid);
                 throw new IllegalArgumentException("Agent with cid " + cid + " not found");
             }
 
+            // Get agent details for logging before deletion
+            try {
+                AgentDirectory agent = agentDirectoryRepository.findById(cid).orElse(null);
+                if (agent != null) {
+                    logger.info("Deleting agent - Name: {}, Alias: {}, Organization: {}, CID: {}",
+                            agent.getName(), agent.getAlias(), agent.getOrganization(), cid);
+                }
+            } catch (Exception e) {
+                logger.debug("Could not retrieve agent details before deletion: {}", e.getMessage());
+            }
+
             agentDirectoryRepository.deleteById(cid);
-            logger.info("Successfully deleted agent directory with cid: {}", cid);
+            logger.info("Successfully deleted agent directory from database with cid: {}", cid);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Validation error in deleteAgentDirectory: {}", e.getMessage());
+            logger.error("Validation error in deleteAgentDirectory for CID {}: {}", cid, e.getMessage());
             throw e;
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            logger.error("Data integrity violation while deleting agent CID {}: {}. Agent may have dependent entities.",
+                    cid, e.getMessage());
+            throw new AgentDirectoryException("Cannot delete agent directory due to existing dependencies", e);
+        } catch (org.springframework.dao.DataAccessException e) {
+            logger.error("Database error while deleting agent CID {}: {}", cid, e.getMessage(), e);
+            throw new AgentDirectoryException("Database error while deleting agent directory", e);
         } catch (Exception e) {
-            logger.error("Error deleting agent directory with cid {}: {}", cid, e.getMessage(), e);
+            logger.error("Unexpected error deleting agent directory with cid {}: {}", cid, e.getMessage(), e);
             throw new AgentDirectoryException("Failed to delete agent directory", e);
         }
     }
@@ -430,15 +450,15 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
         if (dto.getModules() != null) {
             // Remove modules not in DTO
             agentDirectory.getModules().removeIf(existing ->
-                dto.getModules().stream().noneMatch(dtoModule -> dtoModule.getName().equals(existing.getName()))
+                    dto.getModules().stream().noneMatch(dtoModule -> dtoModule.getName().equals(existing.getName()))
             );
 
             // Add or update modules
             dto.getModules().forEach(moduleDTO -> {
                 AgentModule existing = agentDirectory.getModules().stream()
-                    .filter(m -> m.getName().equals(moduleDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(m -> m.getName().equals(moduleDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     // Update existing module (name is already set, update other fields if any)
@@ -458,14 +478,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSkills(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSkills() != null) {
             agentDirectory.getSkills().removeIf(existing ->
-                dto.getSkills().stream().noneMatch(dtoSkill -> dtoSkill.getName().equals(existing.getName()))
+                    dto.getSkills().stream().noneMatch(dtoSkill -> dtoSkill.getName().equals(existing.getName()))
             );
 
             dto.getSkills().forEach(skillDTO -> {
                 AgentSkill existing = agentDirectory.getSkills().stream()
-                    .filter(s -> s.getName().equals(skillDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getName().equals(skillDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing == null) {
                     AgentSkill skill = new AgentSkill();
@@ -481,14 +501,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateDomains(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getDomains() != null) {
             agentDirectory.getDomains().removeIf(existing ->
-                dto.getDomains().stream().noneMatch(dtoDomain -> dtoDomain.getName().equals(existing.getName()))
+                    dto.getDomains().stream().noneMatch(dtoDomain -> dtoDomain.getName().equals(existing.getName()))
             );
 
             dto.getDomains().forEach(domainDTO -> {
                 AgentDomain existing = agentDirectory.getDomains().stream()
-                    .filter(d -> d.getName().equals(domainDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(d -> d.getName().equals(domainDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(domainDTO.getDescription());
@@ -507,14 +527,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateLocators(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getLocators() != null) {
             agentDirectory.getLocators().removeIf(existing ->
-                dto.getLocators().stream().noneMatch(dtoLoc -> dtoLoc.getUrl().equals(existing.getUrl()))
+                    dto.getLocators().stream().noneMatch(dtoLoc -> dtoLoc.getUrl().equals(existing.getUrl()))
             );
 
             dto.getLocators().forEach(locatorDTO -> {
                 AgentLocator existing = agentDirectory.getLocators().stream()
-                    .filter(l -> l.getUrl().equals(locatorDTO.getUrl()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(l -> l.getUrl().equals(locatorDTO.getUrl()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setLocatorType(locatorDTO.getLocatorType());
@@ -533,14 +553,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSyncs(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSyncs() != null) {
             agentDirectory.getSyncs().removeIf(existing ->
-                dto.getSyncs().stream().noneMatch(dtoSync -> dtoSync.getTarget().equals(existing.getTarget()))
+                    dto.getSyncs().stream().noneMatch(dtoSync -> dtoSync.getTarget().equals(existing.getTarget()))
             );
 
             dto.getSyncs().forEach(syncDTO -> {
                 AgentSync existing = agentDirectory.getSyncs().stream()
-                    .filter(s -> s.getTarget().equals(syncDTO.getTarget()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getTarget().equals(syncDTO.getTarget()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setFrequency(syncDTO.getFrequency());
@@ -559,14 +579,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updatePublications(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getPublications() != null) {
             agentDirectory.getPublications().removeIf(existing ->
-                dto.getPublications().stream().noneMatch(dtoPub -> dtoPub.getChannel().equals(existing.getChannel()))
+                    dto.getPublications().stream().noneMatch(dtoPub -> dtoPub.getChannel().equals(existing.getChannel()))
             );
 
             dto.getPublications().forEach(publicationDTO -> {
                 AgentPublication existing = agentDirectory.getPublications().stream()
-                    .filter(p -> p.getChannel().equals(publicationDTO.getChannel()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(p -> p.getChannel().equals(publicationDTO.getChannel()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setPublishedDate(publicationDTO.getPublishedDate());
@@ -585,8 +605,8 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateExtensions(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getExtensions() != null) {
             agentDirectory.getExtensions().removeIf(existing ->
-                dto.getExtensions().stream().noneMatch(dtoExt ->
-                    dtoExt.getKey() != null && dtoExt.getKey().equals(existing.getExtKey()))
+                    dto.getExtensions().stream().noneMatch(dtoExt ->
+                            dtoExt.getKey() != null && dtoExt.getKey().equals(existing.getExtKey()))
             );
 
             dto.getExtensions().forEach(extensionDTO -> {
@@ -595,9 +615,9 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                 }
 
                 AgentExtension existing = agentDirectory.getExtensions().stream()
-                    .filter(e -> e.getExtKey() != null && e.getExtKey().equals(extensionDTO.getKey()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(e -> e.getExtKey() != null && e.getExtKey().equals(extensionDTO.getKey()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setExtValue(extensionDTO.getValue());
@@ -619,8 +639,8 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSelectors(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSelectors() != null) {
             agentDirectory.getSelectors().removeIf(existing ->
-                dto.getSelectors().stream().noneMatch(dtoSel ->
-                    dtoSel.getKey() != null && dtoSel.getKey().equals(existing.getSelKey()))
+                    dto.getSelectors().stream().noneMatch(dtoSel ->
+                            dtoSel.getKey() != null && dtoSel.getKey().equals(existing.getSelKey()))
             );
 
             dto.getSelectors().forEach(selectorDTO -> {
@@ -629,9 +649,9 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                 }
 
                 AgentSelector existing = agentDirectory.getSelectors().stream()
-                    .filter(s -> s.getSelKey() != null && s.getSelKey().equals(selectorDTO.getKey()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getSelKey() != null && s.getSelKey().equals(selectorDTO.getKey()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setSelValue(selectorDTO.getValue());
@@ -651,17 +671,17 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSignatures(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSignatures() != null) {
             agentDirectory.getSignatures().removeIf(existing ->
-                dto.getSignatures().stream().noneMatch(dtoSig ->
-                    dtoSig.getAlgorithm().equals(existing.getAlgorithm()) &&
-                    dtoSig.getValue().equals(existing.getValue()))
+                    dto.getSignatures().stream().noneMatch(dtoSig ->
+                            dtoSig.getAlgorithm().equals(existing.getAlgorithm()) &&
+                                    dtoSig.getValue().equals(existing.getValue()))
             );
 
             dto.getSignatures().forEach(signatureDTO -> {
                 AgentSignature existing = agentDirectory.getSignatures().stream()
-                    .filter(s -> s.getAlgorithm().equals(signatureDTO.getAlgorithm()) &&
-                                 s.getValue().equals(signatureDTO.getValue()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getAlgorithm().equals(signatureDTO.getAlgorithm()) &&
+                                s.getValue().equals(signatureDTO.getValue()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setCertificate(signatureDTO.getCertificate());
@@ -679,14 +699,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateTools(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getTools() != null) {
             agentDirectory.getTools().removeIf(existing ->
-                dto.getTools().stream().noneMatch(dtoTool -> dtoTool.getName().equals(existing.getName()))
+                    dto.getTools().stream().noneMatch(dtoTool -> dtoTool.getName().equals(existing.getName()))
             );
 
             dto.getTools().forEach(toolDTO -> {
                 AgentTool existing = agentDirectory.getTools().stream()
-                    .filter(t -> t.getName().equals(toolDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(t -> t.getName().equals(toolDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     // Update existing tool
@@ -695,16 +715,16 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                     // Update parameters: remove old ones not in DTO
                     if (toolDTO.getParameters() != null) {
                         existing.getParameters().removeIf(existingParam ->
-                            toolDTO.getParameters().stream()
-                                .noneMatch(dtoParam -> dtoParam.getName().equals(existingParam.getName()))
+                                toolDTO.getParameters().stream()
+                                        .noneMatch(dtoParam -> dtoParam.getName().equals(existingParam.getName()))
                         );
 
                         // Add or update parameters
                         toolDTO.getParameters().forEach(paramDTO -> {
                             AgentToolParameter existingParam = existing.getParameters().stream()
-                                .filter(p -> p.getName().equals(paramDTO.getName()))
-                                .findFirst()
-                                .orElse(null);
+                                    .filter(p -> p.getName().equals(paramDTO.getName()))
+                                    .findFirst()
+                                    .orElse(null);
 
                             if (existingParam != null) {
                                 // Update existing parameter
@@ -754,14 +774,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateResources(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getResources() != null) {
             agentDirectory.getResources().removeIf(existing ->
-                dto.getResources().stream().noneMatch(dtoRes -> dtoRes.getName().equals(existing.getName()))
+                    dto.getResources().stream().noneMatch(dtoRes -> dtoRes.getName().equals(existing.getName()))
             );
 
             dto.getResources().forEach(resourceDTO -> {
                 AgentResource existing = agentDirectory.getResources().stream()
-                    .filter(r -> r.getName().equals(resourceDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(r -> r.getName().equals(resourceDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(resourceDTO.getDescription());
@@ -780,14 +800,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updatePrompts(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getPrompts() != null) {
             agentDirectory.getPrompts().removeIf(existing ->
-                dto.getPrompts().stream().noneMatch(dtoPrompt -> dtoPrompt.getName().equals(existing.getName()))
+                    dto.getPrompts().stream().noneMatch(dtoPrompt -> dtoPrompt.getName().equals(existing.getName()))
             );
 
             dto.getPrompts().forEach(promptDTO -> {
                 AgentPrompt existing = agentDirectory.getPrompts().stream()
-                    .filter(p -> p.getName().equals(promptDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(p -> p.getName().equals(promptDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(promptDTO.getDescription());
@@ -941,7 +961,7 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
 
     @Override
     public List<AgentDirectory> getAllAgentsByTypeAndOrg(String project, Pageable paginate, String query,
-                                                          String type, String interfacetype) {
+                                                         String type, String interfacetype) {
         try {
             // Validate input
             if (project == null || project.trim().isEmpty()) {

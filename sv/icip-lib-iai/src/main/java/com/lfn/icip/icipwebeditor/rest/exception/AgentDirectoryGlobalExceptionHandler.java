@@ -30,286 +30,319 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AgentDirectoryGlobalExceptionHandler {
 
-	/**
-	 * Build error response with all details.
-	 */
-	private ErrorResponse buildErrorResponse(HttpStatus status, String message, String details,
-			String exception, WebRequest request) {
-		return ErrorResponse.builder()
-				.timestamp(LocalDateTime.now())
-				.status(status.value())
-				.error(status.getReasonPhrase())
-				.message(message)
-				.details(details)
-				.path(request.getDescription(false).replace("uri=", ""))
-				.exception(exception)
-				.build();
-	}
+    /**
+     * Build error response with all details.
+     */
+    private ErrorResponse buildErrorResponse(HttpStatus status, String message, String details,
+                                             String exception, WebRequest request) {
+        return ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .details(details)
+                .path(request.getDescription(false).replace("uri=", ""))
+                .exception(exception)
+                .build();
+    }
 
-	/**
-	 * Handle AgentDirectoryException.
-	 */
-	@ExceptionHandler(AgentDirectoryException.class)
-	public ResponseEntity<ErrorResponse> handleAgentDirectoryException(
-			AgentDirectoryException ex, WebRequest request) {
-		log.error("Agent directory operation error: {}", ex.getMessage(), ex);
-		Throwable rootCause = ExceptionUtil.findRootCause(ex);
+    /**
+     * Handle AgentDirectoryException.
+     */
+    @ExceptionHandler(AgentDirectoryException.class)
+    public ResponseEntity<ErrorResponse> handleAgentDirectoryException(
+            AgentDirectoryException ex, WebRequest request) {
+        log.error("Agent directory operation error: {}", ex.getMessage(), ex);
+        Throwable rootCause = ExceptionUtil.findRootCause(ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.INTERNAL_SERVER_ERROR,
-				"An unexpected error occurred while processing agent directory operation",
-				rootCause.getMessage() != null ? rootCause.getMessage() : ex.getMessage(),
-				"AgentDirectoryException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An unexpected error occurred while processing agent directory operation",
+                rootCause.getMessage() != null ? rootCause.getMessage() : ex.getMessage(),
+                "AgentDirectoryException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	/**
-	 * Handle IllegalArgumentException for validation errors.
-	 */
-	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-			IllegalArgumentException ex, WebRequest request) {
-		log.error("Validation error in agent directory: {}", ex.getMessage(), ex);
+    /**
+     * Handle IllegalArgumentException for validation errors.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException ex, WebRequest request) {
+        log.error("Validation error in agent directory: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Validation failed for agent directory operation",
-				ex.getMessage(),
-				"IllegalArgumentException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed for agent directory operation",
+                ex.getMessage(),
+                "IllegalArgumentException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle URISyntaxException.
-	 */
-	@ExceptionHandler(URISyntaxException.class)
-	public ResponseEntity<ErrorResponse> handleURISyntaxException(
-			URISyntaxException ex, WebRequest request) {
-		log.error("URI syntax error in agent directory: {}", ex.getMessage(), ex);
+    /**
+     * Handle URISyntaxException.
+     */
+    @ExceptionHandler(URISyntaxException.class)
+    public ResponseEntity<ErrorResponse> handleURISyntaxException(
+            URISyntaxException ex, WebRequest request) {
+        log.error("URI syntax error in agent directory: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Invalid URI format in agent directory operation",
-				ex.getMessage(),
-				"URISyntaxException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid URI format in agent directory operation",
+                ex.getMessage(),
+                "URISyntaxException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle EmptyResultDataAccessException when agent directory not found.
-	 */
-	@ExceptionHandler(EmptyResultDataAccessException.class)
-	public ResponseEntity<ErrorResponse> handleEmptyResultDataAccess(
-			EmptyResultDataAccessException ex, WebRequest request) {
-		log.error("Agent directory not found: {}", ex.getMessage(), ex);
+    /**
+     * Handle EmptyResultDataAccessException when agent directory not found.
+     */
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyResultDataAccess(
+            EmptyResultDataAccessException ex, WebRequest request) {
+        log.error("Agent directory not found: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.NOT_FOUND,
-				"Agent directory not found",
-				"No agent directory entry found matching the specified criteria",
-				"EmptyResultDataAccessException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.NOT_FOUND,
+                "Agent directory not found",
+                "No agent directory entry found matching the specified criteria",
+                "EmptyResultDataAccessException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 
-	/**
-	 * Handle JSONException.
-	 */
-	@ExceptionHandler(JSONException.class)
-	public ResponseEntity<ErrorResponse> handleJSONException(JSONException ex, WebRequest request) {
-		log.error("JSON processing error in agent directory: {}", ex.getMessage(), ex);
+    /**
+     * Handle JSONException.
+     */
+    @ExceptionHandler(JSONException.class)
+    public ResponseEntity<ErrorResponse> handleJSONException(JSONException ex, WebRequest request) {
+        log.error("JSON processing error in agent directory: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Invalid JSON format in request",
-				ex.getMessage(),
-				"JSONException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid JSON format in request",
+                ex.getMessage(),
+                "JSONException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle JsonProcessingException.
-	 */
-	@ExceptionHandler(JsonProcessingException.class)
-	public ResponseEntity<ErrorResponse> handleJsonProcessingException(
-			JsonProcessingException ex, WebRequest request) {
-		log.error("JSON processing error: {}", ex.getMessage(), ex);
+    /**
+     * Handle JsonProcessingException.
+     */
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<ErrorResponse> handleJsonProcessingException(
+            JsonProcessingException ex, WebRequest request) {
+        log.error("JSON processing error: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Failed to process JSON data",
-				ex.getOriginalMessage(),
-				"JsonProcessingException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Failed to process JSON data",
+                ex.getOriginalMessage(),
+                "JsonProcessingException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle TransactionalException.
-	 */
-	@ExceptionHandler(TransactionalException.class)
-	public ResponseEntity<ErrorResponse> handleTransactionalException(
-			TransactionalException ex, WebRequest request) {
-		log.error("Transaction error in agent directory operation: {}", ex.getMessage(), ex);
-		Throwable rootCause = ExceptionUtil.findRootCause(ex);
+    /**
+     * Handle TransactionalException.
+     */
+    @ExceptionHandler(TransactionalException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionalException(
+            TransactionalException ex, WebRequest request) {
+        log.error("Transaction error in agent directory operation: {}", ex.getMessage(), ex);
+        Throwable rootCause = ExceptionUtil.findRootCause(ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.INTERNAL_SERVER_ERROR,
-				"Transaction operation failed for agent directory",
-				rootCause.getMessage() != null ? rootCause.getMessage() : "Database transaction could not be completed",
-				"TransactionalException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Transaction operation failed for agent directory",
+                rootCause.getMessage() != null ? rootCause.getMessage() : "Database transaction could not be completed",
+                "TransactionalException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	/**
-	 * Handle DataAccessException.
-	 */
-	@ExceptionHandler(DataAccessException.class)
-	public ResponseEntity<ErrorResponse> handleDataAccessException(
-			DataAccessException ex, WebRequest request) {
-		log.error("Database access error in agent directory: {}", ex.getMessage(), ex);
-		Throwable rootCause = ExceptionUtil.findRootCause(ex);
+    /**
+     * Handle DataAccessException.
+     */
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccessException(
+            DataAccessException ex, WebRequest request) {
+        log.error("Database access error in agent directory: {}", ex.getMessage(), ex);
+        Throwable rootCause = ExceptionUtil.findRootCause(ex);
 
-		String details = rootCause.getMessage() != null ? rootCause.getMessage() : "Database operation failed";
+        String details = rootCause.getMessage() != null ? rootCause.getMessage() : "Database operation failed";
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.INTERNAL_SERVER_ERROR,
-				"Database operation failed",
-				details,
-				"DataAccessException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Database operation failed",
+                details,
+                "DataAccessException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	/**
-	 * Handle MissingServletRequestParameterException.
-	 */
-	@ExceptionHandler(MissingServletRequestParameterException.class)
-	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
-			MissingServletRequestParameterException ex, WebRequest request) {
-		log.error("Missing request parameter: {}", ex.getParameterName(), ex);
+    /**
+     * Handle MissingServletRequestParameterException.
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex, WebRequest request) {
+        log.error("Missing request parameter: {}", ex.getParameterName(), ex);
 
-		String paramName = ex.getParameterName();
-		String paramType = ex.getParameterType();
-		String details = String.format("Required parameter '%s' of type '%s' is missing from the request",
-				paramName, paramType);
+        String paramName = ex.getParameterName();
+        String paramType = ex.getParameterType();
+        String details = String.format("Required parameter '%s' of type '%s' is missing from the request",
+                paramName, paramType);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Missing required request parameter",
-				details,
-				"MissingServletRequestParameterException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Missing required request parameter",
+                details,
+                "MissingServletRequestParameterException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle MethodArgumentTypeMismatchException.
-	 */
-	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
-			MethodArgumentTypeMismatchException ex, WebRequest request) {
-		log.error("Method argument type mismatch: {}", ex.getMessage(), ex);
+    /**
+     * Handle MethodArgumentTypeMismatchException.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex, WebRequest request) {
+        log.error("Method argument type mismatch: {}", ex.getMessage(), ex);
 
-		String paramName = ex.getName();
-		String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
-		String providedValue = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String paramName = ex.getName();
+        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+        String providedValue = ex.getValue() != null ? ex.getValue().toString() : "null";
 
-		String details = String.format("Parameter '%s' with value '%s' could not be converted to type '%s'",
-				paramName, providedValue, requiredType);
+        String details = String.format("Parameter '%s' with value '%s' could not be converted to type '%s'",
+                paramName, providedValue, requiredType);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Invalid parameter type",
-				details,
-				"MethodArgumentTypeMismatchException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid parameter type",
+                details,
+                "MethodArgumentTypeMismatchException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle NumberFormatException.
-	 */
-	@ExceptionHandler(NumberFormatException.class)
-	public ResponseEntity<ErrorResponse> handleNumberFormatException(
-			NumberFormatException ex, WebRequest request) {
-		log.error("Number format error in agent directory: {}", ex.getMessage(), ex);
+    /**
+     * Handle NumberFormatException.
+     */
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<ErrorResponse> handleNumberFormatException(
+            NumberFormatException ex, WebRequest request) {
+        log.error("Number format error in agent directory: {}", ex.getMessage(), ex);
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.BAD_REQUEST,
-				"Invalid number format in pagination parameters",
-				ex.getMessage(),
-				"NumberFormatException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid number format in pagination parameters",
+                ex.getMessage(),
+                "NumberFormatException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
-	/**
-	 * Handle NullPointerException.
-	 */
-	@ExceptionHandler(NullPointerException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerException(
-			NullPointerException ex, WebRequest request) {
-		log.error("Null pointer exception in agent directory: {}", ex.getMessage(), ex);
-		Throwable rootCause = ExceptionUtil.findRootCause(ex);
+    /**
+     * Handle NullPointerException.
+     */
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorResponse> handleNullPointerException(
+            NullPointerException ex, WebRequest request) {
+        log.error("Null pointer exception in agent directory: {}", ex.getMessage(), ex);
+        Throwable rootCause = ExceptionUtil.findRootCause(ex);
 
-		String details = rootCause.getMessage() != null ? rootCause.getMessage() :
-				"A required data field was null or missing";
+        String details = rootCause.getMessage() != null ? rootCause.getMessage() :
+                "A required data field was null or missing";
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.INTERNAL_SERVER_ERROR,
-				"Required data not found",
-				details,
-				"NullPointerException",
-				request
-		);
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Required data not found",
+                details,
+                "NullPointerException",
+                request
+        );
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	/**
-	 * Handle all other exceptions.
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, WebRequest request) {
-		log.error("Unexpected error in agent directory operation: {}", ex.getMessage(), ex);
-		Throwable rootCause = ExceptionUtil.findRootCause(ex);
+    /**
+     * Handle AccessDeniedException for authorization failures.
+     * This occurs when a user does not have permission to perform an operation.
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+            org.springframework.security.access.AccessDeniedException ex, WebRequest request) {
 
-		ErrorResponse errorResponse = buildErrorResponse(
-				HttpStatus.INTERNAL_SERVER_ERROR,
-				"An unexpected error occurred while processing your request",
-				rootCause.getMessage() != null ? rootCause.getMessage() : ex.getMessage(),
-				ex.getClass().getSimpleName(),
-				request
-		);
+        // Log with detailed context
+        log.error("ACCESS DENIED - Permission check failed. Path: {}, Error: {}",
+                request.getDescription(false), ex.getMessage());
 
-		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+        // Try to get user information for logging
+        try {
+            String username = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication().getName();
+            log.error("User '{}' attempted unauthorized access to: {}", username, request.getDescription(false));
+        } catch (Exception e) {
+            log.debug("Could not retrieve user context for access denied error");
+        }
+
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.FORBIDDEN,
+                "Access Denied: You do not have permission to perform this operation",
+                "User does not have the required permissions for this agent directory operation. " +
+                        "Please contact your administrator if you believe you should have access.",
+                "AccessDeniedException",
+                request
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Handle all other exceptions.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, WebRequest request) {
+        log.error("Unexpected error in agent directory operation: {}", ex.getMessage(), ex);
+        Throwable rootCause = ExceptionUtil.findRootCause(ex);
+
+        ErrorResponse errorResponse = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "An unexpected error occurred while processing your request",
+                rootCause.getMessage() != null ? rootCause.getMessage() : ex.getMessage(),
+                ex.getClass().getSimpleName(),
+                request
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
