@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -21,12 +22,15 @@ import jakarta.transaction.TransactionalException;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Global exception handler for Agent Directory Controller.
+ * Global exception handler for Agent Directory Controller and Deployment Form Controller.
  * Provides detailed error responses with status codes, descriptions, and suggested actions.
  *
  * @author essedum
  */
-@ControllerAdvice(assignableTypes = com.lfn.icip.icipwebeditor.rest.ICIPAgentDirectoryController.class)
+@RestControllerAdvice(assignableTypes = {
+		com.lfn.icip.icipwebeditor.rest.ICIPAgentDirectoryController.class,
+		com.lfn.icip.icipwebeditor.rest.DeploymentFormController.class
+})
 @Log4j2
 public class AgentDirectoryGlobalExceptionHandler {
 
