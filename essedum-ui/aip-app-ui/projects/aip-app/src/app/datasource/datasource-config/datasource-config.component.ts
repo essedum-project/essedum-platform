@@ -258,7 +258,10 @@ export class DatasourceConfigComponent implements OnInit {
       this.testSuccessful = true;
     },
       error => {
-        this.Services.message('Error! Please check connection details: ' + error,'error');
+        // Check if error has the new format with error and details
+        if (error?.error && error.error.error && error.error.details) {
+          this.Services.message(error.error.details, 'error');
+        }
       }
     );
   }
@@ -356,11 +359,9 @@ export class DatasourceConfigComponent implements OnInit {
           }
         },
           error => {
-            if (this.data.interfacetype === "adapter") {
-              this.Services.message('Error! Adapter not saved due to: ' + JSON.stringify(error),'error');
-            }
-            else {
-              this.Services.message('Error! Connection not updated due to: ' + JSON.stringify(error),'error');
+            // Check if error has the new format with error and details
+            if (error?.error && error.error.error && error.error.details) {
+              this.Services.message(error.error.details, 'error');
             }
           });
       }
@@ -397,10 +398,9 @@ export class DatasourceConfigComponent implements OnInit {
           }
         },
           error => {
-            if (this.data.interfacetype === "adapter") {
-              this.Services.message('Error! Adapter not created due to: ' + JSON.stringify(error),'error');
-            } else {
-              this.Services.message('Error! Connection not created due to: ' + JSON.stringify(error),'error');
+            // Check if error has the new format with error and details
+            if (error?.error && error.error.error && error.error.details) {
+              this.Services.message(error.error.details, 'error');
             }
           });
       }

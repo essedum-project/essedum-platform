@@ -722,10 +722,10 @@ export class MethodCreateEditComponent {
           );
         },
         (error) => {
-          this.adapterServices.messageNotificaionService(
-            'warning',
-            'Tested!  FAILED'
-          );
+          // Check if error has the new format with error and details
+          if (error?.error && error.error.error && error.error.details) {
+            this.adapterServices.messageNotificaionService('warning', error.error.details);
+          }
         }
       );
     } else {
@@ -750,10 +750,10 @@ export class MethodCreateEditComponent {
           );
         },
         (error) => {
-          this.adapterServices.messageNotificaionService(
-            'warning',
-            'Tested!  FAILED'
-          );
+          // Check if error has the new format with error and details
+          if (error?.error && error.error.error && error.error.details) {
+            this.adapterServices.messageNotificaionService('warning', error.error.details);
+          }
         }
       );
     }

@@ -470,7 +470,10 @@ export class DatasourceComponent implements OnInit, OnChanges {
             }
           },
           (error) => {
-            this.service.message('Error deleting connection '+error?.error?.message ,'error');
+            // Check if error has the new format with error and details
+            if (error?.error && error.error.error && error.error.details) {
+              this.service.message(error.error.details, 'error');
+            }
           }
         );
       }

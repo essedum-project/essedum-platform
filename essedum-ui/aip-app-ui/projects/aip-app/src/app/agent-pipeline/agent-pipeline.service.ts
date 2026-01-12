@@ -99,7 +99,10 @@ export class AgentPipelineService {
           })
         );
       }),
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in generateadkAgent:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -114,7 +117,10 @@ export class AgentPipelineService {
     console.log('Update payload:', updates);
     
     return this.http.post<ICIPAiAgentScript[]>(url, updates).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in bulkUpdateFiles:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -180,7 +186,10 @@ export class AgentPipelineService {
     console.log('Fetching files list from:', url);
     
     return this.http.get<any[]>(url).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in getFilesList:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -194,7 +203,10 @@ export class AgentPipelineService {
     console.log('Fetching agent files from:', url);
     
     return this.http.get<any[]>(url).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in getAgentFiles:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -210,7 +222,10 @@ export class AgentPipelineService {
     console.log('Folder path:', folderPath);
     
     return this.http.post<any>(url, {}, { params }).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in uploadAgentFolder:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -224,7 +239,10 @@ export class AgentPipelineService {
     console.log('Downloading file content from:', url);
     
     return this.http.get(url, { responseType: 'text' }).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in downloadFileContent:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -449,7 +467,10 @@ export class AgentPipelineService {
         'Accept': 'application/zip'
       }
     }).pipe(
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in downloadAllFilesAsZip:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -467,9 +488,9 @@ export class AgentPipelineService {
         console.log('Delete file API response:', response);
         return response;
       }),
-      catchError(error => {
-        console.error('Error deleting file:', error);
-        throw error;
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in deleteFile:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -569,7 +590,10 @@ export class AgentPipelineService {
         console.log('MinIO upload response:', response);
         return response;
       }),
-      catchError(this.handleError)
+      catchError((error: HttpErrorResponse) => {
+        console.error('API Error in uploadToMinio:', error);
+        return throwError(() => error);
+      })
     );
   }
 }

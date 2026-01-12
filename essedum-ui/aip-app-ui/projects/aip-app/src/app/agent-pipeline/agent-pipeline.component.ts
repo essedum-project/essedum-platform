@@ -1409,10 +1409,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         successResponse,
         'File deleted successfully!'
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting file:', error);
-      // Show error message
-      this.service.messageService(error);
+      // Check if error has the new format with error and details
+      if (error?.error && error.error.error && error.error.details) {
+        this.service.message(error.error.details, 'error');
+      }
     } finally {
       this.isSavingFile = false;
     }
@@ -1561,6 +1563,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading files:', error);
+        // Check if error has the new format with error and details
+        if (error?.error && error.error.error && error.error.details) {
+          this.service.message(error.error.details, 'error');
+        }
         this.isLoadingFiles = false;
         this.fileSystemData = [];
         this.hasGeneratedAgent = false;
@@ -1801,7 +1807,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error downloading files:', error);
-          this.service.messageService(error);
+          // Check if error has the new format with error and details
+          if (error?.error && error.error.error && error.error.details) {
+            this.service.message(error.error.details, 'error');
+          }
           // Reset loading state on error
           this.isDownloading = false;
         },
@@ -3971,6 +3980,10 @@ DELIVERABLES
           cname,
           error
         );
+        // Check if error has the new format with error and details
+        if (error?.error && error.error.error && error.error.details) {
+          this.service.message(error.error.details, 'error');
+        }
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
@@ -4101,6 +4114,10 @@ DELIVERABLES
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
+        // Check if error has the new format with error and details
+        if (error?.error && error.error.error && error.error.details) {
+          this.service.message(error.error.details, 'error');
+        }
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;

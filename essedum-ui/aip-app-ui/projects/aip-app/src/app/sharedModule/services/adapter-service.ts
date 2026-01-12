@@ -243,7 +243,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -275,7 +278,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -316,7 +322,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -336,7 +345,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -356,7 +368,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -383,7 +398,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -405,7 +423,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -421,7 +442,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -438,7 +462,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -455,7 +482,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -476,7 +506,12 @@ export class AdapterServices {
         params: parameters,
         headers: headers,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error && error.error.error && error.error.details) {
+          this.messageService(error, error.error.details);
+        }
+        return this.handleError(error);
+      }));
   }
 
   callDeleteApi(url, parameters?, headers?) {
@@ -495,7 +530,10 @@ export class AdapterServices {
         headers: headers,
       })
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -522,7 +560,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -650,8 +691,12 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
-          this.messageNotificaionService('error', 'Error!');
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          } else {
+            this.messageNotificaionService('error', 'Error!');
+          }
           return this.handleError(err);
         })
       );
@@ -666,7 +711,12 @@ export class AdapterServices {
         }),
         observe: 'response',
       })
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error && error.error.error && error.error.details) {
+          this.messageService(error, error.error.details);
+        }
+        return this.handleError(error);
+      }));
   }
 
   getDataset(name: string): Observable<any> {
@@ -694,7 +744,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -917,7 +970,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -936,7 +992,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -956,7 +1015,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -983,7 +1045,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -1005,7 +1070,10 @@ export class AdapterServices {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
