@@ -1769,7 +1769,7 @@ export class Services {
   update(streaming_services: StreamingServices): Observable<StreamingServices> {
     try {
       streaming_services.organization = sessionStorage.getItem('organization');
-      const body =' JSON.stringify(streaming_services);'
+      const body = JSON.stringify(streaming_services);
       if (streaming_services.json_content) {
         const jsonContent = JSON.parse(streaming_services.json_content);
         jsonContent.elements?.map((ele) => {
