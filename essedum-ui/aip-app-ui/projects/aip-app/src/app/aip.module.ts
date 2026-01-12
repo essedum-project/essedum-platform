@@ -160,7 +160,6 @@ import { GeneralComponent } from './agent-directory/general/general.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
 import { DeploymentFormComponent } from './agent-pipeline/deployment-form/deployment-form.component';
 
-
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
   name: 'icm_tickets',
@@ -271,7 +270,8 @@ PipelineAgentDetailComponent,
     AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
     AgentDirectoryCreateComponent,
     GeneralComponent,AgentDirectoryEditComponent,
-DeploymentFormComponent
+    DeploymentFormComponent
+
   ],
   imports: [
     CommonModule,
