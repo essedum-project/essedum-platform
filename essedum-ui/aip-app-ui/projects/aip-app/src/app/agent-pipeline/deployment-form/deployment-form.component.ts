@@ -26,95 +26,17 @@ export class DeploymentFormComponent implements OnInit {
   validationForm: FormGroup;
 
   // Hover states for buttons
+  hoverSaveOverview = false;
+  hoverSaveScope = false;
+  hoverSaveApproval = false;
+  hoverSaveValidation = false;
   isFinishHovered = false;
 
-  // Deployment ID for edit mode
-  deploymentId: number | null = null;
-
-  // Static text constants - Labels
-  readonly AGENT_NAME_LABEL = 'Agent Name';
-  readonly AGENT_VERSION_LABEL = 'Agent Version';
-  readonly DEPLOYMENT_ENVIRONMENT_LABEL = 'Deployment Environment';
-  readonly DEPLOYMENT_DATETIME_LABEL = 'Deployment Date & Time';
-  readonly BUILD_RELEASE_ID_LABEL = 'Build/Release ID';
-  readonly AGENT_PACKAGE_LOCATION_LABEL = 'Agent Package Location';
-  readonly HASH_CHECKSUM_LABEL = 'Hash/Checksum';
-  readonly TARGET_NODES_LABEL = 'Target Nodes/Hosts';
-  readonly IMPACTED_SERVICES_LABEL = 'Impacted Services';
-  readonly DEPENDENCIES_LABEL = 'Dependencies (e.g., SDK, Runtime)';
-  readonly HEALTH_CHECK_STATUS_LABEL = 'Health Check Status';
-  readonly BACKUP_CONFIRMATION_LABEL = 'Backup Confirmation';
-  readonly CHANGE_FREEZE_COMPLIANCE_LABEL = 'Change Freeze Compliance';
-  readonly SECURITY_PATCH_VERIFICATION_LABEL = 'Security Patch Verification';
-  readonly APPROVER_NAME_ROLE_LABEL = 'Approver Name & Role';
-  readonly CAB_APPROVAL_REFERENCE_LABEL = 'CAB Approval Reference';
-  readonly CHANGE_REQUEST_ID_LABEL = 'Change Request ID';
-  readonly ROLLBACK_PROCEDURE_REFERENCE_LABEL = 'Rollback Procedure Reference';
-  readonly PREVIOUS_STABLE_VERSION_LABEL = 'Previous Stable Agent Version';
-  readonly SMOKE_TEST_STATUS_LABEL = 'Smoke Test Status';
-  readonly PERFORMANCE_TEST_SUMMARY_LABEL = 'Performance Test Summary';
-  readonly SSL_TLS_CERTIFICATE_CHECK_LABEL = 'SSL/TLS Certificate Check';
-  readonly DR_READINESS_LABEL = 'DR Readiness';
-  readonly DATA_RETENTION_CONFIRMATION_LABEL = 'Data Retention Confirmation';
-  readonly ANTIVIRUS_PATCH_CONFIRMATION_LABEL = 'Anti-virus/Patch Confirmation';
-  readonly DEPLOYMENT_OWNER_LABEL = 'Deployment Owner';
-  readonly INFRA_SUPPORT_CONTACTS_LABEL = 'Infra & Support Contacts';
-  readonly AUDIT_POC_DETAILS_LABEL = 'Audit POC Details';
-
-  // Static text constants - Placeholders
-  readonly AGENT_NAME_PLACEHOLDER = 'Enter Agent Name...';
-  readonly AGENT_VERSION_PLACEHOLDER = 'e.g., 1.0.0';
-  readonly DEPLOYMENT_ENVIRONMENT_PLACEHOLDER = 'Select Environment';
-  readonly DEPLOYMENT_DATETIME_PLACEHOLDER = 'Select Date & Time';
-  readonly BUILD_RELEASE_ID_PLACEHOLDER = 'Enter Build/Release ID...';
-  readonly AGENT_PACKAGE_LOCATION_PLACEHOLDER = 'Enter Package Location URL...';
-  readonly HASH_CHECKSUM_PLACEHOLDER = 'Enter Hash/Checksum...';
-  readonly TARGET_NODES_PLACEHOLDER = 'Select Target Nodes';
-  readonly IMPACTED_SERVICES_PLACEHOLDER = 'Select Impacted Services';
-  readonly DEPENDENCIES_PLACEHOLDER = 'List All Dependencies...';
-  readonly APPROVER_NAME_ROLE_PLACEHOLDER = 'Enter Approver Name & Role...';
-  readonly CAB_APPROVAL_REFERENCE_PLACEHOLDER = 'Enter CAB Approval Reference...';
-  readonly CHANGE_REQUEST_ID_PLACEHOLDER = 'Enter Change Request ID...';
-  readonly ROLLBACK_PROCEDURE_REFERENCE_PLACEHOLDER = 'Enter Rollback Procedure Reference...';
-  readonly PREVIOUS_STABLE_VERSION_PLACEHOLDER = 'e.g., 0.9.5';
-  readonly PERFORMANCE_TEST_SUMMARY_PLACEHOLDER = 'Enter Performance Test Summary...';
-  readonly DEPLOYMENT_OWNER_PLACEHOLDER = 'Enter Deployment Owner...';
-  readonly INFRA_SUPPORT_CONTACTS_PLACEHOLDER = 'Enter Infrastructure & Support Contacts...';
-  readonly AUDIT_POC_DETAILS_PLACEHOLDER = 'Enter Audit POC Details...';
-
-  // Static text constants - Error messages
-  readonly FIELD_REQUIRED_ERROR = 'This field is required';
-  readonly HEALTH_CHECK_REQUIRED_ERROR = 'Health check status is required';
-  readonly BACKUP_CONFIRMATION_REQUIRED_ERROR = 'Backup confirmation is required';
-  readonly CHANGE_FREEZE_REQUIRED_ERROR = 'Change freeze compliance is required';
-  readonly SECURITY_PATCH_REQUIRED_ERROR = 'Security patch verification is required';
-  readonly SMOKE_TEST_REQUIRED_ERROR = 'Smoke test status is required';
-  readonly SSL_TLS_REQUIRED_ERROR = 'SSL/TLS certificate check is required';
-  readonly DR_READINESS_REQUIRED_ERROR = 'DR readiness is required';
-  readonly DATA_RETENTION_REQUIRED_ERROR = 'Data retention confirmation is required';
-  readonly ANTIVIRUS_PATCH_REQUIRED_ERROR = 'Anti-virus/patch confirmation is required';
-
-  // Static text constants - Button labels
-  readonly FINISH_BUTTON_LABEL = 'Finish';
-  readonly SAVE_OVERVIEW_BUTTON_LABEL = 'Save Overview';
-  readonly SAVE_SCOPE_BUTTON_LABEL = 'Save Scope & Pre-Checks';
-  readonly SAVE_APPROVAL_BUTTON_LABEL = 'Save Approval & Rollback';
-  readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
-
-  // Static text constants - Messages
-  readonly FINISH_NOTE_MESSAGE = 'Fill required fields: Agent Name, Agent Version, Deployment Date & Time';
-  readonly OVERVIEW_SAVED_MESSAGE = 'Overview saved';
-  readonly SCOPE_SAVED_MESSAGE = 'Scope & Pre-Checks saved';
-  readonly APPROVAL_SAVED_MESSAGE = 'Approval & Rollback saved';
-  readonly VALIDATION_SAVED_MESSAGE = 'Validation & Compliance saved';
-  readonly FILL_REQUIRED_FIELDS_MESSAGE = 'Please fill all required fields';
-  readonly FILL_REQUIRED_FIELDS_FINISH_MESSAGE = 'Please fill all required fields (Agent Name, Agent Version, Deployment Date & Time)';
-  readonly DEPLOYMENT_SAVED_SUCCESS_MESSAGE = 'Deployment form saved successfully!';
-  readonly DEPLOYMENT_SAVED_ERROR_MESSAGE = 'Error saving deployment form: ';
-
-  // Static text constants - Radio button values
-  readonly RADIO_PASS_LABEL = 'Pass';
-  readonly RADIO_FAIL_LABEL = 'Fail';
+  // Track which forms have been saved
+  overviewSaved = false;
+  scopeSaved = false;
+  approvalSaved = false;
+  validationSaved = false;
 
   // Dropdown options
   deploymentEnvironments = ['Production', 'Staging', 'UAT'];
@@ -136,180 +58,120 @@ export class DeploymentFormComponent implements OnInit {
   ];
 
   constructor(private fb: FormBuilder, private service: Services) {
-    // Initialize Overview Form - Only agentName, agentVersion, deploymentDateTime are required
+    // Initialize Overview Form
     this.overviewForm = this.fb.group({
       agentName: ['', Validators.required],
       agentVersion: ['', Validators.required],
-      deploymentEnvironment: [''],
+      deploymentEnvironment: ['', Validators.required],
       deploymentDateTime: ['', Validators.required],
-      buildReleaseId: [''],
-      agentPackageLocation: [''],
-      hashChecksum: ['']
+      buildReleaseId: ['', Validators.required],
+      agentPackageLocation: ['', Validators.required],
+      hashChecksum: ['', Validators.required]
     });
 
-    // Initialize Scope & Pre-Checks Form - No required fields
+    // Initialize Scope & Pre-Checks Form
     this.scopeForm = this.fb.group({
-      targetNodes: [[]],
-      impactedServices: [[]],
-      dependencies: [''],
-      healthCheckStatus: [''],
-      backupConfirmation: [false],
-      changeFreezeCompliance: [false],
-      securityPatchVerification: [false]
+      targetNodes: [[], Validators.required],
+      impactedServices: [[], Validators.required],
+      dependencies: ['', Validators.required],
+      healthCheckStatus: ['', Validators.required],
+      backupConfirmation: [false, Validators.requiredTrue],
+      changeFreezeCompliance: [false, Validators.requiredTrue],
+      securityPatchVerification: [false, Validators.requiredTrue]
     });
 
-    // Initialize Approval & Rollback Form - No required fields
+    // Initialize Approval & Rollback Form
     this.approvalForm = this.fb.group({
-      approverNameRole: [''],
-      cabApprovalReference: [''],
-      changeRequestId: [''],
-      rollbackProcedureReference: [''],
-      previousStableVersion: ['']
+      approverNameRole: ['', Validators.required],
+      cabApprovalReference: ['', Validators.required],
+      changeRequestId: ['', Validators.required],
+      rollbackProcedureReference: ['', Validators.required],
+      previousStableVersion: ['', Validators.required]
     });
 
-    // Initialize Validation & Compliance Form - No required fields
+    // Initialize Validation & Compliance Form
     this.validationForm = this.fb.group({
-      smokeTestStatus: [''],
-      performanceTestSummary: [''],
-      sslTlsCertificateCheck: [false],
-      drReadiness: [false],
-      dataRetentionConfirmation: [false],
-      antivirusPatchConfirmation: [false],
-      deploymentOwner: [''],
-      infraSupportContacts: [''],
-      auditPocDetails: ['']
+      smokeTestStatus: ['', Validators.required],
+      performanceTestSummary: ['', Validators.required],
+      sslTlsCertificateCheck: [false, Validators.requiredTrue],
+      drReadiness: [false, Validators.requiredTrue],
+      dataRetentionConfirmation: [false, Validators.requiredTrue],
+      antivirusPatchConfirmation: [false, Validators.requiredTrue],
+      deploymentOwner: ['', Validators.required],
+      infraSupportContacts: ['', Validators.required],
+      auditPocDetails: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    // Check if we have a deployment ID to load (edit mode)
-    // If not, forms remain empty for new creation (create mode)
-    if (this.deploymentId) {
-      this.loadDeploymentForm(this.deploymentId);
-    }
+    // Initialize form with default values if needed
   }
 
   /**
-   * Load deployment form data by ID
-   * @param id - Deployment form ID to load
-   */
-  loadDeploymentForm(id: number): void {
-    this.service.getDeploymentFormById(id).subscribe(
-      (response) => {
-        if (response) {
-          this.deploymentId = response.id;
-          this.populateFormWithData(response);
-          this.service.message('Deployment form loaded successfully', 'success');
-        }
-      },
-      (error) => {
-        console.error('Error loading deployment form:', error);
-        // If record not found, keep forms empty for new creation
-        if (error.status === 404) {
-          console.log('No existing deployment form found, ready for new creation');
-          this.deploymentId = null; // Reset to create mode
-        } else {
-          this.service.message('Error loading deployment form', 'error');
-        }
-      }
-    );
-  }
-
-  /**
-   * Populate all form fields with fetched data
-   * @param data - Deployment form data from API
-   */
-  private populateFormWithData(data: any): void {
-    // Populate Overview Form
-    this.overviewForm.patchValue({
-      agentName: data.agent_name || '',
-      agentVersion: data.agent_version || '',
-      deploymentEnvironment: data.deployment_environment || '',
-      deploymentDateTime: data.deployment_datetime || '',
-      buildReleaseId: data.build_release_id || '',
-      agentPackageLocation: data.agent_package_location || '',
-      hashChecksum: data.hash_checksum || ''
-    });
-
-    // Populate Scope & Pre-Checks Form
-    this.scopeForm.patchValue({
-      targetNodes: data.target_nodes_hosts ? JSON.parse(data.target_nodes_hosts) : [],
-      impactedServices: data.impacted_services ? JSON.parse(data.impacted_services) : [],
-      dependencies: data.dependencies || '',
-      healthCheckStatus: data.health_check_status || '',
-      backupConfirmation: data.backup_confirmation || false,
-      changeFreezeCompliance: data.change_freeze_compliance || false,
-      securityPatchVerification: data.security_patch_verification || false
-    });
-
-    // Populate Approval & Rollback Form
-    this.approvalForm.patchValue({
-      approverNameRole: data.approver_name_role || '',
-      cabApprovalReference: data.cab_approval_reference || '',
-      changeRequestId: data.change_request_id || '',
-      rollbackProcedureReference: data.rollback_procedure_reference || '',
-      previousStableVersion: data.previous_stable_agent_version || ''
-    });
-
-    // Populate Validation & Compliance Form
-    this.validationForm.patchValue({
-      smokeTestStatus: data.smoke_test_status || '',
-      performanceTestSummary: data.performance_test_summary || '',
-      sslTlsCertificateCheck: data.ssl_tls_certificate_check || false,
-      drReadiness: data.dr_readiness || false,
-      dataRetentionConfirmation: data.data_retention_confirmation || false,
-      antivirusPatchConfirmation: data.antivirus_patch_confirmation || false,
-      deploymentOwner: data.deployment_owner || '',
-      infraSupportContacts: data.infra_support_contacts || '',
-      auditPocDetails: data.audit_poc_details || ''
-    });
-
-    console.log('Forms populated with data for deployment ID:', this.deploymentId);
-  }
-
-  /**
-   * Save Overview - Just marks as saved, no API call
+   * Save Overview form
    */
   saveOverview(): void {
     if (this.overviewForm.valid) {
-      console.log('Overview data saved locally:', this.overviewForm.value);
-      this.service.message(this.OVERVIEW_SAVED_MESSAGE, 'success');
+      console.log('Saving Overview form:', this.overviewForm.value);
+      this.overviewSaved = true;
+      // TODO: API integration
+      this.service.message('Overview saved successfully!', 'success');
     } else {
       this.markFormGroupTouched(this.overviewForm);
-      this.service.message(this.FILL_REQUIRED_FIELDS_MESSAGE, 'error');
+      this.service.message('Please fill all required fields', 'error');
     }
   }
 
   /**
-   * Save Scope - Just marks as saved, no API call
+   * Save Scope & Pre-Checks form
    */
   saveScope(): void {
-    console.log('Scope data saved locally:', this.scopeForm.value);
-    this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+    if (this.scopeForm.valid) {
+      console.log('Saving Scope & Pre-Checks form:', this.scopeForm.value);
+      this.scopeSaved = true;
+      // TODO: API integration
+      this.service.message('Scope & Pre-Checks saved successfully!', 'success');
+    } else {
+      this.markFormGroupTouched(this.scopeForm);
+      this.service.message('Please fill all required fields', 'error');
+    }
   }
 
   /**
-   * Save Approval - Just marks as saved, no API call
+   * Save Approval & Rollback form
    */
   saveApproval(): void {
-    console.log('Approval data saved locally:', this.approvalForm.value);
-    this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+    if (this.approvalForm.valid) {
+      console.log('Saving Approval & Rollback form:', this.approvalForm.value);
+      this.approvalSaved = true;
+      // TODO: API integration
+      this.service.message('Approval & Rollback saved successfully!', 'success');
+    } else {
+      this.markFormGroupTouched(this.approvalForm);
+      this.service.message('Please fill all required fields', 'error');
+    }
   }
 
   /**
-   * Save Validation - Just marks as saved, no API call
+   * Save Validation & Compliance form
    */
   saveValidation(): void {
-    console.log('Validation data saved locally:', this.validationForm.value);
-    this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
+    if (this.validationForm.valid) {
+      console.log('Saving Validation & Compliance form:', this.validationForm.value);
+      this.validationSaved = true;
+      // TODO: API integration
+      this.service.message('Validation & Compliance saved successfully!', 'success');
+    } else {
+      this.markFormGroupTouched(this.validationForm);
+      this.service.message('Please fill all required fields', 'error');
+    }
   }
 
   /**
-   * Check if all required fields are filled to enable Finish button
+   * Check if all forms are valid and saved
    */
   isAllFormsValid(): boolean {
-    // Only check if the required fields are filled: agentName, agentVersion, deploymentDateTime
-    return this.overviewForm.valid;
+    return this.overviewSaved && this.scopeSaved && this.approvalSaved && this.validationSaved;
   }
 
   /**
@@ -330,81 +192,26 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   /**
-   * Finish deployment - validate required fields and save complete form
+   * Finish deployment configuration and emit event
    */
   finishDeployment(): void {
-    // Check if required fields are filled
-    if (!this.overviewForm.valid) {
-      this.markFormGroupTouched(this.overviewForm);
-      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+    // Double-check all forms are saved
+    if (!this.isAllFormsValid()) {
+      this.service.message('Please complete and save all deployment forms before finishing', 'error');
       return;
     }
 
-    const deploymentData = this.buildDeploymentPayload();
+    const deploymentData: DeploymentFormData = {
+      overview: this.overviewForm.value,
+      scope: this.scopeForm.value,
+      approval: this.approvalForm.value,
+      validation: this.validationForm.value
+    };
 
     console.log('Deployment configuration finished:', deploymentData);
     
-    // Call the save API
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
-        }
-        this.service.message(this.DEPLOYMENT_SAVED_SUCCESS_MESSAGE, 'success');
-        
-        // Emit event to parent component
-        this.deploymentFinished.emit(deploymentData);
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
-  }
-
-  /**
-   * Build the complete deployment payload from all forms
-   */
-  private buildDeploymentPayload(): any {
-    const payload: any = {
-      agent_name: this.overviewForm.get('agentName')?.value,
-      agent_version: this.overviewForm.get('agentVersion')?.value,
-      deployment_environment: this.overviewForm.get('deploymentEnvironment')?.value,
-      deployment_datetime: this.overviewForm.get('deploymentDateTime')?.value,
-      build_release_id: this.overviewForm.get('buildReleaseId')?.value,
-      agent_package_location: this.overviewForm.get('agentPackageLocation')?.value,
-      hash_checksum: this.overviewForm.get('hashChecksum')?.value,
-      
-      target_nodes_hosts: JSON.stringify(this.scopeForm.get('targetNodes')?.value || []),
-      impacted_services: JSON.stringify(this.scopeForm.get('impactedServices')?.value || []),
-      dependencies: this.scopeForm.get('dependencies')?.value,
-      health_check_status: this.scopeForm.get('healthCheckStatus')?.value,
-      backup_confirmation: this.scopeForm.get('backupConfirmation')?.value || false,
-      change_freeze_compliance: this.scopeForm.get('changeFreezeCompliance')?.value || false,
-      security_patch_verification: this.scopeForm.get('securityPatchVerification')?.value || false,
-      
-      approver_name_role: this.approvalForm.get('approverNameRole')?.value,
-      cab_approval_reference: this.approvalForm.get('cabApprovalReference')?.value,
-      change_request_id: this.approvalForm.get('changeRequestId')?.value,
-      rollback_procedure_reference: this.approvalForm.get('rollbackProcedureReference')?.value,
-      previous_stable_agent_version: this.approvalForm.get('previousStableVersion')?.value,
-      
-      smoke_test_status: this.validationForm.get('smokeTestStatus')?.value,
-      performance_test_summary: this.validationForm.get('performanceTestSummary')?.value,
-      ssl_tls_certificate_check: this.validationForm.get('sslTlsCertificateCheck')?.value || false,
-      dr_readiness: this.validationForm.get('drReadiness')?.value || false,
-      data_retention_confirmation: this.validationForm.get('dataRetentionConfirmation')?.value || false,
-      antivirus_patch_confirmation: this.validationForm.get('antivirusPatchConfirmation')?.value || false,
-      deployment_owner: this.validationForm.get('deploymentOwner')?.value,
-      infra_support_contacts: this.validationForm.get('infraSupportContacts')?.value,
-      audit_poc_details: this.validationForm.get('auditPocDetails')?.value
-    };
-
-    // Add ID if in edit mode
-    if (this.deploymentId) {
-      payload.id = this.deploymentId;
-    }
-
-    return payload;
+    // Emit event to parent component
+    this.deploymentFinished.emit(deploymentData);
   }
 
   /**
