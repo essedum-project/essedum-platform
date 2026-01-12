@@ -144,7 +144,8 @@ export class AgentDirectoryService {
       deleteAgentDirectory(id: number): Observable<any> {
         return this.https.delete('/api/aip/agent-directory/delete/' + id, {
           headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
-          observe: 'response'
+          observe: 'response',
+          responseType: 'text' as 'json'
         })
           .pipe(map(response => response))
           .pipe(catchError(err => this.handleError(err)));
