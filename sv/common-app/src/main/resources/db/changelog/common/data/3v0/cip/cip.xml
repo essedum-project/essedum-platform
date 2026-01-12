@@ -1444,5 +1444,93 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
                                  onUpdate="CASCADE"/>
     </changeSet>
 
+    <!-- Deployment Form Table - Agent Deployment Tracking and Compliance -->
+    <changeSet author="Essedum (generated)" id="3v0-cip-deployment-form-table">
+        <createTable tableName="deployment_form">
+            <column autoIncrement="true" name="id" type="BIGINT UNSIGNED">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="agent_name" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="agent_version" type="VARCHAR(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="deployment_environment" type="VARCHAR(100)" />
+            <column name="deployment_datetime" type="DATETIME(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="build_release_id" type="VARCHAR(100)" />
+            <column name="agent_package_location" type="VARCHAR(500)" />
+            <column name="hash_checksum" type="VARCHAR(255)" />
+            <column name="target_nodes_hosts" type="JSON" />
+            <column name="impacted_services" type="JSON" />
+            <column name="dependencies" type="TEXT" />
+            <column name="health_check_status" type="VARCHAR(100)" />
+            <column name="backup_confirmation" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="change_freeze_compliance" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="security_patch_verification" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="approver_name_role" type="VARCHAR(255)" />
+            <column name="cab_approval_reference" type="VARCHAR(100)" />
+            <column name="change_request_id" type="VARCHAR(100)" />
+            <column name="rollback_procedure_reference" type="VARCHAR(255)" />
+            <column name="previous_stable_agent_version" type="VARCHAR(100)" />
+            <column name="smoke_test_status" type="VARCHAR(100)" />
+            <column name="performance_test_summary" type="TEXT" />
+            <column name="ssl_tls_certificate_check" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="dr_readiness" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="data_retention_confirmation" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="antivirus_patch_confirmation" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="deployment_owner" type="VARCHAR(255)" />
+            <column name="infra_support_contacts" type="TEXT" />
+            <column name="audit_poc_details" type="TEXT" />
+            <column name="created_at" type="TIMESTAMP(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" />
+        </modifySql>
+    </changeSet>
+
+    <!-- Add JSON validation constraints and ON UPDATE trigger for deployment_form -->
+    <changeSet author="Essedum (generated)" id="3v0-cip-deployment-form-constraints">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="deployment_form" />
+        </preConditions>
+        <sql dbms="mysql">
+            ALTER TABLE deployment_form
+            ADD CONSTRAINT chk_target_nodes_hosts_json
+            CHECK (target_nodes_hosts IS NULL OR JSON_VALID(target_nodes_hosts));
+        </sql>
+        <sql dbms="mysql">
+            ALTER TABLE deployment_form
+            ADD CONSTRAINT chk_impacted_services_json
+            CHECK (impacted_services IS NULL OR JSON_VALID(impacted_services));
+        </sql>
+        <sql dbms="mysql">
+            ALTER TABLE deployment_form
+            MODIFY COLUMN updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6);
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>
