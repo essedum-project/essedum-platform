@@ -37,6 +37,9 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.*;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.google.api.gax.paging.Page;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -56,8 +59,12 @@ import okhttp3.OkHttpClient;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,10 +90,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import javax.imageio.ImageIO;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -95,10 +99,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -109,16 +110,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.net.ssl.*;
-
-import com.google.api.gax.paging.Page;
-import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.storage.*;
-import java.security.*;
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 
 @Component("s3ds")
@@ -886,7 +877,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
-                .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withPathStyleAccessEnabled(true)
+                .build();
         long partSize = 100L * 1024 * 1024;
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -1031,7 +1024,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
                         .withEndpointConfiguration(
                                 new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
-                        .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+                        .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                        .withPathStyleAccessEnabled(true)
+                        .build();
                 DeleteObjectRequest delete = new DeleteObjectRequest(bucketName, filePath);
                 s3Client.deleteObject(delete);
                 logger.info("File Deleted Successfully");
@@ -1085,6 +1080,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);
@@ -1169,6 +1165,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);
@@ -1202,6 +1199,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                                 new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
                         .withCredentials(
                                 new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                        .withPathStyleAccessEnabled(true)
                         .build();
                 Date expiration = new Date(System.currentTimeMillis() + 3600000);
 
