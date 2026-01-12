@@ -1,0 +1,274 @@
+.deployment-container {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+// Finish button at top
+.finish-section-top {
+  padding: 14px 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  .finish-button {
+    min-width: 140px;
+    height: 38px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+
+    &:not(:disabled) {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  .finish-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #fff3cd;
+    border-left: 3px solid #ffc107;
+    border-radius: 3px;
+    color: #856404;
+    font-size: 12px;
+    max-width: 320px;
+
+    span {
+      line-height: 1.3;
+    }
+  }
+}
+
+.deployment-tabs {
+  flex: 1;
+  overflow: auto;
+  
+  ::ng-deep {
+    .mat-tab-body-wrapper {
+      flex: 1;
+      height: 100%;
+    }
+
+    .mat-tab-label {
+      font-weight: 500;
+      font-size: 14px;
+      min-width: 200px;
+      color: #495057;
+    }
+
+    .mat-tab-label-active {
+      color: #0a142f;
+      font-weight: 600;
+    }
+  }
+}
+
+.form-container {
+  padding: 24px 36px;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  h3 {
+    color: #0a142f;
+    margin-bottom: 24px;
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0094ff;
+  }
+}
+
+.deployment-form {
+  .row {
+    margin-bottom: 0;
+  }
+
+  .lfx-u-mar-b-16 {
+    margin-bottom: 16px;
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+
+  // Radio button group styling
+  .radio-group-container {
+    padding: 10px 14px;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+
+    .radio-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #495057;
+      margin-bottom: 8px;
+    }
+
+    .radio-group-inline {
+      display: flex;
+      gap: 24px;
+
+      ::ng-deep .mat-radio-button {
+        margin-right: 0;
+        
+        .mat-radio-label {
+          font-size: 13px;
+        }
+      }
+    }
+
+    mat-error {
+      font-size: 11px;
+      color: #dc3545;
+      margin-top: 6px;
+      display: block;
+    }
+  }
+
+  // Checkbox styling
+  .checkbox-container {
+    padding: 10px 14px;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+
+    ::ng-deep .mat-checkbox {
+      font-size: 13px;
+      font-weight: 500;
+      color: #495057;
+      
+      .mat-checkbox-label {
+        font-size: 13px;
+      }
+    }
+
+    mat-error {
+      font-size: 11px;
+      color: #dc3545;
+      margin-top: 6px;
+      margin-left: 32px;
+      display: block;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+
+    .save-btn {
+      min-width: 160px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+// Material form field overrides
+::ng-deep {
+  .lfx-form-field {
+    width: 100%;
+
+    .mat-form-field-wrapper {
+      padding-bottom: 1.25em;
+    }
+
+    .mat-form-field-flex {
+      background-color: #ffffff;
+    }
+
+    .mat-form-field-label {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    &.mat-focused {
+      .mat-form-field-label {
+        color: #0094ff;
+      }
+
+      .mat-form-field-ripple {
+        background-color: #0094ff;
+      }
+    }
+
+    .mat-error {
+      font-size: 12px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .form-container {
+    padding: 20px 16px;
+  }
+
+  .finish-section-top {
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 10px;
+    
+    .finish-button {
+      min-width: 120px;
+      font-size: 13px;
+      height: 36px;
+    }
+
+    .finish-note {
+      font-size: 11px;
+      padding: 6px 10px;
+      max-width: 100%;
+    }
+  }
+
+  .deployment-form {
+    .form-actions {
+      .save-btn {
+        min-width: 140px;
+        height: 38px;
+      }
+    }
+
+    .radio-group-container {
+      padding: 8px 12px;
+      
+      .radio-group-inline {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    
+    .checkbox-container {
+      padding: 8px 12px;
+    }
+  }
+}
