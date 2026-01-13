@@ -564,35 +564,6 @@ export class Services {
       );
   }
 
-  /**
-   * Get deployment form by cname and org
-   * @param cname - Customer name
-   * @param org - Organization name
-   * @returns Observable with deployment form data
-   */
-  getDeploymentFormByCnameOrg(cname: string, org: string): Observable<any> {
-    return this.https
-      .get(
-        this.dataUrl + '/deployment-form?cname=' + encodeURIComponent(cname) + '&org=' + encodeURIComponent(org),
-        {
-          headers: new HttpHeaders({
-            'Content-Type': 'application/json; charset=utf-8',
-          }),
-          observe: 'response',
-        }
-      )
-      .pipe(
-        map((response) => {
-          return response.body;
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
-      );
-  }
-
   async encryptgcm(plaintext, password) {
     // Generate random 12-byte IV
     const iv = crypto.getRandomValues(new Uint8Array(12));
