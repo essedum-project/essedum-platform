@@ -145,6 +145,8 @@ import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/
 import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
 import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
+import { LitellmComponent } from './litellm/litellm.component';
+import { LangfuseComponent } from './langfuse/langfuse.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
@@ -257,6 +259,8 @@ PipelineAgentDetailComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
     AgentComponent,
+    LitellmComponent,
+    LangfuseComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
     PlaygroundTabComponent,
