@@ -511,6 +511,59 @@ export class Services {
     }
   }
 
+  // Deployment Form API Methods
+  saveDeploymentForm(deploymentData: any): Observable<any> {
+    return this.https
+      .post(
+        this.dataUrl + '/deployment-form/save',
+        deploymentData,
+        {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json; charset=utf-8',
+          }),
+          observe: 'response',
+        }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  /**
+   * Get deployment form by ID
+   * @param id - Deployment form ID
+   * @returns Observable with deployment form data
+   */
+  getDeploymentFormById(id: number): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl + '/deployment-form/' + id,
+        {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json; charset=utf-8',
+          }),
+          observe: 'response',
+        }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
   async encryptgcm(plaintext, password) {
     // Generate random 12-byte IV
     const iv = crypto.getRandomValues(new Uint8Array(12));
