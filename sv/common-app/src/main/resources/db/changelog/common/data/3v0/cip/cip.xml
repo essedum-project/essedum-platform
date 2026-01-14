@@ -1456,6 +1456,8 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
             <column name="agent_version" type="VARCHAR(100)">
                 <constraints nullable="false" />
             </column>
+            <column name="cname" type="VARCHAR(100)" />
+            <column name="org" type="VARCHAR(500)" />
             <column name="deployment_environment" type="VARCHAR(100)" />
             <column name="deployment_datetime" type="DATETIME(6)">
                 <constraints nullable="false" />
