@@ -54,6 +54,15 @@ public interface IDeploymentFormService {
     DeploymentFormDTO getDeploymentFormById(Long id);
 
     /**
+     * Get deployment form by cname and org.
+     *
+     * @param cname the customer name
+     * @param org the organization/project name
+     * @return the deployment form DTO
+     */
+    DeploymentFormDTO getDeploymentFormByProjectAndCid(String cname, String org);
+
+    /**
      * Delete deployment form by id.
      *
      * @param id the deployment form id

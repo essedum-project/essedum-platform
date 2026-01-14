@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,6 +50,12 @@ public class DeploymentFormDTO implements Serializable {
 
     @JsonProperty("deployment_datetime")
     private LocalDateTime deploymentDatetime;
+
+    @JsonProperty("cname")
+    private String cname;
+
+    @JsonProperty("org")
+    private String org;
 
     @JsonProperty("build_release_id")
     private String buildReleaseId;
