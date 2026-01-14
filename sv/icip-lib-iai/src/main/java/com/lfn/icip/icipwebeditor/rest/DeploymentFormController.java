@@ -91,18 +91,21 @@ public class DeploymentFormController {
     }
 
     /**
-     * Get deployment form by id.
+     * Get deployment form by cname and org.
      *
-     * GET /${icip.pathPrefix}/deployment-form/{id}
+     * GET /${icip.pathPrefix}/deployment-form?cname={cname}&org={org}
      *
-     * @param id the deployment form id
+     * @param cname the customer name
+     * @param org the organization/project name
      * @return the response entity with deployment form
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<DeploymentFormDTO> getDeploymentFormById(@PathVariable Long id) {
-        logger.info("Fetching deployment form with id: {}", id);
+    @GetMapping
+    public ResponseEntity<DeploymentFormDTO> getDeploymentFormByProjectAndCid(
+            @RequestParam String cname,
+            @RequestParam String org) {
+        logger.info("Fetching deployment form with cname: {} and org: {}", cname, org);
 
-        DeploymentFormDTO result = deploymentFormService.getDeploymentFormById(id);
+        DeploymentFormDTO result = deploymentFormService.getDeploymentFormByProjectAndCid(cname, org);
         return ResponseEntity.ok(result);
     }
 

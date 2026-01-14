@@ -238,6 +238,36 @@ public class DeploymentFormService implements IDeploymentFormService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public DeploymentFormDTO getDeploymentFormByProjectAndCid(String cname, String org) {
+        try {
+            logger.info("Fetching deployment form with cname: {} and org: {}", cname, org);
+
+            // Validate input
+            if (cname == null || cname.trim().isEmpty()) {
+                throw new IllegalArgumentException("Customer name cannot be null or empty");
+            }
+            if (org == null || org.trim().isEmpty()) {
+                throw new IllegalArgumentException("Organization cannot be null or empty");
+            }
+
+            DeploymentForm deploymentForm = deploymentFormRepository.findByCnameAndOrg(cname, org)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Deployment form not found with cname: " + cname + " and org: " + org));
+
+            return modelMapper.map(deploymentForm, DeploymentFormDTO.class);
+
+        } catch (IllegalArgumentException e) {
+            // Re-throw validation errors as-is
+            throw e;
+        } catch (Exception e) {
+            // Wrap any other exceptions in AgentDirectoryException
+            logger.error("Failed to fetch deployment form with cname: {} and org: {}", cname, org, e);
+            throw new AgentDirectoryException("Failed to fetch deployment form", e);
+        }
+    }
+
+    @Override
     public void deleteDeploymentForm(Long id) {
         try {
             logger.info("Deleting deployment form with id: {}", id);

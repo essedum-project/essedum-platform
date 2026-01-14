@@ -33,5 +33,14 @@ import com.lfn.icip.icipwebeditor.model.DeploymentForm;
 @Repository
 public interface DeploymentFormRepository extends JpaRepository<DeploymentForm, Long> {
 
+    /**
+     * Find deployment form by cname and org.
+     *
+     * @param cname the customer name
+     * @param org the organization/project name
+     * @return optional deployment form
+     */
+    Optional<DeploymentForm> findByCnameAndOrg(String cname, String org);
+
 }
 

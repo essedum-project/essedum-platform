@@ -54,6 +54,12 @@ public class DeploymentForm implements Serializable {
     @Column(name = "agent_version", length = 100, nullable = false)
     private String agentVersion;
 
+    @Column(name = "cname", length = 100, nullable = false)
+    private String cname;
+
+    @Column(name = "org", length = 100, nullable = false)
+    private String org;
+
     @Column(name = "deployment_environment", length = 100)
     private String deploymentEnvironment;
 
