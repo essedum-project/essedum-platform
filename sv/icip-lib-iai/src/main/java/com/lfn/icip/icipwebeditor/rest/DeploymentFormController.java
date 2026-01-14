@@ -52,10 +52,10 @@ public class DeploymentFormController {
 
     /**
      * Save or update deployment form.
-     * If id is null in DTO, creates a new deployment form.
-     * If id is provided in DTO, updates the existing deployment form.
+     * Checks if a deployment form exists for the given cname and org.
+     * If exists, updates the existing record. Otherwise, creates a new one.
      *
-     * PUT /${icip.pathPrefix}/deployment-form
+     * POST /${icip.pathPrefix}/deployment-form/save
      *
      * @param deploymentFormDTO the deployment form DTO
      * @return the response entity with saved/updated deployment form
@@ -66,22 +66,20 @@ public class DeploymentFormController {
     public ResponseEntity<?> saveOrUpdateDeploymentForm(@RequestBody DeploymentFormDTO deploymentFormDTO)
             throws URISyntaxException {
 
-        logger.info("Save/Update deployment form for agent: {}", deploymentFormDTO.getAgentName());
+        logger.info("Save/Update deployment form for cname: {}, org: {}, agent: {}",
+                deploymentFormDTO.getCname(), deploymentFormDTO.getOrg(), deploymentFormDTO.getAgentName());
 
-        DeploymentFormDTO result;
-        boolean isCreate = (deploymentFormDTO.getId() == null);
+        DeploymentFormDTO result = deploymentFormService.saveOrUpdateDeploymentForm(deploymentFormDTO);
+
+        boolean isCreate = result.getCreatedAt() != null && result.getUpdatedAt() != null
+                && result.getCreatedAt().equals(result.getUpdatedAt());
 
         if (isCreate) {
-            // Create new deployment form
-            result = deploymentFormService.saveDeploymentForm(deploymentFormDTO);
             logger.info("Successfully created deployment form with id: {}", result.getId());
-
             return ResponseEntity.created(new URI("/deployment-form/" + result.getId()))
                     .headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
                     .body(result);
         } else {
-            // Update existing deployment form
-            result = deploymentFormService.updateDeploymentForm(deploymentFormDTO.getId(), deploymentFormDTO);
             logger.info("Successfully updated deployment form with id: {}", result.getId());
 
             return ResponseEntity.ok()
