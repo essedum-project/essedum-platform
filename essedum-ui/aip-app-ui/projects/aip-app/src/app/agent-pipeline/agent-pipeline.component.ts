@@ -2826,7 +2826,7 @@ public class ZipController {
    */
   private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
     try {
-      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
+      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOSMPL-78048&org=leo1311';
       console.log('  FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
       
       const response = await this.http.get<any[]>(apiUrl).toPromise();
