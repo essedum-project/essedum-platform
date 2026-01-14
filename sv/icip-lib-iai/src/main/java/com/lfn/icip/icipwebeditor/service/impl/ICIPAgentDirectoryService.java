@@ -1122,6 +1122,7 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
      * Check if an agent matches a specific query.
      * Implements hierarchical prefix matching for skills, domains, and modules.
      * Implements exact matching for locators.
+     * Supports dynamic key-value matching for domains and locators.
      *
      * @param agent the agent to check
      * @param query the query to match
@@ -1134,28 +1135,115 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
 
         String type = query.getType().toUpperCase();
         String value = query.getValue();
+        String key = query.getKey(); // Can be null for SKILL/MODULE
 
         switch (type) {
             case "SKILL":
+                // Always searches on "name" field
                 return agent.getSkills() != null && agent.getSkills().stream()
                         .anyMatch(skill -> matchesHierarchical(skill.getName(), value));
 
             case "DOMAIN":
+                // Dynamic key-value matching: supports "name" or "description"
                 return agent.getDomains() != null && agent.getDomains().stream()
-                        .anyMatch(domain -> matchesHierarchical(domain.getName(), value));
+                        .anyMatch(domain -> matchesDomain(domain, key, value));
 
             case "MODULE":
+                // Always searches on "name" field
                 return agent.getModules() != null && agent.getModules().stream()
                         .anyMatch(module -> matchesHierarchical(module.getName(), value));
 
             case "LOCATOR":
+                // Dynamic key-value matching: supports "locator_type" or "url"
                 return agent.getLocators() != null && agent.getLocators().stream()
-                        .anyMatch(locator -> matchesExact(locator.getLocatorType(), value));
+                        .anyMatch(locator -> matchesLocator(locator, key, value));
 
             default:
                 logger.warn("Unknown query type: {}", type);
                 return false;
         }
+    }
+
+    /**
+     * Match domain based on key-value pair with flexible matching.
+     * Supports three scenarios:
+     * 1. Key only: Matches domains where name matches key (value is null/empty)
+     * 2. Value only: Matches domains where description matches value (key is null/empty)
+     * 3. Both: Matches domains where name matches key AND description matches value
+     *
+     * @param domain the domain object
+     * @param key the domain name to match (optional)
+     * @param value the domain description to match (optional)
+     * @return true if matches
+     */
+    private boolean matchesDomain(AgentDomain domain, String key, String value) {
+        if (domain == null) {
+            return false;
+        }
+
+        boolean hasKey = key != null && !key.trim().isEmpty();
+        boolean hasValue = value != null && !value.trim().isEmpty();
+
+        // Case 1: Both key and value provided - both must match
+        if (hasKey && hasValue) {
+            boolean nameMatches = matchesHierarchical(domain.getName(), key);
+            boolean descriptionMatches = matchesHierarchical(domain.getDescription(), value);
+            return nameMatches && descriptionMatches;
+        }
+
+        // Case 2: Only key provided - match on name only
+        if (hasKey && !hasValue) {
+            return matchesHierarchical(domain.getName(), key);
+        }
+
+        // Case 3: Only value provided - match on description only
+        if (!hasKey && hasValue) {
+            return matchesHierarchical(domain.getDescription(), value);
+        }
+
+        // Case 4: Neither provided - no match
+        return false;
+    }
+
+    /**
+     * Match locator based on key-value pair with flexible matching.
+     * Supports three scenarios:
+     * 1. Key only: Matches locators where locator_type matches key (value is null/empty)
+     * 2. Value only: Matches locators where url matches value (key is null/empty)
+     * 3. Both: Matches locators where locator_type matches key AND url matches value
+     *
+     * @param locator the locator object
+     * @param key the locator_type to match (optional)
+     * @param value the url to match (optional)
+     * @return true if matches
+     */
+    private boolean matchesLocator(AgentLocator locator, String key, String value) {
+        if (locator == null) {
+            return false;
+        }
+
+        boolean hasKey = key != null && !key.trim().isEmpty();
+        boolean hasValue = value != null && !value.trim().isEmpty();
+
+        // Case 1: Both key and value provided - both must match
+        if (hasKey && hasValue) {
+            boolean typeMatches = matchesExact(locator.getLocatorType(), key);
+            boolean urlMatches = matchesExact(locator.getUrl(), value);
+            return typeMatches && urlMatches;
+        }
+
+        // Case 2: Only key provided - match on locator_type only
+        if (hasKey && !hasValue) {
+            return matchesExact(locator.getLocatorType(), key);
+        }
+
+        // Case 3: Only value provided - match on url only
+        if (!hasKey && hasValue) {
+            return matchesExact(locator.getUrl(), value);
+        }
+
+        // Case 4: Neither provided - no match
+        return false;
     }
 
     /**

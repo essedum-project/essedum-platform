@@ -15,6 +15,7 @@
 
 package com.lfn.icip.icipwebeditor.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * The Class AgentSearchQueryDTO.
- * Represents a single search query with type and value.
+ * Represents a single search query with type, key, and value.
  */
 @Data
 @NoArgsConstructor
@@ -36,9 +37,24 @@ public class AgentSearchQueryDTO {
     private String type;
 
     /**
-     * The value to search for.
-     * For skills/domains/modules: hierarchical prefix matching (e.g., "AI" matches "AI/ML", "AI/NLP").
-     * For locators: exact matching on locator_type.
+     * The key field interpretation varies by type:
+     * - SKILL: Not used (searches on "name" by default)
+     * - MODULE: Not used (searches on "name" by default)
+     * - DOMAIN: The domain name to match (e.g., "domain", "research")
+     * - LOCATOR: The locator type to match (e.g., "source-code", "docker-image")
+     *
+     * This field is excluded from JSON response when null.
+     */
+    @JsonProperty("key")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String key;
+
+    /**
+     * The value field interpretation varies by type:
+     * - SKILL: The skill name to match (hierarchical prefix matching)
+     * - MODULE: The module name to match (hierarchical prefix matching)
+     * - DOMAIN: The domain description to match (hierarchical prefix matching)
+     * - LOCATOR: The locator URL to match (exact matching)
      */
     @JsonProperty("value")
     private String value;

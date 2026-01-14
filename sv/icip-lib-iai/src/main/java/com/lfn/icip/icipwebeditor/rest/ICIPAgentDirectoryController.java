@@ -320,18 +320,45 @@ public class ICIPAgentDirectoryController {
      * Implements OR-based matching with configurable threshold (min_match_score).
      * Supports hierarchical prefix matching for skills, domains, and modules.
      * Supports exact matching for locators.
+     * Supports flexible key-value pair matching for domains and locators.
      *
      * Request body example:
      * {
      *   "queries": [
      *     { "type": "SKILL", "value": "AI" },
-     *     { "type": "LOCATOR", "value": "docker-image" },
-     *     { "type": "DOMAIN", "value": "research" }
+     *     { "type": "DOMAIN", "key": "domain", "value": "research" },
+     *     { "type": "DOMAIN", "key": "domain" },
+     *     { "type": "DOMAIN", "value": "research" },
+     *     { "type": "LOCATOR", "key": "source-code", "value": "Github" },
+     *     { "type": "LOCATOR", "key": "source-code" },
+     *     { "type": "LOCATOR", "value": "Github" },
+     *     { "type": "MODULE", "value": "Module1" }
      *   ],
      *   "min_match_score": 1,
      *   "limit": 10,
      *   "organization": "leo1311"
      * }
+     *
+     * Query structure:
+     * - type: Required - SKILL, DOMAIN, MODULE, or LOCATOR
+     * - key: Optional for all types
+     *   - For SKILL/MODULE: Not used
+     *   - For DOMAIN: The domain name to match
+     *   - For LOCATOR: The locator_type to match
+     * - value: Optional for DOMAIN/LOCATOR, Required for SKILL/MODULE
+     *   - For SKILL/MODULE: The name to search
+     *   - For DOMAIN: The description to search
+     *   - For LOCATOR: The URL to search
+     *
+     * Flexible matching logic for DOMAIN:
+     * - Both key and value: Matches when domain.name == key AND domain.description matches value
+     * - Only key: Matches when domain.name == key (any description)
+     * - Only value: Matches when domain.description matches value (any name)
+     *
+     * Flexible matching logic for LOCATOR:
+     * - Both key and value: Matches when locator.locator_type == key AND locator.url == value
+     * - Only key: Matches when locator.locator_type == key (any url)
+     * - Only value: Matches when locator.url == value (any type)
      *
      * Response example:
      * {
@@ -340,7 +367,7 @@ public class ICIPAgentDirectoryController {
      *       "recordRef": 123,
      *       "matchQueries": [
      *         { "type": "SKILL", "value": "AI" },
-     *         { "type": "DOMAIN", "value": "research" }
+     *         { "type": "DOMAIN", "key": "domain", "value": "research" }
      *       ],
      *       "matchScore": 2,
      *       "agent": { ... agent details ... }
