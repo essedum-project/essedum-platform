@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Services } from '../../services/service';
 
@@ -16,6 +16,8 @@ interface DeploymentFormData {
 })
 export class DeploymentFormComponent implements OnInit {
   @Output() deploymentFinished = new EventEmitter<DeploymentFormData>();
+  @Input() cname: string = ''; // Container name from parent
+  @Input() organisation: string = ''; // Organisation from parent
 
   selectedTabIndex = 0;
   
@@ -102,7 +104,7 @@ export class DeploymentFormComponent implements OnInit {
   readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
 
   // Static text constants - Messages
-  readonly FINISH_NOTE_MESSAGE = 'Fill required fields: Agent Name, Agent Version, Deployment Date & Time';
+  readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button : Agent Name, Agent Version, Deployment Date & Time';
   readonly OVERVIEW_SAVED_MESSAGE = 'Overview saved';
   readonly SCOPE_SAVED_MESSAGE = 'Scope & Pre-Checks saved';
   readonly APPROVAL_SAVED_MESSAGE = 'Approval & Rollback saved';
@@ -182,11 +184,38 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check if we have a deployment ID to load (edit mode)
-    // If not, forms remain empty for new creation (create mode)
-    if (this.deploymentId) {
+    // Load deployment form data by cname and org if available
+    if (this.cname && this.organisation) {
+      this.loadDeploymentFormByCnameOrg(this.cname, this.organisation);
+    } else if (this.deploymentId) {
+      // Fallback to loading by ID if available (edit mode)
       this.loadDeploymentForm(this.deploymentId);
     }
+  }
+
+  /**
+   * Load deployment form data by cname and org
+   * @param cname - Customer name
+   * @param org - Organization name
+   */
+  loadDeploymentFormByCnameOrg(cname: string, org: string): void {
+    this.service.getDeploymentFormByCnameOrg(cname, org).subscribe(
+      (response) => {
+        if (response) {
+          this.deploymentId = response.id;
+          this.populateFormWithData(response);
+          console.log('Deployment form loaded successfully for cname:', cname, 'org:', org);
+        }
+      },
+      (error) => {
+        console.error('Error loading deployment form:', error);
+        // If record not found, keep forms empty for new creation
+        if (error.status === 404) {
+          console.log('No existing deployment form found for cname and org, ready for new creation');
+          this.deploymentId = null; // Reset to create mode
+        }
+      }
+    );
   }
 
   /**
@@ -268,12 +297,22 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   /**
-   * Save Overview - Just marks as saved, no API call
+   * Save Overview - Calls the same API as finish button
    */
   saveOverview(): void {
     if (this.overviewForm.valid) {
-      console.log('Overview data saved locally:', this.overviewForm.value);
-      this.service.message(this.OVERVIEW_SAVED_MESSAGE, 'success');
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.OVERVIEW_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
+        }
+      );
     } else {
       this.markFormGroupTouched(this.overviewForm);
       this.service.message(this.FILL_REQUIRED_FIELDS_MESSAGE, 'error');
@@ -281,27 +320,57 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   /**
-   * Save Scope - Just marks as saved, no API call
+   * Save Scope - Calls the same API as finish button
    */
   saveScope(): void {
-    console.log('Scope data saved locally:', this.scopeForm.value);
-    this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+    const deploymentData = this.buildDeploymentPayload();
+    this.service.saveDeploymentForm(deploymentData).subscribe(
+      (response) => {
+        if (response && response.id) {
+          this.deploymentId = response.id;
+        }
+        this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+      },
+      (error) => {
+        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
+      }
+    );
   }
 
   /**
-   * Save Approval - Just marks as saved, no API call
+   * Save Approval - Calls the same API as finish button
    */
   saveApproval(): void {
-    console.log('Approval data saved locally:', this.approvalForm.value);
-    this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+    const deploymentData = this.buildDeploymentPayload();
+    this.service.saveDeploymentForm(deploymentData).subscribe(
+      (response) => {
+        if (response && response.id) {
+          this.deploymentId = response.id;
+        }
+        this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+      },
+      (error) => {
+        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
+      }
+    );
   }
 
   /**
-   * Save Validation - Just marks as saved, no API call
+   * Save Validation - Calls the same API as finish button
    */
   saveValidation(): void {
-    console.log('Validation data saved locally:', this.validationForm.value);
-    this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
+    const deploymentData = this.buildDeploymentPayload();
+    this.service.saveDeploymentForm(deploymentData).subscribe(
+      (response) => {
+        if (response && response.id) {
+          this.deploymentId = response.id;
+        }
+        this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
+      },
+      (error) => {
+        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
+      }
+    );
   }
 
   /**
@@ -366,6 +435,8 @@ export class DeploymentFormComponent implements OnInit {
    */
   private buildDeploymentPayload(): any {
     const payload: any = {
+      cname: this.cname || '',
+      org: this.organisation || '',
       agent_name: this.overviewForm.get('agentName')?.value,
       agent_version: this.overviewForm.get('agentVersion')?.value,
       deployment_environment: this.overviewForm.get('deploymentEnvironment')?.value,

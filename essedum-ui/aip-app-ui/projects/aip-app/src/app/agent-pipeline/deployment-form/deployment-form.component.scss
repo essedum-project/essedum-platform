@@ -7,20 +7,15 @@
   overflow: hidden; // Remove all scrollbars
 }
 
-// Finish button at top
-.finish-section-top {
-  padding: 14px 24px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+// Form actions container with finish and save buttons
+.form-actions {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
-
-  .spacer {
-    flex: 1;
-  }
+  padding: 16px 0;
+  margin-top: 16px;
+  border-top: 1px solid #e9ecef;
 
   .finish-button {
     min-width: 140px;
@@ -34,7 +29,6 @@
     border-radius: 16px;
     color: #ffffff !important;
     transition: all 0.3s ease;
-    margin-left: auto;
 
     &:not(:disabled) {
       background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat,
@@ -42,6 +36,11 @@
       background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat padding-box !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       cursor: pointer;
+
+      &:hover {
+        box-shadow: 0 2px 6px rgba(0, 82, 204, 0.3);
+        transform: translateY(-1px);
+      }
     }
 
     &:disabled {
@@ -52,27 +51,20 @@
     }
   }
 
-  .finish-note {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background-color: #fff3cd;
-    border-left: 3px solid #ffc107;
-    border-radius: 3px;
-    color: #856404;
-    font-size: 12px;
-    max-width: 320px;
-    order: 1;
-
-    span {
-      line-height: 1.3;
-    }
+  .mat-save-btn {
+    // Existing save button styles remain the same
   }
+}
 
-  .finish-button {
-    order: 2;
-  }
+// Note message below buttons
+.finish-note {
+  margin-top: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+  color: #d9534f;
+  line-height: 1.4;
+  font-style: italic;
+  text-align: right;
 }
 
 .deployment-tabs {
@@ -138,7 +130,7 @@
 }
 
 .deployment-form {
-  padding: 20px 24px;
+  padding: 12px 24px 20px 24px;
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(100vh - 200px);
@@ -244,15 +236,6 @@
       margin-left: 32px;
       display: block;
     }
-  }
-
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 24px;
-    padding-top: 20px;
-    margin-right: 50px !important;
-    border-top: 1px solid #dee2e6;
   }
 }
 

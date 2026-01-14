@@ -1,26 +1,9 @@
 <div class="deployment-container">
-  <!-- Finish Button at Top -->
-  
-  <div class="finish-section-top">
-    <div class="finish-note" *ngIf="!isAllFormsValid()">
-      <span>{{ FINISH_NOTE_MESSAGE }}</span>
-    </div>
-    <div class="spacer" *ngIf="isAllFormsValid()"></div>
-    <button mat-raised-button 
-            class="finish-button" 
-            [disabled]="!isAllFormsValid()"
-            (click)="finishDeployment()">
-      {{ FINISH_BUTTON_LABEL }}
-    </button>
-    
-  </div>
-
   <!-- Sub-tabs for deployment forms -->
   <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="deployment-tabs">
     
     <!-- Tab 1: Deployment Overview -->
     <mat-tab label="Deployment Overview">
-      <hr>
       <form [formGroup]="overviewForm" class="deployment-form">
         <div class="row">
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
@@ -102,17 +85,26 @@
 
           <div class="form-actions">
             <button mat-raised-button 
-                    class="mat-save-btn mat-button-radius"
-                    (click)="saveOverview()">
-              {{ SAVE_OVERVIEW_BUTTON_LABEL }}
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
             </button>
+            <button mat-raised-button 
+                    class="mat-save-btn mat-button-radius"
+                    [disabled]="!overviewForm.valid"
+                    (click)="saveOverview()">
+              Save
+            </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
           </div>
         </form>
     </mat-tab>
 
     <!-- Tab 2: Scope & Pre-Checks -->
     <mat-tab label="Scope & Pre-Checks">
-      <hr>
       <form [formGroup]="scopeForm" class="deployment-form">
           <div class="row">
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
@@ -193,17 +185,25 @@
 
           <div class="form-actions">
             <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
+            <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
                     (click)="saveScope()">
-              {{ SAVE_SCOPE_BUTTON_LABEL }}
+              Save
             </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
           </div>
         </form>
     </mat-tab>
 
     <!-- Tab 3: Approval & Rollback -->
     <mat-tab label="Approval & Rollback">
-      <hr>
       <form [formGroup]="approvalForm" class="deployment-form">
           <div class="row">
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
@@ -237,28 +237,27 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
-                <mat-label class="mat-style-label">{{ PREVIOUS_STABLE_VERSION_LABEL }}</mat-label>
-                <input matInput class="mat-style-input" formControlName="previousStableVersion" [placeholder]="PREVIOUS_STABLE_VERSION_PLACEHOLDER">
-              </mat-form-field>
-            </div>
-          </div>
-
           <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
                     (click)="saveApproval()">
-              {{ SAVE_APPROVAL_BUTTON_LABEL }}
+              Save
             </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
           </div>
         </form>
     </mat-tab>
 
     <!-- Tab 4: Validation & Compliance -->
     <mat-tab label="Validation & Compliance">
-      <hr>
       <form [formGroup]="validationForm" class="deployment-form">
           <div class="row">
             <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
@@ -339,22 +338,21 @@
             </div>
           </div>
 
-          <div class="row">
-            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
-                <mat-label class="mat-style-label">{{ AUDIT_POC_DETAILS_LABEL }}</mat-label>
-                <textarea matInput class="mat-style-input no-resize" formControlName="auditPocDetails" rows="3" 
-                  [placeholder]="AUDIT_POC_DETAILS_PLACEHOLDER"></textarea>
-              </mat-form-field>
-            </div>
-          </div>
-
           <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
                     (click)="saveValidation()">
-              {{ SAVE_VALIDATION_BUTTON_LABEL }}
+              Save
             </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
           </div>
         </form>
     </mat-tab>
