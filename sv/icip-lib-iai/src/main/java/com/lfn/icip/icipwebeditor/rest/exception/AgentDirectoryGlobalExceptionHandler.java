@@ -1,25 +1,28 @@
 package com.lfn.icip.icipwebeditor.rest.exception;
 
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
+import jakarta.transaction.TransactionalException;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
-
-import jakarta.transaction.TransactionalException;
-import lombok.extern.log4j.Log4j2;
+import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler for Agent Directory Controller and Deployment Form Controller.
@@ -296,6 +299,66 @@ public class AgentDirectoryGlobalExceptionHandler {
 		);
 
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	/**
+	 * Handle MethodArgumentNotValidException for @Valid annotation.
+	 * Triggered when bean validation fails on request body.
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException ex, WebRequest request) {
+		log.error("Bean validation failed: {}", ex.getMessage(), ex);
+
+		// Collect all field errors
+		Map<String, String> fieldErrors = new HashMap<>();
+		ex.getBindingResult().getAllErrors().forEach(error -> {
+			String fieldName = ((FieldError) error).getField();
+			String errorMessage = error.getDefaultMessage();
+			fieldErrors.put(fieldName, errorMessage);
+		});
+
+		// Build a detailed message
+		String details = fieldErrors.entrySet().stream()
+				.map(entry -> entry.getKey() + ": " + entry.getValue())
+				.collect(Collectors.joining(", "));
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+				.timestamp(LocalDateTime.now())
+				.status(HttpStatus.BAD_REQUEST.value())
+				.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+				.message("Validation failed for request body")
+				.details(details)
+				.path(request.getDescription(false).replace("uri=", ""))
+				.exception("MethodArgumentNotValidException")
+				.context("Field validation errors: " + fieldErrors.size())
+				.build();
+
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * Handle ConstraintViolationException for @Validated on controller level.
+	 */
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErrorResponse> handleConstraintViolation(
+			ConstraintViolationException ex, WebRequest request) {
+		log.error("Constraint violation: {}", ex.getMessage(), ex);
+
+		// Collect all constraint violations
+		String details = ex.getConstraintViolations().stream()
+				.map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+				.collect(Collectors.joining(", "));
+
+		ErrorResponse errorResponse = buildErrorResponse(
+				HttpStatus.BAD_REQUEST,
+				"Validation constraint violated",
+				details,
+				"ConstraintViolationException",
+				request
+		);
+
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
 	/**

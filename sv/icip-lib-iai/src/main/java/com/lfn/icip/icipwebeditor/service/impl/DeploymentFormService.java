@@ -32,6 +32,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -264,6 +265,66 @@ public class DeploymentFormService implements IDeploymentFormService {
             // Wrap any other exceptions in AgentDirectoryException
             logger.error("Failed to fetch deployment form with cname: {} and org: {}", cname, org, e);
             throw new AgentDirectoryException("Failed to fetch deployment form", e);
+        }
+    }
+
+    @Override
+    public DeploymentFormDTO saveOrUpdateDeploymentForm(DeploymentFormDTO deploymentFormDTO) {
+        try {
+            logger.info("Save or update deployment form for cname: {}, org: {}",
+                    deploymentFormDTO.getCname(), deploymentFormDTO.getOrg());
+
+            // Validate required fields
+            if (deploymentFormDTO == null) {
+                throw new IllegalArgumentException("Deployment form DTO cannot be null");
+            }
+            if (deploymentFormDTO.getCname() == null || deploymentFormDTO.getCname().trim().isEmpty()) {
+                throw new IllegalArgumentException("Customer name (cname) is required");
+            }
+            if (deploymentFormDTO.getOrg() == null || deploymentFormDTO.getOrg().trim().isEmpty()) {
+                throw new IllegalArgumentException("Organization (org) is required");
+            }
+            if (deploymentFormDTO.getAgentName() == null || deploymentFormDTO.getAgentName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Agent name is required");
+            }
+            if (deploymentFormDTO.getAgentVersion() == null || deploymentFormDTO.getAgentVersion().trim().isEmpty()) {
+                throw new IllegalArgumentException("Agent version is required");
+            }
+            if (deploymentFormDTO.getDeploymentDatetime() == null) {
+                throw new IllegalArgumentException("Deployment datetime is required");
+            }
+
+            // Check if deployment form already exists for this cname and org
+            Optional<DeploymentForm> existingFormOpt = deploymentFormRepository.findByCnameAndOrg(
+                    deploymentFormDTO.getCname(), deploymentFormDTO.getOrg());
+
+            DeploymentFormDTO result;
+            if (existingFormOpt.isPresent()) {
+                // Update existing deployment form
+                DeploymentForm existingForm = existingFormOpt.get();
+                logger.info("Found existing deployment form with id: {}, updating...", existingForm.getId());
+
+                deploymentFormDTO.setId(existingForm.getId());
+                result = updateDeploymentForm(existingForm.getId(), deploymentFormDTO);
+                logger.info("Successfully updated deployment form with id: {}", result.getId());
+            } else {
+                // Create new deployment form
+                logger.info("No existing deployment form found, creating new...");
+                result = saveDeploymentForm(deploymentFormDTO);
+                logger.info("Successfully created deployment form with id: {}", result.getId());
+            }
+
+            return result;
+
+        } catch (IllegalArgumentException e) {
+            // Re-throw validation errors as-is
+            throw e;
+        } catch (Exception e) {
+            // Wrap any other exceptions in AgentDirectoryException
+            logger.error("Failed to save or update deployment form for cname: {}, org: {}",
+                    deploymentFormDTO != null ? deploymentFormDTO.getCname() : "null",
+                    deploymentFormDTO != null ? deploymentFormDTO.getOrg() : "null", e);
+            throw new AgentDirectoryException("Failed to save or update deployment form", e);
         }
     }
 

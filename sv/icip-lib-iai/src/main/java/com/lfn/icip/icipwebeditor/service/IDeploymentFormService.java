@@ -63,6 +63,16 @@ public interface IDeploymentFormService {
     DeploymentFormDTO getDeploymentFormByProjectAndCid(String cname, String org);
 
     /**
+     * Save or update deployment form.
+     * If a deployment form exists with the given cname and org, updates it.
+     * Otherwise, creates a new deployment form.
+     *
+     * @param deploymentFormDTO the deployment form DTO
+     * @return the saved or updated deployment form DTO
+     */
+    DeploymentFormDTO saveOrUpdateDeploymentForm(DeploymentFormDTO deploymentFormDTO);
+
+    /**
      * Delete deployment form by id.
      *
      * @param id the deployment form id
