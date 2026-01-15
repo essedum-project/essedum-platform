@@ -4292,6 +4292,9 @@ DELIVERABLES
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
+    
+    // Check if deployment form data exists for the Deploy button
+    this.checkDeploymentFormData();
 
     // Call folder list API first - using the cname as both cname and filename for the API
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
