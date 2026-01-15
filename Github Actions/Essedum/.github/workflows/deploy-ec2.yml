@@ -54,6 +54,20 @@ jobs:
             echo "User: $(whoami)"
             echo "Directory: ${HOME}/${{ env.APP_NAME }}"
             
+            # Install Git if not present
+            if ! command -v git &> /dev/null; then
+              echo "📥 Installing Git..."
+              sudo yum install -y git || sudo apt-get install -y git
+              echo "✅ Git installed"
+            fi
+            
+            # Install Python 3.11 if not present
+            if ! command -v python3.11 &> /dev/null; then
+              echo "🐍 Installing Python 3.11..."
+              sudo yum install -y python3.11 python3.11-pip || sudo apt-get install -y python3.11 python3.11-venv
+              echo "✅ Python 3.11 installed"
+            fi
+            
             # Check if app directory exists, if not create and clone
             if [ ! -d "${HOME}/${{ env.APP_NAME }}" ]; then
               echo "📁 Creating app directory..."
@@ -190,16 +204,3 @@ jobs:
           echo "- Health: http://${{ secrets.EC2_HOST }}:8080/health" >> $GITHUB_STEP_SUMMARY
           echo "- API Docs: http://${{ secrets.EC2_HOST }}:8080/docs" >> $GITHUB_STEP_SUMMARY
           echo "- Query: POST http://${{ secrets.EC2_HOST }}:8080/query" >> $GITHUB_STEP_SUMMARY
-        run: |
-          sleep 5
-          curl -f http://${{ secrets.EC2_HOST }}:8080/health || exit 1
-          echo "✅ Health check passed!"
-      
-      - name: Deployment notification
-        if: always()
-        run: |
-          if [ ${{ job.status }} == 'success' ]; then
-            echo "🎉 Deployment to EC2 completed successfully!"
-          else
-            echo "❌ Deployment to EC2 failed!"
-          fi
