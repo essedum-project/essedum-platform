@@ -1,0 +1,205 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes'
+        required: false
+        default: 'false'
+
+env:
+  APP_NAME: agent-dk
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies locally (for testing)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run syntax checks
+        run: |
+          python -m py_compile src/*.py
+          echo "✅ Python syntax check passed"
+      
+      - name: Deploy to EC2 via SSH (Password Auth)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            
+            echo "🚀 Starting deployment..."
+            echo "User: $(whoami)"
+            echo "Directory: ${HOME}/${{ env.APP_NAME }}"
+            
+            # Check if app directory exists, if not create and clone
+            if [ ! -d "${HOME}/${{ env.APP_NAME }}" ]; then
+              echo "📁 Creating app directory..."
+              mkdir -p "${HOME}/${{ env.APP_NAME }}"
+              cd "${HOME}/${{ env.APP_NAME }}"
+              
+              echo "📥 Cloning repository..."
+              git clone https://github.com/${{ github.repository }}.git .
+              
+              echo "🐍 Creating virtual environment..."
+              python3.11 -m venv venv
+              
+              echo "📦 Installing dependencies..."
+              source venv/bin/activate
+              pip install --upgrade pip
+              pip install -r requirements.txt
+              
+              echo "⚙️ Setting up environment file..."
+              if [ ! -f .env ]; then
+                cp env.template .env
+                echo "⚠️ WARNING: Update .env file with actual credentials!"
+              fi
+              
+              echo "🔧 Creating systemd service..."
+              sudo tee /etc/systemd/system/${{ env.APP_NAME }}.service > /dev/null <<EOF
+            [Unit]
+            Description=Agent Development Kit Service
+            After=network.target
+            
+            [Service]
+            Type=simple
+            User=$(whoami)
+            WorkingDirectory=${HOME}/${{ env.APP_NAME }}
+            Environment="PATH=${HOME}/${{ env.APP_NAME }}/venv/bin"
+            ExecStart=${HOME}/${{ env.APP_NAME }}/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
+            Restart=always
+            RestartSec=10
+            
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+              
+              sudo systemctl daemon-reload
+              sudo systemctl enable ${{ env.APP_NAME }}
+              echo "✅ Service created and enabled"
+            else
+              # Update existing installation
+              cd "${HOME}/${{ env.APP_NAME }}"
+              
+              echo "📥 Pulling latest code..."
+              git fetch origin
+              git reset --hard origin/${{ github.ref_name }}
+              
+              echo "📦 Updating dependencies..."
+              source venv/bin/activate
+              pip install -r requirements.txt --upgrade
+            fi
+            
+            # Update environment variables from secrets (if provided)
+            if [ -n "${{ secrets.AZURE_OPENAI_API_KEY }}" ]; then
+              echo "🔐 Updating environment variables from secrets..."
+              cd "${HOME}/${{ env.APP_NAME }}"
+              
+              # Backup existing .env
+              if [ -f .env ]; then
+                cp .env .env.backup
+              fi
+              
+              # Update .env file
+              cat > .env <<EOF
+            # Updated by GitHub Actions on $(date)
+            AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+            AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+            AZURE_API_VERSION=2024-06-01
+            
+            MODEL_NAME=gpt-4
+            TEMPERATURE=0.7
+            MAX_TOKENS=1000
+            TIMEOUT_SECONDS=60
+            
+            ENVIRONMENT=production
+            LOG_LEVEL=INFO
+            PORT=8080
+            HOST=0.0.0.0
+            EOF
+              
+              chmod 600 .env
+              echo "✅ Environment variables updated"
+            fi
+            
+            # Restart service
+            echo "♻️ Restarting service..."
+            sudo systemctl restart ${{ env.APP_NAME }}
+            
+            # Wait for service to start
+            sleep 5
+            
+            # Check service status
+            if sudo systemctl is-active --quiet ${{ env.APP_NAME }}; then
+              echo "✅ Deployment successful!"
+              sudo systemctl status ${{ env.APP_NAME }} --no-pager -l
+            else
+              echo "❌ Service failed to start"
+              echo "Recent logs:"
+              sudo journalctl -u ${{ env.APP_NAME }} -n 50 --no-pager
+              exit 1
+            fi
+      
+      - name: Health Check
+        run: |
+          sleep 5
+          response=$(curl -f http://${{ secrets.EC2_HOST }}:8080/health || echo "failed")
+          if [ "$response" != "failed" ]; then
+            echo "✅ Health check passed!"
+            echo "Response: $response"
+          else
+            echo "❌ Health check failed!"
+            exit 1
+          fi
+      
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **EC2 Host**: ${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Access Points" >> $GITHUB_STEP_SUMMARY
+          echo "- Health: http://${{ secrets.EC2_HOST }}:8080/health" >> $GITHUB_STEP_SUMMARY
+          echo "- API Docs: http://${{ secrets.EC2_HOST }}:8080/docs" >> $GITHUB_STEP_SUMMARY
+          echo "- Query: POST http://${{ secrets.EC2_HOST }}:8080/query" >> $GITHUB_STEP_SUMMARY
+        run: |
+          sleep 5
+          curl -f http://${{ secrets.EC2_HOST }}:8080/health || exit 1
+          echo "✅ Health check passed!"
+      
+      - name: Deployment notification
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "🎉 Deployment to EC2 completed successfully!"
+          else
+            echo "❌ Deployment to EC2 failed!"
+          fi

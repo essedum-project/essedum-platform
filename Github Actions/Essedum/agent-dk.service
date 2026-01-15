@@ -1,0 +1,20 @@
+[Unit]
+Description=Agent Development Kit (ADK) Service
+After=network.target
+
+[Service]
+Type=simple
+User=user
+Group=user
+WorkingDirectory=/home/user/agent-dk
+Environment="PATH=/home/user/agent-dk/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/home/user/agent-dk/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agent-dk
+
+[Install]
+WantedBy=multi-user.target
