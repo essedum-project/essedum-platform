@@ -175,6 +175,34 @@ jobs:
               fi
             fi
             
+            # Ensure systemd service exists (in case service was deleted but directory exists)
+            if ! sudo systemctl list-unit-files | grep -q "${{ env.APP_NAME }}.service"; then
+              echo "🔧 Service not found. Creating systemd service..."
+              cd "${HOME}/${{ env.APP_NAME }}"
+              
+              sudo tee /etc/systemd/system/${{ env.APP_NAME }}.service > /dev/null <<EOF
+            [Unit]
+            Description=Agent Development Kit Service
+            After=network.target
+            
+            [Service]
+            Type=simple
+            User=$(whoami)
+            WorkingDirectory=${HOME}/${{ env.APP_NAME }}
+            Environment="PATH=${HOME}/${{ env.APP_NAME }}/venv/bin"
+            ExecStart=${HOME}/${{ env.APP_NAME }}/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
+            Restart=always
+            RestartSec=10
+            
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+              
+              sudo systemctl daemon-reload
+              sudo systemctl enable ${{ env.APP_NAME }}
+              echo "✅ Service created and enabled"
+            fi
+            
             # Update environment variables from secrets (if provided)
             if [ -n "${{ secrets.AZURE_OPENAI_API_KEY }}" ]; then
               echo "🔐 Updating environment variables from secrets..."
