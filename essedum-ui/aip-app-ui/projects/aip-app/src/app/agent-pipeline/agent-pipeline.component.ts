@@ -4163,34 +4163,69 @@ DELIVERABLES
    */
   private checkDeploymentFormData(): void {
     if (!this.currentCname) {
-      console.log('Cannot check deployment form data: no cname available');
+      console.log('❌ Cannot check deployment form data: no cname available');
       this.hasDeploymentFormData = false;
+      this.deploymentEnvironment = '';
       return;
     }
 
     const organization = this.getOrganization();
-    console.log('Checking deployment form data for cname:', this.currentCname, 'org:', organization);
+    console.log('🔍 Checking deployment form data for cname:', this.currentCname, 'org:', organization);
+    console.log('🔍 API URL will be: /api/aip/deployment-form?cname=' + this.currentCname + '&org=' + organization);
     
     this.isCheckingDeploymentData = true;
     
     this.service.getDeploymentFormByCnameOrg(this.currentCname, organization).subscribe({
       next: (response) => {
-        console.log('Deployment form API response:', response);
+        console.log('📦 Deployment form API response:', response);
+        console.log('📦 Response type:', typeof response);
+        console.log('📦 Is array:', Array.isArray(response));
         
-        // Check if response has data (not null/empty)
-        if (response && (Array.isArray(response) ? response.length > 0 : Object.keys(response).length > 0)) {
+        // More robust checking - if response exists and is not empty
+        let hasData = false;
+        let data = null;
+        
+        if (response) {
+          if (Array.isArray(response)) {
+            hasData = response.length > 0;
+            data = response[0];
+            console.log('📦 Array response with length:', response.length);
+          } else if (typeof response === 'object') {
+            hasData = Object.keys(response).length > 0;
+            data = response;
+            console.log('📦 Object response with keys:', Object.keys(response).length);
+          }
+        }
+        
+        console.log('📦 Has data:', hasData);
+        
+        if (hasData && data) {
+          // Set flag to TRUE - button MUST show
           this.hasDeploymentFormData = true;
-          console.log('✅ Deployment form data exists - Deploy button will be enabled');
+          
+          // Try to extract deployment environment (optional)
+          this.deploymentEnvironment = data.deployment_environment || '';
+          
+          console.log('✅ Deployment form data EXISTS - Deploy button WILL show');
+          console.log('✅ Deployment environment extracted:', this.deploymentEnvironment || '(none - will show as "Deploy")');
+          console.log('✅ hasDeploymentFormData flag set to:', this.hasDeploymentFormData);
         } else {
           this.hasDeploymentFormData = false;
-          console.log('❌ No deployment form data found - Deploy button will be disabled');
+          this.deploymentEnvironment = '';
+          console.log('❌ No deployment form data found - Deploy button will NOT show');
         }
         
         this.isCheckingDeploymentData = false;
+        
+        // Force change detection to ensure UI updates
+        this.cdr.detectChanges();
+        console.log('🔄 Change detection triggered');
       },
       error: (error) => {
-        console.error('Error checking deployment form data:', error);
+        console.error('❌ Error checking deployment form data:', error);
+        console.error('❌ Error details:', error.message || error);
         this.hasDeploymentFormData = false;
+        this.deploymentEnvironment = '';
         this.isCheckingDeploymentData = false;
       }
     });
