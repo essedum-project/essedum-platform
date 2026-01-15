@@ -476,3 +476,14 @@ Use this to verify all files are ready:
 - All files are production-ready
 
 **Status:** ✅ Complete and Ready for Deployment
+
+
+
+
+sudo tee /etc/sudoers.d/github-actions > /dev/null <<'EOF'
+rishabh ALL=(ALL) NOPASSWD: /bin/systemctl
+rishabh ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/systemd/system/*
+rishabh ALL=(ALL) NOPASSWD: /usr/bin/journalctl
+EOF
+
+sudo chmod 0440 /etc/sudoers.d/github-actions

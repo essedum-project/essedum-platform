@@ -246,11 +246,12 @@ jobs:
             # Check service status
             if sudo systemctl is-active --quiet ${{ env.APP_NAME }}; then
               echo "✅ Deployment successful!"
-              sudo systemctl status ${{ env.APP_NAME }} --no-pager -l
+              echo "Service is running"
+              sudo systemctl status ${{ env.APP_NAME }} --no-pager -l || echo "Status check completed"
             else
               echo "❌ Service failed to start"
               echo "Recent logs:"
-              sudo journalctl -u ${{ env.APP_NAME }} -n 50 --no-pager
+              sudo journalctl -u ${{ env.APP_NAME }} -n 50 --no-pager || echo "Could not retrieve logs"
               exit 1
             fi
       
