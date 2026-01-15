@@ -117,13 +117,33 @@ jobs:
               # Update existing installation
               cd "${HOME}/${{ env.APP_NAME }}"
               
-              echo "📥 Pulling latest code..."
-              git fetch origin
-              git reset --hard origin/${{ github.ref_name }}
-              
-              echo "📦 Updating dependencies..."
-              source venv/bin/activate
-              pip install -r requirements.txt --upgrade
+              # Check if directory is a valid git repository
+              if [ ! -d .git ]; then
+                echo "⚠️ Directory exists but is not a git repository. Re-initializing..."
+                cd "${HOME}"
+                rm -rf "${{ env.APP_NAME }}"
+                mkdir -p "${{ env.APP_NAME }}"
+                cd "${{ env.APP_NAME }}"
+                
+                echo "📥 Cloning repository..."
+                git clone https://github.com/${{ github.repository }}.git .
+                
+                echo "🐍 Creating virtual environment..."
+                python3.11 -m venv venv
+                
+                echo "📦 Installing dependencies..."
+                source venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+              else
+                echo "📥 Pulling latest code..."
+                git fetch origin
+                git reset --hard origin/${{ github.ref_name }}
+                
+                echo "📦 Updating dependencies..."
+                source venv/bin/activate
+                pip install -r requirements.txt --upgrade
+              fi
             fi
             
             # Update environment variables from secrets (if provided)
