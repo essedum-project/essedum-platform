@@ -15,6 +15,9 @@ export class PlaygroundTabComponent {
   @Input() consoleOutput: string[] = [];
   @Input() isGenerating: boolean = false;
   @Input() isLoadingFiles: boolean = false;
+  @Input() hasDeploymentFormData: boolean = false;
+  @Input() isCheckingDeploymentData: boolean = false;
+  @Input() deploymentEnvironment: string = '';
   
   @Output() runAndDeployClick = new EventEmitter<void>();
   @Output() openPlaygroundClick = new EventEmitter<void>();

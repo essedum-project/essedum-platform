@@ -30,7 +30,7 @@
             <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
 
               <!-- Tabs (Show directly on view details) -->
-              <mat-tab-group disableRipple (selectedTabChange)="onTabChange($event)">
+              <mat-tab-group #tabGroup disableRipple (selectedTabChange)="onTabChange($event)">
 
                 <!-- Agent/MCP Builder Tab - Split View (Conditionally visible based on created_source) -->
                 <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" 
@@ -312,6 +312,9 @@
                     [consoleOutput]="consoleOutput"
                     [isGenerating]="isGenerating"
                     [isLoadingFiles]="isLoadingFiles"
+                    [hasDeploymentFormData]="hasDeploymentFormData"
+                    [isCheckingDeploymentData]="isCheckingDeploymentData"
+                    [deploymentEnvironment]="deploymentEnvironment"
                     (runAndDeployClick)="runAndDeploy()"
                     (openPlaygroundClick)="openPlayground()">
                   </app-playground-tab>

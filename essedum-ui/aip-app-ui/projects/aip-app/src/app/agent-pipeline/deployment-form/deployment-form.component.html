@@ -48,7 +48,7 @@
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
               <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
                 <mat-label class="mat-style-label">{{ DEPLOYMENT_DATETIME_LABEL }}</mat-label>
-                <input matInput class="mat-style-input" [matDatepicker]="picker" formControlName="deploymentDateTime" [placeholder]="DEPLOYMENT_DATETIME_PLACEHOLDER" readonly>
+                <input matInput class="mat-style-input" [matDatepicker]="picker" formControlName="deploymentDateTime" [placeholder]="DEPLOYMENT_DATETIME_PLACEHOLDER" [min]="minDate" readonly>
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
                 <mat-error class="ml-15m" *ngIf="overviewForm.get('deploymentDateTime')?.hasError('required')">

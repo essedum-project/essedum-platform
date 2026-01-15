@@ -33,6 +33,9 @@ export class DeploymentFormComponent implements OnInit {
   // Deployment ID for edit mode
   deploymentId: number | null = null;
 
+  // Min date for deployment date picker (today)
+  minDate: Date = new Date();
+
   // Static text constants - Labels
   readonly AGENT_NAME_LABEL = 'Agent Name';
   readonly AGENT_VERSION_LABEL = 'Agent Version';
@@ -143,7 +146,7 @@ export class DeploymentFormComponent implements OnInit {
       agentName: ['', Validators.required],
       agentVersion: ['', Validators.required],
       deploymentEnvironment: [''],
-      deploymentDateTime: ['', Validators.required],
+      deploymentDateTime: [new Date(), Validators.required], // Set today's date as default
       buildReleaseId: [''],
       agentPackageLocation: [''],
       hashChecksum: ['']
