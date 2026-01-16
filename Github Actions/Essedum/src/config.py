@@ -3,7 +3,7 @@
 Application Configuration
 
 Manages environment variables and configuration settings using Pydantic v2 BaseSettings.
-Supports both Azure OpenAI and OpenAI with automatic fallback logic.
+Supports AWS Bedrock with Claude models.
 """
 
 from typing import Optional
@@ -15,7 +15,7 @@ class AppConfig(BaseSettings):
     """
     Application configuration loaded from environment variables and .env file.
     
-    Supports dual Azure OpenAI / OpenAI configuration with validation.
+    Supports AWS Bedrock for LLM inference with Claude models.
     """
     
     model_config = SettingsConfigDict(
@@ -25,19 +25,16 @@ class AppConfig(BaseSettings):
         extra="ignore"
     )
     
-    # Azure OpenAI configuration
-    azure_openai_api_key: Optional[str] = Field(None, alias="AZURE_OPENAI_API_KEY")
-    azure_openai_endpoint: Optional[str] = Field(None, alias="AZURE_OPENAI_ENDPOINT")
-    azure_openai_deployment: Optional[str] = Field(None, alias="AZURE_OPENAI_DEPLOYMENT")
-    azure_api_version: str = Field("2024-06-01", alias="AZURE_API_VERSION")
-    
-    # OpenAI configuration (fallback)
-    openai_api_key: Optional[str] = Field(None, alias="OPENAI_API_KEY")
+    # AWS Bedrock configuration
+    aws_access_key_id: Optional[str] = Field(None, alias="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: Optional[str] = Field(None, alias="AWS_SECRET_ACCESS_KEY")
+    aws_region: str = Field("us-east-1", alias="AWS_REGION")
+    aws_session_token: Optional[str] = Field(None, alias="AWS_SESSION_TOKEN")
     
     # Common model settings
-    model_name: str = Field("gpt-4", alias="MODEL_NAME")
+    model_name: str = Field("anthropic.claude-3-5-sonnet-20241022-v2:0", alias="MODEL_NAME")
     temperature: float = Field(0.7, alias="TEMPERATURE")
-    max_tokens: Optional[int] = Field(None, alias="MAX_TOKENS")
+    max_tokens: Optional[int] = Field(4096, alias="MAX_TOKENS")
     timeout_seconds: int = Field(60, alias="TIMEOUT_SECONDS")
     
     # System configuration
@@ -47,39 +44,32 @@ class AppConfig(BaseSettings):
     def model_post_init(self, __context) -> None:
         """Normalize configuration after initialization."""
         # Strip whitespace from string fields
-        if self.azure_openai_endpoint:
-            self.azure_openai_endpoint = self.azure_openai_endpoint.strip()
-        if self.azure_openai_deployment:
-            self.azure_openai_deployment = self.azure_openai_deployment.strip()
+        if self.aws_region:
+            self.aws_region = self.aws_region.strip()
         
-        # Ensure temperature is in valid range
+        # Ensure temperature is in valid range (Bedrock uses 0-1)
         if self.temperature < 0:
             self.temperature = 0.0
-        elif self.temperature > 2:
-            self.temperature = 2.0
+        elif self.temperature > 1:
+            self.temperature = 1.0
     
-    def is_azure(self) -> bool:
-        """Check if Azure OpenAI credentials are configured."""
+    def is_aws_bedrock(self) -> bool:
+        """Check if AWS Bedrock credentials are configured."""
         return bool(
-            self.azure_openai_api_key 
-            and self.azure_openai_endpoint 
-            and self.azure_openai_deployment
+            self.aws_access_key_id 
+            and self.aws_secret_access_key 
+            and self.aws_region
         )
-    
-    def is_openai(self) -> bool:
-        """Check if OpenAI credentials are configured."""
-        return bool(self.openai_api_key)
     
     def validate(self) -> None:
         """
-        Validate that at least one LLM provider is configured.
+        Validate that AWS Bedrock credentials are configured.
         
         Raises:
-            ValueError: If neither Azure nor OpenAI credentials are present
+            ValueError: If AWS Bedrock credentials are not present
         """
-        if not self.is_azure() and not self.is_openai():
+        if not self.is_aws_bedrock():
             raise ValueError(
-                "Missing LLM credentials. Provide either Azure OpenAI "
-                "(AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT) "
-                "or OpenAI (OPENAI_API_KEY) configuration."
+                "Missing AWS Bedrock credentials. Provide AWS_ACCESS_KEY_ID, "
+                "AWS_SECRET_ACCESS_KEY, and AWS_REGION configuration."
             )

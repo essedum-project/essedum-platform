@@ -9,7 +9,7 @@ Nodes receive WorkflowState and AppConfig, execute logic, and return updates as 
 import logging
 from typing import Any, Optional
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langchain_openai import AzureChatOpenAI, ChatOpenAI
+from langchain_aws import ChatBedrock
 from langgraph.prebuilt import create_react_agent
 
 from src.workflow_state import WorkflowState
@@ -22,7 +22,7 @@ def get_model(config: AppConfig, node_params: Optional[dict] = None):
     """
     Get LLM instance based on configuration.
     
-    Prefers Azure OpenAI if configured, falls back to OpenAI.
+    Uses AWS Bedrock with Claude models.
     Applies node-specific parameters or config defaults.
     
     Args:
@@ -30,41 +30,40 @@ def get_model(config: AppConfig, node_params: Optional[dict] = None):
         node_params: Optional node-specific parameters (temperature, model_name, etc.)
         
     Returns:
-        LLM instance (AzureChatOpenAI or ChatOpenAI)
+        LLM instance (ChatBedrock)
     """
     params = node_params or {}
     
     temperature = params.get("temperature", config.temperature)
     max_tokens = params.get("max_tokens", config.max_tokens)
-    timeout = params.get("timeout", config.timeout_seconds)
+    model_id = params.get("model_name", config.model_name)
     
     try:
-        if config.is_azure():
-            model_name = params.get("model_name", config.model_name)
-            logger.info(f"Using Azure OpenAI with deployment: {config.azure_openai_deployment}")
-            
-            return AzureChatOpenAI(
-                azure_endpoint=config.azure_openai_endpoint,
-                azure_deployment=config.azure_openai_deployment,
-                api_version=config.azure_api_version,
-                api_key=config.azure_openai_api_key,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=timeout,
-            )
-        else:
-            model_name = params.get("model_name", config.model_name)
-            logger.info(f"Using OpenAI with model: {model_name}")
-            
-            return ChatOpenAI(
-                model=model_name,
-                api_key=config.openai_api_key,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=timeout,
-            )
+        logger.info(f"Using AWS Bedrock with model: {model_id} in region: {config.aws_region}")
+        
+        # Prepare credentials dict
+        credentials = {
+            "aws_access_key_id": config.aws_access_key_id,
+            "aws_secret_access_key": config.aws_secret_access_key,
+            "region_name": config.aws_region,
+        }
+        
+        # Add session token if provided (for temporary credentials)
+        if config.aws_session_token:
+            credentials["aws_session_token"] = config.aws_session_token
+        
+        return ChatBedrock(
+            model_id=model_id,
+            model_kwargs={
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            },
+            credentials_profile_name=None,  # Use explicit credentials
+            region_name=config.aws_region,
+            **credentials
+        )
     except Exception as e:
-        logger.error(f"Failed to initialize LLM: {e}")
+        logger.error(f"Failed to initialize AWS Bedrock LLM: {e}")
         raise
 
 

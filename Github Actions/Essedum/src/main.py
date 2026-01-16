@@ -68,8 +68,7 @@ class HealthResponse(BaseModel):
     """Health check response."""
     status: str
     version: str
-    azure_configured: bool
-    openai_configured: bool
+    bedrock_configured: bool
 
 
 @app.on_event("startup")
@@ -84,7 +83,7 @@ async def startup_event():
         # Load configuration
         config_instance = AppConfig()
         config_instance.validate()
-        logger.info(f"Configuration loaded (Azure: {config_instance.is_azure()}, OpenAI: {config_instance.is_openai()})")
+        logger.info(f"Configuration loaded (Bedrock: {config_instance.is_aws_bedrock()}, Region: {config_instance.aws_region})")
         
         # Load design JSON
         design_files = ["LEOAZR_M74854_M74854.json", "design.json"]
@@ -131,8 +130,7 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         version="1.0.0",
-        azure_configured=config_instance.is_azure() if config_instance else False,
-        openai_configured=config_instance.is_openai() if config_instance else False
+        bedrock_configured=config_instance.is_aws_bedrock() if config_instance else False
     )
 
 

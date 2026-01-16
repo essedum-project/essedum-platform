@@ -15,6 +15,8 @@ on:
 env:
   APP_NAME: agent-dk
   PYTHON_VERSION: "3.11"
+  DOCKER_IMAGE: agent-dk
+  DOCKER_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
@@ -40,7 +42,31 @@ jobs:
           python -m py_compile src/*.py
           echo "✅ Python syntax check passed"
       
-      - name: Deploy to EC2 via SSH (Password Auth)
+      - name: Build Docker image
+        run: |
+          echo "🐋 Building Docker image..."
+          docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
+          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} ${{ env.DOCKER_IMAGE }}:latest
+          echo "✅ Docker image built successfully"
+      
+      - name: Save Docker image to file
+        run: |
+          echo "💾 Saving Docker image to tar file..."
+          docker save ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} | gzip > ${{ env.DOCKER_IMAGE }}-${{ env.DOCKER_TAG }}.tar.gz
+          ls -lh ${{ env.DOCKER_IMAGE }}-${{ env.DOCKER_TAG }}.tar.gz
+          echo "✅ Docker image saved"
+      
+      - name: Copy Docker image to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: 22
+          source: "${{ env.DOCKER_IMAGE }}-${{ env.DOCKER_TAG }}.tar.gz"
+          target: "/tmp/"
+      
+      - name: Load and Deploy Docker Container on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -50,208 +76,120 @@ jobs:
           script: |
             set -e
             
-            echo "🚀 Starting deployment..."
+            echo "🚀 Starting Docker deployment..."
             echo "User: $(whoami)"
-            echo "Directory: ${HOME}/${{ env.APP_NAME }}"
+            echo "Image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}"
             
-            # Install Git if not present
-            if ! command -v git &> /dev/null; then
-              echo "📥 Installing Git..."
-              sudo yum install -y git || sudo apt-get install -y git
-              echo "✅ Git installed"
-            fi
-            
-            # Install Python 3.11 if not present
-            if ! command -v python3.11 &> /dev/null; then
-              echo "🐍 Installing Python 3.11..."
-              sudo yum install -y python3.11 python3.11-pip || sudo apt-get install -y python3.11 python3.11-venv
-              echo "✅ Python 3.11 installed"
-            fi
-            
-            # Check if app directory exists, if not create and clone
-            if [ ! -d "${HOME}/${{ env.APP_NAME }}" ]; then
-              echo "📁 Creating app directory..."
-              mkdir -p "${HOME}/${{ env.APP_NAME }}"
-              cd "${HOME}/${{ env.APP_NAME }}"
+            # Install Docker if not present
+            if ! command -v docker &> /dev/null; then
+              echo "🐋 Installing Docker..."
               
-              echo "📥 Cloning repository..."
-              git clone https://github.com/${{ github.repository }}.git .
-              
-              echo "🐍 Creating virtual environment..."
-              python3.11 -m venv venv
-              
-              echo "📦 Installing dependencies..."
-              source venv/bin/activate
-              pip install --upgrade pip
-              pip install -r requirements.txt
-              
-              echo "⚙️ Setting up environment file..."
-              if [ ! -f .env ]; then
-                cp env.template .env
-                echo "⚠️ WARNING: Update .env file with actual credentials!"
-              fi
-              
-              echo "🔧 Creating systemd service..."
-              sudo tee /etc/systemd/system/${{ env.APP_NAME }}.service > /dev/null <<EOF
-            [Unit]
-            Description=Agent Development Kit Service
-            After=network.target
-            
-            [Service]
-            Type=simple
-            User=$(whoami)
-            WorkingDirectory=${HOME}/${{ env.APP_NAME }}
-            Environment="PATH=${HOME}/${{ env.APP_NAME }}/venv/bin"
-            ExecStart=${HOME}/${{ env.APP_NAME }}/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
-            Restart=always
-            RestartSec=10
-            
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-              
-              sudo systemctl daemon-reload
-              sudo systemctl enable ${{ env.APP_NAME }}
-              echo "✅ Service created and enabled"
-            else
-              # Update existing installation
-              cd "${HOME}/${{ env.APP_NAME }}"
-              
-              # Check if directory is a valid git repository
-              if [ ! -d .git ]; then
-                echo "⚠️ Directory exists but is not a git repository. Re-initializing..."
-                cd "${HOME}"
-                rm -rf "${{ env.APP_NAME }}"
-                mkdir -p "${{ env.APP_NAME }}"
-                cd "${{ env.APP_NAME }}"
-                
-                echo "📥 Cloning repository..."
-                git clone https://github.com/${{ github.repository }}.git .
-                
-                echo "🐍 Creating virtual environment..."
-                python3.11 -m venv venv
-                
-                echo "📦 Installing dependencies..."
-                source venv/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                
-                echo "⚙️ Setting up environment file..."
-                if [ ! -f .env ]; then
-                  cp env.template .env
-                  echo "⚠️ WARNING: Update .env file with actual credentials!"
+              # Detect OS and install Docker
+              if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                if [[ "$ID" == "amzn" ]] || [[ "$ID_LIKE" == *"rhel"* ]]; then
+                  # Amazon Linux 2 or RHEL-based
+                  sudo yum update -y
+                  sudo yum install -y docker
+                  sudo systemctl start docker
+                  sudo systemctl enable docker
+                  sudo usermod -a -G docker $(whoami)
+                elif [[ "$ID" == "ubuntu" ]] || [[ "$ID" == "debian" ]]; then
+                  # Ubuntu or Debian
+                  sudo apt-get update
+                  sudo apt-get install -y docker.io
+                  sudo systemctl start docker
+                  sudo systemctl enable docker
+                  sudo usermod -a -G docker $(whoami)
                 fi
-                
-                echo "🔧 Creating systemd service..."
-                sudo tee /etc/systemd/system/${{ env.APP_NAME }}.service > /dev/null <<EOF
-            [Unit]
-            Description=Agent Development Kit Service
-            After=network.target
-            
-            [Service]
-            Type=simple
-            User=$(whoami)
-            WorkingDirectory=${HOME}/${{ env.APP_NAME }}
-            Environment="PATH=${HOME}/${{ env.APP_NAME }}/venv/bin"
-            ExecStart=${HOME}/${{ env.APP_NAME }}/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
-            Restart=always
-            RestartSec=10
-            
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-                
-                sudo systemctl daemon-reload
-                sudo systemctl enable ${{ env.APP_NAME }}
-                echo "✅ Service created and enabled"
+              fi
+              
+              echo "✅ Docker installed"
+              echo "⚠️ Note: You may need to log out and back in for group changes to take effect"
+              
+              # Try to use docker with sudo if needed
+              if ! docker ps &> /dev/null; then
+                echo "Using sudo for Docker commands..."
+                DOCKER_CMD="sudo docker"
               else
-                echo "📥 Pulling latest code..."
-                git fetch origin
-                git reset --hard origin/${{ github.ref_name }}
-                
-                echo "📦 Updating dependencies..."
-                source venv/bin/activate
-                pip install -r requirements.txt --upgrade
+                DOCKER_CMD="docker"
+              fi
+            else
+              echo "✅ Docker already installed"
+              
+              # Check if we can run docker without sudo
+              if ! docker ps &> /dev/null; then
+                DOCKER_CMD="sudo docker"
+              else
+                DOCKER_CMD="docker"
               fi
             fi
             
-            # Ensure systemd service exists (in case service was deleted but directory exists)
-            if ! sudo systemctl list-unit-files | grep -q "${{ env.APP_NAME }}.service"; then
-              echo "🔧 Service not found. Creating systemd service..."
-              cd "${HOME}/${{ env.APP_NAME }}"
-              
-              sudo tee /etc/systemd/system/${{ env.APP_NAME }}.service > /dev/null <<EOF
-            [Unit]
-            Description=Agent Development Kit Service
-            After=network.target
+            # Load Docker image from tar file
+            echo "📥 Loading Docker image from tar file..."
+            $DOCKER_CMD load -i /tmp/${{ env.DOCKER_IMAGE }}-${{ env.DOCKER_TAG }}.tar.gz
+            echo "✅ Docker image loaded"
             
-            [Service]
-            Type=simple
-            User=$(whoami)
-            WorkingDirectory=${HOME}/${{ env.APP_NAME }}
-            Environment="PATH=${HOME}/${{ env.APP_NAME }}/venv/bin"
-            ExecStart=${HOME}/${{ env.APP_NAME }}/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8080
-            Restart=always
-            RestartSec=10
+            # Stop and remove existing container if it exists
+            echo "🛑 Stopping existing container..."
+            $DOCKER_CMD stop ${{ env.APP_NAME }} 2>/dev/null || true
+            $DOCKER_CMD rm ${{ env.APP_NAME }} 2>/dev/null || true
             
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-              
-              sudo systemctl daemon-reload
-              sudo systemctl enable ${{ env.APP_NAME }}
-              echo "✅ Service created and enabled"
-            fi
+            # Remove old images (keep last 3)
+            echo "🧹 Cleaning up old images..."
+            $DOCKER_CMD images ${{ env.DOCKER_IMAGE }} --format "{{.ID}} {{.Tag}}" | tail -n +4 | awk '{print $1}' | xargs -r $DOCKER_CMD rmi 2>/dev/null || true
             
-            # Update environment variables from secrets (if provided)
-            if [ -n "${{ secrets.AZURE_OPENAI_API_KEY }}" ]; then
-              echo "🔐 Updating environment variables from secrets..."
-              cd "${HOME}/${{ env.APP_NAME }}"
-              
-              # Backup existing .env
-              if [ -f .env ]; then
-                cp .env .env.backup
-              fi
-              
-              # Update .env file
-              cat > .env <<EOF
-            # Updated by GitHub Actions on $(date)
-            AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
-            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
-            AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
-            AZURE_API_VERSION=2024-06-01
+            # Clean up transferred tar file
+            rm -f /tmp/${{ env.DOCKER_IMAGE }}-${{ env.DOCKER_TAG }}.tar.gz
             
-            MODEL_NAME=gpt-4
+            # Create env file for container
+            echo "⚙️ Creating environment file..."
+            cat > /tmp/${{ env.APP_NAME }}.env <<EOF
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            MODEL_NAME=anthropic.claude-3-5-sonnet-20241022-v2:0
             TEMPERATURE=0.7
-            MAX_TOKENS=1000
+            MAX_TOKENS=4096
             TIMEOUT_SECONDS=60
-            
             ENVIRONMENT=production
             LOG_LEVEL=INFO
             PORT=8080
             HOST=0.0.0.0
             EOF
-              
-              chmod 600 .env
-              echo "✅ Environment variables updated"
-            fi
             
-            # Restart service
-            echo "♻️ Restarting service..."
-            sudo systemctl restart ${{ env.APP_NAME }}
+            # Run new container
+            echo "🚀 Starting new container..."
+            $DOCKER_CMD run -d \
+              --name ${{ env.APP_NAME }} \
+              --restart always \
+              -p 8080:8080 \
+              --env-file /tmp/${{ env.APP_NAME }}.env \
+              --log-driver json-file \
+              --log-opt max-size=10m \
+              --log-opt max-file=3 \
+              ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
             
-            # Wait for service to start
-            sleep 5
+            # Clean up env file
+            rm /tmp/${{ env.APP_NAME }}.env
             
-            # Check service status
-            if sudo systemctl is-active --quiet ${{ env.APP_NAME }}; then
-              echo "✅ Deployment successful!"
-              echo "Service is running"
-              sudo systemctl status ${{ env.APP_NAME }} --no-pager -l || echo "Status check completed"
-            else
-              echo "❌ Service failed to start"
+            # Wait for container to start
+            echo "⏳ Waiting for container to start..."
+            sleep 10
+            
+            # Check container status
+            if $DOCKER_CMD ps | grep -q ${{ env.APP_NAME }}; then
+              echo "✅ Container is running!"
+              echo ""
+              echo "Container details:"
+              $DOCKER_CMD ps --filter "name=${{ env.APP_NAME }}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+              echo ""
               echo "Recent logs:"
-              sudo journalctl -u ${{ env.APP_NAME }} -n 50 --no-pager || echo "Could not retrieve logs"
+              $DOCKER_CMD logs --tail 20 ${{ env.APP_NAME }}
+            else
+              echo "❌ Container failed to start"
+              echo "Container logs:"
+              $DOCKER_CMD logs ${{ env.APP_NAME }}
               exit 1
             fi
       
