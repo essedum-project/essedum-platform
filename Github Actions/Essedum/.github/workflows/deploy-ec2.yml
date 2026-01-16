@@ -175,7 +175,7 @@ jobs:
             
             # Wait for container to start
             echo "⏳ Waiting for container to start..."
-            sleep 10
+            sleep 15
             
             # Check container status
             if $DOCKER_CMD ps | grep -q ${{ env.APP_NAME }}; then
@@ -184,26 +184,50 @@ jobs:
               echo "Container details:"
               $DOCKER_CMD ps --filter "name=${{ env.APP_NAME }}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
               echo ""
-              echo "Recent logs:"
-              $DOCKER_CMD logs --tail 20 ${{ env.APP_NAME }}
-            else
-              echo "❌ Container failed to start"
-              echo "Container logs:"
+              echo "Container logs (all):"
               $DOCKER_CMD logs ${{ env.APP_NAME }}
+              echo ""
+              echo "Checking if application is listening on port 8080..."
+              $DOCKER_CMD exec ${{ env.APP_NAME }} netstat -tlnp 2>/dev/null | grep 8080 || echo "⚠️ Port 8080 not listening yet"
+            else
+              echo "❌ Container failed to start or stopped immediately"
+              echo "Container logs:"
+              $DOCKER_CMD logs ${{ env.APP_NAME }} 2>&1 || echo "No logs available"
               exit 1
             fi
       
       - name: Health Check
         run: |
-          sleep 5
-          response=$(curl -f http://${{ secrets.EC2_HOST }}:8080/health || echo "failed")
-          if [ "$response" != "failed" ]; then
-            echo "✅ Health check passed!"
-            echo "Response: $response"
-          else
-            echo "❌ Health check failed!"
-            exit 1
-          fi
+          echo "Waiting for application to be ready..."
+          sleep 10
+          
+          # Try health check with retries
+          max_attempts=6
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts..."
+            
+            response=$(curl -f -m 10 http://${{ secrets.EC2_HOST }}:8080/health 2>&1 || echo "failed")
+            
+            if [[ "$response" != "failed" ]] && [[ "$response" != *"Connection refused"* ]] && [[ "$response" != *"Couldn't connect"* ]]; then
+              echo "✅ Health check passed!"
+              echo "Response: $response"
+              exit 0
+            fi
+            
+            if [ $attempt -lt $max_attempts ]; then
+              echo "⚠️ Health check failed, retrying in 10 seconds..."
+              sleep 10
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          echo "❌ Health check failed after $max_attempts attempts!"
+          echo "Fetching container logs for debugging..."
+          ssh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "docker logs agent-dk --tail 50" || echo "Could not fetch logs"
+          exit 1
       
       - name: Deployment Summary
         if: always()

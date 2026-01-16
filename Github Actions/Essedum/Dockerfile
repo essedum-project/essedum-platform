@@ -56,8 +56,8 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-# Entry point - API mode
-CMD ["python", "-m", "src.main"]
+# Entry point - Start FastAPI with uvicorn
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
 
 # ============================================================================
 # Build Instructions:
