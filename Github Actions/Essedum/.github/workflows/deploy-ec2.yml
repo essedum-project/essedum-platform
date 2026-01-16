@@ -80,49 +80,49 @@ jobs:
             echo "User: $(whoami)"
             echo "Image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}"
             
-            # Install Docker if not present
+            # Check if Docker is installed
             if ! command -v docker &> /dev/null; then
-              echo "🐋 Installing Docker..."
+              echo "❌ Docker is not installed on this EC2 instance"
+              echo ""
+              echo "Please install Docker on your EC2 instance first:"
+              echo "  Amazon Linux 2:"
+              echo "    sudo yum update -y"
+              echo "    sudo yum install -y docker"
+              echo "    sudo systemctl start docker"
+              echo "    sudo systemctl enable docker"
+              echo "    sudo usermod -aG docker \$(whoami)"
+              echo ""
+              echo "  Ubuntu/Debian:"
+              echo "    sudo apt-get update"
+              echo "    sudo apt-get install -y docker.io"
+              echo "    sudo systemctl start docker"
+              echo "    sudo systemctl enable docker"
+              echo "    sudo usermod -aG docker \$(whoami)"
+              echo ""
+              echo "After installation, log out and log back in for group changes to take effect."
+              exit 1
+            fi
+            
+            echo "✅ Docker is installed"
+            
+            # Check if docker daemon is running
+            if ! docker ps &> /dev/null 2>&1; then
+              echo "⚠️ Docker daemon may not be running or user lacks permissions"
+              echo "Attempting to use sudo for Docker commands..."
+              DOCKER_CMD="sudo docker"
               
-              # Detect OS and install Docker
-              if [ -f /etc/os-release ]; then
-                . /etc/os-release
-                if [[ "$ID" == "amzn" ]] || [[ "$ID_LIKE" == *"rhel"* ]]; then
-                  # Amazon Linux 2 or RHEL-based
-                  sudo yum update -y
-                  sudo yum install -y docker
-                  sudo systemctl start docker
-                  sudo systemctl enable docker
-                  sudo usermod -a -G docker $(whoami)
-                elif [[ "$ID" == "ubuntu" ]] || [[ "$ID" == "debian" ]]; then
-                  # Ubuntu or Debian
-                  sudo apt-get update
-                  sudo apt-get install -y docker.io
-                  sudo systemctl start docker
-                  sudo systemctl enable docker
-                  sudo usermod -a -G docker $(whoami)
-                fi
-              fi
-              
-              echo "✅ Docker installed"
-              echo "⚠️ Note: You may need to log out and back in for group changes to take effect"
-              
-              # Try to use docker with sudo if needed
-              if ! docker ps &> /dev/null; then
-                echo "Using sudo for Docker commands..."
-                DOCKER_CMD="sudo docker"
-              else
-                DOCKER_CMD="docker"
+              # Verify sudo docker works
+              if ! $DOCKER_CMD ps &> /dev/null; then
+                echo "❌ Cannot access Docker even with sudo"
+                echo "Please ensure:"
+                echo "  1. Docker service is running: sudo systemctl start docker"
+                echo "  2. User is in docker group: sudo usermod -aG docker \$(whoami)"
+                echo "  3. Log out and back in after adding to docker group"
+                exit 1
               fi
             else
-              echo "✅ Docker already installed"
-              
-              # Check if we can run docker without sudo
-              if ! docker ps &> /dev/null; then
-                DOCKER_CMD="sudo docker"
-              else
-                DOCKER_CMD="docker"
-              fi
+              echo "✅ Docker is accessible without sudo"
+              DOCKER_CMD="docker"
             fi
             
             # Load Docker image from tar file
