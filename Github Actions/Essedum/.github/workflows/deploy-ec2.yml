@@ -90,14 +90,14 @@ jobs:
               echo "    sudo yum install -y docker"
               echo "    sudo systemctl start docker"
               echo "    sudo systemctl enable docker"
-              echo "    sudo usermod -aG docker \$(whoami)"
+              echo '    sudo usermod -aG docker $(whoami)'
               echo ""
               echo "  Ubuntu/Debian:"
               echo "    sudo apt-get update"
               echo "    sudo apt-get install -y docker.io"
               echo "    sudo systemctl start docker"
               echo "    sudo systemctl enable docker"
-              echo "    sudo usermod -aG docker \$(whoami)"
+              echo '    sudo usermod -aG docker $(whoami)'
               echo ""
               echo "After installation, log out and log back in for group changes to take effect."
               exit 1
@@ -116,7 +116,7 @@ jobs:
                 echo "❌ Cannot access Docker even with sudo"
                 echo "Please ensure:"
                 echo "  1. Docker service is running: sudo systemctl start docker"
-                echo "  2. User is in docker group: sudo usermod -aG docker \$(whoami)"
+                echo '  2. User is in docker group: sudo usermod -aG docker $(whoami)'
                 echo "  3. Log out and back in after adding to docker group"
                 exit 1
               fi
