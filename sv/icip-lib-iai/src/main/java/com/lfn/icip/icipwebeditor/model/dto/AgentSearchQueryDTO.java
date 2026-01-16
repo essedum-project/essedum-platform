@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AgentSearchQueryDTO {
 
     /**
@@ -57,6 +58,7 @@ public class AgentSearchQueryDTO {
      * - LOCATOR: The locator URL to match (exact matching)
      */
     @JsonProperty("value")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String value;
 }
 

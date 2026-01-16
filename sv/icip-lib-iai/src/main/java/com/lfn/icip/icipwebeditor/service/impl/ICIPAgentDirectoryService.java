@@ -1129,13 +1129,26 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
      * @return true if the agent matches the query
      */
     private boolean matchesQuery(AgentDirectory agent, AgentSearchQueryDTO query) {
-        if (query.getType() == null || query.getValue() == null) {
+        if (query.getType() == null) {
             return false;
         }
 
         String type = query.getType().toUpperCase();
         String value = query.getValue();
         String key = query.getKey(); // Can be null for SKILL/MODULE
+
+        // Validate based on type
+        // For SKILL and MODULE: value is required
+        // For DOMAIN and LOCATOR: at least key or value must be provided
+        if ("SKILL".equals(type) || "MODULE".equals(type)) {
+            if (value == null) {
+                return false;
+            }
+        } else if ("DOMAIN".equals(type) || "LOCATOR".equals(type)) {
+            if ((key == null || key.trim().isEmpty()) && (value == null || value.trim().isEmpty())) {
+                return false;
+            }
+        }
 
         switch (type) {
             case "SKILL":
