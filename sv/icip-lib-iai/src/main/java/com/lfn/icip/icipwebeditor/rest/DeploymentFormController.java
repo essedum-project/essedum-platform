@@ -99,8 +99,8 @@ public class DeploymentFormController {
      */
     @GetMapping
     public ResponseEntity<DeploymentFormDTO> getDeploymentFormByProjectAndCid(
-            @RequestParam String cname,
-            @RequestParam String org) {
+            @RequestParam(name = "cname") String cname,
+            @RequestParam(name = "org") String org) {
         logger.info("Fetching deployment form with cname: {} and org: {}", cname, org);
 
         DeploymentFormDTO result = deploymentFormService.getDeploymentFormByProjectAndCid(cname, org);
