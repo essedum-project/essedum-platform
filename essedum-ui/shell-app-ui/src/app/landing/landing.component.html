@@ -184,6 +184,15 @@
                           item.label === 'Agent MCP Pipelines'
                         " src="assets/img/pipeline_agent.jpg" alt="Pipeline Agent Icon"
                         style="height: 42px !important; width: 42px !important;" />
+
+                                <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Lite LLM'
+                        " src="assets/img/lite-llm.jpg" alt="Lite LLM Icon"
+                        style="height: 42px !important; width: 42px !important;" />
+                                <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Langfuse'
+                        " src="assets/img/langfuse.jpg" alt="langfuse Icon"
+                        style="height: 42px !important; width: 42px !important;" />
                       </div>
                       <i *ngIf="
                           item.icon &&
@@ -192,6 +201,8 @@
                           !item.icon.startsWith('icon') &&
                           item.label !== 'Agent Designer' &&
                           item.label !== 'Agent MCP Pipelines' &&
+                          item.label !== 'Lite LLM' &&
+                          item.label !== 'Langfuse' &&
                           !item.icon.includes('data:image/')
                         " class="fa fa-{{ item.icon }} fa-2x" [ngStyle]="{
                           color: item.label == highlightedLabel ? '#0052cc' : '#68696c'

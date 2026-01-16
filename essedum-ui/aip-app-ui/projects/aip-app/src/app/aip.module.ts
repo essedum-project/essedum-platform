@@ -145,18 +145,20 @@ import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/
 import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
 import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
+import { LitellmComponent } from './litellm/litellm.component';
+import { LangfuseComponent } from './langfuse/langfuse.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { PlaygroundTabComponent } from './agent-pipeline/playground-tab/playground-tab.component';
 import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
 import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
 import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory-create/agent-directory-create.component';
 import { GeneralComponent } from './agent-directory/general/general.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
-
+import { DeploymentFormComponent } from './agent-pipeline/deployment-form/deployment-form.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -257,14 +259,18 @@ PipelineAgentDetailComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
     AgentComponent,
+    LitellmComponent,
+    LangfuseComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
+    PlaygroundTabComponent,
     GitHubPushComponent,
    
 
     AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
     AgentDirectoryCreateComponent,
-    GeneralComponent,AgentDirectoryEditComponent
+    GeneralComponent,AgentDirectoryEditComponent,
+    DeploymentFormComponent
 
   ],
   imports: [

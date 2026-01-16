@@ -1,11 +1,11 @@
-// Agent component styles - Simplified for direct embedded view
+// Langfuse component styles - Simplified for direct embedded view
 
 .aip-container {
   height: 100%;
   overflow: hidden;
 }
 
-mat-card.langflow-embed-card {
+mat-card.langfuse-embed-card {
   height: calc(100vh - 150px);
   margin: 20px 0;
   padding: 16px;
@@ -18,11 +18,13 @@ mat-card.langflow-embed-card {
 .iframe-container {
   width: 100%;
   height: 100%;
+  overflow: hidden;
   
   iframe {
     display: block;
     width: 100%;
     height: 100%;
     border: none;
+    background: #fff;
   }
 }
