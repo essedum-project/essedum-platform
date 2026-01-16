@@ -30,7 +30,7 @@
             <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
 
               <!-- Tabs (Show directly on view details) -->
-              <mat-tab-group disableRipple (selectedTabChange)="onTabChange($event)">
+              <mat-tab-group #tabGroup disableRipple (selectedTabChange)="onTabChange($event)">
 
                 <!-- Agent/MCP Builder Tab - Split View (Conditionally visible based on created_source) -->
                 <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" 
@@ -300,8 +300,7 @@
                   </div>
                   <!-- </div> -->
                 </mat-tab>
-
-                <!-- Playground Tab (Only show when files exist) -->
+   <!-- Playground Tab (Only show when files exist) -->
                 <mat-tab label="Playground" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent || hasExistingFiles()">
                   <app-playground-tab
                     [pipelineMode]="pipelineMode"
@@ -313,10 +312,26 @@
                     [consoleOutput]="consoleOutput"
                     [isGenerating]="isGenerating"
                     [isLoadingFiles]="isLoadingFiles"
+                    [hasDeploymentFormData]="hasDeploymentFormData"
+                    [isCheckingDeploymentData]="isCheckingDeploymentData"
+                    [deploymentEnvironment]="deploymentEnvironment"
                     (runAndDeployClick)="runAndDeploy()"
                     (openPlaygroundClick)="openPlayground()">
                   </app-playground-tab>
                 </mat-tab>
+                
+                <!-- Deployment Tab (Only show after agent generation) -->
+                <mat-tab label="Deployment" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
+                  <div class="tab-content mb-5">
+                    <app-deployment-form 
+                      [cname]="currentCname" 
+                      [organisation]="organisation"
+                      (deploymentFinished)="onDeploymentFinished($event)">
+                    </app-deployment-form>
+                  </div>
+                </mat-tab>
+
+             
               </mat-tab-group>
             </div>
           </div>
