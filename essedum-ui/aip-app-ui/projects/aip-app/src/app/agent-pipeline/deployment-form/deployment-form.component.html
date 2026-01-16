@@ -1,0 +1,360 @@
+<div class="deployment-container">
+  <!-- Sub-tabs for deployment forms -->
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="deployment-tabs">
+    
+    <!-- Tab 1: Deployment Overview -->
+    <mat-tab label="Deployment Overview">
+      <form [formGroup]="overviewForm" class="deployment-form">
+        <div class="row">
+          <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+            <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+              <mat-label class="mat-style-label">{{ AGENT_NAME_LABEL }}</mat-label>
+              <input matInput class="mat-style-input text-transform" formControlName="agentName" [placeholder]="AGENT_NAME_PLACEHOLDER">
+              <mat-error class="ml-15m" *ngIf="overviewForm.get('agentName')?.hasError('required')">
+                {{ FIELD_REQUIRED_ERROR }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ AGENT_VERSION_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="agentVersion" [placeholder]="AGENT_VERSION_PLACEHOLDER">
+                <mat-error class="ml-15m" *ngIf="overviewForm.get('agentVersion')?.hasError('required')">
+                  {{ FIELD_REQUIRED_ERROR }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <div style="position: relative; width: 100%; overflow: hidden;">
+                <mat-form-field appearance="fill" 
+                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
+                  floatLabel="always">
+                  <mat-label class="mat-style-label">{{ DEPLOYMENT_ENVIRONMENT_LABEL }}</mat-label>
+                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="deploymentEnvironment" [placeholder]="DEPLOYMENT_ENVIRONMENT_PLACEHOLDER">
+                    <mat-option *ngFor="let env of deploymentEnvironments" [value]="env">
+                      {{ env }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <img src="/assets/images/Accordion_open.png" 
+                 class="dropdown-arrow " >
+              </div>
+            </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ DEPLOYMENT_DATETIME_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" [matDatepicker]="picker" formControlName="deploymentDateTime" [placeholder]="DEPLOYMENT_DATETIME_PLACEHOLDER" readonly>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error class="ml-15m" *ngIf="overviewForm.get('deploymentDateTime')?.hasError('required')">
+                  {{ FIELD_REQUIRED_ERROR }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ BUILD_RELEASE_ID_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="buildReleaseId" [placeholder]="BUILD_RELEASE_ID_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ AGENT_PACKAGE_LOCATION_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="agentPackageLocation" [placeholder]="AGENT_PACKAGE_LOCATION_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ HASH_CHECKSUM_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="hashChecksum" [placeholder]="HASH_CHECKSUM_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
+            <button mat-raised-button 
+                    class="mat-save-btn mat-button-radius"
+                    [disabled]="!overviewForm.valid"
+                    (click)="saveOverview()">
+              Save
+            </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
+          </div>
+        </form>
+    </mat-tab>
+
+    <!-- Tab 2: Scope & Pre-Checks -->
+    <mat-tab label="Scope & Pre-Checks">
+      <form [formGroup]="scopeForm" class="deployment-form">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <div style="position: relative; width: 100%; overflow: hidden;">
+                <mat-form-field appearance="fill" 
+                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
+                  floatLabel="always">
+                  <mat-label class="mat-style-label">{{ TARGET_NODES_LABEL }}</mat-label>
+                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="targetNodes" multiple [placeholder]="TARGET_NODES_PLACEHOLDER">
+                    <mat-option *ngFor="let node of availableNodes" [value]="node">
+                      {{ node }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <img src="/assets/images/Accordion_open.png" 
+                  class="dropdown-arrow">
+              </div>
+            </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <div style="position: relative; width: 100%; overflow: hidden;">
+                <mat-form-field appearance="fill" 
+                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
+                  floatLabel="always">
+                  <mat-label class="mat-style-label">{{ IMPACTED_SERVICES_LABEL }}</mat-label>
+                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="impactedServices" multiple [placeholder]="IMPACTED_SERVICES_PLACEHOLDER">
+                    <mat-option *ngFor="let service of availableServices" [value]="service">
+                      {{ service }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <img src="/assets/images/Accordion_open.png" 
+                  class="dropdown-arrow">
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ DEPENDENCIES_LABEL }}</mat-label>
+                <textarea matInput class="mat-style-input no-resize" formControlName="dependencies" rows="3" 
+                  [placeholder]="DEPENDENCIES_PLACEHOLDER"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+                  <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="backupConfirmation" color="primary">
+                  {{ BACKUP_CONFIRMATION_LABEL }}
+                </mat-checkbox>
+              </div>
+                <div class="checkbox-container">
+                <mat-checkbox formControlName="changeFreezeCompliance" color="primary">
+                  {{ CHANGE_FREEZE_COMPLIANCE_LABEL }}
+                </mat-checkbox>
+              </div>
+                  <div class="checkbox-container">
+                <mat-checkbox formControlName="securityPatchVerification" color="primary">
+                  {{ SECURITY_PATCH_VERIFICATION_LABEL }}
+                </mat-checkbox>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <div class="radio-group-container">
+                <label class="radio-label">{{ HEALTH_CHECK_STATUS_LABEL }}</label>
+                <mat-radio-group formControlName="healthCheckStatus" class="radio-group-inline">
+                  <mat-radio-button value="Pass" color="primary">{{ RADIO_PASS_LABEL }}</mat-radio-button>
+                  <mat-radio-button value="Fail" color="primary">{{ RADIO_FAIL_LABEL }}</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+       
+      
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
+            <button mat-raised-button 
+                    class="mat-save-btn mat-button-radius"
+                    (click)="saveScope()">
+              Save
+            </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
+          </div>
+        </form>
+    </mat-tab>
+
+    <!-- Tab 3: Approval & Rollback -->
+    <mat-tab label="Approval & Rollback">
+      <form [formGroup]="approvalForm" class="deployment-form">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ APPROVER_NAME_ROLE_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="approverNameRole" [placeholder]="APPROVER_NAME_ROLE_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ CAB_APPROVAL_REFERENCE_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="cabApprovalReference" [placeholder]="CAB_APPROVAL_REFERENCE_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ CHANGE_REQUEST_ID_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="changeRequestId" [placeholder]="CHANGE_REQUEST_ID_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ ROLLBACK_PROCEDURE_REFERENCE_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="rollbackProcedureReference" [placeholder]="ROLLBACK_PROCEDURE_REFERENCE_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
+            <button mat-raised-button 
+                    class="mat-save-btn mat-button-radius"
+                    (click)="saveApproval()">
+              Save
+            </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
+          </div>
+        </form>
+    </mat-tab>
+
+    <!-- Tab 4: Validation & Compliance -->
+    <mat-tab label="Validation & Compliance">
+      <form [formGroup]="validationForm" class="deployment-form">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+              <div class="radio-group-container">
+                <label class="radio-label">{{ SMOKE_TEST_STATUS_LABEL }}</label>
+                <mat-radio-group formControlName="smokeTestStatus" class="radio-group-inline">
+                  <mat-radio-button value="Pass" color="primary">{{ RADIO_PASS_LABEL }}</mat-radio-button>
+                  <mat-radio-button value="Fail" color="primary">{{ RADIO_FAIL_LABEL }}</mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="sslTlsCertificateCheck" color="primary">
+                  {{ SSL_TLS_CERTIFICATE_CHECK_LABEL }}
+                </mat-checkbox>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="drReadiness" color="primary">
+                  {{ DR_READINESS_LABEL }}
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="dataRetentionConfirmation" color="primary">
+                  {{ DATA_RETENTION_CONFIRMATION_LABEL }}
+                </mat-checkbox>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
+              <div class="checkbox-container">
+                <mat-checkbox formControlName="antivirusPatchConfirmation" color="primary">
+                  {{ ANTIVIRUS_PATCH_CONFIRMATION_LABEL }}
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ DEPLOYMENT_OWNER_LABEL }}</mat-label>
+                <input matInput class="mat-style-input" formControlName="deploymentOwner" [placeholder]="DEPLOYMENT_OWNER_PLACEHOLDER">
+              </mat-form-field>
+            </div>
+          </div>
+
+           <div class="row">
+            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ PERFORMANCE_TEST_SUMMARY_LABEL }}</mat-label>
+                <textarea matInput class="mat-style-input no-resize" formControlName="performanceTestSummary" rows="3" 
+                  [placeholder]="PERFORMANCE_TEST_SUMMARY_PLACEHOLDER"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+         
+
+          <div class="row">
+            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ INFRA_SUPPORT_CONTACTS_LABEL }}</mat-label>
+                <textarea matInput class="mat-style-input no-resize" formControlName="infraSupportContacts" rows="3" 
+                  [placeholder]="INFRA_SUPPORT_CONTACTS_PLACEHOLDER"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button 
+                    class="finish-button" 
+                    [disabled]="!isAllFormsValid()"
+                    (click)="finishDeployment()">
+              {{ FINISH_BUTTON_LABEL }}
+            </button>
+            <button mat-raised-button 
+                    class="mat-save-btn mat-button-radius"
+                    (click)="saveValidation()">
+              Save
+            </button>
+          </div>
+          <div class="finish-note" *ngIf="!isAllFormsValid()">
+            <span>{{ FINISH_NOTE_MESSAGE }}</span>
+          </div>
+        </form>
+    </mat-tab>
+  </mat-tab-group>
+</div>
