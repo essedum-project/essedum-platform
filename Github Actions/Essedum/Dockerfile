@@ -39,8 +39,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source code
 COPY src/ ./src/
 
-# Copy design files if present
-COPY *.json ./ 2>/dev/null || true
+# Copy design files if present (using shell to handle missing files)
+RUN cp *.json ./ 2>/dev/null || true
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
