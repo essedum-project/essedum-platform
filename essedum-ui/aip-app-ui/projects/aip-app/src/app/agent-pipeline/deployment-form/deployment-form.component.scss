@@ -302,6 +302,22 @@
     position: relative;
   }
 
+  // Add custom arrow icon using ::after pseudo-element
+  .mat-mdc-select-trigger::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-image: url("/assets/images/Accordion_open.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+  }
+
   // Material label styling
   mat-label {
     text-align: left;
@@ -524,4 +540,9 @@ textarea.mat-style-input {
 ::ng-deep .cdk-overlay-pane .mat-mdc-select-panel {
   max-width: 80% !important;
   min-width: 80% !important;
+}
+
+.deploy-button-header{
+  display: flex;
+  justify-content: flex-end;
 }

@@ -1,5 +1,6 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
 
 interface DeploymentFormData {
@@ -16,8 +17,13 @@ interface DeploymentFormData {
 })
 export class DeploymentFormComponent implements OnInit {
   @Output() deploymentFinished = new EventEmitter<DeploymentFormData>();
+ // @Output() deployClick = new EventEmitter<void>();
   @Input() cname: string = ''; // Container name from parent
   @Input() organisation: string = ''; // Organisation from parent
+  @Input() isRunningAndDeploying: boolean = false;
+  @Input() isCheckingDeploymentData: boolean = false;
+  @Input() hasDeploymentFormData: boolean = false;
+  @Input() deploymentEnvironment: string = '';
 
   selectedTabIndex = 0;
   
@@ -32,6 +38,9 @@ export class DeploymentFormComponent implements OnInit {
 
   // Deployment ID for edit mode
   deploymentId: number | null = null;
+
+  // Flag to track if deployment is finished and forms should be disabled
+  isDeploymentFinished: boolean = false;
 
   // Static text constants - Labels
   readonly AGENT_NAME_LABEL = 'Agent Name';
@@ -119,7 +128,23 @@ export class DeploymentFormComponent implements OnInit {
   readonly RADIO_FAIL_LABEL = 'Fail';
 
   // Dropdown options
-  deploymentEnvironments = ['Production', 'Staging', 'UAT'];
+  deploymentEnvironments = ['UAT', 'Staging', 'Production'];
+
+  /**
+   * Handle environment change - warn and prevent Production selection
+   */
+  onEnvironmentChange(event: any): void {
+    const selectedValue = event.value;
+    if (selectedValue === 'Production') {
+      this.service.message('Production environment is restricted. Defaulting to UAT.', 'warning');
+      // Reset to UAT after a brief delay to show the warning
+      setTimeout(() => {
+        this.overviewForm.patchValue({
+          deploymentEnvironment: 'UAT'
+        });
+      }, 100);
+    }
+  }
   
   // Multi-select options
   availableNodes = [
@@ -137,7 +162,11 @@ export class DeploymentFormComponent implements OnInit {
     'Storage Service'
   ];
 
-  constructor(private fb: FormBuilder, private service: Services) {
+  constructor(
+    private fb: FormBuilder, 
+    private service: Services,
+    private dialog: MatDialog
+  ) {
     // Initialize Overview Form - Only agentName, agentVersion, deploymentDateTime are required
     this.overviewForm = this.fb.group({
       agentName: ['', Validators.required],
@@ -421,6 +450,10 @@ export class DeploymentFormComponent implements OnInit {
         }
         this.service.message(this.DEPLOYMENT_SAVED_SUCCESS_MESSAGE, 'success');
         
+        // Disable all forms after successful deployment
+        this.isDeploymentFinished = true;
+        this.disableAllForms();
+        
         // Emit event to parent component
         this.deploymentFinished.emit(deploymentData);
       },
@@ -428,6 +461,16 @@ export class DeploymentFormComponent implements OnInit {
         this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
       }
     );
+  }
+
+  /**
+   * Disable all form groups after successful deployment
+   */
+  private disableAllForms(): void {
+    this.overviewForm.disable();
+    this.scopeForm.disable();
+    this.approvalForm.disable();
+    this.validationForm.disable();
   }
 
   /**
@@ -483,5 +526,216 @@ export class DeploymentFormComponent implements OnInit {
    */
   getSelectedEnvironment(): string {
     return this.overviewForm.get('deploymentEnvironment')?.value || 'Production';
+  }
+
+  /**
+   * Get dynamic deploy button text based on selected environment
+   */
+  getDeployButtonText(): string {
+    const environment = this.overviewForm.get('deploymentEnvironment')?.value;
+    if (this.isRunningAndDeploying) {
+      return 'Deploying...';
+    }
+    if (environment) {
+      return `Deploy to ${environment}`;
+    }
+    return 'Deploy';
+  }
+
+  /**
+   * Handle Deploy button click - emit event to parent
+   */
+  onDeploy(): void {
+
+  }
+
+  /**
+   * Open branch selection dialog
+   */
+  openBranchSelectionDialog(): void {
+    const dialogRef = this.dialog.open(BranchSelectionDialogComponent, {
+      width: '550px',
+      maxWidth: '90vw',
+      disableClose: true,
+      panelClass: 'branch-deployment-dialog',
+      data: {
+        cname: this.cname,
+        organisation: this.organisation
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('Branch deployment result:', result);
+        this.service.message('Branch deployment initiated successfully', 'success');
+      }
+    });
+  }
+}
+
+// Inline Branch Selection Dialog Component
+@Component({
+  selector: 'branch-selection-dialog',
+  template: `
+    <h2 mat-dialog-title style="color: #333; font-size: 20px; font-weight: 600;">Branch Deployment</h2>
+    <mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
+      <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
+        <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
+        <p style="margin-top: 16px; color: #666;">Loading branch configuration...</p>
+      </div>
+      
+      <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
+        <div>
+          <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500;">Select Source Branch</label>
+          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+            <mat-label>Source Branch</mat-label>
+            <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select">
+              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+                {{ branch }}
+              </mat-option>
+            </mat-select>
+            <mat-error class="ml-18" *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
+              Source branch is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500;">Select Destination Branch</label>
+          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+            <mat-label>Destination Branch</mat-label>
+            <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select">
+              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+                {{ branch }}
+              </mat-option>
+            </mat-select>
+            <mat-error class="ml-18" *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
+              Destination branch is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
+      <button mat-raised-button (click)="onCancel()" style="margin-right: 8px;" [disabled]="isDeploying">Cancel</button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="onDeploy()" 
+        [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
+        {{ isDeploying ? 'Deploying...' : 'Deploy' }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    :host ::ng-deep .mat-mdc-dialog-container {
+      border-radius: 8px;
+    }
+    :host ::ng-deep mat-dialog-content {
+      overflow: visible !important;
+    }
+      ml-18{
+        margin-left:-18px;}
+  `]
+})
+export class BranchSelectionDialogComponent implements OnInit {
+  branchForm: FormGroup;
+  availableBranches: string[] = ['main', 'develop', 'staging', 'production']; // Default branches
+  isDeploying = false;
+  isLoadingBranches = false;
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialogRef: MatDialogRef<BranchSelectionDialogComponent>,
+    private fb: FormBuilder,
+    private service: Services
+  ) {
+    this.branchForm = this.fb.group({
+      sourceBranch: ['', Validators.required],
+      destinationBranch: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    // Load existing git config from API
+    this.loadGitConfig();
+  }
+
+  /**
+   * Load git config from API and populate form
+   */
+  loadGitConfig(): void {
+    if (!this.data.cname || !this.data.organisation) {
+      console.warn('Missing cname or organisation for git config');
+      return;
+    }
+
+    this.isLoadingBranches = true;
+    this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
+      (response: any) => {
+        this.isLoadingBranches = false;
+        console.log('Git config loaded:', response);
+        
+        // If response has branch name, use it as default
+        if (response && response.bname) {
+          // Add the current branch to available branches if not already present
+          if (!this.availableBranches.includes(response.bname)) {
+            this.availableBranches.push(response.bname);
+          }
+          
+          // Set the destination branch to the current branch
+          this.branchForm.patchValue({
+            destinationBranch: response.bname
+          });
+        }
+      },
+      (error) => {
+        this.isLoadingBranches = false;
+        console.log('No existing git config found or error loading:', error);
+        // Continue with default branches if no config exists
+      }
+    );
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
+  onDeploy(): void {
+    if (this.branchForm.valid) {
+      this.isDeploying = true;
+      
+      const currentUser = sessionStorage.getItem('username') || 'demo';
+      const payload = {
+        id: null, // Will be set by backend if updating existing config
+        cname: this.data.cname,
+        org: this.data.organisation,
+        bname: this.branchForm.get('destinationBranch')?.value, // Destination branch as the main branch
+        createdby: currentUser,
+        createdat: new Date().toISOString(),
+        updatedby: currentUser,
+        updatedat: new Date().toISOString()
+      };
+
+      console.log('Saving git config with payload:', payload);
+      
+      this.service.saveGitConfig(payload).subscribe(
+        (response) => {
+          this.isDeploying = false;
+          this.service.message('Branch configuration saved successfully', 'success');
+          this.dialogRef.close({
+            ...response,
+            sourceBranch: this.branchForm.get('sourceBranch')?.value,
+            destinationBranch: this.branchForm.get('destinationBranch')?.value
+          });
+        },
+        (error) => {
+          this.isDeploying = false;
+          const errorMsg = error?.error?.message || error?.message || 'Branch configuration save failed';
+          this.service.message(errorMsg, 'error');
+          console.error('Git config save error:', error);
+        }
+      );
+    }
   }
 }

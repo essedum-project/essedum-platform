@@ -4079,83 +4079,15 @@ DELIVERABLES
   }
 
   /**
-   * Handle deployment form finish event
-   * Navigate to Playground tab and show deploy button message
+   * Handle Deploy button click from Deployment Tab
+   * This triggers the actual deployment process (Run & Deploy)
    */
-  onDeploymentFinished(deploymentData: any): void {
-    console.log('🎯 Deployment form finished successfully:', deploymentData);
-    console.log('🎯 Current tabGroup exists:', !!this.tabGroup);
+  onDeployFromDeploymentTab(): void {
+    console.log('🚀 Deploy button clicked from Deployment tab');
+    console.log('🚀 Deployment environment:', this.deploymentEnvironment);
     
-    // Set flag to true so the deploy button will show on Playground tab
-    this.hasDeploymentFormData = true;
-    
-    // Extract and store deployment environment from the correct path
-    this.deploymentEnvironment = deploymentData?.deployment_environment || '';
-    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
-    
-    // Trigger change detection to ensure the state is updated
-    this.cdr.detectChanges();
-    
-    // Navigate to Playground tab
-    // Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
-    // Use a longer timeout to ensure ViewChild is initialized and tabs are rendered
-    setTimeout(() => {
-      console.log('🎯 Attempting tab navigation...');
-      console.log('🎯 tabGroup exists:', !!this.tabGroup);
-      
-      if (this.tabGroup) {
-        // Find the Playground tab index dynamically
-        const playgroundTabIndex = this.getPlaygroundTabIndex();
-        console.log('🎯 Calculated Playground tab index:', playgroundTabIndex);
-        console.log('🎯 Current selected index:', this.tabGroup.selectedIndex);
-        console.log('🎯 Total tabs:', this.tabGroup._tabs.length);
-        
-        if (playgroundTabIndex >= 0 && playgroundTabIndex < this.tabGroup._tabs.length) {
-          this.tabGroup.selectedIndex = playgroundTabIndex;
-          console.log('✅ Successfully navigated to Playground tab at index:', playgroundTabIndex);
-          
-          // Force change detection after tab switch
-          this.cdr.detectChanges();
-          
-          // Show success message with deploy button instruction
-          setTimeout(() => {
-            this.service.message(
-              'Deployment configuration saved successfully. Click on the Deploy button to start deployment.',
-              'success'
-            );
-          }, 300);
-        } else {
-          console.error('❌ Invalid playground tab index:', playgroundTabIndex);
-        }
-      } else {
-        console.error('❌ tabGroup is not initialized!');
-      }
-    }, 500);
-  }
-  
-  /**
-   * Get the index of the Playground tab dynamically
-   * Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
-   * Since tabs can be conditionally visible, we need to calculate the index
-   */
-  private getPlaygroundTabIndex(): number {
-    let index = 0;
-    
-    // Builder tab (conditional)
-    if (this.shouldShowBuilderTab) {
-      console.log('  Builder tab is visible, index++');
-      index++;
-    }
-    
-    // Codespace tab (always visible)
-    console.log('  Codespace tab is visible, index++');
-    index++;
-    
-    // Playground tab is next (before Deployment tab in HTML)
-    // Note: Playground is shown when hasGeneratedAgent || hasExistingFiles()
-    console.log('  Playground tab should be at index:', index);
-    
-    return index;
+    // Call the existing run and deploy method
+   // this.runAndDeploy();
   }
 
   /**

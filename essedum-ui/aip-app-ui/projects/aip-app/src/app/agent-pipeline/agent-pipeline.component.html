@@ -326,7 +326,12 @@
                     <app-deployment-form 
                       [cname]="currentCname" 
                       [organisation]="organisation"
-                      (deploymentFinished)="onDeploymentFinished($event)">
+                      [isRunningAndDeploying]="isRunningAndDeploying"
+                      [isCheckingDeploymentData]="isCheckingDeploymentData"
+                      [hasDeploymentFormData]="hasDeploymentFormData"
+                      [deploymentEnvironment]="deploymentEnvironment"
+                      (deploymentFinished)="onDeploymentFinished($event)"
+                      (deployClick)="onDeployFromDeploymentTab()">
                     </app-deployment-form>
                   </div>
                 </mat-tab>

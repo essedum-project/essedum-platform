@@ -1,4 +1,17 @@
 <div class="deployment-container">
+  <!-- Deploy Button - Above tabs -->
+  <div class="deploy-button-header" *ngIf="isDeploymentFinished">
+    <button mat-raised-button 
+            color="primary"
+            class="deploy-button"
+            [disabled]="isRunningAndDeploying"
+            [matTooltip]="getDeployButtonText()"
+            matTooltipPosition="above"
+            (click)="openBranchSelectionDialog()">
+      {{ getDeployButtonText() }}
+    </button>
+  </div>
+
   <!-- Sub-tabs for deployment forms -->
   <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="deployment-tabs">
     
@@ -29,20 +42,14 @@
 
           <div class="row">
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-              <div style="position: relative; width: 100%; overflow: hidden;">
-                <mat-form-field appearance="fill" 
-                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
-                  floatLabel="always">
-                  <mat-label class="mat-style-label">{{ DEPLOYMENT_ENVIRONMENT_LABEL }}</mat-label>
-                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="deploymentEnvironment" [placeholder]="DEPLOYMENT_ENVIRONMENT_PLACEHOLDER">
-                    <mat-option *ngFor="let env of deploymentEnvironments" [value]="env">
-                      {{ env }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <img src="/assets/images/Accordion_open.png" 
-                 class="dropdown-arrow " >
-              </div>
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ DEPLOYMENT_ENVIRONMENT_LABEL }}</mat-label>
+                <mat-select class="mat-style-select custom-placeholder-style" formControlName="deploymentEnvironment" [placeholder]="DEPLOYMENT_ENVIRONMENT_PLACEHOLDER" (selectionChange)="onEnvironmentChange($event)">
+                  <mat-option *ngFor="let env of deploymentEnvironments" [value]="env">
+                    {{ env }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
 
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
@@ -86,13 +93,13 @@
           <div class="form-actions">
             <button mat-raised-button 
                     class="finish-button" 
-                    [disabled]="!isAllFormsValid()"
+                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
                     (click)="finishDeployment()">
               {{ FINISH_BUTTON_LABEL }}
             </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
-                    [disabled]="!overviewForm.valid"
+                    [disabled]="!overviewForm.valid || isDeploymentFinished"
                     (click)="saveOverview()">
               Save
             </button>
@@ -108,37 +115,25 @@
       <form [formGroup]="scopeForm" class="deployment-form">
           <div class="row">
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-              <div style="position: relative; width: 100%; overflow: hidden;">
-                <mat-form-field appearance="fill" 
-                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
-                  floatLabel="always">
-                  <mat-label class="mat-style-label">{{ TARGET_NODES_LABEL }}</mat-label>
-                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="targetNodes" multiple [placeholder]="TARGET_NODES_PLACEHOLDER">
-                    <mat-option *ngFor="let node of availableNodes" [value]="node">
-                      {{ node }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <img src="/assets/images/Accordion_open.png" 
-                  class="dropdown-arrow">
-              </div>
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ TARGET_NODES_LABEL }}</mat-label>
+                <mat-select class="mat-style-select custom-placeholder-style" formControlName="targetNodes" multiple [placeholder]="TARGET_NODES_PLACEHOLDER">
+                  <mat-option *ngFor="let node of availableNodes" [value]="node">
+                    {{ node }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
 
             <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-              <div style="position: relative; width: 100%; overflow: hidden;">
-                <mat-form-field appearance="fill" 
-                  style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
-                  floatLabel="always">
-                  <mat-label class="mat-style-label">{{ IMPACTED_SERVICES_LABEL }}</mat-label>
-                  <mat-select class="mat-style-select custom-placeholder-style" formControlName="impactedServices" multiple [placeholder]="IMPACTED_SERVICES_PLACEHOLDER">
-                    <mat-option *ngFor="let service of availableServices" [value]="service">
-                      {{ service }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <img src="/assets/images/Accordion_open.png" 
-                  class="dropdown-arrow">
-              </div>
+              <mat-form-field appearance="fill" class="lfx-form-field w-100" floatLabel="always">
+                <mat-label class="mat-style-label">{{ IMPACTED_SERVICES_LABEL }}</mat-label>
+                <mat-select class="mat-style-select custom-placeholder-style" formControlName="impactedServices" multiple [placeholder]="IMPACTED_SERVICES_PLACEHOLDER">
+                  <mat-option *ngFor="let service of availableServices" [value]="service">
+                    {{ service }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
           </div>
 
@@ -186,12 +181,13 @@
           <div class="form-actions">
             <button mat-raised-button 
                     class="finish-button" 
-                    [disabled]="!isAllFormsValid()"
+                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
                     (click)="finishDeployment()">
               {{ FINISH_BUTTON_LABEL }}
             </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
+                    [disabled]="isDeploymentFinished"
                     (click)="saveScope()">
               Save
             </button>
@@ -240,12 +236,13 @@
           <div class="form-actions">
             <button mat-raised-button 
                     class="finish-button" 
-                    [disabled]="!isAllFormsValid()"
+                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
                     (click)="finishDeployment()">
               {{ FINISH_BUTTON_LABEL }}
             </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
+                    [disabled]="isDeploymentFinished"
                     (click)="saveApproval()">
               Save
             </button>
@@ -341,12 +338,13 @@
           <div class="form-actions">
             <button mat-raised-button 
                     class="finish-button" 
-                    [disabled]="!isAllFormsValid()"
+                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
                     (click)="finishDeployment()">
               {{ FINISH_BUTTON_LABEL }}
             </button>
             <button mat-raised-button 
                     class="mat-save-btn mat-button-radius"
+                    [disabled]="isDeploymentFinished"
                     (click)="saveValidation()">
               Save
             </button>
