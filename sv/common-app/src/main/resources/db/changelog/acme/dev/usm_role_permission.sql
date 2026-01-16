@@ -1810,4 +1810,7 @@ INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.
 
 INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-post-api-deployment-form-save' AND  p.module='cip' AND r.project_id IS NULL;
 INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-get-api-deployment-form' AND  p.module='cip' AND r.project_id IS NULL;
+INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-post-api-github-config' AND  p.module='cip' AND r.project_id IS NULL;
+INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-put-api-github-config' AND  p.module='cip' AND r.project_id IS NULL;
+INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-get-api-github-config' AND  p.module='cip' AND r.project_id IS NULL;
 

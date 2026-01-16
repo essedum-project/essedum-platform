@@ -393,3 +393,12 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 
 INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-deployment-form');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/deployment-form/.*/.*', 'GET', 0, 'cip-get-api-deployment-form', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-github-config');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/git-configs/save', 'POST', 0, 'cip-post-api-github-config', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-put-api-github-config');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/git-configs/update/.*/.*', 'PUT', 0, 'cip-put-api-github-config', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-github-config');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/git-configs/.*/.*', 'GET', 0, 'cip-get-api-github-config', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
