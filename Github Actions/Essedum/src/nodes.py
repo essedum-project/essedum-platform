@@ -86,11 +86,12 @@ def claude_node(state: WorkflowState, model_name: str, temperature: float, max_t
     try:
         logger.info(f"Processing Claude node with model: {model_name}")
         
-        # Get user query from state
-        user_query = state.get("user_input", "")
-        if not user_query and state.get("messages"):
+        # Get user query from state (WorkflowState is a Pydantic model, not a dict)
+        user_query = state.user_input or ""
+        
+        if not user_query and state.messages:
             # Try to extract from messages
-            last_msg = state["messages"][-1]
+            last_msg = state.messages[-1]
             if isinstance(last_msg, dict):
                 user_query = last_msg.get("content", "")
             elif hasattr(last_msg, "content"):
@@ -119,11 +120,15 @@ def claude_node(state: WorkflowState, model_name: str, temperature: float, max_t
         response_text = response.content if hasattr(response, 'content') else str(response)
         logger.info(f"Claude response received: {response_text[:100]}...")
         
+        # Return updates as dict
+        current_messages = state.messages if state.messages else []
+        
         return {
-            "assistant_response": response_text,
-            "messages": state.get("messages", []) + [
-                HumanMessage(content=user_query),
-                AIMessage(content=response_text)
+            "final_output": response_text,
+            "model_response": response_text,
+            "messages": current_messages + [
+                {"role": "user", "content": user_query},
+                {"role": "assistant", "content": response_text}
             ]
         }
         
