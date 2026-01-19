@@ -100,6 +100,41 @@ def visualize_graph_structure(design_json: dict) -> str:
         return f"Visualization failed: {e}"
 
 
+def create_default_workflow(config: AppConfig):
+    """
+    Create a simple default workflow with just a Claude node.
+    
+    Args:
+        config: Application configuration
+        
+    Returns:
+        Compiled LangGraph workflow with single Claude node
+    """
+    logger.info("Creating default workflow with single Claude node")
+    
+    # Create StateGraph
+    workflow = StateGraph(WorkflowState)
+    
+    # Add single Claude node
+    claude_node_fn = partial(
+        nodes.claude_node,
+        model_name=config.MODEL_NAME,
+        temperature=config.TEMPERATURE,
+        max_tokens=config.MAX_TOKENS,
+    )
+    workflow.add_node("claude", claude_node_fn)
+    
+    # Set entry point and end
+    workflow.set_entry_point("claude")
+    workflow.add_edge("claude", END)
+    
+    # Compile workflow
+    compiled_workflow = workflow.compile()
+    logger.info("Default workflow compiled successfully")
+    
+    return compiled_workflow
+
+
 def create_workflow(design_json: dict, config: AppConfig):
     """
     Build and compile LangGraph workflow from Langflow design JSON.
@@ -119,7 +154,8 @@ def create_workflow(design_json: dict, config: AppConfig):
         edges_data = design_json.get("data", {}).get("edges", [])
         
         if not nodes_data:
-            raise ValueError("No nodes found in design JSON")
+            logger.warning("No nodes found in design JSON, creating default simple workflow")
+            return create_default_workflow(config)
         
         logger.info(f"Found {len(nodes_data)} nodes and {len(edges_data)} edges")
         
