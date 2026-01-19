@@ -32,7 +32,9 @@ class AppConfig(BaseSettings):
     aws_session_token: Optional[str] = Field(None, alias="AWS_SESSION_TOKEN")
     
     # Common model settings
-    model_name: str = Field("anthropic.claude-3-5-sonnet-20241022-v2:0", alias="MODEL_NAME")
+    # Use cross-region inference profile for Claude 3.5 Sonnet v2
+    # Alternatives: us.anthropic.claude-3-5-sonnet-20241022-v2:0, anthropic.claude-3-5-sonnet-20240620-v1:0
+    model_name: str = Field("us.anthropic.claude-3-5-sonnet-20241022-v2:0", alias="MODEL_NAME")
     temperature: float = Field(0.7, alias="TEMPERATURE")
     max_tokens: Optional[int] = Field(4096, alias="MAX_TOKENS")
     timeout_seconds: int = Field(60, alias="TIMEOUT_SECONDS")

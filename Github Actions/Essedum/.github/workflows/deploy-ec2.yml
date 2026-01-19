@@ -148,7 +148,7 @@ jobs:
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             AWS_REGION=${{ secrets.AWS_REGION }}
-            MODEL_NAME=anthropic.claude-3-5-sonnet-20241022-v2:0
+            MODEL_NAME=us.anthropic.claude-3-5-sonnet-20241022-v2:0
             TEMPERATURE=0.7
             MAX_TOKENS=4096
             TIMEOUT_SECONDS=60
