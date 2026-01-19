@@ -118,9 +118,10 @@ def create_default_workflow(config: AppConfig):
     # Add single Claude node
     claude_node_fn = partial(
         nodes.claude_node,
-        model_name=config.MODEL_NAME,
-        temperature=config.TEMPERATURE,
-        max_tokens=config.MAX_TOKENS,
+        model_name=config.model_name,
+        temperature=config.temperature,
+        max_tokens=config.max_tokens,
+        config=config,
     )
     workflow.add_node("claude", claude_node_fn)
     
