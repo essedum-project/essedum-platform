@@ -67,6 +67,71 @@ def get_model(config: AppConfig, node_params: Optional[dict] = None):
         raise
 
 
+def claude_node(state: WorkflowState, model_name: str, temperature: float, max_tokens: int, config: AppConfig) -> dict:
+    """
+    Simple Claude node for default workflow.
+    
+    Takes user query from state and returns Claude's response.
+    
+    Args:
+        state: Current workflow state
+        model_name: Claude model ID
+        temperature: Sampling temperature
+        max_tokens: Maximum tokens in response
+        config: Application configuration
+        
+    Returns:
+        Updated state with assistant response
+    """
+    try:
+        logger.info(f"Processing Claude node with model: {model_name}")
+        
+        # Get user query from state
+        user_query = state.get("user_input", "")
+        if not user_query and state.get("messages"):
+            # Try to extract from messages
+            last_msg = state["messages"][-1]
+            if isinstance(last_msg, dict):
+                user_query = last_msg.get("content", "")
+            elif hasattr(last_msg, "content"):
+                user_query = last_msg.content
+            else:
+                user_query = str(last_msg)
+        
+        if not user_query:
+            logger.warning("No user query found in state")
+            return {"error": "No user query provided"}
+        
+        # Get LLM instance
+        llm = get_model(config, {
+            "model_name": model_name,
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        })
+        
+        # Create message
+        messages = [HumanMessage(content=user_query)]
+        
+        # Invoke LLM
+        logger.info(f"Invoking Claude with query: {user_query[:100]}...")
+        response = llm.invoke(messages)
+        
+        response_text = response.content if hasattr(response, 'content') else str(response)
+        logger.info(f"Claude response received: {response_text[:100]}...")
+        
+        return {
+            "assistant_response": response_text,
+            "messages": state.get("messages", []) + [
+                HumanMessage(content=user_query),
+                AIMessage(content=response_text)
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in Claude node: {e}")
+        return {"error": f"Claude node failed: {str(e)}"}
+
+
 def node_chatinput_vip4f(state: WorkflowState, config: AppConfig) -> dict:
     """
     ChatInput node: Captures user input and adds to message history.
