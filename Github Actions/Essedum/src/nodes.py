@@ -41,11 +41,10 @@ def get_model(config: AppConfig, node_params: Optional[dict] = None):
     try:
         logger.info(f"Using AWS Bedrock with model: {model_id} in region: {config.aws_region}")
         
-        # Prepare credentials dict
+        # Prepare credentials - don't include region_name here as it's passed separately
         credentials = {
             "aws_access_key_id": config.aws_access_key_id,
             "aws_secret_access_key": config.aws_secret_access_key,
-            "region_name": config.aws_region,
         }
         
         # Add session token if provided (for temporary credentials)
@@ -58,7 +57,6 @@ def get_model(config: AppConfig, node_params: Optional[dict] = None):
                 "temperature": temperature,
                 "max_tokens": max_tokens,
             },
-            credentials_profile_name=None,  # Use explicit credentials
             region_name=config.aws_region,
             **credentials
         )
