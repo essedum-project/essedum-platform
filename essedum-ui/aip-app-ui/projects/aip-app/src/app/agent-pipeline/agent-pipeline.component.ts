@@ -6,10 +6,12 @@ import {
   Input,
   Inject,
   ChangeDetectorRef,
+  ViewChild,
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabGroup } from '@angular/material/tabs';
 import { Services } from '../services/service';
 import {
   AgentPipelineService,
@@ -394,7 +396,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   showScriptUnsavedDialog = false;
   pendingScriptAction: (() => void) | null = null;
   
-  
+  // Deployment form data check
+  hasDeploymentFormData = false;
+  isCheckingDeploymentData = false;
+  deploymentEnvironment: string = ''; // Store selected deployment environment
 
   // Drag and Drop functionality
   isDragging = false;
@@ -417,6 +422,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   isHoveredSave = false;
   isHoveredDuplicate = false;
   isBackHovered = false;
+
+  // Reference to mat-tab-group for programmatic tab switching
+  @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
   constructor(
     @Inject('envi') private baseUrl: string,
@@ -1286,6 +1294,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     // Automatically call APIs to check for existing data
     this.autoLoadAgentData();
+    
+    // Check if deployment form data exists
+    this.checkDeploymentFormData();
   }
 
   // Save current file changes
@@ -2888,7 +2899,7 @@ public class ZipController {
       },
       error: (error) => {
         console.error('MinIO push failed, cannot proceed with deployment:', error);
-        
+
         // Check if this is a parsing error with 200 status (success but unparseable response)
         if (error.status === 200 && error.name === 'HttpErrorResponse' && 
             (error.message?.includes('parsing') || error.error?.text)) {
@@ -2916,7 +2927,7 @@ public class ZipController {
    */
   private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
     try {
-      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOMN-S310629&org=leo1311';
+      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOSMPL-78048&org=leo1311';
       console.log('  FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
       
       const response = await this.http.get<any[]>(apiUrl).toPromise();
@@ -2981,7 +2992,7 @@ public class ZipController {
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
 		  
-	this.socket = io('https://essedum.az.ad.idemo-ppc.com', {
+	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],       // <-- force polling only
 	  timeout: 60000,
@@ -4080,6 +4091,159 @@ DELIVERABLES
     this.resetDiffTracking();
   }
 
+  /**
+   * Handle deployment form finish event
+   * Navigate to Playground tab and show deploy button message
+   */
+  onDeploymentFinished(deploymentData: any): void {
+    console.log('🎯 Deployment form finished successfully:', deploymentData);
+    console.log('🎯 Current tabGroup exists:', !!this.tabGroup);
+    
+    // Set flag to true so the deploy button will show on Playground tab
+    this.hasDeploymentFormData = true;
+    
+    // Extract and store deployment environment from the correct path
+    this.deploymentEnvironment = deploymentData?.deployment_environment || '';
+    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
+    
+    // Trigger change detection to ensure the state is updated
+    this.cdr.detectChanges();
+    
+    // Navigate to Playground tab
+    // Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
+    // Use a longer timeout to ensure ViewChild is initialized and tabs are rendered
+    setTimeout(() => {
+      console.log('🎯 Attempting tab navigation...');
+      console.log('🎯 tabGroup exists:', !!this.tabGroup);
+      
+      if (this.tabGroup) {
+        // Find the Playground tab index dynamically
+        const playgroundTabIndex = this.getPlaygroundTabIndex();
+        console.log('🎯 Calculated Playground tab index:', playgroundTabIndex);
+        console.log('🎯 Current selected index:', this.tabGroup.selectedIndex);
+        console.log('🎯 Total tabs:', this.tabGroup._tabs.length);
+        
+        if (playgroundTabIndex >= 0 && playgroundTabIndex < this.tabGroup._tabs.length) {
+          this.tabGroup.selectedIndex = playgroundTabIndex;
+          console.log('✅ Successfully navigated to Playground tab at index:', playgroundTabIndex);
+          
+          // Force change detection after tab switch
+          this.cdr.detectChanges();
+          
+          // Show success message with deploy button instruction
+          setTimeout(() => {
+            this.service.message(
+              'Deployment configuration saved successfully. Click on the Deploy button to start deployment.',
+              'success'
+            );
+          }, 300);
+        } else {
+          console.error('❌ Invalid playground tab index:', playgroundTabIndex);
+        }
+      } else {
+        console.error('❌ tabGroup is not initialized!');
+      }
+    }, 500);
+  }
+  
+  /**
+   * Get the index of the Playground tab dynamically
+   * Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
+   * Since tabs can be conditionally visible, we need to calculate the index
+   */
+  private getPlaygroundTabIndex(): number {
+    let index = 0;
+    
+    // Builder tab (conditional)
+    if (this.shouldShowBuilderTab) {
+      console.log('  Builder tab is visible, index++');
+      index++;
+    }
+    
+    // Codespace tab (always visible)
+    console.log('  Codespace tab is visible, index++');
+    index++;
+    
+    // Playground tab is next (before Deployment tab in HTML)
+    // Note: Playground is shown when hasGeneratedAgent || hasExistingFiles()
+    console.log('  Playground tab should be at index:', index);
+    
+    return index;
+  }
+
+  /**
+   * Check if deployment form data exists for the current agent
+   */
+  private checkDeploymentFormData(): void {
+    if (!this.currentCname) {
+      console.log('❌ Cannot check deployment form data: no cname available');
+      this.hasDeploymentFormData = false;
+      this.deploymentEnvironment = '';
+      return;
+    }
+
+    const organization = this.getOrganization();
+    console.log('🔍 Checking deployment form data for cname:', this.currentCname, 'org:', organization);
+    console.log('🔍 API URL will be: /api/aip/deployment-form?cname=' + this.currentCname + '&org=' + organization);
+    
+    this.isCheckingDeploymentData = true;
+    
+    this.service.getDeploymentFormByCnameOrg(this.currentCname, organization).subscribe({
+      next: (response) => {
+        console.log('📦 Deployment form API response:', response);
+        console.log('📦 Response type:', typeof response);
+        console.log('📦 Is array:', Array.isArray(response));
+        
+        // More robust checking - if response exists and is not empty
+        let hasData = false;
+        let data = null;
+        
+        if (response) {
+          if (Array.isArray(response)) {
+            hasData = response.length > 0;
+            data = response[0];
+            console.log('📦 Array response with length:', response.length);
+          } else if (typeof response === 'object') {
+            hasData = Object.keys(response).length > 0;
+            data = response;
+            console.log('📦 Object response with keys:', Object.keys(response).length);
+          }
+        }
+        
+        console.log('📦 Has data:', hasData);
+        
+        if (hasData && data) {
+          // Set flag to TRUE - button MUST show
+          this.hasDeploymentFormData = true;
+          
+          // Try to extract deployment environment (optional)
+          this.deploymentEnvironment = data.deployment_environment || '';
+          
+          console.log('✅ Deployment form data EXISTS - Deploy button WILL show');
+          console.log('✅ Deployment environment extracted:', this.deploymentEnvironment || '(none - will show as "Deploy")');
+          console.log('✅ hasDeploymentFormData flag set to:', this.hasDeploymentFormData);
+        } else {
+          this.hasDeploymentFormData = false;
+          this.deploymentEnvironment = '';
+          console.log('❌ No deployment form data found - Deploy button will NOT show');
+        }
+        
+        this.isCheckingDeploymentData = false;
+        
+        // Force change detection to ensure UI updates
+        this.cdr.detectChanges();
+        console.log('🔄 Change detection triggered');
+      },
+      error: (error) => {
+        console.error('❌ Error checking deployment form data:', error);
+        console.error('❌ Error details:', error.message || error);
+        this.hasDeploymentFormData = false;
+        this.deploymentEnvironment = '';
+        this.isCheckingDeploymentData = false;
+      }
+    });
+  }
+
   // Automatically load agent data when viewing details
   private autoLoadAgentData(): void {
     if (!this.currentCname) {
@@ -4145,6 +4309,9 @@ DELIVERABLES
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
+    
+    // Check if deployment form data exists for the Deploy button
+    this.checkDeploymentFormData();
 
     // Call folder list API first - using the cname as both cname and filename for the API
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({

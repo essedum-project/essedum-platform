@@ -33,6 +33,17 @@
           <mat-icon>smart_toy</mat-icon>
           <span class="button-label">Open Playground</span>
         </button>
+        
+        <!-- Deploy Button - Show when deployment form data exists -->
+        <button mat-raised-button 
+                color="primary"
+                class="deploy-button action-btn"
+                *ngIf="hasDeploymentFormData"
+                [disabled]="isRunningAndDeploying || isCheckingDeploymentData"
+                [matTooltip]="deploymentEnvironment ? 'Deploy to ' + deploymentEnvironment : 'Deploy with saved configuration'"
+                matTooltipPosition="above">
+          <span class="button-label">{{ isRunningAndDeploying ? 'Deploying...' : (deploymentEnvironment ? 'Deploy to ' + deploymentEnvironment : 'Deploy') }}</span>
+        </button>
       </div>
 
       <!-- Status Message -->
