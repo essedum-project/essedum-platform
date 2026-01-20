@@ -3281,6 +3281,17 @@ public class ZipController {
   }
 
   /**
+   * Handle ZIP file created from GitHub pull
+   */
+  onGitHubPullZipCreated(zipFile: File): void {
+    console.log('GitHub pull ZIP file received:', zipFile.name, 'Size:', zipFile.size);
+    this.selectedZipFile = zipFile;
+    
+    // Automatically trigger upload
+    this.uploadAgentFiles();
+  }
+
+  /**
    * Upload selected zip file to server
    */
   uploadAgentFiles(): void {
