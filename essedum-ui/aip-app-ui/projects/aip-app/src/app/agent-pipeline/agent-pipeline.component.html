@@ -167,11 +167,11 @@
                    'status-error': deploymentStatus === 'error',
                    'status-idle': deploymentStatus === 'idle'
                  }">{{ deploymentStatusMessage }}</div>
-                          </div> <!-- GitHub Copilot Instructions -->
+                          </div>
+                          
+                          <!-- GitHub Copilot Instructions -->
                           <div class="prompt-template-container"
                             *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
-                          <!-- GitHub Copilot Instructions - Always Show -->
-                          <div class="prompt-template-container">
                             <div class="prompt-instructions">
                               <p><strong>Instructions for {{ pipelineMode === 'mcp' ? 'MCP Server' : 'Agent' }} Code Generation using Github Copilot:</strong></p>
                               <ol>
@@ -255,9 +255,6 @@
                   </div>
                 </mat-tab>
 
-                <!-- Essedum Codespace Tab (Only show after agent generation) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'"
-                  class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
                 <!-- Essedum Codespace Tab (Always visible) -->
                 <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'" class="lfx-u-header-xl">
                   <div class="tab-content mb-5">
@@ -271,9 +268,6 @@
                               <mat-icon>folder_open</mat-icon>
                               <h3>Project Files</h3>
                             </div>
-                            <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
-                              <button mat-icon-button class="upload-button" title="Upload to MinIO"
-                                (click)="pushToMinio()">
                             <div class="header-right">
                               <!-- Upload ZIP Files Button - Only show when no files exist -->
                               <button mat-raised-button class="upload-files-button" 
@@ -429,7 +423,6 @@
                       </div>
                     </div>
                   </div>
-                  <!-- </div> -->
                 </mat-tab>
    <!-- Playground Tab (Only show when files exist) -->
                 <mat-tab label="Playground" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent || hasExistingFiles()">
