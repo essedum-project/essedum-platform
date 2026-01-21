@@ -1,7 +1,18 @@
 import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
+
+// Custom validator for array fields to ensure at least one item is selected
+function arrayNotEmptyValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return { required: true };
+    }
+    return null;
+  };
+}
 
 interface DeploymentFormData {
   overview: any;
@@ -113,13 +124,13 @@ export class DeploymentFormComponent implements OnInit {
   readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
 
   // Static text constants - Messages
-  readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button : Agent Name, Agent Version, Deployment Date & Time';
+  readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button: Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner';
   readonly OVERVIEW_SAVED_MESSAGE = 'Overview saved';
   readonly SCOPE_SAVED_MESSAGE = 'Scope & Pre-Checks saved';
   readonly APPROVAL_SAVED_MESSAGE = 'Approval & Rollback saved';
   readonly VALIDATION_SAVED_MESSAGE = 'Validation & Compliance saved';
   readonly FILL_REQUIRED_FIELDS_MESSAGE = 'Please fill all required fields';
-  readonly FILL_REQUIRED_FIELDS_FINISH_MESSAGE = 'Please fill all required fields (Agent Name, Agent Version, Deployment Date & Time)';
+  readonly FILL_REQUIRED_FIELDS_FINISH_MESSAGE = 'Please fill all required fields (Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner)';
   readonly DEPLOYMENT_SAVED_SUCCESS_MESSAGE = 'Deployment form saved successfully!';
   readonly DEPLOYMENT_SAVED_ERROR_MESSAGE = 'Error saving deployment form: ';
 
@@ -178,10 +189,10 @@ export class DeploymentFormComponent implements OnInit {
       hashChecksum: ['']
     });
 
-    // Initialize Scope & Pre-Checks Form - No required fields
+    // Initialize Scope & Pre-Checks Form - targetNodes and impactedServices are required
     this.scopeForm = this.fb.group({
-      targetNodes: [[]],
-      impactedServices: [[]],
+      targetNodes: [[], [Validators.required, arrayNotEmptyValidator()]],
+      impactedServices: [[], [Validators.required, arrayNotEmptyValidator()]],
       dependencies: [''],
       healthCheckStatus: [''],
       backupConfirmation: [false],
@@ -189,24 +200,24 @@ export class DeploymentFormComponent implements OnInit {
       securityPatchVerification: [false]
     });
 
-    // Initialize Approval & Rollback Form - No required fields
+    // Initialize Approval & Rollback Form - approverNameRole and cabApprovalReference are required
     this.approvalForm = this.fb.group({
-      approverNameRole: [''],
-      cabApprovalReference: [''],
+      approverNameRole: ['', Validators.required],
+      cabApprovalReference: ['', Validators.required],
       changeRequestId: [''],
       rollbackProcedureReference: [''],
       previousStableVersion: ['']
     });
 
-    // Initialize Validation & Compliance Form - No required fields
+    // Initialize Validation & Compliance Form - smokeTestStatus and deploymentOwner are required
     this.validationForm = this.fb.group({
-      smokeTestStatus: [''],
+      smokeTestStatus: ['', Validators.required],
       performanceTestSummary: [''],
       sslTlsCertificateCheck: [false],
       drReadiness: [false],
       dataRetentionConfirmation: [false],
       antivirusPatchConfirmation: [false],
-      deploymentOwner: [''],
+      deploymentOwner: ['', Validators.required],
       infraSupportContacts: [''],
       auditPocDetails: ['']
     });
@@ -329,6 +340,9 @@ export class DeploymentFormComponent implements OnInit {
    * Save Overview - Calls the same API as finish button
    */
   saveOverview(): void {
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.overviewForm);
+    
     if (this.overviewForm.valid) {
       const deploymentData = this.buildDeploymentPayload();
       this.service.saveDeploymentForm(deploymentData).subscribe(
@@ -343,8 +357,7 @@ export class DeploymentFormComponent implements OnInit {
         }
       );
     } else {
-      this.markFormGroupTouched(this.overviewForm);
-      this.service.message(this.FILL_REQUIRED_FIELDS_MESSAGE, 'error');
+      this.service.message('Please fill all required fields in Overview tab', 'error');
     }
   }
 
@@ -352,62 +365,86 @@ export class DeploymentFormComponent implements OnInit {
    * Save Scope - Calls the same API as finish button
    */
   saveScope(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.scopeForm);
+    
+    if (this.scopeForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Scope & Pre-Checks tab', 'error');
+    }
   }
 
   /**
    * Save Approval - Calls the same API as finish button
    */
   saveApproval(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.approvalForm);
+    
+    if (this.approvalForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Approval & Rollback tab', 'error');
+    }
   }
 
   /**
    * Save Validation - Calls the same API as finish button
    */
   saveValidation(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.validationForm);
+    
+    if (this.validationForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Validation & Compliance tab', 'error');
+    }
   }
 
   /**
    * Check if all required fields are filled to enable Finish button
    */
   isAllFormsValid(): boolean {
-    // Only check if the required fields are filled: agentName, agentVersion, deploymentDateTime
-    return this.overviewForm.valid;
+    // Check all required fields across all forms
+    return this.overviewForm.valid && 
+           this.scopeForm.valid && 
+           this.approvalForm.valid && 
+           this.validationForm.valid;
   }
 
   /**
@@ -431,10 +468,34 @@ export class DeploymentFormComponent implements OnInit {
    * Finish deployment - validate required fields and save complete form
    */
   finishDeployment(): void {
-    // Check if required fields are filled
+    // Mark all forms as touched to show validation errors
+    this.markFormGroupTouched(this.overviewForm);
+    this.markFormGroupTouched(this.scopeForm);
+    this.markFormGroupTouched(this.approvalForm);
+    this.markFormGroupTouched(this.validationForm);
+    
+    // Check if all required fields are filled
     if (!this.overviewForm.valid) {
-      this.markFormGroupTouched(this.overviewForm);
       this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 0; // Navigate to Overview tab
+      return;
+    }
+    
+    if (!this.scopeForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 1; // Navigate to Scope tab
+      return;
+    }
+    
+    if (!this.approvalForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 2; // Navigate to Approval tab
+      return;
+    }
+    
+    if (!this.validationForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 3; // Navigate to Validation tab
       return;
     }
 
