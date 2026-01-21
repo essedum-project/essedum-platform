@@ -6,7 +6,8 @@ import {
   GitHubRepository,
   AuthStatus,
   OAuthResponse,
-  PushRequest
+  PushRequest,
+  PullRequest
 } from '../models/github.models';
 
 @Injectable({
@@ -83,6 +84,17 @@ export class GitHubService {
         withCredentials: true,
         responseType: 'text'
       }
+    );
+  }
+
+  /**
+   * Pull files from GitHub
+   */
+  pullFromGitHub(request: PullRequest): Observable<any> {
+    return this.http.post(
+      `${this.API_BASE}/pull`,
+      request,
+      { withCredentials: true }
     );
   }
 

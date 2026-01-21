@@ -430,15 +430,15 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
         if (dto.getModules() != null) {
             // Remove modules not in DTO
             agentDirectory.getModules().removeIf(existing ->
-                dto.getModules().stream().noneMatch(dtoModule -> dtoModule.getName().equals(existing.getName()))
+                    dto.getModules().stream().noneMatch(dtoModule -> dtoModule.getName().equals(existing.getName()))
             );
 
             // Add or update modules
             dto.getModules().forEach(moduleDTO -> {
                 AgentModule existing = agentDirectory.getModules().stream()
-                    .filter(m -> m.getName().equals(moduleDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(m -> m.getName().equals(moduleDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     // Update existing module (name is already set, update other fields if any)
@@ -458,14 +458,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSkills(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSkills() != null) {
             agentDirectory.getSkills().removeIf(existing ->
-                dto.getSkills().stream().noneMatch(dtoSkill -> dtoSkill.getName().equals(existing.getName()))
+                    dto.getSkills().stream().noneMatch(dtoSkill -> dtoSkill.getName().equals(existing.getName()))
             );
 
             dto.getSkills().forEach(skillDTO -> {
                 AgentSkill existing = agentDirectory.getSkills().stream()
-                    .filter(s -> s.getName().equals(skillDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getName().equals(skillDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing == null) {
                     AgentSkill skill = new AgentSkill();
@@ -481,14 +481,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateDomains(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getDomains() != null) {
             agentDirectory.getDomains().removeIf(existing ->
-                dto.getDomains().stream().noneMatch(dtoDomain -> dtoDomain.getName().equals(existing.getName()))
+                    dto.getDomains().stream().noneMatch(dtoDomain -> dtoDomain.getName().equals(existing.getName()))
             );
 
             dto.getDomains().forEach(domainDTO -> {
                 AgentDomain existing = agentDirectory.getDomains().stream()
-                    .filter(d -> d.getName().equals(domainDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(d -> d.getName().equals(domainDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(domainDTO.getDescription());
@@ -507,14 +507,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateLocators(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getLocators() != null) {
             agentDirectory.getLocators().removeIf(existing ->
-                dto.getLocators().stream().noneMatch(dtoLoc -> dtoLoc.getUrl().equals(existing.getUrl()))
+                    dto.getLocators().stream().noneMatch(dtoLoc -> dtoLoc.getUrl().equals(existing.getUrl()))
             );
 
             dto.getLocators().forEach(locatorDTO -> {
                 AgentLocator existing = agentDirectory.getLocators().stream()
-                    .filter(l -> l.getUrl().equals(locatorDTO.getUrl()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(l -> l.getUrl().equals(locatorDTO.getUrl()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setLocatorType(locatorDTO.getLocatorType());
@@ -533,14 +533,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSyncs(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSyncs() != null) {
             agentDirectory.getSyncs().removeIf(existing ->
-                dto.getSyncs().stream().noneMatch(dtoSync -> dtoSync.getTarget().equals(existing.getTarget()))
+                    dto.getSyncs().stream().noneMatch(dtoSync -> dtoSync.getTarget().equals(existing.getTarget()))
             );
 
             dto.getSyncs().forEach(syncDTO -> {
                 AgentSync existing = agentDirectory.getSyncs().stream()
-                    .filter(s -> s.getTarget().equals(syncDTO.getTarget()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getTarget().equals(syncDTO.getTarget()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setFrequency(syncDTO.getFrequency());
@@ -559,14 +559,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updatePublications(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getPublications() != null) {
             agentDirectory.getPublications().removeIf(existing ->
-                dto.getPublications().stream().noneMatch(dtoPub -> dtoPub.getChannel().equals(existing.getChannel()))
+                    dto.getPublications().stream().noneMatch(dtoPub -> dtoPub.getChannel().equals(existing.getChannel()))
             );
 
             dto.getPublications().forEach(publicationDTO -> {
                 AgentPublication existing = agentDirectory.getPublications().stream()
-                    .filter(p -> p.getChannel().equals(publicationDTO.getChannel()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(p -> p.getChannel().equals(publicationDTO.getChannel()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setPublishedDate(publicationDTO.getPublishedDate());
@@ -585,8 +585,8 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateExtensions(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getExtensions() != null) {
             agentDirectory.getExtensions().removeIf(existing ->
-                dto.getExtensions().stream().noneMatch(dtoExt ->
-                    dtoExt.getKey() != null && dtoExt.getKey().equals(existing.getExtKey()))
+                    dto.getExtensions().stream().noneMatch(dtoExt ->
+                            dtoExt.getKey() != null && dtoExt.getKey().equals(existing.getExtKey()))
             );
 
             dto.getExtensions().forEach(extensionDTO -> {
@@ -595,9 +595,9 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                 }
 
                 AgentExtension existing = agentDirectory.getExtensions().stream()
-                    .filter(e -> e.getExtKey() != null && e.getExtKey().equals(extensionDTO.getKey()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(e -> e.getExtKey() != null && e.getExtKey().equals(extensionDTO.getKey()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setExtValue(extensionDTO.getValue());
@@ -619,8 +619,8 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSelectors(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSelectors() != null) {
             agentDirectory.getSelectors().removeIf(existing ->
-                dto.getSelectors().stream().noneMatch(dtoSel ->
-                    dtoSel.getKey() != null && dtoSel.getKey().equals(existing.getSelKey()))
+                    dto.getSelectors().stream().noneMatch(dtoSel ->
+                            dtoSel.getKey() != null && dtoSel.getKey().equals(existing.getSelKey()))
             );
 
             dto.getSelectors().forEach(selectorDTO -> {
@@ -629,9 +629,9 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                 }
 
                 AgentSelector existing = agentDirectory.getSelectors().stream()
-                    .filter(s -> s.getSelKey() != null && s.getSelKey().equals(selectorDTO.getKey()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getSelKey() != null && s.getSelKey().equals(selectorDTO.getKey()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setSelValue(selectorDTO.getValue());
@@ -651,17 +651,17 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateSignatures(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getSignatures() != null) {
             agentDirectory.getSignatures().removeIf(existing ->
-                dto.getSignatures().stream().noneMatch(dtoSig ->
-                    dtoSig.getAlgorithm().equals(existing.getAlgorithm()) &&
-                    dtoSig.getValue().equals(existing.getValue()))
+                    dto.getSignatures().stream().noneMatch(dtoSig ->
+                            dtoSig.getAlgorithm().equals(existing.getAlgorithm()) &&
+                                    dtoSig.getValue().equals(existing.getValue()))
             );
 
             dto.getSignatures().forEach(signatureDTO -> {
                 AgentSignature existing = agentDirectory.getSignatures().stream()
-                    .filter(s -> s.getAlgorithm().equals(signatureDTO.getAlgorithm()) &&
-                                 s.getValue().equals(signatureDTO.getValue()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(s -> s.getAlgorithm().equals(signatureDTO.getAlgorithm()) &&
+                                s.getValue().equals(signatureDTO.getValue()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setCertificate(signatureDTO.getCertificate());
@@ -679,14 +679,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateTools(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getTools() != null) {
             agentDirectory.getTools().removeIf(existing ->
-                dto.getTools().stream().noneMatch(dtoTool -> dtoTool.getName().equals(existing.getName()))
+                    dto.getTools().stream().noneMatch(dtoTool -> dtoTool.getName().equals(existing.getName()))
             );
 
             dto.getTools().forEach(toolDTO -> {
                 AgentTool existing = agentDirectory.getTools().stream()
-                    .filter(t -> t.getName().equals(toolDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(t -> t.getName().equals(toolDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     // Update existing tool
@@ -695,16 +695,16 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
                     // Update parameters: remove old ones not in DTO
                     if (toolDTO.getParameters() != null) {
                         existing.getParameters().removeIf(existingParam ->
-                            toolDTO.getParameters().stream()
-                                .noneMatch(dtoParam -> dtoParam.getName().equals(existingParam.getName()))
+                                toolDTO.getParameters().stream()
+                                        .noneMatch(dtoParam -> dtoParam.getName().equals(existingParam.getName()))
                         );
 
                         // Add or update parameters
                         toolDTO.getParameters().forEach(paramDTO -> {
                             AgentToolParameter existingParam = existing.getParameters().stream()
-                                .filter(p -> p.getName().equals(paramDTO.getName()))
-                                .findFirst()
-                                .orElse(null);
+                                    .filter(p -> p.getName().equals(paramDTO.getName()))
+                                    .findFirst()
+                                    .orElse(null);
 
                             if (existingParam != null) {
                                 // Update existing parameter
@@ -754,14 +754,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updateResources(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getResources() != null) {
             agentDirectory.getResources().removeIf(existing ->
-                dto.getResources().stream().noneMatch(dtoRes -> dtoRes.getName().equals(existing.getName()))
+                    dto.getResources().stream().noneMatch(dtoRes -> dtoRes.getName().equals(existing.getName()))
             );
 
             dto.getResources().forEach(resourceDTO -> {
                 AgentResource existing = agentDirectory.getResources().stream()
-                    .filter(r -> r.getName().equals(resourceDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(r -> r.getName().equals(resourceDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(resourceDTO.getDescription());
@@ -780,14 +780,14 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
     private void updatePrompts(AgentDirectory agentDirectory, AgentDirectoryDTO dto) {
         if (dto.getPrompts() != null) {
             agentDirectory.getPrompts().removeIf(existing ->
-                dto.getPrompts().stream().noneMatch(dtoPrompt -> dtoPrompt.getName().equals(existing.getName()))
+                    dto.getPrompts().stream().noneMatch(dtoPrompt -> dtoPrompt.getName().equals(existing.getName()))
             );
 
             dto.getPrompts().forEach(promptDTO -> {
                 AgentPrompt existing = agentDirectory.getPrompts().stream()
-                    .filter(p -> p.getName().equals(promptDTO.getName()))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(p -> p.getName().equals(promptDTO.getName()))
+                        .findFirst()
+                        .orElse(null);
 
                 if (existing != null) {
                     existing.setDescription(promptDTO.getDescription());
@@ -941,7 +941,7 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
 
     @Override
     public List<AgentDirectory> getAllAgentsByTypeAndOrg(String project, Pageable paginate, String query,
-                                                          String type, String interfacetype) {
+                                                         String type, String interfacetype) {
         try {
             // Validate input
             if (project == null || project.trim().isEmpty()) {
@@ -1042,6 +1042,258 @@ public class ICIPAgentDirectoryService implements IICIPAgentDirectoryService {
             logger.error("Error fetching pipeline IDs: {}", e.getMessage(), e);
             throw new AgentDirectoryException("Failed to fetch pipeline IDs", e);
         }
+    }
+
+    @Override
+    public AgentSearchResponseDTO searchAgents(AgentSearchRequestDTO searchRequest) {
+        try {
+            // Validate input
+            if (searchRequest == null || searchRequest.getQueries() == null || searchRequest.getQueries().isEmpty()) {
+                throw new IllegalArgumentException("Search queries cannot be null or empty");
+            }
+
+            // Set default values
+            Integer minMatchScore = searchRequest.getMinMatchScore() != null ? searchRequest.getMinMatchScore() : 1;
+
+            logger.info("Searching agents with {} queries, minMatchScore: {}, limit: {}, organization: {}",
+                    searchRequest.getQueries().size(), minMatchScore,
+                    searchRequest.getLimit(), searchRequest.getOrganization());
+
+            // Fetch all agents (or filter by organization if provided)
+            List<AgentDirectory> allAgents;
+            if (searchRequest.getOrganization() != null && !searchRequest.getOrganization().trim().isEmpty()) {
+                allAgents = agentDirectoryRepository.findByOrganization(searchRequest.getOrganization());
+            } else {
+                allAgents = agentDirectoryRepository.findAll();
+            }
+
+            logger.info("Total agents to search: {}", allAgents.size());
+
+            // Search and score each agent
+            List<AgentSearchResultDTO> results = new ArrayList<>();
+
+            for (AgentDirectory agent : allAgents) {
+                List<AgentSearchQueryDTO> matchedQueries = new ArrayList<>();
+
+                for (AgentSearchQueryDTO query : searchRequest.getQueries()) {
+                    if (matchesQuery(agent, query)) {
+                        matchedQueries.add(query);
+                    }
+                }
+
+                // Only include if match score meets minimum threshold
+                if (matchedQueries.size() >= minMatchScore) {
+                    AgentSearchResultDTO result = new AgentSearchResultDTO();
+                    result.setRecordRef(agent.getCid());
+                    result.setMatchQueries(matchedQueries);
+                    result.setMatchScore(matchedQueries.size());
+                    result.setAgent(convertToDTO(agent));
+                    results.add(result);
+                }
+            }
+
+            // Sort by match score (highest first)
+            results.sort((r1, r2) -> r2.getMatchScore().compareTo(r1.getMatchScore()));
+
+            // Apply limit if specified
+            Integer totalCount = results.size();
+            if (searchRequest.getLimit() != null && searchRequest.getLimit() > 0 && results.size() > searchRequest.getLimit()) {
+                results = results.subList(0, searchRequest.getLimit());
+            }
+
+            logger.info("Search completed. Total matches: {}, Returned: {}", totalCount, results.size());
+
+            AgentSearchResponseDTO response = new AgentSearchResponseDTO();
+            response.setResults(results);
+            response.setTotalCount(totalCount);
+
+            return response;
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Validation error in searchAgents: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error searching agents: {}", e.getMessage(), e);
+            throw new AgentDirectoryException("Failed to search agents", e);
+        }
+    }
+
+    /**
+     * Check if an agent matches a specific query.
+     * Implements hierarchical prefix matching for skills, domains, and modules.
+     * Implements exact matching for locators.
+     * Supports dynamic key-value matching for domains and locators.
+     *
+     * @param agent the agent to check
+     * @param query the query to match
+     * @return true if the agent matches the query
+     */
+    private boolean matchesQuery(AgentDirectory agent, AgentSearchQueryDTO query) {
+        if (query.getType() == null) {
+            return false;
+        }
+
+        String type = query.getType().toUpperCase();
+        String value = query.getValue();
+        String key = query.getKey(); // Can be null for SKILL/MODULE
+
+        // Validate based on type
+        // For SKILL and MODULE: value is required
+        // For DOMAIN and LOCATOR: at least key or value must be provided
+        if ("SKILL".equals(type) || "MODULE".equals(type)) {
+            if (value == null) {
+                return false;
+            }
+        } else if ("DOMAIN".equals(type) || "LOCATOR".equals(type)) {
+            if ((key == null || key.trim().isEmpty()) && (value == null || value.trim().isEmpty())) {
+                return false;
+            }
+        }
+
+        switch (type) {
+            case "SKILL":
+                // Always searches on "name" field
+                return agent.getSkills() != null && agent.getSkills().stream()
+                        .anyMatch(skill -> matchesHierarchical(skill.getName(), value));
+
+            case "DOMAIN":
+                // Dynamic key-value matching: supports "name" or "description"
+                return agent.getDomains() != null && agent.getDomains().stream()
+                        .anyMatch(domain -> matchesDomain(domain, key, value));
+
+            case "MODULE":
+                // Always searches on "name" field
+                return agent.getModules() != null && agent.getModules().stream()
+                        .anyMatch(module -> matchesHierarchical(module.getName(), value));
+
+            case "LOCATOR":
+                // Dynamic key-value matching: supports "locator_type" or "url"
+                return agent.getLocators() != null && agent.getLocators().stream()
+                        .anyMatch(locator -> matchesLocator(locator, key, value));
+
+            default:
+                logger.warn("Unknown query type: {}", type);
+                return false;
+        }
+    }
+
+    /**
+     * Match domain based on key-value pair with flexible matching.
+     * Supports three scenarios:
+     * 1. Key only: Matches domains where name matches key (value is null/empty)
+     * 2. Value only: Matches domains where description matches value (key is null/empty)
+     * 3. Both: Matches domains where name matches key AND description matches value
+     *
+     * @param domain the domain object
+     * @param key the domain name to match (optional)
+     * @param value the domain description to match (optional)
+     * @return true if matches
+     */
+    private boolean matchesDomain(AgentDomain domain, String key, String value) {
+        if (domain == null) {
+            return false;
+        }
+
+        boolean hasKey = key != null && !key.trim().isEmpty();
+        boolean hasValue = value != null && !value.trim().isEmpty();
+
+        // Case 1: Both key and value provided - both must match
+        if (hasKey && hasValue) {
+            boolean nameMatches = matchesHierarchical(domain.getName(), key);
+            boolean descriptionMatches = matchesHierarchical(domain.getDescription(), value);
+            return nameMatches && descriptionMatches;
+        }
+
+        // Case 2: Only key provided - match on name only
+        if (hasKey && !hasValue) {
+            return matchesHierarchical(domain.getName(), key);
+        }
+
+        // Case 3: Only value provided - match on description only
+        if (!hasKey && hasValue) {
+            return matchesHierarchical(domain.getDescription(), value);
+        }
+
+        // Case 4: Neither provided - no match
+        return false;
+    }
+
+    /**
+     * Match locator based on key-value pair with flexible matching.
+     * Supports three scenarios:
+     * 1. Key only: Matches locators where locator_type matches key (value is null/empty)
+     * 2. Value only: Matches locators where url matches value (key is null/empty)
+     * 3. Both: Matches locators where locator_type matches key AND url matches value
+     *
+     * @param locator the locator object
+     * @param key the locator_type to match (optional)
+     * @param value the url to match (optional)
+     * @return true if matches
+     */
+    private boolean matchesLocator(AgentLocator locator, String key, String value) {
+        if (locator == null) {
+            return false;
+        }
+
+        boolean hasKey = key != null && !key.trim().isEmpty();
+        boolean hasValue = value != null && !value.trim().isEmpty();
+
+        // Case 1: Both key and value provided - both must match
+        if (hasKey && hasValue) {
+            boolean typeMatches = matchesExact(locator.getLocatorType(), key);
+            boolean urlMatches = matchesExact(locator.getUrl(), value);
+            return typeMatches && urlMatches;
+        }
+
+        // Case 2: Only key provided - match on locator_type only
+        if (hasKey && !hasValue) {
+            return matchesExact(locator.getLocatorType(), key);
+        }
+
+        // Case 3: Only value provided - match on url only
+        if (!hasKey && hasValue) {
+            return matchesExact(locator.getUrl(), value);
+        }
+
+        // Case 4: Neither provided - no match
+        return false;
+    }
+
+    /**
+     * Hierarchical prefix matching for skills, domains, and modules.
+     * Example: "AI" matches "AI", "AI/ML", "AI/NLP", etc.
+     *
+     * @param entityValue the value from the entity
+     * @param queryValue the value from the query
+     * @return true if matches
+     */
+    private boolean matchesHierarchical(String entityValue, String queryValue) {
+        if (entityValue == null || queryValue == null) {
+            return false;
+        }
+
+        // Exact match
+        if (entityValue.equalsIgnoreCase(queryValue)) {
+            return true;
+        }
+
+        // Prefix match with hierarchy separator
+        // e.g., "AI" matches "AI/ML", "AI/NLP"
+        return entityValue.toLowerCase().startsWith(queryValue.toLowerCase() + "/");
+    }
+
+    /**
+     * Exact matching for locators.
+     *
+     * @param entityValue the value from the entity
+     * @param queryValue the value from the query
+     * @return true if matches
+     */
+    private boolean matchesExact(String entityValue, String queryValue) {
+        if (entityValue == null || queryValue == null) {
+            return false;
+        }
+        return entityValue.equalsIgnoreCase(queryValue);
     }
 
 }

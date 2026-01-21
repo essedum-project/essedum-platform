@@ -115,7 +115,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   readonly FilterType = FilterType;
 
   // UI state
-  isFilterExpanded = false;
+  isFilterExpanded = false; // Default to expanded so filters are visible
   isExpanded = false;
   isLoading = false;
 
@@ -459,9 +459,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets agent directory filter options
    */
   getAgentDirectoryFilters(): void {
+    console.log('[Filter] getAgentDirectoryFilters called, data:', this.agentDirectoryData);
     if (!this.agentDirectoryData || this.agentDirectoryData.length === 0) {
+      console.log('[Filter] No agent directory data available yet');
       return;
     }
+
+    console.log('[Filter] Processing', this.agentDirectoryData.length, 'agent records');
 
     // Extract unique skills from mock data
     const skillsSet = new Set<string>();
@@ -531,6 +535,11 @@ export class AipFilterComponent implements OnInit, OnChanges {
       value: type,
       selected: false
     }));
+
+    console.log('[Filter] Filter lists populated - Skills:', this.agentSkillsList.length, 
+                'Locators:', this.agentLocatorTypesList.length,
+                'Modules:', this.agentModulesList.length,
+                'Types:', this.agentAllTypesList.length);
   }
 
   /**
@@ -2339,7 +2348,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
           activeFilters.push('Type');
         }
         if (this.agentCreationDateFrom !== null || this.agentCreationDateTo !== null) {
-          activeFilters.push('Creation Date');
+          activeFilters.push('Date Range');
         }
         break;
       default:

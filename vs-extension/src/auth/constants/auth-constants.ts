@@ -3,7 +3,7 @@ import { environment } from '../../config/environment';
 /**
  * Network Configuration Types
  */
-export type NetworkType = 'infosys' | 'lfn';
+export type NetworkType = 'infosys' | 'lfn' | 'server5g';
 
 /**
  * Network Configuration Interface
@@ -60,6 +60,19 @@ export const AUTH_CONFIG = {
             createUserIfNotExist: true,
             silentRefreshTimeoutFactor: 0.85,
             baseURL: environment.networks.lfn.baseURL
+        } as NetworkConfig,
+        SERVER5G: {
+            id: 'server5g' as NetworkType,
+            name: 'server5g',
+            displayName: '5G Server Network',
+            issuerUri: environment.networks.server5g.issuerUri,
+            jwkSetUri: environment.networks.server5g.jwkSetUri,
+            clientId: environment.networks.server5g.clientId,
+            scope: 'openid profile email',
+            claim: 'email||admin',
+            createUserIfNotExist: true,
+            silentRefreshTimeoutFactor: 0.85,
+            baseURL: environment.networks.server5g.baseURL
         } as NetworkConfig
     },
     
