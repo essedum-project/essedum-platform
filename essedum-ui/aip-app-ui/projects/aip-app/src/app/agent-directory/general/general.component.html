@@ -2,7 +2,7 @@
     <div class="main-content col-md-9">
         <!-- About Section -->
         <div id="about" class="section-card">
-            <h2 class="section-title">About</h2>
+            <h2 class="section-title">{{ sectionTitles.about }}</h2>
 
             <div class="section-divider"></div>
 
@@ -101,7 +101,7 @@
         <!-- Modules Section -->
         <div id="modules" class="section-card">
             <h2 class="section-title">
-                Modules
+                {{ sectionTitles.modules }}
                 <span class="count">{{ modules.length }}</span>
             </h2>
 
@@ -122,7 +122,7 @@
         <!-- Skills Section -->
         <div *ngIf="agentData?.type !== 'MCP' && agentData?.type !== 'mcpServer'" id="skills" class="section-card">
             <h2 class="section-title">
-                Skills
+                {{ sectionTitles.skills }}
                 <span class="count">{{ skills.length }}</span>
             </h2>
 
@@ -133,139 +133,6 @@
             </div>
         </div>
 
-        <!-- Domains Section -->
-        <div id="domains" class="section-card">
-            <h2 class="section-title">
-                Domains
-                <span class="count">{{ domains.length }}</span>
-            </h2>
-
-            <div *ngIf="domains.length === 0" class="empty-state">
-                <div class="empty-icon">ℹ️</div>
-                <h4>No domains available</h4>
-                <p>This record doesn't have any domains configured.</p>
-            </div>
-
-            <div class="domains-list">
-                <div *ngFor="let domain of domains" class="domain-item">
-                    <h4 class="domain-name">{{ domain.name }}</h4>
-                    <p class="domain-description">{{ domain.description }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Locators Section -->
-        <div id="locators" class="section-card">
-            <h2 class="section-title">Locators</h2>
-
-            <table class="locators-table">
-                <thead>
-                    <tr>
-                        <th>Type <span class="info-icon">ⓘ</span></th>
-                        <th>URL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let locator of locators">
-                        <td>{{ locator.locator_type }}</td>
-                        <td>
-                            <a [href]="locator.url" target="_blank" class="url-link">
-                                {{ locator.url }}
-                                <mat-icon class="external-icon">open_in_new</mat-icon>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Syncs Section -->
-        <div id="syncs" class="section-card">
-            <h2 class="section-title">
-                Syncs
-                <span class="count">{{ syncs.length }}</span>
-            </h2>
-
-            <div *ngIf="syncs.length === 0" class="empty-state">
-                <div class="empty-icon">ℹ️</div>
-                <h4>No syncs available</h4>
-                <p>This record doesn't have any sync operations configured.</p>
-            </div>
-
-            <table class="locators-table" *ngIf="syncs.length > 0">
-                <thead>
-                    <tr>
-                        <th *ngFor="let header of syncsHeaders">{{ header.label }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let sync of syncs">
-                        <td>{{ sync.target }}</td>
-                        <td>{{ sync.frequency }}</td>
-                        <td>{{ sync.last_sync | date:'short' }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Publications Section -->
-        <div id="publications" class="section-card">
-            <h2 class="section-title">
-                Publications
-                <span class="count">{{ publications.length }}</span>
-            </h2>
-
-            <div *ngIf="publications.length === 0" class="empty-state">
-                <div class="empty-icon">ℹ️</div>
-                <h4>No publications available</h4>
-                <p>This record doesn't have any publications.</p>
-            </div>
-
-            <table class="locators-table" *ngIf="publications.length > 0">
-                <thead>
-                    <tr>
-                        <th *ngFor="let header of publicationsHeaders">{{ header.label }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let publication of publications">
-                        <td>{{ publication.channel }}</td>
-                        <td>{{ publication.published_date | date:'mediumDate' }}</td>
-                        <td><span class="status-badge status-{{ publication.status }}">{{ publication.status }}</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Extensions Section -->
-        <div id="extensions" class="section-card">
-            <h2 class="section-title">
-                Extensions (Custom Metadata)
-                <span class="count">{{ extensions.length }}</span>
-            </h2>
-
-            <div *ngIf="extensions.length === 0" class="empty-state">
-                <div class="empty-icon">ℹ️</div>
-                <h4>No extensions available</h4>
-                <p>This record doesn't have any custom metadata.</p>
-            </div>
-
-            <table class="locators-table" *ngIf="extensions.length > 0">
-                <thead>
-                    <tr>
-                        <th *ngFor="let header of extensionsHeaders">{{ header.label }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let extension of extensions">
-                        <td><strong>{{ extension.key }}</strong></td>
-                        <td>{{ extension.value }}</td>
-                        <td>{{ extension.description }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
         <!-- Selectors Section -->
         <div id="selectors" class="section-card">
@@ -287,10 +154,226 @@
             </div>
         </div>
 
+
+        <!-- Domains Section -->
+        <div id="domains" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.domains }}
+                <span class="count">{{ domains.length }}</span>
+            </h2>
+
+            <div *ngIf="domains.length === 0" class="empty-state">
+                <div class="empty-icon">ℹ️</div>
+                <h4>No domains available</h4>
+                <p>This record doesn't have any domains configured.</p>
+            </div>
+
+            <div class="domains-list">
+                <div *ngFor="let domain of domains" class="domain-item">
+                    <h4 class="domain-name">{{ domain.name }}</h4>
+                    <p class="domain-description">{{ domain.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Locators Section -->
+        <div id="locators" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.locators }}
+                <span class="count">{{ locators.length }}</span>
+            </h2>
+
+            <table class="locators-table two-cols-33-66">
+                <thead>
+                    <tr>
+                        <th *ngFor="let header of locatorsHeaders">{{ header.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let locator of locators">
+                        <td>{{ locator.locator_type }}</td>
+                        <td>
+                            <a [href]="locator.url" target="_blank" class="url-link">
+                                {{ locator.url }}
+                                <mat-icon class="external-icon">open_in_new</mat-icon>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Syncs Section -->
+        <div id="syncs" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.syncs }}
+                <span class="count">{{ syncs.length }}</span>
+            </h2>
+
+            <div *ngIf="syncs.length === 0" class="empty-state">
+                <div class="empty-icon">ℹ️</div>
+                <h4>No syncs available</h4>
+                <p>This record doesn't have any sync operations configured.</p>
+            </div>
+
+            <table class="locators-table equal-cols-3" *ngIf="syncs.length > 0">
+                <thead>
+                    <tr>
+                        <th *ngFor="let header of syncsHeaders">{{ header.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let sync of syncs">
+                        <td>{{ sync.target }}</td>
+                        <td>{{ sync.frequency }}</td>
+                        <td>{{ sync.last_sync | date:'short' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Publications Section -->
+        <div id="publications" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.publications }}
+                <span class="count">{{ publications.length }}</span>
+            </h2>
+
+            <div *ngIf="publications.length === 0" class="empty-state">
+                <div class="empty-icon">ℹ️</div>
+                <h4>No publications available</h4>
+                <p>This record doesn't have any publications.</p>
+            </div>
+
+            <table class="locators-table equal-cols-3" *ngIf="publications.length > 0">
+                <thead>
+                    <tr>
+                        <th *ngFor="let header of publicationsHeaders">{{ header.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let publication of publications">
+                        <td>{{ publication.channel }}</td>
+                        <td>{{ publication.published_date | date:'mediumDate' }}</td>
+                        <td><span class="status-badge status-{{ publication.status }}">{{ publication.status }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Extensions Section -->
+        <div id="extensions" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.extensions }} (Custom Metadata)
+                <span class="count">{{ extensions.length }}</span>
+            </h2>
+
+            <div *ngIf="extensions.length === 0" class="empty-state">
+                <div class="empty-icon">ℹ️</div>
+                <h4>No extensions available</h4>
+                <p>This record doesn't have any custom metadata.</p>
+            </div>
+
+            <table class="locators-table equal-cols-3" *ngIf="extensions.length > 0">
+                <thead>
+                    <tr>
+                        <th *ngFor="let header of extensionsHeaders">{{ header.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let extension of extensions">
+                        <td>{{ extension.key }}</td>
+                        <td>{{ extension.value }}</td>
+                        <td>{{ extension.description }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+        <!-- Tools Section -->
+        <div *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" id="tools" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.tools }}
+                <span class="count">{{ filteredTools.length }}</span>
+            </h2>
+
+            <!-- Search Box -->
+            <div class="search-box">
+                <mat-icon class="search-icon">search</mat-icon>
+                <input type="text" class="search-input" placeholder="Search tools..." [(ngModel)]="toolSearchQuery"
+                    (input)="searchTools()" />
+            </div>
+
+            <div *ngIf="filteredTools.length === 0" class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h4>No tools found</h4>
+                <p>No tools match your search criteria.</p>
+            </div>
+
+            <div *ngFor="let tool of filteredTools; let i = index" class="tool-item">
+                <h4 class="tool-name"><span class="firstcap">{{ tool.name }}</span></h4>
+                <p class="tool-description"><span class="firstcap">{{ tool.description }}</span></p>
+
+                <table class="parameters-table equal-cols-3" *ngIf="tool.parameters && tool.parameters.length > 0">
+                    <thead>
+                        <tr>
+                            <th *ngFor="let header of parametersHeaders" (click)="sortParameters(tool, header.key)"
+                                class="sortable-header">
+                                {{ header.label }}
+                                <mat-icon class="sort-icon">{{ getSortIcon(header.key) }}</mat-icon>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let param of tool.parameters">
+                            <td>{{ param.name }}</td>
+                            <td><span class="type-badge">{{ param.type }}</span></td>
+                            <td>{{ param.description }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-divider thin" *ngIf="i < filteredTools.length - 1"></div>
+            </div>
+        </div>
+
+        <!-- Resources Section -->
+        <div *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" id="resources" class="section-card">
+            <h2 class="section-title">
+                {{ sectionTitles.resources }}
+                <span class="count">{{ resources.length }}</span>
+            </h2>
+
+            <table class="locators-table three-cols-25-25-50" *ngIf="resources.length > 0">
+                <thead>
+                    <tr>
+                        <th *ngFor="let header of resourcesHeaders">{{ header.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let resource of resources">
+                        <td>{{ resource.name }}</td>
+                        <td>{{ resource.description }}</td>
+                        <td>
+                            <a [href]="resource.url" target="_blank" class="url-link">
+                                {{ resource.url }}
+                                <mat-icon class="external-icon">open_in_new</mat-icon>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Signatures Section -->
         <div id="signatures" class="section-card">
             <h2 class="section-title">
-                Signatures (Cryptographic Verification)
+                {{ sectionTitles.signatures }} (Cryptographic Verification)
                 <span class="count">{{ signatures.length }}</span>
             </h2>
 
@@ -302,7 +385,7 @@
 
             <div *ngFor="let signature of signatures" class="signature-item">
                 <div class="signature-header">
-                    <h4 class="signature-algorithm">Algorithm: {{ signature.algorithm }}</h4>
+                    <h4 class="signature-algorithm">Algorithm: <span class="firstcap">{{ signature.algorithm }}</span></h4>
                 </div>
                 <div class="signature-field">
                     <label>Signature Value:</label>
@@ -326,86 +409,27 @@
             </div>
         </div>
 
-
-        <!-- Tools Section -->
-        <div *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" id="tools" class="section-card">
-            <h2 class="section-title">
-                Tools
-                <span class="count">{{ filteredTools.length }}</span>
-            </h2>
-
-            <!-- Search Box -->
-            <div class="search-box">
-                <mat-icon class="search-icon">search</mat-icon>
-                <input type="text" class="search-input" placeholder="Search tools..." [(ngModel)]="toolSearchQuery"
-                    (input)="searchTools()" />
-            </div>
-
-            <div *ngIf="filteredTools.length === 0" class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <h4>No tools found</h4>
-                <p>No tools match your search criteria.</p>
-            </div>
-
-            <div *ngFor="let tool of filteredTools; let i = index" class="tool-item">
-                <h4 class="tool-name">{{ tool.name }}</h4>
-                <p class="tool-description">{{ tool.description }}</p>
-
-                <table class="parameters-table" *ngIf="tool.parameters && tool.parameters.length > 0">
-                    <thead>
-                        <tr>
-                            <th *ngFor="let header of parametersHeaders" (click)="sortParameters(tool, header.key)"
-                                class="sortable-header">
-                                {{ header.label }}
-                                <span class="info-icon">ⓘ</span>
-                                <mat-icon class="sort-icon">{{ getSortIcon(header.key) }}</mat-icon>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let param of tool.parameters">
-                            <td><code>{{ param.name }}</code></td>
-                            <td><span class="type-badge">{{ param.type }}</span></td>
-                            <td>{{ param.description }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="section-divider thin" *ngIf="i < filteredTools.length - 1"></div>
-            </div>
-        </div>
-
-        <!-- Resources Section -->
-        <div *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" id="resources" class="section-card">
-            <h2 class="section-title">
-                Resources
-                <span class="count">{{ resources.length }}</span>
-            </h2>
-
-            <div class="resources-list">
-                <div *ngFor="let resource of resources" class="resource-item">
-                    <div class="resource-header">
-                        <h4 class="resource-name">{{ resource.name }}</h4>
-                    </div>
-                    <p class="resource-description">{{ resource.description }} <a [href]="resource.url"
-                            class="resource-link">()</a></p>
-                </div>
-            </div>
-        </div>
-
         <!-- Prompts Section -->
         <div *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" id="prompts" class="section-card">
             <h2 class="section-title">
-                Prompts
+                {{ sectionTitles.prompts }}
                 <span class="count">{{ prompts.length }}</span>
             </h2>
 
             <div class="prompts-list">
-                <div *ngFor="let prompt of prompts" class="prompt-item">
-                    <h4 class="prompt-name">{{ prompt.name }}</h4>
-                    <p class="prompt-description">{{ prompt.description }} <button class="copy-icon-btn-inline"
-                            (click)="copyToClipboard(prompt.description)" title="Copy"><mat-icon
-                                class="small-icon">content_copy</mat-icon></button></p>
+                <div *ngFor="let prompt of prompts" class="signature-item">
+                    <div class="signature-header">
+                        <h4 class="signature-algorithm"><span class="firstcap">{{ prompt.name }}</span></h4>
+                    </div>
+                    <div class="signature-field">
+                        <label>Description:</label>
+                        <div class="signature-value-box">
+                            <code>{{ prompt.description }}</code>
+                            <button class="copy-icon-btn-inline" (click)="copyToClipboard(prompt.description)" title="Copy">
+                                <mat-icon class="small-icon">content_copy</mat-icon>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -415,50 +439,53 @@
     <div class="side-nav col-md-3">
         <nav>
             <a (click)="scrollToSection('about')" [class.active]="activeSection === 'about'" class="nav-item">
-                About
+                {{ sectionTitles.about }}
             </a>
             <a (click)="scrollToSection('modules')" [class.active]="activeSection === 'modules'" class="nav-item">
-                Modules
+                {{ sectionTitles.modules }}
             </a>
 
             <a *ngIf="agentData?.type !== 'MCP' && agentData?.type !== 'mcpServer'" (click)="scrollToSection('skills')"
                 [class.active]="activeSection === 'skills'" class="nav-item">
-                Skills
+                {{ sectionTitles.skills }}
+            </a>
+            <a (click)="scrollToSection('selectors')" [class.active]="activeSection === 'selectors'" class="nav-item">
+                {{ sectionTitles.selectors }}
             </a>
             <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
-                Domains
+                {{ sectionTitles.domains }}
             </a>
             <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
-                Locators
+                {{ sectionTitles.locators }}
             </a>
             <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
-                Syncs
+                {{ sectionTitles.syncs }}
             </a>
             <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
                 class="nav-item">
-                Publications
+                {{ sectionTitles.publications }}
             </a>
             <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'" class="nav-item">
-                Extensions
+                {{ sectionTitles.extensions }}
             </a>
-            <a (click)="scrollToSection('selectors')" [class.active]="activeSection === 'selectors'" class="nav-item">
-                Selectors
-            </a>
-            <a (click)="scrollToSection('signatures')" [class.active]="activeSection === 'signatures'" class="nav-item">
-                Signatures
-            </a>
+
+
             <a *ngIf="agentData?.type === 'MCP'  || agentData?.type === 'mcpServer'" (click)="scrollToSection('tools')"
                 [class.active]="activeSection === 'tools'" class="nav-item">
-                Tools
+                {{ sectionTitles.tools }}
             </a>
             <a *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'"
                 (click)="scrollToSection('resources')" [class.active]="activeSection === 'resources'" class="nav-item">
-                Resources
+                {{ sectionTitles.resources }}
+            </a>
+            <a (click)="scrollToSection('signatures')" [class.active]="activeSection === 'signatures'" class="nav-item">
+                {{ sectionTitles.signatures }}
             </a>
             <a *ngIf="agentData?.type === 'MCP' || agentData?.type === 'mcpServer'" (click)="scrollToSection('prompts')"
                 [class.active]="activeSection === 'prompts'" class="nav-item">
-                Prompts
+                {{ sectionTitles.prompts }}
             </a>
+
         </nav>
     </div>
 </div>

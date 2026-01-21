@@ -27,13 +27,10 @@
                     style="justify-content: flex-end">download</mat-icon>
             </span>
         </div>
-        <!-- <div *ngIf="servicev1 === 'agent-directory'" style="display: flex; align-items: center; gap: 6px">
-            <span class="lfx-c-badge">
-                <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onModelDownload(card)"
-                    style="font-size: 18px; line-height: 1" class="header-action-icon"
-                    style="justify-content: flex-end">download</mat-icon>
-            </span>
-        </div> -->
+        <div *ngIf="servicev1 === 'agent-directory'">
+            <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails()"
+                class="header-action-icon" style="justify-content: flex-end">visibility</mat-icon>
+        </div>
         <div *ngIf="servicev1 === 'Datasets'">
             <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)"
                 class="header-action-icon" style="justify-content: flex-end">visibility</mat-icon>

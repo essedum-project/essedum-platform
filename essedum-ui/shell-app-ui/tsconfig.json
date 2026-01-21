@@ -15,14 +15,16 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
-    "module": "es2020",
-    "noImplicitAny":false,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "noImplicitAny": false,
     "strictPropertyInitialization": false,
-    "strictNullChecks":false,
+    "strictNullChecks": false,
     "skipLibCheck": true,
     "lib": [
-      "es2020",
+      "ES2022",
+      "ES2020",
       "dom"
     ],
     "paths": {
@@ -40,8 +42,7 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": false,
-    "strictLiteralTypes":false,
-    "fullTemplateTypeCheck":false,
-
+    "strictLiteralTypes": false,
+    "fullTemplateTypeCheck": false,
   }
 }

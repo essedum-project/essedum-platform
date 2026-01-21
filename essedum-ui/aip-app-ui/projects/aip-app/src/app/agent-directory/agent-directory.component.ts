@@ -321,6 +321,8 @@ export class AgentDirectoryComponent implements OnInit, OnChanges {
               }
             );
             
+            console.log('[AgentDirectory] Loaded', data.length, 'agents, triggering filter refresh');
+            
             // Notify filter component to refresh
             this.tagrefresh = true;
             setTimeout(() => {
@@ -416,10 +418,10 @@ export class AgentDirectoryComponent implements OnInit, OnChanges {
     // Apply creation date filter (based on lastmodifieddate)
     if (this.agentCreationDateFrom || this.agentCreationDateTo) {
       tempFilteredCards = tempFilteredCards.filter(card => {
-        if (!card.lastmodifieddate) return true; // If no date, include the card
+        if (!card.lastModifiedDate) return true; // If no date, include the card
         
         // Parse the card date
-        const cardDate = new Date(card.lastmodifieddate);
+        const cardDate = new Date(card.lastModifiedDate);
         
         // Check if date is valid
         if (isNaN(cardDate.getTime())) return true;
@@ -427,20 +429,16 @@ export class AgentDirectoryComponent implements OnInit, OnChanges {
         // Reset time to start of day for fair comparison
         const cardDateOnly = new Date(cardDate.getFullYear(), cardDate.getMonth(), cardDate.getDate());
         
+        // Check From date
         if (this.agentCreationDateFrom) {
-          const fromDate = new Date(this.agentCreationDateFrom);
-          const fromDateOnly = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
-          if (cardDateOnly < fromDateOnly) {
-            return false;
-          }
+          const fromDateOnly = new Date(this.agentCreationDateFrom.getFullYear(), this.agentCreationDateFrom.getMonth(), this.agentCreationDateFrom.getDate());
+          if (cardDateOnly.getTime() < fromDateOnly.getTime()) return false;
         }
         
+        // Check To date
         if (this.agentCreationDateTo) {
-          const toDate = new Date(this.agentCreationDateTo);
-          const toDateOnly = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
-          if (cardDateOnly > toDateOnly) {
-            return false;
-          }
+          const toDateOnly = new Date(this.agentCreationDateTo.getFullYear(), this.agentCreationDateTo.getMonth(), this.agentCreationDateTo.getDate());
+          if (cardDateOnly.getTime() > toDateOnly.getTime()) return false;
         }
         
         return true;
