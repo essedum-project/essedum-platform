@@ -15,66 +15,137 @@
             <div class="align-items-center justify-content-between d-flex">
               <div class="selector-model-title-head d-flex align-items-center">
                 <span class="">
-                  <mat-icon class="aip-led-icons" (click)="navigateBack()"
-                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon></span> &nbsp; &nbsp;
+                  <mat-icon
+                    class="aip-led-icons"
+                    (click)="navigateBack()"
+                    [ngStyle]="{ color: isBackHovered ? '#0094ff' : '#0a142f' }"
+                    matTooltip="Back"
+                    matTooltipPosition="above"
+                    (mouseenter)="isBackHovered = true"
+                    (mouseleave)="isBackHovered = false"
+                    >arrow_back</mat-icon
+                  ></span
+                >
+                &nbsp; &nbsp;
                 <span class="aip-desc-title lfx-u-header-xxl">
-                  <span style="color: #737373">{{cardTitle}}: </span>
+                  <span style="color: #737373">{{ cardTitle }}: </span>
                   {{ pipelineAlias }}
                 </span>
               </div>
             </div>
 
             <!-- Main Content Panel -->
-            <div class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: white">
-
+            <div
+              class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow"
+              style="background-color: white"
+            >
               <!-- Tabs (Show directly on view details) -->
-              <mat-tab-group #tabGroup disableRipple (selectedTabChange)="onTabChange($event)">
-
+              <mat-tab-group
+                #tabGroup
+                disableRipple
+                (selectedTabChange)="onTabChange($event)"
+              >
                 <!-- Agent/MCP Builder Tab - Split View (Conditionally visible based on created_source) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" 
-                         class="lfx-u-header-xl"
-                         *ngIf="shouldShowBuilderTab">
+                <mat-tab
+                  [label]="
+                    pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'
+                  "
+                  class="lfx-u-header-xl"
+                  *ngIf="shouldShowBuilderTab"
+                >
                   <div class="tab-content mb-5">
                     <div class="script-split-container">
-
                       <!-- Left Half - Config File -->
                       <div class="config-panel">
                         <div class="file-editor">
                           <div class="editor-header">
                             <div class="file-info">
-                              <mat-icon class="file-type-icon">{{ pipelineMode === 'mcp' ? 'code' : 'description'
-                                }}</mat-icon>
-                              <span class="file-name" [title]="scriptFileName">{{scriptFileName}}</span>
-                              <span *ngIf="isScriptModified" class="modified-indicator"
-                                title="Configuration has unsaved changes">●</span>
+                              <mat-icon class="file-type-icon">{{
+                                pipelineMode === "mcp" ? "code" : "description"
+                              }}</mat-icon>
+                              <span
+                                class="file-name"
+                                [title]="scriptFileName"
+                                >{{ scriptFileName }}</span
+                              >
+                              <span
+                                *ngIf="isScriptModified"
+                                class="modified-indicator"
+                                title="Configuration has unsaved changes"
+                                >●</span
+                              >
                             </div>
                             <div class="editor-actions">
-                              <button mat-icon-button class="action-button save-button"
-                                [class.save-enabled]="isScriptModified" [class.save-disabled]="!isScriptModified"
-                                (click)="saveScriptConfiguration()" [disabled]="!isScriptModified"
-                                matTooltip="Save Configuration" matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="action-button save-button"
+                                [class.save-enabled]="isScriptModified"
+                                [class.save-disabled]="!isScriptModified"
+                                (click)="saveScriptConfiguration()"
+                                [disabled]="!isScriptModified"
+                                matTooltip="Save Configuration"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>save</mat-icon>
                               </button>
                             </div>
                           </div>
-                          <div class="code-editor" style="height: 400px; overflow: hidden;">
-                            <div class="code-content" style="height: 100%; overflow-y: auto;">
+                          <div
+                            class="code-editor"
+                            style="height: 400px; overflow: hidden"
+                          >
+                            <div
+                              class="code-content"
+                              style="height: 100%; overflow-y: auto"
+                            >
                               <div style="height: max-content">
                                 <!-- MCP Mode - JSON Editor -->
                                 <div *ngIf="pipelineMode === 'mcp'">
-                                  <textarea class="json-config-editor" [ngModel]="getDisplayedJsonConfig()"
-                                    (ngModelChange)="onScriptContentChange($event)"
+                                  <textarea
+                                    class="json-config-editor"
+                                    [ngModel]="getDisplayedJsonConfig()"
+                                    (ngModelChange)="
+                                      onScriptContentChange($event)
+                                    "
                                     placeholder="MCP JSON Configuration..."
-                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                    style="
+                                      width: 100%;
+                                      height: 380px;
+                                      font-family:
+                                        &quot;Courier New&quot;, monospace;
+                                      font-size: 14px;
+                                      border: none;
+                                      outline: none;
+                                      resize: none;
+                                      padding: 10px;
+                                      background-color: #1e1e1e;
+                                      color: #d4d4d4;
+                                    "
+                                  ></textarea>
                                 </div>
                                 <!-- Agent Mode - JSON Editor (converted from code editor) -->
                                 <div *ngIf="pipelineMode === 'agent'">
-                                  <textarea class="json-config-editor agent-config-editor"
-                                    [ngModel]="getScriptAsString()" (ngModelChange)="onScriptContentChange($event)"
+                                  <textarea
+                                    class="json-config-editor agent-config-editor"
+                                    [ngModel]="getScriptAsString()"
+                                    (ngModelChange)="
+                                      onScriptContentChange($event)
+                                    "
                                     placeholder="Agent JSON Configuration..."
-                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                    style="
+                                      width: 100%;
+                                      height: 380px;
+                                      font-family:
+                                        &quot;Courier New&quot;, monospace;
+                                      font-size: 14px;
+                                      border: none;
+                                      outline: none;
+                                      resize: none;
+                                      padding: 10px;
+                                      background-color: #1e1e1e;
+                                      color: #d4d4d4;
+                                    "
+                                  ></textarea>
                                 </div>
                               </div>
                             </div>
@@ -87,166 +158,99 @@
                         <div class="generate-agent-container">
                           <div class="generate-header">
                             <div class="header-content">
-                              <h2>{{ pipelineMode === 'mcp' ? 'MCP Server Implementation' : 'Agent Implementation from
-                                Design' }}</h2>
-                              <p *ngIf="hasGeneratedAgent || hasExistingFiles()">Click on Run and Deploy to build the {{
-                                pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} access playground button</p>
-                              <p *ngIf="!hasGeneratedAgent && !hasExistingFiles()">Please select LLM provider or upload
-                                files to generate {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} code</p>
-                              <h2>{{ pipelineMode === 'mcp' ? 'MCP Server Configuration' : 'Agent Configuration' }}</h2>
-                              <p>Configure your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} design below</p>
+                              <h2>
+                                {{
+                                  pipelineMode === "mcp"
+                                    ? "MCP Server Configuration"
+                                    : "Agent Configuration"
+                                }}
+                              </h2>
+                              <p>
+                                Configure your
+                                {{
+                                  pipelineMode === "mcp"
+                                    ? "MCP server"
+                                    : "agent"
+                                }}
+                                design below
+                              </p>
                             </div>
                             <div class="header-actions">
-                              <button mat-icon-button class="refresh-button" (click)="loadAgentFiles()"
-                                matTooltip="Refresh to check for generated agent files" matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="refresh-button"
+                                (click)="loadAgentFiles()"
+                                matTooltip="Refresh to check for generated agent files"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>refresh</mat-icon>
                               </button>
                             </div>
                           </div>
 
-                          <!-- LLM Selection and Generate Controls in same row -->
-                          <div class="generate-controls-row">
-                            <!-- LLM Selection Dropdown - Only show when no files exist -->
-                            <div class="llm-selection-container" *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
-                              [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
-                              <div class="llm-selection-row">
-                                <label >Select LLM Provider</label>
-                                <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select"
-                                  [disabled]="hasGeneratedAgent || hasExistingFiles()">
-                                  <mat-option value="github-copilot">GitHub Copilot</mat-option>
-                                  <mat-option value="aws-bedrock" disabled>AWS Bedrock</mat-option>
-                                  <mat-option value="azure-ai-studio" disabled>Azure AI Studio</mat-option>
-                                  <mat-option value="gcp-vertex-ai" disabled>GCP Vertex AI</mat-option>
-                                </mat-select>
-                              </div>
-                            </div>
-
-                            <!-- Action Buttons Container -->
-                            <div class="action-buttons-container"
-                              [class.full-width]="hasGeneratedAgent || hasExistingFiles()">
-
-                              <!-- Upload Button - Only show when no files exist yet -->
-                              <button mat-raised-button class="upload-agent-button" *ngIf="shouldShowUploadButton()"
-                                (click)="openUploadDialog()" [disabled]="isUploadingFiles"
-                                [matTooltip]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'"
-                                matTooltipPosition="above">
-                                <mat-icon>{{ isUploadingFiles ? 'hourglass_empty' : 'upload' }}</mat-icon>
-                                <span class="button-label">{{ isUploadingFiles ? 'Uploading...' : (pipelineMode ===
-                                  'mcp' ? 'Upload MCP Files' : 'Upload Agent Files') }}</span>
-                              </button>
-
-                              <!-- Run and Deploy Button - Only show when files exist -->
-                              <button mat-raised-button class="run-deploy-button"
-                                *ngIf="shouldShowRunPlaygroundButtons()"
-                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
-                                (click)="runAndDeploy()" [disabled]="!canRunAndDeploy()"
-                                [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : 'Run and Deploy Agent'"
-                                matTooltipPosition="above">
-                                <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
-                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">{{
-                                  isRunningAndDeploying ? 'Running & Deploying' : 'Run & Deploy' }}</span>
-                              </button>
-
-                              <!-- Playground Button - Only show when files exist -->
-                              <button mat-raised-button class="playground-button"
-                                *ngIf="shouldShowRunPlaygroundButtons()"
-                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
-                                [class.playground-disabled]="!canOpenPlayground()" [disabled]="!canOpenPlayground()"
-                                (click)="openPlayground()" [title]="getPlaygroundTooltipMessage()">
-                                <mat-icon>smart_toy</mat-icon>
-                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">Open
-                                  Playground</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          <!-- Minimal status message as separate row below buttons -->
-                          <div class="playground-status-row" *ngIf="!canOpenPlayground() && deploymentStatusMessage">
-                            <div class="playground-status-hint" [ngClass]="{
-                   'status-progress': deploymentStatus === 'running',
-                   'status-error': deploymentStatus === 'error',
-                   'status-idle': deploymentStatus === 'idle'
-                 }">{{ deploymentStatusMessage }}</div>
-                          </div> <!-- GitHub Copilot Instructions -->
-                          <div class="prompt-template-container"
-                            *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
                           <!-- GitHub Copilot Instructions - Always Show -->
                           <div class="prompt-template-container">
                             <div class="prompt-instructions">
-                              <p><strong>Instructions for {{ pipelineMode === 'mcp' ? 'MCP Server' : 'Agent' }} Code Generation using Github Copilot:</strong></p>
+                              <p>
+                                <strong
+                                  >Instructions for
+                                  {{
+                                    pipelineMode === "mcp"
+                                      ? "MCP Server"
+                                      : "Agent"
+                                  }}
+                                  Code Generation using Github Copilot:</strong
+                                >
+                              </p>
                               <ol>
-                                <li><strong>Install Visual Studio Code:</strong> Download and install VS Code</li>
-                                <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum"
-                                  extension from the VS Code marketplace</li>
-                                <li *ngIf="pipelineMode === 'agent'"><strong>Generate Agent:</strong> Copy the prompt
-                                  below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your
-                                  agent files</li>
-                                <li *ngIf="pipelineMode === 'mcp'"><strong>Upload MCP Files:</strong> Go to the Essedum
-                                  Plugin and upload your MCP files from there</li>
-                                <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum" extension from the VS Code marketplace</li>
-                                <li><strong>Generate {{ pipelineMode === 'mcp' ? 'MCP Server' : 'Agent' }}:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} files</li>
+                                <li>
+                                  <strong>Install Visual Studio Code:</strong>
+                                  Download and install VS Code
+                                </li>
+                                <li>
+                                  <strong>Install Essedum Plugin:</strong>
+                                  Search for and install the "Essedum" extension
+                                  from the VS Code marketplace
+                                </li>
+                                <li>
+                                  <strong
+                                    >Generate
+                                    {{
+                                      pipelineMode === "mcp"
+                                        ? "MCP Server"
+                                        : "Agent"
+                                    }}:</strong
+                                  >
+                                  Copy the prompt below and paste it into the
+                                  Essedum Plugin's GitHub Copilot interface to
+                                  generate your
+                                  {{
+                                    pipelineMode === "mcp"
+                                      ? "MCP server"
+                                      : "agent"
+                                  }}
+                                  files
+                                </li>
                               </ol>
                             </div>
                             <!-- Show prompt template for both modes -->
                             <div class="prompt-template-header">
                               <mat-icon>description</mat-icon>
                               <span>Copilot Prompt Template</span>
-                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
-                                matTooltip="Copy Prompt" matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="copy-prompt-button"
+                                (click)="copyPromptTemplate()"
+                                matTooltip="Copy Prompt"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>content_copy</mat-icon>
                               </button>
                             </div>
                             <div class="prompt-template-content">
-                              <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
-                            </div>
-                            <!-- MCP Upload Instructions -->
-                            <div *ngIf="pipelineMode === 'mcp'" class="mcp-upload-instructions">
-                              <div class="instruction-box">
-                                <mat-icon>cloud_upload</mat-icon>
-                                <h3>Upload MCP Files</h3>
-                                <p>Use the Essedum Plugin to upload your MCP server files and they will automatically
-                                  appear here for deployment.</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <!-- Regular Console Output for all LLM providers after generation -->
-                          <div class="console-container"
-                            *ngIf="hasGeneratedAgent || hasExistingFiles() || (selectedLLM && (selectedLLM !== 'github-copilot' || hasGeneratedAgent || hasExistingFiles()))">
-                            <div class="console-header">
-                              <mat-icon>terminal</mat-icon>
-                              <span>Console Output</span>
-                            </div>
-                            <div class="console-output">
-                              <div *ngFor="let line of consoleOutput" class="console-line">
-                                <span class="console-prompt">$</span>
-                                <span class="console-text">{{ line }}</span>
-                              </div>
-                              <div *ngIf="isGenerating" class="console-line">
-                                <span class="console-prompt">$</span>
-                                <span class="console-text console-loading">Processing...</span>
-                              </div>
-                              <div *ngIf="consoleOutput.length === 0 && !isGenerating && !isLoadingFiles"
-                                class="console-empty">
-                                <span>Console ready. Click "Run and Deploy" to see output.</span>
-                              </div>
-                              <div *ngIf="isLoadingFiles" class="console-line">
-                                <span class="console-prompt">$</span>
-                                <span class="console-text console-loading">Loading agent data...</span>
-                              </div>
-                            </div>
-                          </div> <!-- End console-container -->
-
-
-
-                          <!-- No Files Found Message (when no LLM is selected) -->
-                          <div class="no-files-info" *ngIf="!hasGeneratedAgent && !hasExistingFiles() && !selectedLLM">
-                            <div class="no-files-message">
-                              <mat-icon>info_outline</mat-icon>
-                              <p>{{ pipelineMode === 'mcp' ? 'MCP server code is not yet generated. Please select an LLM
-                                provider or upload files to generate MCP server files, then click refresh to load them.'
-                                : 'Agent code is not yet generated. Please select an LLM provider or upload files to
-                                generate agent files, then click refresh to load them.' }}</p>
+                              <pre class="prompt-text">{{
+                                getPromptTemplate()
+                              }}</pre>
                             </div>
                           </div>
                         </div>
@@ -255,13 +259,16 @@
                   </div>
                 </mat-tab>
 
-                <!-- Essedum Codespace Tab (Only show after agent generation) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'"
-                  class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
                 <!-- Essedum Codespace Tab (Always visible) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'" class="lfx-u-header-xl">
+                <mat-tab
+                  [label]="
+                    pipelineMode === 'mcp'
+                      ? 'MCP Codespace'
+                      : 'Essedum Codespace'
+                  "
+                  class="lfx-u-header-xl"
+                >
                   <div class="tab-content mb-5">
-
                     <!-- File Structure -->
                     <div class="file-structure-container">
                       <div class="file-panel">
@@ -271,84 +278,151 @@
                               <mat-icon>folder_open</mat-icon>
                               <h3>Project Files</h3>
                             </div>
-                            <div class="header-right" *ngIf="hasGeneratedAgent && currentCname">
-                              <button mat-icon-button class="upload-button" title="Upload to MinIO"
-                                (click)="pushToMinio()">
                             <div class="header-right">
                               <!-- Upload ZIP Files Button - Only show when no files exist -->
-                              <button mat-raised-button class="upload-files-button" 
-                                      *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
-                                      (click)="openUploadDialog()"
-                                      color="primary"
-                                      [title]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'">
+                              <button
+                                mat-raised-button
+                                class="upload-files-button"
+                                *ngIf="
+                                  !hasGeneratedAgent && !hasExistingFiles()
+                                "
+                                (click)="openUploadDialog()"
+                                color="primary"
+                                [title]="
+                                  pipelineMode === 'mcp'
+                                    ? 'Upload MCP Server Files (ZIP)'
+                                    : 'Upload Agent Files (ZIP)'
+                                "
+                              >
                                 <mat-icon>upload_file</mat-icon>
-                                <span style="margin-left: 8px;">Upload Files</span>
+                                <span style="margin-left: 8px"
+                                  >Upload Files</span
+                                >
                               </button>
                               <!-- MinIO Upload Button -->
-                              <button mat-icon-button class="upload-button" 
-                                      *ngIf="hasGeneratedAgent && currentCname"
-                                      title="Upload to MinIO" 
-                                      (click)="pushToMinio()">
+                              <button
+                                mat-icon-button
+                                class="upload-button"
+                                *ngIf="hasGeneratedAgent && currentCname"
+                                title="Upload to MinIO"
+                                (click)="pushToMinio()"
+                              >
                                 <mat-icon>cloud_upload</mat-icon>
                               </button>
                               <!-- GitHub Push Button -->
-                              <app-github-push *ngIf="hasGeneratedAgent && currentCname" 
-                                               [cname]="currentCname" 
-                                               class="git-push-button"></app-github-push>
+                              <app-github-push
+                                *ngIf="hasGeneratedAgent && currentCname"
+                                [cname]="currentCname"
+                                class="git-push-button"
+                              ></app-github-push>
                               <!-- Download Button -->
-                              <button mat-icon-button class="download-button" 
-                                      *ngIf="hasGeneratedAgent && currentCname"
-                                      (click)="downloadAllFiles()"
-                                      [disabled]="isDownloading" 
-                                      title="Download ZIP">
-                                <mat-icon *ngIf="!isDownloading">file_download</mat-icon>
-                                <mat-icon *ngIf="isDownloading" class="spin-icon">hourglass_empty</mat-icon>
+                              <button
+                                mat-icon-button
+                                class="download-button"
+                                *ngIf="hasGeneratedAgent && currentCname"
+                                (click)="downloadAllFiles()"
+                                [disabled]="isDownloading"
+                                title="Download ZIP"
+                              >
+                                <mat-icon *ngIf="!isDownloading"
+                                  >file_download</mat-icon
+                                >
+                                <mat-icon
+                                  *ngIf="isDownloading"
+                                  class="spin-icon"
+                                  >hourglass_empty</mat-icon
+                                >
                               </button>
                             </div>
                           </div>
                           <div class="file-tree">
                             <div *ngIf="isLoadingFiles" class="tree-loading">
-                              <mat-icon class="spin-icon">hourglass_empty</mat-icon>
+                              <mat-icon class="spin-icon"
+                                >hourglass_empty</mat-icon
+                              >
                               <span>Loading files...</span>
                             </div>
                             <ng-container *ngIf="!isLoadingFiles">
                               <ng-container
-                                *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: fileSystemData, level: 0 }"></ng-container>
+                                *ngTemplateOutlet="
+                                  fileTreeTemplate;
+                                  context: {
+                                    $implicit: fileSystemData,
+                                    level: 0,
+                                  }
+                                "
+                              ></ng-container>
                             </ng-container>
                           </div>
                         </div>
 
                         <!-- File Editor with Pipeline Script Style -->
-                        <div class="file-editor-container" *ngIf="selectedFileName">
+                        <div
+                          class="file-editor-container"
+                          *ngIf="selectedFileName"
+                        >
                           <!-- Editor Controls Bar -->
                           <div class="editor-controls-bar">
                             <div class="file-info">
-                              <mat-icon class="file-type-icon" [ngClass]="getFileTypeClass(selectedFileName)">{{
-                                getFileIcon(selectedFileName) }}</mat-icon>
-                              <span class="file-name" [class.modified]="isFileModified" [title]="selectedFileName">{{
-                                selectedFileName }}</span>
-                              <span class="file-path-breadcrumb" [title]="selectedFilePath">{{ selectedFilePath
-                                }}</span>
-                              <span class="modified-indicator" *ngIf="isFileModified"
-                                title="File has unsaved changes">●</span>
+                              <mat-icon
+                                class="file-type-icon"
+                                [ngClass]="getFileTypeClass(selectedFileName)"
+                                >{{ getFileIcon(selectedFileName) }}</mat-icon
+                              >
+                              <span
+                                class="file-name"
+                                [class.modified]="isFileModified"
+                                [title]="selectedFileName"
+                                >{{ selectedFileName }}</span
+                              >
+                              <span
+                                class="file-path-breadcrumb"
+                                [title]="selectedFilePath"
+                                >{{ selectedFilePath }}</span
+                              >
+                              <span
+                                class="modified-indicator"
+                                *ngIf="isFileModified"
+                                title="File has unsaved changes"
+                                >●</span
+                              >
                             </div>
                             <div class="editor-actions">
-
-                              <button mat-icon-button class="action-button save-button"
-                                [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
-                                (click)="saveFile()" [disabled]="!isFileModified" matTooltip="Save File"
-                                matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="action-button save-button"
+                                [class.save-enabled]="isFileModified"
+                                [class.save-disabled]="!isFileModified"
+                                (click)="saveFile()"
+                                [disabled]="!isFileModified"
+                                matTooltip="Save File"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>save</mat-icon>
                               </button>
-                              <button mat-icon-button class="action-button delete-button"
-                                [class.delete-enabled]="selectedFileName && !isSavingFile"
-                                [class.delete-disabled]="!selectedFileName || isSavingFile"
-                                (click)="showDeleteConfirmation()" [disabled]="!selectedFileName || isSavingFile"
-                                matTooltip="Delete File" matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="action-button delete-button"
+                                [class.delete-enabled]="
+                                  selectedFileName && !isSavingFile
+                                "
+                                [class.delete-disabled]="
+                                  !selectedFileName || isSavingFile
+                                "
+                                (click)="showDeleteConfirmation()"
+                                [disabled]="!selectedFileName || isSavingFile"
+                                matTooltip="Delete File"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>delete</mat-icon>
                               </button>
-                              <button mat-icon-button class="action-button close-button" (click)="closeFile()"
-                                matTooltip="Close File" matTooltipPosition="above">
+                              <button
+                                mat-icon-button
+                                class="action-button close-button"
+                                (click)="closeFile()"
+                                matTooltip="Close File"
+                                matTooltipPosition="above"
+                              >
                                 <mat-icon>close</mat-icon>
                               </button>
                             </div>
@@ -358,60 +432,151 @@
                           <div class="editor-content-wrapper">
                             <ng-container *ngIf="fileExtension === 'py'">
                               <div class="python-editor-container">
-                                <app-enl-code-editor id="ele" [script]="selectedFileContent.split('\n')" lang="python"
-                                  [class.editor-modified]="isFileModified" (scriptChange)="onFileContentChange($event)">
+                                <app-enl-code-editor
+                                  id="ele"
+                                  [script]="selectedFileContent.split('\n')"
+                                  lang="python"
+                                  [class.editor-modified]="isFileModified"
+                                  (scriptChange)="onFileContentChange($event)"
+                                >
                                 </app-enl-code-editor>
                               </div>
                             </ng-container>
                             <ng-container *ngIf="fileExtension != 'py'">
                               <div class="text-editor-container">
                                 <div class="line-numbers-column">
-                                  <div *ngFor="let lineNum of getVisibleLineNumbers(); let i = index"
-                                    class="line-number" [class.line-added]="addedLines.has(lineNum - 1)"
-                                    [class.line-modified]="modifiedLines.has(lineNum - 1)"
-                                    [class.user-modified]="userModifiedLines.has(lineNum - 1)">
-                                    <span class="line-number-text">{{ lineNum }}</span>
-                                    <span class="diff-indicator" *ngIf="addedLines.has(lineNum - 1)">+</span>
-                                    <span class="diff-indicator"
-                                      *ngIf="modifiedLines.has(lineNum - 1) && !addedLines.has(lineNum - 1)">~</span>
-                                    <span class="user-indicator" *ngIf="userModifiedLines.has(lineNum - 1)">●</span>
+                                  <div
+                                    *ngFor="
+                                      let lineNum of getVisibleLineNumbers();
+                                      let i = index
+                                    "
+                                    class="line-number"
+                                    [class.line-added]="
+                                      addedLines.has(lineNum - 1)
+                                    "
+                                    [class.line-modified]="
+                                      modifiedLines.has(lineNum - 1)
+                                    "
+                                    [class.user-modified]="
+                                      userModifiedLines.has(lineNum - 1)
+                                    "
+                                  >
+                                    <span class="line-number-text">{{
+                                      lineNum
+                                    }}</span>
+                                    <span
+                                      class="diff-indicator"
+                                      *ngIf="addedLines.has(lineNum - 1)"
+                                      >+</span
+                                    >
+                                    <span
+                                      class="diff-indicator"
+                                      *ngIf="
+                                        modifiedLines.has(lineNum - 1) &&
+                                        !addedLines.has(lineNum - 1)
+                                      "
+                                      >~</span
+                                    >
+                                    <span
+                                      class="user-indicator"
+                                      *ngIf="userModifiedLines.has(lineNum - 1)"
+                                      >●</span
+                                    >
                                   </div>
                                 </div>
                                 <div class="text-editor-column">
-                                  <ng-container *ngIf="fileExtension === 'json'">
-                                    <textarea class="file-content-editor json-editor"
-                                      [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
-                                      placeholder="JSON content..." spellcheck="false"
-                                      [style.background-image]="getLineDiffStyles()"></textarea>
-                                  </ng-container>
-                                  <ng-container *ngIf="fileExtension === 'java'">
-                                    <textarea class="file-content-editor java-editor"
-                                      [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
-                                      placeholder="Java code..." spellcheck="false"
-                                      [style.background-image]="getLineDiffStyles()"></textarea>
-                                  </ng-container>
-                                  <ng-container *ngIf="fileExtension === 'xml'">
-                                    <textarea class="file-content-editor xml-editor"
-                                      [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
-                                      placeholder="XML content..." spellcheck="false"
-                                      [style.background-image]="getLineDiffStyles()"></textarea>
-                                  </ng-container>
-                                  <ng-container *ngIf="fileExtension === 'properties'">
-                                    <textarea class="file-content-editor properties-editor"
-                                      [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
-                                      (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
-                                      placeholder="Properties content..." spellcheck="false"
-                                      [style.background-image]="getLineDiffStyles()"></textarea>
+                                  <ng-container
+                                    *ngIf="fileExtension === 'json'"
+                                  >
+                                    <textarea
+                                      class="file-content-editor json-editor"
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent"
+                                      (ngModelChange)="
+                                        onTextContentChange($event)
+                                      "
+                                      (scroll)="onTextareaScroll($event)"
+                                      placeholder="JSON content..."
+                                      spellcheck="false"
+                                      [style.background-image]="
+                                        getLineDiffStyles()
+                                      "
+                                    ></textarea>
                                   </ng-container>
                                   <ng-container
-                                    *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
-                                    <textarea class="file-content-editor" [class.editor-modified]="isFileModified"
-                                      [(ngModel)]="selectedFileContent" (ngModelChange)="onTextContentChange($event)"
-                                      (scroll)="onTextareaScroll($event)" placeholder="File content..."
-                                      spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
+                                    *ngIf="fileExtension === 'java'"
+                                  >
+                                    <textarea
+                                      class="file-content-editor java-editor"
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent"
+                                      (ngModelChange)="
+                                        onTextContentChange($event)
+                                      "
+                                      (scroll)="onTextareaScroll($event)"
+                                      placeholder="Java code..."
+                                      spellcheck="false"
+                                      [style.background-image]="
+                                        getLineDiffStyles()
+                                      "
+                                    ></textarea>
+                                  </ng-container>
+                                  <ng-container *ngIf="fileExtension === 'xml'">
+                                    <textarea
+                                      class="file-content-editor xml-editor"
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent"
+                                      (ngModelChange)="
+                                        onTextContentChange($event)
+                                      "
+                                      (scroll)="onTextareaScroll($event)"
+                                      placeholder="XML content..."
+                                      spellcheck="false"
+                                      [style.background-image]="
+                                        getLineDiffStyles()
+                                      "
+                                    ></textarea>
+                                  </ng-container>
+                                  <ng-container
+                                    *ngIf="fileExtension === 'properties'"
+                                  >
+                                    <textarea
+                                      class="file-content-editor properties-editor"
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent"
+                                      (ngModelChange)="
+                                        onTextContentChange($event)
+                                      "
+                                      (scroll)="onTextareaScroll($event)"
+                                      placeholder="Properties content..."
+                                      spellcheck="false"
+                                      [style.background-image]="
+                                        getLineDiffStyles()
+                                      "
+                                    ></textarea>
+                                  </ng-container>
+                                  <ng-container
+                                    *ngIf="
+                                      fileExtension != 'json' &&
+                                      fileExtension != 'java' &&
+                                      fileExtension != 'xml' &&
+                                      fileExtension != 'properties'
+                                    "
+                                  >
+                                    <textarea
+                                      class="file-content-editor"
+                                      [class.editor-modified]="isFileModified"
+                                      [(ngModel)]="selectedFileContent"
+                                      (ngModelChange)="
+                                        onTextContentChange($event)
+                                      "
+                                      (scroll)="onTextareaScroll($event)"
+                                      placeholder="File content..."
+                                      spellcheck="false"
+                                      [style.background-image]="
+                                        getLineDiffStyles()
+                                      "
+                                    ></textarea>
                                   </ng-container>
                                 </div>
                               </div>
@@ -419,11 +584,17 @@
                           </div>
                         </div>
 
-                        <div class="file-editor-placeholder" *ngIf="!selectedFileName">
+                        <div
+                          class="file-editor-placeholder"
+                          *ngIf="!selectedFileName"
+                        >
                           <div class="placeholder-content">
                             <mat-icon>folder_open</mat-icon>
                             <h3>Select a file to view its contents</h3>
-                            <p>Choose a file from the project explorer to start editing</p>
+                            <p>
+                              Choose a file from the project explorer to start
+                              editing
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -431,8 +602,12 @@
                   </div>
                   <!-- </div> -->
                 </mat-tab>
-   <!-- Playground Tab (Only show when files exist) -->
-                <mat-tab label="Playground" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent || hasExistingFiles()">
+                <!-- Playground Tab (Only show when files exist) -->
+                <mat-tab
+                  label="Playground"
+                  class="lfx-u-header-xl"
+                  *ngIf="hasGeneratedAgent || hasExistingFiles()"
+                >
                   <app-playground-tab
                     [pipelineMode]="pipelineMode"
                     [isRunningAndDeploying]="isRunningAndDeploying"
@@ -447,27 +622,32 @@
                     [isCheckingDeploymentData]="isCheckingDeploymentData"
                     [deploymentEnvironment]="deploymentEnvironment"
                     (runAndDeployClick)="runAndDeploy()"
-                    (openPlaygroundClick)="openPlayground()">
+                    (openPlaygroundClick)="openPlayground()"
+                  >
                   </app-playground-tab>
                 </mat-tab>
-                
+
                 <!-- Deployment Tab (Only show after agent generation) -->
-                <mat-tab label="Deployment" class="lfx-u-header-xl" *ngIf="hasGeneratedAgent">
+                <mat-tab
+                  label="Deployment"
+                  class="lfx-u-header-xl"
+                  *ngIf="hasGeneratedAgent"
+                >
                   <div class="tab-content mb-5">
-                    <app-deployment-form 
-                      [cname]="currentCname" 
+                    <app-deployment-form
+                      [cname]="currentCname"
                       [organisation]="organisation"
                       [isRunningAndDeploying]="isRunningAndDeploying"
                       [isCheckingDeploymentData]="isCheckingDeploymentData"
                       [hasDeploymentFormData]="hasDeploymentFormData"
                       [deploymentEnvironment]="deploymentEnvironment"
                       (deploymentFinished)="onDeploymentFinished($event)"
-                      (deployClick)="onDeployFromDeploymentTab()">
+                      (deployClick)="onDeployFromDeploymentTab()"
+                    >
+                      >
                     </app-deployment-form>
                   </div>
                 </mat-tab>
-
-             
               </mat-tab-group>
             </div>
           </div>
@@ -481,57 +661,114 @@
 <ng-template #fileTreeTemplate let-nodes let-level="level">
   <div class="tree-level">
     <div *ngFor="let node of nodes" class="tree-node">
-      <div class="tree-node-content" [class.selected]="isFileSelected(node)"
-        [class.folder-node]="node.type === 'folder'" [class.file-node]="node.type === 'file'"
-        [class.file-modified]="isNodeFileModified(node)" [class.drag-over]="dropTarget === node"
-        [style.padding-left.px]="(level * 16) + 8" [draggable]="true" (click)="selectFile(node)"
-        (dragstart)="onDragStart($event, node)" (dragover)="onDragOver($event)" (dragenter)="onDragEnter($event, node)"
-        (dragleave)="onDragLeave($event)" (drop)="onDrop($event, node)">
-
+      <div
+        class="tree-node-content"
+        [class.selected]="isFileSelected(node)"
+        [class.folder-node]="node.type === 'folder'"
+        [class.file-node]="node.type === 'file'"
+        [class.file-modified]="isNodeFileModified(node)"
+        [class.drag-over]="dropTarget === node"
+        [style.padding-left.px]="level * 16 + 8"
+        [draggable]="true"
+        (click)="selectFile(node)"
+        (dragstart)="onDragStart($event, node)"
+        (dragover)="onDragOver($event)"
+        (dragenter)="onDragEnter($event, node)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event, node)"
+      >
         <!-- Folder toggle icon -->
-        <mat-icon class="folder-toggle" *ngIf="node.type === 'folder' && node.children && node.children.length > 0"
-          (click)="toggleFolder(node, $event)">
-          {{ isFolderExpanded(node) ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+        <mat-icon
+          class="folder-toggle"
+          *ngIf="
+            node.type === 'folder' && node.children && node.children.length > 0
+          "
+          (click)="toggleFolder(node, $event)"
+        >
+          {{
+            isFolderExpanded(node)
+              ? "keyboard_arrow_down"
+              : "keyboard_arrow_right"
+          }}
         </mat-icon>
 
         <!-- Spacer for files and empty folders -->
-        <span class="folder-spacer" *ngIf="node.type === 'file' || !node.children || node.children.length === 0">
+        <span
+          class="folder-spacer"
+          *ngIf="
+            node.type === 'file' || !node.children || node.children.length === 0
+          "
+        >
         </span>
 
         <mat-icon class="node-icon folder-icon" *ngIf="node.type === 'folder'">
-          {{ isFolderExpanded(node) ? 'folder_open' : 'folder' }}
+          {{ isFolderExpanded(node) ? "folder_open" : "folder" }}
         </mat-icon>
-        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.java')">
+        <mat-icon
+          class="node-icon file-icon"
+          *ngIf="node.type === 'file' && node.name.endsWith('.java')"
+        >
           code
         </mat-icon>
-        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.xml')">
+        <mat-icon
+          class="node-icon file-icon"
+          *ngIf="node.type === 'file' && node.name.endsWith('.xml')"
+        >
           code
         </mat-icon>
-        <mat-icon class="node-icon file-icon" *ngIf="node.type === 'file' && node.name.endsWith('.properties')">
+        <mat-icon
+          class="node-icon file-icon"
+          *ngIf="node.type === 'file' && node.name.endsWith('.properties')"
+        >
           settings
         </mat-icon>
-        <mat-icon class="node-icon file-icon"
-          *ngIf="node.type === 'file' && !node.name.endsWith('.java') && !node.name.endsWith('.xml') && !node.name.endsWith('.properties')">
+        <mat-icon
+          class="node-icon file-icon"
+          *ngIf="
+            node.type === 'file' &&
+            !node.name.endsWith('.java') &&
+            !node.name.endsWith('.xml') &&
+            !node.name.endsWith('.properties')
+          "
+        >
           description
         </mat-icon>
         <span class="node-name" [title]="node.name">{{ node.name }}</span>
       </div>
       <!-- Only show children if folder is expanded -->
-      <div *ngIf="node.children && node.children.length > 0 && isFolderExpanded(node)" class="tree-children">
+      <div
+        *ngIf="
+          node.children && node.children.length > 0 && isFolderExpanded(node)
+        "
+        class="tree-children"
+      >
         <ng-container
-          *ngTemplateOutlet="fileTreeTemplate; context: { $implicit: node.children, level: level + 1 }"></ng-container>
+          *ngTemplateOutlet="
+            fileTreeTemplate;
+            context: { $implicit: node.children, level: level + 1 }
+          "
+        ></ng-container>
       </div>
     </div>
   </div>
 </ng-template>
 
 <!-- Playground Popup -->
-<div class="playground-overlay" *ngIf="showPlayground" (click)="closePlayground()">
+<div
+  class="playground-overlay"
+  *ngIf="showPlayground"
+  (click)="closePlayground()"
+>
   <div class="playground-popup" (click)="$event.stopPropagation()">
     <div class="playground-header">
       <div class="playground-title">
         <mat-icon>smart_toy</mat-icon>
-        <h2>{{ pipelineAlias || (pipelineMode === 'mcp' ? 'MCP Playground' : 'Agent Playground') }}</h2>
+        <h2>
+          {{
+            pipelineAlias ||
+              (pipelineMode === "mcp" ? "MCP Playground" : "Agent Playground")
+          }}
+        </h2>
       </div>
       <button mat-icon-button (click)="closePlayground()" class="close-button">
         <mat-icon>close</mat-icon>
@@ -540,23 +777,34 @@
 
     <div class="playground-content">
       <div class="chat-messages">
-        <div *ngFor="let message of playgroundMessages" class="message-wrapper"
+        <div
+          *ngFor="let message of playgroundMessages"
+          class="message-wrapper"
           [class.user-message-wrapper]="message.role === 'user'"
-          [class.agent-message-wrapper]="message.role === 'agent'">
-          <div class="message" [class.user-message]="message.role === 'user'"
-            [class.agent-message]="message.role === 'agent'">
+          [class.agent-message-wrapper]="message.role === 'agent'"
+        >
+          <div
+            class="message"
+            [class.user-message]="message.role === 'user'"
+            [class.agent-message]="message.role === 'agent'"
+          >
             <div class="message-avatar">
               <mat-icon *ngIf="message.role === 'agent'">smart_toy</mat-icon>
               <mat-icon *ngIf="message.role === 'user'">person</mat-icon>
             </div>
             <div class="message-content">
-              <div class="message-role">{{ message.role === 'user' ? 'You' : selectedAgent?.alias }}</div>
+              <div class="message-role">
+                {{ message.role === "user" ? "You" : selectedAgent?.alias }}
+              </div>
               <div class="message-text">{{ message.content }}</div>
             </div>
           </div>
         </div>
 
-        <div *ngIf="isAgentThinking" class="message-wrapper agent-message-wrapper">
+        <div
+          *ngIf="isAgentThinking"
+          class="message-wrapper agent-message-wrapper"
+        >
           <div class="message agent-message">
             <div class="message-avatar">
               <mat-icon>smart_toy</mat-icon>
@@ -572,10 +820,21 @@
       </div>
 
       <div class="chat-input-container">
-        <textarea class="chat-input" [(ngModel)]="userQuestion" (keypress)="onPlaygroundKeyPress($event)"
-          placeholder="Ask the agent a question..." rows="2" [disabled]="isAgentThinking"></textarea>
-        <button mat-raised-button color="primary" class="send-button" (click)="sendQuestion()"
-          [disabled]="!userQuestion.trim() || isAgentThinking">
+        <textarea
+          class="chat-input"
+          [(ngModel)]="userQuestion"
+          (keypress)="onPlaygroundKeyPress($event)"
+          placeholder="Ask the agent a question..."
+          rows="2"
+          [disabled]="isAgentThinking"
+        ></textarea>
+        <button
+          mat-raised-button
+          color="primary"
+          class="send-button"
+          (click)="sendQuestion()"
+          [disabled]="!userQuestion.trim() || isAgentThinking"
+        >
           <mat-icon>send</mat-icon>
           Send
         </button>
@@ -585,15 +844,25 @@
 </div>
 
 <!-- Save File Structure Dialog -->
-<div class="save-structure-overlay" *ngIf="showSaveStructureDialog" (click)="cancelStructureChange()">
+<div
+  class="save-structure-overlay"
+  *ngIf="showSaveStructureDialog"
+  (click)="cancelStructureChange()"
+>
   <div class="save-structure-popup" (click)="$event.stopPropagation()">
     <div class="save-structure-header">
       <div class="save-structure-title">
         <mat-icon>save</mat-icon>
         <h2>Save File Structure Changes</h2>
-        <span class="save-structure-subtitle">The file/folder structure has been modified</span>
+        <span class="save-structure-subtitle"
+          >The file/folder structure has been modified</span
+        >
       </div>
-      <button mat-icon-button (click)="cancelStructureChange()" class="close-button">
+      <button
+        mat-icon-button
+        (click)="cancelStructureChange()"
+        class="close-button"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -601,8 +870,13 @@
     <div class="save-structure-content">
       <div class="structure-info">
         <mat-icon>info</mat-icon>
-        <p>You have moved files or folders. Do you want to save the new structure?</p>
-        <p class="warning-text">This action will update the file paths permanently.</p>
+        <p>
+          You have moved files or folders. Do you want to save the new
+          structure?
+        </p>
+        <p class="warning-text">
+          This action will update the file paths permanently.
+        </p>
       </div>
     </div>
 
@@ -611,7 +885,12 @@
         <button mat-stroked-button (click)="cancelStructureChange()">
           Cancel
         </button>
-        <button mat-raised-button color="primary" class="save-structure-button" (click)="saveNewFileStructure()">
+        <button
+          mat-raised-button
+          color="primary"
+          class="save-structure-button"
+          (click)="saveNewFileStructure()"
+        >
           <mat-icon>save</mat-icon>
           Save New Structure
         </button>
@@ -621,7 +900,11 @@
 </div>
 
 <!-- Save Confirmation Dialog -->
-<div class="save-confirmation-overlay" *ngIf="showSaveConfirmationDialog" (click)="cancelNavigation()">
+<div
+  class="save-confirmation-overlay"
+  *ngIf="showSaveConfirmationDialog"
+  (click)="cancelNavigation()"
+>
   <div class="save-confirmation-popup" (click)="$event.stopPropagation()">
     <div class="save-confirmation-header">
       <h3>Unsaved Changes</h3>
@@ -631,18 +914,35 @@
     </div>
 
     <div class="save-confirmation-content">
-      <p>You have unsaved changes in <strong>{{ selectedFileName }}</strong>.</p>
+      <p>
+        You have unsaved changes in <strong>{{ selectedFileName }}</strong
+        >.
+      </p>
       <p class="warning-text">Changes will be lost if you don't save.</p>
     </div>
 
     <div class="save-confirmation-footer">
-      <button mat-stroked-button (click)="cancelNavigation()" class="cancel-btn">
+      <button
+        mat-stroked-button
+        (click)="cancelNavigation()"
+        class="cancel-btn"
+      >
         Cancel
       </button>
-      <button mat-stroked-button color="warn" (click)="discardAndContinue()" class="discard-btn">
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="discardAndContinue()"
+        class="discard-btn"
+      >
         Discard
       </button>
-      <button mat-raised-button color="primary" (click)="saveAndContinue()" class="save-btn">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveAndContinue()"
+        class="save-btn"
+      >
         Save & Continue
       </button>
     </div>
@@ -650,28 +950,53 @@
 </div>
 
 <!-- Custom Unsaved Changes Dialog -->
-<div class="unsaved-changes-overlay" *ngIf="showUnsavedDialog" (click)="cancelUnsavedDialog()">
+<div
+  class="unsaved-changes-overlay"
+  *ngIf="showUnsavedDialog"
+  (click)="cancelUnsavedDialog()"
+>
   <div class="unsaved-changes-popup" (click)="$event.stopPropagation()">
     <div class="unsaved-changes-header">
       <h3>Unsaved Changes</h3>
-      <button mat-icon-button (click)="cancelUnsavedDialog()" class="close-button">
+      <button
+        mat-icon-button
+        (click)="cancelUnsavedDialog()"
+        class="close-button"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="unsaved-changes-content">
-      <p>You have unsaved changes in <strong>{{ selectedFileName }}</strong>.</p>
+      <p>
+        You have unsaved changes in <strong>{{ selectedFileName }}</strong
+        >.
+      </p>
       <p class="warning-text">Changes will be lost if you don't save.</p>
     </div>
 
     <div class="unsaved-changes-footer">
-      <button mat-stroked-button (click)="cancelUnsavedDialog()" class="cancel-btn">
+      <button
+        mat-stroked-button
+        (click)="cancelUnsavedDialog()"
+        class="cancel-btn"
+      >
         Cancel
       </button>
-      <button mat-stroked-button color="warn" (click)="proceedWithoutSaving()" class="discard-btn">
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="proceedWithoutSaving()"
+        class="discard-btn"
+      >
         Discard
       </button>
-      <button mat-raised-button color="primary" (click)="saveAndProceed()" class="save-btn">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveAndProceed()"
+        class="save-btn"
+      >
         Save & Continue
       </button>
     </div>
@@ -679,7 +1004,11 @@
 </div>
 
 <!-- Delete Confirmation Dialog -->
-<div class="delete-confirmation-overlay" *ngIf="showDeleteDialog" (click)="cancelDelete()">
+<div
+  class="delete-confirmation-overlay"
+  *ngIf="showDeleteDialog"
+  (click)="cancelDelete()"
+>
   <div class="delete-confirmation-popup" (click)="$event.stopPropagation()">
     <div class="delete-confirmation-header">
       <h3>Delete File?</h3>
@@ -689,7 +1018,10 @@
     </div>
 
     <div class="delete-confirmation-content">
-      <p>Are you sure you want to delete <strong>{{ selectedFileName }}</strong>?</p>
+      <p>
+        Are you sure you want to delete <strong>{{ selectedFileName }}</strong
+        >?
+      </p>
       <p class="warning-text">This action cannot be undone.</p>
     </div>
 
@@ -697,7 +1029,12 @@
       <button mat-stroked-button (click)="cancelDelete()" class="cancel-btn">
         Cancel
       </button>
-      <button mat-raised-button color="warn" (click)="confirmDelete()" class="delete-btn">
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="confirmDelete()"
+        class="delete-btn"
+      >
         Delete
       </button>
     </div>
@@ -705,27 +1042,48 @@
 </div>
 
 <!-- Prompt Copy Confirmation Dialog -->
-<div class="prompt-copy-overlay" *ngIf="showPromptCopyDialog" (click)="closePromptCopyDialog()">
+<div
+  class="prompt-copy-overlay"
+  *ngIf="showPromptCopyDialog"
+  (click)="closePromptCopyDialog()"
+>
   <div class="prompt-copy-popup" (click)="$event.stopPropagation()">
     <div class="prompt-copy-header">
       <h3>Prompt Copied!</h3>
-      <button mat-icon-button (click)="closePromptCopyDialog()" class="close-button">
+      <button
+        mat-icon-button
+        (click)="closePromptCopyDialog()"
+        class="close-button"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="prompt-copy-content">
-      <p>The GitHub Copilot prompt template has been copied to your clipboard.</p>
-      <p class="copy-instruction">Paste it into the Essedum Plugin's GitHub Copilot interface to generate your agent.
+      <p>
+        The GitHub Copilot prompt template has been copied to your clipboard.
+      </p>
+      <p class="copy-instruction">
+        Paste it into the Essedum Plugin's GitHub Copilot interface to generate
+        your agent.
       </p>
     </div>
 
     <div class="prompt-copy-footer">
       <div class="dialog-actions">
-        <button mat-stroked-button (click)="closePromptCopyDialog()" class="cancel-btn">
+        <button
+          mat-stroked-button
+          (click)="closePromptCopyDialog()"
+          class="cancel-btn"
+        >
           Cancel
         </button>
-        <button mat-raised-button color="primary" (click)="closePromptCopyDialog()" class="ok-btn">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="closePromptCopyDialog()"
+          class="ok-btn"
+        >
           OK
         </button>
       </div>
@@ -734,25 +1092,45 @@
 </div>
 
 <!-- Script Unsaved Changes Dialog -->
-<div class="unsaved-changes-overlay" *ngIf="showScriptUnsavedDialog" (click)="cancelScriptUnsavedDialog()">
+<div
+  class="unsaved-changes-overlay"
+  *ngIf="showScriptUnsavedDialog"
+  (click)="cancelScriptUnsavedDialog()"
+>
   <div class="unsaved-changes-popup" (click)="$event.stopPropagation()">
     <div class="unsaved-changes-header">
       <h3>Unsaved Configuration Changes</h3>
-      <button mat-icon-button (click)="cancelScriptUnsavedDialog()" class="close-button">
+      <button
+        mat-icon-button
+        (click)="cancelScriptUnsavedDialog()"
+        class="close-button"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="unsaved-changes-content">
-      <p>You have unsaved changes in your {{pipelineMode === 'mcp' ? 'MCP' : 'Agent'}} configuration.</p>
+      <p>
+        You have unsaved changes in your
+        {{ pipelineMode === "mcp" ? "MCP" : "Agent" }} configuration.
+      </p>
       <p>Do you want to save your changes before proceeding?</p>
     </div>
 
     <div class="unsaved-changes-footer">
-      <button mat-stroked-button (click)="discardScriptAndProceed()" class="cancel-btn">
+      <button
+        mat-stroked-button
+        (click)="discardScriptAndProceed()"
+        class="cancel-btn"
+      >
         Discard Changes
       </button>
-      <button mat-raised-button color="primary" (click)="saveScriptAndProceed()" class="save-btn">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveScriptAndProceed()"
+        class="save-btn"
+      >
         <mat-icon>save</mat-icon>
         Save & Continue
       </button>
@@ -761,39 +1139,72 @@
 </div>
 
 <!-- Upload Agent Files Dialog -->
-<div class="upload-overlay" *ngIf="showUploadDialog" (click)="closeUploadDialog()">
+<div
+  class="upload-overlay"
+  *ngIf="showUploadDialog"
+  (click)="closeUploadDialog()"
+>
   <div class="upload-dialog" (click)="$event.stopPropagation()">
     <div class="upload-dialog-header">
-      <h3>{{ pipelineMode === 'mcp' ? 'Upload MCP Server Files' : 'Upload Agent Files' }}</h3>
-      <button mat-icon-button (click)="closeUploadDialog()" class="close-button">
+      <h3>
+        {{
+          pipelineMode === "mcp"
+            ? "Upload MCP Server Files"
+            : "Upload Agent Files"
+        }}
+      </h3>
+      <button
+        mat-icon-button
+        (click)="closeUploadDialog()"
+        class="close-button"
+      >
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="upload-dialog-content">
-      <p>Select a ZIP file containing your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} files to upload:</p>
+      <p>
+        Select a ZIP file containing your
+        {{ pipelineMode === "mcp" ? "MCP server" : "agent" }} files to upload:
+      </p>
 
       <div class="file-input-container">
-        <input type="file" #fileInput accept=".zip" (change)="onFileSelected($event)" class="file-input"
-          id="zipFileInput">
+        <input
+          type="file"
+          #fileInput
+          accept=".zip"
+          (change)="onFileSelected($event)"
+          class="file-input"
+          id="zipFileInput"
+        />
         <label for="zipFileInput" class="file-input-label">
           <mat-icon>attachment</mat-icon>
-          <span>{{ selectedZipFile ? selectedZipFile.name : 'Choose ZIP file...' }}</span>
+          <span>{{
+            selectedZipFile ? selectedZipFile.name : "Choose ZIP file..."
+          }}</span>
         </label>
       </div>
-
-      <app-github-push mode="pull" (zipFileCreated)="onGitHubPullZipCreated($event)"></app-github-push>
     </div>
 
     <div class="upload-dialog-footer">
-      <button mat-stroked-button (click)="closeUploadDialog()" class="cancel-btn" [disabled]="isUploadingFiles">
+      <button
+        mat-stroked-button
+        (click)="closeUploadDialog()"
+        class="cancel-btn"
+        [disabled]="isUploadingFiles"
+      >
         Cancel
       </button>
-      <button mat-raised-button color="primary" (click)="uploadAgentFiles()" class="upload-btn"
-        [disabled]="!selectedZipFile || isUploadingFiles">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="uploadAgentFiles()"
+        class="upload-btn"
+        [disabled]="!selectedZipFile || isUploadingFiles"
+      >
         <mat-icon *ngIf="isUploadingFiles">hourglass_empty</mat-icon>
         <mat-icon *ngIf="!isUploadingFiles">upload</mat-icon>
-        {{ isUploadingFiles ? 'Uploading...' : 'Upload' }}
+        {{ isUploadingFiles ? "Uploading..." : "Upload" }}
       </button>
     </div>
   </div>
