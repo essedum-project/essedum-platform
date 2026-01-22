@@ -190,6 +190,74 @@
 
                           <!-- GitHub Copilot Instructions - Always Show -->
                           <div class="prompt-template-container">
+                          <!-- LLM Selection and Generate Controls in same row -->
+                          <div class="generate-controls-row">
+                            <!-- LLM Selection Dropdown - Only show when no files exist -->
+                            <div class="llm-selection-container" *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
+                              [class.disabled]="hasGeneratedAgent || hasExistingFiles()">
+                              <div class="llm-selection-row">
+                                <label >Select LLM Provider</label>
+                                <mat-select [(value)]="selectedLLM" placeholder="Choose LLM Provider" class="llm-select"
+                                  [disabled]="hasGeneratedAgent || hasExistingFiles()">
+                                  <mat-option value="github-copilot">GitHub Copilot</mat-option>
+                                  <mat-option value="aws-bedrock" disabled>AWS Bedrock</mat-option>
+                                  <mat-option value="azure-ai-studio" disabled>Azure AI Studio</mat-option>
+                                  <mat-option value="gcp-vertex-ai" disabled>GCP Vertex AI</mat-option>
+                                </mat-select>
+                              </div>
+                            </div>
+
+                            <!-- Action Buttons Container -->
+                            <div class="action-buttons-container"
+                              [class.full-width]="hasGeneratedAgent || hasExistingFiles()">
+
+                              <!-- Upload Button - Only show when no files exist yet -->
+                              <button mat-raised-button class="upload-agent-button" *ngIf="shouldShowUploadButton()"
+                                (click)="openUploadDialog()" [disabled]="isUploadingFiles"
+                                [matTooltip]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'"
+                                matTooltipPosition="above">
+                                <mat-icon>{{ isUploadingFiles ? 'hourglass_empty' : 'upload' }}</mat-icon>
+                                <span class="button-label">{{ isUploadingFiles ? 'Uploading...' : (pipelineMode ===
+                                  'mcp' ? 'Upload MCP Files' : 'Upload Agent Files') }}</span>
+                              </button>
+
+                              <!-- Run and Deploy Button - Only show when files exist -->
+                              <button mat-raised-button class="run-deploy-button"
+                                *ngIf="shouldShowRunPlaygroundButtons()"
+                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
+                                (click)="runAndDeploy()" [disabled]="!canRunAndDeploy()"
+                                [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : 'Run and Deploy Agent'"
+                                matTooltipPosition="above">
+                                <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">{{
+                                  isRunningAndDeploying ? 'Running & Deploying' : 'Run & Deploy' }}</span>
+                              </button>
+
+                              <!-- Playground Button - Only show when files exist -->
+                              <button mat-raised-button class="playground-button"
+                                *ngIf="shouldShowRunPlaygroundButtons()"
+                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
+                                [class.playground-disabled]="!canOpenPlayground()" [disabled]="!canOpenPlayground()"
+                                (click)="openPlayground()" [title]="getPlaygroundTooltipMessage()">
+                                <mat-icon>smart_toy</mat-icon>
+                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">Open
+                                  Playground</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Minimal status message as separate row below buttons -->
+                          <div class="playground-status-row" *ngIf="!canOpenPlayground() && deploymentStatusMessage">
+                            <div class="playground-status-hint" [ngClass]="{
+                   'status-progress': deploymentStatus === 'running',
+                   'status-error': deploymentStatus === 'error',
+                   'status-idle': deploymentStatus === 'idle'
+                 }">{{ deploymentStatusMessage }}</div>
+                          </div>
+                          
+                          <!-- GitHub Copilot Instructions -->
+                          <div class="prompt-template-container"
+                            *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
                             <div class="prompt-instructions">
                               <p>
                                 <strong
@@ -600,7 +668,6 @@
                       </div>
                     </div>
                   </div>
-                  <!-- </div> -->
                 </mat-tab>
                 <!-- Playground Tab (Only show when files exist) -->
                 <mat-tab

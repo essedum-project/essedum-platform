@@ -1,7 +1,19 @@
 import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
+import { GitHubService } from '../../sharedModule/services/github.service';
+
+// Custom validator for array fields to ensure at least one item is selected
+function arrayNotEmptyValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return { required: true };
+    }
+    return null;
+  };
+}
 
 interface DeploymentFormData {
   overview: any;
@@ -113,13 +125,13 @@ export class DeploymentFormComponent implements OnInit {
   readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
 
   // Static text constants - Messages
-  readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button : Agent Name, Agent Version, Deployment Date & Time';
+  readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button: Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner';
   readonly OVERVIEW_SAVED_MESSAGE = 'Overview saved';
   readonly SCOPE_SAVED_MESSAGE = 'Scope & Pre-Checks saved';
   readonly APPROVAL_SAVED_MESSAGE = 'Approval & Rollback saved';
   readonly VALIDATION_SAVED_MESSAGE = 'Validation & Compliance saved';
   readonly FILL_REQUIRED_FIELDS_MESSAGE = 'Please fill all required fields';
-  readonly FILL_REQUIRED_FIELDS_FINISH_MESSAGE = 'Please fill all required fields (Agent Name, Agent Version, Deployment Date & Time)';
+  readonly FILL_REQUIRED_FIELDS_FINISH_MESSAGE = 'Please fill all required fields (Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner)';
   readonly DEPLOYMENT_SAVED_SUCCESS_MESSAGE = 'Deployment form saved successfully!';
   readonly DEPLOYMENT_SAVED_ERROR_MESSAGE = 'Error saving deployment form: ';
 
@@ -135,15 +147,6 @@ export class DeploymentFormComponent implements OnInit {
    */
   onEnvironmentChange(event: any): void {
     const selectedValue = event.value;
-    if (selectedValue === 'Production') {
-      this.service.message('Production environment is restricted. Defaulting to UAT.', 'warning');
-      // Reset to UAT after a brief delay to show the warning
-      setTimeout(() => {
-        this.overviewForm.patchValue({
-          deploymentEnvironment: 'UAT'
-        });
-      }, 100);
-    }
   }
   
   // Multi-select options
@@ -178,10 +181,10 @@ export class DeploymentFormComponent implements OnInit {
       hashChecksum: ['']
     });
 
-    // Initialize Scope & Pre-Checks Form - No required fields
+    // Initialize Scope & Pre-Checks Form - targetNodes and impactedServices are required
     this.scopeForm = this.fb.group({
-      targetNodes: [[]],
-      impactedServices: [[]],
+      targetNodes: [[], [Validators.required, arrayNotEmptyValidator()]],
+      impactedServices: [[], [Validators.required, arrayNotEmptyValidator()]],
       dependencies: [''],
       healthCheckStatus: [''],
       backupConfirmation: [false],
@@ -189,24 +192,24 @@ export class DeploymentFormComponent implements OnInit {
       securityPatchVerification: [false]
     });
 
-    // Initialize Approval & Rollback Form - No required fields
+    // Initialize Approval & Rollback Form - approverNameRole and cabApprovalReference are required
     this.approvalForm = this.fb.group({
-      approverNameRole: [''],
-      cabApprovalReference: [''],
+      approverNameRole: ['', Validators.required],
+      cabApprovalReference: ['', Validators.required],
       changeRequestId: [''],
       rollbackProcedureReference: [''],
       previousStableVersion: ['']
     });
 
-    // Initialize Validation & Compliance Form - No required fields
+    // Initialize Validation & Compliance Form - smokeTestStatus and deploymentOwner are required
     this.validationForm = this.fb.group({
-      smokeTestStatus: [''],
+      smokeTestStatus: ['', Validators.required],
       performanceTestSummary: [''],
       sslTlsCertificateCheck: [false],
       drReadiness: [false],
       dataRetentionConfirmation: [false],
       antivirusPatchConfirmation: [false],
-      deploymentOwner: [''],
+      deploymentOwner: ['', Validators.required],
       infraSupportContacts: [''],
       auditPocDetails: ['']
     });
@@ -329,6 +332,9 @@ export class DeploymentFormComponent implements OnInit {
    * Save Overview - Calls the same API as finish button
    */
   saveOverview(): void {
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.overviewForm);
+    
     if (this.overviewForm.valid) {
       const deploymentData = this.buildDeploymentPayload();
       this.service.saveDeploymentForm(deploymentData).subscribe(
@@ -343,8 +349,7 @@ export class DeploymentFormComponent implements OnInit {
         }
       );
     } else {
-      this.markFormGroupTouched(this.overviewForm);
-      this.service.message(this.FILL_REQUIRED_FIELDS_MESSAGE, 'error');
+      this.service.message('Please fill all required fields in Overview tab', 'error');
     }
   }
 
@@ -352,62 +357,86 @@ export class DeploymentFormComponent implements OnInit {
    * Save Scope - Calls the same API as finish button
    */
   saveScope(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.scopeForm);
+    
+    if (this.scopeForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Scope & Pre-Checks tab', 'error');
+    }
   }
 
   /**
    * Save Approval - Calls the same API as finish button
    */
   saveApproval(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.approvalForm);
+    
+    if (this.approvalForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Approval & Rollback tab', 'error');
+    }
   }
 
   /**
    * Save Validation - Calls the same API as finish button
    */
   saveValidation(): void {
-    const deploymentData = this.buildDeploymentPayload();
-    this.service.saveDeploymentForm(deploymentData).subscribe(
-      (response) => {
-        if (response && response.id) {
-          this.deploymentId = response.id;
+    // Mark form as touched to show validation errors
+    this.markFormGroupTouched(this.validationForm);
+    
+    if (this.validationForm.valid) {
+      const deploymentData = this.buildDeploymentPayload();
+      this.service.saveDeploymentForm(deploymentData).subscribe(
+        (response) => {
+          if (response && response.id) {
+            this.deploymentId = response.id;
+          }
+          this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
+        },
+        (error) => {
+          this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
         }
-        this.service.message(this.VALIDATION_SAVED_MESSAGE, 'success');
-      },
-      (error) => {
-        this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
-      }
-    );
+      );
+    } else {
+      this.service.message('Please fill all required fields in Validation & Compliance tab', 'error');
+    }
   }
 
   /**
    * Check if all required fields are filled to enable Finish button
    */
   isAllFormsValid(): boolean {
-    // Only check if the required fields are filled: agentName, agentVersion, deploymentDateTime
-    return this.overviewForm.valid;
+    // Check all required fields across all forms
+    return this.overviewForm.valid && 
+           this.scopeForm.valid && 
+           this.approvalForm.valid && 
+           this.validationForm.valid;
   }
 
   /**
@@ -431,10 +460,34 @@ export class DeploymentFormComponent implements OnInit {
    * Finish deployment - validate required fields and save complete form
    */
   finishDeployment(): void {
-    // Check if required fields are filled
+    // Mark all forms as touched to show validation errors
+    this.markFormGroupTouched(this.overviewForm);
+    this.markFormGroupTouched(this.scopeForm);
+    this.markFormGroupTouched(this.approvalForm);
+    this.markFormGroupTouched(this.validationForm);
+    
+    // Check if all required fields are filled
     if (!this.overviewForm.valid) {
-      this.markFormGroupTouched(this.overviewForm);
       this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 0; // Navigate to Overview tab
+      return;
+    }
+    
+    if (!this.scopeForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 1; // Navigate to Scope tab
+      return;
+    }
+    
+    if (!this.approvalForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 2; // Navigate to Approval tab
+      return;
+    }
+    
+    if (!this.validationForm.valid) {
+      this.service.message(this.FILL_REQUIRED_FIELDS_FINISH_MESSAGE, 'error');
+      this.selectedTabIndex = 3; // Navigate to Validation tab
       return;
     }
 
@@ -581,16 +634,18 @@ export class DeploymentFormComponent implements OnInit {
     <mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
       <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
         <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
-        <p style="margin-top: 16px; color: #666;">Loading branch configuration...</p>
+        <p style="margin-top: 16px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
       </div>
       
       <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
         <div>
-          <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500;">Select Source Branch</label>
           <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
             <mat-label>Source Branch</mat-label>
-            <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select">
-              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+            <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select" [disabled]="isLoadingSourceBranches">
+              <mat-option *ngIf="isLoadingSourceBranches" disabled>
+                <span>Loading branches...</span>
+              </mat-option>
+              <mat-option *ngFor="let branch of availableSourceBranches" [value]="branch">
                 {{ branch }}
               </mat-option>
             </mat-select>
@@ -601,14 +656,9 @@ export class DeploymentFormComponent implements OnInit {
         </div>
 
         <div>
-          <label style="display: block; margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500;">Select Destination Branch</label>
           <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
             <mat-label>Destination Branch</mat-label>
-            <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select">
-              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
-                {{ branch }}
-              </mat-option>
-            </mat-select>
+            <input matInput formControlName="destinationBranch" placeholder="Destination Branch" class="mat-style-input" readonly>
             <mat-error class="ml-18" *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
               Destination branch is required
             </mat-error>
@@ -640,63 +690,139 @@ export class DeploymentFormComponent implements OnInit {
 })
 export class BranchSelectionDialogComponent implements OnInit {
   branchForm: FormGroup;
-  availableBranches: string[] = ['main', 'develop', 'staging', 'production']; // Default branches
+  availableSourceBranches: string[] = [];
   isDeploying = false;
   isLoadingBranches = false;
+  isLoadingSourceBranches = false;
+  sourceRepoName = ''; // Will be set dynamically with owner/repo format
+  gitUsername: any;
+  gitSelectedRepo: any;
+  gitSelectedBranch: any;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<BranchSelectionDialogComponent>,
     private fb: FormBuilder,
-    private service: Services
+    private service: Services,
+    private githubService: GitHubService
   ) {
     this.branchForm = this.fb.group({
       sourceBranch: ['', Validators.required],
-      destinationBranch: ['', Validators.required]
+      destinationBranch: [{value: '', disabled: true}, Validators.required]
     });
   }
 
   ngOnInit(): void {
-    // Load existing git config from API
-    this.loadGitConfig();
+    // Load GitHub config from session storage
+    this.loadGitHubConfigFromSession();
+    
+    // Load source branches from repo
+    this.loadSourceBranches();
+    
+    // Load destination branch from API and compare with session storage
+    this.loadDestinationFromApi();
+  }
+
+  
+
+  /**
+   * Load GitHub config from session storage
+   */
+  loadGitHubConfigFromSession(): void {
+    try {
+      const githubConfigStr = sessionStorage.getItem('github_config');
+      if (githubConfigStr) {
+        const githubConfig = JSON.parse(githubConfigStr);
+        console.log('🔧 Loaded GitHub config from session:', githubConfig);
+        
+        // You can use these values if needed
+        this.gitUsername = githubConfig.git_username;
+        this.gitSelectedRepo = githubConfig.git_selected_Repo;
+        this.gitSelectedBranch = githubConfig.git_selected_branch;
+           } else {
+        console.warn('No github_config found in session storage');
+      }
+    } catch (error) {
+      console.error('Error parsing github_config from session storage:', error);
+    }
   }
 
   /**
-   * Load git config from API and populate form
+   * Load source branches from hardcoded "testing_deployment" repository
    */
-  loadGitConfig(): void {
-    if (!this.data.cname || !this.data.organisation) {
-      console.warn('Missing cname or organisation for git config');
-      return;
-    }
-
-    this.isLoadingBranches = true;
-    this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
-      (response: any) => {
+  loadSourceBranches(): void {
+    this.isLoadingSourceBranches = true;
+    this.availableSourceBranches = [];
+    this.githubService.getBranches(this.sourceRepoName).subscribe(
+      (branches) => {
+        this.availableSourceBranches = branches;
+        this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
-        console.log('Git config loaded:', response);
-        
-        // If response has branch name, use it as default
-        if (response && response.bname) {
-          // Add the current branch to available branches if not already present
-          if (!this.availableBranches.includes(response.bname)) {
-            this.availableBranches.push(response.bname);
-          }
-          
-          // Set the destination branch to the current branch
-          this.branchForm.patchValue({
-            destinationBranch: response.bname
-          });
-        }
       },
       (error) => {
+        console.error('Error loading source branches:', error);
+        this.service.message('Error loading source branches from ' + this.sourceRepoName, 'error');
+        this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
-        console.log('No existing git config found or error loading:', error);
-        // Continue with default branches if no config exists
       }
     );
   }
 
+  /**
+   * Load destination branch from API and compare with session storage
+   */
+  loadDestinationFromApi(): void {
+    if (!this.data.cname || !this.data.organisation) {
+      console.warn('Missing cname or organisation to fetch git config');
+      return;
+    }
+
+    this.isLoadingBranches = true;
+    console.log('🔍 Fetching git config for cname:', this.data.cname, 'org:', this.data.organisation);
+    
+    this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
+      (response) => {
+        this.isLoadingBranches = false;
+        console.log('📦 API Response - Git Config:', response);
+        
+        if (response && response.bname) {
+          const apiDestinationBranch = response.bname;
+         
+          // Check if session storage branch matches API branch
+          if (this.gitSelectedBranch && this.gitSelectedBranch === apiDestinationBranch) {
+            // Auto-populate the destination branch
+            this.branchForm.patchValue({
+              destinationBranch: apiDestinationBranch
+            });
+            
+          } else {
+            // Still populate with API value but keep disabled
+            this.branchForm.patchValue({
+              destinationBranch: apiDestinationBranch
+            });
+          }
+        } else {
+          // Fallback to session storage if API returns no data
+          if (this.gitSelectedBranch) {
+            this.branchForm.patchValue({
+              destinationBranch: this.gitSelectedBranch
+            });
+          }
+        }
+      },
+      (error) => {
+        this.isLoadingBranches = false;
+        // Fallback to session storage on error
+        if (this.gitSelectedBranch) {
+          this.branchForm.patchValue({
+            destinationBranch: this.gitSelectedBranch
+          });
+        } else {
+          this.service.message('Error loading destination branch configuration', 'error');
+        }
+      }
+    );
+  }
   onCancel(): void {
     this.dialogRef.close();
   }
