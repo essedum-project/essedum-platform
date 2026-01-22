@@ -57,6 +57,11 @@ export class GitHubPushComponent implements OnInit {
         this.isAuthenticated = status.authenticated;
         if (status.authenticated && status.githubUsername) {
           this.username = status.githubUsername;
+          
+          // Store username in sessionStorage
+          sessionStorage.setItem('git_username', this.username);
+          this.updateGitHubConfig();
+          
           this.loadRepositories();
         }
       },
@@ -127,6 +132,11 @@ export class GitHubPushComponent implements OnInit {
         this.isLoading = false;
         this.isAuthenticated = true;
         this.username = status.githubUsername || '';
+        
+        // Store username in sessionStorage
+        sessionStorage.setItem('git_username', this.username);
+        this.updateGitHubConfig();
+        
         this.showModal = true;
         this.loadRepositories();
       },
@@ -152,6 +162,12 @@ export class GitHubPushComponent implements OnInit {
         this.branches = [];
         this.resetForm();
         this.isLoading = false;
+
+        // Clear sessionStorage
+        sessionStorage.removeItem('git_username');
+        sessionStorage.removeItem('git_selected_Repo');
+        sessionStorage.removeItem('git_selected_branch');
+        sessionStorage.removeItem('github_config');
 
         // Show message to user about logging out from GitHub
         this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
@@ -195,11 +211,17 @@ export class GitHubPushComponent implements OnInit {
     if (!this.selectedRepo) {
       this.branches = [];
       this.selectedRepoObject = null;
+      sessionStorage.removeItem('git_selected_Repo');
+      this.updateGitHubConfig();
       return;
     }
 
     // Find and store the selected repository object
     this.selectedRepoObject = this.repositories.find(repo => repo.fullName === this.selectedRepo) || null;
+
+    // Store selected repo in sessionStorage
+    sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
+    this.updateGitHubConfig();
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -208,6 +230,11 @@ export class GitHubPushComponent implements OnInit {
       next: (branches) => {
         this.branches = branches;
         this.selectedBranch = branches.length > 0 ? branches[0] : '';
+        
+        // Store selected branch in sessionStorage
+        sessionStorage.setItem('git_selected_branch', this.selectedBranch);
+        this.updateGitHubConfig();
+        
         this.isLoading = false;
       },
       error: (error) => {
@@ -215,6 +242,30 @@ export class GitHubPushComponent implements OnInit {
         this.errorMessage = 'Failed to load branches: ' + error.message;
       }
     });
+  }
+
+  /**
+   * Handle branch selection change
+   */
+  onBranchChange(): void {
+    if (this.selectedBranch) {
+      // Store selected branch in sessionStorage
+      sessionStorage.setItem('git_selected_branch', this.selectedBranch);
+      this.updateGitHubConfig();
+    }
+  }
+
+  /**
+   * Update GitHub config object in sessionStorage
+   */
+  updateGitHubConfig(): void {
+    const githubConfig = {
+      git_username: sessionStorage.getItem('git_username') || this.username || '',
+      git_selected_Repo: sessionStorage.getItem('git_selected_Repo') || this.selectedRepo || '',
+      git_selected_branch: sessionStorage.getItem('git_selected_branch') || this.selectedBranch || ''
+    };
+    
+    sessionStorage.setItem('github_config', JSON.stringify(githubConfig));
   }
 
   /**
