@@ -1547,6 +1547,7 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
             </column>
             <column name="org" type="VARCHAR(255)" />
             <column name="bname" type="VARCHAR(255)" />
+            <column name="repo" type="VARCHAR(255)" />
             <column name="createdby" type="VARCHAR(100)">
                 <constraints nullable="false" />
             </column>
