@@ -256,7 +256,7 @@
                           </div>
                           
                           <!-- GitHub Copilot Instructions -->
-                          <div class="prompt-template-container"
+                          <div class="prompt-template-sub-container"
                             *ngIf="selectedLLM === 'github-copilot' && !hasGeneratedAgent && !hasExistingFiles()">
                             <div class="prompt-instructions">
                               <p>
@@ -320,6 +320,7 @@
                                 getPromptTemplate()
                               }}</pre>
                             </div>
+                          </div>
                           </div>
                         </div>
                       </div>
