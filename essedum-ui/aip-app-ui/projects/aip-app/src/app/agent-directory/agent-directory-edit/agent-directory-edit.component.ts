@@ -111,32 +111,30 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   isBackHovered: boolean = false;
 
-  // Dynamic table headers
+  // Dynamic table headers (include width and put Actions first for consistent layout)
   locatorsHeaders = [
-    { key: 'type', label: 'Type' },
-    { key: 'url', label: 'URL' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'actions', label: 'Action', width: '10%' },
+    { key: 'type', label: 'Type', width: '30%' },
+    { key: 'url', label: 'URL', width: '60%' },
   ];
 
   syncsHeaders = [
-    { key: 'target', label: 'Target' },
-    { key: 'frequency', label: 'Frequency' },
-    { key: 'lastSync', label: 'Last Sync' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'actions', label: 'Action', width: '10%' },
+    { key: 'target', label: 'Target', width: '60%' },
+    { key: 'frequency', label: 'Frequency', width: '30%' },
   ];
 
   publicationsHeaders = [
-    { key: 'channel', label: 'Channel' },
-    { key: 'publishedDate', label: 'Published Date' },
-    { key: 'status', label: 'Status' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'actions', label: 'Action', width: '10%' },
+    { key: 'channel', label: 'Channel', width: '60%' },
+    { key: 'status', label: 'Status', width: '30%' },
   ];
 
   extensionsHeaders = [
-    { key: 'key', label: 'Key' },
-    { key: 'value', label: 'Value' },
-    { key: 'description', label: 'Description' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'actions', label: 'Action', width: '10%' },
+    { key: 'key', label: 'Key', width: '30%' },
+    { key: 'value', label: 'Value', width: '30%' },
+    { key: 'description', label: 'Description', width: '30%' },
   ];
 
   parametersHeaders = [
@@ -146,6 +144,63 @@ export class AgentDirectoryEditComponent implements OnInit {
     { key: 'required', label: 'Required' },
     { key: 'actions', label: 'Actions' },
   ];
+
+  // Section titles
+  sectionTitles = {
+    basic: 'Basic Information',
+    cid: 'CID',
+    jsonModel: 'JSON Model',
+    modules: 'Modules',
+    skills: 'Skills',
+    selectors: 'Selectors',
+    domains: 'Domains',
+    locators: 'Locators',
+    syncs: 'Syncs',
+    publications: 'Publications',
+    extensions: 'Extensions',
+    signatures: 'Signatures',
+    tools: 'Tools',
+    resources: 'Resources',
+    prompts: 'Prompts'
+  };
+
+  // Section collapse states
+  sectionStates: { [key: string]: boolean } = {
+    'basic': true,
+    'cid': true,
+    'json-model': true,
+    'modules': true,
+    'skills': true,
+    'selectors': true,
+    'domains': true,
+    'locators': true,
+    'syncs': true,
+    'publications': true,
+    'extensions': true,
+    'signatures': true,
+    'tools': true,
+    'resources': true,
+    'prompts': true
+  };
+
+  // Section hover states for title animation
+  sectionHoverStates: { [key: string]: boolean } = {
+    'basic': false,
+    'cid': false,
+    'json-model': false,
+    'modules': false,
+    'skills': false,
+    'selectors': false,
+    'domains': false,
+    'locators': false,
+    'syncs': false,
+    'publications': false,
+    'extensions': false,
+    'signatures': false,
+    'tools': false,
+    'resources': false,
+    'prompts': false
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -331,15 +386,10 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   // Locator operations
   addLocator(): void {
-    if (this.newLocatorType && this.newLocatorUrl.trim()) {
-      // Don't include id for new items
-      this.agentData.locators.push({
-        locator_type: this.newLocatorType,
-        url: this.newLocatorUrl.trim(),
-      });
-      this.newLocatorType = '';
-      this.newLocatorUrl = '';
-    }
+    this.agentData.locators.push({
+      locator_type: '',
+      url: '',
+    });
   }
 
   removeLocator(index: number): void {
@@ -415,15 +465,11 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   // Sync operations
   addSync(): void {
-    if (this.newSyncTarget.trim() && this.newSyncFrequency) {
-      this.agentData.syncs.push({
-        target: this.newSyncTarget.trim(),
-        frequency: this.newSyncFrequency,
-        last_sync: new Date().toISOString(),
-      });
-      this.newSyncTarget = '';
-      this.newSyncFrequency = '';
-    }
+    this.agentData.syncs.push({
+      target: '',
+      frequency: '',
+      last_sync: new Date().toISOString(),
+    });
   }
 
   removeSync(index: number): void {
@@ -432,15 +478,11 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   // Publication operations
   addPublication(): void {
-    if (this.newPublicationChannel.trim() && this.newPublicationStatus) {
-      this.agentData.publications.push({
-        channel: this.newPublicationChannel.trim(),
-        published_date: new Date(),
-        status: this.newPublicationStatus,
-      });
-      this.newPublicationChannel = '';
-      this.newPublicationStatus = '';
-    }
+    this.agentData.publications.push({
+      channel: '',
+      published_date: new Date(),
+      status: '',
+    });
   }
 
   removePublication(index: number): void {
@@ -449,16 +491,11 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   // Extension operations
   addExtension(): void {
-    if (this.newExtensionKey.trim() && this.newExtensionValue.trim()) {
-      this.agentData.extensions.push({
-        key: this.newExtensionKey.trim(),
-        value: this.newExtensionValue.trim(),
-        description: this.newExtensionDescription.trim(),
-      });
-      this.newExtensionKey = '';
-      this.newExtensionValue = '';
-      this.newExtensionDescription = '';
-    }
+    this.agentData.extensions.push({
+      key: '',
+      value: '',
+      description: '',
+    });
   }
 
   removeExtension(index: number): void {
@@ -483,16 +520,12 @@ export class AgentDirectoryEditComponent implements OnInit {
 
   // Signature operations
   addSignature(): void {
-    if (this.newSignatureAlgorithm && this.newSignatureValue.trim()) {
-      this.agentData.signatures.push({
-        algorithm: this.newSignatureAlgorithm,
-        value: this.newSignatureValue.trim(),
-        certificate: this.newSignatureCertificate.trim(),
-      });
-      this.newSignatureAlgorithm = '';
-      this.newSignatureValue = '';
-      this.newSignatureCertificate = '';
-    }
+    // Always add an empty signature row to allow immediate inline editing
+    this.agentData.signatures.push({
+      algorithm: '',
+      value: '',
+      certificate: ''
+    });
   }
 
   removeSignature(index: number): void {
@@ -506,6 +539,10 @@ export class AgentDirectoryEditComponent implements OnInit {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+
+  toggleSection(sectionId: string): void {
+    this.sectionStates[sectionId] = !this.sectionStates[sectionId];
   }
 
   // Actions
@@ -605,6 +642,7 @@ export class AgentDirectoryEditComponent implements OnInit {
           key: e.key,
           value: e.value,
           description: e.description,
+          
         };
         if (e.id) extension.id = e.id;
         return extension;

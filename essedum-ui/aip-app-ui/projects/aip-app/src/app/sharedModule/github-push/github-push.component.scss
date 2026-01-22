@@ -42,6 +42,81 @@
   }
 }
 
+/* Git Pull Trigger Button - similar to push */
+.git-pull-trigger {
+  background: transparent !important;
+  border: none !important;
+  color: #cccccc !important;
+  padding: 0 !important;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  &:disabled {
+    color: #858585 !important;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor !important;
+  }
+}
+
+/* GitHub Pull Input Container - matches file input style */
+.github-pull-input-container {
+  margin-top: 16px;
+}
+
+.github-pull-input-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #495057;
+  width: 100%;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #0366d6;
+  }
+
+  span {
+    font-weight: 500;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+    border-color: #0366d6;
+    color: #0366d6;
+  }
+
+  &:active {
+    background-color: #dee2e6;
+  }
+}
+
 /* Button Styles */
 .btn {
   padding: 4px 8px;

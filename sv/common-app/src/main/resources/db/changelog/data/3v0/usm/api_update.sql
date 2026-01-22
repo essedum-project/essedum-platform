@@ -402,3 +402,6 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 
 INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-github-config');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/git-configs/.*/.*', 'GET', 0, 'cip-get-api-github-config', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-search');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/search', 'GET', 0, 'cip-post-api-agent-directory-search', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-search' limit 1;

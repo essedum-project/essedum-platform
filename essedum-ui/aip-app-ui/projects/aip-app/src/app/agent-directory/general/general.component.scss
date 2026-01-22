@@ -459,15 +459,25 @@
 }
 
 .tool-name {
-  font: normal normal 600 16px/24px Roboto !important;
+  font: normal normal 500 14px/20px Roboto !important;
   color: #000000;
   margin: 0 0 0.5rem 0;
+  text-transform: lowercase;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .tool-description {
   font: normal normal normal 14px/20px Roboto !important;
   color: #737373;
   margin: 0 0 1rem 0;
+  text-transform: lowercase;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 .parameters-table {
@@ -624,8 +634,13 @@
   color: #737373;
   margin: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
+  justify-content: space-between;
+
+  .copyable-box {
+    flex: 1 1 auto;
+  }
 
   .copy-icon-btn-inline {
     background: none;
@@ -711,6 +726,114 @@
       text-decoration: underline;
     }
   }
+
+  .external-icon{
+    font-size: 14px;
+    padding-top: 8px;
+  }
+}
+
+/* Equal 3-column table helper */
+.equal-cols-3 {
+  width: 100%;
+
+  th, td {
+    width: 33.3333%;
+    max-width: 33.3333%;
+    box-sizing: border-box;
+  }
+}
+
+/* Two-column 33% / 66% helper for locators table */
+.two-cols-33-66 {
+  width: 100%;
+
+  th:first-child, td:first-child {
+    width: 33.3333%;
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 66.6666%;
+  }
+
+  th, td {
+    box-sizing: border-box;
+  }
+}
+
+/* Three-column 25% / 25% / 50% helper for resources table */
+.three-cols-25-25-50 {
+  width: 100%;
+
+  th:first-child, td:first-child {
+    width: 25%;
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 25%;
+  }
+
+  th:nth-child(3), td:nth-child(3) {
+    width: 50%;
+  }
+
+  th, td {
+    box-sizing: border-box;
+  }
+}
+
+/* Copyable box for resources and prompts */
+.copyable-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+
+  code {
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 13px;
+    color: #111827;
+    white-space: pre-wrap;
+    max-width: 60ch;
+    overflow-wrap: anywhere;
+  }
+
+  .copy-icon-btn-inline {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.125rem;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      color: #0094ff;
+      background: #f3f4f6;
+    }
+  }
+}
+
+/* First letter uppercase, rest lowercase helper */
+.firstcap {
+  text-transform: lowercase;
+}
+.firstcap::first-letter {
+  text-transform: uppercase;
 }
 
 /* Domains List */
@@ -799,9 +922,14 @@
   }
 
   .signature-algorithm {
-    font: normal normal 500 16px/24px Roboto;
+    font: normal normal 500 14px/20px Roboto;
     color: #111827;
     margin: 0;
+    text-transform: lowercase;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
   }
 
   .signature-field {
@@ -831,7 +959,7 @@
 
     code {
       flex: 1;
-      font: normal normal normal 12px/18px 'Monaco', 'Menlo', 'Courier New', monospace;
+      font: normal normal normal 12px/18px Roboto;
       color: #1f2937;
       overflow-wrap: break-word;
     }
