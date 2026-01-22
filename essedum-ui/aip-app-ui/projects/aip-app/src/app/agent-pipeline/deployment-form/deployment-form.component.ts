@@ -753,7 +753,7 @@ export class BranchSelectionDialogComponent implements OnInit {
   loadSourceBranches(): void {
     this.isLoadingSourceBranches = true;
     this.availableSourceBranches = [];
-    this.githubService.getBranches(this.sourceRepoName).subscribe(
+    this.githubService.getBranches(this.gitSelectedRepo).subscribe(
       (branches) => {
         this.availableSourceBranches = branches;
         this.isLoadingSourceBranches = false;
@@ -761,7 +761,7 @@ export class BranchSelectionDialogComponent implements OnInit {
       },
       (error) => {
         console.error('Error loading source branches:', error);
-        this.service.message('Error loading source branches from ' + this.sourceRepoName, 'error');
+        this.service.message('Error loading source branches from ' + this.gitSelectedRepo, 'error');
         this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
       }
