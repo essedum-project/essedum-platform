@@ -16,15 +16,9 @@
 package com.lfn.common.app.service;
 
 import com.lfn.common.app.exception.GitOperationException;
-import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
-import com.lfn.common.app.web.rest.dto.PullRequest;
-import com.lfn.common.app.web.rest.dto.PullResponse;
-import com.lfn.common.app.web.rest.dto.PushRequest;
+import com.lfn.common.app.web.rest.dto.*;
 import okhttp3.OkHttpClient;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.*;
 import org.kohsuke.github.extras.okhttp3.OkHttpGitHubConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,6 +259,106 @@ public class GitHubIntegrationService {
         } catch (Exception e) {
             log.error("Error pulling from GitHub: {}", e.getMessage(), e);
             throw new GitOperationException("Failed to pull from GitHub", e);
+        }
+    }
+
+    /**
+     * Push code from source branch to destination branch within the same repository
+     *
+     * @param request Branch push request containing repo, source and destination branches
+     * @param token GitHub Personal Access Token
+     * @param username GitHub username
+     * @return BranchPushResponse containing operation result details
+     * @throws Exception if push operation fails
+     */
+    public BranchPushResponse pushBranchToBranch(BranchPushRequest request, String token, String username) throws Exception {
+        try {
+            log.info("Starting branch-to-branch push - Repo: {}, Source: {}, Destination: {}",
+                     request.getRepoName(), request.getSourceBranch(), request.getDestinationBranch());
+
+            // Validate inputs
+            if (request.getRepoName() == null || request.getRepoName().isEmpty()) {
+                throw new IllegalArgumentException("Repository name is required");
+            }
+            if (request.getSourceBranch() == null || request.getSourceBranch().isEmpty()) {
+                throw new IllegalArgumentException("Source branch name is required");
+            }
+            if (request.getDestinationBranch() == null || request.getDestinationBranch().isEmpty()) {
+                throw new IllegalArgumentException("Destination branch name is required");
+            }
+
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(request.getRepoName());
+
+            // Check if source branch exists
+            GHBranch sourceBranch;
+            try {
+                sourceBranch = repo.getBranch(request.getSourceBranch());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Source branch '" + request.getSourceBranch() + "' does not exist");
+            }
+
+            // Get the SHA of the source branch
+            String sourceSha = sourceBranch.getSHA1();
+            log.info("Source branch SHA: {}", sourceSha);
+
+            boolean branchCreated = false;
+            GHBranch destinationBranch = null;
+
+            // Check if destination branch exists
+            try {
+                destinationBranch = repo.getBranch(request.getDestinationBranch());
+                log.info("Destination branch exists with SHA: {}", destinationBranch.getSHA1());
+            } catch (Exception e) {
+                if (request.isCreateBranchIfNotExists()) {
+                    log.info("Destination branch does not exist, creating it from source branch");
+                    // Create the destination branch from source branch
+                    repo.createRef("refs/heads/" + request.getDestinationBranch(), sourceSha);
+                    branchCreated = true;
+                    log.info("Created destination branch: {}", request.getDestinationBranch());
+                } else {
+                    throw new IllegalArgumentException("Destination branch '" + request.getDestinationBranch() +
+                                                     "' does not exist. Set 'createBranchIfNotExists' to true to create it.");
+                }
+            }
+
+            // If branch was just created, we're done
+            if (branchCreated) {
+                return BranchPushResponse.builder()
+                    .success(true)
+                    .message("Successfully created destination branch from source branch")
+                    .repoName(request.getRepoName())
+                    .sourceBranch(request.getSourceBranch())
+                    .destinationBranch(request.getDestinationBranch())
+                    .commitSha(sourceSha)
+                    .filesChanged(0)
+                    .branchCreated(true)
+                    .build();
+            }
+
+            // Update the destination branch reference to point to source branch SHA
+            String refPath = "refs/heads/" + request.getDestinationBranch();
+            repo.getRef("heads/" + request.getDestinationBranch()).updateTo(sourceSha, request.isForcePush());
+
+            log.info("Successfully updated destination branch to source branch SHA");
+
+            return BranchPushResponse.builder()
+                .success(true)
+                .message("Successfully pushed code from " + request.getSourceBranch() + " to " + request.getDestinationBranch())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .destinationBranch(request.getDestinationBranch())
+                .commitSha(sourceSha)
+                .filesChanged(0)
+                .branchCreated(false)
+                .build();
+
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in branch-to-branch push: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in branch-to-branch push: {}", e.getMessage(), e);
+            throw new GitOperationException("Failed to push from branch to branch", e);
         }
     }
 }

@@ -13,52 +13,60 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.icip.icipwebeditor.model.dto;
-
-import java.io.Serializable;
-import java.sql.Timestamp;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package com.lfn.common.app.web.rest.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * The Class GitHubInfoDTO.
- * Data Transfer Object for GitHub repository information.
+ * DTO for Branch to Branch Push Response
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GitHubInfoDTO implements Serializable {
+@Builder
+public class BranchPushResponse {
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * Success status of the operation
+     */
+    private boolean success;
 
-    private Long id;
+    /**
+     * Message describing the result
+     */
+    private String message;
 
-    @JsonProperty("cname")
-    private String cname;
+    /**
+     * Repository name
+     */
+    private String repoName;
 
-    @JsonProperty("org")
-    private String org;
+    /**
+     * Source branch
+     */
+    private String sourceBranch;
 
-    @JsonProperty("bname")
-    private String bname;
+    /**
+     * Destination branch
+     */
+    private String destinationBranch;
 
-    @JsonProperty("repo")
-    private String repo;
+    /**
+     * Commit SHA of the pushed code
+     */
+    private String commitSha;
 
-    @JsonProperty("createdby")
-    private String createdBy;
+    /**
+     * Number of files changed
+     */
+    private int filesChanged;
 
-    @JsonProperty("createdat")
-    private Timestamp createdAt;
-
-    @JsonProperty("updatedby")
-    private String updatedBy;
-
-    @JsonProperty("updatedat")
-    private Timestamp updatedAt;
+    /**
+     * Whether destination branch was created
+     */
+    private boolean branchCreated;
 }
 
