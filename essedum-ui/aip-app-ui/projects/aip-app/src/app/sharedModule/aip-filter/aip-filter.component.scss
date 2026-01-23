@@ -107,7 +107,35 @@
 .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+
+  ::ng-deep {
+    .mat-mdc-checkbox {
+      .mdc-form-field {
+        font-family: "Roboto", "Segoe UI", sans-serif !important;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .mdc-checkbox {
+        padding: 0;
+        margin-right: 8px;
+      }
+
+      .mdc-checkbox__background {
+        border-color: #737373;
+      }
+
+      &:hover .mdc-checkbox__background {
+        border-color: #0094ff;
+      }
+
+      .mdc-checkbox--selected .mdc-checkbox__background {
+        background-color: #0094ff;
+        border-color: #0094ff;
+      }
+    }
+  }
 }
 
 .filter-actions {
@@ -509,5 +537,70 @@
   .mat-mdc-optgroup-label {
     font-weight: 600;
     color: #333;
+  }
+}
+
+.date-range-container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+
+  .date-field {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  ::ng-deep {
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+
+    .mat-datepicker-toggle {
+      color: #737373;
+      
+      &:hover {
+        color: #0094ff;
+      }
+    }
+  }
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+// Styles for multi-select with checkboxes
+::ng-deep .mat-mdc-select-panel {
+  .mat-mdc-option {
+    .mat-mdc-checkbox {
+      pointer-events: none;
+      margin-right: 8px;
+      
+      .mdc-checkbox__background {
+        border-color: #737373;
+      }
+
+      &:hover .mdc-checkbox__background {
+        border-color: #0094ff;
+      }
+
+      .mdc-checkbox--selected .mdc-checkbox__background {
+        background-color: #0094ff;
+        border-color: #0094ff;
+      }
+    }
+
+    .mdc-list-item__primary-text {
+      display: flex;
+      align-items: center;
+      font-family: "Roboto", "Segoe UI", sans-serif !important;
+      font-size: 14px;
+    }
   }
 }

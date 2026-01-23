@@ -11,7 +11,7 @@
  * 
  * @fileoverview Client-side JavaScript for pipeline cards webview
  * @author Essedum AI Platform Team
- * @version 1.0.0
+ * @version 1.0.21
  */
 
 // ================================
@@ -293,7 +293,15 @@ const Utils = {
 
 class PipelineCardsClient {
     constructor() {
-        this.vscode = acquireVsCodeApi();
+        // Check if VS Code API already acquired and stored globally
+        if (window.vscodeApi) {
+            this.vscode = window.vscodeApi;
+        } else {
+            this.vscode = acquireVsCodeApi();
+            // Store globally for reuse
+            window.vscodeApi = this.vscode;
+        }
+        
         this.initializeElements();
         this.attachEventListeners();
         this.requestInitialLoad();
@@ -1045,15 +1053,12 @@ class PipelineCardsClient {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new PipelineCardsClient();
-});
-
-// Also initialize immediately if DOM is already loaded
+// Initialize only once when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         new PipelineCardsClient();
     });
 } else {
+    // DOM is already loaded, initialize immediately
     new PipelineCardsClient();
 }

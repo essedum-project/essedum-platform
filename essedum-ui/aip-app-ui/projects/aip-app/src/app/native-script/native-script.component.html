@@ -40,7 +40,7 @@
                       (mouseleave)="isHoveredTag = false"
                     >
                       <mat-icon
-                        class="lfx-u-mar-r-16 aip-led-icons"                      
+                        class="lfx-u-mar-r-16 aip-led-icons"
                         >local_offer</mat-icon
                       >
                     </button>
@@ -67,7 +67,7 @@
                       (mouseleave)="isHoveredRun = false"
                     >
                       <mat-icon
-                        class="lfx-u-mar-r-16 aip-led-icons"                       
+                        class="lfx-u-mar-r-16 aip-led-icons"
                         >play_arrow</mat-icon
                       >
                     </button>
@@ -107,7 +107,7 @@
                       (mouseleave)="isHovered = false"
                     >
                       <mat-icon
-                        class="lfx-u-mar-r-16 aip-led-icons"                      
+                        class="lfx-u-mar-r-16 aip-led-icons"
                         >content_copy</mat-icon
                       >
                     </button>
@@ -273,16 +273,15 @@
                       [isauth]="isAuth"
                       (configDataChange)="onSecretsDataChange($event)"
                     ></app-user-secrets>
-                  </div> 
+                  </div>
                 </div>
               </mat-tab>
               <mat-tab label="Script" class="lfx-u-header-xl">
                 <div class="tab-content selector-764-41 mb-5">
+                  <!-- Top section with run type selector -->
                   <div class="col-md-12">
                     <div class="d-flex">
-                      <span class="lfx-u-mar-t-24 lfx-u-mar-l-16 fs"
-                        >Select run type</span
-                      >
+                      <span class="lfx-u-mar-t-24 lfx-u-mar-l-16 fs">Select run type</span>
                       <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
                         <mat-select
                           [(ngModel)]="selectedRunType"
@@ -300,16 +299,82 @@
                       </mat-form-field>
                     </div>
                   </div>
-                  <div style="height: max-content">
-                    <app-enl-code-editor
-                      id="ele"
-                      *ngIf="loadScript"
-                      [script]="script"
-                      [lang]="lang"
-                      (scriptChange)="onScriptChange($event)"
-                      class="selector-764-48"
-                    >
-                    </app-enl-code-editor>
+
+                  <!-- Main content area with file explorer and code editor -->
+                  <div class="file-explorer-container" style="display: flex; height: 600px; border: 1px solid #e0e0e0;">
+                    <!-- File Structure Panel -->
+                    <div class="file-explorer-panel" style="width: 300px; border-right: 1px solid #e0e0e0; background-color: #f5f5f5; overflow-y: auto;">
+                      <div class="file-explorer-header" style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; font-weight: 500; color: #424242;">
+                        <mat-icon style="vertical-align: middle; margin-right: 8px; color: #757575;">code</mat-icon>
+                         CODESPACE
+                      </div>
+                      <div class="file-explorer-content" style="padding: 8px;">
+                        <mat-tree [dataSource]="fileTreeDataSource" [treeControl]="fileTreeControl" class="file-tree">
+                          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding
+                                         [class.selected-file]="node.selected"
+                                         (click)="onFileNodeSelect(node)"
+                                         style="cursor: pointer; padding: 4px 8px; border-radius: 4px; margin: 2px 0;">
+                            <div style="display: flex; align-items: center;">
+                              <mat-icon style="margin-right: 8px; font-size: 16px; color: #757575;">
+                                {{ node.extension === 'py' ? 'description' : 'book' }}
+                              </mat-icon>
+                              <span [style.color]="node.selected ? '#2196f3' : '#666666'">
+                                {{ node.name }}
+                              </span>
+                            </div>
+                          </mat-tree-node>
+                          <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+                            <button mat-icon-button matTreeNodeToggle>
+                              <mat-icon>
+                                {{ fileTreeControl.isExpanded(node) ? 'expand_less' : 'expand_more' }}
+                              </mat-icon>
+                            </button>
+                            {{ node.name }}
+                          </mat-tree-node>
+                        </mat-tree>
+
+                        <!-- Empty state when no files -->
+                        <div *ngIf="!fileStructure || fileStructure.length === 0"
+                             style="text-align: center; padding: 40px 20px; color: #757575;">
+                          <mat-icon style="font-size: 48px; color: #e0e0e0;">folder_open</mat-icon>
+                          <div style="margin-top: 16px;">No script files found</div>
+                          <div style="font-size: 12px; margin-top: 8px;">Script files will appear here when loaded</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Code Editor Panel -->
+                    <div class="code-editor-panel" style="flex: 1; display: flex; flex-direction: column;">
+                      <div class="code-editor-header" style="padding: 12px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; font-weight: 500; color: #424242;">
+                        <mat-icon style="vertical-align: middle; margin-right: 8px; color: #757575;">code</mat-icon>
+                        <span *ngIf="selectedFileNode?.extension === 'py'">{{ selectedFileNode?.name || 'Select a Python file to view content' }}</span>
+                        <span *ngIf="selectedFileNode?.extension === 'ipynb'" style="color: #666;">{{ selectedFileNode?.name }} - Use VS Code extension to view notebook content</span>
+                        <span *ngIf="!selectedFileNode">Select a file to view content</span>
+                      </div>
+                      <div class="code-editor-content" style="flex: 1; position: relative;">
+                        <!-- Show code editor for Python files -->
+                        <app-enl-code-editor
+                          id="ele"
+                          *ngIf="loadScript && (!selectedFileNode || selectedFileNode.extension === 'py')"
+                          [script]="script"
+                          [lang]="lang"
+                          (scriptChange)="onScriptChange($event)"
+                          style="height: 100%; width: 100%;"
+                        >
+                        </app-enl-code-editor>
+
+                        <!-- Show placeholder for notebook files -->
+                        <div *ngIf="selectedFileNode?.extension === 'ipynb'" class="notebook-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background-color: #f8f9fa; color: #666;">
+                          <mat-icon style="font-size: 64px; color: #e0e0e0; margin-bottom: 20px;">book</mat-icon>
+                          <h3 style="margin: 0 0 12px 0; color: #333;">Notebook File Selected</h3>
+                          <p style="margin: 0; text-align: center; max-width: 300px; line-height: 1.5;">This is a Jupyter Notebook file. Please use the VS Code extension to view and edit notebook content.</p>
+                          <button mat-raised-button color="primary" style="margin-top: 20px;" (click)="showNotebookDialog()">
+                            <mat-icon style="margin-right: 8px;">info</mat-icon>
+                            View Instructions
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </mat-tab>

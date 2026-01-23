@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dynamic-services-ingress
+  namespace: aipns
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: essedum.az.ad.idemo-ppc.com
+    http:
+      paths:
+      - path: /apps(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: proxy-service
+            port:
+              number: 8080

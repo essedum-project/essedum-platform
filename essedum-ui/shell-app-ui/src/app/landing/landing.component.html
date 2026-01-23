@@ -24,14 +24,13 @@
             </button>
 
             <img id="clientimage" *ngIf="!isimg" src="assets/img/essedum_icon_small.png"
-              class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo"
-              style="margin-left: 8px;" />
+              class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo" style="margin-left: 8px;" />
             <span class="responsive-title" style="margin-left: 8px;">ESSEDUM</span>
 
           </div>
         </div>
         <!--header ends -->
-        
+
         <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name != currentrole">
           <mat-sidenav-container class="example-sidenav-container selector-3-20" autosize="">
             <mat-sidenav *ngIf="
@@ -62,7 +61,7 @@
                     }"></i>
                 </span>
                 <!-- Sidebar menu popup -->
-                <div *ngIf="showSidebarMenuList" class="sidebar-menu-popup" style=" margin-top: -5px;" [ngStyle]="{
+                <div *ngIf="showSidebarMenuList" class="sidebar-menu-popup" style=" margin-top: -8px;" [ngStyle]="{
                     position: 'fixed',
                     left: sidebarMenuPopupPosition?.left + 'px',
                     top: sidebarMenuPopupPosition?.top + 'px',
@@ -94,7 +93,7 @@
                         }">
                         {{ item.label }}
                       </span>
-                    </div>             
+                    </div>
                   </div>
                 </div>
                 <!-- Sidebar menu popup closed -->
@@ -106,7 +105,7 @@
                   " [class.config]="
                     item.label == highlightedLabel &&
                     sidebarhighlightcolor == true
-                  " [ngClass]="{ sidebarhovercolor: sidebarhovercolor == true }" [ngStyle]="{
+                  " [class.second-item]="i === 1" [ngClass]="{ sidebarhovercolor: sidebarhovercolor == true }" [ngStyle]="{
                     'margin-top': i != 0 ? sidebarItemMarginTop : '',
                 
                     height:
@@ -162,22 +161,48 @@
                           'sidebar-svg-iconcolordefault':
                             sidebartextcolor != true
                         }" [src]="cleanSVG(item.icon)" alt="" />
-                      <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                      <!-- <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
                           item.icon &&
                           (item.icon.includes('data:image/png') ||
                             item.icon.includes('data:image/jpg') ||
                             item.icon.includes('data:image/jpeg')) &&
-                          item.label !== 'AI Agent'
-                        " [src]="item.icon" alt="" />
+                          item.label !== 'Agent Designer'
+                        " [src]="item.icon" alt="" /> -->
                       <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
-                          item.label === 'AI Agent'
-                        " src="assets/img/ai-agent-logo.jpg" alt="AI Agent Icon" style="height: 42px !important; width: 42px !important;" />
+                          item.label === 'Agent Designer'
+                        " src="assets/img/ai-agent-logo.jpg" alt="Agent Designer Icon"
+                        style="height: 42px !important; width: 42px !important;" />
+                      <div style="margin-top: 0px !important;">
+                        <!-- <img class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                          item.icon &&
+                          (item.icon.includes('data:image/png') ||
+                            item.icon.includes('data:image/jpg') ||
+                            item.icon.includes('data:image/jpeg')) &&
+                          item.label !== 'Agent MCP Pipelines'
+                        " [src]="item.icon" alt="" /> -->
+                      <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Agent MCP Pipelines'
+                        " src="assets/img/pipeline_agent.jpg" alt="Pipeline Agent Icon"
+                        style="height: 42px !important; width: 42px !important;" />
+
+                                <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Lite LLM'
+                        " src="assets/img/lite-llm.jpg" alt="Lite LLM Icon"
+                        style="height: 42px !important; width: 42px !important;" />
+                                <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Langfuse'
+                        " src="assets/img/langfuse.jpg" alt="langfuse Icon"
+                        style="height: 42px !important; width: 42px !important;" />
+                      </div>
                       <i *ngIf="
                           item.icon &&
                           !item.icon.startsWith('assets/icons/') &&
                           !item.icon.startsWith('fa-') &&
                           !item.icon.startsWith('icon') &&
-                          item.label !== 'AI Agent' &&
+                          item.label !== 'Agent Designer' &&
+                          item.label !== 'Agent MCP Pipelines' &&
+                          item.label !== 'Lite LLM' &&
+                          item.label !== 'Langfuse' &&
                           !item.icon.includes('data:image/')
                         " class="fa fa-{{ item.icon }} fa-2x" [ngStyle]="{
                           color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
@@ -226,8 +251,8 @@
                         <!-- {{ item.label }} -->
                       </div>
                     </div>
-                  </div>                 
-                </div> 
+                  </div>
+                </div>
               </mat-nav-list>
             </mat-sidenav>
             <!-- righside container starts-->
@@ -449,7 +474,7 @@
                   <li style="cursor: pointer" class="breadcrumb-item"
                     *ngFor="let bccbreadcrumb of bccbreadcrumbs; let i = index">
                     <span style="color: var(--breadcrumbtext-color)" (click)="bccbreadcrumbroute(bccbreadcrumb, i)">
-                      {{ bccbreadcrumb }} 
+                      {{ bccbreadcrumb }}
                     </span>
                   </li>
                 </ol>
@@ -687,7 +712,7 @@
           </mat-menu>
         </div>
       </div>
-    <!--main header ends-->
+      <!--main header ends-->
       <button mat-icon-button="" draggable="true" (dragstart)="onDragStartChat($event)"
         (dragend)="onDragEndChat($event)" id="aipButton" *ngIf="aip_chatbot && !showChatBot" style="
           padding-left: 2.5vh;

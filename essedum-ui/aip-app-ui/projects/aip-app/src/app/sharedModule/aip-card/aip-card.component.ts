@@ -3,6 +3,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
 // Constants for service types
 const SERVICE_TYPES = {
+  PIPELINEAGENT: 'pipelineagent',
   ADAPTERS: 'adapters',
   INSTANCES: 'instances',
   SPECS: 'specs',
@@ -12,6 +13,7 @@ const SERVICE_TYPES = {
   CONNECTIONS: 'connections',
   DATASETS: 'Datasets',
   AGENT: 'agent',
+  AGENT_DIRECTORY: 'agent-directory',
 };
 
 // Background colors
@@ -98,6 +100,9 @@ export class AipCardComponent {
 
   getAvatarBackgroundColor(): string {
     const character = this.getAvatar();
+    if (!character) {
+      return BACKGROUND_COLORS[0];
+    }
     let hash = 0;
 
     for (let i = 0; i < character.length; i++) {
@@ -117,9 +122,11 @@ export class AipCardComponent {
       [SERVICE_TYPES.SCHEMAS]: this.card?.name,
       [SERVICE_TYPES.MODEL]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.PIPELINE]: this.card?.type,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.type,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
       [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.AGENT]: this.card?.type,
+      [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.category,
     };
     return categoryMap[this.servicev1];
   }
@@ -131,10 +138,12 @@ export class AipCardComponent {
       [SERVICE_TYPES.SPECS]: this.card?.domainname,
       [SERVICE_TYPES.SCHEMAS]: this.card?.alias,
       [SERVICE_TYPES.PIPELINE]: this.card?.alias,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.alias,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
       [SERVICE_TYPES.MODEL]: this.card?.modelName,
       [SERVICE_TYPES.DATASETS]: this.card?.alias,
       [SERVICE_TYPES.AGENT]: this.card?.name,
+      [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.alias,
     };
     return titleMap[this.servicev1];
   }
@@ -149,7 +158,9 @@ export class AipCardComponent {
       [SERVICE_TYPES.DATASETS]: this.card?.lastmodifieddate,
       [SERVICE_TYPES.MODEL]: this.card?.createdOn,
       [SERVICE_TYPES.PIPELINE]: this.card?.createdDate,
+      [SERVICE_TYPES.PIPELINEAGENT]: this.card?.createdDate,
       [SERVICE_TYPES.AGENT]: this.card?.createdon,
+      [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.lastModifiedDate,
     };
     return dateMap[this.servicev1];
   }
@@ -166,8 +177,39 @@ export class AipCardComponent {
       [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
       [SERVICE_TYPES.PIPELINE]:
         this.card?.target?.created_by || 'Name Not Available',
+      [SERVICE_TYPES.PIPELINEAGENT]:
+        this.card?.target?.created_by || 'Name Not Available',
       [SERVICE_TYPES.AGENT]: this.card?.name || 'Agent',
+      [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.lastmodifiedby || 'Name Not Available',
     };
     return avatarMap[this.servicev1];
+  }
+
+  getSkills():any{
+      const titleMap = {
+      [SERVICE_TYPES.AGENT_DIRECTORY]: this.card?.skills,
+    };
+    return titleMap[this.servicev1];
+  }
+
+  getToolsCount(): number {
+    if (this.servicev1 === SERVICE_TYPES.AGENT_DIRECTORY && Array.isArray(this.card?.tools)) {
+      return this.card.tools.length;
+    }
+    return 0;
+  }
+
+  getResourcesCount(): number {
+    if (this.servicev1 === SERVICE_TYPES.AGENT_DIRECTORY && Array.isArray(this.card?.resources)) {
+      return this.card.resources.length;
+    }
+    return 0;
+  }
+
+  getPromptsCount(): number {
+    if (this.servicev1 === SERVICE_TYPES.AGENT_DIRECTORY && Array.isArray(this.card?.prompts)) {
+      return this.card.prompts.length;
+    }
+    return 0;
   }
 }

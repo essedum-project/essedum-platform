@@ -1,8 +1,12 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
 import { getBaseUrl } from '../constants/api-config';
+import { createHTTPSAgent } from '../utils/ssl-config.util';
+import { STORAGE_KEYS } from '../constants/extension-constants';
+import * as ExtensionUtils from '../utils/extension-utils';
 
 const axios = require('axios');
+const logger = ExtensionUtils.createLogger('EssedumFileProvider');
 
 interface EssedumFile {
     uri: vscode.Uri;
@@ -25,11 +29,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
     private _token: string;
     private _project: any;
     private _role: any;
+    private _context?: vscode.ExtensionContext;
 
-    constructor(token: string, project: any, role: any) {
+    constructor(token: string, project: any, role: any, context?: vscode.ExtensionContext) {
         this._token = token;
         this._project = project;
         this._role = role;
+        this._context = context;
     }
 
     /**
@@ -148,6 +154,14 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
     }
 
     /**
+     * Get file content by URI (useful for reading updated content)
+     */
+    public getFileContent(uri: vscode.Uri): string | undefined {
+        const file = this._files.get(uri.toString());
+        return file?.content;
+    }
+
+    /**
      * Register a file with the file system provider
      */
     public registerFile(fileName: string, content: string, pipelineName: string, organization: string): vscode.Uri {
@@ -208,9 +222,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      * Save individual file to Essedum server using correct API endpoint
      */
     private async saveFileToServer(file: EssedumFile): Promise<void> {
-        const httpsAgent = new https.Agent({
-            rejectUnauthorized: false
-        });
+        const httpsAgent = createHTTPSAgent(this._context);
 
         const headers = {
             'Accept': 'application/json, text/plain, */*',
@@ -243,18 +255,18 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
         formData.append('organization', file.organization);
         
         // Debug: log the form data contents
-        console.log('FormData contents:');
-        console.log('- scriptFile:', file.fileName, 'size:', file.content.length);
-        console.log('- filetype:', fileType);
-        console.log('- pipelineName:', file.pipelineName);
-        console.log('- organization:', file.organization);
+        logger.info('FormData contents:');
+        logger.info('- scriptFile:', file.fileName, 'size:', file.content.length);
+        logger.info('- filetype:', fileType);
+        logger.info('- pipelineName:', file.pipelineName);
+        logger.info('- organization:', file.organization);
 
         // Use the correct file create endpoint from curl analysis
         const uploadEndpoint = `/api/aip/file/create/${file.pipelineName}/${file.organization}/${fileType}?file=${file.fileName}`;
         
-        console.log(`Attempting to upload file ${file.fileName} to pipeline ${file.pipelineName} in organization ${file.organization}`);
-        console.log(`Using endpoint: ${uploadEndpoint}`);
-        console.log(`File type: ${fileType}`);
+        logger.info(`Attempting to upload file ${file.fileName} to pipeline ${file.pipelineName} in organization ${file.organization}`);
+        logger.info(`Using endpoint: ${uploadEndpoint}`);
+        logger.info(`File type: ${fileType}`);
         
         const response = await axios.post(
             uploadEndpoint,
@@ -267,7 +279,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
             }
         );
         
-        console.log(`File ${file.fileName} saved to Essedum server successfully:`, response.data);
+        logger.info(`File ${file.fileName} saved to Essedum server successfully:`, response.data);
     }
 
     /**

@@ -1,0 +1,208 @@
+// Container Styles
+.aip-container {
+  padding: 0;
+}
+
+// Pipeline Toggle Section - Clean separation from header
+.pipeline-toggle-section {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+// Pipeline Toggle Section - Clean separation from header
+.pipeline-toggle-section {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+// Enhanced Pipeline Mode Toggle Styles - Modern appealing design
+.pipeline-mode-toggle {
+  display: flex;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 16px rgba(0, 148, 255, 0.15), 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  background: linear-gradient(135deg, #f8fafb 0%, #ffffff 100%);
+  position: relative;
+  padding: 4px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 
+      0 6px 20px rgba(0, 148, 255, 0.2), 
+      0 4px 12px rgba(0, 0, 0, 0.12),
+      0 2px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #0094ff, #0084e6);
+    border-radius: 12px;
+    opacity: 0.05;
+    z-index: 0;
+  }
+  
+  .toggle-button {
+    border: none;
+    background: transparent;
+    color: #5a6c7d;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 14px 28px;
+    min-width: 160px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    border-radius: 8px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    &:first-child {
+      margin-right: 2px;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 8px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: -1;
+    }
+    
+    &:hover {
+      color: #334155;
+      transform: translateY(-1px);
+      
+      &::before {
+        opacity: 1;
+      }
+    }
+    
+    &.active {
+      background: linear-gradient(135deg, #0094ff 0%, #0084e6 50%, #006bb3 100%) !important;
+      color: white !important;
+      box-shadow: 
+        0 4px 12px rgba(0, 148, 255, 0.4),
+        0 2px 4px rgba(0, 132, 230, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      
+      &::before {
+        opacity: 0;
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        right: 1px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        border-radius: 8px;
+      }
+      
+      &:hover {
+        background: linear-gradient(135deg, #0088f0 0%, #0078d4 50%, #005fa3 100%) !important;
+        transform: translateY(-3px);
+        box-shadow: 
+          0 6px 16px rgba(0, 148, 255, 0.5),
+          0 4px 8px rgba(0, 132, 230, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 148, 255, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Remove any conflicting styles
+.dashboard-header-section,
+.pipeline-mode-toggle-container,
+.mode-toggle {
+  // Remove previous broken styling
+  display: none;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pipeline-toggle-section {
+    margin: 15px 0;
+    padding: 0 15px;
+  }
+  
+  .pipeline-mode-toggle {
+    width: 100%;
+    box-shadow: 0 3px 12px rgba(0, 148, 255, 0.12), 0 1px 6px rgba(0, 0, 0, 0.06);
+    
+    .toggle-button {
+      flex: 1;
+      min-width: auto;
+      padding: 12px 20px;
+      font-size: 13px;
+      
+      &:first-child {
+        margin-right: 1px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pipeline-toggle-section {
+    padding: 0 10px;
+  }
+  
+  .pipeline-mode-toggle {
+    .toggle-button {
+      padding: 10px 16px;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+  }
+}
+
+// Add subtle animation when component loads
+.pipeline-toggle-section {
+  animation: slideInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

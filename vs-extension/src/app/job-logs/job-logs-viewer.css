@@ -1,0 +1,444 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 16px;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+    margin: 0;
+}
+
+.title-jobs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.refresh-btn {
+    background: none;
+    border: none;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.refresh-btn:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+    color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    background-color: var(--vscode-editor-background);
+}
+
+th, td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    font-size: 14px;
+}
+
+th {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+tr:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.badge-error {
+    background-color: var(--vscode-errorForeground);
+    color: white;
+}
+
+.badge-active {
+    background-color: var(--vscode-testing-iconPassed);
+    color: white;
+}
+
+.badge-warning {
+    background-color: var(--vscode-list-warningForeground);
+    color: white;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    padding: 6px;
+    margin: 0 2px;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pagination button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.trigger-tag {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    margin-top: 4px;
+}
+
+.job-id {
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--vscode-descriptionForeground);
+}
+
+/* Job Log Details Styles */
+.details-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-card {
+    background: linear-gradient(135deg, var(--vscode-editor-inactiveSelectionBackground) 0%, var(--vscode-editor-background) 100%);
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid var(--vscode-panel-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+.refresh-btn-modern {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn-modern:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.refresh-btn-modern svg {
+    transition: transform 0.3s ease;
+}
+
+.refresh-btn-modern:hover svg {
+    transform: rotate(180deg);
+}
+
+.header-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background-color: var(--vscode-editor-background);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--vscode-panel-border);
+    transition: all 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: var(--vscode-focusBorder);
+}
+
+.info-icon {
+    font-size: 24px;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 14px;
+    color: var(--vscode-foreground);
+    font-family: var(--vscode-editor-font-family, 'Courier New', monospace);
+    word-break: break-all;
+}
+
+.info-value.job-type {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.logs-section {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logs-container {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.log-entry {
+    display: flex;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    transition: background-color 0.15s ease;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-entry:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.log-key {
+    font-weight: 600;
+    min-width: 180px;
+    color: var(--vscode-symbolIcon-keywordForeground);
+    font-size: 13px;
+    padding-right: 16px;
+}
+
+.log-value {
+    flex: 1;
+    font-family: var(--vscode-editor-font-family, 'Courier New', monospace);
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--vscode-foreground);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-running,
+.status-active {
+    background-color: #ff9800;
+    color: white;
+}
+
+.status-completed,
+.status-success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.status-error,
+.status-failed {
+    background-color: #f44336;
+    color: white;
+}
+
+.status-pending {
+    background-color: #2196f3;
+    color: white;
+}
+
+/* Console Logs Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.action-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.job-info {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--vscode-button-background);
+}
+
+.job-info h3 {
+    margin: 0 0 12px 0;
+    color: var(--vscode-symbolIcon-keywordForeground);
+}
+
+.log-content {
+    font-family: var(--vscode-editor-font-family, 'Courier New', monospace);
+    font-size: var(--vscode-editor-font-size, 14px);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.5;
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-editor-background);
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--vscode-input-border);
+}
+
+.empty-logs {
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+    padding: 40px;
+}
+
+.error-message {
+    background-color: var(--vscode-inputValidation-errorBackground);
+    color: var(--vscode-inputValidation-errorForeground);
+    border: 1px solid var(--vscode-inputValidation-errorBorder);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 16px 0;
+}
+
+/* Output Artifacts Styles */
+.artifacts-container {
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.artifact-item {
+    padding: 12px;
+    margin: 8px 0;
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border-radius: 6px;
+    border-left: 4px solid var(--vscode-button-background);
+}
+
+.artifact-name {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--vscode-symbolIcon-keywordForeground);
+}
+
+.artifact-content {
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    background-color: var(--vscode-editor-background);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--vscode-panel-border);
+}

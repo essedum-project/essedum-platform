@@ -2,6 +2,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 import { AipComponent } from './aip.component';
@@ -34,6 +35,15 @@ import { PaginationComponent } from './pagination/pagination.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { AgentComponent } from './agent/agent.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
+import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { LitellmComponent } from './litellm/litellm.component';
+import { LangfuseComponent } from './langfuse/langfuse.component';
+
+import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
+import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
+import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
 
 
 const routes: Routes = [
@@ -69,10 +79,36 @@ const routes: Routes = [
     
         ],
       },
+      {
+        path: 'pipeline-agent',
+        children: [
+          { path: '', component: PipelineAgentComponent },
+          { path: 'pipeline-detail/:cname', component: PipelineAgentDetailComponent },
+        ],
+      },
+      {
+        path: 'agent-pipeline',
+        children: [
+          { path: '', component: AgentPipelineDashboardComponent },
+           { path: 'view/:cname', component: AgentPipelineComponent },
+        ],
+      },
         {
         path: 'agent',
         children: [
           { path: '', component: AgentComponent }
+        ]
+      },
+      {
+        path: 'lite-llm',
+        children: [
+          { path: '', component: LitellmComponent }
+        ]
+      },
+      {
+        path: 'langfuse',
+        children: [
+          { path: '', component: LangfuseComponent }
         ]
       },
       {
@@ -94,6 +130,18 @@ const routes: Routes = [
           { path: 'edit/:name/:edit', component: ConnectionViewComponent },
           { path: 'preview/:name', component: ConnectionViewComponent },
         ],
+      },
+
+      {
+        path: 'agent-directory',
+        children: [
+          { path: '', component: AgentDirectoryComponent },
+         { path: 'create', component: DatasourceConfigComponent },
+          { path: 'view/:name', component: AgentDirectoryViewComponent },
+          { path: 'edit/:name', component: AgentDirectoryEditComponent },
+          { path: 'add', component: AgentDirectoryEditComponent }
+        
+        ]
       },
 
       {
@@ -131,7 +179,7 @@ const routes: Routes = [
           { path: '', component: AdapterComponent },
           { path: 'create', component: AdapterCreateEditComponent },
           { path: ':adapter', component: AdapterDescriptionComponent },
-        ],
+         ],
       },
       {
         path: 'instances',

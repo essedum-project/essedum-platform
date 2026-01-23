@@ -1,8 +1,13 @@
 // Job Logs Viewer - VS Code Extension implementation
 import * as vscode from 'vscode';
 import axios from 'axios';
-import * as https from 'https';
 import { getBaseUrl } from '../../constants/api-config';
+import { createHTTPSAgent } from '../../utils/ssl-config.util';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as ExtensionUtils from '../../utils/extension-utils';
+
+const logger = ExtensionUtils.createLogger('JobLogsViewer');
 
 
 export interface JobData {
@@ -70,7 +75,7 @@ export class JobLogsViewer {
             );
 
             // Set initial HTML content
-            jobLogsPanel.webview.html = this.getJobLogsHtml();
+            jobLogsPanel.webview.html = this.getJobLogsHtml(jobLogsPanel.webview);
 
             // Handle messages from the webview
             jobLogsPanel.webview.onDidReceiveMessage(
@@ -127,31 +132,31 @@ export class JobLogsViewer {
      * Handle messages from webview
      */
     private async handleWebviewMessage(message: any, panel: vscode.WebviewPanel): Promise<void> {
-        console.log('Received webview message:', message);
+        logger.info('Received webview message:', message);
 
         switch (message.command) {
             case 'refresh':
-                console.log('Handling refresh command');
+                logger.info('Handling refresh command');
                 await this.onRefresh(panel);
                 break;
             case 'getJobs':
-                console.log('Handling getJobs command:', message.choice);
+                logger.info('Handling getJobs command:', message.choice);
                 await this.getJobs(message.choice, panel);
                 break;
             case 'showConsole':
-                console.log('Handling showConsole command for jobId:', message.jobId);
+                logger.info('Handling showConsole command for jobId:', message.jobId);
                 await this.showConsole(message.jobId, message.runtime, message.status, message.job, panel);
                 break;
             case 'stopJob':
-                console.log('Handling stopJob command for jobId:', message.jobId);
+                logger.info('Handling stopJob command for jobId:', message.jobId);
                 await this.stopJob(message.jobId, panel);
                 break;
             case 'showOutputArtifact':
-                console.log('Handling showOutputArtifact command for jobId:', message.jobId);
+                logger.info('Handling showOutputArtifact command for jobId:', message.jobId);
                 await this.showOutputArtifact(message.jobId);
                 break;
             default:
-                console.log('Unknown command received:', message.command);
+                logger.info('Unknown command received:', message.command);
         }
     }
 
@@ -358,7 +363,7 @@ export class JobLogsViewer {
             }
         );
 
-        consolePanel.webview.html = this.getConsoleLogsHtml(jobId, logData);
+        consolePanel.webview.html = this.getConsoleLogsHtml(consolePanel.webview, jobId, logData);
 
         // Handle messages from the console logs webview
         consolePanel.webview.onDidReceiveMessage(
@@ -366,7 +371,7 @@ export class JobLogsViewer {
                 if (message.command === 'refreshConsoleLogs') {
                     try {
                         const refreshedData = await this.fetchConsoleJob(jobId, 0, 0, 'ERROR', false);
-                        consolePanel.webview.html = this.getConsoleLogsHtml(jobId, refreshedData);
+                        consolePanel.webview.html = this.getConsoleLogsHtml(consolePanel.webview, jobId, refreshedData);
                     } catch (error: any) {
                         vscode.window.showErrorMessage(`Failed to refresh console logs: ${error.message}`);
                     }
@@ -509,7 +514,7 @@ export class JobLogsViewer {
             }
         );
 
-        logPanel.webview.html = this.getJobLogDetailsHtml(jobId, jobType, status, data);
+        logPanel.webview.html = this.getJobLogDetailsHtml(logPanel.webview, jobId, jobType, status, data);
 
         // Handle message for refreshing logs
         logPanel.webview.onDidReceiveMessage(
@@ -528,7 +533,7 @@ export class JobLogsViewer {
      * Stop a job (equivalent to stopJob)
      */
     private async stopJob(jobId: string, panel: vscode.WebviewPanel): Promise<void> {
-        console.log('stopJob called with jobId:', jobId);
+        logger.info('stopJob called with jobId:', jobId);
 
         // Show confirmation dialog using VS Code's native dialog
         const confirmResult = await vscode.window.showWarningMessage(
@@ -538,23 +543,23 @@ export class JobLogsViewer {
         );
 
         if (confirmResult !== 'Yes, Stop Job') {
-            console.log('User cancelled stop job operation');
+            logger.info('User cancelled stop job operation');
             return;
         }
 
         vscode.window.showInformationMessage(`Attempting to stop job: ${jobId}`);
 
         try {
-            console.log('Calling stopPipeline API...');
+            logger.info('Calling stopPipeline API...');
             const response = await this.stopPipeline(jobId);
-            console.log('stopPipeline API response:', response);
+            logger.info('stopPipeline API response:', response);
 
             vscode.window.showInformationMessage('Stop Event Triggered!');
-            console.log(response, 'stopjob response');
+            logger.info(response, 'stopjob response');
 
-            console.log('Refreshing job list...');
+            logger.info('Refreshing job list...');
             await this.onRefresh(panel);
-            console.log('Job list refreshed successfully');
+            logger.info('Job list refreshed successfully');
         } catch (error: any) {
             console.error('Error stopping job:', error);
             console.error('Error details:', {
@@ -585,7 +590,7 @@ export class JobLogsViewer {
                 }
             );
 
-            artifactsPanel.webview.html = this.getOutputArtifactsHtml(jobId, response);
+            artifactsPanel.webview.html = this.getOutputArtifactsHtml(artifactsPanel.webview, jobId, response);
         } catch (error: any) {
             console.error('Error showing output artifacts:', error);
             vscode.window.showErrorMessage(`Failed to show output artifacts: ${error.message}`);
@@ -596,8 +601,8 @@ export class JobLogsViewer {
      * Update jobs in webview
      */
     private updateJobsInWebview(panel: vscode.WebviewPanel): void {
-        console.log('updateJobsInWebview called with jobs:', this.jobList.length);
-        console.log('Sample job data:', this.jobList[0]);
+        logger.info('updateJobsInWebview called with jobs:', this.jobList.length);
+        logger.info('Sample job data:', this.jobList[0]);
 
         panel.webview.postMessage({
             command: 'updateJobs',
@@ -607,13 +612,13 @@ export class JobLogsViewer {
             lastPage: this.lastPage
         });
 
-        console.log('Posted updateJobs message to webview');
+        logger.info('Posted updateJobs message to webview');
     }
 
     // API Methods (
 
     private async fetchInternalJobLenByName(jobName: string): Promise<number> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobName}/count`, {
@@ -627,7 +632,7 @@ export class JobLogsViewer {
     }
 
     private async getJobsByStreamingServiceLen(serviceName: string): Promise<number> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/streamingLen/${serviceName}/${this.project.name}`, {
@@ -641,7 +646,7 @@ export class JobLogsViewer {
     }
 
     private async fetchInternalJobByName(jobName: string, page: number, size: number): Promise<JobData[]> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/jobs/${jobName}/${this.project.name}?page=${page}&size=${size}`, {
@@ -655,7 +660,7 @@ export class JobLogsViewer {
     }
 
     private async fetchInternalJobByName2(internalJob: string, page: number, size: number): Promise<JobData[]> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal2/${internalJob}?page=${page}&size=${size}`, {
@@ -669,7 +674,7 @@ export class JobLogsViewer {
     }
 
     private async fetchInternalJob(jobId: string, lineNumber: number, size: number, status: string): Promise<any> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=${lineNumber}&size=${size}&status=${status}`, {
@@ -683,7 +688,7 @@ export class JobLogsViewer {
     }
 
     private async fetchSparkJob(jobId: string, lineNumber: number, runtime: string, size: number, status: string, isBackground: boolean): Promise<any> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=${lineNumber}&runtime=${runtime}&size=${size}&status=${status}&background=${isBackground}`, {
@@ -700,7 +705,7 @@ export class JobLogsViewer {
      * Fetch console logs for a job using the console API endpoint
      */
     private async fetchConsoleJob(jobId: string, offset: number = 0, lineno: number = 0, status: string = 'ERROR', readconsole: boolean = false): Promise<any> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getConsoleHeaders();
 
         const response = await axios.get(`/api/aip/jobs/console/${jobId}?offset=${offset}&org=${this.project.name}&lineno=${lineno}&status=${status}&readconsole=${readconsole}`, {
@@ -714,16 +719,16 @@ export class JobLogsViewer {
     }
 
     private async stopPipeline(jobId: string): Promise<any> {
-        console.log('stopPipeline called with jobId:', jobId);
-        console.log('BASE_URL:', getBaseUrl());
-        console.log('Organization:', this.project.name);
+        logger.info('stopPipeline called with jobId:', jobId);
+        logger.info('BASE_URL:', getBaseUrl());
+        logger.info('Organization:', this.project.name);
 
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
-        console.log('Request headers:', headers);
+        logger.info('Request headers:', headers);
 
         const url = `/api/aip/service/v1/jobs/stopJob/${jobId}`;
-        console.log('Making GET request to:', `${getBaseUrl()}${url}`);
+        logger.info('Making GET request to:', `${getBaseUrl()}${url}`);
 
         try {
             const response = await axios.get(url, {
@@ -733,8 +738,8 @@ export class JobLogsViewer {
                 timeout: 10000
             });
 
-            console.log('stopPipeline API response status:', response.status);
-            console.log('stopPipeline API response data:', response.data);
+            logger.info('stopPipeline API response status:', response.status);
+            logger.info('stopPipeline API response data:', response.data);
             return response.data;
         } catch (error: any) {
             console.error('stopPipeline API error:', error);
@@ -745,7 +750,7 @@ export class JobLogsViewer {
     }
 
     private async fetchOutputArtifacts(jobId: string): Promise<any> {
-        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const httpsAgent = createHTTPSAgent(this._context);
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/outputArtifacts/${jobId}`, {
@@ -793,811 +798,159 @@ export class JobLogsViewer {
     }
 
     /**
+     * Load HTML template from file
+     */
+    private loadHtmlTemplate(templateName: string): string {
+        // Check if we're in development or production
+        const isDevelopment = fs.existsSync(path.join(this._context.extensionPath, 'src'));
+        const baseFolder = isDevelopment ? 'src' : 'dist';
+        
+        const templatePath = path.join(
+            this._context.extensionPath,
+            baseFolder,
+            'app',
+            'job-logs',
+            templateName
+        );
+        return fs.readFileSync(templatePath, 'utf8');
+    }
+
+    /**
+     * Get nonce for CSP
+     */
+    private getNonce(): string {
+        let text = '';
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    }
+
+    /**
      * Generate HTML for job logs viewer (main table view)
      */
-    private getJobLogsHtml(): string {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Job Logs</title>
-            <style>
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                    padding: 16px;
-                    color: var(--vscode-foreground);
-                    background-color: var(--vscode-editor-background);
-                    margin: 0;
-                }
-                
-                .title-jobs {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 16px;
-                    font-size: 18px;
-                    font-weight: bold;
-                }
-                
-                .refresh-btn {
-                    background: none;
-                    border: none;
-                    color: var(--vscode-foreground);
-                    cursor: pointer;
-                    padding: 8px;
-                    border-radius: 4px;
-                }
-                
-                .refresh-btn:hover {
-                    background-color: var(--vscode-toolbar-hoverBackground);
-                    color: #0056b3;
-                }
-                
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 16px;
-                    background-color: var(--vscode-editor-background);
-                }
-                
-                th, td {
-                    padding: 12px 8px;
-                    text-align: left;
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                    font-size: 14px;
-                }
-                
-                th {
-                    background-color: var(--vscode-editor-inactiveSelectionBackground);
-                    font-weight: 600;
-                    position: sticky;
-                    top: 0;
-                }
-                
-                tr:hover {
-                    background-color: var(--vscode-list-hoverBackground);
-                }
-                
-                .badge {
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                }
-                
-                .badge-error {
-                    background-color: var(--vscode-errorForeground);
-                    color: white;
-                }
-                
-                .badge-active {
-                    background-color: var(--vscode-testing-iconPassed);
-                    color: white;
-                }
-                
-                .badge-warning {
-                    background-color: var(--vscode-list-warningForeground);
-                    color: white;
-                }
-                
-                .action-btn {
-                    background: none;
-                    border: none;
-                    color: var(--vscode-foreground);
-                    cursor: pointer;
-                    padding: 6px;
-                    margin: 0 2px;
-                    border-radius: 4px;
-                }
-                
-                .action-btn:hover {
-                    background-color: var(--vscode-toolbar-hoverBackground);
-                }
-                
-                .pagination {
-                    display: flex;
-                    justify-content: center;
-                    gap: 8px;
-                    margin-top: 16px;
-                }
-                
-                .pagination button {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-                
-                .pagination button:hover:not(:disabled) {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
-                
-                .pagination button:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-                
-                .trigger-tag {
-                    font-size: 12px;
-                    color: var(--vscode-descriptionForeground);
-                    margin-top: 4px;
-                }
-                
-                .job-id {
-                    font-family: monospace;
-                    font-size: 13px;
-                }
-                
-                .loading {
-                    text-align: center;
-                    padding: 40px;
-                    color: var(--vscode-descriptionForeground);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="title-jobs">
-                <span>Total Jobs: <span id="totalJobs">0</span></span>
-                <button class="refresh-btn" onclick="refresh()" title="Refresh">
-                    🔄
-                </button>
-            </div>
-            
-            <div id="loadingContainer" class="loading">
-                Loading jobs...
-            </div>
-            
-            <div id="tableContainer" style="display: none;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Job Id</th>
-                            <th>Submitted By</th>
-                            <th>Submitted On</th>
-                            <th>Completed On</th>
-                            <th>Runtime</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                            <th>Output Artifacts</th>
-                        </tr>
-                    </thead>
-                    <tbody id="jobsTableBody">
-                    </tbody>
-                </table>
-                
-                <div class="pagination">
-                    <button id="firstBtn" onclick="getJobs('First')">First</button>
-                    <button id="prevBtn" onclick="getJobs('Prev')">&lt;&lt; Prev</button>
-                    <button id="nextBtn" onclick="getJobs('Next')">Next &gt;&gt;</button>
-                    <button id="lastBtn" onclick="getJobs('Last')">Last</button>
-                </div>
-            </div>
-            
-            <script>
-                const vscode = acquireVsCodeApi();
-                
-                let currentJobs = [];
-                let currentPage = 0;
-                let lastPage = 0;
-                
-                function refresh() {
-                    console.log('Refresh function called');
-                    vscode.postMessage({ command: 'refresh' });
-                    console.log('Refresh message sent');
-                    showLoading();
-                }
-                
-                function getJobs(choice) {
-                    vscode.postMessage({ command: 'getJobs', choice: choice });
-                }
-                
-                function showConsole(jobId, runtime, status, job) {
-                    console.log('showConsole function called with:', { jobId, runtime, status, job });
-                    vscode.postMessage({ 
-                        command: 'showConsole', 
-                        jobId: jobId, 
-                        runtime: runtime, 
-                        status: status, 
-                        job: job 
-                    });
-                    console.log('showConsole message sent');
-                }
-                
-                function stopJob(jobId) {
-                    console.log('stopJob function called with jobId:', jobId);
-                    // Send message directly without confirmation - VS Code will handle confirmation
-                    console.log('Sending stopJob message to VS Code');
-                    vscode.postMessage({ command: 'stopJob', jobId: jobId });
-                    console.log('Message sent to VS Code');
-                }
-                
-                function showOutputArtifact(jobId) {
-                    vscode.postMessage({ command: 'showOutputArtifact', jobId: jobId });
-                }
-                
-                function showLoading() {
-                    document.getElementById('loadingContainer').style.display = 'block';
-                    document.getElementById('tableContainer').style.display = 'none';
-                }
-                
-                function hideLoading() {
-                    document.getElementById('loadingContainer').style.display = 'none';
-                    document.getElementById('tableContainer').style.display = 'block';
-                }
-                
-                function formatDate(dateString) {
-                    if (!dateString) return '-';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
-                
-                function getStatusBadgeClass(status) {
-                    switch (status) {
-                        case 'ERROR':
-                        case 'CANCELLED':
-                            return 'badge-error';
-                        case 'COMPLETED':
-                            return 'badge-active';
-                        case 'RUNNING':
-                        case 'OPEN':
-                            return 'badge-warning';
-                        default:
-                            return 'badge-active';
-                    }
-                }
-                
-                function updatePaginationButtons() {
-                    document.getElementById('firstBtn').disabled = currentPage === 0;
-                    document.getElementById('prevBtn').disabled = currentPage === 0;
-                    document.getElementById('nextBtn').disabled = currentPage === lastPage;
-                    document.getElementById('lastBtn').disabled = currentPage === lastPage;
-                }
-                
-                function renderJobs(jobs) {
-                    console.log('renderJobs called with', jobs.length, 'jobs');
-                    const tbody = document.getElementById('jobsTableBody');
-                    tbody.innerHTML = '';
-                    
-                    jobs.forEach((job, index) => {
-                        console.log('Rendering job', index, ':', job);
-                        const row = document.createElement('tr');
-                        
-                        const triggerType = job.jobmetadata && job.jobmetadata.tag === 'EVENT' ? 'Event triggered' : 'User triggered';
-                        
-                        const showStopButton = job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN';
-                        console.log('Job', job.jobId, 'status:', job.jobStatus, 'show stop button:', showStopButton);
-                        
-                        row.innerHTML = \`
-                            <td class="job-id">\${job.id || job.jobId}</td>
-                            <td>
-                                <div>\${job.submittedBy || '-'}</div>
-                                <div class="trigger-tag">\${triggerType}</div>
-                            </td>
-                            <td>\${formatDate(job.submittedOn)}</td>
-                            <td>\${formatDate(job.finishtime)}</td>
-                            <td>\${job.runtime || '-'}</td>
-                            <td>
-                                <span class="badge \${getStatusBadgeClass(job.jobStatus)}">\${job.jobStatus}</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" onclick="showConsole('\${job.jobId}', '\${job.runtime}', '\${job.jobStatus}', \${JSON.stringify(job).replace(/"/g, '&quot;')})" title="View Logs">
-                                    📄
-                                </button>
-                                \${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ? 
-                                    \`<button class="action-btn" onclick="stopJob('\${job.jobId}')" title="Stop Job">⏹️</button>\` : 
-                                    ''
-                                }
-                            </td>
-                            <td>
-                                \${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ? 
-                                    \`<button class="action-btn" onclick="showOutputArtifact('\${job.jobId}')" title="Show Output Artifacts">📊</button>\` : 
-                                    '-'
-                                }
-                            </td>
-                        \`;
-                        
-                        tbody.appendChild(row);
-                    });
-                }
-                
-                // Handle messages from extension
-                window.addEventListener('message', event => {
-                    const message = event.data;
-                    
-                    switch (message.command) {
-                        case 'updateJobs':
-                            currentJobs = message.jobs;
-                            currentPage = message.currentPage;
-                            lastPage = message.lastPage;
-                            
-                            document.getElementById('totalJobs').textContent = message.totalJobs;
-                            renderJobs(currentJobs);
-                            updatePaginationButtons();
-                            hideLoading();
-                            break;
-                    }
-                });
-                
-                // Initialize
-                showLoading();
-            </script>
-        </body>
-        </html>`;
+    private getJobLogsHtml(webview: vscode.Webview): string {
+        const nonce = this.getNonce();
+        
+        // Check if we're in development or production
+        const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
+        const baseFolder = isDevelopment ? 'src' : 'dist';
+        
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer-client.js'));
+        
+        let html = this.loadHtmlTemplate('job-logs-viewer.html');
+        
+        html = html.replace(/{{nonce}}/g, nonce);
+        html = html.replace(/{{cssUri}}/g, styleUri.toString());
+        html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
+        
+        return html;
     }
 
     /**
      * Generate HTML for job log details (equivalent to JobDataViewerComponent)
      */
-    private getJobLogDetailsHtml(jobId: string, jobType: string, status: string, logData: JobLogData[]): string {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Job Log Details</title>
-            <style>
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                    padding: 16px;
-                    color: var(--vscode-foreground);
-                    background-color: var(--vscode-editor-background);
-                    margin: 0;
-                }
-                
-                .header {
-                    background-color: var(--vscode-editor-inactiveSelectionBackground);
-                    padding: 16px;
-                    border-radius: 8px;
-                    margin-bottom: 16px;
-                }
-                
-                .header h2 {
-                    margin: 0 0 8px 0;
-                    color: var(--vscode-foreground);
-                }
-                
-                .header-info {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 16px;
-                }
-                
-                .info-item {
-                    display: flex;
-                    flex-direction: column;
-                }
-                
-                .info-label {
-                    font-size: 12px;
-                    color: var(--vscode-descriptionForeground);
-                    margin-bottom: 4px;
-                    text-transform: uppercase;
-                    font-weight: 600;
-                }
-                
-                .info-value {
-                    font-size: 14px;
-                    color: var(--vscode-foreground);
-                    font-family: monospace;
-                }
-                
-                .logs-container {
-                    background-color: var(--vscode-editor-background);
-                    border: 1px solid var(--vscode-panel-border);
-                    border-radius: 8px;
-                    max-height: 60vh;
-                    overflow-y: auto;
-                }
-                
-                .log-entry {
-                    display: flex;
-                    padding: 8px 16px;
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                }
-                
-                .log-entry:hover {
-                    background-color: var(--vscode-list-hoverBackground);
-                }
-                
-                .log-key {
-                    font-weight: 600;
-                    min-width: 150px;
-                    color: var(--vscode-symbolIcon-keywordForeground);
-                    font-size: 13px;
-                }
-                
-                .log-value {
-                    flex: 1;
-                    font-family: monospace;
-                    font-size: 13px;
-                    white-space: pre-wrap;
-                    word-break: break-all;
-                }
-                
-                .status-badge {
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                }
-                
-                .status-running {
-                    background-color: var(--vscode-list-warningForeground);
-                    color: white;
-                }
-                
-                .status-completed {
-                    background-color: var(--vscode-testing-iconPassed);
-                    color: white;
-                }
-                
-                .status-error {
-                    background-color: var(--vscode-errorForeground);
-                    color: white;
-                }
-                
-                .refresh-btn {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    margin-bottom: 16px;
-                }
-                
-                .refresh-btn:hover {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Job Log Details</h2>
-                <div class="header-info">
-                    <div class="info-item">
-                        <div class="info-label">Job ID</div>
-                        <div class="info-value">${jobId}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Job Type</div>
-                        <div class="info-value">${jobType}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Status</div>
-                        <div class="info-value">
-                            <span class="status-badge status-${status.toLowerCase()}">${status}</span>
-                        </div>
-                    </div>
-                </div>
+    private getJobLogDetailsHtml(webview: vscode.Webview, jobId: string, jobType: string, status: string, logData: JobLogData[]): string {
+        const nonce = this.getNonce();
+        
+        // Check if we're in development or production
+        const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
+        const baseFolder = isDevelopment ? 'src' : 'dist';
+        
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-log-details-client.js'));
+        
+        let html = this.loadHtmlTemplate('job-log-details.html');
+        
+        const logEntries = logData.map(entry => `
+            <div class="log-entry">
+                <div class="log-key">${this.escapeHtml(entry.name)}:</div>
+                <div class="log-value">${typeof entry.value === 'object' ? this.escapeHtml(JSON.stringify(entry.value, null, 2)) : this.escapeHtml(String(entry.value))}</div>
             </div>
-            
-            <button class="refresh-btn" onclick="refreshLogs()">🔄 Refresh Logs</button>
-            
-            <div class="logs-container">
-                ${logData.map(entry => `
-                    <div class="log-entry">
-                        <div class="log-key">${entry.name}:</div>
-                        <div class="log-value">${typeof entry.value === 'object' ? JSON.stringify(entry.value, null, 2) : entry.value}</div>
-                    </div>
-                `).join('')}
-            </div>
-            
-            <script>
-                const vscode = acquireVsCodeApi();
-                
-                function refreshLogs() {
-                    vscode.postMessage({ command: 'refreshLogs' });
-                }
-            </script>
-        </body>
-        </html>`;
+        `).join('');
+        
+        html = html.replace(/{{nonce}}/g, nonce);
+        html = html.replace(/{{cssUri}}/g, styleUri.toString());
+        html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
+        html = html.replace(/{{jobId}}/g, this.escapeHtml(jobId));
+        html = html.replace(/{{jobType}}/g, this.escapeHtml(jobType));
+        html = html.replace(/{{status}}/g, this.escapeHtml(status));
+        html = html.replace(/{{statusLower}}/g, status.toLowerCase());
+        html = html.replace(/{{logEntries}}/g, logEntries);
+        
+        return html;
     }
 
     /**
      * Generate HTML for output artifacts (equivalent to ShowOutputArtifactsComponent)
      */
-    private getOutputArtifactsHtml(jobId: string, artifactsData: any): string {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Output Artifacts</title>
-            <style>
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                    padding: 16px;
-                    color: var(--vscode-foreground);
-                    background-color: var(--vscode-editor-background);
-                    margin: 0;
-                }
-                
-                .header {
-                    margin-bottom: 20px;
-                }
-                
-                .artifacts-container {
-                    background-color: var(--vscode-editor-background);
-                    border: 1px solid var(--vscode-panel-border);
-                    border-radius: 8px;
-                    padding: 16px;
-                }
-                
-                .artifact-item {
-                    padding: 12px;
-                    margin: 8px 0;
-                    background-color: var(--vscode-editor-inactiveSelectionBackground);
-                    border-radius: 6px;
-                    border-left: 4px solid var(--vscode-button-background);
-                }
-                
-                .artifact-name {
-                    font-weight: 600;
-                    margin-bottom: 8px;
-                    color: var(--vscode-symbolIcon-keywordForeground);
-                }
-                
-                .artifact-content {
-                    font-family: monospace;
-                    font-size: 13px;
-                    white-space: pre-wrap;
-                    background-color: var(--vscode-editor-background);
-                    padding: 8px;
-                    border-radius: 4px;
-                    border: 1px solid var(--vscode-panel-border);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Output Artifacts for Job</h2>
-            </div>
-            
-            <div class="artifacts-container">
-                ${Array.isArray(artifactsData) ?
-                artifactsData.map((artifact, index) => `
-                        <div class="artifact-item">
-                            <div class="artifact-name">Artifact ${index + 1}</div>
-                            <div class="artifact-content">${typeof artifact === 'object' ? JSON.stringify(artifact, null, 2) : artifact}</div>
-                        </div>
-                    `).join('') :
-                `<div class="artifact-item">
-                        <div class="artifact-name">Output Data</div>
-                        <div class="artifact-content">${typeof artifactsData === 'object' ? JSON.stringify(artifactsData, null, 2) : artifactsData}</div>
-                    </div>`
-            }
-            </div>
-        </body>
-        </html>`;
-    }
-
-    /**
-     * Handle messages from the panel webview
-     */
-    public async handlePanelMessage(message: any, webviewView: vscode.WebviewView): Promise<void> {
-        // Convert WebviewView to WebviewPanel-like interface for compatibility
-        const panelLike = {
-            webview: webviewView.webview
-        } as vscode.WebviewPanel;
-
-        // Reuse existing message handling logic
-        await this.handleWebviewMessage(message, panelLike);
-    }
-
-    /**
-     * Set webview content for the panel view
-     */
-    public setWebviewContent(webviewView: vscode.WebviewView): void {
-        webviewView.webview.html = this.getJobLogsHtml();
-
-        // Initialize jobs if we have panel-like interface
-        const panelLike = {
-            webview: webviewView.webview
-        } as vscode.WebviewPanel;
-
-        this.initializeJobs(panelLike);
-    }
-
-    /**
-     * Show job logs in panel (alternative to showJobLogsViewer)
-     */
-    public async showJobLogsInPanel(): Promise<void> {
-        // This method will be called by the panel provider
-        // The actual implementation is handled by the panel provider
-        // which calls setWebviewContent
+    private getOutputArtifactsHtml(webview: vscode.Webview, jobId: string, artifactsData: any): string {
+        // Check if we're in development or production
+        const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
+        const baseFolder = isDevelopment ? 'src' : 'dist';
+        
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
+        
+        let html = this.loadHtmlTemplate('output-artifacts.html');
+        
+        const artifactsContent = Array.isArray(artifactsData) ?
+            artifactsData.map((artifact, index) => `
+                <div class="artifact-item">
+                    <div class="artifact-name">Artifact ${index + 1}</div>
+                    <div class="artifact-content">${this.escapeHtml(typeof artifact === 'object' ? JSON.stringify(artifact, null, 2) : String(artifact))}</div>
+                </div>
+            `).join('') :
+            `<div class="artifact-item">
+                <div class="artifact-name">Output Data</div>
+                <div class="artifact-content">${this.escapeHtml(typeof artifactsData === 'object' ? JSON.stringify(artifactsData, null, 2) : String(artifactsData))}</div>
+            </div>`;
+        
+        html = html.replace(/{{cssUri}}/g, styleUri.toString());
+        html = html.replace(/{{artifactsContent}}/g, artifactsContent);
+        
+        return html;
     }
 
     /**
      * Generate HTML for console logs viewer
      */
-    private getConsoleLogsHtml(jobId: string, logData: any): string {
+    private getConsoleLogsHtml(webview: vscode.Webview, jobId: string, logData: any): string {
+        const nonce = this.getNonce();
         const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
-
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Console Logs - ${jobId}</title>
-            <style>
-                body {
-                    font-family: var(--vscode-font-family);
-                    font-size: var(--vscode-font-size);
-                    line-height: 1.6;
-                    padding: 16px;
-                    color: var(--vscode-foreground);
-                    background-color: var(--vscode-editor-background);
-                    margin: 0;
-                }
-                
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                    padding-bottom: 16px;
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                }
-                
-                .header h2 {
-                    margin: 0;
-                    color: var(--vscode-symbolIcon-keywordForeground);
-                }
-                
-                .header-actions {
-                    display: flex;
-                    gap: 12px;
-                }
-                
-                .action-btn {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 14px;
-                }
-                
-                .action-btn:hover {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
-                
-                .job-info {
-                    background-color: var(--vscode-editor-inactiveSelectionBackground);
-                    border-radius: 6px;
-                    padding: 16px;
-                    margin-bottom: 20px;
-                    border-left: 4px solid var(--vscode-button-background);
-                }
-                
-                .job-info h3 {
-                    margin: 0 0 12px 0;
-                    color: var(--vscode-symbolIcon-keywordForeground);
-                }
-                
-                .logs-container {
-                    background-color: var(--vscode-editor-background);
-                    border: 1px solid var(--vscode-panel-border);
-                    border-radius: 8px;
-                    padding: 16px;
-                    max-height: 70vh;
-                    overflow-y: auto;
-                }
-                
-                .log-content {
-                    font-family: var(--vscode-editor-font-family, 'Courier New', monospace);
-                    font-size: var(--vscode-editor-font-size, 14px);
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
-                    line-height: 1.5;
-                    color: var(--vscode-editor-foreground);
-                    background-color: var(--vscode-editor-background);
-                    padding: 16px;
-                    border-radius: 4px;
-                    border: 1px solid var(--vscode-input-border);
-                }
-                
-                .empty-logs {
-                    text-align: center;
-                    color: var(--vscode-descriptionForeground);
-                    font-style: italic;
-                    padding: 40px;
-                }
-                
-                .loading {
-                    display: none;
-                    text-align: center;
-                    padding: 20px;
-                    color: var(--vscode-descriptionForeground);
-                }
-                
-                .error-message {
-                    background-color: var(--vscode-inputValidation-errorBackground);
-                    color: var(--vscode-inputValidation-errorForeground);
-                    border: 1px solid var(--vscode-inputValidation-errorBorder);
-                    border-radius: 4px;
-                    padding: 12px;
-                    margin: 16px 0;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Console Logs</h2>
-                <div class="header-actions">
-                    <button class="action-btn" onclick="refreshLogs()" title="Refresh Logs">
-                        🔄 Refresh
-                    </button>
-                    <button class="action-btn" onclick="downloadLogs()" title="Download Logs">
-                        💾 Download
-                    </button>
-                </div>
-            </div>
-            
-            <div class="job-info">
-                <h3>Job ID: ${jobId}</h3>
-                <p>Console logs retrieved from the ESSEDUM platform</p>
-            </div>
-            
-            <div class="logs-container">
-                <div class="loading" id="loading">
-                    Loading logs...
-                </div>
-                ${logContent ? `
-                    <div class="log-content" id="logContent">${this.escapeHtml(logContent)}</div>
-                ` : `
-                    <div class="empty-logs">
-                        No console logs available for this job.
-                    </div>
-                `}
-            </div>
-            
-            <script>
-                const vscode = acquireVsCodeApi();
-                
-                function refreshLogs() {
-                    document.getElementById('loading').style.display = 'block';
-                    vscode.postMessage({
-                        command: 'refreshConsoleLogs'
-                    });
-                }
-                
-                function downloadLogs() {
-                    vscode.postMessage({
-                        command: 'downloadLogs'
-                    });
-                }
-                
-                // Auto-scroll to bottom of logs
-                window.addEventListener('load', function() {
-                    const logsContainer = document.querySelector('.logs-container');
-                    if (logsContainer) {
-                        logsContainer.scrollTop = logsContainer.scrollHeight;
-                    }
-                });
-            </script>
-        </body>
-        </html>`;
+        
+        // Check if we're in development or production
+        const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
+        const baseFolder = isDevelopment ? 'src' : 'dist';
+        
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'console-logs-client.js'));
+        
+        let html = this.loadHtmlTemplate('console-logs.html');
+        
+        const logContentHtml = logContent ? 
+            `<div class="log-content" id="logContent">${this.escapeHtml(logContent)}</div>` : 
+            `<div class="empty-logs">No console logs available for this job.</div>`;
+        
+        html = html.replace(/{{nonce}}/g, nonce);
+        html = html.replace(/{{cssUri}}/g, styleUri.toString());
+        html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
+        html = html.replace(/{{jobId}}/g, this.escapeHtml(jobId));
+        html = html.replace(/{{logContent}}/g, logContentHtml);
+        
+        return html;
     }
 
     /**
      * Escape HTML to prevent XSS
      */
-    private escapeHtml(text: string): string {
-        return text
+    private escapeHtml(text: any): string {
+        if (text === null || text === undefined) {
+            return '';
+        }
+        const str = String(text);
+        return str
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
@@ -1606,3 +959,5 @@ export class JobLogsViewer {
             .replace(/\//g, '&#x2F;');
     }
 }
+
+

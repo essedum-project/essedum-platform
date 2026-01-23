@@ -352,4 +352,47 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 UPDATE usm_permission_api SET is_whitelisted=TRUE WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='role-permissionss-view' LIMIT 1) AND api='/api/usm-role-permissionss/formodule/.*';
 INSERT INTO `usm_permission_api` (`api`, `type`, `permission_id`, `is_whitelisted`, `description`) VALUES('/api/exp/project/featureProject','PUT','2959','0',NULL);
 
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-folder-createBycnameAndorg');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/upload/.*/.*', 'POST', 0, 'cip-post-api-folder-createBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-folder-createBycnameAndorg' limit 1;
 
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-folder-updateBycnameAndorg');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/update/.*/.*', 'POST', 0, 'cip-post-api-folder-updateBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-folder-updateBycnameAndorg' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-folder-listBycnameAndorg');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/list/.*/.*', 'POST', 0, 'cip-get-api-folder-listBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-folder-listBycnameAndorg' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-folder-downloadBycnameAndorg');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/download/.*/.*', 'POST', 0, 'cip-get-api-folder-downloadBycnameAndorg', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-folder-downloadBycnameAndorg' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-folder-pushToMinIo');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/folder/push-to-minio/.*/.*', 'POST', 0, 'cip-post-api-folder-pushToMinIo', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-folder-pushToMinIo' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-save');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/save', 'POST', 0, 'cip-post-api-agent-directory-save', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-save' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-get');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/get/.*/.*', 'GET', 0, 'cip-post-api-agent-directory-get', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-get' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-delete');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/delete/.*', 'DELETE', 0, 'cip-post-api-agent-directory-delete', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-delete' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-getAll');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/list', 'GET', 0, 'cip-post-api-agent-directory-getAll', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-getAll' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-countAgents');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/count', 'GET', 0, 'cip-post-api-agent-directory-countAgents', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-countAgents' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-matchcids');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/match-by-pipeline-cids', 'POST', 0, 'cip-post-api-agent-directory-matchcids', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-matchcids' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-agent-directory-unregistered');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/pipelines/unregistered/.*', 'GET', 0, 'cip-get-api-agent-directory-unregistered', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-agent-directory-unregistered' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-deployment-form-save');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/deployment-form/save', 'POST', 0, 'cip-post-api-deployment-form-save', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-deployment-form-save' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-get-api-deployment-form');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/deployment-form/.*/.*', 'GET', 0, 'cip-get-api-deployment-form', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-get-api-deployment-form' limit 1;
+
+INSERT INTO usm_permissions (module,permission) Values('cip','cip-post-api-agent-directory-search');
+INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/agent-directory/search', 'GET', 0, 'cip-post-api-agent-directory-search', id FROM usm_permissions WHERE module = 'cip'  AND permission ='cip-post-api-agent-directory-search' limit 1;

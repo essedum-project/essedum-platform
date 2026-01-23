@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server-deployment
+  labels:
+    app: mcp-server # This label is used by the Service
+spec:
+  replicas: 1 # Start with one replica
+  selector:
+    matchLabels:
+      app: mcp-server # This must match the template's labels
+  template:
+    metadata:
+      labels:
+        app: mcp-server # This must match the selector
+    spec:
+      containers:
+      - name: mcp-server
+        # --- IMPORTANT ---
+        # Replace this with the path to your actual container image
+        image: acrreq0762935.azurecr.io/mcp-server:v1 
+        # ---
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000 # This matches the PORT in your Dockerfile
+        
+        # Liveness probe to restart the container if it freezes
+        livenessProbe:
+          tcpSocket:
+            port: 8000 # Checks if the port is open
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        
+        # Readiness probe to wait before sending traffic
+        readinessProbe:
+          tcpSocket:
+            port: 8000 # Checks if the port is open
+          initialDelaySeconds: 5
+          periodSeconds: 10

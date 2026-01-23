@@ -298,6 +298,7 @@ cip,Files-Pipeline-upload
 cip,file-upload
 cip,file-writeConfig
 cip,file-writeXml
+cip,folder-delete
 cip,generate-FileID
 cip,generate-FormTemplate
 cip,getArtefactByIds

@@ -39,6 +39,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
+
 def get_access_token(connection):
 
     credentials_info = {
@@ -60,19 +61,26 @@ def get_access_token(connection):
         'https://www.googleapis.com/auth/cloud-platform.read-only'
     ]
     
-
-
-    
+    # Remove proxy settings
     os.environ.pop('http_proxy', None)
     os.environ.pop('https_proxy', None)
     os.environ.pop('HTTP_PROXY', None)
     os.environ.pop('HTTPS_PROXY', None)
 
-
     logger.info(f"Creating credentials from service account info...")
     credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
     logger.info(f"Credentials created successfully: {credentials}")
-    auth_req = google.auth.transport.requests.Request()
+    
+    # Create a custom session that doesn't verify SSL
+    import requests
+    session = requests.Session()
+    session.verify = False
+    
+    # Disable SSL warnings
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    
+    auth_req = google.auth.transport.requests.Request(session=session)
     logger.info(f"auth_req: {auth_req}")
     credentials.refresh(auth_req)
     logger.info(f"token: {credentials.token}")

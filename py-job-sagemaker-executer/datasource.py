@@ -90,7 +90,7 @@ def get_connection_details(referer, adapter_instance, project, isInstance=None):
 
 
 def get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance=None):
-	os.environ['no_proxy'] = "localhost,lfn.essedum.anuket.iol.unh.edu,0.0.0.0,10.*,10.82.53.110,victlpast02"
+	os.environ['no_proxy'] = "localhost,essedum.az.ad.idemo-ppc.com,0.0.0.0,10.*,*.ad.infosys.com,10.82.53.110,victlpast02,infyaiplat-tst.ad.infosys.com,infyaiplat.ad.infosys.com"
 	logger.info(f"Inside datasource.py file...")
 	connection_details = {}
 	try:

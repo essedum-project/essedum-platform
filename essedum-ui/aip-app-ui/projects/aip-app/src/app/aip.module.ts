@@ -1,4 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AipRouting } from './aip-routing';
 import { AipComponent } from './aip.component';
 import { MatCardModule } from '@angular/material/card';
@@ -10,11 +11,13 @@ import { EventsService } from './services/event.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { ModelComponent } from './model/model.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { NotebookDialogComponent } from './pipeline.description/notebook-dialog/notebook-dialog.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
@@ -22,8 +25,9 @@ import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
+import { AgentDirectoryService } from './agent-directory/agent-directory.service';
 import { AipInterceptorService } from './services/interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 import {
@@ -138,8 +142,23 @@ import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/m
 import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
 import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
+import { GitHubPushComponent } from './sharedModule/github-push/github-push.component';
+import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
-
+import { LitellmComponent } from './litellm/litellm.component';
+import { LangfuseComponent } from './langfuse/langfuse.component';
+import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
+import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
+import { PlaygroundTabComponent } from './agent-pipeline/playground-tab/playground-tab.component';
+import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
+import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
+import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory-create/agent-directory-create.component';
+import { GeneralComponent } from './agent-directory/general/general.component';
+import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
+import { DeploymentFormComponent } from './agent-pipeline/deployment-form/deployment-form.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -170,8 +189,11 @@ const dbConfig: DBConfig = {
     DatasourceConfigComponent,
     ModelCreateComponent,
     PipelineComponent,
+    PipelineAgentComponent,
+PipelineAgentDetailComponent,
     PipelineCreateComponent,
     PipelineDescriptionComponent,
+    NotebookDialogComponent,
     EnlCodeEditorComponent,
     DatasourceComponent,
     ModalConfigRestDatasourceComponent,
@@ -236,10 +258,24 @@ const dbConfig: DBConfig = {
     AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent,
-    AgentComponent
+    AgentComponent,
+    LitellmComponent,
+    LangfuseComponent,
+    AgentPipelineComponent,
+    AgentPipelineDashboardComponent,
+    PlaygroundTabComponent,
+    GitHubPushComponent,
+   
+
+    AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
+    AgentDirectoryCreateComponent,
+    GeneralComponent,AgentDirectoryEditComponent,
+    DeploymentFormComponent
 
   ],
   imports: [
+    CommonModule,
+    HttpClientModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
@@ -247,6 +283,7 @@ const dbConfig: DBConfig = {
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
+    GithubLoginComponent,
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
@@ -260,6 +297,7 @@ const dbConfig: DBConfig = {
     MatSliderModule,
     MatSnackBarModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,
@@ -310,6 +348,7 @@ const dbConfig: DBConfig = {
     EventsService,
     JobsService,
     SchemaRegistryService,
+    AgentDirectoryService,
     encKey,
     DashConstantService,
     SchemaRelationshipService,
@@ -317,6 +356,7 @@ const dbConfig: DBConfig = {
     SemanticService,
     DynamicRemoteLoad,
     AipSnackbarCustomService,
+    GitHubService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],

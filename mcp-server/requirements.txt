@@ -1,0 +1,4 @@
+fastmcp
+httpx
+mysql-connector-python
+python-dotenv

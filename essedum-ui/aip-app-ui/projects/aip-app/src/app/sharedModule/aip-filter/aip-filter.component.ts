@@ -29,6 +29,7 @@ interface FilterItem {
 
 // Enum for service types
 enum ServiceType {
+  PIPELINEAGENT='pipelineagent',
   PIPELINE = 'pipeline',
   CHAIN = 'chain',
   CONNECTIONS = 'connections',
@@ -40,7 +41,8 @@ enum ServiceType {
   DG_APP = 'dgApp',
   INSTANCES = 'instances',
   WORKER_TOOLS = 'worker-tools',
-  MODEL='model'
+  MODEL='model',
+  AGENT_DIRECTORY='agent-directory'
 }
 
 // Enum for filter types
@@ -61,7 +63,12 @@ enum FilterType {
   DATASET_KNOWLEDGE = 'datasetKnowledge',
   DATASET_TAG = 'datasetTag',
   CONNECTION_TYPE = 'connectiontype',
-  DATASOURCE='Datasource'
+  DATASOURCE='Datasource',
+  AGENT_SKILLS = 'agentSkills',
+  AGENT_LOCATOR_TYPES = 'agentLocatorTypes',
+  AGENT_MODULES = 'agentModules',
+  AGENT_ALL_TYPES = 'agentAllTypes',
+  AGENT_CREATION_DATE = 'agentCreationDate'
 }
 
 @Component({
@@ -90,11 +97,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
   @Input() selectedModelDataSourceList:any;
   @Input() selectedDatasetTypeList: any;
   @Input() selectedPipelineTypeList: any;
+  @Input() selectedAgentPipelineTypeList: any;
   @Input() selectedToolsTypeList: any;
   @Input() selectedChainTypeList: any;
   @Input() selectedModelTypeLists: any;
   @Input() selectedEndpointTypeLists: any;
   @Input() selectedAppTypeList: any;
+  @Input() agentDirectoryData: any[] = [];
 
   // Output properties
   @Output() tagSelected = new EventEmitter<TagEventDTO>();
@@ -106,7 +115,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   readonly FilterType = FilterType;
 
   // UI state
-  isFilterExpanded = false;
+  isFilterExpanded = false; // Default to expanded so filters are visible
   isExpanded = false;
   isLoading = false;
 
@@ -126,6 +135,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedAdapterList: string[] = [];
   selectedAdapterInstance: string[] = [];
   selectedPipelineType: string[] = [];
+  selectedAgentPipelineType: string[] = [];
   selectedToolsType: string[] = [];
   selectedconnectionType: string[] = [];
   selectedMlAdapterConnectionType: string[] = [];
@@ -146,11 +156,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
   appTypes: any[] = [];
   adapterInstanceList: FilterItem[] = [];
   pipelinesTypeList: FilterItem[] = [];
+  agentPipelinesTypeList: FilterItem[] = [];
   toolsTypeList: FilterItem[] = [];
   connectionsTypeList: FilterItem[] = [];
   datasetTopicList: FilterItem[] = [];
   datasetsTypes: string[] = [];
   pipelinesTypes: string[] = [];
+  agentPipelinesTypes: string[] = [];
   toolsTypes: string[] = [];
   connectionsTypes: string[] = [];
   datasetsTypeList: FilterItem[] = [];
@@ -183,6 +195,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   pipelineType: string[] = [];
   toolsType: string[] = [];
   chainType: string[] = [];
+  agentPipelineType: string[] = [];
   instanceType: string[] = [];
   appType: string[] = [];
 
@@ -190,6 +203,18 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedMlIncType: string[] = [];
   appsTypeList = [];
   modelDataSourceList: FilterItem[] = [];
+
+  // Agent Directory specific filters
+  agentSkillsList: FilterItem[] = [];
+  selectedAgentSkills: string[] = [];
+  agentLocatorTypesList: FilterItem[] = [];
+  selectedAgentLocatorTypes: string[] = [];
+  agentModulesList: FilterItem[] = [];
+  selectedAgentModules: string[] = [];
+  agentAllTypesList: FilterItem[] = [];
+  selectedAgentAllTypes: string[] = [];
+  agentCreationDateFrom: Date | null = null;
+  agentCreationDateTo: Date | null = null;
 
   constructor(
     private service: Services,
@@ -217,6 +242,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
     // Handle changes to selectedModelDataSourceList
     if (changes.selectedModelDataSourceList?.currentValue) {
       this.initializeModelDatasourceList();
+    }
+
+    // Handle changes to agentDirectoryData
+    if (changes.agentDirectoryData?.currentValue) {
+      if (this.servicev1 === ServiceType.AGENT_DIRECTORY) {
+        this.getAgentDirectoryFilters();
+      }
     }
   }
 
@@ -249,6 +281,17 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.pipelineType =
         this.selectedPipelineTypeList.selectedAdapterType ?? [];
     }
+
+    if (this.selectedPipelineTypeList) {
+      this.pipelineType =
+        this.selectedPipelineTypeList.selectedAdapterType ?? [];
+    }
+
+    if (this.selectedAgentPipelineTypeList) {
+      this.agentPipelineType =
+        this.selectedAgentPipelineTypeList.selectedAdapterType ?? [];
+    }
+
     if (this.selectedToolsTypeList) {
       this.toolsType = this.selectedToolsTypeList.selectedAdapterType ?? [];
     }
@@ -304,6 +347,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
       ...this.type,
       ...this.appType,
       ...this.pipelineType,
+      ...this.agentPipelineType,
       ...this.toolsType,
       ...this.chainType,
     ];
@@ -322,6 +366,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
       case ServiceType.PIPELINE:
       case ServiceType.CHAIN:
         this.getPipelinesTypes();
+        this.getTags();
+        break;
+      case ServiceType.PIPELINEAGENT:
+        this.getAgentPipelinesTypes();
         this.getTags();
         break;
       case ServiceType.CONNECTIONS:
@@ -365,6 +413,9 @@ export class AipFilterComponent implements OnInit, OnChanges {
         this.getTags();
         this.initializeModelDatasourceList();
         break;
+      case ServiceType.AGENT_DIRECTORY:
+        this.getAgentDirectoryFilters();
+        break;
       default:
         this.getTags();
         this.fetchAdaptersTypes();
@@ -402,6 +453,105 @@ export class AipFilterComponent implements OnInit, OnChanges {
    */
   getToolsTypes(): void {
     // Implementation to be added
+  }
+
+  /**
+   * Gets agent directory filter options
+   */
+  getAgentDirectoryFilters(): void {
+    console.log('[Filter] getAgentDirectoryFilters called, data:', this.agentDirectoryData);
+    if (!this.agentDirectoryData || this.agentDirectoryData.length === 0) {
+      console.log('[Filter] No agent directory data available yet');
+      return;
+    }
+
+    console.log('[Filter] Processing', this.agentDirectoryData.length, 'agent records');
+
+    // Extract unique skills from mock data
+    const skillsSet = new Set<string>();
+    this.agentDirectoryData.forEach(agent => {
+      if (agent.skills && Array.isArray(agent.skills)) {
+        agent.skills.forEach(skill => {
+          const skillName = typeof skill === 'string' ? skill : skill.name;
+          if (skillName) {
+            skillsSet.add(skillName);
+          }
+        });
+      }
+    });
+    this.agentSkillsList = Array.from(skillsSet).map(skill => ({
+      category: 'Agent Skills',
+      label: this.formatLabel(skill),
+      value: skill,
+      selected: false
+    }));
+
+    // Extract unique locator types from mock data
+    const locatorTypesSet = new Set<string>();
+    this.agentDirectoryData.forEach(agent => {
+      if (agent.locators && Array.isArray(agent.locators)) {
+        agent.locators.forEach(locator => {
+          if (locator.locatorType) {
+            locatorTypesSet.add(locator.locatorType);
+          }
+        });
+      }
+    });
+    this.agentLocatorTypesList = Array.from(locatorTypesSet).map(locatorType => ({
+      category: 'Locator Types',
+      label: this.formatLabel(locatorType),
+      value: locatorType,
+      selected: false
+    }));
+
+    // Extract unique modules from mock data
+    const modulesSet = new Set<string>();
+    this.agentDirectoryData.forEach(agent => {
+      if (agent.modules && Array.isArray(agent.modules)) {
+        agent.modules.forEach(module => {
+          if (module.name) {
+            modulesSet.add(module.name);
+          }
+        });
+      }
+    });
+    this.agentModulesList = Array.from(modulesSet).map(module => ({
+      category: 'Modules',
+      label: module,
+      value: module,
+      selected: false
+    }));
+
+    // Extract unique types from mock data
+    const typesSet = new Set<string>();
+    this.agentDirectoryData.forEach(agent => {
+      if (agent.type) {
+        typesSet.add(agent.type);
+      }
+    });
+    this.agentAllTypesList = Array.from(typesSet).map(type => ({
+      category: 'All Types',
+      label: type,
+      value: type,
+      selected: false
+    }));
+
+    console.log('[Filter] Filter lists populated - Skills:', this.agentSkillsList.length, 
+                'Locators:', this.agentLocatorTypesList.length,
+                'Modules:', this.agentModulesList.length,
+                'Types:', this.agentAllTypesList.length);
+  }
+
+  /**
+   * Formats a label by converting kebab-case or snake_case to Title Case
+   */
+  private formatLabel(value: string): string {
+    if (!value) return '';
+    return value
+      .replace(/[-_]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   /**
@@ -562,8 +712,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.pipelinesTypes = JSON.parse(res);
 
       const excludedTypes =
-        this.servicev1 === ServiceType.CHAIN ? ['App'] : ['App', 'Langchain'];
+        this.servicev1 === ServiceType.CHAIN
+          ? ['App'] : ['App', 'Langchain','AIAgent'];
 
+      
       this.pipelinesTypeList = this.pipelinesTypes
         .filter((element) => element && !excludedTypes.includes(element))
         .map((element) => {
@@ -582,6 +734,50 @@ export class AipFilterComponent implements OnInit, OnChanges {
         });
     });
   }
+
+   /**
+   * Gets Agent pipeline types based on service type
+   */
+  getAgentPipelinesTypes(): void {
+    this.agentPipelinesTypeList = [];
+    this.agentPipelinesTypes = [];
+    this.selectedAgentPipelineType = [];
+
+    // Add pipeline types to selected types
+    this.agentPipelineType.forEach((type) => {
+      if (!this.selectedAdapterType.includes(type)) {
+        this.selectedAdapterType.push(type);
+      }
+    });
+
+    this.service.getPipelinesTypeByOrganization().subscribe((res) => {
+      this.agentPipelinesTypes = JSON.parse(res);
+
+      const excludedTypes =
+       this.servicev1 === ServiceType.PIPELINEAGENT
+          ? ['App', 'Langchain', 'NativeScript']
+          : ['App', 'Langchain'];
+
+      
+      this.agentPipelinesTypeList = this.agentPipelinesTypes
+        .filter((element) => element && !excludedTypes.includes(element))
+        .map((element) => {
+          const typesList =
+            this.servicev1 === ServiceType.PIPELINEAGENT
+              ? this.agentPipelineType
+              : this.pipelineType;
+          const isSelected = typesList.includes(element);
+
+          return {
+            category: 'Type',
+            label: element,
+            value: element,
+            selected: isSelected,
+          } as FilterItem;
+        });
+    });
+  }
+
 
   /**
    * Gets datasource types
@@ -1044,6 +1240,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
    */
   private emitSelectionChanges(): void {
     this.tagSelected.emit(this.geteventtagsdto());
+    this.updateFilterStatus();
   }
 
   /**
@@ -1063,6 +1260,22 @@ export class AipFilterComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Handles agent pipeline type selection
+   */
+  agentPipelineTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.agentPipelinesTypeList?.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
+  }
+
+  /**
    * Removes a pipeline type from selection
    */
   removePipelineType(type: string): void {
@@ -1070,6 +1283,18 @@ export class AipFilterComponent implements OnInit, OnChanges {
       type,
       this.selectedAdapterType,
       this.pipelinesTypeList || [],
+      true
+    );
+  }
+
+  /**
+   * Removes a pipeline type from selection
+   */
+  removeAgentPipelineType(type: string): void {
+    this.removeFromSelection(
+      type,
+      this.selectedAdapterType,
+      this.agentPipelinesTypeList || [],
       true
     );
   }
@@ -1414,6 +1639,129 @@ export class AipFilterComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Handles agent skill selection
+   */
+  agentSkillSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAgentSkills);
+
+    this.agentSkillsList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+    this.toggleFilterExpanded();
+  }
+
+  /**
+   * Removes an agent skill from selection
+   */
+  removeAgentSkill(skill: string): void {
+    this.removeFromSelection(
+      skill,
+      this.selectedAgentSkills,
+      this.agentSkillsList,
+      true
+    );
+  }
+
+  /**
+   * Handles agent locator type selection
+   */
+  agentLocatorTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAgentLocatorTypes);
+
+    this.agentLocatorTypesList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+    this.toggleFilterExpanded();
+  }
+
+  /**
+   * Removes an agent locator type from selection
+   */
+  removeAgentLocatorType(locatorType: string): void {
+    this.removeFromSelection(
+      locatorType,
+      this.selectedAgentLocatorTypes,
+      this.agentLocatorTypesList,
+      true
+    );
+  }
+
+  /**
+   * Handles agent module selection
+   */
+  agentModuleSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAgentModules);
+
+    this.agentModulesList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+    this.toggleFilterExpanded();
+  }
+
+  /**
+   * Removes an agent module from selection
+   */
+  removeAgentModule(module: string): void {
+    this.removeFromSelection(
+      module,
+      this.selectedAgentModules,
+      this.agentModulesList,
+      true
+    );
+  }
+
+  /**
+   * Handles agent all type selection (single select dropdown)
+   */
+  agentAllTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAgentAllTypes);
+
+    this.agentAllTypesList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+    this.toggleFilterExpanded();
+  }
+
+  /**
+   * Removes an agent all type from selection
+   */
+  removeAgentAllType(type: string): void {
+    this.removeFromSelection(
+      type,
+      this.selectedAgentAllTypes,
+      this.agentAllTypesList,
+      true
+    );
+  }
+
+  /**
+   * Handles date change events for agent creation date filters
+   */
+  onDateChange(): void {
+    this.emitSelectionChanges();
+  }
+
+  /**
    * Handles adapter instance selection
    */
   adapterInstanceSelected(value: FilterItem): void {
@@ -1754,6 +2102,23 @@ export class AipFilterComponent implements OnInit, OnChanges {
         break;
       case FilterType.DATASET_TAG:
         this.clearFilterList(this.selectedTagList, this.datasetsTagsList || []);
+        break;
+      case FilterType.AGENT_SKILLS:
+        this.clearFilterList(this.selectedAgentSkills, this.agentSkillsList || []);
+        break;
+      case FilterType.AGENT_LOCATOR_TYPES:
+        this.clearFilterList(this.selectedAgentLocatorTypes, this.agentLocatorTypesList || []);
+        break;
+      case FilterType.AGENT_MODULES:
+        this.clearFilterList(this.selectedAgentModules, this.agentModulesList || []);
+        break;
+      case FilterType.AGENT_ALL_TYPES:
+        this.clearFilterList(this.selectedAgentAllTypes, this.agentAllTypesList || []);
+        break;
+      case FilterType.AGENT_CREATION_DATE:
+        this.agentCreationDateFrom = null;
+        this.agentCreationDateTo = null;
+        break;
     }
 
     // Emit changes
@@ -1809,7 +2174,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.selectedMlInstancesAdapterType,
       this.selectedMlInstancesConnectionType,
       this.selectedDatasetTopicType,
-      this.selectedModelDatasource
+      this.selectedModelDatasource,
+      this.selectedAgentSkills,
+      this.selectedAgentLocatorTypes,
+      this.selectedAgentModules,
+      this.selectedAgentAllTypes,
+      this.agentCreationDateFrom,
+      this.agentCreationDateTo
     );
   }
 
@@ -1852,6 +2223,17 @@ export class AipFilterComponent implements OnInit, OnChanges {
       return (
         this.selectedMlInstancesAdapterType?.length > 0 ||
         this.selectedMlInstancesConnectionType?.length > 0
+      );
+    }
+
+    if (this.servicev1 === ServiceType.AGENT_DIRECTORY) {
+      return (
+        this.selectedAgentSkills?.length > 0 ||
+        this.selectedAgentLocatorTypes?.length > 0 ||
+        this.selectedAgentModules?.length > 0 ||
+        this.selectedAgentAllTypes?.length > 0 ||
+        this.agentCreationDateFrom !== null ||
+        this.agentCreationDateTo !== null
       );
     }
 
@@ -1950,6 +2332,23 @@ export class AipFilterComponent implements OnInit, OnChanges {
       case ServiceType.WORKER_TOOLS:
         if (this.selectedAdapterType?.length > 0) {
           activeFilters.push('Type');
+        }
+        break;
+      case ServiceType.AGENT_DIRECTORY:
+        if (this.selectedAgentSkills?.length > 0) {
+          activeFilters.push('Skills');
+        }
+        if (this.selectedAgentLocatorTypes?.length > 0) {
+          activeFilters.push('Locator Types');
+        }
+        if (this.selectedAgentModules?.length > 0) {
+          activeFilters.push('Modules');
+        }
+        if (this.selectedAgentAllTypes?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.agentCreationDateFrom !== null || this.agentCreationDateTo !== null) {
+          activeFilters.push('Date Range');
         }
         break;
       default:

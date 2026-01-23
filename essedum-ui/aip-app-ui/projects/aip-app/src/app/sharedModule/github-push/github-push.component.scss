@@ -1,0 +1,452 @@
+/* Git Push Trigger Button - matches download button style */
+.git-push-trigger {
+  background: transparent !important;
+  border: none !important;
+  color: #cccccc !important;
+  padding: 0 !important;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  &:disabled {
+    color: #858585 !important;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor !important;
+  }
+
+  // Override any btn-primary styles that might still be applied
+  &.btn-primary {
+    background: transparent !important;
+    color: #cccccc !important;
+    
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
+/* Git Pull Trigger Button - similar to push */
+.git-pull-trigger {
+  background: transparent !important;
+  border: none !important;
+  color: #cccccc !important;
+  padding: 0 !important;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  &:disabled {
+    color: #858585 !important;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor !important;
+  }
+}
+
+/* GitHub Pull Input Container - matches file input style */
+.github-pull-input-container {
+  margin-top: 16px;
+}
+
+.github-pull-input-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #495057;
+  width: 100%;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #0366d6;
+  }
+
+  span {
+    font-weight: 500;
+  }
+
+  &:hover {
+    background-color: #e9ecef;
+    border-color: #0366d6;
+    color: #0366d6;
+  }
+
+  &:active {
+    background-color: #dee2e6;
+  }
+}
+
+/* Button Styles */
+.btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #0366d6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0256b9;
+}
+
+.btn-github {
+  background-color: #24292e;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-github:hover {
+  background-color: #1b1f23;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-link {
+  background: none;
+  color: #0366d6;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: relative;
+  background: white !important;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #586069;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #24292e;
+}
+
+.modal-body {
+  padding: 20px;
+  min-height: 200px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #e1e4e8;
+  flex-shrink: 0;
+}
+
+/* Loading Indicator */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0366d6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alert Styles */
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.alert-error {
+  background-color: #ffeef0;
+  color: #d73a49;
+  border: 1px solid #f97583;
+}
+
+.alert-success {
+  background-color: #dcffe4;
+  color: #22863a;
+  border: 1px solid #34d058;
+}
+
+/* Form Styles */
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #24292e;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+.form-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #586069;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox-wrapper label {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Auth Section */
+.auth-section {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.auth-section p {
+  margin-bottom: 20px;
+  color: #586069;
+}
+
+/* Logged Out Section */
+.logged-out-section {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.logged-out-icon {
+  margin: 0 auto 20px;
+  color: #586069;
+  opacity: 0.6;
+}
+
+.logged-out-section h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.logged-out-section p {
+  margin: 0 0 16px;
+  color: #586069;
+  font-size: 14px;
+}
+
+.logout-instructions {
+  text-align: left;
+  margin: 0 auto 24px;
+  padding-left: 24px;
+  max-width: 350px;
+  color: #586069;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.logout-instructions li {
+  margin-bottom: 8px;
+}
+
+.logout-instructions a {
+  color: #0366d6;
+  text-decoration: underline;
+}
+
+.logout-instructions a:hover {
+  color: #0256b9;
+}
+
+.logged-out-section .btn-github {
+  margin: 0 auto;
+}
+
+/* Content Section */
+.content-section {
+  padding: 0;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f6f8fa;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.user-info p {
+  margin: 0;
+  font-size: 14px;
+}

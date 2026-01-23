@@ -90,7 +90,23 @@ export class PipelineCreateComponent implements OnInit {
         delete this.data.canvasData.created_date
       }
     }
-    this.getAllPlugins()
+    
+    // Handle MCP-specific setup
+    if (this.interfaceType === 'mcp-pipeline') {
+      // Set MCP-specific options
+      this.options = [{ viewValue: 'MCP Server', value: 'mcpServer' }];
+      this.type = 'mcpServer';
+      console.log('MCP Pipeline creation mode initialized');
+    } else if (this.interfaceType === 'pipeline-agent') {
+      // Set Agent-specific options
+      this.options = [{ viewValue: 'AI Agent', value: 'AIAgent' }];
+      this.type = 'AIAgent';
+      console.log('Agent Pipeline creation mode initialized');
+    } else {
+      // Regular pipeline setup
+      this.getAllPlugins();
+    }
+    
     this.ssTypes.push('Azure');
     this.ssTypes.push('Vertex');
     this.ssTypes.push('ICMM');
@@ -134,6 +150,18 @@ export class PipelineCreateComponent implements OnInit {
         } else {
           newCanvas.interfacetype = this.interfaceType;
         }
+        
+        // Ensure correct type for pipeline-agent interface
+        if (this.interfaceType === 'pipeline-agent' && newCanvas.type !== 'AIAgent') {
+          newCanvas.type = 'AIAgent';
+          console.log('Corrected type to AIAgent for pipeline-agent interface');
+        }
+        
+        // Ensure correct type for mcp-pipeline interface
+        if (this.interfaceType === 'mcp-pipeline' && newCanvas.type !== 'mcpServer') {
+          newCanvas.type = 'mcpServer';
+          console.log('Corrected type to mcpServer for mcp-pipeline interface');
+        }
 
         newCanvas.is_template = this.isTemplate;
         const temp = [];
@@ -158,6 +186,10 @@ export class PipelineCreateComponent implements OnInit {
             }
           }
         }
+        // For new pipeline creation from add button ONLY for pipeline-agent or mcp-pipeline
+        else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
+          newCanvas.json_content = JSON.stringify({ 'created_source': 'user_defined' });
+        }
 
         if (this.importedJson) {
           newCanvas.json_content = this.importedJson;
@@ -166,7 +198,17 @@ export class PipelineCreateComponent implements OnInit {
 
         this.Services.create(newCanvas).subscribe((data) => {
           this.responseLink.emit(data);
-          if (data.type == "NativeScript") {
+          
+          // Handle MCP pipeline creation with dummy file
+          if (data.type === 'mcpServer' && this.interfaceType === 'mcp-pipeline') {
+            this.createMcpDummyFile(data);
+          }
+          // Handle Agent pipeline creation with dummy file
+          else if (data.type === 'AIAgent' && this.interfaceType === 'pipeline-agent') {
+            this.createAgentDummyFile(data);
+          }
+          // Handle existing NativeScript logic
+          else if (data.type == "NativeScript") {
             if (data.json_content) {
               let json_content = JSON.parse(data.json_content)
               let script_file = json_content.elements[0].attributes.files[0]
@@ -190,19 +232,16 @@ export class PipelineCreateComponent implements OnInit {
                 }
               );
             }
-     
-
           }
+          
           this.Services.message("Created Sucessfully.", "success");
           this.dialogRef.close(data);
-
 
           if (this.data.edit || this.data.copy) {
             this.dialogRef.close(data);
           } else {
             this.closeModal();
              this.dialogRef.close(data);
-
           }
  
         },
@@ -365,5 +404,174 @@ export class PipelineCreateComponent implements OnInit {
     }
   }
 
+  /**
+   * Create dummy MCP configuration file
+   */
+  private createMcpDummyFile(pipelineData: any): void {
+    console.log('Creating MCP dummy configuration file for:', pipelineData.name);
+    
+    // Generate dynamic filename for MCP
+    const organization = sessionStorage.getItem('organization') || 'defaultorg';
+    const dynamicFilename = `${pipelineData.name}_${organization}.json`;
+    
+    // MCP dummy configuration content
+    const mcpConfig = {
+      mcpServers: {
+        [pipelineData.name]: {
+          command: "python",
+          args: ["-m", "mcp_server"],
+          description: `MCP Server configuration for ${pipelineData.alias}`,
+          version: "1.0.0",
+          tools: [],
+          resources: []
+        }
+      },
+      createdBy: "AIP MCP Pipeline Generator",
+      createdAt: new Date().toISOString(),
+      pipelineName: pipelineData.name,
+      organization: organization
+    };
+    
+    console.log('MCP Configuration:', mcpConfig);
+    console.log('Dynamic filename:', dynamicFilename);
+    
+    // Preserve original json_content from add API response (created_source flag)
+    let originalJsonContent = {};
+    try {
+      if (pipelineData.json_content) {
+        originalJsonContent = JSON.parse(pipelineData.json_content);
+      }
+    } catch (e) {
+      console.warn('Could not parse original json_content:', e);
+    }
+    
+    // Update the pipeline's json_content with the MCP configuration, preserving created_source
+    pipelineData.json_content = JSON.stringify({
+      ...originalJsonContent,
+      elements: [{
+        type: 'mcpServer',
+        name: pipelineData.name,
+        config: mcpConfig,
+        filename: dynamicFilename
+      }]
+    });
+    
+    // Update the pipeline using update API
+    this.Services.update(pipelineData).subscribe(
+      (updateResponse) => {
+        console.log('MCP pipeline updated successfully with configuration:', updateResponse);
+        
+        // Create file content using create API
+        const jsonContent = JSON.stringify(mcpConfig, null, 2);
+        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+        const formData = new FormData();
+        formData.set('scriptFile', jsonBlob, dynamicFilename);
+        
+        // Call create API to save the dummy file using name from API response
+        this.Services.createNativeFile(pipelineData.name, organization, dynamicFilename, 'json', formData).subscribe(
+          (createResponse) => {
+            console.log('MCP dummy file created successfully:', createResponse);
+          },
+          (createError) => {
+            console.error('Error creating MCP dummy file:', createError);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error updating MCP pipeline with configuration:', error);
+      }
+    );
+  }
+
+  /**
+   * Create dummy Agent configuration file
+   */
+  private createAgentDummyFile(pipelineData: any): void {
+    console.log('Creating Agent dummy configuration file for:', pipelineData.name);
+    
+    // Generate dynamic filename for Agent
+    const organization = sessionStorage.getItem('organization') || 'defaultorg';
+    const dynamicFilename = `${pipelineData.name}_${organization}.json`;
+    
+    // Agent dummy configuration content
+    const agentConfig = {
+      agent: {
+        name: pipelineData.name,
+        alias: pipelineData.alias,
+        description: pipelineData.description,
+        type: "AIAgent",
+        interface: "pipeline-agent",
+        model: {
+          provider: "openai",
+          model_name: "gpt-3.5-turbo",
+          temperature: 0.7,
+          max_tokens: 1000
+        },
+        tools: [],
+        memory: {
+          type: "conversation",
+          max_history: 10
+        },
+        system_prompt: `You are ${pipelineData.alias}, an AI agent created to assist users.`
+      },
+      configuration: {
+        version: "1.0.0",
+        created_by: "AIP Agent Pipeline Generator",
+        created_at: new Date().toISOString(),
+        organization: organization,
+        environment: "development"
+      }
+    };
+    
+    console.log('Agent Configuration:', agentConfig);
+    console.log('Dynamic filename:', dynamicFilename);
+    
+    // Preserve original json_content from add API response (created_source flag)
+    let originalJsonContent = {};
+    try {
+      if (pipelineData.json_content) {
+        originalJsonContent = JSON.parse(pipelineData.json_content);
+      }
+    } catch (e) {
+      console.warn('Could not parse original json_content:', e);
+    }
+    
+    // Update the pipeline's json_content with the Agent configuration, preserving created_source
+    pipelineData.json_content = JSON.stringify({
+      ...originalJsonContent,
+      elements: [{
+        type: 'AIAgent',
+        name: pipelineData.name,
+        config: agentConfig,
+        filename: dynamicFilename
+      }]
+    });
+    
+    // Update the pipeline using update API
+    this.Services.update(pipelineData).subscribe(
+      (updateResponse) => {
+        console.log('Agent pipeline updated successfully with configuration:', updateResponse);
+        
+        // Create file content using create API
+        const jsonContent = JSON.stringify(agentConfig, null, 2);
+        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+        const formData = new FormData();
+        formData.set('scriptFile', jsonBlob, dynamicFilename);
+        
+        // Call create API to save the dummy file using name from API response
+        this.Services.createNativeFile(pipelineData.name, organization, dynamicFilename, 'json', formData).subscribe(
+          (createResponse) => {
+            console.log('Agent dummy file created successfully:', createResponse);
+          },
+          (createError) => {
+            console.error('Error creating Agent dummy file:', createError);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error updating Agent pipeline with configuration:', error);
+      }
+    );
+  }
 
 }

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Log Details</title>
+    <link rel="stylesheet" href="{{cssUri}}">
+</head>
+<body>
+    <div class="details-container">
+        <div class="header-card">
+            <div class="header-title">
+                <h1>Job Log Details</h1>
+                <button class="refresh-btn-modern" onclick="refreshLogs()" title="Refresh Logs">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M13.65 2.35a8 8 0 1 0 2.31 6.65h-1.5a6.5 6.5 0 1 1-1.94-5.15L11 5.37h3.5V1.87l-1.85 1.48z"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+            
+            <div class="header-info-grid">
+                <div class="info-card">
+                    <div class="info-icon">📋</div>
+                    <div class="info-content">
+                        <div class="info-label">Job ID</div>
+                        <div class="info-value">{{jobId}}</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">⚙️</div>
+                    <div class="info-content">
+                        <div class="info-label">Job Type</div>
+                        <div class="info-value job-type">{{jobType}}</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">📊</div>
+                    <div class="info-content">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                            <span class="status-badge status-{{statusLower}}">{{status}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="logs-section">
+            <h2 class="section-title">📝 Log Entries</h2>
+            <div class="logs-container" id="logsContainer">
+                {{logEntries}}
+            </div>
+        </div>
+    </div>
+    
+    <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
+</body>
+</html>

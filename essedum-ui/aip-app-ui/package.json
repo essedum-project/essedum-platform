@@ -1,7 +1,6 @@
 {
   "name": "aip-app-ui",
   "version": "3.2.0",
-
   "scripts": {
     "ng": "ng",
     "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8083",
@@ -75,6 +74,7 @@
     "quill-to-word": "^1.3.0",
     "rxjs": "^7.8.1",
     "rxjs-compat": "^6.6.7",
+    "socket.io-client": "^4.8.1",
     "sockjs-client": "^1.6.1",
     "swagger-ui": "^3.52.5",
     "tslib": "^2.3.0",

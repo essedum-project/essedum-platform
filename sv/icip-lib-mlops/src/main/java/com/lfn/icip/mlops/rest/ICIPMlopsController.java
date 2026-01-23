@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -50,18 +50,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,6 +109,7 @@ import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.lfn.icip.icipwebeditor.service.ICIPImageSavingService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentJobsService;
+import com.lfn.icip.icipwebeditor.service.IICIPAgentDirectoryService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentService;
 import com.lfn.icip.icipwebeditor.service.IICIPAppService;
 import com.lfn.icip.icipwebeditor.service.IICIPEventJobMappingService;
@@ -145,6 +135,11 @@ import jakarta.transaction.Transactional;
 
 @RestController
 @Timed
+@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
+	       "https://essedum.az.ad.idemo-ppc.com"},
+        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
+        allowCredentials = "true",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping("/${icip.pathPrefix}/service/v1")
 @RefreshScope
 public class ICIPMlopsController {
@@ -758,7 +753,44 @@ public class ICIPMlopsController {
 		}
 	}
 
+
     @PostMapping("/models/register")
+    public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
+                                                 @RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
+        if (fedModeldto.getId() != null) {
+            fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
+            fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
+
+        } else {
+            fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
+            fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
+        }
+        fedModeldto.setOrganisation(project);
+        ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
+        logger.info("Request for RegisterModel: ");
+        try {
+            List<ICIPMLFederatedModelDTO> fedModels = fedModelService
+                    .getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
+            if (fedModels != null && fedModels.size() > 0) {
+                if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
+                    return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
+                            HttpStatus.BAD_REQUEST);
+                else if (fedModeldto.getId() != null && fedModels.size() == 1
+                        && !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
+                    return new ResponseEntity<>(
+                            "Another Model with name '" + fedModeldto.getName() + "' already exists",
+                            HttpStatus.BAD_REQUEST);
+                }
+            }
+            ICIPMLFederatedModel response = fedModelService.savemodel(federatedModetToAdd);
+            return ResponseEntity.status(201).body(new JSONObject(response).toString());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/models/registers")
     public ResponseEntity<String> modelRegister(@RequestBody String endpointsdeploybody,
                                                        @RequestParam(name = "adapter_instance", required = true) String adapterInstance,
                                                        @RequestParam(name = "project", required = true) String project,
@@ -1836,6 +1868,11 @@ public class ICIPMlopsController {
 
 	@PostMapping("/streamingServices/add")
 	@Transactional
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
+            "https://essedum.az.ad.idemo-ppc.com"},
+            allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
+            allowCredentials = "true",
+            methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 	public ResponseEntity<?> createStreamingServices(@RequestBody ICIPStreamingServicesDTO streamingServicesDTO,
 			@RequestAttribute(required = false, name = "organization") String org)
 			throws URISyntaxException, SQLException {
@@ -2681,4 +2718,7 @@ public class ICIPMlopsController {
 
 		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
+
+
+
 }

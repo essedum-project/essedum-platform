@@ -9,88 +9,11 @@
  * 
  * @fileoverview Centralized constants to avoid hardcoded values throughout the application
  * @author Essedum AI Platform Team
- * @version 1.0.0
+ * @version 1.0.21
  */
 
 import { get } from "axios";
 import { getBaseUrl } from "./api-config";
-
-// ================================
-// AUTHENTICATION CONFIGURATION
-// ================================
-
-/**
- * Network Configuration Types
- */
-export type NetworkType = 'infosys' | 'lfn';
-
-/**
- * Network Configuration Interface
- */
-export interface NetworkConfig {
-    id: NetworkType;
-    name: string;
-    displayName: string;
-    issuerUri: string;
-    jwkSetUri: string;
-    clientId: string;
-    scope: string;
-    claim: string;
-    createUserIfNotExist: boolean;
-    silentRefreshTimeoutFactor: number;
-    baseURL: string;
-}
-
-/**
- * Keycloak Authentication Configuration
- * Contains all OAuth/OIDC related settings for different networks
- */
-export const AUTH_CONFIG = {
-    /** Authentication timeout in milliseconds */
-    AUTH_TIMEOUT: 60000,
-    
-    /** Token refresh threshold in minutes (refresh when token expires within this time) */
-    TOKEN_REFRESH_THRESHOLD_MINUTES: 5,
-    
-    /** Available authentication networks */
-    NETWORKS: {
-        INFOSYS: {
-            id: 'infosys' as NetworkType,
-            name: 'infosys',
-            displayName: 'Infosys Internal Network',
-            issuerUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
-            jwkSetUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM/protocol/openid-connect/certs',
-            clientId: 'essedum-45',
-            scope: 'email',
-            claim: 'email||admin',
-            createUserIfNotExist: true,
-            silentRefreshTimeoutFactor: 0.85,
-            baseURL: 'https://essedum.az.ad.idemo-ppc.com'
-        } as NetworkConfig,
-        LFN: {
-            id: 'lfn' as NetworkType,
-            name: 'lfn',
-            displayName: 'LFN Network',
-            issuerUri: 'https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM',
-            jwkSetUri: 'https://login.lfn.essedum.anuket.iol.unh.edu:8443/realms/ESSEDUM/protocol/openid-connect/certs',
-            clientId: 'essedum-45',
-            scope: 'email',
-            claim: 'email||admin',
-            createUserIfNotExist: true,
-            silentRefreshTimeoutFactor: 0.85,
-            baseURL: 'https://lfn.essedum.anuket.iol.unh.edu'
-        } as NetworkConfig
-    },
-    
-    /** Default network (for backwards compatibility) */
-    DEFAULT_NETWORK: 'infosys' as NetworkType,
-    
-    /** Legacy constants for backwards compatibility */
-    ISSUER_URI: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
-    CLIENT_ID: 'essedum-45',
-    SCOPE: 'email',
-    REALM: 'ESSEDUM'
-} as const;
 
 // ================================
 // PROJECT AND ORGANIZATION SETTINGS
@@ -124,6 +47,15 @@ export const EXTENSION_CONFIG = {
     
     /** Explorer view container ID */
     EXPLORER_VIEW_ID: 'essedum-explorer',
+
+    /** Navigation view ID */
+    NAVIGATION_VIEW_ID: 'essedum-navigation',
+
+    /** Pipeline view ID */
+    PIPELINE_VIEW_ID: 'essedum-pipeline',
+
+    /** Pipeline agent view ID */
+    PIPELINE_AGENT_VIEW_ID: 'essedum-pipeline-agent',
     
     /** File system scheme for virtual files */
     FILE_SYSTEM_SCHEME: 'essedum'
@@ -178,6 +110,24 @@ export const COMMANDS = {
     
     /** Refresh user information */
     REFRESH_USER_INFO: 'essedum.refreshUserInfo',
+
+    /** Clear all user data */
+    CLEAR_USER_DATA: 'essedum.clearUserData',
+
+    /** Debug user data */
+    DEBUG_USER_DATA: 'essedum.debugUserData',
+
+    /** Show navigation screen */
+    SHOW_NAVIGATION: 'essedum.showNavigation',
+
+    /** Show pipeline screen */
+    SHOW_PIPELINE: 'essedum.showPipeline',
+
+    /** Show pipeline agent screen */
+    SHOW_PIPELINE_AGENT: 'essedum.showPipelineAgent',
+
+    /** Navigate back to navigation screen */
+    BACK_TO_NAVIGATION: 'essedum.backToNavigation',
     
     /** VS Code built-in commands */
     VSCODE: {
@@ -194,7 +144,16 @@ export const COMMANDS = {
  */
 export const CONTEXT_KEYS = {
     /** Whether user is authenticated */
-    IS_AUTHENTICATED: 'essedum.isAuthenticated'
+    IS_AUTHENTICATED: 'essedum.isAuthenticated',
+
+    /** Show navigation screen */
+    SHOW_NAVIGATION: 'essedum.showNavigation',
+
+    /** Show pipeline screen */
+    SHOW_PIPELINE: 'essedum.showPipeline',
+
+    /** Show pipeline agent screen */
+    SHOW_PIPELINE_AGENT: 'essedum.showPipelineAgent'
 } as const;
 
 // ================================
