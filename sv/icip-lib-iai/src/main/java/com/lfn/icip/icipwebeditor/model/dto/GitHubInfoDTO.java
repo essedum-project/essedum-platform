@@ -49,6 +49,9 @@ public class GitHubInfoDTO implements Serializable {
     @JsonProperty("repo")
     private String repo;
 
+    @JsonProperty("gituser")
+    private String gitUser;
+
     @JsonProperty("createdby")
     private String createdBy;
 

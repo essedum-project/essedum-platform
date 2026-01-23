@@ -111,9 +111,39 @@ public class GitHubInfoService implements IGitHubInfoService {
             GitHubInfo existingInfo = gitHubInfoRepository.findByCnameAndOrg(cname, org)
                     .orElseThrow(() -> new IllegalArgumentException("GitHub info not found for cname: " + cname + " and org: " + org));
 
-            // Update fields from DTO (excluding cname and org which are identifiers)
+            // Check if cname or org is being updated and if it conflicts with another record
+            boolean cnameChanged = gitHubInfoDTO.getCname() != null && !gitHubInfoDTO.getCname().equals(cname);
+            boolean orgChanged = gitHubInfoDTO.getOrg() != null && !gitHubInfoDTO.getOrg().equals(org);
+
+            if (cnameChanged || orgChanged) {
+                String newCname = gitHubInfoDTO.getCname() != null ? gitHubInfoDTO.getCname() : cname;
+                String newOrg = gitHubInfoDTO.getOrg() != null ? gitHubInfoDTO.getOrg() : org;
+
+                // Check if the new combination already exists (and it's not the same record)
+                var conflictingRecord = gitHubInfoRepository.findByCnameAndOrg(newCname, newOrg);
+                if (conflictingRecord.isPresent() && !conflictingRecord.get().getId().equals(existingInfo.getId())) {
+                    throw new IllegalArgumentException("GitHub info already exists for cname: " + newCname + " and org: " + newOrg);
+                }
+            }
+
+            // Update fields from DTO
+            if (gitHubInfoDTO.getCname() != null) {
+                existingInfo.setCname(gitHubInfoDTO.getCname());
+            }
+            if (gitHubInfoDTO.getOrg() != null) {
+                existingInfo.setOrg(gitHubInfoDTO.getOrg());
+            }
             if (gitHubInfoDTO.getBname() != null) {
                 existingInfo.setBname(gitHubInfoDTO.getBname());
+            }
+            if (gitHubInfoDTO.getRepo() != null) {
+                existingInfo.setRepo(gitHubInfoDTO.getRepo());
+            }
+            if (gitHubInfoDTO.getGitUser() != null) {
+                existingInfo.setGituser(gitHubInfoDTO.getGitUser());
+            }
+            if (gitHubInfoDTO.getCreatedBy() != null) {
+                existingInfo.setCreatedBy(gitHubInfoDTO.getCreatedBy());
             }
             if (gitHubInfoDTO.getUpdatedBy() != null) {
                 existingInfo.setUpdatedBy(gitHubInfoDTO.getUpdatedBy());
@@ -230,6 +260,15 @@ public class GitHubInfoService implements IGitHubInfoService {
                 // Update fields
                 if (gitHubInfoDTO.getBname() != null) {
                     gitHubInfo.setBname(gitHubInfoDTO.getBname());
+                }
+                if (gitHubInfoDTO.getRepo() != null) {
+                    gitHubInfo.setRepo(gitHubInfoDTO.getRepo());
+                }
+                if (gitHubInfoDTO.getGitUser() != null) {
+                    gitHubInfo.setGituser(gitHubInfoDTO.getGitUser());
+                }
+                if (gitHubInfoDTO.getCreatedBy() != null) {
+                    gitHubInfo.setCreatedBy(gitHubInfoDTO.getCreatedBy());
                 }
                 if (gitHubInfoDTO.getUpdatedBy() != null) {
                     gitHubInfo.setUpdatedBy(gitHubInfoDTO.getUpdatedBy());

@@ -337,13 +337,12 @@ public class GitHubIntegrationService {
             }
 
             // Update the destination branch reference to point to source branch SHA
-            // For branch-to-branch deployment, we always use force=true to ensure the update succeeds
-            // even when it's not a fast-forward (which is the expected behavior for deployments)
+            // Use forcePush flag from request to determine whether to force update
             String refPath = "refs/heads/" + request.getDestinationBranch();
             GHRef destinationRef = repo.getRef("heads/" + request.getDestinationBranch());
-            destinationRef.updateTo(sourceSha, true);  // Always force update for deployment scenario
-            
-            log.info("Successfully updated destination branch to source branch SHA (force=true)");
+            destinationRef.updateTo(sourceSha, request.isForcePush());
+
+            log.info("Successfully updated destination branch to source branch SHA (force={})", request.isForcePush());
 
             return BranchPushResponse.builder()
                 .success(true)

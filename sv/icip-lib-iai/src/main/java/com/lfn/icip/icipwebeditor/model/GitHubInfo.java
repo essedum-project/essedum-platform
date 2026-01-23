@@ -64,6 +64,10 @@ public class GitHubInfo implements Serializable {
     @JsonProperty("repo")
     private String repo;
 
+    @Column(name = "gituser", length = 512)
+    @JsonProperty("gituser")
+    private String gituser;
+
     @Column(name = "createdby", length = 256)
     @JsonProperty("createdby")
     private String createdBy;
