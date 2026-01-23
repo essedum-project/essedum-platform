@@ -655,6 +655,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             title: `Loading Pipeline Agent: ${card.alias || pipelineName}...`,
             cancellable: false
         }, async (progress) => {
+            let formattedContent = '';
+            let jsonLoadError: string | null = null;
+
             try {
                 progress.report({ increment: 0, message: 'Reading configuration file...' });
 
@@ -675,7 +678,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 const fileContent = textDecoder.decode(fileResponse.data);
 
                 // Try to parse and format the JSON
-                let formattedContent = fileContent;
+                formattedContent = fileContent;
                 try {
                     const jsonData = JSON.parse(fileContent);
                     formattedContent = JSON.stringify(jsonData, null, 2);
@@ -704,82 +707,83 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     preview: false
                 });
 
-                progress.report({ increment: 90, message: 'Opening detail view...' });
-
-                // Send message to webview to show detail view in same panel
-                if (this._view) {
-                    this._view.webview.postMessage({
-                        command: CONSTANTS.CLIENT_COMMANDS.SHOW_DETAILS,
-                        data: {
-                            pipelineId: pipelineName,
-                            name: card.alias || pipelineName,
-                            description: card.description || '',
-                            alias: card.alias,
-                            type: card.type || card.interfacetype || 'N/A',
-                            organization: this.organization,
-                            status: card.status || 'active',
-                            jsonContent: formattedContent
-                        }
-                    });
-                }
-
-                progress.report({ increment: 95, message: 'Checking ADK files...' });
-
-                // Check if ADK files exist to show/hide View ADK button
-                try {
-                    const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
-                    const hasFiles = adkFiles && adkFiles.length > 0;
-                    
-                    // Send message to main webview to show/hide View ADK button
-                    if (this._view) {
-                        this._view.webview.postMessage({
-                            command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
-                            hasFiles: hasFiles,
-                            fileCount: adkFiles.length
-                        });
-                    }
-                } catch (error) {
-                    // Silently fail - just means View ADK button won't show
-                    if (this._view) {
-                        this._view.webview.postMessage({
-                            command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
-                            hasFiles: false,
-                            fileCount: 0
-                        });
-                    }
-                }
-
-                progress.report({ increment: 100, message: 'Complete!' });
-
             } catch (error: any) {
-                console.error(`${this.logPrefix} Error loading Pipeline Agent details:`, error);
+                console.error(`${this.logPrefix} Error loading Pipeline Agent JSON:`, error);
 
-                // Handle specific error cases
-                let errorMessage = 'Failed to load Pipeline Agent details';
+                // Handle specific error cases first
                 const errorStatus = error.status || 500;
 
                 if (errorStatus === 404) {
-                    errorMessage = `Configuration file not found for pipeline: ${card.alias || pipelineName}`;
+                    jsonLoadError = `Configuration file not found for pipeline: ${card.alias || pipelineName}`;
                 } else if (errorStatus === 401 || errorStatus === 403) {
-                    errorMessage = 'Authentication required. Please log in again.';
-                    this._isAuthenticated = false;
+                    jsonLoadError = 'Authentication required. Please log in again.';
                     
-                    // Show login prompt
-                    vscode.window.showErrorMessage(errorMessage, 'Login').then(selection => {
+                    // Show login prompt but still show detail view
+                    vscode.window.showErrorMessage(jsonLoadError, 'Login').then(selection => {
                         if (selection === 'Login') {
                             vscode.commands.executeCommand('essedum.login');
                         }
                     });
-                    
-                    // Show authentication required page
-                    this.showAuthenticationRequired();
-                    return;
-                } else if (error.message) {
-                    errorMessage = error.message;
+                } else {
+                    jsonLoadError = error.message || 'Failed to load configuration file';
                 }
 
-                vscode.window.showErrorMessage(`${this.logPrefix} ${errorMessage}`);
+                // Create error JSON content
+                const safeErrorMessage = (jsonLoadError || 'Unknown error').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                formattedContent = `{\n  "error": "Failed to load configuration",\n  "message": "${safeErrorMessage}"\n}`;
+
+                // Show warning notification
+                vscode.window.showWarningMessage(`${this.logPrefix} ${jsonLoadError}. Showing detail view with available information.`);
             }
+
+            progress.report({ increment: 90, message: 'Opening detail view...' });
+
+            // ALWAYS send message to webview to show detail view, even if JSON load failed
+            if (this._view) {
+                this._view.webview.postMessage({
+                    command: CONSTANTS.CLIENT_COMMANDS.SHOW_DETAILS,
+                    data: {
+                        pipelineId: pipelineName,
+                        name: card.alias || pipelineName,
+                        description: card.description || '',
+                        alias: card.alias,
+                        type: card.type || card.interfacetype || 'N/A',
+                        organization: this.organization,
+                        status: card.status || 'active',
+                        jsonContent: formattedContent,
+                        hasError: !!jsonLoadError,
+                        errorMessage: jsonLoadError || undefined
+                    }
+                });
+            }
+
+            progress.report({ increment: 95, message: 'Checking ADK files...' });
+
+            // Check if ADK files exist to show/hide View ADK button
+            try {
+                const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
+                const hasFiles = adkFiles && adkFiles.length > 0;
+                
+                // Send message to main webview to show/hide View ADK button
+                if (this._view) {
+                    this._view.webview.postMessage({
+                        command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                        hasFiles: hasFiles,
+                        fileCount: adkFiles.length
+                    });
+                }
+            } catch (error) {
+                // Silently fail - just means View ADK button won't show
+                if (this._view) {
+                    this._view.webview.postMessage({
+                        command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                        hasFiles: false,
+                        fileCount: 0
+                    });
+                }
+            }
+
+            progress.report({ increment: 100, message: 'Complete!' });
         });
     }
 

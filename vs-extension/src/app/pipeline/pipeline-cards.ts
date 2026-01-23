@@ -1455,8 +1455,12 @@ if __name__ == "__main__":
                             `✅ Essedum file changes auto-uploaded successfully to ${scriptFile.fileName}!`
                         );
 
-                        // Update stream item and save
-                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        // Update stream item and save (non-blocking - commented out due to PUT API 403 issues)
+                        try {
+                            await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        } catch (updateError: any) {
+                            console.warn('⚠️ Stream item update skipped:', updateError.message);
+                        }
 
                     } catch (error: any) {
                         console.error('❌ Essedum file auto-upload failed:', error);
@@ -1498,8 +1502,12 @@ if __name__ == "__main__":
                             `✅ Notebook changes auto-uploaded successfully to ${scriptFile.fileName}!`
                         );
 
-                        // Update stream item and save
-                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        // Update stream item and save (non-blocking - commented out due to PUT API 403 issues)
+                        try {
+                            await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        } catch (updateError: any) {
+                            console.warn('⚠️ Stream item update skipped:', updateError.message);
+                        }
 
                     } catch (error: any) {
                         console.error('❌ Notebook auto-upload failed:', error);
@@ -1742,17 +1750,34 @@ if __name__ == "__main__":
             streamItem.json_content = JSON.stringify(jsonContent);
             streamItem.organization = this.organization;
 
-            // Update the streaming service
-            await this.updateStreamingService(streamItem);
+            // COMMENTED OUT: Update the streaming service (PUT API disabled due to 403 permission issues)
+            // TODO: Re-enable when user has appropriate permissions
+            /*
+            try {
+                await this.updateStreamingService(streamItem);
+                logger.info('✅ Streaming service updated successfully');
+            } catch (updateError: any) {
+                // Log warning but don't fail the entire operation
+                console.warn('⚠️ Failed to update streaming service (continuing anyway):', updateError.message);
+                vscode.window.showWarningMessage(
+                    `⚠️ Pipeline will run, but couldn't update service: ${updateError.message}`,
+                    'Dismiss'
+                );
+            }
+            */
+            logger.info('ℹ️ Streaming service update skipped (PUT API commented out)');
 
             if (run) {
-                logger.info('JSON saved successfully for pipeline run');
+                logger.info('JSON processing completed for pipeline run');
             }
 
         } catch (error: any) {
             console.error('Error in saveJson:', error);
+            // Only throw if not for run, otherwise just warn
             if (run) {
-                throw new Error(`Canvas not updated due to error: ${error.message}`);
+                console.warn('Non-critical error in saveJson, continuing with pipeline run:', error.message);
+            } else {
+                throw error;
             }
         }
     }
@@ -1848,8 +1873,17 @@ if __name__ == "__main__":
                             connectionElement.attributes.connections = datasource[0];
                             streamItem.json_content = JSON.stringify(jsonContent);
 
-                            // Update streaming service with new connection data
-                            await this.updateStreamingService(streamItem);
+                            // COMMENTED OUT: Update streaming service with new connection data (PUT API disabled)
+                            // TODO: Re-enable when user has appropriate permissions
+                            /*
+                            try {
+                                await this.updateStreamingService(streamItem);
+                                logger.info('✅ Connection datasource updated successfully');
+                            } catch (updateError) {
+                                console.warn('⚠️ Could not update streaming service with connection data (continuing):', updateError);
+                            }
+                            */
+                            logger.info('ℹ️ Connection datasource update skipped (PUT API commented out)');
                         }
                     } catch (error) {
                         console.warn('Could not update datasource connection:', error);
@@ -2245,14 +2279,18 @@ if __name__ == "__main__":
 
             logger.info('📊 Stream item to update:', streamItem);
 
-            // Call the update streaming service API
+            // COMMENTED OUT: Call the update streaming service API (PUT API disabled due to 403 permission issues)
+            // TODO: Re-enable when user has appropriate permissions
+            /*
             await this.updateStreamingService(streamItem);
-
             logger.info('✅ Stream item updated successfully');
+            */
+            logger.info('ℹ️ Stream item update skipped (PUT API commented out)');
 
         } catch (error: any) {
             console.error('❌ Failed to update stream item:', error);
-            throw error;
+            // Don't throw error - allow file upload to succeed even if update fails
+            console.warn('⚠️ Continuing despite update error (PUT API commented out)');
         }
     }
 
