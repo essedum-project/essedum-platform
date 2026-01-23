@@ -80,6 +80,13 @@ This setup is ideal for developers who want to work on the source code and contr
 - **Python Job Executor**:
   - Python 3.12 or higher
 
+  **Command to Install prerequisites**
+
+  ```bash
+  chmod +x setup_prerequisites.sh
+  ./setup_prerequisites.sh
+  ```
+
 #### Step-by-Step Guide
 
 1. **Clone the Repository**:
@@ -87,6 +94,7 @@ This setup is ideal for developers who want to work on the source code and contr
    git clone <repository-url>
    cd essedum-platform
    ```
+
 
 2. **Backend Setup**:
    - Navigate to the `sv/` directory.
