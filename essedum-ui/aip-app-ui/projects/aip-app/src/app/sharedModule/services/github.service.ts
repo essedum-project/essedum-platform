@@ -113,6 +113,17 @@ export class GitHubService {
   }
 
   /**
+   * Save git configuration (repo, branch, etc.) to database
+   */
+  saveGitConfig(config: any): Observable<any> {
+    return this.http.post(
+      '/api/aip/git-configs/save',
+      config,
+      { withCredentials: true }
+    );
+  }
+
+  /**
    * Open OAuth popup and poll for authentication
    */
   initiateOAuthFlow(): Observable<AuthStatus> {
