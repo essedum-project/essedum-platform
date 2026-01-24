@@ -203,7 +203,8 @@ export async function initializePipelineServices(
             context,
             accessToken,
             authService,
-            pipelineAgentService
+            pipelineAgentService,
+            essedumFileProvider
         );
 
         // Update file provider with token
@@ -240,7 +241,8 @@ export async function initializePipelineServices(
             context,
             '',
             authService,
-            pipelineAgentService
+            pipelineAgentService,
+            essedumFileProvider
         );
 
         await ExtensionUtils.updateAuthenticationContext(false);

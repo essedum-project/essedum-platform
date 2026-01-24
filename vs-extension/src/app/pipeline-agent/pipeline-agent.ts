@@ -22,9 +22,147 @@ import * as os from 'os';
 import archiver from 'archiver';
 import { PipelineAgentCard } from '../../interfaces/pipeline-agent.interface';
 import * as ExtensionUtils from '../../utils/extension-utils';
+import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 
 const logger = ExtensionUtils.createLogger('PipelineAgent');
 
+/**
+ * ADK Tree Item for tree view
+ */
+class AdkTreeItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+        public readonly resourceUri?: vscode.Uri,
+        public readonly isFile: boolean = false,
+        public readonly children: AdkTreeItem[] = []
+    ) {
+        super(label, collapsibleState);
+        
+        if (isFile && resourceUri) {
+            this.command = {
+                command: 'vscode.open',
+                title: 'Open File',
+                arguments: [resourceUri]
+            };
+            this.contextValue = 'adkFile';
+            // Set icon based on file extension
+            const ext = path.extname(label);
+            this.iconPath = new vscode.ThemeIcon(this.getIconForExtension(ext));
+        } else {
+            this.contextValue = 'adkFolder';
+            this.iconPath = new vscode.ThemeIcon('folder');
+        }
+    }
+
+    private getIconForExtension(ext: string): string {
+        const iconMap: { [key: string]: string } = {
+            '.py': 'symbol-method',
+            '.js': 'symbol-method',
+            '.ts': 'symbol-method',
+            '.json': 'json',
+            '.md': 'markdown',
+            '.txt': 'file-text',
+            '.yaml': 'file-code',
+            '.yml': 'file-code'
+        };
+        return iconMap[ext.toLowerCase()] || 'file';
+    }
+}
+
+/**
+ * ADK Tree Data Provider for Explorer view
+ */
+class AdkTreeDataProvider implements vscode.TreeDataProvider<AdkTreeItem> {
+    private _onDidChangeTreeData = new vscode.EventEmitter<AdkTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+    private rootItems: AdkTreeItem[] = [];
+
+    constructor(private fileSystemProvider: EssedumFileSystemProvider) {}
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+
+    setFiles(pipelineName: string, files: any[]): void {
+        // Build tree structure from flat file list
+        this.rootItems = [];
+        const folderMap = new Map<string, AdkTreeItem>();
+
+        // Sort files by path
+        const sortedFiles = files.sort((a, b) => a.filePath.localeCompare(b.filePath));
+
+        for (const file of sortedFiles) {
+            const parts = file.filePath.split('/');
+            const fileName = parts[parts.length - 1];
+            const folderPath = parts.slice(0, -1).join('/');
+
+            // Create folders if needed
+            if (folderPath) {
+                const folderParts = folderPath.split('/');
+                let currentPath = '';
+                let parentFolder: AdkTreeItem | null = null;
+
+                for (const folderName of folderParts) {
+                    currentPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+                    
+                    if (!folderMap.has(currentPath)) {
+                        const folderItem = new AdkTreeItem(
+                            folderName,
+                            vscode.TreeItemCollapsibleState.Expanded,
+                            undefined,
+                            false,
+                            []
+                        );
+                        folderMap.set(currentPath, folderItem);
+
+                        if (parentFolder) {
+                            parentFolder.children.push(folderItem);
+                        } else {
+                            this.rootItems.push(folderItem);
+                        }
+                    }
+                    parentFolder = folderMap.get(currentPath)!;
+                }
+            }
+
+            // Create file item
+            const uri = vscode.Uri.parse(`essedum://adk/${pipelineName}/${file.filePath}`);
+            const fileItem = new AdkTreeItem(
+                fileName,
+                vscode.TreeItemCollapsibleState.None,
+                uri,
+                true
+            );
+
+            // Add to appropriate parent
+            if (folderPath && folderMap.has(folderPath)) {
+                folderMap.get(folderPath)!.children.push(fileItem);
+            } else {
+                this.rootItems.push(fileItem);
+            }
+        }
+
+        this.refresh();
+    }
+
+    clear(): void {
+        this.rootItems = [];
+        this.refresh();
+    }
+
+    getTreeItem(element: AdkTreeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: AdkTreeItem): Thenable<AdkTreeItem[]> {
+        if (!element) {
+            return Promise.resolve(this.rootItems);
+        }
+        return Promise.resolve(element.children);
+    }
+}
 
 /**
  * Pipeline Agent Provider - Independent implementation for Pipeline Agent management
@@ -50,6 +188,15 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
     /** Pipeline Agent service instance */
     private _pipelineAgentService: PipelineAgentService;
+
+    /** File system provider for ADK files */
+    private _fileSystemProvider?: EssedumFileSystemProvider;
+
+    /** ADK Tree Data Provider */
+    private _adkTreeDataProvider?: AdkTreeDataProvider;
+
+    /** ADK Tree View */
+    private _adkTreeView?: vscode.TreeView<AdkTreeItem>;
 
     /** Pagination and filtering configuration */
     private pageNumber: number = CONSTANTS.PAGINATION.INITIAL_PAGE;
@@ -91,12 +238,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      * @param token - Authentication token
      * @param authService - Authentication service instance
      * @param pipelineAgentService - Pipeline Agent service instance
+     * @param fileSystemProvider - File system provider for ADK files
      */
     constructor(
         _context: vscode.ExtensionContext,
         token: string,
         authService?: any,
-        pipelineAgentService?: PipelineAgentService
+        pipelineAgentService?: PipelineAgentService,
+        fileSystemProvider?: EssedumFileSystemProvider
     ) {
         this._context = _context;
         this._extensionUri = _context.extensionUri;
@@ -106,10 +255,27 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         this.role = _context.globalState.get(CONSTANTS.STATE_KEYS.ROLE);
         this._authService = authService;
         this._pipelineAgentService = pipelineAgentService || new PipelineAgentService(_context);
+        this._fileSystemProvider = fileSystemProvider;
+
+        // Configure file system provider with pipeline agent service for individual saves
+        if (this._fileSystemProvider && this._pipelineAgentService) {
+            this._fileSystemProvider.setPipelineAgentService(this._pipelineAgentService);
+            
+            // Note: ADK tree provider commented out - using workspace folders instead
+            // this._adkTreeDataProvider = new AdkTreeDataProvider(this._fileSystemProvider);
+            // this._adkTreeView = vscode.window.createTreeView('essedumAdkExplorer', {
+            //     treeDataProvider: this._adkTreeDataProvider,
+            //     showCollapseAll: true
+            // });
+            // this._context.subscriptions.push(this._adkTreeView);
+        }
 
         // Initialize cache directory
         this.cacheDir = path.join(os.tmpdir(), CONSTANTS.CACHE_CONFIG.ROOT_DIR_NAME);
         this.ensureCacheDirectory();
+
+        // Register GLOBAL save handler for ADK files
+        this.registerGlobalAdkSaveHandler();
 
         logger.info(`${this.logPrefix} Pipeline Agent Provider initialized independently`);
         logger.info(`${this.logPrefix} Organization: ${this.organization}, Page size: ${this.pageSize}`);
@@ -967,13 +1133,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Handle View ADK action
+     * Handle View ADK action - Opens ADK files in workspace Explorer with auto-save to server
      */
     private async handleViewAdk(pipelineId: string): Promise<void> {
         try {
             // Refresh auth data to ensure organization is current
             this.refreshAuthData();
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1019,35 +1185,106 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     fs.writeFileSync(fullPath, file.filescript || '', 'utf-8');
                 }
 
-                progress.report({ increment: 80, message: 'Opening files in editor...' });
+                progress.report({ increment: 70, message: 'Storing context...' });
 
-                // Open all files in editor
-                for (const file of adkFiles) {
-                    const fullPath = path.join(adkFolderPath, file.filePath);
-                    const fileUri = vscode.Uri.file(fullPath);
-                    
-                    try {
-                        const doc = await vscode.workspace.openTextDocument(fileUri);
-                        await vscode.window.showTextDocument(doc, {
-                            preview: false,
-                            preserveFocus: true
-                        });
-                    } catch (err) {
-                        console.error(`${this.logPrefix} Failed to open file ${file.filePath}:`, err);
-                    }
+                // Get current base URL from storage - try multiple keys
+                let baseUrl = this._context.globalState.get<string>(STORAGE_KEYS.BASE_URL);
+                if (!baseUrl) {
+                    // Try alternate key
+                    baseUrl = this._context.globalState.get<string>('baseUrl');
+                }
+                if (!baseUrl) {
+                    // Import and use the current value from api-config
+                    const { getBaseUrl } = require('../../constants/api-config');
+                    baseUrl = getBaseUrl();
                 }
 
-                // Also reveal folder in explorer
+                logger.info(`${this.logPrefix} Retrieved base URL for storage: ${baseUrl}`);
+
+                // Verify we have a valid base URL
+                if (!baseUrl) {
+                    logger.error(`${this.logPrefix} ⚠️ WARNING: Base URL is empty! This will cause API calls to fail.`);
+                    vscode.window.showWarningMessage('Base URL not configured. Please ensure network is selected.');
+                }
+
+                // Create file ID mapping (filePath -> id)
+                const fileIdMap: Record<string, number> = {};
+                for (const file of adkFiles) {
+                    fileIdMap[file.filePath] = file.id;
+                }
+
+                // CRITICAL: Store ADK context BEFORE adding workspace folder
+                // This ensures context survives the extension reload that happens when workspace changes
+                const contextData = {
+                    pipelineName: pipelineName,
+                    pipelineId: pipelineId,
+                    organization: this.organization,
+                    project: this.project,
+                    role: this.role,
+                    token: this._token,
+                    baseUrl: baseUrl || '',
+                    folderPath: adkFolderPath,
+                    fileIdMap: fileIdMap,
+                    timestamp: Date.now()
+                };
+
+                logger.info(`${this.logPrefix} ⚡ Storing ADK context BEFORE workspace update:`, JSON.stringify(contextData, null, 2));
+                
+                await this._context.globalState.update('adkContext', contextData);
+                
+                // Verify it was stored
+                const verifyContext = this._context.globalState.get('adkContext');
+                logger.info(`${this.logPrefix} ✅ Verified stored context:`, JSON.stringify(verifyContext, null, 2));
+                
+                if (!verifyContext) {
+                    logger.error(`${this.logPrefix} ⚠️ CRITICAL: Context was not stored properly!`);
+                    throw new Error('Failed to store ADK context');
+                }
+
+                progress.report({ increment: 80, message: 'Adding to workspace...' });
+
                 const folderUri = vscode.Uri.file(adkFolderPath);
-                await vscode.commands.executeCommand('revealInExplorer', folderUri);
+                const workspaceFoldersCount = vscode.workspace.workspaceFolders?.length || 0;
+                
+                // Add the ADK folder to workspace (shows in Explorer)
+                const added = vscode.workspace.updateWorkspaceFolders(
+                    workspaceFoldersCount,
+                    0,
+                    { uri: folderUri, name: `ADK: ${pipelineName}` }
+                );
+
+                if (added) {
+                    // Give VS Code a moment to update the workspace
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Focus the Explorer view to show the new folder
+                    await vscode.commands.executeCommand('workbench.view.explorer');
+                    
+                    // Reveal the folder in Explorer
+                    try {
+                        await vscode.commands.executeCommand('revealInExplorer', folderUri);
+                    } catch (err) {
+                        logger.warn(`${this.logPrefix} Could not reveal in explorer:`, err);
+                    }
+                } else {
+                    logger.warn(`${this.logPrefix} Failed to add ADK folder to workspace`);
+                }
+
+                progress.report({ increment: 90, message: 'Setting up auto-save...' });
+
+                // Context is already stored before workspace update (to survive extension reload)
+                // Just setup the file watcher now
+                this.setupAdkFolderWatcher(adkFolderPath, pipelineName);
 
                 progress.report({ increment: 100, message: 'Complete!' });
 
-                vscode.window.showInformationMessage(`✓ ${adkFiles.length} ADK files opened. Edit and save to sync changes.`);
-                this.sendMessageToWebview({ command: 'actionComplete', message: `✓ ${adkFiles.length} files opened` });
-
-                // Setup file watcher for auto-sync
-                this.setupAdkFolderWatcher(adkFolderPath, pipelineName);
+                vscode.window.showInformationMessage(
+                    `✓ ${adkFiles.length} ADK files opened in Explorer. Edit any file and press Ctrl+S to save to server.`
+                );
+                this.sendMessageToWebview({ 
+                    command: 'actionComplete', 
+                    message: `✓ ${adkFiles.length} files opened` 
+                });
             });
 
         } catch (error: any) {
@@ -1265,33 +1502,249 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     /**
      * Setup file system watcher for ADK folder
      */
+    /**
+     * Register global save handler for ADK files
+     * This ensures ALL file saves are caught, regardless of how the folder was added
+     */
+    private registerGlobalAdkSaveHandler(): void {
+        const globalSaveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
+            try {
+                logger.info(`${this.logPrefix} === GLOBAL SAVE HANDLER ===`);
+                logger.info(`${this.logPrefix} File saved: ${document.uri.fsPath}`);
+                
+                // Debug: List all keys in globalState
+                const allKeys = this._context.globalState.keys();
+                logger.info(`${this.logPrefix} Available context keys: ${JSON.stringify(allKeys)}`);
+                
+                // Check if this file is in an ADK folder
+                const adkContext = this._context.globalState.get<any>('adkContext');
+                
+                logger.info(`${this.logPrefix} ADK context retrieved:`, JSON.stringify(adkContext, null, 2));
+                
+                if (adkContext && adkContext.folderPath) {
+                    const normalizedDocPath = path.normalize(document.uri.fsPath).toLowerCase();
+                    const normalizedAdkPath = path.normalize(adkContext.folderPath).toLowerCase();
+                    
+                    logger.info(`${this.logPrefix} ADK folder path: ${normalizedAdkPath}`);
+                    logger.info(`${this.logPrefix} Document path: ${normalizedDocPath}`);
+                    logger.info(`${this.logPrefix} Is in ADK folder: ${normalizedDocPath.startsWith(normalizedAdkPath)}`);
+                    
+                    if (normalizedDocPath.startsWith(normalizedAdkPath)) {
+                        logger.info(`${this.logPrefix} 🎯 ADK FILE DETECTED - Triggering save to server`);
+                        await this.handleAdkFileSaveToServer(document, adkContext.pipelineName, adkContext.folderPath);
+                    } else {
+                        logger.info(`${this.logPrefix} Not an ADK file - skipping`);
+                    }
+                } else {
+                    logger.warn(`${this.logPrefix} ⚠️ No ADK context found - skipping`);
+                    logger.warn(`${this.logPrefix} This means the context was not stored when ADK folder was opened`);
+                }
+            } catch (error) {
+                logger.error(`${this.logPrefix} Error in global save handler:`, error);
+            }
+        });
+        
+        this._context.subscriptions.push(globalSaveDisposable);
+        logger.info(`${this.logPrefix} Global ADK save handler registered`);
+    }
+
+    /**
+     * Setup document save handler for ADK files in virtual file system
+     */
+    private setupAdkSaveHandler(pipelineName: string): void {
+        // Create a save handler that watches for document saves
+        const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
+            // Check if this document is an ADK file (essedum://adk/{pipelineName}/...)
+            if (document.uri.scheme === 'essedum' && 
+                document.uri.path.startsWith(`/adk/${pipelineName}/`)) {
+                await this.handleAdkFileSave(document, pipelineName);
+            }
+        });
+
+        this._context.subscriptions.push(saveDisposable);
+    }
+
+    /**
+     * Handle ADK file save - sync to server using individual updateAdkFile API
+     */
+    private async handleAdkFileSave(document: vscode.TextDocument, pipelineName: string): Promise<void> {
+        try {
+            logger.info(`${this.logPrefix} Saving ADK file: ${document.uri.toString()}`);
+
+            // Check if file system provider is available
+            if (!this._fileSystemProvider) {
+                throw new Error('File system provider not found');
+            }
+
+            // Get the file from the virtual file system
+            const file = this._fileSystemProvider.getAdkFilesForPipeline(pipelineName)
+                .find(f => f.uri.toString() === document.uri.toString());
+
+            if (!file) {
+                throw new Error('File not found in virtual file system');
+            }
+
+            // Save individual file using the updateAdkFile API
+            await this._fileSystemProvider.saveIndividualAdkFile(file);
+
+            // Show success message
+            const fileName = document.uri.path.split('/').pop();
+            vscode.window.showInformationMessage(`✓ ${fileName} saved to server`);
+
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} Error syncing file:`, error);
+            vscode.window.showErrorMessage(`Failed to sync file: ${error.message}`);
+        }
+    }
+
     private setupAdkFolderWatcher(adkFolderPath: string, pipelineName: string): void {
         if (this.adkFolderWatcher) {
             this.adkFolderWatcher.dispose();
         }
 
+        // Normalize path for consistent comparison
+        const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
+        
+        logger.info(`${this.logPrefix} Setting up ADK folder watcher`);
+        logger.info(`${this.logPrefix} Watching path: ${normalizedAdkPath}`);
+        logger.info(`${this.logPrefix} Pipeline: ${pipelineName}`);
+
         const pattern = new vscode.RelativePattern(adkFolderPath, '**/*');
         this.adkFolderWatcher = vscode.workspace.createFileSystemWatcher(pattern);
 
-        // Watch for file saves
+        // Watch for file saves - use API to save to server (handles both edits and new files)
         const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
-            if (document.uri.fsPath.startsWith(adkFolderPath)) {
-                await this.handleAdkFileSave(document, pipelineName, adkFolderPath);
+            const normalizedDocPath = path.normalize(document.uri.fsPath).toLowerCase();
+            
+            logger.info(`${this.logPrefix} File saved: ${normalizedDocPath}`);
+            logger.info(`${this.logPrefix} Checking if starts with: ${normalizedAdkPath}`);
+            
+            if (normalizedDocPath.startsWith(normalizedAdkPath)) {
+                logger.info(`${this.logPrefix} Match! Syncing to server...`);
+                await this.handleAdkFileSaveToServer(document, pipelineName, adkFolderPath);
+            } else {
+                logger.info(`${this.logPrefix} No match - file not in ADK folder`);
             }
+        });
+
+        // Watch for file creations (via Explorer "New File" button)
+        this.adkFolderWatcher.onDidCreate(async (uri) => {
+            logger.info(`${this.logPrefix} File created: ${uri.fsPath}`);
+            // Wait a bit for the file to be created and opened
+            setTimeout(async () => {
+                try {
+                    const document = await vscode.workspace.openTextDocument(uri);
+                    // Show message that file will be synced on first save
+                    const fileName = path.basename(uri.fsPath);
+                    vscode.window.showInformationMessage(`ℹ ${fileName} created. Press Ctrl+S to upload to server.`);
+                } catch (err) {
+                    logger.warn(`${this.logPrefix} Could not open created file:`, err);
+                }
+            }, 100);
         });
 
         // Watch for file deletions
         this.adkFolderWatcher.onDidDelete(async (uri) => {
+            logger.info(`${this.logPrefix} File deleted: ${uri.fsPath}`);
             await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
         });
 
         this._context.subscriptions.push(this.adkFolderWatcher, saveDisposable);
+        logger.info(`${this.logPrefix} ADK folder watcher setup complete`);
     }
 
     /**
-     * Handle ADK file save - sync to server
+     * Handle ADK file save - sync to server using updateAdkFile API
      */
-    private async handleAdkFileSave(document: vscode.TextDocument, pipelineName: string, adkFolderPath: string): Promise<void> {
+    private async handleAdkFileSaveToServer(document: vscode.TextDocument, pipelineName: string, adkFolderPath: string): Promise<void> {
+        try {
+            const relativePath = path.relative(adkFolderPath, document.uri.fsPath).replace(/\\/g, '/');
+            const fileContent = document.getText();
+
+            logger.info(`${this.logPrefix} ==========================================`);
+            logger.info(`${this.logPrefix} Saving file to server`);
+            logger.info(`${this.logPrefix} Pipeline: ${pipelineName}`);
+            logger.info(`${this.logPrefix} Relative path: ${relativePath}`);
+            logger.info(`${this.logPrefix} Content length: ${fileContent.length} bytes`);
+
+            // Retrieve ADK context from workspace state
+            const adkContext = this._context.globalState.get<any>('adkContext');
+            if (adkContext) {
+                logger.info(`${this.logPrefix} Using stored ADK context:`);
+                logger.info(`${this.logPrefix}   - Pipeline: ${adkContext.pipelineName}`);
+                logger.info(`${this.logPrefix}   - Organization: ${adkContext.organization}`);
+                logger.info(`${this.logPrefix}   - Base URL: ${adkContext.baseUrl}`);
+                logger.info(`${this.logPrefix}   - Has token: ${!!adkContext.token}`);
+                logger.info(`${this.logPrefix}   - Has project: ${!!adkContext.project}`);
+                logger.info(`${this.logPrefix}   - Has role: ${!!adkContext.role}`);
+                logger.info(`${this.logPrefix}   - File ID map: ${JSON.stringify(adkContext.fileIdMap || {})}`);
+                
+                // Update context state keys for PipelineAgentService to use
+                await this._context.globalState.update(STORAGE_KEYS.ACCESS_TOKEN, adkContext.token);
+                await this._context.globalState.update(STORAGE_KEYS.PROJECT, adkContext.project);
+                await this._context.globalState.update(STORAGE_KEYS.ROLE, adkContext.role);
+                await this._context.globalState.update(STORAGE_KEYS.ORGANIZATION, adkContext.organization);
+                
+                // CRITICAL: Restore base URL from context
+                if (adkContext.baseUrl) {
+                    await this._context.globalState.update(STORAGE_KEYS.BASE_URL, adkContext.baseUrl);
+                    // Also set it in the API config
+                    const { setBaseUrl } = require('../../constants/api-config');
+                    setBaseUrl(adkContext.baseUrl);
+                    logger.info(`${this.logPrefix}   - Base URL restored: ${adkContext.baseUrl}`);
+                }
+            } else {
+                logger.warn(`${this.logPrefix} No ADK context found, using current values`);
+            }
+
+            logger.info(`${this.logPrefix} ==========================================`);
+
+            // Refresh service auth data before API call
+            this._pipelineAgentService.refreshAuthData();
+
+            // Get file ID from stored mapping
+            const fileId = adkContext?.fileIdMap?.[relativePath] || 0;
+            if (fileId === 0) {
+                logger.warn(`${this.logPrefix} ⚠️ No file ID found for ${relativePath}, using 0 (may fail)`);
+            } else {
+                logger.info(`${this.logPrefix} Using file ID: ${fileId} for ${relativePath}`);
+            }
+
+            // Use the updateAdkFile API
+            await this._pipelineAgentService.updateAdkFile(pipelineName, relativePath, fileContent, fileId);
+
+            logger.info(`${this.logPrefix} API call completed successfully`);
+
+            // Update cache
+            const cachedFiles = this.adkFilesCache.get(pipelineName);
+            if (cachedFiles) {
+                const fileIndex = cachedFiles.findIndex(f => f.filePath === relativePath);
+                if (fileIndex !== -1) {
+                    cachedFiles[fileIndex].filescript = fileContent;
+                    logger.info(`${this.logPrefix} Updated cache for file: ${relativePath}`);
+                }
+            }
+
+            const fileName = path.basename(relativePath);
+            vscode.window.showInformationMessage(`✓ ${fileName} saved to server`);
+
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} ==========================================`);
+            logger.error(`${this.logPrefix} Error saving file to server:`, error);
+            logger.error(`${this.logPrefix} Error details:`, {
+                message: error.message,
+                stack: error.stack,
+                response: error.response?.data
+            });
+            logger.error(`${this.logPrefix} ==========================================`);
+            vscode.window.showErrorMessage(`Failed to save file: ${error.message}`);
+        }
+    }
+
+    /**
+     * Handle ADK file save - sync to server (old method for workspace folders)
+     */
+    private async handleAdkFileSaveOld(document: vscode.TextDocument, pipelineName: string, adkFolderPath: string): Promise<void> {
         try {
             const relativePath = path.relative(adkFolderPath, document.uri.fsPath).replace(/\\/g, '/');
             const fileContent = document.getText();
@@ -1325,23 +1778,44 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             const relativePath = path.relative(adkFolderPath, uri.fsPath).replace(/\\/g, '/');
 
-            const cachedFiles = this.adkFilesCache.get(pipelineName);
-            if (!cachedFiles) {return;}
+            logger.info(`${this.logPrefix} Deleting file from server: ${relativePath}`);
 
-            const fileMetadata = cachedFiles.find(f => f.filePath === relativePath);
-            if (!fileMetadata || !fileMetadata.id) {return;}
-
-            await this._pipelineAgentService.deleteAdkFolderFile(fileMetadata.id);
-
-            const fileIndex = cachedFiles.findIndex(f => f.filePath === relativePath);
-            if (fileIndex !== -1) {
-                cachedFiles.splice(fileIndex, 1);
+            // Retrieve and apply ADK context for API call
+            const adkContext = this._context.globalState.get<any>('adkContext');
+            if (adkContext) {
+                await this._context.globalState.update(STORAGE_KEYS.ACCESS_TOKEN, adkContext.token);
+                await this._context.globalState.update(STORAGE_KEYS.PROJECT, adkContext.project);
+                await this._context.globalState.update(STORAGE_KEYS.ROLE, adkContext.role);
+                await this._context.globalState.update(STORAGE_KEYS.ORGANIZATION, adkContext.organization);
+                
+                // Restore base URL
+                if (adkContext.baseUrl) {
+                    await this._context.globalState.update(STORAGE_KEYS.BASE_URL, adkContext.baseUrl);
+                    const { setBaseUrl } = require('../../constants/api-config');
+                    setBaseUrl(adkContext.baseUrl);
+                }
             }
 
-            vscode.window.showInformationMessage(`✓ ${path.basename(relativePath)} deleted from server`);
+            // Refresh service auth data
+            this._pipelineAgentService.refreshAuthData();
+
+            // Use the deleteAdkFile API (requires pipeline ID and file path)
+            await this._pipelineAgentService.deleteAdkFile(pipelineName, relativePath);
+
+            // Update cache
+            const cachedFiles = this.adkFilesCache.get(pipelineName);
+            if (cachedFiles) {
+                const fileIndex = cachedFiles.findIndex(f => f.filePath === relativePath);
+                if (fileIndex !== -1) {
+                    cachedFiles.splice(fileIndex, 1);
+                }
+            }
+
+            const fileName = path.basename(relativePath);
+            vscode.window.showInformationMessage(`✓ ${fileName} deleted from server`);
 
         } catch (error: any) {
-            console.error(`${this.logPrefix} Error deleting file from server:`, error);
+            logger.error(`${this.logPrefix} Error deleting file from server:`, error);
             vscode.window.showErrorMessage(`Failed to delete file: ${error.message}`);
         }
     }

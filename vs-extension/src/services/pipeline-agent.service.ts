@@ -462,14 +462,15 @@ export class PipelineAgentService {
 
   /**
    * Update ADK file content
-   * PUT /api/aip/file/update/{pipelineId}/{org}
+   * POST /api/aip/folder/update/{pipelineId}/{org}
    * @param pipelineId - Pipeline ID or name
    * @param filePath - Relative file path
    * @param fileContent - New file content
+   * @param fileId - File ID from database (required for update)
    * @param signal - Optional AbortSignal for cancellation
    * @returns Update response
    */
-  async updateAdkFile(pipelineId: string, filePath: string, fileContent: string, signal?: AbortSignal): Promise<any> {
+  async updateAdkFile(pipelineId: string, filePath: string, fileContent: string, fileId: number = 0, signal?: AbortSignal): Promise<any> {
     this.refreshAuthData();
 
     if (!pipelineId || !filePath) {
@@ -478,15 +479,23 @@ export class PipelineAgentService {
 
     const safeId = encodeURIComponent(pipelineId);
     const safeOrg = encodeURIComponent(this.organization);
-    const url = `${this.API.FILE_UPDATE}/${safeId}/${safeOrg}`;
+    const url = `${this.API.FOLDER_UPDATE}/${safeId}/${safeOrg}`;
 
-    const payload = {
+    // Extract filename from path
+    const filename = filePath.split(/[\\\\/]/).pop() || filePath;
+
+    // API expects array of file objects with specific structure
+    const payload = [{
+      id: fileId,
+      cname: pipelineId,
+      organization: this.organization,
+      filename: filename,
       filePath: filePath,
       filescript: fileContent
-    };
+    }];
 
     const config = this.buildAxiosConfig({}, {}, signal);
-    return this.requestWithRetry<any>('put', url, config, payload);
+    return this.requestWithRetry<any>('post', url, config, payload);
   }
 
   /**
