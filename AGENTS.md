@@ -11,7 +11,13 @@ The platform is composed of four main components:
 *   **Backend (`sv/`)**: A Java Spring Boot application that forms the core of the Essedum platform. It provides RESTful APIs for the frontend, manages business logic, and handles data persistence.
 *   **Frontend (`essedum-ui/`)**: An Angular-based single-page application that provides the user interface for the Essedum platform.
 *   **Nginx (`nginx/`)**: Used as a reverse proxy to serve the frontend application and route API requests to the backend services.
-*   **Python Job Executor (`py-job-executer/`)**: A separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks.
+*   **Python Job Executors**:
+    *   **Standard Executor (`py-job-executer/`)**: Executes general Python-based jobs.
+    *   **SageMaker Executor (`py-job-sagemaker-executer/`)**: Specialized executor for AWS SageMaker jobs.
+    *   **Vertex AI Executor (`py-job-vertex-executer/`)**: Specialized executor for GCP Vertex AI jobs.
+    *   **Azure Executor (`py-job-azure-executer/`)**: Specialized executor for Azure jobs.
+*   **VS Code Extension (`vs-extension/`)**: A Visual Studio Code extension for interacting with the Essedum platform.
+*   **Langflow Integration**: Integrated UI for designing AI agents.
 
 ## Build and Test Commands
 
@@ -43,9 +49,9 @@ npm install
 npm run build
 ```
 
-### Python Job Executor (`py-job-executer/`)
+### Python Job Executors
 
-To set up the Python Job Executor, navigate to the `py-job-executer/` directory and run:
+To set up any of the job executors (`py-job-executer/`, `py-job-sagemaker-executer/`, `py-job-vertex-executer/`, `py-job-azure-executer/`), navigate to the respective directory and run:
 
 ```bash
 # Create and activate a virtual environment (recommended)

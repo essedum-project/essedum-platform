@@ -3009,15 +3009,20 @@ public class ZipController {
             const deploymentAlias = streamingResponse?.alias || 'runner-service'; // fallback to default
             console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
             
-            // Now prepare payload with dynamic deployment_name
+            // Now prepare payload with dynamic deployment_name based on pipeline mode
             const apiParams = this.getApiParametersForMode();
+            
+            // Determine deployment name based on pipeline mode
+            const deploymentName = this.pipelineMode === 'mcp' 
+              ? 'service-qualification-mcp-5g' 
+              : 'service-qualification-agent-5g';
             
             const payload = {
               minio_endpoint: 'http://100.78.49.20:9000',
               bucket_name: 'aiptest',
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
               target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-              deployment_name: deploymentAlias, // Dynamic value from API
+              deployment_name: deploymentName, // Based on pipeline mode
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
@@ -3025,7 +3030,7 @@ public class ZipController {
             };
            
             console.log('  Step 5: Sending start_pipeline event with dynamic payload:', payload);
-            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentAlias}`);
+            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentName}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
             console.log('  Step 6: start_pipeline event emitted to WebSocket');
@@ -3033,14 +3038,20 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use fallback deployment_name if API call fails
+            // Use fallback deployment_name if API call fails - based on pipeline mode
             const apiParams = this.getApiParametersForMode();
+            
+            // Determine fallback deployment name based on pipeline mode
+            const fallbackDeploymentName = this.pipelineMode === 'mcp' 
+              ? 'service-qualification-mcp-5g' 
+              : 'service-qualification-agent-5g';
+            
             const fallbackPayload = {
               minio_endpoint: 'http://100.78.49.20:9000',
               bucket_name: 'aiptest',
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
               target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-              deployment_name: 'runner-service', // fallback value
+              deployment_name: fallbackDeploymentName, // Based on pipeline mode
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
@@ -3048,7 +3059,7 @@ public class ZipController {
             };
             
             console.log('  Step 5 (Fallback): Using fallback payload due to API error:', fallbackPayload);
-            this.addToConsole(`Using fallback deployment name: runner-service`);
+            this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
         });
