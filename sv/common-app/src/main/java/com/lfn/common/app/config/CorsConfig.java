@@ -28,23 +28,32 @@ import java.util.List;
 // 
 /**
  * The Class CorsConfig.
+ * Centralized CORS configuration - all settings come from application-mysql.yml
+ * No hardcoded origins in controllers anymore!
  *
  * @author essedum
  */
 @Configuration
 public class CorsConfig {
 
-    @Value("${spring.cors.allowedOriginPatterns}")
-    private String allowedOriginPatterns;
+    @Value("${spring.cors.allowed-origins}")
+    private String allowedOrigins;
 
-    @Value("${spring.cors.allowedHeaders}")
-    private String allowedHeader;
+    @Value("${spring.cors.allowed-headers}")
+    private String allowedHeaders;
 
-    @Value("${spring.cors.allowedMethods}")
-    private String allowedMethod;
+    @Value("${spring.cors.allowed-methods}")
+    private String allowedMethods;
+
+    @Value("${spring.cors.allow-credentials:true}")
+    private boolean allowCredentials;
+
+    @Value("${spring.cors.max-age:3600}")
+    private long maxAge;
 
     /**
-     * Cors filter.
+     * Cors filter - primary CORS configuration.
+     * This configuration is applied to /api/** endpoints.
      *
      * @return the cors filter
      */
@@ -52,62 +61,41 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOriginPattern(allowedOriginPatterns);
-        config.addAllowedHeader(allowedHeader);
-        config.setAllowedHeaders(
-                List.of(
-                        "Authorization",
-                        "Content-Type",
-                        "X-Requested-With",
-                        "Accept",
-                        "Origin",
-                        "Referer",
-                        "User-Agent",
-                        "Project",
-                        "ProjectName",
-                        "roleId",
-                        "roleName",
-                        "charset"
-                )
 
-        );
-        config.addAllowedMethod(allowedMethod);
+        // Set allowed origins from YAML configuration
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+
+        // Set allowed headers from YAML configuration
+        config.setAllowedHeaders(Arrays.asList(allowedHeaders.split(",")));
+
+        // Set allowed methods from YAML configuration
+        config.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
+
+        // Set credentials and max age
+        config.setAllowCredentials(allowCredentials);
+        config.setMaxAge(maxAge);
+
         source.registerCorsConfiguration("/api/**", config);
         return new CorsFilter(source);
     }
 
 
+    /**
+     * Global CORS configuration source.
+     * This configuration is applied to all endpoints (/**).
+     *
+     * @return the URL-based CORS configuration source
+     */
     @Bean
-    public
-    UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 1. Allow your React app (3000), Angular app (8087), and Python Backend (7860)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8087", "http://localhost:7860", "https://langflow.az.ad.idemo-ppc.com",
-                "https://essedum.az.ad.idemo-ppc.com"));
-
-        // 2. Allow the standard methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // 3. CRITICAL: Explicitly allow the custom headers you are sending in curl
-        // If you miss 'Project' or 'roleId' here, the browser will block the request
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "Project",
-                "ProjectName",
-                "roleId",
-                "roleName",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
-
-        // 4. Allow credentials if your fetch/axios request uses cookies/auth
-        configuration.setAllowCredentials(true);
+        // Use externalized configuration instead of hardcoded values
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
+        configuration.setAllowedHeaders(Arrays.asList(allowedHeaders.split(",")));
+        configuration.setAllowCredentials(allowCredentials);
+        configuration.setMaxAge(maxAge);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
