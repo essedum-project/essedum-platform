@@ -3005,12 +3005,18 @@ public class ZipController {
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
             console.log('  Step 4.2: Streaming service response:', streamingResponse);
             
-            // Extract alias from the response
-            const deploymentAlias = streamingResponse?.alias || 'runner-service'; // fallback to default
-            console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
+            // Determine deployment name based on pipeline mode
+            const deploymentName = this.pipelineMode === 'mcp' 
+              ? 'service-qualification-mcp-5g' 
+              : 'service-qualification-agent-5g';
             
-            // Now prepare payload with dynamic deployment_name
+            // Extract alias from the response, fallback to mode-specific deployment name
+            const deploymentAlias =  deploymentName;
+            
+            // Now prepare payload with dynamic deployment_name based on pipeline mode
             const apiParams = this.getApiParametersForMode();
+            
+            console.log('  Step 4.3: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentName);
             
             const payload = {
               minio_endpoint: 'http://100.78.49.20:9000',
@@ -3033,14 +3039,18 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use fallback deployment_name if API call fails
+            // Use fallback deployment_name if API call fails - mode-specific
             const apiParams = this.getApiParametersForMode();
+            const fallbackDeploymentName = this.pipelineMode === 'mcp' 
+              ? 'service-qualification-mcp-5g' 
+              : 'service-qualification-agent-5g';
+            
             const fallbackPayload = {
               minio_endpoint: 'http://100.78.49.20:9000',
               bucket_name: 'aiptest',
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
               target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-              deployment_name: 'runner-service', // fallback value
+              deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
@@ -3048,7 +3058,7 @@ public class ZipController {
             };
             
             console.log('  Step 5 (Fallback): Using fallback payload due to API error:', fallbackPayload);
-            this.addToConsole(`Using fallback deployment name: runner-service`);
+            this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
         });
@@ -3157,7 +3167,7 @@ public class ZipController {
         
         // Step 3: Add/update the playgroundUrl
         const environmentUrl = this.getEnvironmentUrl();
-        jsonContent.playgroundurl = `${environmentUrl}/apps/runner-service/ask`;
+        jsonContent.playgroundurl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
         console.log('Updated json_content with playground URL:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
@@ -3666,6 +3676,7 @@ DELIVERABLES
 
   /**
    * Check if playground button should be enabled
+   * Playground is only available for agent pipelines, not MCP
    */
   canOpenPlayground(): boolean {
     return this.shouldShowRunPlaygroundButtons() && this.isPlaygroundEnabled && !this.isRunningAndDeploying;
@@ -3734,20 +3745,20 @@ DELIVERABLES
         } else {
           console.log('fetchPlaygroundUrl - No playgroundurl found, using default');
           const environmentUrl = this.getEnvironmentUrl();
-          this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+          this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
           console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
         }
       } else {
         console.log('fetchPlaygroundUrl - No json_content in response, using default');
         const environmentUrl = this.getEnvironmentUrl();
-        this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+        this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
         console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
       console.log('fetchPlaygroundUrl - Error occurred, using default URL');
       const environmentUrl = this.getEnvironmentUrl();
-      this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+      this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
       console.log('fetchPlaygroundUrl - Using default URL after error:', this.playgroundUrl);
     }
   }
