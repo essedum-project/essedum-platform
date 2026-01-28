@@ -25,96 +25,143 @@
 
             <!-- Basic Information Section -->
             <div id="basic" class="section-card">
-                <h2 class="section-title">Basic Information <span class="required-badge">Required</span></h2>
+                <div class="section-header-with-collapse">
+                    <h2 class="section-title-hoverable" 
+                        [ngStyle]="{color: sectionHoverStates['basic'] ? '#0052cc' : 'black', transform: sectionHoverStates['basic'] ? 'translateX(12px)' : 'translateX(0)'}"
+                        (mouseenter)="sectionHoverStates['basic'] = true"
+                        (mouseleave)="sectionHoverStates['basic'] = false">
+                        {{ sectionTitles.basic }} <span class="required-badge">Required</span>
+                    </h2>
+                    <button class="collapse-btn" (click)="toggleSection('basic')">
+                        <mat-icon>{{ sectionStates['basic'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                </div>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Name</mat-label>
-                    <input matInput [(ngModel)]="agentData.alias" placeholder="Enter agent name" required>
-                </mat-form-field>
+                <div *ngIf="sectionStates['basic']" class="section-content">
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Name</mat-label>
+                        <input matInput [(ngModel)]="agentData.alias" placeholder="Enter agent name" required>
+                    </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Version</mat-label>
-                    <input matInput [(ngModel)]="agentData.version" placeholder="e.g., 1.0.0" >
-                </mat-form-field>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Version</mat-label>
+                        <input matInput [(ngModel)]="agentData.version" placeholder="e.g., 1.0.0" >
+                    </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Type</mat-label>
-                    <mat-select disabled [(ngModel)]="agentData.type" required>
-                        <mat-option *ngFor="let option of options" [value]="option.value">
-                            {{ option.value }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Type</mat-label>
+                        <mat-select disabled [(ngModel)]="agentData.type" placeholder="Select type" required>
+                            <mat-option *ngFor="let option of options" [value]="option.value">
+                                {{ option.value }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
 
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label *ngIf="agentData.type==='AIAgent'">Assigned Agent Pipeline</mat-label>
-                    <mat-label *ngIf="agentData.type==='mcpServer'">Assigned MCP Pipeline</mat-label>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label *ngIf="agentData.type==='AIAgent'">Assigned Agent Pipeline</mat-label>
+                        <mat-label *ngIf="agentData.type==='mcpServer'">Assigned MCP Pipeline</mat-label>
 
-                    <input matInput disabled [(ngModel)]="assignedAgentMcpPipeline" placeholder="">
-                </mat-form-field>
+                        <input matInput disabled [(ngModel)]="assignedAgentMcpPipeline" placeholder="">
+                    </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Description</mat-label>
-                    <textarea matInput [(ngModel)]="agentData.description" placeholder="Enter description"
-                        rows="3"></textarea>
-                </mat-form-field>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput [(ngModel)]="agentData.description" placeholder="Enter description"
+                            rows="3"></textarea>
+                    </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Creator</mat-label>
-                    <input matInput disabled [(ngModel)]="agentData.creator" placeholder="Enter creator name">
-                </mat-form-field>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Creator</mat-label>
+                        <input matInput disabled [(ngModel)]="agentData.creator" placeholder="Enter creator name">
+                    </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Organization</mat-label>
-                    <input matInput disabled [(ngModel)]="agentData.organization" placeholder="Enter organization name">
-                </mat-form-field>
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                        <mat-label>Organization</mat-label>
+                        <input matInput disabled [(ngModel)]="agentData.organization" placeholder="Enter organization name">
+                    </mat-form-field>
+                </div>
             </div>
 
             <!-- CID Section -->
             <div id="cid" class="section-card">
-                <h2 class="section-title">CID</h2>
-
-                <div class="cid-field-group">
-                    <mat-form-field appearance="fill" class="cid-input">
-                        <mat-label>Content Identifier</mat-label>
-                        <input matInput disabled [(ngModel)]="agentData.cid" readonly>
-                    </mat-form-field>
-                   
-                    <button class="icon-btn" (click)="copyToClipboard(agentData.cid)" title="Copy CID">
-                        <mat-icon>content_copy</mat-icon>
+                <div class="section-header-with-collapse">
+                    <h2 class="section-title-hoverable"
+                        [ngStyle]="{color: sectionHoverStates['cid'] ? '#0052cc' : 'black', transform: sectionHoverStates['cid'] ? 'translateX(12px)' : 'translateX(0)'}"
+                        (mouseenter)="sectionHoverStates['cid'] = true"
+                        (mouseleave)="sectionHoverStates['cid'] = false">
+                        {{ sectionTitles.cid }}
+                    </h2>
+                    <button class="collapse-btn" (click)="toggleSection('cid')">
+                        <mat-icon>{{ sectionStates['cid'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
+                </div>
+
+                <div *ngIf="sectionStates['cid']" class="section-content">
+                    <div class="cid-field-group">
+                        <mat-form-field appearance="fill" class="cid-input" floatLabel="always">
+                            <mat-label>Content Identifier</mat-label>
+                            <input matInput disabled [(ngModel)]="agentData.cid" readonly>
+                        </mat-form-field>
+                   
+                        <button class="icon-btn" (click)="copyToClipboard(agentData.cid)" title="Copy CID">
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- JSON Model Section -->
             <div id="json-model" class="section-card">
-                <h2 class="section-title">JSON Model</h2>
+                <div class="section-header-with-collapse">
+                    <h2 class="section-title-hoverable"
+                        [ngStyle]="{color: sectionHoverStates['json-model'] ? '#0052cc' : 'black', transform: sectionHoverStates['json-model'] ? 'translateX(12px)' : 'translateX(0)'}"
+                        (mouseenter)="sectionHoverStates['json-model'] = true"
+                        (mouseleave)="sectionHoverStates['json-model'] = false">
+                        {{ sectionTitles.jsonModel }}
+                    </h2>
+                    <button class="collapse-btn" (click)="toggleSection('json-model')">
+                        <mat-icon>{{ sectionStates['json-model'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                </div>
 
-                <app-enl-code-editor id="ele" [script]="script" [lang]="lang" (scriptChange)="onScriptChange($event)"
-                    style="height: 100%; width: 100%;">
-                </app-enl-code-editor>
+                <div *ngIf="sectionStates['json-model']" class="section-content">
+                    <app-enl-code-editor id="ele" [script]="script" [lang]="lang" (scriptChange)="onScriptChange($event)"
+                        style="height: 100%; width: 100%;">
+                    </app-enl-code-editor>
+                </div>
             </div>
 
             <!-- Modules Section -->
             <div id="modules" class="section-card">
-                <h2 class="section-title">
-                    Modules
-                    <span class="count">{{ agentData.modules.length }}</span>
-                </h2>
-
-                <div class="add-item-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Module Name</mat-label>
-                        <input matInput [(ngModel)]="newModuleName" placeholder="Enter module name"
-                            (keyup.enter)="addModule()">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addModule()">
-                        <mat-icon>add</mat-icon>
-                        Add Module
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['modules'] ? '#0052cc' : 'black', transform: sectionHoverStates['modules'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['modules'] = true"
+                            (mouseleave)="sectionHoverStates['modules'] = false">
+                            {{ sectionTitles.modules }}
+                            <span class="count">{{ agentData.modules.length }}</span>
+                        </h2>
+                        <button class="add-btn" (click)="addModule()">
+                            <mat-icon>add</mat-icon>
+                            Add Module
+                        </button>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('modules')">
+                        <mat-icon>{{ sectionStates['modules'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
+
+                <div *ngIf="sectionStates['modules']" class="section-content">
+                    <div class="add-item-row">
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Module Name</mat-label>
+                            <input matInput [(ngModel)]="newModuleName" placeholder="Enter module name"
+                                (keyup.enter)="addModule()">
+                        </mat-form-field>
+                    </div>
 
                 <div class="items-list" *ngIf="agentData.modules.length > 0">
                     <div *ngFor="let module of agentData.modules; let i = index" class="item-chip">
@@ -125,29 +172,41 @@
                     </div>
                 </div>
 
-                <div class="empty-state" *ngIf="agentData.modules.length === 0">
-                    <p>No modules added yet</p>
+                    <div class="empty-state" *ngIf="agentData.modules.length === 0">
+                        <p>No modules added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Skills Section -->
             <div *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'" id="skills" class="section-card">
-                <h2 class="section-title">
-                    Skills
-                    <span class="count">{{ agentData.skills.length }}</span>
-                </h2>
-
-                <div class="add-item-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Skill Name</mat-label>
-                        <input matInput [(ngModel)]="newSkillName" placeholder="Enter skill name"
-                            (keyup.enter)="addSkill()">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addSkill()">
-                        <mat-icon>add</mat-icon>
-                        Add Skill
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['skills'] ? '#0052cc' : 'black', transform: sectionHoverStates['skills'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['skills'] = true"
+                            (mouseleave)="sectionHoverStates['skills'] = false">
+                            {{ sectionTitles.skills }}
+                            <span class="count">{{ agentData.skills.length }}</span>
+                        </h2>
+                        <button class="add-btn" (click)="addSkill()">
+                            <mat-icon>add</mat-icon>
+                            Add Skill
+                        </button>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('skills')">
+                        <mat-icon>{{ sectionStates['skills'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
+
+                <div *ngIf="sectionStates['skills']" class="section-content">
+                    <div class="add-item-row">
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Skill Name</mat-label>
+                            <input matInput [(ngModel)]="newSkillName" placeholder="Enter skill name"
+                                (keyup.enter)="addSkill()">
+                        </mat-form-field>
+                    </div>
 
                 <div class="items-list" *ngIf="agentData.skills.length > 0">
                     <div *ngFor="let skill of agentData.skills; let i = index" class="item-chip skill-badge">
@@ -158,33 +217,95 @@
                     </div>
                 </div>
 
-                <div class="empty-state" *ngIf="agentData.skills.length === 0">
-                    <p>No skills added yet</p>
+                    <div class="empty-state" *ngIf="agentData.skills.length === 0">
+                        <p>No skills added yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selectors Section -->
+            <div id="selectors" class="section-card">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['selectors'] ? '#0052cc' : 'black', transform: sectionHoverStates['selectors'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['selectors'] = true"
+                            (mouseleave)="sectionHoverStates['selectors'] = false">
+                            {{ sectionTitles.selectors }} <span class="info-badge">Tags/Filters for Routing</span>
+                            <span class="count">{{ agentData.selectors.length }}</span>
+                        </h2>
+                        <button class="add-btn" (click)="addSelector()">
+                            <mat-icon>add</mat-icon>
+                            Add Selector
+                        </button>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('selectors')">
+                        <mat-icon>{{ sectionStates['selectors'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                </div>
+
+                <div *ngIf="sectionStates['selectors']" class="section-content">
+                    <div class="add-item-row selector-add-row">
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Key</mat-label>
+                            <input matInput [(ngModel)]="newSelectorKey" placeholder="e.g., environment">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Value</mat-label>
+                            <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
+                                (keyup.enter)="addSelector()">
+                        </mat-form-field>
+                    </div>
+
+                <div class="items-list" *ngIf="agentData.selectors.length > 0">
+                    <div *ngFor="let selector of agentData.selectors; let i = index" class="item-chip selector-badge">
+                        <span><strong>{{ selector.key }}:</strong> {{ selector.value }}</span>
+                        <button class="remove-icon-btn" (click)="removeSelector(i)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                    <div class="empty-state" *ngIf="agentData.selectors.length === 0">
+                        <p>No selectors added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Domains Section -->
             <div id="domains" class="section-card">
-                <h2 class="section-title">
-                    Domains
-                    <span class="count">{{ agentData.domains.length }}</span>
-                </h2>
-
-                <div class="add-item-row domain-add-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Domain Name</mat-label>
-                        <input matInput [(ngModel)]="newDomainName" placeholder="Enter domain name">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Description</mat-label>
-                        <input matInput [(ngModel)]="newDomainDescription" placeholder="Domain description"
-                            (keyup.enter)="addDomain()">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addDomain()">
-                        <mat-icon>add</mat-icon>
-                        Add Domain
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['domains'] ? '#0052cc' : 'black', transform: sectionHoverStates['domains'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['domains'] = true"
+                            (mouseleave)="sectionHoverStates['domains'] = false">
+                            {{ sectionTitles.domains }}
+                            <span class="count">{{ agentData.domains.length }}</span>
+                        </h2>
+                        <button class="add-btn" (click)="addDomain()">
+                            <mat-icon>add</mat-icon>
+                            Add Domain
+                        </button>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('domains')">
+                        <mat-icon>{{ sectionStates['domains'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
+
+                <div *ngIf="sectionStates['domains']" class="section-content">
+                    <div class="add-item-row domain-add-row">
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Domain Name</mat-label>
+                            <input matInput [(ngModel)]="newDomainName" placeholder="Enter domain name">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="flex-grow" floatLabel="always">
+                            <mat-label>Description</mat-label>
+                            <input matInput [(ngModel)]="newDomainDescription" placeholder="Domain description"
+                                (keyup.enter)="addDomain()">
+                        </mat-form-field>
+                        
+                    </div>
 
                 <div *ngFor="let domain of agentData.domains; let i = index" class="domain-item">
                     <div class="domain-header">
@@ -196,391 +317,329 @@
                     <p class="domain-desc">{{ domain.description }}</p>
                 </div>
 
-                <div class="empty-state" *ngIf="agentData.domains.length === 0">
-                    <p>No domains added yet</p>
+                    <div class="empty-state" *ngIf="agentData.domains.length === 0">
+                        <p>No domains added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Locators Section -->
             <div id="locators" class="section-card">
-                <h2 class="section-title">
-                    Locators
-                    <span class="count">{{ agentData.locators.length }}</span>
-                </h2>
-
-                <div class="add-item-row locator-add-row">
-                    <mat-form-field appearance="fill" class="locator-type-field">
-                        <mat-label>Type</mat-label>
-                        <mat-select [(ngModel)]="newLocatorType">
-                            <mat-option *ngFor="let option of locatorTypeOptions" [value]="option.value">
-                                {{ option.label }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>URL</mat-label>
-                        <input matInput [(ngModel)]="newLocatorUrl" placeholder="Enter URL"
-                            (keyup.enter)="addLocator()">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addLocator()">
-                        <mat-icon>add</mat-icon>
-                        Add Locator
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['locators'] ? '#0052cc' : 'black', transform: sectionHoverStates['locators'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['locators'] = true"
+                            (mouseleave)="sectionHoverStates['locators'] = false">
+                            {{ sectionTitles.locators }}
+                            <span class="count">{{ agentData.locators.length }}</span>
+                        </h2>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('locators')">
+                        <mat-icon>{{ sectionStates['locators'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
 
-                <table class="edit-table" *ngIf="agentData.locators.length > 0">
-                    <thead>
-                        <tr>
-                            <th *ngFor="let header of locatorsHeaders"
-                                [attr.width]="header.key === 'actions' ? '50' : null">
-                                {{ header.label }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let locator of agentData.locators; let i = index">
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <mat-select [(ngModel)]="locator.locator_type">
-                                        <mat-option *ngFor="let option of locatorTypeOptions" [value]="option.value">
+                <div *ngIf="sectionStates['locators']" class="section-content">
+                    <table class="table table-striped table-bordered sync-params-table">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let h of locatorsHeaders" class="table-header-title" [style.width]="h.width">
+                                    {{ h.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let locator of agentData.locators; let i = index">
+                                <td style="text-align: center" (click)="removeLocator(i)">
+                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td>
+                                    <select style="height: 3rem" [(ngModel)]="locator.locator_type" class="form-control">
+                                        <option *ngFor="let option of locatorTypeOptions" [value]="option.value">
                                             {{ option.label }}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="locator.url">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <button class="icon-btn-small" (click)="removeLocator(i)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                        </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="locator.url" class="form-control"
+                                        type="text" placeholder="Enter URL" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center" (click)="addLocator()">
+                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                <div class="empty-state" *ngIf="agentData.locators.length === 0">
-                    <p>No locators added yet</p>
+                    <div class="empty-state" *ngIf="agentData.locators.length === 0">
+                        <p>No locators added yet</p>
+                    </div>
+                </div>
+            </div>
+
+              <!-- Extensions Section -->
+            <div id="extensions" class="section-card">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title">
+                            Extensions <span class="info-badge">Custom Metadata</span>
+                            <span class="count">{{ agentData.extensions.length }}</span>
+                        </h2>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('extensions')">
+                        <mat-icon>{{ sectionStates['extensions'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                </div>
+
+                <div *ngIf="sectionStates['extensions']" class="section-content">
+                    <table class="table table-striped table-bordered sync-params-table">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let h of extensionsHeaders" class="table-header-title" [style.width]="h.width">
+                                    {{ h.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let extension of agentData.extensions; let i = index">
+                                <td style="text-align: center" (click)="removeExtension(i)">
+                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="extension.key" class="form-control"
+                                        type="text" placeholder="Enter key" />
+                                </td>
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="extension.value" class="form-control"
+                                        type="text" placeholder="Enter value" />
+                                </td>
+                               
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="extension.description" class="form-control"
+                                        type="text" placeholder="Enter description" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center" (click)="addExtension()">
+                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="empty-state" *ngIf="agentData.extensions.length === 0">
+                        <p>No extensions added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Syncs Section -->
             <div id="syncs" class="section-card">
-                <h2 class="section-title">
-                    Syncs
-                    <span class="count">{{ agentData.syncs.length }}</span>
-                </h2>
-
-                <div class="add-item-row sync-add-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Target</mat-label>
-                        <input matInput [(ngModel)]="newSyncTarget" placeholder="e.g., production-cluster">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="sync-frequency-field">
-                        <mat-label>Frequency</mat-label>
-                        <mat-select [(ngModel)]="newSyncFrequency">
-                            <mat-option *ngFor="let option of syncFrequencyOptions" [value]="option.value">
-                                {{ option.label }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addSync()">
-                        <mat-icon>add</mat-icon>
-                        Add Sync
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['syncs'] ? '#0052cc' : 'black', transform: sectionHoverStates['syncs'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['syncs'] = true"
+                            (mouseleave)="sectionHoverStates['syncs'] = false">
+                            {{ sectionTitles.syncs }}
+                            <span class="count">{{ agentData.syncs.length }}</span>
+                        </h2>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('syncs')">
+                        <mat-icon>{{ sectionStates['syncs'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
 
-                <table class="edit-table" *ngIf="agentData.syncs.length > 0">
-                    <thead>
-                        <tr>
-                            <th *ngFor="let header of syncsHeaders"
-                                [attr.width]="header.key === 'actions' ? '50' : null">
-                                {{ header.label }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let sync of agentData.syncs; let i = index">
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="sync.target">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <mat-select [(ngModel)]="sync.frequency">
-                                        <mat-option *ngFor="let option of syncFrequencyOptions" [value]="option.value">
+                <div *ngIf="sectionStates['syncs']" class="section-content">
+                    <table class="table table-striped table-bordered sync-params-table">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let h of syncsHeaders" class="table-header-title" [style.width]="h.width">
+                                    {{ h.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let sync of agentData.syncs; let i = index">
+                                <td style="text-align: center" (click)="removeSync(i)">
+                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="sync.target" class="form-control"
+                                        type="text" placeholder="Enter target" />
+                                </td>
+                                <td>
+                                    <select style="height: 3rem" [(ngModel)]="sync.frequency" class="form-control">
+                                        <option *ngFor="let option of syncFrequencyOptions" [value]="option.value">
                                             {{ option.label }}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </td>
-                            <td>{{ sync.last_sync | date:'short' }}</td>
-                            <td>
-                                <button class="icon-btn-small" (click)="removeSync(i)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center" (click)="addSync()">
+                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                <div class="empty-state" *ngIf="agentData.syncs.length === 0">
-                    <p>No syncs configured yet</p>
+                    <div class="empty-state" *ngIf="agentData.syncs.length === 0">
+                        <p>No syncs configured yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Publications Section -->
             <div id="publications" class="section-card">
-                <h2 class="section-title">
-                    Publications
-                    <span class="count">{{ agentData.publications.length }}</span>
-                </h2>
-
-                <div class="add-item-row publication-add-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Channel</mat-label>
-                        <input matInput [(ngModel)]="newPublicationChannel" placeholder="e.g., GitHub Registry">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="publication-status-field">
-                        <mat-label>Status</mat-label>
-                        <mat-select [(ngModel)]="newPublicationStatus">
-                            <mat-option *ngFor="let option of publicationStatusOptions" [value]="option.value">
-                                {{ option.label }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addPublication()">
-                        <mat-icon>add</mat-icon>
-                        Add Publication
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title-hoverable"
+                            [ngStyle]="{color: sectionHoverStates['publications'] ? '#0052cc' : 'black', transform: sectionHoverStates['publications'] ? 'translateX(12px)' : 'translateX(0)'}"
+                            (mouseenter)="sectionHoverStates['publications'] = true"
+                            (mouseleave)="sectionHoverStates['publications'] = false">
+                            {{ sectionTitles.publications }}
+                            <span class="count">{{ agentData.publications.length }}</span>
+                        </h2>
+                    </div>
+                    <button class="collapse-btn" (click)="toggleSection('publications')">
+                        <mat-icon>{{ sectionStates['publications'] ? 'expand_less' : 'expand_more' }}</mat-icon>
                     </button>
                 </div>
 
-                <table class="edit-table" *ngIf="agentData.publications.length > 0">
-                    <thead>
-                        <tr>
-                            <th *ngFor="let header of publicationsHeaders"
-                                [attr.width]="header.key === 'actions' ? '50' : null">
-                                {{ header.label }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let publication of agentData.publications; let i = index">
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="publication.channel">
-                                </mat-form-field>
-                            </td>
-                            <td>{{ publication.published_date | date:'shortDate' }}</td>
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <mat-select [(ngModel)]="publication.status">
-                                        <mat-option *ngFor="let option of publicationStatusOptions"
-                                            [value]="option.value">
+                <div *ngIf="sectionStates['publications']" class="section-content">
+                    <table class="table table-striped table-bordered sync-params-table">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let h of publicationsHeaders" class="table-header-title" [style.width]="h.width">
+                                    {{ h.label }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let publication of agentData.publications; let i = index">
+                                <td style="text-align: center" (click)="removePublication(i)">
+                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td>
+                                    <input style="height: 3rem" [(ngModel)]="publication.channel" class="form-control"
+                                        type="text" placeholder="Enter channel" />
+                                </td>
+                                <td>
+                                    <select style="height: 3rem" [(ngModel)]="publication.status" class="form-control">
+                                        <option *ngFor="let option of publicationStatusOptions" [value]="option.value">
                                             {{ option.label }}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <button class="icon-btn-small" (click)="removePublication(i)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center" (click)="addPublication()">
+                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                <div class="empty-state" *ngIf="agentData.publications.length === 0">
-                    <p>No publications added yet</p>
-                </div>
-            </div>
-
-            <!-- Extensions Section -->
-            <div id="extensions" class="section-card">
-                <h2 class="section-title">
-                    Extensions <span class="info-badge">Custom Metadata</span>
-                    <span class="count">{{ agentData.extensions.length }}</span>
-                </h2>
-
-                <div class="add-item-row extension-add-row">
-                    <mat-form-field appearance="fill" class="extension-key-field">
-                        <mat-label>Key</mat-label>
-                        <input matInput [(ngModel)]="newExtensionKey" placeholder="e.g., deployment_region">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="extension-value-field">
-                        <mat-label>Value</mat-label>
-                        <input matInput [(ngModel)]="newExtensionValue" placeholder="e.g., us-east-1">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Description</mat-label>
-                        <input matInput [(ngModel)]="newExtensionDescription" placeholder="Optional description">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addExtension()">
-                        <mat-icon>add</mat-icon>
-                        Add Extension
-                    </button>
-                </div>
-
-                <table class="edit-table" *ngIf="agentData.extensions.length > 0">
-                    <thead>
-                        <tr>
-                            <th *ngFor="let header of extensionsHeaders"
-                                [attr.width]="header.key === 'actions' ? '50' : null">
-                                {{ header.label }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let extension of agentData.extensions; let i = index">
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="extension.key">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="extension.value">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <mat-form-field appearance="fill" class="table-field">
-                                    <input matInput [(ngModel)]="extension.description">
-                                </mat-form-field>
-                            </td>
-                            <td>
-                                <button class="icon-btn-small" (click)="removeExtension(i)">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="empty-state" *ngIf="agentData.extensions.length === 0">
-                    <p>No extensions added yet</p>
-                </div>
-            </div>
-
-            <!-- Selectors Section -->
-            <div id="selectors" class="section-card">
-                <h2 class="section-title">
-                    Selectors <span class="info-badge">Tags/Filters for Routing</span>
-                    <span class="count">{{ agentData.selectors.length }}</span>
-                </h2>
-
-                <div class="add-item-row selector-add-row">
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Key</mat-label>
-                        <input matInput [(ngModel)]="newSelectorKey" placeholder="e.g., environment">
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Value</mat-label>
-                        <input matInput [(ngModel)]="newSelectorValue" placeholder="e.g., production"
-                            (keyup.enter)="addSelector()">
-                    </mat-form-field>
-                    <button class="add-btn" (click)="addSelector()">
-                        <mat-icon>add</mat-icon>
-                        Add Selector
-                    </button>
-                </div>
-
-                <div class="items-list" *ngIf="agentData.selectors.length > 0">
-                    <div *ngFor="let selector of agentData.selectors; let i = index" class="item-chip selector-badge">
-                        <span><strong>{{ selector.key }}:</strong> {{ selector.value }}</span>
-                        <button class="remove-icon-btn" (click)="removeSelector(i)">
-                            <mat-icon>close</mat-icon>
-                        </button>
+                    <div class="empty-state" *ngIf="agentData.publications.length === 0">
+                        <p>No publications added yet</p>
                     </div>
                 </div>
-
-                <div class="empty-state" *ngIf="agentData.selectors.length === 0">
-                    <p>No selectors added yet</p>
-                </div>
             </div>
-
+          
             <!-- Signatures Section -->
-            <div id="signatures" class="section-card">
-                <h2 class="section-title">
-                    Signatures <span class="info-badge">Cryptographic Verification</span>
-                    <span class="count">{{ agentData.signatures.length }}</span>
-                </h2>
-
-                <div class="add-item-row signature-add-row">
-                    <mat-form-field appearance="fill" class="signature-algorithm-field">
-                        <mat-label>Algorithm</mat-label>
-                        <mat-select [(ngModel)]="newSignatureAlgorithm">
-                            <mat-option *ngFor="let option of signatureAlgorithmOptions" [value]="option.value">
-                                {{ option.label }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="fill" class="flex-grow">
-                        <mat-label>Signature Value</mat-label>
-                        <input matInput [(ngModel)]="newSignatureValue" placeholder="Enter signature value">
-                    </mat-form-field>
+            <div id="signatures" class="section-card signature-section">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title">
+                            Signatures <span class="info-badge">Cryptographic Verification</span>
+                            <span class="count">{{ agentData.signatures.length }}</span>
+                        </h2>
+                    </div>
                     <button class="add-btn" (click)="addSignature()">
                         <mat-icon>add</mat-icon>
                         Add Signature
                     </button>
+                    <button class="collapse-btn" (click)="toggleSection('signatures')">
+                        <mat-icon>{{ sectionStates['signatures'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
                 </div>
 
-                <div *ngFor="let signature of agentData.signatures; let i = index" class="signature-item">
-                    <div class="signature-header">
-                        <h4>{{ signature.algorithm }}</h4>
-                        <button class="icon-btn-small" (click)="removeSignature(i)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                <div *ngIf="sectionStates['signatures']" class="section-content">
+                    <div *ngFor="let signature of agentData.signatures; let i = index" class="signature-item">
+                        <div class="signature-header">
+                            <h4>{{ signature.algorithm || 'New Signature' }}</h4>
+                            <button class="icon-btn-small" (click)="removeSignature(i)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Algorithm</mat-label>
+                            <mat-select [(ngModel)]="signature.algorithm">
+                                <mat-option *ngFor="let opt of signatureAlgorithmOptions" [value]="opt.value">
+                                    {{ opt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Signature Value</mat-label>
+                            <textarea matInput [(ngModel)]="signature.value" rows="2"></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Certificate (Optional)</mat-label>
+                            <textarea matInput [(ngModel)]="signature.certificate" rows="3"></textarea>
+                        </mat-form-field>
                     </div>
 
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Signature Value</mat-label>
-                        <textarea matInput [(ngModel)]="signature.value" rows="2"></textarea>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Certificate (Optional)</mat-label>
-                        <textarea matInput [(ngModel)]="signature.certificate" rows="3"></textarea>
-                    </mat-form-field>
-                </div>
-
-                <div class="empty-state" *ngIf="agentData.signatures.length === 0">
-                    <p>No signatures added yet</p>
+                    <div class="empty-state" *ngIf="agentData.signatures.length === 0">
+                        <p>No signatures added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Tools Section -->
-            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="tools" class="section-card">
-                <h2 class="section-title">
-                    Tools
-                    <span class="count">{{ agentData.tools?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="tools" class="section-card tools-section">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title">
+                            {{ sectionTitles.tools }}
+                            <span class="count">{{ agentData.tools?.length || 0 }}</span>
+                        </h2>
+                    </div>
                     <button class="add-btn" (click)="addTool()">
                         <mat-icon>add</mat-icon>
                         Add Tool
                     </button>
+                    <button class="collapse-btn" (click)="toggleSection('tools')">
+                        <mat-icon>{{ sectionStates['tools'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
                 </div>
 
-                <div *ngFor="let tool of agentData.tools || []; let i = index" class="tool-edit-item">
-                    <div class="tool-header">
-                        <h3>Tool {{ i + 1 }}</h3>
-                        <button class="icon-btn-small" (click)="removeTool(i)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
+                <div *ngIf="sectionStates['tools']" class="section-content">
+                    <div *ngFor="let tool of agentData.tools || []; let i = index" class="tool-edit-item">
+                        <div class="tool-header">
+                            <h3>Tool {{ i + 1 }}</h3>
+                            <button class="icon-btn-small" (click)="removeTool(i)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                         <mat-label>Tool Name</mat-label>
                         <input matInput [(ngModel)]="tool.name" placeholder="Enter tool name">
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                         <mat-label>Description</mat-label>
                         <textarea matInput [(ngModel)]="tool.description" placeholder="Enter tool description"
                             rows="2"></textarea>
@@ -606,12 +665,12 @@
                             </thead>
                             <tbody>
                                 <tr *ngFor="let param of tool.parameters; let j = index">
-                                    <td>
+                                    <td class="tool-params">
                                         <mat-form-field appearance="fill" class="table-field">
                                             <input matInput [(ngModel)]="param.name" placeholder="Parameter name">
                                         </mat-form-field>
                                     </td>
-                                    <td>
+                                    <td class="tool-params">
                                         <mat-form-field appearance="fill" class="table-field">
                                             <mat-select [(ngModel)]="param.type">
                                                 <mat-option value="string">string</mat-option>
@@ -622,7 +681,7 @@
                                             </mat-select>
                                         </mat-form-field>
                                     </td>
-                                    <td>
+                                    <td class="tool-params">
                                         <mat-form-field appearance="fill" class="table-field">
                                             <input matInput [(ngModel)]="param.description" placeholder="Description">
                                         </mat-form-field>
@@ -647,46 +706,52 @@
                     <div class="section-divider thin" *ngIf="i < (agentData.tools?.length || 0) - 1"></div>
                 </div>
 
-                <div class="empty-state" *ngIf="(agentData.tools?.length || 0) === 0">
-                    <p>No tools added yet</p>
+                    <div class="empty-state" *ngIf="(agentData.tools?.length || 0) === 0">
+                        <p>No tools added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Resources Section -->
             <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="resources"
-                class="section-card">
-                <h2 class="section-title">
-                    Resources
-                    <span class="count">{{ agentData.resources?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+                class="section-card resources-section">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title">
+                            {{ sectionTitles.resources }}
+                            <span class="count">{{ agentData.resources?.length || 0 }}</span>
+                        </h2>
+                    </div>
                     <button class="add-btn" (click)="addResource()">
                         <mat-icon>add</mat-icon>
                         Add Resource
                     </button>
+                    <button class="collapse-btn" (click)="toggleSection('resources')">
+                        <mat-icon>{{ sectionStates['resources'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
                 </div>
 
-                <div *ngFor="let resource of agentData.resources || []; let i = index" class="resource-edit-item">
-                    <div class="resource-header">
-                        <h3>Resource {{ i + 1 }}</h3>
-                        <button class="icon-btn-small" (click)="removeResource(i)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
+                <div *ngIf="sectionStates['resources']" class="section-content">
+                    <div *ngFor="let resource of agentData.resources || []; let i = index" class="resource-edit-item">
+                        <div class="resource-header">
+                            <h3>Resource {{ i + 1 }}</h3>
+                            <button class="icon-btn-small" (click)="removeResource(i)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
 
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Name</mat-label>
-                        <input matInput [(ngModel)]="resource.name" placeholder="Enter resource name">
-                    </mat-form-field>
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Name</mat-label>
+                            <input matInput [(ngModel)]="resource.name" placeholder="Enter resource name">
+                        </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Description</mat-label>
-                        <textarea matInput [(ngModel)]="resource.description" placeholder="Enter description"
-                            rows="2"></textarea>
-                    </mat-form-field>
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Description</mat-label>
+                            <textarea matInput [(ngModel)]="resource.description" placeholder="Enter description"
+                                rows="2"></textarea>
+                        </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                         <mat-label>URL</mat-label>
                         <input matInput [(ngModel)]="resource.url" placeholder="Enter URL">
                     </mat-form-field>
@@ -694,49 +759,56 @@
                     <div class="section-divider thin" *ngIf="i < (agentData.resources?.length || 0) - 1"></div>
                 </div>
 
-                <div class="empty-state" *ngIf="(agentData.resources?.length || 0) === 0">
-                    <p>No resources added yet</p>
+                    <div class="empty-state" *ngIf="(agentData.resources?.length || 0) === 0">
+                        <p>No resources added yet</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Prompts Section -->
-            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="prompts" class="section-card">
-                <h2 class="section-title">
-                    Prompts
-                    <span class="count">{{ agentData.prompts?.length || 0 }}</span>
-                </h2>
-
-                <div class="button-row-right">
+            <div *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'" id="prompts" class="section-card prompts-section">
+                <div class="section-header-with-collapse">
+                    <div class="section-header-left">
+                        <h2 class="section-title">
+                            {{ sectionTitles.prompts }}
+                            <span class="count">{{ agentData.prompts?.length || 0 }}</span>
+                        </h2>
+                    </div>
                     <button class="add-btn" (click)="addPrompt()">
                         <mat-icon>add</mat-icon>
                         Add Prompt
                     </button>
+                    <button class="collapse-btn" (click)="toggleSection('prompts')">
+                        <mat-icon>{{ sectionStates['prompts'] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
                 </div>
 
-                <div *ngFor="let prompt of agentData.prompts || []; let i = index" class="prompt-edit-item">
-                    <div class="prompt-header">
-                        <h3>Prompt {{ i + 1 }}</h3>
-                        <button class="icon-btn-small" (click)="removePrompt(i)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                <div *ngIf="sectionStates['prompts']" class="section-content">
+                    <div *ngFor="let prompt of agentData.prompts || []; let i = index" class="prompt-edit-item">
+                        <div class="prompt-header">
+                            <h3>Prompt {{ i + 1 }}</h3>
+                            <button class="icon-btn-small" (click)="removePrompt(i)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Name</mat-label>
+                            <input matInput [(ngModel)]="prompt.name" placeholder="Enter prompt name">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                            <mat-label>Description</mat-label>
+                            <textarea matInput [(ngModel)]="prompt.description" placeholder="Enter prompt description"
+                                rows="3"></textarea>
+                        </mat-form-field>
+
+                        <div class="section-divider thin" *ngIf="i < (agentData.prompts?.length || 0) - 1"></div>
                     </div>
 
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Name</mat-label>
-                        <input matInput [(ngModel)]="prompt.name" placeholder="Enter prompt name">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Description</mat-label>
-                        <textarea matInput [(ngModel)]="prompt.description" placeholder="Enter prompt description"
-                            rows="3"></textarea>
-                    </mat-form-field>
-
-                    <div class="section-divider thin" *ngIf="i < (agentData.prompts?.length || 0) - 1"></div>
-                </div>
-
-                <div class="empty-state" *ngIf="(agentData.prompts?.length || 0) === 0">
-                    <p>No prompts added yet</p>
+                    <div class="empty-state" *ngIf="(agentData.prompts?.length || 0) === 0">
+                        <p>No prompts added yet</p>
+                    </div>
                 </div>
             </div>
 
@@ -746,56 +818,57 @@
         <div class="side-nav col-md-4">
             <nav>
                 <a (click)="scrollToSection('basic')" [class.active]="activeSection === 'basic'" class="nav-item">
-                    Basic Information <span class="required-indicator">*</span>
+                    {{ sectionTitles.basic }} <span class="required-indicator">*</span>
                 </a>
                 <a (click)="scrollToSection('json-model')" [class.active]="activeSection === 'json-model'"
                     class="nav-item">
-                    JSON Model
+                    {{ sectionTitles.jsonModel }}
                 </a>
                 <a (click)="scrollToSection('modules')" [class.active]="activeSection === 'modules'" class="nav-item">
-                    Modules
+                    {{ sectionTitles.modules }}
                 </a>
                 <a *ngIf="agentData.type!=='mcpServer' && agentData.type!=='mcpServer'"
                     (click)="scrollToSection('skills')" [class.active]="activeSection === 'skills'" class="nav-item">
-                    Skills
-                </a>
-                <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
-                    Domains
-                </a>
-                <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
-                    Locators
-                </a>
-                <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
-                    Syncs
-                </a>
-                <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
-                    class="nav-item">
-                    Publications
-                </a>
-                <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'"
-                    class="nav-item">
-                    Extensions
+                    {{ sectionTitles.skills }}
                 </a>
                 <a (click)="scrollToSection('selectors')" [class.active]="activeSection === 'selectors'"
                     class="nav-item">
-                    Selectors
+                    {{ sectionTitles.selectors }}
                 </a>
+                <a (click)="scrollToSection('domains')" [class.active]="activeSection === 'domains'" class="nav-item">
+                    {{ sectionTitles.domains }}
+                </a>
+                <a (click)="scrollToSection('locators')" [class.active]="activeSection === 'locators'" class="nav-item">
+                    {{ sectionTitles.locators }}
+                </a>
+                  <a (click)="scrollToSection('extensions')" [class.active]="activeSection === 'extensions'"
+                    class="nav-item">
+                    {{ sectionTitles.extensions }}
+                </a>
+                <a (click)="scrollToSection('syncs')" [class.active]="activeSection === 'syncs'" class="nav-item">
+                    {{ sectionTitles.syncs }}
+                </a>
+                <a (click)="scrollToSection('publications')" [class.active]="activeSection === 'publications'"
+                    class="nav-item">
+                    {{ sectionTitles.publications }}
+                </a>
+              
                 <a (click)="scrollToSection('signatures')" [class.active]="activeSection === 'signatures'"
                     class="nav-item">
-                    Signatures
+                    {{ sectionTitles.signatures }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('tools')" [class.active]="activeSection === 'tools'" class="nav-item">
-                    Tools
+                    {{ sectionTitles.tools }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('resources')" [class.active]="activeSection === 'resources'"
                     class="nav-item">
-                    Resources
+                    {{ sectionTitles.resources }}
                 </a>
                 <a *ngIf="agentData.type==='mcpServer' || agentData.type==='mcpServer'"
                     (click)="scrollToSection('prompts')" [class.active]="activeSection === 'prompts'" class="nav-item">
-                    Prompts
+                    {{ sectionTitles.prompts }}
                 </a>
             </nav>
         </div>

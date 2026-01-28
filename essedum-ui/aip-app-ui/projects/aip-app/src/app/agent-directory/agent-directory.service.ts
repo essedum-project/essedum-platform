@@ -142,8 +142,8 @@ export class AgentDirectoryService {
        * DELETE /api/aip/agent-directory/delete/{id}
        */
       deleteAgentDirectory(id: number): Observable<any> {
-        // Backend returns plain text message; request responseType set to 'text' to avoid JSON parse error
         return this.https.delete('/api/aip/agent-directory/delete/' + id, {
+          headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
           observe: 'response',
           responseType: 'text' as 'json'
         })

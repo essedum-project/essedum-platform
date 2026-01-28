@@ -28,8 +28,8 @@
             *ngFor="let card of filteredCards | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
             <div class="card-wrapper h-100">
               <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="true" 
-                [deleteAuth]="true" (click)="viewAgentDirectory(card.name)" (edit)="editAgentDirectory(card.name)"
-                (delete)="deleteAgentDirectory(card.cid)" (download)="downloadSelectedFile(card)">
+                [deleteAuth]="true" (viewDetails)="viewAgentDirectory(card.name)" (edit)="editAgentDirectory(card.name)"
+                (delete)="deleteAgentDirectory(card.cid)" >
               </app-aip-card>
             </div>
           </div>

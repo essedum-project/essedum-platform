@@ -19,6 +19,10 @@ export const NETWORK_INFO = {
     LFN: {
         name: 'LFN Network',
         description: 'For Linux Foundation Networking users'
+    },
+    SERVER5G: {
+        name: '5G Server Network',
+        description: 'For 5G Server users'
     }
 } as const;
 
