@@ -259,8 +259,10 @@ export class DatasourceConfigComponent implements OnInit {
     },
       error => {
         // Check if error has the new format with error and details
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.Services.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.Services.message(error.error.message, 'error');
         }
       }
     );
@@ -360,8 +362,10 @@ export class DatasourceConfigComponent implements OnInit {
         },
           error => {
             // Check if error has the new format with error and details
-            if (error?.error && error.error.error && error.error.details) {
+            if (error?.error?.details) {
               this.Services.message(error.error.details, 'error');
+            } else if (error?.error?.message) {
+              this.Services.message(error.error.message, 'error');
             }
           });
       }
@@ -399,8 +403,10 @@ export class DatasourceConfigComponent implements OnInit {
         },
           error => {
             // Check if error has the new format with error and details
-            if (error?.error && error.error.error && error.error.details) {
+            if (error?.error?.details) {
               this.Services.message(error.error.details, 'error');
+            } else if (error?.error?.message) {
+              this.Services.message(error.error.message, 'error');
             }
           });
       }

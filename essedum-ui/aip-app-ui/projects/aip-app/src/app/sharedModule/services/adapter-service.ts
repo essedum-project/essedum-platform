@@ -507,8 +507,10 @@ export class AdapterServices {
         headers: headers,
       })
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.messageService(error, error.error.details);
+        } else if (error?.error?.message) {
+          this.messageService(error, error.error.message);
         }
         return this.handleError(error);
       }));
@@ -712,8 +714,10 @@ export class AdapterServices {
         observe: 'response',
       })
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.messageService(error, error.error.details);
+        } else if (error?.error?.message) {
+          this.messageService(error, error.error.message);
         }
         return this.handleError(error);
       }));

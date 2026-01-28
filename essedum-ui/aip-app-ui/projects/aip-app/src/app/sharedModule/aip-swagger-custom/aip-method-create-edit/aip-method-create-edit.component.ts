@@ -723,8 +723,10 @@ export class AipMethodCreateEditComponent {
         },
         (error) => {
           // Check if error has the new format with error and details
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.adapterServices.messageNotificaionService('warning', error.error.details);
+          } else if (error?.error?.message) {
+            this.adapterServices.messageNotificaionService('warning', error.error.message);
           }
         }
       );
@@ -751,8 +753,10 @@ export class AipMethodCreateEditComponent {
         },
         (error) => {
           // Check if error has the new format with error and details
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.adapterServices.messageNotificaionService('warning', error.error.details);
+          } else if (error?.error?.message) {
+            this.adapterServices.messageNotificaionService('warning', error.error.message);
           }
         }
       );

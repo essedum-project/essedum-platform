@@ -583,8 +583,8 @@ export class AgentPipelineService {
     return this.http.post(url, {}, {
       headers: {
         'Content-Type': 'application/json'
-      },
-      responseType: 'text' // Expect text response instead of JSON to prevent parsing errors
+      }
+      // Remove responseType: 'text' to allow proper JSON error parsing
     }).pipe(
       map((response: any) => {
         console.log('MinIO upload response:', response);
@@ -592,6 +592,7 @@ export class AgentPipelineService {
       }),
       catchError((error: HttpErrorResponse) => {
         console.error('API Error in uploadToMinio:', error);
+        // Error is already properly structured by HttpClient
         return throwError(() => error);
       })
     );

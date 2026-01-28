@@ -1893,8 +1893,10 @@ export class Services {
         .get(this.dataUrl + '/plugin/allPlugins/' + org)
         .pipe(map((response) => response))
         .pipe(catchError((error: any) => {
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
           }
           return this.handleError(error);
         }))
@@ -1912,8 +1914,10 @@ export class Services {
       )
       .pipe(
         catchError((error: any) => {
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
           }
           return this.handleError(error);
         })
@@ -2176,8 +2180,10 @@ export class Services {
 
       .pipe(map((response) => response))
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -2593,8 +2599,10 @@ export class Services {
       )
       .pipe(map((response) => response))
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -2614,8 +2622,10 @@ export class Services {
       .pipe(map((response) => response))
 
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -2632,8 +2642,10 @@ export class Services {
       )
       .pipe(map((response) => response))
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -2653,8 +2665,10 @@ export class Services {
       )
       .pipe(
         catchError((error: any) => {
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
           }
           return this.handleError(error);
         })
@@ -2672,8 +2686,10 @@ export class Services {
       )
       .pipe(map((response) => response))
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -2706,8 +2722,10 @@ export class Services {
       )
       .pipe(map((response) => response))
       .pipe(catchError((error: any) => {
-        if (error?.error && error.error.error && error.error.details) {
+        if (error?.error?.details) {
           this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
         }
         return this.handleError(error);
       }));
@@ -3573,8 +3591,10 @@ export class Services {
     return this.https.delete(this.baseUrl + '/app/delete/' + id)
       .pipe(
         catchError((error: any) => {
-          if (error?.error && error.error.error && error.error.details) {
+          if (error?.error?.details) {
             this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
           }
           return this.handleError(error);
         })
