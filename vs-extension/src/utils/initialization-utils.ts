@@ -76,7 +76,7 @@ export function registerWebviewProviders(
     }
 
     // Create and register navigation screen provider
-    const navigationScreenProvider = new NavigationScreenProvider(context.extensionUri);
+    const navigationScreenProvider = new NavigationScreenProvider(context.extensionUri, context);
     if (!registeredProviders.has(AppConstants.EXTENSION_CONFIG.NAVIGATION_VIEW_ID)) {
         ExtensionUtils.registerWebviewViewProvider(
             context,
@@ -164,6 +164,17 @@ export async function initializePipelineServices(
     logger.info(MSG.PIPELINE.INITIALIZING);
 
     try {
+        // CRITICAL: Ensure base URL is set before validating tokens
+        // This is needed when extension reactivates (e.g., when opening ADK folder)
+        const { setBaseUrl, isBaseUrlSet } = require('../constants/api-config');
+        if (!isBaseUrlSet()) {
+            const storedNetwork = context.globalState.get<any>(STORAGE_KEYS.SELECTED_NETWORK);
+            if (storedNetwork && storedNetwork.baseURL) {
+                logger.info(`Restoring base URL from storage: ${storedNetwork.baseURL}`);
+                setBaseUrl(storedNetwork.baseURL);
+            }
+        }
+
         // Retrieve and validate stored tokens
         let accessToken = '';
         const storedTokens = await authService.getStoredTokens();
@@ -171,16 +182,26 @@ export async function initializePipelineServices(
         if (storedTokens && storedTokens.access_token) {
             accessToken = storedTokens.access_token;
 
-            // Validate token
-            try {
-                await UserUtils.getUserInfo(context, accessToken);
-                logger.info(MSG.PIPELINE.INITIALIZED_WITH_TOKEN);
-            } catch (error: any) {
-                logger.error(MSG.PIPELINE.TOKEN_INVALID, error);
-                await authService.clearStoredTokens(false);
-                await UserUtils.clearUserDataExceptNetwork(context);
-                accessToken = '';
-                await context.globalState.update(STORAGE_KEYS.TOKEN_VALIDATION_FAILED, true);
+            // Validate token only if base URL is set
+            if (isBaseUrlSet()) {
+                try {
+                    await UserUtils.getUserInfo(context, accessToken);
+                    logger.info(MSG.PIPELINE.INITIALIZED_WITH_TOKEN);
+                } catch (error: any) {
+                    // Only clear tokens if this is a real auth error, not a network/URL error
+                    if (error.isAuthorizationError || error.response?.status === 401 || error.response?.status === 403) {
+                        logger.error(MSG.PIPELINE.TOKEN_INVALID, error);
+                        await authService.clearStoredTokens(false);
+                        await UserUtils.clearUserDataExceptNetwork(context);
+                        accessToken = '';
+                        await context.globalState.update(STORAGE_KEYS.TOKEN_VALIDATION_FAILED, true);
+                    } else {
+                        logger.warn('Token validation failed due to network/config issue, keeping token:', error.message);
+                        // Keep the token, it might be valid once network is properly configured
+                    }
+                }
+            } else {
+                logger.warn('Base URL not set, skipping token validation - will validate on next API call');
             }
         } else {
             logger.info(MSG.PIPELINE.NO_TOKENS);
@@ -299,6 +320,7 @@ function registerPipelineProviders(
 
 /**
  * Determines and shows the appropriate initial screen based on authentication status
+ * Restores the previously active view if extension is reactivating
  * 
  * @param context - Extension context
  * @param hasValidAuth - Whether user has valid authentication
@@ -318,11 +340,26 @@ export async function showInitialScreen(
         await ExtensionUtils.updateAuthenticationContext(false);
         await vscode.commands.executeCommand(AppConstants.COMMANDS.SHOW_LOGIN_SCREEN);
     } else if (hasValidAuth) {
-        // User is authenticated - show navigation
+        // User is authenticated - restore previous view or default to navigation
         await ExtensionUtils.updateAuthenticationContext(true);
-        // Note: authService needs to be passed or accessed differently
-        // await ExtensionUtils.checkAndUpdateAuthStatus(authService);
-        await vscode.commands.executeCommand(AppConstants.COMMANDS.SHOW_NAVIGATION);
+        
+        // Check if there's a stored active view (from before extension reload)
+        const activeView = context.globalState.get<string>(STORAGE_KEYS.ACTIVE_VIEW, 'navigation');
+        logger.info(`Restoring active view: ${activeView}`);
+        
+        // Restore the appropriate view (commands now handle saving the state)
+        switch (activeView) {
+            case 'pipeline':
+                await vscode.commands.executeCommand(AppConstants.COMMANDS.SHOW_PIPELINE);
+                break;
+            case 'pipeline-agent':
+                await vscode.commands.executeCommand(AppConstants.COMMANDS.SHOW_PIPELINE_AGENT);
+                break;
+            case 'navigation':
+            default:
+                await vscode.commands.executeCommand(AppConstants.COMMANDS.SHOW_NAVIGATION);
+                break;
+        }
     } else {
         // No authentication - show login
         await ExtensionUtils.updateAuthenticationContext(false);

@@ -339,28 +339,43 @@ export async function handleCheckAuth(authService: KeycloakAuthService): Promise
 /**
  * Sets navigation context keys
  */
-export async function setNavigationContext(): Promise<void> {
+export async function setNavigationContext(context?: vscode.ExtensionContext): Promise<void> {
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, true);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, false);
+    
+    // Save active view for restoration after extension reload
+    if (context) {
+        await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'navigation');
+    }
 }
 
 /**
  * Sets pipeline context keys
  */
-export async function setPipelineContext(): Promise<void> {
+export async function setPipelineContext(context?: vscode.ExtensionContext): Promise<void> {
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, true);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, false);
+    
+    // Save active view for restoration after extension reload
+    if (context) {
+        await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline');
+    }
 }
 
 /**
  * Sets pipeline agent context keys
  */
-export async function setPipelineAgentContext(): Promise<void> {
+export async function setPipelineAgentContext(context?: vscode.ExtensionContext): Promise<void> {
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, true);
+    
+    // Save active view for restoration after extension reload
+    if (context) {
+        await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline-agent');
+    }
 }
 
 /**
@@ -545,4 +560,50 @@ export async function handleDebugUserData(context: vscode.ExtensionContext): Pro
         `• Organization: ${organization || 'Not set'}`;
 
     await vscode.window.showInformationMessage(message);
+}
+
+/**
+ * Delete file on server (right-click context menu in Explorer)
+ */
+export async function handleDeleteFileOnServer(
+    context: vscode.ExtensionContext,
+    pipelineAgentProvider: PipelineAgentProvider,
+    uri?: vscode.Uri
+): Promise<void> {
+    logger.info('Delete file on server triggered');
+    
+    if (!uri) {
+        logger.warn('No URI provided for delete');
+        return;
+    }
+
+    try {
+        await pipelineAgentProvider.deleteFileFromExplorer(uri);
+    } catch (error) {
+        logger.error('Error deleting file on server:', error);
+        vscode.window.showErrorMessage(`Failed to delete file: ${error}`);
+    }
+}
+
+/**
+ * Upload Agent Folder (right-click context menu on folder in Explorer)
+ */
+export async function handleUploadAgentFolder(
+    context: vscode.ExtensionContext,
+    pipelineAgentProvider: PipelineAgentProvider,
+    uri?: vscode.Uri
+): Promise<void> {
+    logger.info('Upload agent folder triggered');
+    
+    if (!uri) {
+        logger.warn('No URI provided for upload');
+        return;
+    }
+
+    try {
+        await pipelineAgentProvider.uploadAgentFolder(uri);
+    } catch (error) {
+        logger.error('Error uploading folder:', error);
+        vscode.window.showErrorMessage(`Failed to upload folder: ${error}`);
+    }
 }

@@ -223,6 +223,22 @@ export function createHTTPSAgent(context?: vscode.ExtensionContext): https.Agent
 export async function makeSecureRequest(method: string, url: string, context?: vscode.ExtensionContext, config: any = {}): Promise<any> {
     const axios = require('axios');
     
+    // Check if URL is absolute or needs base URL
+    const isAbsoluteUrl = url.startsWith('http://') || url.startsWith('https://');
+    
+    // If URL is relative and base URL is not set, throw a clear error
+    if (!isAbsoluteUrl) {
+        const baseUrl = getBaseUrl();
+        if (!baseUrl) {
+            const error: any = new Error('Base URL is not configured. Network selection required before making API requests.');
+            error.code = 'ERR_BASE_URL_NOT_SET';
+            logger.error('Cannot make request - base URL not set:', url);
+            throw error;
+        }
+        // Convert relative URL to absolute
+        url = `${baseUrl}${url}`;
+    }
+    
     // Use conditional SSL based on network
     const bypass = shouldBypassSSL(context);
     

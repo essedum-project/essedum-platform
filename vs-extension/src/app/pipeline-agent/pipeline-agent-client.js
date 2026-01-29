@@ -349,16 +349,26 @@ class PipelineAgentClient {
     handleAdkFilesStatus(message) {
         console.log('[Pipeline Agent Client] ADK files status:', message);
         const DISP = this.constants.DISPLAY;
+        
+        // When code is available: show Edit Code and Download Code, hide Open Copilot and Upload Code
+        // When code is not available: hide Edit Code and Download Code, show Open Copilot and Upload Code
         if (this.viewAdkBtn) {
             this.viewAdkBtn.style.display = message.hasFiles ? DISP.INLINE_BLOCK : DISP.NONE;
         }
         if (this.downloadAdkBtn) {
             this.downloadAdkBtn.style.display = message.hasFiles ? DISP.INLINE_BLOCK : DISP.NONE;
         }
+        if (this.openCopilotBtn) {
+            this.openCopilotBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
+        }
+        if (this.uploadAdkBtn) {
+            this.uploadAdkBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
+        }
+        
         if (message.hasFiles) {
-            console.log(`[Pipeline Agent Client] ADK buttons shown (${message.fileCount} files available)`);
+            console.log(`[Pipeline Agent Client] Edit/Download buttons shown (${message.fileCount} files available)`);
         } else {
-            console.log('[Pipeline Agent Client] ADK buttons hidden (no files available)');
+            console.log('[Pipeline Agent Client] Open Copilot/Upload Code buttons shown (no files available)');
         }
     }
 

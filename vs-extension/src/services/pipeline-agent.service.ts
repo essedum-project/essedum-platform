@@ -546,7 +546,7 @@ export class PipelineAgentService {
 
   /**
    * Delete ADK folder file by ID
-   * DELETE /api/aip/folder/delete/{id}
+   * DELETE /api/aip/folder/delete/{id}?project={projectName}&interfacetype=pipeline-agent
    * @param fileId - File ID to delete
    * @param signal - Optional AbortSignal for cancellation
    * @returns Delete response
@@ -559,7 +559,11 @@ export class PipelineAgentService {
     }
 
     const url = `${this.API.FOLDER_DELETE}/${fileId}`;
-    const config = this.buildAxiosConfig({}, {}, signal);
+    const queryParams = {
+      project: this._project?.name || this.organization,
+      interfacetype: 'pipeline-agent'
+    };
+    const config = this.buildAxiosConfig(queryParams, {}, signal);
     return this.requestWithRetry<any>('delete', url, config);
   }
 

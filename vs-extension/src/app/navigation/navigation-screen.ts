@@ -31,8 +31,11 @@ export class NavigationScreenProvider implements vscode.WebviewViewProvider {
     
     private _view?: vscode.WebviewView;
     private _disposables: vscode.Disposable[] = [];
+    private _context?: vscode.ExtensionContext;
 
-    constructor(private readonly _extensionUri: vscode.Uri) {}
+    constructor(private readonly _extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
+        this._context = context;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -40,6 +43,13 @@ export class NavigationScreenProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
+        
+        // Save active view state when navigation view is opened/resolved
+        // This ensures the view is restored correctly after extension reload
+        if (this._context) {
+            const { STORAGE_KEYS } = require('../../constants/extension-constants');
+            this._context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'navigation');
+        }
 
         webviewView.webview.options = {
             enableScripts: true,

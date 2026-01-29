@@ -35,6 +35,7 @@ import {
     getLanguageFromExtension,
 } from '../../constants/pipeline-constants';
 
+import { STORAGE_KEYS } from '../../constants/extension-constants';
 import { getBaseUrl } from '../../constants/api-config';
 import * as ExtensionUtils from '../../utils/extension-utils';
 
@@ -191,6 +192,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
+        
+        // Save active view state when pipeline view is opened/resolved
+        // This ensures the view is restored correctly after extension reload
+        this._context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline').then(() => {
+            logger.info(`${this.logPrefix} Saved active view state: pipeline`);
+        });
 
         webviewView.webview.options = {
             enableScripts: true,

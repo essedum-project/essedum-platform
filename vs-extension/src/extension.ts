@@ -252,10 +252,14 @@ function registerCommands(): void {
         // Navigation
         { id: AppConstants.COMMANDS.OPEN_SIDEBAR, handler: () => 
             ExtensionUtils.safeExecuteCommand(AppConstants.COMMANDS.VSCODE.OPEN_EXTENSION_VIEW) },
-        { id: AppConstants.COMMANDS.SHOW_NAVIGATION, handler: CommandHandlers.setNavigationContext },
-        { id: AppConstants.COMMANDS.SHOW_PIPELINE, handler: CommandHandlers.setPipelineContext },
-        { id: AppConstants.COMMANDS.SHOW_PIPELINE_AGENT, handler: CommandHandlers.setPipelineAgentContext },
-        { id: AppConstants.COMMANDS.BACK_TO_NAVIGATION, handler: CommandHandlers.setNavigationContext },
+        { id: AppConstants.COMMANDS.SHOW_NAVIGATION, handler: () => 
+            CommandHandlers.setNavigationContext(context) },
+        { id: AppConstants.COMMANDS.SHOW_PIPELINE, handler: () => 
+            CommandHandlers.setPipelineContext(context) },
+        { id: AppConstants.COMMANDS.SHOW_PIPELINE_AGENT, handler: () => 
+            CommandHandlers.setPipelineAgentContext(context) },
+        { id: AppConstants.COMMANDS.BACK_TO_NAVIGATION, handler: () => 
+            CommandHandlers.setNavigationContext(context) },
 
         // Pipeline
         { id: AppConstants.COMMANDS.RUN_PIPELINE, handler: (name?: string) => 
@@ -269,7 +273,13 @@ function registerCommands(): void {
         { id: AppConstants.COMMANDS.CLEAR_USER_DATA, handler: () => 
             CommandHandlers.handleClearUserData(context) },
         { id: AppConstants.COMMANDS.DEBUG_USER_DATA, handler: () => 
-            CommandHandlers.handleDebugUserData(context) }
+            CommandHandlers.handleDebugUserData(context) },
+
+        // Pipeline Agent
+        { id: 'essedum.deleteFileOnServer', handler: (uri?: vscode.Uri) => 
+            CommandHandlers.handleDeleteFileOnServer(context, pipelineAgentProvider, uri) },
+        { id: 'essedum.uploadAgentFolder', handler: (uri?: vscode.Uri) => 
+            CommandHandlers.handleUploadAgentFolder(context, pipelineAgentProvider, uri) }
     ];
 
     commands.forEach(({ id, handler }) => {
