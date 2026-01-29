@@ -1086,9 +1086,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 progress.report({ increment: 80, message: 'Opening in editor...' });
 
-                // Save JSON file in cache directory
+                // Save JSON file in pipeline-specific folder
                 this.ensureCacheDirectory();
-                const cachedJsonPath = path.join(this.cacheDir, jsonFileName);
+                const pipelineFolderPath = this.getPipelineFolderPath(pipelineName);
+                const cachedJsonPath = path.join(pipelineFolderPath, jsonFileName);
                 fs.writeFileSync(cachedJsonPath, formattedContent, 'utf-8');
 
                 // Track this file for cleanup (map normalized to original path)
@@ -1205,7 +1206,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
-            const jsonFilePath = path.join(this.cacheDir, jsonFileName);
+            
+            // Use pipeline-specific folder
+            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
+            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
 
             // If JSON doesn't exist in cache, fetch it
             if (!fs.existsSync(jsonFilePath)) {
@@ -1252,7 +1256,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             await vscode.env.clipboard.writeText(promptContent);
 
             vscode.window.showInformationMessage(
-                `Copilot Chat opened! Paste the prompt (Ctrl+V) to generate ADK code in ${this.cacheDir}`,
+                `Copilot Chat opened! Paste the prompt (Ctrl+V) to generate ADK code in ${pipelineFolderPath}`,
                 'Got it'
             );
 
@@ -1270,8 +1274,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      */
     private async handleUploadAdk(pipelineId: string): Promise<void> {
         try {
-            // Refresh auth data to ensure organization is current
-            this.refreshAuthData();
+            // Validate and refresh authentication before proceeding
+            // This is critical for operations after idle time (15-30 mins)
+            const isAuthenticated = await this.validateAndRefreshAuth();
+            
+            if (!isAuthenticated) {
+                this.sendMessageToWebview({ 
+                    command: 'actionError', 
+                    message: 'Authentication required. Please login again.' 
+                });
+                return;
+            }
             
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
@@ -1281,14 +1294,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
 
-            // Verify cache directory exists
-            if (!fs.existsSync(this.cacheDir)) {
-                throw new Error('Cache directory not found. Please open Copilot first.');
+            // Use pipeline-specific folder
+            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
+            
+            // Verify pipeline folder exists
+            if (!fs.existsSync(pipelineFolderPath)) {
+                throw new Error('Pipeline folder not found. Please open Copilot first.');
             }
 
-            // Get all files in cache directory (excluding the JSON config file)
+            // Get all files in pipeline folder (excluding the JSON config file)
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
-            const allFiles = fs.readdirSync(this.cacheDir);
+            const allFiles = fs.readdirSync(pipelineFolderPath);
             const adkFiles = allFiles.filter(f => f !== jsonFileName && !f.endsWith('.zip'));
 
             if (adkFiles.length === 0) {
@@ -1303,7 +1319,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 progress.report({ increment: 0, message: `Creating ZIP archive...` });
 
                 // Create ZIP file
-                const zipPath = await this.createZipFromCache(pipelineName, adkFiles);
+                const zipPath = await this.createZipFromCache(pipelineName, adkFiles, pipelineFolderPath);
 
                 progress.report({ increment: 50, message: 'Uploading to server...' });
 
@@ -1316,7 +1332,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 // Clean up ADK files (keep JSON) - handle both files and directories
                 adkFiles.forEach(fileName => {
-                    const filePath = path.join(this.cacheDir, fileName);
+                    const filePath = path.join(pipelineFolderPath, fileName);
                     if (fs.existsSync(filePath)) {
                         try {
                             const stats = fs.statSync(filePath);
@@ -1565,8 +1581,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      */
     private async handleDownloadAdk(pipelineId: string): Promise<void> {
         try {
-            // Refresh auth data to ensure organization is current
-            this.refreshAuthData();
+            // Validate and refresh authentication before proceeding
+            const isAuthenticated = await this.validateAndRefreshAuth();
+            
+            if (!isAuthenticated) {
+                this.sendMessageToWebview({ 
+                    command: 'actionError', 
+                    message: 'Authentication required. Please login again.' 
+                });
+                return;
+            }
             
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
@@ -1645,8 +1669,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      */
     private async handleRefreshJson(pipelineId: string): Promise<void> {
         try {
-            // Refresh auth data to ensure organization is current
-            this.refreshAuthData();
+            // Validate and refresh authentication before proceeding
+            const isAuthenticated = await this.validateAndRefreshAuth();
+            
+            if (!isAuthenticated) {
+                this.sendMessageToWebview({ 
+                    command: 'actionError', 
+                    message: 'Authentication required. Please login again.' 
+                });
+                return;
+            }
             
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
@@ -1668,8 +1700,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const jsonData = JSON.parse(fileContent);
             const formattedContent = JSON.stringify(jsonData, null, 2);
 
-            // Update cached file
-            const cachedJsonPath = path.join(this.cacheDir, jsonFileName);
+            // Update cached file in pipeline-specific folder
+            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
+            const cachedJsonPath = path.join(pipelineFolderPath, jsonFileName);
             fs.writeFileSync(cachedJsonPath, formattedContent, 'utf-8');
 
             // Update open editor if exists
@@ -1711,7 +1744,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
-            const jsonFilePath = path.join(this.cacheDir, jsonFileName);
+            
+            // Use pipeline-specific folder
+            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
+            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
 
             if (!fs.existsSync(jsonFilePath)) {
                 throw new Error('Configuration file not found in cache');
@@ -1730,12 +1766,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Create ZIP file from cache directory
+     * Create ZIP file from pipeline-specific directory
      */
-    private async createZipFromCache(pipelineName: string, adkFiles: string[]): Promise<string> {
+    private async createZipFromCache(pipelineName: string, adkFiles: string[], pipelineFolderPath: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const zipFileName = `${pipelineName}_adk.zip`;
-            const zipPath = path.join(this.cacheDir, zipFileName);
+            const zipPath = path.join(pipelineFolderPath, zipFileName);
 
             if (fs.existsSync(zipPath)) {
                 fs.unlinkSync(zipPath);
@@ -1751,7 +1787,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             archive.pipe(output);
 
             adkFiles.forEach(fileName => {
-                const filePath = path.join(this.cacheDir, fileName);
+                const filePath = path.join(pipelineFolderPath, fileName);
                 if (fs.existsSync(filePath)) {
                     const stats = fs.statSync(filePath);
                     if (stats.isDirectory()) {
@@ -2370,6 +2406,87 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         if (!fs.existsSync(this.cacheDir)) {
             fs.mkdirSync(this.cacheDir, { recursive: true });
             logger.info(`${this.logPrefix} Created cache directory: ${this.cacheDir}`);
+        }
+    }
+
+    /**
+     * Get pipeline-specific folder path
+     * Creates a unique folder for each pipeline agent based on pipelineId
+     */
+    private getPipelineFolderPath(pipelineId: string): string {
+        const pipelineFolderPath = path.join(this.cacheDir, `pipeline_${pipelineId}`);
+        if (!fs.existsSync(pipelineFolderPath)) {
+            fs.mkdirSync(pipelineFolderPath, { recursive: true });
+            logger.info(`${this.logPrefix} Created pipeline-specific folder: ${pipelineFolderPath}`);
+        }
+        return pipelineFolderPath;
+    }
+
+    /**
+     * Validate and refresh authentication if needed
+     * Checks token validity and refreshes if expired/expiring
+     * Returns true if authentication is valid, false otherwise
+     */
+    private async validateAndRefreshAuth(): Promise<boolean> {
+        try {
+            if (!this._authService) {
+                logger.warn(`${this.logPrefix} Auth service not available`);
+                return false;
+            }
+
+            // Check if token is valid
+            const isValid = await this._authService.isTokenValid();
+            
+            if (!isValid) {
+                logger.warn(`${this.logPrefix} Token is invalid or expired`);
+                
+                // Try to get stored tokens which will trigger refresh if needed
+                try {
+                    const tokens = await this._authService.getStoredTokens();
+                    
+                    if (!tokens) {
+                        logger.error(`${this.logPrefix} Failed to refresh tokens`);
+                        vscode.window.showErrorMessage(
+                            'Your session has expired. Please login again.',
+                            'Login'
+                        ).then(selection => {
+                            if (selection === 'Login') {
+                                vscode.commands.executeCommand('essedum.authenticate');
+                            }
+                        });
+                        return false;
+                    }
+                    
+                    logger.info(`${this.logPrefix} Token refreshed successfully`);
+                    
+                    // Refresh auth data and service
+                    this.refreshAuthData();
+                    this._pipelineAgentService.refreshAuthData();
+                    
+                    return true;
+                } catch (error: any) {
+                    logger.error(`${this.logPrefix} Failed to refresh authentication:`, error);
+                    vscode.window.showErrorMessage(
+                        'Authentication failed. Please login again.',
+                        'Login'
+                    ).then(selection => {
+                        if (selection === 'Login') {
+                            vscode.commands.executeCommand('essedum.authenticate');
+                        }
+                    });
+                    return false;
+                }
+            }
+            
+            logger.info(`${this.logPrefix} Token is valid`);
+            // Refresh auth data to ensure latest values
+            this.refreshAuthData();
+            this._pipelineAgentService.refreshAuthData();
+            return true;
+            
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} Error validating authentication:`, error);
+            return false;
         }
     }
 
