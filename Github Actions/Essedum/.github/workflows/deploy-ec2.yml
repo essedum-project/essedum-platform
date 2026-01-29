@@ -3,8 +3,9 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main
-      - develop
+      - uat_test
+      - staging_test
+      - prod_test
   workflow_dispatch:
     inputs:
       force_deploy:
@@ -24,6 +25,24 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Determine Environment
+        id: env
+        run: |
+          if [[ "${{ github.ref_name }}" == "uat_test" ]]; then
+            echo "ENVIRONMENT=UAT" >> $GITHUB_OUTPUT
+            echo "ENV_SUFFIX=uat" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "staging_test" ]]; then
+            echo "ENVIRONMENT=STAGING" >> $GITHUB_OUTPUT
+            echo "ENV_SUFFIX=staging" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "prod_test" ]]; then
+            echo "ENVIRONMENT=PRODUCTION" >> $GITHUB_OUTPUT
+            echo "ENV_SUFFIX=prod" >> $GITHUB_OUTPUT
+          else
+            echo "ENVIRONMENT=DEVELOPMENT" >> $GITHUB_OUTPUT
+            echo "ENV_SUFFIX=dev" >> $GITHUB_OUTPUT
+          fi
+          echo "Deploying to: $(echo $ENVIRONMENT)"
+      
       - name: Checkout code
         uses: actions/checkout@v4
       
@@ -44,9 +63,10 @@ jobs:
       
       - name: Build Docker image
         run: |
-          echo "🐋 Building Docker image..."
+          echo "🐋 Building Docker image for ${{ steps.env.outputs.ENVIRONMENT }}..."
           docker build -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
           docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} ${{ env.DOCKER_IMAGE }}:latest
+          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} ${{ env.DOCKER_IMAGE }}:${{ steps.env.outputs.ENV_SUFFIX }}-latest
           echo "✅ Docker image built successfully"
       
       - name: Save Docker image to file
@@ -76,8 +96,9 @@ jobs:
           script: |
             set -e
             
-            echo "🚀 Starting Docker deployment..."
+            echo "🚀 Starting Docker deployment to ${{ steps.env.outputs.ENVIRONMENT }}..."
             echo "User: $(whoami)"
+            echo "Environment: ${{ steps.env.outputs.ENVIRONMENT }}"
             echo "Image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}"
             
             # Check if Docker is installed
@@ -152,7 +173,7 @@ jobs:
             TEMPERATURE=0.7
             MAX_TOKENS=4096
             TIMEOUT_SECONDS=60
-            ENVIRONMENT=production
+            ENVIRONMENT=${{ steps.env.outputs.ENVIRONMENT }}
             LOG_LEVEL=INFO
             PORT=8080
             HOST=0.0.0.0
@@ -255,6 +276,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Repository**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ steps.env.outputs.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **EC2 Host**: ${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
