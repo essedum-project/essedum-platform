@@ -28,6 +28,7 @@ import {
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
+import pipelineConfig from './pipeline-config.json';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
@@ -3019,10 +3020,10 @@ public class ZipController {
             console.log('  Step 4.3: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentName);
             
             const payload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
               deployment_name: deploymentAlias, // Dynamic value from API
               cname: this.currentCname,
               organization: organization,
@@ -3046,10 +3047,10 @@ public class ZipController {
               : 'service-qualification-agent-5g';
             
             const fallbackPayload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
               deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
