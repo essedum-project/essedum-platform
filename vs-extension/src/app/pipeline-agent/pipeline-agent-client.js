@@ -47,6 +47,10 @@ class PipelineAgentClient {
         this.cardsContainer = document.getElementById('cardsContainer');
         this.emptyState = document.getElementById('emptyState');
 
+        // Tab navigation
+        this.tabButtons = document.querySelectorAll('.tab-button');
+        this.currentTab = 'agents'; // Default tab
+
         // Pagination elements
         this.paginationContainer = document.getElementById('paginationContainer');
         this.paginationInfo = document.getElementById('paginationInfo');
@@ -71,6 +75,11 @@ class PipelineAgentClient {
     }
 
     attachEventListeners() {
+        // Tab navigation
+        this.tabButtons.forEach(button => {
+            button.addEventListener('click', () => this.handleTabSwitch(button.dataset.tab));
+        });
+
         // Search
         this.searchBtn?.addEventListener('click', () => this.handleSearch());
         this.searchInput?.addEventListener('keypress', (e) => {
@@ -140,6 +149,36 @@ class PipelineAgentClient {
 
     handleRefresh() {
         this.vscode.postMessage({ command: this.constants.COMMANDS_TO_EXTENSION.REFRESH });
+    }
+
+    handleTabSwitch(tab) {
+        console.log('[Pipeline Agent Client] Switching to tab:', tab);
+        
+        // Update active tab button
+        this.tabButtons.forEach(button => {
+            if (button.dataset.tab === tab) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Update current tab
+        this.currentTab = tab;
+
+        // Clear search input
+        if (this.searchInput) {
+            this.searchInput.value = '';
+        }
+
+        // Update search placeholder
+        const placeholder = tab === 'mcp' ? 'Search MCP servers...' : 'Search pipeline agents...';
+        if (this.searchInput) {
+            this.searchInput.placeholder = placeholder;
+        }
+
+        // Send tab switch message to extension
+        this.vscode.postMessage({ command: 'switchTab', tab });
     }
 
     goToPage(page) {

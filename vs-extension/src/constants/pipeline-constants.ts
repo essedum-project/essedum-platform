@@ -25,7 +25,7 @@ import { getBaseUrl } from "./api-config";
  */
 export const PIPELINE_CONFIG = {
     /** Default page size for pagination */
-    DEFAULT_PAGE_SIZE: 3,
+    DEFAULT_PAGE_SIZE: 2,
 
     /** Initial page number */
     INITIAL_PAGE: 1,

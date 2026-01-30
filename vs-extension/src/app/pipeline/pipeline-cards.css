@@ -25,7 +25,7 @@
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 12px;
-    --spacing-lg: 16px;
+    --spacing-lg: 12px;
     --spacing-xl: 20px;
     --spacing-xxl: 24px;
     --spacing-xxxl: 32px;
@@ -62,21 +62,12 @@
     --transition-normal: 0.2s ease;
     --transition-slow: 0.3s ease;
 
-    /* Z-index layers */
-    --z-index-dropdown: 100;
-    --z-index-modal: 200;
-    --z-index-tooltip: 300;
-
     /* Component specific */
-    --card-min-height: 100px;
+    --card-min-height: 140px;
     --button-height: 28px;
     --input-height: 28px;
     --pagination-button-size: 24px;
-    --avatar-size: 32px;
-
-    /* Scrollbar */
-    --scrollbar-width: 4px;
-    --scrollbar-width-hover: 8px;
+    --avatar-size: 48px;
 }
 
 /* ================================
@@ -524,67 +515,55 @@ body {
 
 .pagination-container {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs);
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
     border-top: 1px solid var(--vscode-panel-border);
-    background-color: var(--vscode-editor-background);
-    flex-shrink: 0;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
 }
 
 .pagination-info {
-    text-align: center;
+    font-size: var(--font-size-sm);
     color: var(--vscode-descriptionForeground);
-    font-size: var(--font-size-xs);
-    margin: 0;
 }
 
 .pagination-controls {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
-}
-
-.btn-pagination,
-.page-number {
-    min-width: var(--pagination-button-size);
-    height: var(--pagination-button-size);
-    padding: var(--spacing-xs);
-    border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
-    border-radius: var(--radius-md);
-    background-color: var(--vscode-button-secondaryBackground);
-    color: var(--vscode-button-secondaryForeground);
-    cursor: pointer;
-    font-size: var(--font-size-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-normal);
-    text-decoration: none;
-}
-
-.btn-pagination:hover:not(:disabled),
-.page-number:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
-.btn-pagination:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    gap: var(--spacing-sm);
 }
 
 .pagination-pages {
     display: flex;
     gap: var(--spacing-xs);
-    margin: 0 var(--spacing-sm);
 }
 
-.page-number.active {
+.btn-pagination {
+    min-width: var(--pagination-button-size);
+    width: var(--pagination-button-size);
+    height: var(--pagination-button-size);
+    padding: 0;
+    font-size: var(--font-size-sm);
+    background-color: transparent;
+    color: var(--vscode-foreground);
+    border: 1px solid var(--vscode-panel-border);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
+}
+
+.btn-pagination.active {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border-color: var(--vscode-button-background);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .page-ellipsis {
@@ -957,6 +936,11 @@ body::-webkit-scrollbar {
         /* Allow wrapping if needed */
         justify-content: flex-start;
     }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
 }
 
 /* Mobile */
@@ -1039,8 +1023,8 @@ body::-webkit-scrollbar {
 
     .btn-pagination,
     .page-number {
-        min-width: var(--spacing-xl);
-        height: var(--spacing-xl);
+        min-width: var(--pagination-button-size);
+        height: var(--pagination-button-size);
         font-size: var(--font-size-xs);
     }
 

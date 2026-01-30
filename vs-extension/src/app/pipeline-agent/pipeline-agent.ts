@@ -210,6 +210,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private role: any;
     private filter: string = '';
     private loading: boolean = false;
+    private currentTab: 'agents' | 'mcp' = 'agents'; // Track current active tab
 
     /** Cache directory for JSON files and generated ADK */
     private cacheDir: string;
@@ -376,14 +377,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             async (message) => {
                 switch (message.command) {
                     case CONSTANTS.WEBVIEW_COMMANDS.LOAD_CARDS:
-                        await this.getAgentCards();
+                        await this.refreshCurrentTab();
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.FILTER:
                         this.filter = message.filter;
-                        await this.getAgentCards();
+                        await this.refreshCurrentTab();
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.REFRESH:
-                        await this.getAgentCards();
+                        await this.refreshCurrentTab();
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.GO_TO_PAGE:
                         this.goToPage(message.page);
@@ -426,6 +427,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.TRIGGER_LOGIN:
                         await this.handleLogin();
+                        break;
+                    case 'switchTab':
+                        await this.handleTabSwitch(message.tab);
                         break;
                 }
             },
@@ -755,6 +759,153 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
+     * Get MCP Server cards
+     */
+    private async getMcpServerCards(): Promise<void> {
+        logger.info(`${this.logPrefix} getMcpServerCards called, token length: ${this._token ? this._token.length : 0}`);
+
+        // Refresh auth data to ensure organization is current
+        this.refreshAuthData();
+
+        // Check authentication
+        if (!this._isAuthenticated) {
+            logger.info('Not authenticated, checking for token in context...');
+
+            const contextToken = this._context.globalState.get(CONSTANTS.STATE_KEYS.ACCESS_TOKEN) as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                logger.info('Found valid token in context, updating component state');
+                this.updateToken(contextToken);
+            } else {
+                logger.info('No valid token found, showing authentication required page');
+                this.showAuthenticationRequired();
+                return;
+            }
+        }
+
+        if (!this._isAuthenticated) {
+            logger.info('Still not authenticated, showing auth page');
+            this.showAuthenticationRequired();
+            return;
+        }
+
+        this.loading = true;
+        this.updateWebview();
+
+        const params = this.buildHttpParams();
+
+        try {
+            // Step 1: Get total count using MCP count API
+            logger.info(`${this.logPrefix} Fetching MCP Server count...`);
+            this.totalCount = await this._pipelineAgentService.getMcpServerCount(params);
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+
+            logger.info(`${this.logPrefix} Total MCP count: ${this.totalCount}, Total pages: ${this.totalPages}`);
+
+            // Step 2: Get cards using MCP list API
+            logger.info(`${this.logPrefix} Fetching MCP Server cards for page ${this.pageNumber}...`);
+            const response = await this._pipelineAgentService.getMcpServerList(params);
+
+            if (response && Array.isArray(response) && response.length > 0) {
+                this.allCards = response.map((element: any) => ({
+                    pipelineId: element.name || element.id || element._id || Math.random().toString(36),
+                    type: element.type || 'MCP Server',
+                    alias: element.alias || element.name || 'No Alias',
+                    createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                    created_by: element.created_by || element.createdBy || 'Unknown',
+                    id: element.id || element._id,
+                    status: 'active',
+                    description: element.description || '',
+                    interfacetype: 'mcp-pipeline',
+                    ...element
+                }));
+
+                // Use all cards returned from API (already paginated by server)
+                this.filteredCards = this.allCards;
+            } else {
+                logger.info(`${this.logPrefix} No MCP cards returned from API`);
+                this.allCards = [];
+                this.filteredCards = [];
+            }
+
+            logger.info(`${this.logPrefix} Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total MCP cards`);
+
+            this.loading = false;
+            this.updateWebview();
+
+        } catch (error: any) {
+            console.error(`${this.logPrefix} Error fetching MCP Server cards:`, error);
+            this.loading = false;
+
+            // Handle authentication errors
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                console.error(`${this.logPrefix} Authentication error (${error.response.status})`);
+                this._isAuthenticated = false;
+
+                const action = error.response.status === 401 ? 'Login' : 'Login Again';
+                vscode.window.showErrorMessage(
+                    `Authentication ${error.response.status === 401 ? 'required' : 'failed'}. Please authenticate.`,
+                    action
+                ).then(selection => {
+                    if (selection === action) {
+                        vscode.commands.executeCommand('essedum.login');
+                    }
+                });
+
+                this.showAuthenticationRequired();
+                return;
+            }
+
+            // Handle other errors
+            let errorMessage = 'Failed to fetch MCP Server data';
+            if (error.message) {
+                errorMessage = error.message;
+            }
+
+            vscode.window.showErrorMessage(`${this.logPrefix} Error: ${errorMessage}`);
+
+            // Show error state in webview
+            this.filteredCards = [];
+            this.updateWebview();
+        }
+    }
+
+    /**
+     * Handle tab switch between Agents and MCP Servers
+     */
+    private async handleTabSwitch(tab: 'agents' | 'mcp'): Promise<void> {
+        logger.info(`${this.logPrefix} Switching to tab: ${tab}`);
+        
+        // Update current tab
+        this.currentTab = tab;
+        
+        // Reset pagination
+        this.pageNumber = 1;
+        this.totalCount = 0;
+        this.totalPages = 1;
+        this.allCards = [];
+        this.filteredCards = [];
+        this.filter = '';
+
+        // Load appropriate cards based on tab
+        if (tab === 'agents') {
+            await this.getAgentCards();
+        } else if (tab === 'mcp') {
+            await this.getMcpServerCards();
+        }
+    }
+
+    /**
+     * Refresh current tab data
+     */
+    private async refreshCurrentTab(): Promise<void> {
+        if (this.currentTab === 'agents') {
+            await this.getAgentCards();
+        } else if (this.currentTab === 'mcp') {
+            await this.getMcpServerCards();
+        }
+    }
+
+    /**
      * Update webview with current state
      */
     private updateWebview(): void {
@@ -789,31 +940,31 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             return;
         }
         this.pageNumber = page;
-        this.getAgentCards();
+        this.refreshCurrentTab();
     }
 
     public nextPage(): void {
         if (this.pageNumber < this.totalPages) {
             this.pageNumber++;
-            this.getAgentCards();
+            this.refreshCurrentTab();
         }
     }
 
     public previousPage(): void {
         if (this.pageNumber > 1) {
             this.pageNumber--;
-            this.getAgentCards();
+            this.refreshCurrentTab();
         }
     }
 
     public goToFirstPage(): void {
         this.pageNumber = 1;
-        this.getAgentCards();
+        this.refreshCurrentTab();
     }
 
     public goToLastPage(): void {
         this.pageNumber = this.totalPages;
-        this.getAgentCards();
+        this.refreshCurrentTab();
     }
 
     // /**
@@ -1988,7 +2139,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             // Track change
             this.trackFileChange(uri.fsPath, adkFolderPath);
 
-            await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
+            // Note: Server delete API call removed - file deleted locally only
+            // await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
         });
 
         this._context.subscriptions.push(this.adkFolderWatcher, saveDisposable);

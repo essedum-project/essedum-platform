@@ -693,7 +693,76 @@ export class PipelineAgentService {
 
     return this.requestWithRetry<any>('post', url, config, formData);
   }
+
+  /**
+   * Get MCP Server count
+   * GET /api/aip/service/v1/pipelines/count
+   * @param queryParams - Query parameters (page, size, project, etc.)
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns Count of MCP servers
+   */
+  async getMcpServerCount(queryParams: HttpParams, signal?: AbortSignal): Promise<number> {
+    this.refreshAuthData();
+
+    const url = `${this.API.PIPELINES_COUNT}`;
+    
+    // Add MCP-specific parameters
+    const params = {
+      ...queryParams,
+      interfacetype: 'mcp-pipeline',
+      type: 'mcpServer',
+      cloud_provider: 'internal'
+    };
+
+    const config = this.buildAxiosConfig(params, {}, signal);
+    const response = await this.requestWithRetry<any>('get', url, config);
+    
+    // Log the response to debug
+    logger.info('[PipelineAgentService] MCP count response:', {
+      fullResponse: response,
+      data: response?.data,
+      count: response?.data?.count,
+      dataType: typeof response?.data
+    });
+    
+    // Handle different response formats
+    if (typeof response?.data === 'number') {
+      return response.data;
+    }
+    return response?.data?.count || 0;
+  }
+
+  /**
+   * Get MCP Server list
+   * GET /api/aip/service/v1/pipelines/training/list
+   * @param queryParams - Query parameters (page, size, project, etc.)
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns List of MCP servers
+   */
+  async getMcpServerList(queryParams: HttpParams, signal?: AbortSignal): Promise<any[]> {
+    this.refreshAuthData();
+
+    const url = `${this.API.PIPELINES_LIST}`;
+    
+    // Add MCP-specific parameters
+    const params = {
+      ...queryParams,
+      interfacetype: 'mcp-pipeline',
+      type: 'mcpServer'
+    };
+
+    const config = this.buildAxiosConfig(params, {}, signal);
+    const response = await this.requestWithRetry<any>('get', url, config);
+    
+    // Log the response to debug
+    logger.info('[PipelineAgentService] MCP list response:', {
+      fullResponse: response,
+      data: response?.data,
+      dataLength: Array.isArray(response?.data) ? response.data.length : 'not an array',
+      dataType: typeof response?.data
+    });
+    
+    return response?.data || [];
+  }
+
 }
-
-
-

@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.0.33",
+  "version": "1.0.35",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
