@@ -24,21 +24,28 @@ Nginx is used as a reverse proxy to serve the frontend application and route API
 
 The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
 
+### 2.5. Visual Studio Extension (`vs-extension/`)
+
+The ESSEDUM Visual Studio Extension allows developers to code, access, and execute pipeline jobs directly from VS Code. It provides features like automatic OAuth 2.0 authentication, pipeline execution monitoring, and token management. The code for this extension is in the `vs-extension/` directory. For more details, see the [VS Extension documentation](vs-extension/README.md).
+
+### 2.6. Langflow Integration
+
+Essedum integrates with Langflow, a UI-based Agent Designer, allowing users to design AI agents and run them in an integrated playground.
+
 ## 3. Supported Integrations
 
 ### Data Containers
 - **Currently Supported & Tested:**
   - MinIO
   - Azure Storage Containers
-- **Planned / Pending Validation:**
   - AWS S3
   - Google Cloud Storage (GCS)
 
 ### Execution Containers
 - **Currently Supported:**
   - GCP Vertex AI
-- **Planned / Pending Validation:**
   - AWS SageMaker
+- **Planned / Pending Validation:**
   - Azure AI Studio
 
 ### Libraries and Utilities
@@ -46,8 +53,10 @@ The Python Job Executor is a separate service responsible for executing Python-b
   - scikit-learn (classification and regression)
 - **Vector Database:**
   - Qdrant (via vector DB library)
-- **LLM Integration:**
-  - Langchain, Azure OpenAI SDK (for LLM calls)
+- **Agent Frameworks & LLM Integration:**
+  - Langflow (UI-based Agent Designer)
+  - Langchain
+  - Azure OpenAI SDK (for LLM calls)
 - **Embedded Web UI for AI applications:**
   - Streamlit
   - Gradio
@@ -111,11 +120,15 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 4.2. Containerized Setup
+### 4.2. Visual Studio Extension Setup
+
+To install the VS Code extension, verify the requirements in `vs-extension/README.md` and install via the VS Code Marketplace or build from source using the instructions in the directory.
+
+### 4.3. Containerized Setup
 
 This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
 
-#### 4.2.1. Docker Compose Setup
+#### 4.3.1. Docker Compose Setup
 
 This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
 
@@ -126,33 +139,52 @@ This setup is recommended for users who want to quickly deploy and run the Essed
 
 ##### Deployment Steps
 
-1. **Configure your environment**:
-   - Navigate to the `docker` directory.
-   - Create a copy of the `.env.sample` file and name it `.env`.
-     ```bash
-     cp .env.sample .env
-     ```
-   - Open the `.env` file and customize the variables as needed. You can change the external ports for the services, update credentials, etc.
+1.  **Configure your environment**:
+    *   Navigate to the `docker` directory.
+    *   Create a copy of the `.env.sample` file and name it `.env`.
+        ```bash
+        cp .env.sample .env
+        ```
+    *   Open the `.env` file and customize the variables. The most important variables are:
 
-2. **Build and run the services**:
-   - Once you have configured your `.env` file, you can build and run the services using Docker Compose.
-     ```bash
-     docker-compose up --build
-     ```
-   This command will build the Docker images for all the services and start them in the correct order.
+| Variable                | Description                                          | Default                                                                                |
+| ----------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `BACKEND_PORT`          | External port for the backend service                | `8082`                                                                                 |
+| `FRONTEND_PORT`         | External port for the frontend service               | `8084`                                                                                 |
+| `PYJOB_EXECUTOR_PORT`   | External port for the Python Job Executor            | `5000`                                                                                 |
+| `MYSQL_PORT`            | External port for the MySQL database                 | `3306`                                                                                 |
+| `QDRANT_PORT`           | External port for the Qdrant vector database         | `6333`                                                                                 |
+| `KEYCLOAK_PORT`         | External port for the Keycloak identity and access management | `8180`                                                                                 |
+| `MYSQL_ROOT_PASSWORD`   | Root password for the MySQL database                 | `password`                                                                             |
+| `KEYCLOAK_ADMIN_USER`   | Admin username for Keycloak                          | `admin`                                                                                |
+| `KEYCLOAK_ADMIN_PASSWORD` | Admin password for Keycloak                          | `admin`                                                                                |
+| `ENCRYPTION_KEY`        | Encryption key for the backend service               | `leap$123##`                                                                           |
+| `ENCRYPTION_SALT`       | Encryption salt for the backend service              | `NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA==` |
+| `LICENSE`               | License key for the backend service                  | `sOJDitKH4axL5syVqJDVXv4pmu3HZc4uzAwulC6cwf8mpNm9nWVvQA==`                               |
+| `PUBLIC_KEY`            | Public key for the backend service                   | `3bQAP+ugsTVGLWdZ`                                                                     |
 
-3. **Accessing the application**:
-   - Once all the services are running, you can access the frontend application in your browser at `http://localhost:8084`.
-   - The backend API will be available at `http://localhost:8082`.
-   - The Keycloak admin console will be available at `http://localhost:8180`.
+**Note**: The `ENCRYPTION_KEY`, `ENCRYPTION_SALT`, `LICENSE`, and `PUBLIC_KEY` variables are crucial for the backend service's security. It is highly recommended to change these default values for production deployments.
 
-4. **Stopping the application**:
-   - To stop the services, press `Ctrl+C` in the terminal where `docker-compose` is running, or run the following command from the `docker` directory:
-   ```bash
-   docker-compose down
-   ```
+2.  **Build and run the services**:
+    *   From the `docker` directory, run the following command to build and start the services in detached mode:
+        ```bash
+        docker-compose up -d --build
+        ```
+    *   This command will build the Docker images for all the services and start them in the correct order. The `mysql-init` directory is used to initialize the database with the required schema and data.
 
-#### 4.2.2. Kubernetes Setup
+3.  **Accessing the application**:
+    *   Once all the services are running, you can access the platform at the following URLs:
+        *   **Frontend**: `http://localhost:8084`
+        *   **Backend API**: `http://localhost:8082`
+        *   **Keycloak Admin Console**: `http://localhost:8180`
+
+4.  **Stopping the application**:
+    *   To stop the services, run the following command from the `docker` directory:
+        ```bash
+        docker-compose down
+        ```
+
+#### 4.3.2. Kubernetes Setup
 
 This setup is ideal for deploying the Essedum platform to a production-like environment.
 
