@@ -25,6 +25,7 @@
         
         <button mat-raised-button 
                 class="playground-button action-btn"
+                *ngIf="pipelineMode !== 'mcp'"
                 [class.playground-disabled]="!canOpenPlayground"
                 [disabled]="!canOpenPlayground"
                 (click)="onOpenPlayground()"
