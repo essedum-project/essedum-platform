@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console Logs - {{jobId}}</title>
     <link rel="stylesheet" href="{{cssUri}}">
 </head>
+
 <body>
     <div class="header">
         <h2>Console Logs</h2>
@@ -18,19 +20,20 @@
             </button>
         </div>
     </div>
-    
+
     <div class="job-info">
         <h3>Job ID: {{jobId}}</h3>
         <p>Console logs retrieved from the ESSEDUM platform</p>
     </div>
-    
+
     <div class="logs-container">
         <div class="loading" id="loading" style="display: none;">
             Loading logs...
         </div>
         {{logContent}}
     </div>
-    
+
     <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
 </body>
+
 </html>

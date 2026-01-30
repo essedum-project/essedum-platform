@@ -301,7 +301,7 @@ class PipelineCardsClient {
             // Store globally for reuse
             window.vscodeApi = this.vscode;
         }
-        
+
         this.initializeElements();
         this.attachEventListeners();
         this.requestInitialLoad();

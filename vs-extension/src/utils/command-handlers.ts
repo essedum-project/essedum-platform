@@ -343,7 +343,7 @@ export async function setNavigationContext(context?: vscode.ExtensionContext): P
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, true);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, false);
-    
+
     // Save active view for restoration after extension reload
     if (context) {
         await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'navigation');
@@ -357,7 +357,7 @@ export async function setPipelineContext(context?: vscode.ExtensionContext): Pro
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, true);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, false);
-    
+
     // Save active view for restoration after extension reload
     if (context) {
         await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline');
@@ -371,7 +371,7 @@ export async function setPipelineAgentContext(context?: vscode.ExtensionContext)
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_NAVIGATION, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE, false);
     await vscode.commands.executeCommand(AppConstants.COMMANDS.VSCODE.SET_CONTEXT, AppConstants.CONTEXT_KEYS.SHOW_PIPELINE_AGENT, true);
-    
+
     // Save active view for restoration after extension reload
     if (context) {
         await context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline-agent');
@@ -524,9 +524,9 @@ export async function handleRefreshUserInfo(context: vscode.ExtensionContext): P
         async (progress) => {
             progress.report({ increment: 30, message: 'Fetching user information...' });
             await context.globalState.update(STORAGE_KEYS.UPDATED_USER, true);
-            
+
             const userInfo = await UserUtils.getUserInfo(context, accessToken);
-            
+
             progress.report({ increment: 80, message: 'Updating user access...' });
             await UserUtils.initUserAccess(context, userInfo, accessToken);
         },
@@ -565,25 +565,25 @@ export async function handleDebugUserData(context: vscode.ExtensionContext): Pro
 /**
  * Delete file on server (right-click context menu in Explorer)
  */
-export async function handleDeleteFileOnServer(
-    context: vscode.ExtensionContext,
-    pipelineAgentProvider: PipelineAgentProvider,
-    uri?: vscode.Uri
-): Promise<void> {
-    logger.info('Delete file on server triggered');
-    
-    if (!uri) {
-        logger.warn('No URI provided for delete');
-        return;
-    }
+// export async function handleDeleteFileOnServer(
+//     context: vscode.ExtensionContext,
+//     pipelineAgentProvider: PipelineAgentProvider,
+//     uri?: vscode.Uri
+// ): Promise<void> {
+//     logger.info('Delete file on server triggered');
 
-    try {
-        await pipelineAgentProvider.deleteFileFromExplorer(uri);
-    } catch (error) {
-        logger.error('Error deleting file on server:', error);
-        vscode.window.showErrorMessage(`Failed to delete file: ${error}`);
-    }
-}
+//     if (!uri) {
+//         logger.warn('No URI provided for delete');
+//         return;
+//     }
+
+//     try {
+//         await pipelineAgentProvider.deleteFileFromExplorer(uri);
+//     } catch (error) {
+//         logger.error('Error deleting file on server:', error);
+//         vscode.window.showErrorMessage(`Failed to delete file: ${error}`);
+//     }
+// }
 
 /**
  * Upload Agent Folder (right-click context menu on folder in Explorer)
@@ -594,7 +594,7 @@ export async function handleUploadAgentFolder(
     uri?: vscode.Uri
 ): Promise<void> {
     logger.info('Upload agent folder triggered');
-    
+
     if (!uri) {
         logger.warn('No URI provided for upload');
         return;

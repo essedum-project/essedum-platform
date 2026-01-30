@@ -38,7 +38,7 @@ class AdkTreeItem extends vscode.TreeItem {
         public readonly children: AdkTreeItem[] = []
     ) {
         super(label, collapsibleState);
-        
+
         if (isFile && resourceUri) {
             this.command = {
                 command: 'vscode.open',
@@ -79,7 +79,7 @@ class AdkTreeDataProvider implements vscode.TreeDataProvider<AdkTreeItem> {
 
     private rootItems: AdkTreeItem[] = [];
 
-    constructor(private fileSystemProvider: EssedumFileSystemProvider) {}
+    constructor(private fileSystemProvider: EssedumFileSystemProvider) { }
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
@@ -106,7 +106,7 @@ class AdkTreeDataProvider implements vscode.TreeDataProvider<AdkTreeItem> {
 
                 for (const folderName of folderParts) {
                     currentPath = currentPath ? `${currentPath}/${folderName}` : folderName;
-                    
+
                     if (!folderMap.has(currentPath)) {
                         const folderItem = new AdkTreeItem(
                             folderName,
@@ -216,22 +216,22 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
     /** Track opened cached JSON files for cleanup - maps normalized path to original path */
     private openedCachedFiles: Map<string, string> = new Map();
-    
+
     /** Track open ADK documents for cleanup */
     private openDocuments: Map<string, vscode.TextDocument> = new Map();
-    
+
     /** ADK files cache */
     private adkFilesCache: Map<string, any[]> = new Map();
-    
+
     /** Current ADK folder watcher */
     private adkFolderWatcher?: vscode.FileSystemWatcher;
-    
+
     /** Current ADK folder path */
     private currentAdkFolderPath?: string;
 
     /** Track folder changes */
     private folderHasChanges: boolean = false;
-    
+
     /** Changed files tracking */
     private changedFiles: Set<string> = new Set();
 
@@ -266,7 +266,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Configure file system provider with pipeline agent service for individual saves
         if (this._fileSystemProvider && this._pipelineAgentService) {
             this._fileSystemProvider.setPipelineAgentService(this._pipelineAgentService);
-            
+
             // Note: ADK tree provider commented out - using workspace folders instead
             // this._adkTreeDataProvider = new AdkTreeDataProvider(this._fileSystemProvider);
             // this._adkTreeView = vscode.window.createTreeView('essedumAdkExplorer', {
@@ -301,12 +301,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private refreshAuthData(): void {
         this.project = this._context.globalState.get(CONSTANTS.STATE_KEYS.PROJECT);
         this.role = this._context.globalState.get(CONSTANTS.STATE_KEYS.ROLE);
-        
+
         // Get organization from multiple sources with fallbacks
         const storedOrg = this._context.globalState.get<string>(STORAGE_KEYS.ORGANIZATION);
         const projectName = this.project?.name || this.project?.projectname;
         this.organization = storedOrg || projectName || this.organization || '';
-        
+
         logger.info(`${this.logPrefix} Auth data refreshed:`);
         logger.info(`  - Project: ${this.project?.name || 'undefined'}`);
         logger.info(`  - Organization: ${this.organization || 'undefined'}`);
@@ -328,7 +328,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         if (this._pipelineAgentService) {
             this._pipelineAgentService.refreshAuthData();
         }
-        
+
         // Also refresh local auth data
         this.refreshAuthData();
     }
@@ -357,7 +357,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         logger.info(`${this.logPrefix} Resolving webview view`);
 
         this._view = webviewView;
-        
+
         // Save active view state when pipeline-agent view is opened/resolved
         // This ensures the view is restored correctly after extension reload
         this._context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline-agent').then(() => {
@@ -441,7 +441,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     if (tab.input instanceof vscode.TabInputText) {
                         const closedPath = tab.input.uri.fsPath.toLowerCase();
                         logger.info(`${this.logPrefix} Tab closed: ${closedPath}`);
-                        
+
                         // Check if this is one of our tracked cached files (normalized)
                         if (this.openedCachedFiles.has(closedPath)) {
                             logger.info(`${this.logPrefix} Found tracked cached file, attempting deletion...`);
@@ -460,7 +460,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             vscode.workspace.onDidCloseTextDocument((document) => {
                 const filePath = document.uri.fsPath.toLowerCase();
                 logger.info(`${this.logPrefix} Document closed: ${filePath}`);
-                
+
                 // Check if this is one of our tracked cached files (normalized)
                 if (this.openedCachedFiles.has(filePath)) {
                     logger.info(`${this.logPrefix} Found tracked cached file in document close, attempting deletion...`);
@@ -474,11 +474,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         this._context.subscriptions.push(
             vscode.workspace.onDidSaveTextDocument(async (document) => {
                 const documentPath = document.uri.fsPath.toLowerCase();
-                
+
                 // Check if this is one of our cached JSON files
                 const matchedEntry = Array.from(this.openedCachedFiles.entries())
                     .find(([normalized, original]) => normalized === documentPath);
-                
+
                 if (matchedEntry) {
                     const [normalizedPath, originalPath] = matchedEntry;
                     logger.info(`${this.logPrefix} JSON file saved, uploading to server: ${originalPath}`);
@@ -486,7 +486,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 }
             })
         );
-        
+
         logger.info(`${this.logPrefix} Registered cleanup handlers for cached JSON files`);
         logger.info(`${this.logPrefix} Watching cache directory: ${this.cacheDir}`);
     }
@@ -816,48 +816,48 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         this.getAgentCards();
     }
 
-    /**
-     * Delete file from Explorer (context menu)
-     * Public method called from command handler
-     */
-    public async deleteFileFromExplorer(uri: vscode.Uri): Promise<void> {
-        logger.info(`${this.logPrefix} Delete file requested from Explorer: ${uri.fsPath}`);
+    // /**
+    //  * Delete file from Explorer (context menu)
+    //  * Public method called from command handler
+    //  */
+    // public async deleteFileFromExplorer(uri: vscode.Uri): Promise<void> {
+    //     logger.info(`${this.logPrefix} Delete file requested from Explorer: ${uri.fsPath}`);
 
-        // Retrieve ADK context to get pipeline name and folder path
-        const adkContext = this._context.globalState.get<any>('adkContext');
-        if (!adkContext) {
-            vscode.window.showWarningMessage('No ADK context found. Please open ADK files first.');
-            return;
-        }
+    //     // Retrieve ADK context to get pipeline name and folder path
+    //     const adkContext = this._context.globalState.get<any>('adkContext');
+    //     if (!adkContext) {
+    //         vscode.window.showWarningMessage('No ADK context found. Please open ADK files first.');
+    //         return;
+    //     }
 
-        const pipelineName = adkContext.pipelineName;
-        const adkFolderPath = adkContext.folderPath;
+    //     const pipelineName = adkContext.pipelineName;
+    //     const adkFolderPath = adkContext.folderPath;
 
-        // Verify the file is within the ADK folder
-        const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
-        const normalizedFilePath = path.normalize(uri.fsPath).toLowerCase();
-        
-        if (!normalizedFilePath.startsWith(normalizedAdkPath)) {
-            vscode.window.showWarningMessage('This file is not part of the current ADK workspace.');
-            return;
-        }
+    //     // Verify the file is within the ADK folder
+    //     const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
+    //     const normalizedFilePath = path.normalize(uri.fsPath).toLowerCase();
 
-        // Confirm deletion
-        const fileName = path.basename(uri.fsPath);
-        const confirmation = await vscode.window.showWarningMessage(
-            `Delete "${fileName}" from server?`,
-            { modal: true },
-            'Delete',
-            'Cancel'
-        );
+    //     if (!normalizedFilePath.startsWith(normalizedAdkPath)) {
+    //         vscode.window.showWarningMessage('This file is not part of the current ADK workspace.');
+    //         return;
+    //     }
 
-        if (confirmation !== 'Delete') {
-            return;
-        }
+    //     // Confirm deletion
+    //     const fileName = path.basename(uri.fsPath);
+    //     const confirmation = await vscode.window.showWarningMessage(
+    //         `Delete "${fileName}" from server?`,
+    //         { modal: true },
+    //         'Delete',
+    //         'Cancel'
+    //     );
 
-        // Call the delete handler
-        await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
-    }
+    //     if (confirmation !== 'Delete') {
+    //         return;
+    //     }
+
+    //     // Call the delete handler
+    //     await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
+    // }
 
     /**
      * Upload Agent Folder (context menu on folder)
@@ -875,7 +875,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
         const pipelineName = adkContext.pipelineName;
         const adkFolderPath = adkContext.folderPath;
-        
+
         // Get display name (alias) for user-facing messages
         const card = this.allCards.find(c => c.pipelineId === adkContext.pipelineId);
         const pipelineDisplayName = card?.alias || card?.name || pipelineName;
@@ -888,7 +888,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Normalize paths for comparison
         const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
         const normalizedFolderPath = path.normalize(uri.fsPath).toLowerCase();
-        
+
         // Only allow upload on the root ADK folder (not subfolders)
         if (normalizedFolderPath !== normalizedAdkPath) {
             logger.info(`${this.logPrefix} Not root folder. ADK: ${normalizedAdkPath}, Selected: ${normalizedFolderPath}`);
@@ -939,18 +939,18 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         }, async (progress) => {
             try {
                 progress.report({ increment: 10, message: 'Creating ZIP archive...' });
-                
+
                 // Create ZIP from the ADK folder - include ALL contents (files and subfolders)
                 const AdmZip = require('adm-zip');
                 const zip = new AdmZip();
-                
+
                 // Read all files and folders in the ADK folder
                 const items = fs.readdirSync(adkFolderPath);
-                
+
                 for (const item of items) {
                     const itemPath = path.join(adkFolderPath, item);
                     const stat = fs.statSync(itemPath);
-                    
+
                     if (stat.isDirectory()) {
                         // Add entire subfolder with its contents
                         zip.addLocalFolder(itemPath, item);
@@ -959,33 +959,33 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                         zip.addLocalFile(itemPath);
                     }
                 }
-                
+
                 progress.report({ increment: 40, message: 'Compressing files...' });
-                
+
                 const zipBuffer = zip.toBuffer();
                 const zipFileName = `${pipelineName}_${adkContext.organization}.zip`;
-                
+
                 progress.report({ increment: 60, message: 'Uploading to server...' });
-                
+
                 // Upload ZIP using the bulk upload API
                 await this._pipelineAgentService.uploadFolderZip(
                     pipelineName,
                     zipBuffer,
                     zipFileName
                 );
-                
+
                 progress.report({ increment: 100, message: 'Complete!' });
-                
+
                 // Clear changes after successful upload
                 this.changedFiles.clear();
-                
+
                 // Update context menu state
                 this.updateFolderHasChangesContext();
-                
+
                 vscode.window.showInformationMessage(
                     `✓ ${filesToUpload.length} file(s) uploaded successfully to ${pipelineName}`
                 );
-                
+
             } catch (error: any) {
                 logger.error(`${this.logPrefix} Error uploading folder:`, error);
                 vscode.window.showErrorMessage(`Upload failed: ${error.message}`);
@@ -1000,11 +1000,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         logger.info(`${this.logPrefix} trackFileChange called for: ${filePath}`);
         const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
         const normalizedFilePath = path.normalize(filePath).toLowerCase();
-        
+
         logger.info(`${this.logPrefix} Normalized ADK path: ${normalizedAdkPath}`);
         logger.info(`${this.logPrefix} Normalized file path: ${normalizedFilePath}`);
         logger.info(`${this.logPrefix} Starts with? ${normalizedFilePath.startsWith(normalizedAdkPath)}`);
-        
+
         if (normalizedFilePath.startsWith(normalizedAdkPath)) {
             this.changedFiles.add(filePath);
             this.updateFolderHasChangesContext();
@@ -1020,7 +1020,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private updateFolderHasChangesContext(): void {
         const hasChanges = this.changedFiles.size > 0;
         logger.info(`${this.logPrefix} updateFolderHasChangesContext: hasChanges=${hasChanges}, changedFiles.size=${this.changedFiles.size}`);
-        
+
         if (this.folderHasChanges !== hasChanges) {
             this.folderHasChanges = hasChanges;
             vscode.commands.executeCommand('setContext', 'essedum.folderHasChanges', hasChanges);
@@ -1037,7 +1037,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private async viewAgentDetails(pipelineId: string): Promise<void> {
         // Refresh auth data to ensure organization is current
         this.refreshAuthData();
-        
+
         const card = this.allCards.find(c => c.pipelineId === pipelineId);
         if (!card) {
             vscode.window.showErrorMessage('Pipeline Agent not found');
@@ -1116,7 +1116,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     jsonLoadError = `Configuration file not found for pipeline: ${card.alias || pipelineName}`;
                 } else if (errorStatus === 401 || errorStatus === 403) {
                     jsonLoadError = 'Authentication required. Please log in again.';
-                    
+
                     // Show login prompt but still show detail view
                     vscode.window.showErrorMessage(jsonLoadError, 'Login').then(selection => {
                         if (selection === 'Login') {
@@ -1162,7 +1162,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             try {
                 const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
                 const hasFiles = adkFiles && adkFiles.length > 0;
-                
+
                 // Send message to main webview to show/hide View ADK button
                 if (this._view) {
                     this._view.webview.postMessage({
@@ -1197,7 +1197,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             // Refresh auth data to ensure organization is current
             this.refreshAuthData();
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1206,7 +1206,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
-            
+
             // Use pipeline-specific folder
             const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
             const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
@@ -1277,15 +1277,15 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             // Validate and refresh authentication before proceeding
             // This is critical for operations after idle time (15-30 mins)
             const isAuthenticated = await this.validateAndRefreshAuth();
-            
+
             if (!isAuthenticated) {
-                this.sendMessageToWebview({ 
-                    command: 'actionError', 
-                    message: 'Authentication required. Please login again.' 
+                this.sendMessageToWebview({
+                    command: 'actionError',
+                    message: 'Authentication required. Please login again.'
                 });
                 return;
             }
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1296,7 +1296,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             // Use pipeline-specific folder
             const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            
+
             // Verify pipeline folder exists
             if (!fs.existsSync(pipelineFolderPath)) {
                 throw new Error('Pipeline folder not found. Please open Copilot first.');
@@ -1356,12 +1356,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 vscode.window.showInformationMessage(`✓ ADK uploaded successfully (${sizeMB} MB)`);
                 this.sendMessageToWebview({ command: 'actionComplete', message: `✓ ADK uploaded (${sizeMB} MB)` });
-                
+
                 // Refresh ADK files status to show View/Download buttons
                 try {
                     const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
                     const hasFiles = adkFiles && adkFiles.length > 0;
-                    
+
                     if (this._view) {
                         this._view.webview.postMessage({
                             command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
@@ -1419,13 +1419,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 // Create temp folder for ADK files (reuse same path for same pipeline to overwrite)
                 const adkFolderName = `adk_${pipelineName}`;
                 const adkFolderPath = path.join(this.cacheDir, adkFolderName);
-                
+
                 // If folder already exists, remove it first to ensure clean state
                 if (fs.existsSync(adkFolderPath)) {
                     logger.info(`${this.logPrefix} Folder exists, removing old version: ${adkFolderPath}`);
                     fs.rmSync(adkFolderPath, { recursive: true, force: true });
                 }
-                
+
                 fs.mkdirSync(adkFolderPath, { recursive: true });
 
                 this.currentAdkFolderPath = adkFolderPath;
@@ -1437,11 +1437,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 for (const file of adkFiles) {
                     const fullPath = path.join(adkFolderPath, file.filePath);
                     const dir = path.dirname(fullPath);
-                    
+
                     if (!fs.existsSync(dir)) {
                         fs.mkdirSync(dir, { recursive: true });
                     }
-                    
+
                     fs.writeFileSync(fullPath, file.filescript || '', 'utf-8');
                 }
 
@@ -1489,13 +1489,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 };
 
                 logger.info(`${this.logPrefix} ⚡ Storing ADK context BEFORE workspace update:`, JSON.stringify(contextData, null, 2));
-                
+
                 await this._context.globalState.update('adkContext', contextData);
-                
+
                 // Verify it was stored
                 const verifyContext = this._context.globalState.get('adkContext');
                 logger.info(`${this.logPrefix} ✅ Verified stored context:`, JSON.stringify(verifyContext, null, 2));
-                
+
                 if (!verifyContext) {
                     logger.error(`${this.logPrefix} ⚠️ CRITICAL: Context was not stored properly!`);
                     throw new Error('Failed to store ADK context');
@@ -1505,7 +1505,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 const folderUri = vscode.Uri.file(adkFolderPath);
                 const workspaceFoldersCount = vscode.workspace.workspaceFolders?.length || 0;
-                
+
                 // Add the ADK folder to workspace (shows in Explorer) with pipeline alias
                 const added = vscode.workspace.updateWorkspaceFolders(
                     workspaceFoldersCount,
@@ -1519,7 +1519,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                     // Focus the Explorer view to show the new folder
                     await vscode.commands.executeCommand('workbench.view.explorer');
-                    
+
                     // Reveal the folder in Explorer
                     try {
                         await vscode.commands.executeCommand('revealInExplorer', folderUri);
@@ -1541,7 +1541,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             // Show notification AFTER progress dialog closes with option to save workspace
             await new Promise(resolve => setTimeout(resolve, 300));
-            
+
             const workspaceFile = vscode.workspace.workspaceFile;
             if (!workspaceFile || workspaceFile.scheme === 'untitled') {
                 // Prompt user to save workspace
@@ -1564,10 +1564,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     }
                 });
             }
-            
-            this.sendMessageToWebview({ 
-                command: 'actionComplete', 
-                message: `✓ ${adkFilesCount} files opened` 
+
+            this.sendMessageToWebview({
+                command: 'actionComplete',
+                message: `✓ ${adkFilesCount} files opened`
             });
 
         } catch (error: any) {
@@ -1583,15 +1583,15 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             // Validate and refresh authentication before proceeding
             const isAuthenticated = await this.validateAndRefreshAuth();
-            
+
             if (!isAuthenticated) {
-                this.sendMessageToWebview({ 
-                    command: 'actionError', 
-                    message: 'Authentication required. Please login again.' 
+                this.sendMessageToWebview({
+                    command: 'actionError',
+                    message: 'Authentication required. Please login again.'
                 });
                 return;
             }
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1671,15 +1671,15 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             // Validate and refresh authentication before proceeding
             const isAuthenticated = await this.validateAndRefreshAuth();
-            
+
             if (!isAuthenticated) {
-                this.sendMessageToWebview({ 
-                    command: 'actionError', 
-                    message: 'Authentication required. Please login again.' 
+                this.sendMessageToWebview({
+                    command: 'actionError',
+                    message: 'Authentication required. Please login again.'
                 });
                 return;
             }
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1735,7 +1735,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             // Refresh auth data to ensure organization is current
             this.refreshAuthData();
-            
+
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
                 this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
@@ -1744,7 +1744,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
-            
+
             // Use pipeline-specific folder
             const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
             const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
@@ -1814,24 +1814,24 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             try {
                 logger.info(`${this.logPrefix} === GLOBAL SAVE HANDLER ===`);
                 logger.info(`${this.logPrefix} File saved: ${document.uri.fsPath}`);
-                
+
                 // Debug: List all keys in globalState
                 const allKeys = this._context.globalState.keys();
                 logger.info(`${this.logPrefix} Available context keys: ${JSON.stringify(allKeys)}`);
-                
+
                 // Check if this file is in an ADK folder
                 const adkContext = this._context.globalState.get<any>('adkContext');
-                
+
                 logger.info(`${this.logPrefix} ADK context retrieved:`, JSON.stringify(adkContext, null, 2));
-                
+
                 if (adkContext && adkContext.folderPath) {
                     const normalizedDocPath = path.normalize(document.uri.fsPath).toLowerCase();
                     const normalizedAdkPath = path.normalize(adkContext.folderPath).toLowerCase();
-                    
+
                     logger.info(`${this.logPrefix} ADK folder path: ${normalizedAdkPath}`);
                     logger.info(`${this.logPrefix} Document path: ${normalizedDocPath}`);
                     logger.info(`${this.logPrefix} Is in ADK folder: ${normalizedDocPath.startsWith(normalizedAdkPath)}`);
-                    
+
                     if (normalizedDocPath.startsWith(normalizedAdkPath)) {
                         logger.info(`${this.logPrefix} 🎯 ADK FILE DETECTED - Triggering save to server`);
                         await this.handleAdkFileSaveToServer(document, adkContext.pipelineName, adkContext.folderPath);
@@ -1846,7 +1846,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 logger.error(`${this.logPrefix} Error in global save handler:`, error);
             }
         });
-        
+
         this._context.subscriptions.push(globalSaveDisposable);
         logger.info(`${this.logPrefix} Global ADK save handler registered`);
     }
@@ -1856,12 +1856,12 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      */
     private restoreAdkFolderWatcher(): void {
         const adkContext = this._context.globalState.get<any>('adkContext');
-        
+
         if (adkContext && adkContext.folderPath && adkContext.pipelineName) {
             logger.info(`${this.logPrefix} Restoring ADK folder watcher from context`);
             logger.info(`${this.logPrefix} Pipeline: ${adkContext.pipelineName}`);
             logger.info(`${this.logPrefix} Folder: ${adkContext.folderPath}`);
-            
+
             // Check if the folder still exists
             if (fs.existsSync(adkContext.folderPath)) {
                 this.setupAdkFolderWatcher(adkContext.folderPath, adkContext.pipelineName);
@@ -1881,7 +1881,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Create a save handler that watches for document saves
         const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
             // Check if this document is an ADK file (essedum://adk/{pipelineName}/...)
-            if (document.uri.scheme === 'essedum' && 
+            if (document.uri.scheme === 'essedum' &&
                 document.uri.path.startsWith(`/adk/${pipelineName}/`)) {
                 await this.handleAdkFileSave(document, pipelineName);
             }
@@ -1935,7 +1935,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
         // Normalize path for consistent comparison
         const normalizedAdkPath = path.normalize(adkFolderPath).toLowerCase();
-        
+
         logger.info(`${this.logPrefix} Setting up ADK folder watcher`);
         logger.info(`${this.logPrefix} Watching path: ${normalizedAdkPath}`);
         logger.info(`${this.logPrefix} Pipeline: ${pipelineName}`);
@@ -1946,14 +1946,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Watch for file saves - use API to save to server (handles both edits and new files)
         const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (document) => {
             const normalizedDocPath = path.normalize(document.uri.fsPath).toLowerCase();
-            
+
             logger.info(`${this.logPrefix} File saved: ${normalizedDocPath}`);
             logger.info(`${this.logPrefix} Checking if starts with: ${normalizedAdkPath}`);
-            
+
             if (normalizedDocPath.startsWith(normalizedAdkPath)) {
                 logger.info(`${this.logPrefix} Match! Syncing to server...`);
                 await this.handleAdkFileSaveToServer(document, pipelineName, adkFolderPath);
-                
+
                 // Track change
                 this.trackFileChange(document.uri.fsPath, adkFolderPath);
             } else {
@@ -1964,10 +1964,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Watch for file creations (via Explorer "New File" button)
         this.adkFolderWatcher.onDidCreate(async (uri) => {
             logger.info(`${this.logPrefix} File created: ${uri.fsPath}`);
-            
+
             // Track change
             this.trackFileChange(uri.fsPath, adkFolderPath);
-            
+
             // Wait a bit for the file to be created and opened
             setTimeout(async () => {
                 try {
@@ -1984,10 +1984,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // Watch for file deletions
         this.adkFolderWatcher.onDidDelete(async (uri) => {
             logger.info(`${this.logPrefix} File deleted: ${uri.fsPath}`);
-            
+
             // Track change
             this.trackFileChange(uri.fsPath, adkFolderPath);
-            
+
             await this.handleAdkFileDelete(uri, pipelineName, adkFolderPath);
         });
 
@@ -2020,13 +2020,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 logger.info(`${this.logPrefix}   - Has project: ${!!adkContext.project}`);
                 logger.info(`${this.logPrefix}   - Has role: ${!!adkContext.role}`);
                 logger.info(`${this.logPrefix}   - File ID map: ${JSON.stringify(adkContext.fileIdMap || {})}`);
-                
+
                 // Update context state keys for PipelineAgentService to use
                 await this._context.globalState.update(STORAGE_KEYS.ACCESS_TOKEN, adkContext.token);
                 await this._context.globalState.update(STORAGE_KEYS.PROJECT, adkContext.project);
                 await this._context.globalState.update(STORAGE_KEYS.ROLE, adkContext.role);
                 await this._context.globalState.update(STORAGE_KEYS.ORGANIZATION, adkContext.organization);
-                
+
                 // CRITICAL: Restore base URL from context
                 if (adkContext.baseUrl) {
                     await this._context.globalState.update(STORAGE_KEYS.BASE_URL, adkContext.baseUrl);
@@ -2092,10 +2092,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const fileContent = document.getText();
 
             const cachedFiles = this.adkFilesCache.get(pipelineName);
-            if (!cachedFiles) {return;}
+            if (!cachedFiles) { return; }
 
             const fileMetadata = cachedFiles.find(f => f.filePath === relativePath);
-            if (!fileMetadata) {return;}
+            if (!fileMetadata) { return; }
 
             const updatedFile = { ...fileMetadata, filescript: fileContent };
             await this._pipelineAgentService.updateAdkFolder(pipelineName, [updatedFile]);
@@ -2129,7 +2129,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 await this._context.globalState.update(STORAGE_KEYS.PROJECT, adkContext.project);
                 await this._context.globalState.update(STORAGE_KEYS.ROLE, adkContext.role);
                 await this._context.globalState.update(STORAGE_KEYS.ORGANIZATION, adkContext.organization);
-                
+
                 // Restore base URL
                 if (adkContext.baseUrl) {
                     await this._context.globalState.update(STORAGE_KEYS.BASE_URL, adkContext.baseUrl);
@@ -2174,7 +2174,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
         } catch (error: any) {
             logger.error(`${this.logPrefix} Error deleting file from server:`, error);
-            
+
             // Handle specific error cases
             if (error.status === 403 || error.code === 'ERR_BAD_REQUEST' && error.message?.includes('403')) {
                 vscode.window.showErrorMessage(
@@ -2436,14 +2436,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             // Check if token is valid
             const isValid = await this._authService.isTokenValid();
-            
+
             if (!isValid) {
                 logger.warn(`${this.logPrefix} Token is invalid or expired`);
-                
+
                 // Try to get stored tokens which will trigger refresh if needed
                 try {
                     const tokens = await this._authService.getStoredTokens();
-                    
+
                     if (!tokens) {
                         logger.error(`${this.logPrefix} Failed to refresh tokens`);
                         vscode.window.showErrorMessage(
@@ -2456,13 +2456,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                         });
                         return false;
                     }
-                    
+
                     logger.info(`${this.logPrefix} Token refreshed successfully`);
-                    
+
                     // Refresh auth data and service
                     this.refreshAuthData();
                     this._pipelineAgentService.refreshAuthData();
-                    
+
                     return true;
                 } catch (error: any) {
                     logger.error(`${this.logPrefix} Failed to refresh authentication:`, error);
@@ -2477,13 +2477,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     return false;
                 }
             }
-            
+
             logger.info(`${this.logPrefix} Token is valid`);
             // Refresh auth data to ensure latest values
             this.refreshAuthData();
             this._pipelineAgentService.refreshAuthData();
             return true;
-            
+
         } catch (error: any) {
             logger.error(`${this.logPrefix} Error validating authentication:`, error);
             return false;
@@ -2497,40 +2497,40 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         try {
             const content = document.getText();
             const fileName = path.basename(filePath);
-            
+
             // Extract pipeline name and organization from filename
             // Format: {pipelineName}_{organization}.json
             const fileNameWithoutExt = fileName.replace('.json', '');
             const parts = fileNameWithoutExt.split('_');
-            
+
             if (parts.length < 2) {
                 throw new Error('Invalid JSON filename format. Expected: {pipelineName}_{organization}.json');
             }
-            
+
             const pipelineName = parts[0];
             const orgFromFile = parts.slice(1).join('_'); // Handle org names with underscores
-            
+
             logger.info(`${this.logPrefix} Uploading JSON to server:`);
             logger.info(`${this.logPrefix} - Pipeline: ${pipelineName}`);
             logger.info(`${this.logPrefix} - Organization: ${orgFromFile}`);
             logger.info(`${this.logPrefix} - File: ${fileName}`);
-            
+
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Saving ${fileName} to server...`,
                 cancellable: false
             }, async (progress) => {
                 progress.report({ increment: 30, message: 'Uploading...' });
-                
+
                 // Upload using the service
                 await this._pipelineAgentService.uploadJsonFile(pipelineName, orgFromFile, fileName, content);
-                
+
                 progress.report({ increment: 100, message: 'Complete!' });
-                
+
                 vscode.window.showInformationMessage(`✓ ${fileName} saved to server successfully!`);
                 logger.info(`${this.logPrefix} ✓ JSON file uploaded successfully`);
             });
-            
+
         } catch (error: any) {
             console.error(`${this.logPrefix} ✗ Failed to upload JSON file:`, error);
             vscode.window.showErrorMessage(`Failed to save JSON to server: ${error.message}`);
@@ -2565,7 +2565,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         logger.info(`${this.logPrefix} Cleaning up tracked cached files...`);
         logger.info(`${this.logPrefix} Tracked files count: ${this.openedCachedFiles.size}`);
         logger.info(`${this.logPrefix} Cache directory: ${this.cacheDir}`);
-        
+
         // Delete all tracked files using original paths
         let trackedDeleted = 0;
         this.openedCachedFiles.forEach((originalPath, normalizedPath) => {
@@ -2582,17 +2582,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 console.error(`${this.logPrefix} Failed to clean up tracked ${originalPath}:`, error);
             }
         });
-        
+
         this.openedCachedFiles.clear();
         logger.info(`${this.logPrefix} Deleted ${trackedDeleted} tracked file(s)`);
-        
+
         // Fallback: Scan cache directory and delete all JSON files
         try {
             if (fs.existsSync(this.cacheDir)) {
                 const files = fs.readdirSync(this.cacheDir);
                 const jsonFiles = files.filter(f => f.endsWith('.json'));
                 logger.info(`${this.logPrefix} Found ${jsonFiles.length} JSON file(s) in cache directory`);
-                
+
                 let fallbackDeleted = 0;
                 jsonFiles.forEach(fileName => {
                     try {
@@ -2604,13 +2604,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                         console.error(`${this.logPrefix} Failed to delete ${fileName}:`, error);
                     }
                 });
-                
+
                 logger.info(`${this.logPrefix} Deleted ${fallbackDeleted} untracked JSON file(s) from cache`);
             }
         } catch (error: any) {
             console.error(`${this.logPrefix} Failed to scan cache directory:`, error);
         }
-        
+
         logger.info(`${this.logPrefix} Cleanup complete`);
     }
 }

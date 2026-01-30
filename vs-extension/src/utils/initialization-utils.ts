@@ -342,11 +342,11 @@ export async function showInitialScreen(
     } else if (hasValidAuth) {
         // User is authenticated - restore previous view or default to navigation
         await ExtensionUtils.updateAuthenticationContext(true);
-        
+
         // Check if there's a stored active view (from before extension reload)
         const activeView = context.globalState.get<string>(STORAGE_KEYS.ACTIVE_VIEW, 'navigation');
         logger.info(`Restoring active view: ${activeView}`);
-        
+
         // Restore the appropriate view (commands now handle saving the state)
         switch (activeView) {
             case 'pipeline':

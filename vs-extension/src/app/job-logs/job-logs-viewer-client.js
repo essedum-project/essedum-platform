@@ -18,12 +18,12 @@ function getJobs(choice) {
 
 function showConsole(jobId, runtime, status, job) {
     console.log('showConsole function called with:', { jobId, runtime, status, job });
-    vscode.postMessage({ 
-        command: 'showConsole', 
-        jobId: jobId, 
-        runtime: runtime, 
-        status: status, 
-        job: job 
+    vscode.postMessage({
+        command: 'showConsole',
+        jobId: jobId,
+        runtime: runtime,
+        status: status,
+        job: job
     });
     console.log('showConsole message sent');
 }
@@ -51,7 +51,7 @@ function hideLoading() {
 }
 
 function formatDate(dateString) {
-    if (!dateString) {return '-';}
+    if (!dateString) { return '-'; }
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         month: 'short',
@@ -88,16 +88,16 @@ function renderJobs(jobs) {
     console.log('renderJobs called with', jobs.length, 'jobs');
     const tbody = document.getElementById('jobsTableBody');
     tbody.innerHTML = '';
-    
+
     jobs.forEach((job, index) => {
         console.log('Rendering job', index, ':', job);
         const row = document.createElement('tr');
-        
+
         const triggerType = job.jobmetadata && job.jobmetadata.tag === 'EVENT' ? 'Event triggered' : 'User triggered';
-        
+
         const showStopButton = job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN';
         console.log('Job', job.jobId, 'status:', job.jobStatus, 'show stop button:', showStopButton);
-        
+
         row.innerHTML = `
             <td class="job-id">${job.id || job.jobId}</td>
             <td>
@@ -114,19 +114,19 @@ function renderJobs(jobs) {
                 <button class="action-btn" onclick="showConsole('${job.jobId}', '${job.runtime}', '${job.jobStatus}', ${JSON.stringify(job).replace(/"/g, '&quot;')})" title="View Logs">
                     📄
                 </button>
-                ${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ? 
-                    `<button class="action-btn" onclick="stopJob('${job.jobId}')" title="Stop Job">⏹️</button>` : 
-                    ''
-                }
+                ${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ?
+                `<button class="action-btn" onclick="stopJob('${job.jobId}')" title="Stop Job">⏹️</button>` :
+                ''
+            }
             </td>
             <td>
-                ${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ? 
-                    `<button class="action-btn" onclick="showOutputArtifact('${job.jobId}')" title="Show Output Artifacts">📊</button>` : 
-                    '-'
-                }
+                ${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ?
+                `<button class="action-btn" onclick="showOutputArtifact('${job.jobId}')" title="Show Output Artifacts">📊</button>` :
+                '-'
+            }
             </td>
         `;
-        
+
         tbody.appendChild(row);
     });
 }
@@ -134,13 +134,13 @@ function renderJobs(jobs) {
 // Handle messages from extension
 window.addEventListener('message', event => {
     const message = event.data;
-    
+
     switch (message.command) {
         case 'updateJobs':
             currentJobs = message.jobs;
             currentPage = message.currentPage;
             lastPage = message.lastPage;
-            
+
             document.getElementById('totalJobs').textContent = message.totalJobs;
             renderJobs(currentJobs);
             updatePaginationButtons();

@@ -53,7 +53,7 @@ export async function getUserInfo(context: vscode.ExtensionContext, accessToken:
 
         // Check if this is a network/configuration error (Invalid URL, network issues)
         // vs an actual authorization error (401, 403)
-        if (error.code === 'ERR_INVALID_URL' || 
+        if (error.code === 'ERR_INVALID_URL' ||
             error.message?.includes('Invalid URL') ||
             error.code === 'ENOTFOUND' ||
             error.code === 'ETIMEDOUT' ||

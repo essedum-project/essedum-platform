@@ -28,7 +28,7 @@ interface NavigationMessage {
  */
 export class NavigationScreenProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'essedum-navigation';
-    
+
     private _view?: vscode.WebviewView;
     private _disposables: vscode.Disposable[] = [];
     private _context?: vscode.ExtensionContext;
@@ -43,7 +43,7 @@ export class NavigationScreenProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
-        
+
         // Save active view state when navigation view is opened/resolved
         // This ensures the view is restored correctly after extension reload
         if (this._context) {
@@ -93,7 +93,7 @@ export class NavigationScreenProvider implements vscode.WebviewViewProvider {
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         // Get paths to resources
         const scriptUri = webview.asWebviewUri(
             vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'navigation', 'navigation-screen-client.js')

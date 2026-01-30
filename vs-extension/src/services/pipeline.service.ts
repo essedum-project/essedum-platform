@@ -129,9 +129,9 @@ export class PipelineService {
       'user-agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
       'x-requested-with': 'Leap',
-      ...(this._token ? { 
+      ...(this._token ? {
         'access-token': this._token,
-        authorization: `Bearer ${this._token}` 
+        authorization: `Bearer ${this._token}`
       } : {}),
       ...overrides,
     };
@@ -163,12 +163,12 @@ export class PipelineService {
     configureSSLEnvironment(this.context);
 
     const requestParams: Record<string, unknown> = params ? { ...params } : {};
-    
+
     const baseHeaders = this.buildHeaders();
     const overrideHeaders = overrides.headers as Record<string, string> | undefined;
-    
+
     // Properly merge headers instead of replacing them
-    const mergedHeaders = overrideHeaders 
+    const mergedHeaders = overrideHeaders
       ? { ...baseHeaders, ...overrideHeaders }
       : baseHeaders;
 
@@ -176,7 +176,7 @@ export class PipelineService {
     // Otherwise add project to base params
     const overrideParams = overrides.params as Record<string, unknown> | undefined;
     let mergedParams: Record<string, unknown>;
-    
+
     if (overrideParams !== undefined) {
       // Override params explicitly provided - merge base with override (override wins)
       mergedParams = { ...requestParams, ...overrideParams };
@@ -448,7 +448,7 @@ export class PipelineService {
       alias,
       workerlogId: workerlogId || 'undefined',
     });
-    if (datasource) {queryParams.append('datasource', datasource);}
+    if (datasource) { queryParams.append('datasource', datasource); }
 
     const safeType = encodeURIComponent(pipelineType);
     const safeCName = encodeURIComponent(cname);

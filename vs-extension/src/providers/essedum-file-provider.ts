@@ -75,7 +75,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
     readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         const entries: [string, vscode.FileType][] = [];
-        
+
         // Find all files that are children of this URI
         for (const [fileUri, file] of this._files) {
             const fileUriObj = vscode.Uri.parse(fileUri);
@@ -105,17 +105,17 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
     writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
         const existingFile = this._files.get(uri.toString());
-        
+
         if (!existingFile && !options.create) {
             throw vscode.FileSystemError.FileNotFound();
         }
-        
+
         if (existingFile && !options.overwrite) {
             throw vscode.FileSystemError.FileExists();
         }
 
         const contentStr = Buffer.from(content).toString('utf8');
-        
+
         if (existingFile) {
             // Update existing file
             existingFile.content = contentStr;
@@ -151,7 +151,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Update the file object
         file.uri = newUri;
-        
+
         // Move the file in our map
         this._files.delete(oldUri.toString());
         this._files.set(newUri.toString(), file);
@@ -176,7 +176,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
     public registerFile(fileName: string, content: string, pipelineName: string, organization: string): vscode.Uri {
         const extension = fileName.split('.').pop() || 'txt';
         const uri = vscode.Uri.parse(`essedum:///${pipelineName}/${fileName}`);
-        
+
         const file: EssedumFile = {
             uri,
             content,
@@ -189,7 +189,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         this._files.set(uri.toString(), file);
         this._emitter.fire([{ type: vscode.FileChangeType.Created, uri }]);
-        
+
         return uri;
     }
 
@@ -200,7 +200,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
         const extension = filePath.split('.').pop() || 'txt';
         const fileName = filePath.split('/').pop() || filePath;
         const uri = vscode.Uri.parse(`essedum://adk/${pipelineName}/${filePath}`);
-        
+
         const file: EssedumFile = {
             uri,
             content,
@@ -213,7 +213,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         this._files.set(uri.toString(), file);
         this._emitter.fire([{ type: vscode.FileChangeType.Created, uri }]);
-        
+
         return uri;
     }
 
@@ -221,7 +221,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      * Get all files for a specific pipeline that have been modified
      */
     private getModifiedFilesForPipeline(pipelineName: string): EssedumFile[] {
-        return Array.from(this._files.values()).filter(file => 
+        return Array.from(this._files.values()).filter(file =>
             file.pipelineName === pipelineName && file.modified
         );
     }
@@ -230,7 +230,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      * Get all ADK files for a specific pipeline
      */
     public getAdkFilesForPipeline(pipelineName: string): EssedumFile[] {
-        return Array.from(this._files.values()).filter(file => 
+        return Array.from(this._files.values()).filter(file =>
             file.uri.toString().includes(`essedum://adk/${pipelineName}`)
         );
     }
@@ -239,7 +239,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      * Get all modified ADK files for a specific pipeline
      */
     public getModifiedAdkFiles(pipelineName: string): EssedumFile[] {
-        return Array.from(this._files.values()).filter(file => 
+        return Array.from(this._files.values()).filter(file =>
             file.uri.toString().includes(`essedum://adk/${pipelineName}`) && file.modified
         );
     }
@@ -266,13 +266,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      */
     public async saveFilesToServer(pipelineName: string): Promise<void> {
         const filesToSave = this.getModifiedFilesForPipeline(pipelineName);
-        
+
         if (filesToSave.length === 0) {
             return;
         }
 
         const savePromises = filesToSave.map(file => this.saveFileToServer(file));
-        
+
         try {
             await Promise.all(savePromises);
             vscode.window.showInformationMessage(
@@ -311,7 +311,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Create FormData for file upload
         const formData = new FormData();
-        
+
         // Create a Blob from the script content
         const scriptBlob = new Blob([file.content], { type: 'text/plain' });
         formData.append('scriptFile', scriptBlob, file.fileName);
@@ -321,7 +321,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
         formData.append('filetype', fileType);
         formData.append('pipelineName', file.pipelineName);
         formData.append('organization', file.organization);
-        
+
         // Debug: log the form data contents
         logger.info('FormData contents:');
         logger.info('- scriptFile:', file.fileName, 'size:', file.content.length);
@@ -331,11 +331,11 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Use the correct file create endpoint from curl analysis
         const uploadEndpoint = `/api/aip/file/create/${file.pipelineName}/${file.organization}/${fileType}?file=${file.fileName}`;
-        
+
         logger.info(`Attempting to upload file ${file.fileName} to pipeline ${file.pipelineName} in organization ${file.organization}`);
         logger.info(`Using endpoint: ${uploadEndpoint}`);
         logger.info(`File type: ${fileType}`);
-        
+
         const response = await axios.post(
             uploadEndpoint,
             formData,
@@ -346,7 +346,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
                 timeout: 30000
             }
         );
-        
+
         logger.info(`File ${file.fileName} saved to Essedum server successfully:`, response.data);
     }
 
@@ -411,7 +411,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      */
     public async saveAdkFilesToServer(pipelineName: string, organization: string): Promise<void> {
         const modifiedFiles = this.getModifiedAdkFiles(pipelineName);
-        
+
         if (modifiedFiles.length === 0) {
             return;
         }
@@ -437,7 +437,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
             const fullPath = file.uri.path; // e.g., /adk/pipelineName/file.py
             const pathParts = fullPath.split('/');
             const filePath = pathParts.slice(3).join('/'); // Remove /adk/pipelineName/
-            
+
             return {
                 filePath: filePath,
                 filescript: file.content,

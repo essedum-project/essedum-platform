@@ -192,7 +192,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
-        
+
         // Save active view state when pipeline view is opened/resolved
         // This ensures the view is restored correctly after extension reload
         this._context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline').then(() => {
@@ -1834,14 +1834,14 @@ if __name__ == "__main__":
 
             const fileName = `${streamItem.name}_${this.organization}.py`;
             logger.info('📤 Creating script file FIRST:', fileName);
-            
+
             // Create FormData for upload
             const formData = new FormData();
             formData.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
                 filename: 'blob',
                 contentType: 'text/plain'
             });
-            
+
             await this._pipelineService.uploadScript(streamItem.name, fileName, formData);
 
             // Step 2: Save JSON 

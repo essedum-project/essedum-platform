@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Logs</title>
     <link rel="stylesheet" href="{{cssUri}}">
 </head>
+
 <body>
     <div class="title-jobs">
         <span>Total Jobs: <span id="totalJobs">0</span></span>
@@ -13,11 +15,11 @@
             🔄
         </button>
     </div>
-    
+
     <div id="loadingContainer" class="loading">
         Loading jobs...
     </div>
-    
+
     <div id="tableContainer" style="display: none;">
         <table>
             <thead>
@@ -35,7 +37,7 @@
             <tbody id="jobsTableBody">
             </tbody>
         </table>
-        
+
         <div class="pagination">
             <button id="firstBtn" onclick="getJobs('First')">First</button>
             <button id="prevBtn" onclick="getJobs('Prev')">&lt;&lt; Prev</button>
@@ -43,7 +45,8 @@
             <button id="lastBtn" onclick="getJobs('Last')">Last</button>
         </div>
     </div>
-    
+
     <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
 </body>
+
 </html>

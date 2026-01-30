@@ -14,7 +14,7 @@
  */
 
 import { get } from "axios";
-import {  getBaseUrl } from "./api-config";
+import { getBaseUrl } from "./api-config";
 
 // ================================
 // PIPELINE CONFIGURATION
@@ -26,25 +26,25 @@ import {  getBaseUrl } from "./api-config";
 export const PIPELINE_CONFIG = {
     /** Default page size for pagination */
     DEFAULT_PAGE_SIZE: 3,
-    
+
     /** Initial page number */
     INITIAL_PAGE: 1,
-    
+
     /** Default organization name */
     DEFAULT_ORGANIZATION: '',
-    
+
     /** Default runtime type for pipeline execution */
     DEFAULT_RUNTIME: 'REMOTE',
-    
+
     /** Local runtime identifier */
     LOCAL_RUNTIME: 'Local',
-    
+
     /** Remote runtime identifier */
     REMOTE_RUNTIME: 'REMOTE',
-    
+
     /** Default file type for scripts */
     DEFAULT_FILE_TYPE: 'Python3',
-    
+
     /** Default data source alias */
     DEFAULT_DATASOURCE_ALIAS: 'Sample-Remote-Test'
 } as const;
@@ -55,7 +55,7 @@ export const PIPELINE_CONFIG = {
 export const PAGINATION_CONFIG = {
     /** Maximum visible page numbers in pagination */
     MAX_VISIBLE_PAGES: 5,
-    
+
     /** Minimum items required to show pagination */
     MIN_ITEMS_FOR_PAGINATION: 1
 } as const;
@@ -139,7 +139,7 @@ export const UI_TEXT = {
         SAVING: 'Saving...',
         GENERATING: 'Generating scripts...'
     },
-    
+
     /** Error messages */
     ERRORS: {
         NO_PIPELINES: 'No pipelines found.',
@@ -151,7 +151,7 @@ export const UI_TEXT = {
         NETWORK_ERROR: 'Network error. Please check your connection.',
         PERMISSION_DENIED: 'Permission denied. Please contact your administrator.'
     },
-    
+
     /** Success messages */
     SUCCESS: {
         PIPELINE_STARTED: 'Pipeline started successfully!',
@@ -159,7 +159,7 @@ export const UI_TEXT = {
         SCRIPT_COPIED: 'Script copied to clipboard!',
         AUTHENTICATION_SUCCESS: 'Authentication successful!'
     },
-    
+
     /** Button labels */
     BUTTONS: {
         VIEW_DETAILS: 'View Details',
@@ -178,7 +178,7 @@ export const UI_TEXT = {
         NEXT_PAGE: '▶',
         LAST_PAGE: '⏭'
     },
-    
+
     /** Section headers */
     HEADERS: {
         PIPELINES: 'Pipelines',
@@ -188,7 +188,7 @@ export const UI_TEXT = {
         RUN_TYPES: 'Run Types',
         ACTIONS: 'Actions'
     },
-    
+
     /** Form labels */
     LABELS: {
         SELECT_RUN_TYPE: 'Select Run Type:',
@@ -198,7 +198,7 @@ export const UI_TEXT = {
         TYPE: 'Type:',
         UNKNOWN: 'Unknown'
     },
-    
+
     /** Tooltips and accessibility labels */
     TOOLTIPS: {
         FIRST_PAGE: 'First Page',
@@ -222,10 +222,10 @@ export const UI_TEXT = {
 export const REQUEST_TIMEOUTS = {
     /** Default request timeout */
     DEFAULT: 30000,
-    
+
     /** File upload timeout */
     FILE_UPLOAD: 60000,
-    
+
     /** Long running operations timeout */
     LONG_OPERATION: 120000
 } as const;
@@ -265,7 +265,7 @@ export const SCRIPT_TEMPLATES = {
     
     # Convert to JSON format expected by pipeline
     return df.to_json(orient='records')`,
-    
+
     /** Default Python script header */
     PYTHON_HEADER: `# Generated Python script for pipeline execution
 # This script is auto-generated and can be modified as needed
@@ -273,9 +273,9 @@ export const SCRIPT_TEMPLATES = {
 import json
 import pandas as pd
 from typing import Any, Dict, List`,
-    
+
     /** Model registration URL template */
-    MODEL_CARD_URL: (project: string) => 
+    MODEL_CARD_URL: (project: string) =>
         `${getBaseUrl()}api/aip/service/v1/models/register?project=${project}&isCached=true&adapter_instance=local`
 } as const;
 
@@ -291,29 +291,29 @@ export const WEBVIEW_COMMANDS = {
     // LOAD_CARDS: 'loadCards',
     REFRESH: 'refresh',
     FILTER: 'filter',
-    
+
     /** Navigation commands */
     NEXT_PAGE: 'nextPage',
     PREVIOUS_PAGE: 'previousPage',
     FIRST_PAGE: 'firstPage',
     LAST_PAGE: 'lastPage',
     GO_TO_PAGE: 'goToPage',
-    
+
     /** Pipeline actions */
     VIEW_DETAILS: 'viewDetails',
     RUN_PIPELINE: 'runPipeline',
     VIEW_LOGS: 'viewLogs',
     REFRESH_SCRIPTS: 'refreshScripts',
-    
+
     /** Script actions */
     OPEN_SCRIPT: 'openScript',
     COPY_SCRIPT: 'copyScript',
     GENERATE_SCRIPTS: 'generateScripts',
-    
+
     /** Authentication */
     LOGIN: 'login',
     LOGOUT: 'logout',
-    
+
     /** UI updates */
     UPDATE_CARDS: 'updateCards',
     SHOW_DETAILS: 'showDetails',
@@ -333,27 +333,27 @@ export const CSS_CLASSES = {
     CONTAINER: 'container',
     CARDS_CONTAINER: 'cards-container',
     DETAILS_VIEW: 'details-view',
-    
+
     /** Card classes */
     PIPELINE_CARD: 'pipeline-card',
     CARD_HEADER: 'pipeline-card-header',
     CARD_BODY: 'pipeline-card-body',
     CARD_ACTIONS: 'pipeline-card-actions',
-    
+
     /** Button classes */
     BTN: 'btn',
     BTN_PRIMARY: 'btn-primary',
     BTN_SECONDARY: 'btn-secondary',
     BTN_SMALL: 'btn-small',
     BTN_PAGINATION: 'btn-pagination',
-    
+
     /** State classes */
     LOADING: 'loading',
     EMPTY_STATE: 'empty-state',
     ACTIVE: 'active',
     DISABLED: 'disabled',
     HIDDEN: 'hidden',
-    
+
     /** Form classes */
     FORM_GROUP: 'form-group',
     FORM_LABEL: 'form-label',
@@ -371,19 +371,19 @@ export const CSS_CLASSES = {
 export const DATE_FORMAT = {
     /** Default locale for date formatting */
     DEFAULT_LOCALE: 'en-US',
-    
+
     /** Date format options */
     OPTIONS: {
         SHORT_DATE: { year: 'numeric', month: 'short', day: 'numeric' } as Intl.DateTimeFormatOptions,
-        LONG_DATE: { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        LONG_DATE: {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         } as Intl.DateTimeFormatOptions,
-        DATE_TIME: { 
-            year: 'numeric', 
-            month: 'short', 
+        DATE_TIME: {
+            year: 'numeric',
+            month: 'short',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -401,13 +401,13 @@ export const DATE_FORMAT = {
 export const VALIDATION_PATTERNS = {
     /** Pipeline name pattern */
     PIPELINE_NAME: /^[a-zA-Z0-9_-]+$/,
-    
+
     /** File name pattern */
     FILE_NAME: /^[a-zA-Z0-9_.-]+$/,
-    
+
     /** Email pattern */
     EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    
+
     /** URL pattern */
     URL: /^https?:\/\/.+/
 } as const;
@@ -422,16 +422,16 @@ export const VALIDATION_PATTERNS = {
 export const DEFAULTS = {
     /** Default pipeline parameters */
     PIPELINE_PARAMS: '{}',
-    
+
     /** Default worker log ID */
     WORKER_LOG_ID: 'undefined',
-    
+
     /** Default user identifier */
     USER_AVATAR: 'U',
-    
+
     /** Default error retry count */
     MAX_RETRIES: 3,
-    
+
     /** Default debounce delay for search */
     SEARCH_DEBOUNCE_MS: 300
 } as const;

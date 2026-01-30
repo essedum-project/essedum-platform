@@ -12,6 +12,8 @@
  */
 import * as vscode from 'vscode';
 import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
+import * as http from 'http';
+import * as https from 'https';
 import { AdkFile, HttpParams } from "../interfaces/pipeline.interfaces";
 import { getBaseUrl, getApiEndpoints, getHTTPSAgent } from "../constants/api-config";
 import { STORAGE_KEYS } from "../constants/extension-constants";
@@ -52,6 +54,23 @@ export class PipelineAgentService {
   private _role: RoleInfo | undefined;
   private organization: string = '';
   private debug: boolean = false;
+
+  // Keep-alive agents for better connection handling
+  private static httpAgent = new http.Agent({
+    keepAlive: true,
+    keepAliveMsecs: 30000,
+    maxSockets: 50,
+    maxFreeSockets: 10,
+    timeout: 60000,
+  });
+
+  private static httpsAgent = new https.Agent({
+    keepAlive: true,
+    keepAliveMsecs: 30000,
+    maxSockets: 50,
+    maxFreeSockets: 10,
+    timeout: 60000,
+  });
 
   // Get dynamic API endpoints
   private get API(): ReturnType<typeof getApiEndpoints> {
@@ -258,8 +277,15 @@ export class PipelineAgentService {
         // Check if we should retry
         const isRetryable =
           error.code === 'ECONNRESET' ||
+          error.code === 'ECONNABORTED' ||
           error.code === 'ETIMEDOUT' ||
           error.code === 'ECONNREFUSED' ||
+          error.code === 'ENOTFOUND' ||
+          error.code === 'ENETUNREACH' ||
+          error.code === 'EAI_AGAIN' ||
+          error.message?.includes('socket hang up') ||
+          error.response?.status === 408 || // Request Timeout
+          error.response?.status === 429 || // Too Many Requests
           error.response?.status === 502 ||
           error.response?.status === 503 ||
           error.response?.status === 504;
@@ -273,11 +299,9 @@ export class PipelineAgentService {
         // Calculate delay with exponential backoff
         const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
 
-        if (this.debug) {
-          logger.info(
-            `[PipelineAgentService] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`
-          );
-        }
+        logger.info(
+          `[PipelineAgentService] Network error (${error.code || 'unknown'}), retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`
+        );
 
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -395,9 +419,14 @@ export class PipelineAgentService {
       throw new ServiceError('pipelineId and zipBuffer are required', 'ERR_INVALID_PARAMS');
     }
 
+    const sizeMB = (zipBuffer.length / (1024 * 1024)).toFixed(2);
+    logger.info(`[PipelineAgentService] Starting upload: ${zipFileName} (${sizeMB} MB)`);
+
     const safeId = encodeURIComponent(pipelineId);
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FOLDER_UPLOAD}/${safeId}/${safeOrg}`;
+
+    logger.info(`[PipelineAgentService] Upload URL: ${url}`);
 
     // Create FormData
     const FormData = require('form-data');
@@ -410,10 +439,18 @@ export class PipelineAgentService {
     const baseHeaders = this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
 
+    // Determine which agent to use based on URL protocol
+    const urlProtocol = url.toLowerCase().startsWith('https') ? 'https' : 'http';
+    const uploadAgent = urlProtocol === 'https'
+      ? PipelineAgentService.httpsAgent
+      : PipelineAgentService.httpAgent;
+
     const config = this.buildAxiosConfig(
       { zipFile: 'null' },
       {
-        timeout: 300000, // 5 minutes
+        timeout: 600000, // 10 minutes for large uploads
+        httpAgent: PipelineAgentService.httpAgent,
+        httpsAgent: uploadAgent,
         headers: {
           ...baseHeaders,
           ...formData.getHeaders(),
@@ -424,8 +461,15 @@ export class PipelineAgentService {
       signal
     );
 
-    // Use higher retry count for large uploads
-    return this.requestWithRetry<any>('post', url, config, formData, { maxRetries: 3, baseDelay: 2000 });
+    try {
+      // Single attempt without retries to avoid delays
+      const response = await this.requestWithRetry<any>('post', url, config, formData, { maxRetries: 0, baseDelay: 0, maxDelay: 0 });
+      logger.info(`[PipelineAgentService] Upload successful: ${zipFileName}`);
+      return response;
+    } catch (error: any) {
+      logger.error(`[PipelineAgentService] Upload failed: ${zipFileName}`, error);
+      throw error;
+    }
   }
 
   /**

@@ -127,15 +127,15 @@ export interface PipelineServiceConfig {
 
 /** Domain types (adjust to your backend as needed) */
 export interface ProjectInfo {
-  id?: string | number;
-  projectId?: string | number;
-  name?: string;
-  projectname?: string;
+    id?: string | number;
+    projectId?: string | number;
+    name?: string;
+    projectname?: string;
 }
 
 export interface RoleInfo {
-  id?: string | number;
-  roleId?: string | number;
-  name?: string;
-  rolename?: string;
+    id?: string | number;
+    roleId?: string | number;
+    name?: string;
+    rolename?: string;
 }

@@ -48,7 +48,7 @@ export const LOGIN_COMMANDS = {
     LOGIN: 'login',
     CANCEL: 'cancel',
     READY: 'ready',
-    
+
     // From extension to webview
     SHOW_LOADING: 'showLoading',
     HIDE_LOADING: 'hideLoading',

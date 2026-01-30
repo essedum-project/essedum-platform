@@ -11,10 +11,10 @@
 class PipelineAgentClient {
     constructor() {
         console.log('[Pipeline Agent Client] Initializing...');
-        
+
         // Reference to constants
         this.constants = window.PipelineAgentConstants;
-        
+
         // Check if VS Code API already acquired and stored globally
         if (window.vscodeApi) {
             this.vscode = window.vscodeApi;
@@ -23,17 +23,17 @@ class PipelineAgentClient {
             // Store globally for reuse
             window.vscodeApi = this.vscode;
         }
-        
+
         this.currentAgentData = null;
-        
+
         this.initializeElements();
         this.attachEventListeners();
         this.setupMessageHandler();
         this.requestInitialLoad();
-        
+
         // Make available globally
         window.pipelineAgentClient = this;
-        
+
         console.log('[Pipeline Agent Client] Initialized successfully');
     }
 
@@ -46,7 +46,7 @@ class PipelineAgentClient {
         this.loadingState = document.getElementById('loadingState');
         this.cardsContainer = document.getElementById('cardsContainer');
         this.emptyState = document.getElementById('emptyState');
-        
+
         // Pagination elements
         this.paginationContainer = document.getElementById('paginationContainer');
         this.paginationInfo = document.getElementById('paginationInfo');
@@ -55,7 +55,7 @@ class PipelineAgentClient {
         this.prevPageBtn = document.getElementById('prevPageBtn');
         this.nextPageBtn = document.getElementById('nextPageBtn');
         this.lastPageBtn = document.getElementById('lastPageBtn');
-        
+
         // Detail view elements
         this.detailsView = document.getElementById('detailsView');
         this.backBtn = document.getElementById('backBtn');
@@ -74,21 +74,21 @@ class PipelineAgentClient {
         // Search
         this.searchBtn?.addEventListener('click', () => this.handleSearch());
         this.searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {this.handleSearch();}
+            if (e.key === 'Enter') { this.handleSearch(); }
         });
-        
+
         // Refresh
         this.refreshBtn?.addEventListener('click', () => this.handleRefresh());
-        
+
         // Pagination
         this.firstPageBtn?.addEventListener('click', () => this.goToFirstPage());
         this.prevPageBtn?.addEventListener('click', () => this.goToPreviousPage());
         this.nextPageBtn?.addEventListener('click', () => this.goToNextPage());
         this.lastPageBtn?.addEventListener('click', () => this.goToLastPage());
-        
+
         // Detail view - Back button
         this.backBtn?.addEventListener('click', () => this.hideDetailView());
-        
+
         // Detail view - Action buttons
         this.openCopilotBtn?.addEventListener('click', () => this.handleOpenCopilot());
         this.uploadAdkBtn?.addEventListener('click', () => this.handleUploadAdk());
@@ -102,7 +102,7 @@ class PipelineAgentClient {
         window.addEventListener('message', event => {
             const message = event.data;
             console.log('[Pipeline Agent Client] Received message:', message);
-            
+
             const CMD = this.constants.COMMANDS_FROM_EXTENSION;
             const STATUS = this.constants.STATUS_TYPES;
             switch (message.command) {
@@ -166,17 +166,17 @@ class PipelineAgentClient {
 
     renderCards(message) {
         console.log('[Pipeline Agent Client] Rendering cards:', message);
-        
+
         // If still loading, keep showing loading spinner
         if (message && message.loading) {
             console.log('[Pipeline Agent Client] Still loading, showing spinner');
             this.showLoading();
             return;
         }
-        
+
         // Not loading anymore, hide loading spinner
         this.hideLoading();
-        
+
         // Check for empty cards after confirming we're not loading
         if (!message || !message.cards || message.cards.length === 0) {
             this.showEmptyState();
@@ -184,7 +184,7 @@ class PipelineAgentClient {
         }
 
         this.hideEmptyState();
-        
+
         // Render cards using exact Pipeline structure
         this.cardsContainer.innerHTML = message.cards.map(card => this.createCardElement(card)).join('');
 
@@ -199,20 +199,20 @@ class PipelineAgentClient {
         const pipelineId = card.pipelineId || card.id || card._id || card.name || this.constants.DEFAULTS.UNKNOWN_ID;
         const cardTitle = card.alias || pipelineId;
         const cardType = (card.type || card.interfacetype || this.constants.DEFAULTS.PIPELINE_TYPE).toUpperCase();
-        
+
         // Format date - exactly like Pipeline cards
         const createdDate = card.createdDate || card.created_date || new Date().toISOString();
         const dateObj = new Date(createdDate);
         const formattedDate = dateObj.toLocaleDateString(undefined, this.constants.DATE_FORMAT_OPTIONS);
-        
+
         // Get initial for avatar
         const createdBy = card.created_by || this.constants.DEFAULTS.CREATED_BY;
         const initial = createdBy.charAt(0).toUpperCase();
-        
+
         console.log('[Pipeline Agent Client] Creating card for:', pipelineId, card);
-        
+
         const titleCased = this.toTitleCase(cardTitle);
-        
+
         // Use exact HTML structure from Pipeline cards
         return `
             <div class="pipeline-card" tabindex="0" role="article" 
@@ -244,9 +244,9 @@ class PipelineAgentClient {
             </div>
         `;
     }
-    
+
     toTitleCase(str) {
-        if (!str) {return '';}
+        if (!str) { return ''; }
         return str.replace(/\w\S*/g, (txt) => {
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
@@ -260,25 +260,25 @@ class PipelineAgentClient {
     showDetailView(data) {
         console.log('[Pipeline Agent Client] Showing detail view:', data);
         this.currentAgentData = data;
-        
+
         const DISP = this.constants.DISPLAY;
         // Hide cards, pagination, and search
-        if (this.cardsContainer) {this.cardsContainer.style.display = DISP.NONE;}
-        if (this.paginationContainer) {this.paginationContainer.style.display = DISP.NONE;}
-        if (this.emptyState) {this.emptyState.style.display = DISP.NONE;}
-        if (this.searchContainer) {this.searchContainer.style.display = DISP.NONE;}
-        
+        if (this.cardsContainer) { this.cardsContainer.style.display = DISP.NONE; }
+        if (this.paginationContainer) { this.paginationContainer.style.display = DISP.NONE; }
+        if (this.emptyState) { this.emptyState.style.display = DISP.NONE; }
+        if (this.searchContainer) { this.searchContainer.style.display = DISP.NONE; }
+
         // Show detail view
         if (this.detailsView) {
             this.detailsView.style.display = DISP.BLOCK;
             console.log('[Pipeline Agent Client] Detail view displayed');
         }
-        
+
         // Update detail content
         if (this.detailsTitle) {
             this.detailsTitle.textContent = data.name || this.constants.TEXT.DETAILS_TITLE;
         }
-        
+
         if (this.pipelineInfo) {
             const DEF = this.constants.DEFAULTS;
             this.pipelineInfo.innerHTML = `
@@ -293,16 +293,16 @@ class PipelineAgentClient {
 
     hideDetailView() {
         console.log('[Pipeline Agent Client] Hiding detail view');
-        
+
         const DISP = this.constants.DISPLAY;
         // Hide detail view
-        if (this.detailsView) {this.detailsView.style.display = DISP.NONE;}
-        
+        if (this.detailsView) { this.detailsView.style.display = DISP.NONE; }
+
         // Show cards, pagination, and search
-        if (this.cardsContainer) {this.cardsContainer.style.display = DISP.GRID;}
-        if (this.paginationContainer) {this.paginationContainer.style.display = DISP.FLEX;}
-        if (this.searchContainer) {this.searchContainer.style.display = DISP.FLEX;}
-        
+        if (this.cardsContainer) { this.cardsContainer.style.display = DISP.GRID; }
+        if (this.paginationContainer) { this.paginationContainer.style.display = DISP.FLEX; }
+        if (this.searchContainer) { this.searchContainer.style.display = DISP.FLEX; }
+
         this.currentAgentData = null;
     }
 
@@ -349,7 +349,7 @@ class PipelineAgentClient {
     handleAdkFilesStatus(message) {
         console.log('[Pipeline Agent Client] ADK files status:', message);
         const DISP = this.constants.DISPLAY;
-        
+
         // When code is available: show Edit Code and Download Code, hide Open Copilot and Upload Code
         // When code is not available: hide Edit Code and Download Code, show Open Copilot and Upload Code
         if (this.viewAdkBtn) {
@@ -364,7 +364,7 @@ class PipelineAgentClient {
         if (this.uploadAdkBtn) {
             this.uploadAdkBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
         }
-        
+
         if (message.hasFiles) {
             console.log(`[Pipeline Agent Client] Edit/Download buttons shown (${message.fileCount} files available)`);
         } else {
@@ -393,13 +393,13 @@ class PipelineAgentClient {
     }
 
     showActionStatus(message, type = this.constants.STATUS_TYPES.SUCCESS) {
-        if (!this.actionStatus) {return;}
-        
+        if (!this.actionStatus) { return; }
+
         const DISP = this.constants.DISPLAY;
         const STATUS = this.constants.STATUS_TYPES;
         this.actionStatus.textContent = message;
         this.actionStatus.style.display = DISP.BLOCK;
-        
+
         if (type === STATUS.SUCCESS) {
             this.actionStatus.style.backgroundColor = 'var(--vscode-testing-iconPassed)';
             this.actionStatus.style.color = 'var(--vscode-editor-foreground)';
@@ -407,7 +407,7 @@ class PipelineAgentClient {
             this.actionStatus.style.backgroundColor = 'var(--vscode-testing-iconFailed)';
             this.actionStatus.style.color = 'var(--vscode-editor-foreground)';
         }
-        
+
         setTimeout(() => {
             this.actionStatus.style.display = DISP.NONE;
         }, this.constants.TIMING.STATUS_MESSAGE_DURATION);
@@ -423,41 +423,41 @@ class PipelineAgentClient {
     updatePagination(pagination) {
         const { currentPage, totalPages, totalCount } = pagination;
         const DISP = this.constants.DISPLAY;
-        
+
         if (totalPages <= 1) {
             this.paginationContainer.style.display = DISP.NONE;
             return;
         }
-        
+
         this.paginationContainer.style.display = DISP.FLEX;
-        
+
         // Update info
         this.paginationInfo.textContent = `Page ${currentPage} of ${totalPages} (${totalCount} items)`;
-        
+
         // Update button states
         this.firstPageBtn.disabled = currentPage === 1;
         this.prevPageBtn.disabled = currentPage === 1;
         this.nextPageBtn.disabled = currentPage === totalPages;
         this.lastPageBtn.disabled = currentPage === totalPages;
-        
+
         // Render page numbers
         this.renderPageNumbers(currentPage, totalPages);
     }
 
     renderPageNumbers(currentPage, totalPages) {
         if (!this.paginationPages) { return; }
-        
+
         const maxVisible = this.constants.PAGINATION.MAX_VISIBLE_PAGES;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
         let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-        
+
         if (endPage - startPage < maxVisible - 1) {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
-        
+
         // Build HTML string for page numbers
         let pagesHtml = '';
-        
+
         // Add first page and ellipsis if needed
         if (startPage > 1) {
             pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
@@ -465,13 +465,13 @@ class PipelineAgentClient {
                 pagesHtml += `<span class="page-ellipsis">...</span>`;
             }
         }
-        
+
         // Add visible page numbers
         for (let i = startPage; i <= endPage; i++) {
             const isActive = i === currentPage ? 'active' : '';
             pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
         }
-        
+
         // Add ellipsis and last page if needed
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
@@ -479,10 +479,10 @@ class PipelineAgentClient {
             }
             pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
         }
-        
+
         // Set the HTML
         this.paginationPages.innerHTML = pagesHtml;
-        
+
         // Add click listeners to all page number buttons
         this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
             btn.addEventListener('click', (e) => {

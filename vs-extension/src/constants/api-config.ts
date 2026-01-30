@@ -86,7 +86,7 @@ export function getApiEndpoints(): ApiEndpoints {
     // Generate new endpoints with current base URL
     const apiBaseUrl = getApiBaseUrl();
     const baseUrl = getBaseUrl();
-    
+
     _endpointsCache = {
         // Pipeline endpoints
         PIPELINES_COUNT: `${apiBaseUrl}/pipelines/count`,
@@ -94,46 +94,46 @@ export function getApiEndpoints(): ApiEndpoints {
         PIPELINES_BY_NAME: `${apiBaseUrl}/pipelines/byname`,
         PIPELINES_SAVE_JSON: `${apiBaseUrl}/pipelines/save-json`,
         PIPELINE_RUN: `${apiBaseUrl}/pipeline/run-pipeline`,
-        
+
         // Streaming services
         STREAMING_SERVICES: `${apiBaseUrl}/streamingServices`,
         STREAMING_SERVICES_UPDATE: `${baseUrl}/api/aip/service/v1/streamingServices/update`,
-        
+
         // Job and runtime endpoints
         JOB_RUNTIME_TYPES: `${apiBaseUrl}/jobs/runtime/types`,
         DATASOURCES_RUNTIME: `${apiBaseUrl}/datasources/runtime`,
-        
+
         // File operations
         FILE_READ: `${baseUrl}/api/aip/file/read`,
         FILE_CREATE: `${baseUrl}/api/aip/file/create`,
         FILE_UPLOAD: `${baseUrl}/api/aip/file/upload`,
         FILE_UPDATE: `${baseUrl}/api/aip/file/update`,
         FILE_DELETE: `${baseUrl}/api/aip/file/delete`,
-        
+
         // Folder operations
         FOLDER_UPLOAD: `${baseUrl}/api/aip/folder/upload`,
         FOLDER_LIST: `${baseUrl}/api/aip/folder/list`,
         FOLDER_UPDATE: `${baseUrl}/api/aip/folder/update`,
         FOLDER_DELETE: `${baseUrl}/api/aip/folder/delete`,
         FOLDER_DOWNLOAD: `${baseUrl}/api/aip/folder/download`,
-        
+
         // Event endpoints
         EVENTS_TRIGGER: `${apiBaseUrl}/events/trigger`,
         EVENTS_STATUS: `${apiBaseUrl}/events/status`,
-        
+
         // Datasource endpoints
         FETCH_DATASOURCE: `${apiBaseUrl}/fetchDatasource`,
-        
+
         // Authentication
         AUTH_BASE: `${baseUrl}/realms/essedum/protocol/openid-connect`
     };
-    
+
     return _endpointsCache;
 }
 
 // Create a properly typed proxy for backwards compatibility
 export const API_ENDPOINTS: ApiEndpoints = new Proxy({} as ApiEndpoints, {
-    get: function(target, prop: string | symbol) {
+    get: function (target, prop: string | symbol) {
         const endpoints = getApiEndpoints();
         return endpoints[prop as keyof ApiEndpoints];
     }
@@ -201,16 +201,16 @@ export function createSecureAxiosConfig(token: string, role: any, context?: vsco
         },
         adapter: undefined
     };
-    
+
     // Merge additional config, ensuring httpsAgent is not overridden
     const mergedConfig = {
         ...baseConfig,
         ...additionalConfig
     };
-    
+
     // Ensure HTTPS agent is always set with correct SSL config
     mergedConfig.httpsAgent = getHTTPSAgent(context);
-    
+
     return mergedConfig;
 }
 
@@ -222,10 +222,10 @@ export function createHTTPSAgent(context?: vscode.ExtensionContext): https.Agent
 // Simple axios request wrapper with conditional SSL bypass
 export async function makeSecureRequest(method: string, url: string, context?: vscode.ExtensionContext, config: any = {}): Promise<any> {
     const axios = require('axios');
-    
+
     // Check if URL is absolute or needs base URL
     const isAbsoluteUrl = url.startsWith('http://') || url.startsWith('https://');
-    
+
     // If URL is relative and base URL is not set, throw a clear error
     if (!isAbsoluteUrl) {
         const baseUrl = getBaseUrl();
@@ -238,16 +238,16 @@ export async function makeSecureRequest(method: string, url: string, context?: v
         // Convert relative URL to absolute
         url = `${baseUrl}${url}`;
     }
-    
+
     // Use conditional SSL based on network
     const bypass = shouldBypassSSL(context);
-    
+
     // Extract token from config if provided
-    const token = config.headers?.Authorization?.replace('Bearer ', '') || 
-                  config.headers?.authorization?.replace('Bearer ', '') || 
-                  config.headers?.Authorization || 
-                  config.headers?.authorization || 
-                  '';
+    const token = config.headers?.Authorization?.replace('Bearer ', '') ||
+        config.headers?.authorization?.replace('Bearer ', '') ||
+        config.headers?.Authorization ||
+        config.headers?.authorization ||
+        '';
 
     const defaultHeaders: { [key: string]: string } = {
         'accept': 'application/json, text/plain, */*',
@@ -268,12 +268,12 @@ export async function makeSecureRequest(method: string, url: string, context?: v
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
         'x-requested-with': ''
     };
-    
+
     // Add authorization header if token is provided
     if (token) {
         defaultHeaders['authorization'] = `Bearer ${token}`;
     }
-    
+
     const requestConfig = {
         method: method,
         url: url,
@@ -288,27 +288,27 @@ export async function makeSecureRequest(method: string, url: string, context?: v
         },
         ...config
     };
-    
+
     logger.info('Making secure request to:', url);
     logger.info('SSL bypass active:', bypass);
     logger.info('Request headers being sent:', requestConfig.headers);
     logger.info('Token extracted:', token ? 'Token present' : 'No token');
-    logger.info('Full request config:', { 
-        method: requestConfig.method, 
+    logger.info('Full request config:', {
+        method: requestConfig.method,
         url: requestConfig.url,
         params: requestConfig.params,
-        hasHttpsAgent: !!requestConfig.httpsAgent 
+        hasHttpsAgent: !!requestConfig.httpsAgent
     });
-    
+
     return axios(requestConfig);
 }
 
 // Initialize SSL configuration based on network - call this at extension startup
 export function initializeSSLBypass(context?: vscode.ExtensionContext): void {
     logger.info('Initializing SSL configuration...');
-    
+
     const bypass = shouldBypassSSL(context);
-    
+
     if (bypass) {
         // Infosys network - bypass SSL
         process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
@@ -320,7 +320,7 @@ export function initializeSSLBypass(context?: vscode.ExtensionContext): void {
         delete process.env['PYTHONHTTPSVERIFY'];
         logger.info('SSL validation enabled for LFN network');
     }
-    
+
     logger.info('SSL configuration initialized');
 }
 
@@ -328,15 +328,15 @@ export function initializeSSLBypass(context?: vscode.ExtensionContext): void {
 export function setupAxiosDefaults(context?: vscode.ExtensionContext): void {
     const axios = require('axios');
     const bypass = shouldBypassSSL(context);
-    
+
     // Set default HTTPS agent for all axios requests
     axios.defaults.httpsAgent = getHTTPSAgent(context);
-    
+
     // Set other SSL defaults based on network
     if (axios.defaults.https) {
         axios.defaults.https.rejectUnauthorized = !bypass;
     }
-    
+
     // Add request interceptor to ensure correct SSL config on every request
     axios.interceptors.request.use(
         function (config: any) {
@@ -350,7 +350,7 @@ export function setupAxiosDefaults(context?: vscode.ExtensionContext): void {
             return Promise.reject(error);
         }
     );
-    
+
     logger.info(`Axios defaults configured - SSL bypass: ${bypass}`);
 }
 

@@ -277,7 +277,7 @@ export class JobLogsViewer {
     private async showConsole(jobId: string, runtime: string, status: string, job: any, panel: vscode.WebviewPanel): Promise<void> {
         try {
             // Use the new console API to fetch job logs
-            await this.fetchConsoleJobLogs(jobId,job, status, panel);
+            await this.fetchConsoleJobLogs(jobId, job, status, panel);
         } catch (error: any) {
             console.error('Error showing console:', error);
             vscode.window.showErrorMessage(`Failed to show logs: ${error.message}`);
@@ -804,7 +804,7 @@ export class JobLogsViewer {
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._context.extensionPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         const templatePath = path.join(
             this._context.extensionPath,
             baseFolder,
@@ -832,20 +832,20 @@ export class JobLogsViewer {
      */
     private getJobLogsHtml(webview: vscode.Webview): string {
         const nonce = this.getNonce();
-        
+
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer-client.js'));
-        
+
         let html = this.loadHtmlTemplate('job-logs-viewer.html');
-        
+
         html = html.replace(/{{nonce}}/g, nonce);
         html = html.replace(/{{cssUri}}/g, styleUri.toString());
         html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
-        
+
         return html;
     }
 
@@ -854,23 +854,23 @@ export class JobLogsViewer {
      */
     private getJobLogDetailsHtml(webview: vscode.Webview, jobId: string, jobType: string, status: string, logData: JobLogData[]): string {
         const nonce = this.getNonce();
-        
+
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-log-details-client.js'));
-        
+
         let html = this.loadHtmlTemplate('job-log-details.html');
-        
+
         const logEntries = logData.map(entry => `
             <div class="log-entry">
                 <div class="log-key">${this.escapeHtml(entry.name)}:</div>
                 <div class="log-value">${typeof entry.value === 'object' ? this.escapeHtml(JSON.stringify(entry.value, null, 2)) : this.escapeHtml(String(entry.value))}</div>
             </div>
         `).join('');
-        
+
         html = html.replace(/{{nonce}}/g, nonce);
         html = html.replace(/{{cssUri}}/g, styleUri.toString());
         html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
@@ -879,7 +879,7 @@ export class JobLogsViewer {
         html = html.replace(/{{status}}/g, this.escapeHtml(status));
         html = html.replace(/{{statusLower}}/g, status.toLowerCase());
         html = html.replace(/{{logEntries}}/g, logEntries);
-        
+
         return html;
     }
 
@@ -890,11 +890,11 @@ export class JobLogsViewer {
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
-        
+
         let html = this.loadHtmlTemplate('output-artifacts.html');
-        
+
         const artifactsContent = Array.isArray(artifactsData) ?
             artifactsData.map((artifact, index) => `
                 <div class="artifact-item">
@@ -906,10 +906,10 @@ export class JobLogsViewer {
                 <div class="artifact-name">Output Data</div>
                 <div class="artifact-content">${this.escapeHtml(typeof artifactsData === 'object' ? JSON.stringify(artifactsData, null, 2) : String(artifactsData))}</div>
             </div>`;
-        
+
         html = html.replace(/{{cssUri}}/g, styleUri.toString());
         html = html.replace(/{{artifactsContent}}/g, artifactsContent);
-        
+
         return html;
     }
 
@@ -919,26 +919,26 @@ export class JobLogsViewer {
     private getConsoleLogsHtml(webview: vscode.Webview, jobId: string, logData: any): string {
         const nonce = this.getNonce();
         const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
-        
+
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));
         const baseFolder = isDevelopment ? 'src' : 'dist';
-        
+
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'job-logs-viewer.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, baseFolder, 'app', 'job-logs', 'console-logs-client.js'));
-        
+
         let html = this.loadHtmlTemplate('console-logs.html');
-        
-        const logContentHtml = logContent ? 
-            `<div class="log-content" id="logContent">${this.escapeHtml(logContent)}</div>` : 
+
+        const logContentHtml = logContent ?
+            `<div class="log-content" id="logContent">${this.escapeHtml(logContent)}</div>` :
             `<div class="empty-logs">No console logs available for this job.</div>`;
-        
+
         html = html.replace(/{{nonce}}/g, nonce);
         html = html.replace(/{{cssUri}}/g, styleUri.toString());
         html = html.replace(/{{scriptUri}}/g, scriptUri.toString());
         html = html.replace(/{{jobId}}/g, this.escapeHtml(jobId));
         html = html.replace(/{{logContent}}/g, logContentHtml);
-        
+
         return html;
     }
 

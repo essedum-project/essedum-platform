@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Essedum Login</title>
     <link rel="stylesheet" type="text/css" href="{{CSS_URI}}">
 </head>
+
 <body>
     <div class="container">
         <div class="logo">
             <h1>🔐 Essedum AI Platform</h1>
             <p>Please select your authentication network</p>
         </div>
-        
+
         <div id="errorMessage" class="error"></div>
-        
+
         <div class="login-form">
             <div id="formSection" class="form-section">
                 <div class="form-group">
@@ -26,7 +29,7 @@
                         <option value="lfn">LFN Network</option>
                         <option value="server5g">5G Server Network</option>
                     </select>
-                    
+
                     <div id="networkInfo" class="network-info" style="display: none;">
                         <div id="infosysInfo" style="display: none;">
                             <strong>Infosys Internal Network</strong>
@@ -42,13 +45,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="button-group">
                     <button id="loginBtn" class="btn-primary" disabled>Login</button>
                     <button id="cancelBtn" class="btn-secondary">Cancel</button>
                 </div>
             </div>
-            
+
             <div id="loadingSection" class="loading">
                 <div class="spinner"></div>
                 <span id="loadingMessage">Authenticating...</span>
@@ -58,4 +61,5 @@
 
     <script src="{{JS_URI}}" nonce="{{nonce}}"></script>
 </body>
+
 </html>

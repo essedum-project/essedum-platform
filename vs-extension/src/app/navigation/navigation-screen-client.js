@@ -3,7 +3,7 @@
  * Handles user interactions in the navigation webview
  */
 
-(function() {
+(function () {
     const vscode = acquireVsCodeApi();
 
     // Handle Pipeline card click
