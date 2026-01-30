@@ -7,7 +7,9 @@ import {
   AuthStatus,
   OAuthResponse,
   PushRequest,
-  PullRequest
+  PullRequest,
+  BranchToBranchPushRequest,
+  BranchPushResponse
 } from '../models/github.models';
 
 @Injectable({
@@ -94,6 +96,29 @@ export class GitHubService {
     return this.http.post(
       `${this.API_BASE}/pull`,
       request,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Push code from source branch to destination branch
+   * This performs a merge/copy operation from source to destination
+   */
+  pushBranchToBranch(request: BranchToBranchPushRequest): Observable<BranchPushResponse> {
+    return this.http.post<BranchPushResponse>(
+      `${this.API_BASE}/push-branch-to-branch`,
+      request,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Save git configuration (repo, branch, etc.) to database
+   */
+  saveGitConfig(config: any): Observable<any> {
+    return this.http.post(
+      '/api/aip/git-configs/save',
+      config,
       { withCredentials: true }
     );
   }
