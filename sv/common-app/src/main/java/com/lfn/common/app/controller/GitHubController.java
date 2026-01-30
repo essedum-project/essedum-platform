@@ -186,4 +186,44 @@ public class GitHubController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
+
+    @PostMapping("/create-pull-request")
+    public ResponseEntity<CreatePullRequestResponse> createPullRequest(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "X-GitHub-Username", required = false) String username,
+            @RequestBody CreatePullRequestRequest request,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+
+            // Get username from OAuth if not provided
+            if (username == null || username.isEmpty()) {
+                username = oauthService.getGitHubUsername(cleanToken);
+            }
+
+            CreatePullRequestResponse response = gitHubIntegrationService.createPullRequest(request, cleanToken, username);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in pull request creation", e);
+            CreatePullRequestResponse errorResponse = CreatePullRequestResponse.builder()
+                .success(false)
+                .message(e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .build();
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("Error creating pull request", e);
+            CreatePullRequestResponse errorResponse = CreatePullRequestResponse.builder()
+                .success(false)
+                .message("Failed to create pull request: " + e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .details(e.getMessage())
+                .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
 }

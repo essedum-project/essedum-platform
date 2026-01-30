@@ -363,5 +363,145 @@ public class GitHubIntegrationService {
             throw new GitOperationException("Failed to push from branch to branch", e);
         }
     }
+
+    /**
+     * Create a pull request to merge code from source branch to target branch
+     *
+     * @param request Create pull request request containing repo, branches, title, reviewers, etc.
+     * @param token GitHub Personal Access Token
+     * @param username GitHub username
+     * @return CreatePullRequestResponse containing PR details and conflict information
+     * @throws Exception if pull request creation fails
+     */
+    public CreatePullRequestResponse createPullRequest(CreatePullRequestRequest request, String token, String username) throws Exception {
+        try {
+            log.info("Starting pull request creation - Repo: {}, Source: {}, Target: {}",
+                     request.getRepoName(), request.getSourceBranch(), request.getTargetBranch());
+
+            // Validate inputs
+            if (request.getRepoName() == null || request.getRepoName().isEmpty()) {
+                throw new IllegalArgumentException("Repository name is required");
+            }
+            if (request.getSourceBranch() == null || request.getSourceBranch().isEmpty()) {
+                throw new IllegalArgumentException("Source branch name is required");
+            }
+            if (request.getTargetBranch() == null || request.getTargetBranch().isEmpty()) {
+                throw new IllegalArgumentException("Target branch name is required");
+            }
+            if (request.getTitle() == null || request.getTitle().isEmpty()) {
+                throw new IllegalArgumentException("Pull request title is required");
+            }
+            if (request.getSourceBranch().equals(request.getTargetBranch())) {
+                throw new IllegalArgumentException("Source and target branches cannot be the same");
+            }
+
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(request.getRepoName());
+
+            // Verify both branches exist
+            try {
+                repo.getBranch(request.getSourceBranch());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Source branch '" + request.getSourceBranch() + "' does not exist");
+            }
+
+            try {
+                repo.getBranch(request.getTargetBranch());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Target branch '" + request.getTargetBranch() + "' does not exist");
+            }
+
+            // Initialize conflict tracking variables
+            boolean hasMergeConflicts = false;
+            List<String> conflictingFiles = null;
+
+
+            // Create the pull request
+            GHPullRequest pullRequest = repo.createPullRequest(
+                request.getTitle(),
+                request.getSourceBranch(),  // head
+                request.getTargetBranch(),  // base
+                request.getBody() != null ? request.getBody() : "",
+                true,  // maintainer can modify
+                request.isDraft()
+            );
+
+            log.info("Pull request created successfully: #{}", pullRequest.getNumber());
+
+            // Request reviewers if provided
+            List<String> reviewersRequested = null;
+            if (request.getReviewers() != null && !request.getReviewers().isEmpty()) {
+                try {
+                    log.info("Requesting reviewers: {}", request.getReviewers());
+
+                    // Request reviewers by username
+                    pullRequest.requestReviewers(
+                        request.getReviewers().stream()
+                            .map(reviewerUsername -> {
+                                try {
+                                    return github.getUser(reviewerUsername);
+                                } catch (Exception e) {
+                                    log.warn("Could not find user: {}", reviewerUsername);
+                                    return null;
+                                }
+                            })
+                            .filter(user -> user != null)
+                            .collect(Collectors.toList())
+                    );
+
+                    reviewersRequested = request.getReviewers();
+                    log.info("Reviewers requested successfully");
+                } catch (Exception e) {
+                    log.warn("Could not request reviewers: {}", e.getMessage());
+                }
+            }
+
+            // Check if PR is mergeable (this may take a moment for GitHub to compute)
+            Boolean mergeable = null;
+            String mergeableState = null;
+
+            try {
+                // Refresh to get latest mergeable status
+                pullRequest.refresh();
+                mergeable = pullRequest.getMergeable();
+                mergeableState = pullRequest.getMergeableState();
+
+                log.info("PR mergeable status: {}, state: {}", mergeable, mergeableState);
+
+                // If mergeable is false, there are conflicts
+                if (mergeable != null && !mergeable) {
+                    hasMergeConflicts = true;
+                    log.warn("Pull request has merge conflicts");
+                }
+            } catch (Exception e) {
+                log.warn("Could not determine mergeable status: {}", e.getMessage());
+            }
+
+            return CreatePullRequestResponse.builder()
+                .success(true)
+                .message("Pull request created successfully")
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .pullRequestNumber(pullRequest.getNumber())
+                .pullRequestUrl(pullRequest.getHtmlUrl().toString())
+                .hasMergeConflicts(hasMergeConflicts)
+                .conflictingFiles(conflictingFiles)
+                .mergeable(mergeable)
+                .mergeableState(mergeableState)
+                .reviewersRequested(reviewersRequested)
+                .details(hasMergeConflicts ?
+                    "Pull request created but has merge conflicts. Please resolve conflicts before merging." :
+                    "Pull request is ready for review")
+                .build();
+
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in pull request creation: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in pull request creation: {}", e.getMessage(), e);
+            throw new GitOperationException("Failed to create pull request", e);
+        }
+    }
 }
 
