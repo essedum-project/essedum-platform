@@ -89,6 +89,20 @@ public class GitHubController {
         }
     }
 
+    @GetMapping("/collaborators")
+    public ResponseEntity<List<GitHubCollaboratorInfo>> getCollaborators(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam("repo") String repo,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+            return ResponseEntity.ok(gitHubIntegrationService.fetchRepositoryCollaborators(cleanToken, repo));
+        } catch (Exception e) {
+            log.error("Error fetching collaborators for repo: {}", repo, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/push")
     public ResponseEntity<String> pushToGitHub(
             @RequestHeader(value = "Authorization", required = false) String token,

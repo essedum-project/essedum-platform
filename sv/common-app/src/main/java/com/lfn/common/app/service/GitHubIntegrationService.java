@@ -151,6 +151,55 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Fetch repository collaborators who can be added as reviewers
+     *
+     * @param token GitHub Personal Access Token
+     * @param repoName Repository name in format "owner/repo"
+     * @return List of collaborator information (username, name, avatar)
+     * @throws Exception if fetch fails
+     */
+    public List<GitHubCollaboratorInfo> fetchRepositoryCollaborators(String token, String repoName) throws Exception {
+        try {
+            log.info("Fetching collaborators for repository: {}", repoName);
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(repoName);
+
+            // Get current authenticated user to exclude them from the list
+            GHUser currentUser = github.getMyself();
+            String currentUsername = currentUser.getLogin();
+            log.info("Current user: {}", currentUsername);
+
+            // Fetch collaborators (users with write/admin access)
+            List<GitHubCollaboratorInfo> collaborators = repo.getCollaborators().stream()
+                .filter(user -> !user.getLogin().equals(currentUsername)) // Exclude current user
+                .map(user -> {
+                    GitHubCollaboratorInfo info = new GitHubCollaboratorInfo();
+                    info.setLogin(user.getLogin());
+                    try {
+                        info.setName(user.getName() != null ? user.getName() : user.getLogin());
+                    } catch (Exception e) {
+                        info.setName(user.getLogin());
+                    }
+                    info.setAvatarUrl(user.getAvatarUrl());
+                    try {
+                        info.setHtmlUrl(user.getHtmlUrl().toString());
+                    } catch (Exception e) {
+                        info.setHtmlUrl("");
+                    }
+                    return info;
+                })
+                .sorted((a, b) -> a.getLogin().compareToIgnoreCase(b.getLogin()))
+                .collect(Collectors.toList());
+
+            log.info("Found {} collaborators for repository {}", collaborators.size(), repoName);
+            return collaborators;
+        } catch (Exception e) {
+            log.error("Error fetching collaborators for repo {}: {}", repoName, e.getMessage(), e);
+            throw new GitOperationException("Failed to fetch collaborators for repository: " + repoName, e);
+        }
+    }
+
+    /**
      * Push ADK folder or file contents to GitHub repository
      *
      * @param request Push request containing repo, branch, path/files details
