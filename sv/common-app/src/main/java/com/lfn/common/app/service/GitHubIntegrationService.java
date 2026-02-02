@@ -65,6 +65,34 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Centralized exception handler that properly handles GitHub API exceptions
+     * Re-throws HttpException for proper status code handling in controller
+     * Wraps other exceptions in GitOperationException
+     *
+     * @param e The exception to handle
+     * @param operation Description of the operation that failed
+     * @param context Additional context (e.g., repo name, branch name)
+     * @throws Exception Re-throws HttpException or wraps in GitOperationException
+     */
+    private void handleGitHubException(Exception e, String operation, String context) throws Exception {
+        if (e instanceof IllegalArgumentException) {
+            // Validation errors - re-throw as-is
+            log.error("Validation error in {}: {}", operation, e.getMessage());
+            throw e;
+        } else if (e instanceof org.kohsuke.github.HttpException) {
+            // GitHub API errors - re-throw to preserve status code
+            org.kohsuke.github.HttpException httpEx = (org.kohsuke.github.HttpException) e;
+            log.error("GitHub API error in {} ({}): HTTP {} - {}",
+                operation, context, httpEx.getResponseCode(), httpEx.getMessage());
+            throw httpEx;
+        } else {
+            // Other exceptions - wrap in GitOperationException
+            log.error("Error in {} ({}): {}", operation, context, e.getMessage(), e);
+            throw new GitOperationException("Failed to " + operation + ": " + context, e);
+        }
+    }
+
+    /**
      * Create an insecure OkHttpClient that bypasses SSL verification
      * WARNING: Use only for development/testing
      */
@@ -122,8 +150,8 @@ public class GitHubIntegrationService {
                 })
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error fetching repositories: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to fetch repositories", e);
+            handleGitHubException(e, "fetch repositories", "");
+            return null; // Never reached, but needed for compilation
         }
     }
 
@@ -145,8 +173,8 @@ public class GitHubIntegrationService {
                 .sorted()
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error fetching branches for repo {}: {}", repoName, e.getMessage(), e);
-            throw new GitOperationException("Failed to fetch branches for repository: " + repoName, e);
+            handleGitHubException(e, "fetch branches", repoName);
+            return null; // Never reached
         }
     }
 
@@ -194,8 +222,8 @@ public class GitHubIntegrationService {
             log.info("Found {} collaborators for repository {}", collaborators.size(), repoName);
             return collaborators;
         } catch (Exception e) {
-            log.error("Error fetching collaborators for repo {}: {}", repoName, e.getMessage(), e);
-            throw new GitOperationException("Failed to fetch collaborators for repository: " + repoName, e);
+            handleGitHubException(e, "fetch collaborators", repoName);
+            return null; // Never reached
         }
     }
 
@@ -246,8 +274,8 @@ public class GitHubIntegrationService {
             log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
                      request.getRepoName(), request.getBranch());
         } catch (Exception e) {
-            log.error("Error pushing to GitHub: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to push to GitHub", e);
+            handleGitHubException(e, "push to GitHub", request.getRepoName() + ":" + request.getBranch());
+            // Never reached
         }
     }
 
@@ -306,8 +334,8 @@ public class GitHubIntegrationService {
 
             return response;
         } catch (Exception e) {
-            log.error("Error pulling from GitHub: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to pull from GitHub", e);
+            handleGitHubException(e, "pull from GitHub", request.getRepoUrl() + ":" + request.getBranch());
+            return null; // Never reached
         }
     }
 
@@ -404,12 +432,10 @@ public class GitHubIntegrationService {
                 .branchCreated(false)
                 .build();
 
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error in branch-to-branch push: {}", e.getMessage());
-            throw e;
         } catch (Exception e) {
-            log.error("Error in branch-to-branch push: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to push from branch to branch", e);
+            handleGitHubException(e, "push from branch to branch",
+                request.getRepoName() + " (" + request.getSourceBranch() + " -> " + request.getDestinationBranch() + ")");
+            return null; // Never reached
         }
     }
 
@@ -544,12 +570,10 @@ public class GitHubIntegrationService {
                     "Pull request is ready for review")
                 .build();
 
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error in pull request creation: {}", e.getMessage());
-            throw e;
         } catch (Exception e) {
-            log.error("Error in pull request creation: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to create pull request", e);
+            handleGitHubException(e, "create pull request",
+                request.getRepoName() + " (" + request.getSourceBranch() + " -> " + request.getTargetBranch() + ")");
+            return null; // Never reached
         }
     }
 }
