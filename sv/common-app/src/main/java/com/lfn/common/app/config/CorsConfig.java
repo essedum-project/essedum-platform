@@ -45,12 +45,6 @@ public class CorsConfig {
     @Value("${spring.cors.allowedMethods}")
     private String allowedMethod;
 
-    @Value("${spring.cors.allow-credentials:true}")
-    private boolean allowCredentials;
-
-    @Value("${spring.cors.max-age:3600}")
-    private long maxAge;
-
     /**
      * Cors filter - primary CORS configuration.
      * This configuration is applied to /api/** endpoints.
