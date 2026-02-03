@@ -133,13 +133,12 @@ import io.micrometer.core.annotation.Timed;
 //import liquibase.pro.license.keymgr.a;
 import jakarta.transaction.Transactional;
 
+/**
+ * CORS configuration is now centralized in CorsConfig.java
+ * See application-mysql.yml for CORS settings
+ */
 @RestController
 @Timed
-@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-	       "https://essedum.az.ad.idemo-ppc.com"},
-        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-        allowCredentials = "true",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping("/${icip.pathPrefix}/service/v1")
 @RefreshScope
 public class ICIPMlopsController {
@@ -1868,11 +1867,6 @@ public class ICIPMlopsController {
 
 	@PostMapping("/streamingServices/add")
 	@Transactional
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-            "https://essedum.az.ad.idemo-ppc.com"},
-            allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-            allowCredentials = "true",
-            methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 	public ResponseEntity<?> createStreamingServices(@RequestBody ICIPStreamingServicesDTO streamingServicesDTO,
 			@RequestAttribute(required = false, name = "organization") String org)
 			throws URISyntaxException, SQLException {

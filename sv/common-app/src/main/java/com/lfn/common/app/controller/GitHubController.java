@@ -16,7 +16,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/github")
-@CrossOrigin(origins = "*")
 public class GitHubController {
 
     @Autowired

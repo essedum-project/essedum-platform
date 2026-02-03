@@ -38,10 +38,6 @@ import java.util.*;
  */
 @RestController
 @Timed
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "http://localhost:8087"}, 
-             allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"}, 
-             allowCredentials = "true",
-             methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping("/${icip.pathPrefix}/langflow")
 @RefreshScope
 public class ICIPLangflowController {
