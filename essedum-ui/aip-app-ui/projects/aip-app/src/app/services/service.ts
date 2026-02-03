@@ -84,6 +84,50 @@ export class Services {
       );
   }
 
+  /**
+   * Save Git Config - Update branch configuration
+   * @param payload - Git config payload with cname, org, bname, etc.
+   */
+  saveGitConfig(payload: any): Observable<any> {
+    return this.https
+      .post(this.baseUrl + '/git-configs/save', payload, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  /**
+   * Get Git Config - Fetch branch configuration by cname and org
+   * @param cname - Container name
+   * @param org - Organization
+   */
+  getGitConfig(cname: string, org: string): Observable<any> {
+    return this.https
+      .get(this.baseUrl + '/git-configs', {
+        params: { cname: cname, org: org },
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
   getCountPipelines(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/pipelines/count', {

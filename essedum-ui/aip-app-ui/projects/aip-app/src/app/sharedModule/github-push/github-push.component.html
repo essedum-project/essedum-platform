@@ -96,7 +96,7 @@
 
           <div class="form-group" *ngIf="branches.length > 0">
             <label for="branch-select">Select Branch *</label>
-            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch">
+            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch" (ngModelChange)="onBranchChange()">
               <option *ngFor="let branch of branches" [value]="branch">
                 {{ branch }}
               </option>
@@ -107,7 +107,7 @@
         <!-- Branch Selection (Pull Mode Only) -->
         <div class="form-group" *ngIf="mode === 'pull' && branches.length > 0">
           <label for="branch-select-pull">Select Branch *</label>
-          <select id="branch-select-pull" class="form-control" [(ngModel)]="selectedBranch">
+          <select id="branch-select-pull" class="form-control" [(ngModel)]="selectedBranch" (ngModelChange)="onBranchChange()">
             <option *ngFor="let branch of branches" [value]="branch">
               {{ branch }}
             </option>
