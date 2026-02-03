@@ -1,8 +1,8 @@
-import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Services } from '../../services/service';
-import { GitHubService } from '../../sharedModule/services/github.service';
+import { BranchSelectionDialogComponent } from '../branch-selection-dialog/branch-selection-dialog.component';
 
 // Custom validator for array fields to ensure at least one item is selected
 function arrayNotEmptyValidator(): ValidatorFn {
@@ -138,6 +138,8 @@ export class DeploymentFormComponent implements OnInit {
   // Static text constants - Radio button values
   readonly RADIO_PASS_LABEL = 'Pass';
   readonly RADIO_FAIL_LABEL = 'Fail';
+  readonly RAISE_PR = 'Raise Pull Request';
+  readonly CREATE_PR = 'Create Pull Request';
 
   // Dropdown options
   deploymentEnvironments = ['UAT', 'Staging', 'Production'];
@@ -602,10 +604,15 @@ export class DeploymentFormComponent implements OnInit {
 
   }
 
-  /**
-   * Open branch selection dialog
-   */
   openBranchSelectionDialog(): void {
+    this.openDialog(false);
+  }
+
+  openPullRequestDialog(): void {
+    this.openDialog(true);
+  }
+
+  private openDialog(isDirectDeploy: boolean): void {
     const selectedEnvironment = this.overviewForm.get('deploymentEnvironment')?.value || '';
     const dialogRef = this.dialog.open(BranchSelectionDialogComponent, {
       width: '550px',
@@ -615,7 +622,8 @@ export class DeploymentFormComponent implements OnInit {
       data: {
         cname: this.cname,
         organisation: this.organisation,
-        environment: selectedEnvironment
+        environment: selectedEnvironment,
+        isDirectDeploy: isDirectDeploy
       }
     });
 
@@ -625,276 +633,5 @@ export class DeploymentFormComponent implements OnInit {
         this.service.message('Branch deployment initiated successfully', 'success');
       }
     });
-  }
-}
-
-// Inline Branch Selection Dialog Component
-@Component({
-  selector: 'branch-selection-dialog',
-  template: `
-    <h2 mat-dialog-title style="color: #333; font-size: 20px; font-weight: 600;">Branch Deployment{{ environment ? ' - ' + environment : '' }}</h2>
-    <mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
-      <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
-        <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
-        <p style="margin-top: 16px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
-      </div>
-      
-      <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
-        <div>
-          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
-            <mat-label>Source Branch</mat-label>
-            <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select" [disabled]="isLoadingSourceBranches">
-              <mat-option *ngIf="isLoadingSourceBranches">
-                <span>Loading branches...</span>
-              </mat-option>
-              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
-                {{ branch }}
-              </mat-option>
-            </mat-select>
-            <mat-error class="ml-18" *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
-              Source branch is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div>
-          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
-            <mat-label>Destination Branch</mat-label>
-            <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select" >
-              <mat-option *ngIf="isLoadingSourceBranches" >
-                <span>Loading branches...</span>
-              </mat-option>
-              <mat-option *ngFor="let branch of filteredDestinationBranches" [value]="branch">
-                {{ branch }}
-              </mat-option>
-            </mat-select>
-            <mat-error class="ml-18" *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
-              Destination branch is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
-      <button mat-raised-button (click)="onCancel()" style="margin-right: 8px;" [disabled]="isDeploying">Cancel</button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        (click)="onDeploy()" 
-        [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
-        {{ isDeploying ? 'Deploying...' : 'Deploy' }}
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    :host ::ng-deep .mat-mdc-dialog-container {
-      border-radius: 8px;
-    }
-    :host ::ng-deep mat-dialog-content {
-      overflow: visible !important;
-    }
-      ml-18{
-        margin-left:-18px;}
-  `]
-})
-export class BranchSelectionDialogComponent implements OnInit {
-  branchForm: FormGroup;
-  availableBranches: string[] = [];
-  filteredDestinationBranches: string[] = [];
-  isDeploying = false;
-  isLoadingBranches = false;
-  isLoadingSourceBranches = false;
-  sourceRepoName = ''; // Will be set dynamically with owner/repo format
-  gitUsername: any;
-  gitSelectedRepo: any;
-  gitSelectedBranch: any;
-  environment: string = '';
-
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<BranchSelectionDialogComponent>,
-    private fb: FormBuilder,
-    private service: Services,
-    private githubService: GitHubService
-  ) {
-    this.branchForm = this.fb.group({
-      sourceBranch: ['', Validators.required],
-      destinationBranch: ['', Validators.required]
-    });
-  }
-
-  ngOnInit(): void {
-    this.environment = this.data.environment || '';
-    this.loadSourceBranch();
-  }
-
-  /**
-   * Load available branches from repository and filter destination branches by environment
-   */
-  loadAvailableBranches(): void {
-    this.isLoadingSourceBranches = true;
-    this.availableBranches = [];
-    this.filteredDestinationBranches = [];
-    this.githubService.getBranches(this.gitSelectedRepo).subscribe(
-      (branches) => {
-        this.availableBranches = branches.filter(branch => {
-          const lowerBranch = branch.toLowerCase();
-          return !lowerBranch.includes('uat') && 
-                 !lowerBranch.includes('staging') && 
-                 !lowerBranch.includes('production');
-        });
-        if (this.environment) {
-          const envPrefix = this.environment.toLowerCase();
-          this.filteredDestinationBranches = branches.filter(branch => 
-            branch.toLowerCase().includes(envPrefix)
-          );
-        } else {
-          this.filteredDestinationBranches = branches;
-        }
-        
-        this.isLoadingSourceBranches = false;
-        this.isLoadingBranches = false;
-      },
-      (error) => {
-        this.service.message('Error loading available branches from ' + this.gitSelectedRepo, 'error');
-        this.isLoadingSourceBranches = false;
-        this.isLoadingBranches = false;
-      }
-    );
-  }
-
-  /**
-   * Load source branch from API and pre-populate if available
-   */
-  loadSourceBranch(): void {
-    if (!this.data.cname || !this.data.organisation) {
-      return;
-    }
-
-    this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
-      (response) => {
-        this.gitSelectedRepo=response.repo;
-        if (response && response.bname) {
-          const apiSourceBranch = response.bname;
-          this.branchForm.patchValue({
-            sourceBranch: apiSourceBranch
-          });
-        this.loadAvailableBranches();
-        } else {
-          if (this.gitSelectedBranch) {
-            this.branchForm.patchValue({
-              sourceBranch: this.gitSelectedBranch
-            });
-          }
-        }
-      },
-      (error) => {
-        if (this.gitSelectedBranch) {
-          this.branchForm.patchValue({
-            sourceBranch: this.gitSelectedBranch
-          });
-        } else {
-          console.error('Error loading source branch configuration:', error);
-        }
-      }
-    );
-  }
-
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  /**
-   * Save git configuration after successful deployment
-   */
-  saveGitConfig(sourceBranch: string, destinationBranch: string): void {
-    if (!this.data.cname || !this.gitSelectedRepo || !sourceBranch) {
-      this.service.message('Missing required data for saving git config', 'warning');
-      this.isDeploying = false;
-      this.dialogRef.close({
-        sourceBranch: sourceBranch,
-        destinationBranch: destinationBranch,
-        pushSuccess: true
-      });
-      return;
-    }
-
-    const currentUser = sessionStorage.getItem('username') || 'demo';
-    const gitConfigPayload = {
-      id: null,
-      cname: this.data.cname,
-      org: this.data.organisation,
-      gituser: this.gitUsername,
-      repo: this.gitSelectedRepo,
-      bname: sourceBranch,
-      createdby: currentUser,
-      createdat: new Date().toISOString(),
-      updatedby: currentUser,
-      updatedat: new Date().toISOString()
-    };
-
-    this.githubService.saveGitConfig(gitConfigPayload).subscribe({
-      next: (configResponse) => {
-        this.isDeploying = false;
-        this.service.message('Branch configuration saved successfully', 'success');
-        this.dialogRef.close({
-          ...configResponse,
-          sourceBranch: sourceBranch,
-          destinationBranch: destinationBranch,
-          pushSuccess: true
-        });
-      },
-      error: (error) => {
-        this.isDeploying = false;
-        const errorMsg = error?.details || error?.error?.message || error?.message || 'Branch configuration save failed';
-        this.service.message('Deployment succeeded but config save failed: ' + errorMsg, 'warning');
-        this.dialogRef.close({
-          sourceBranch: sourceBranch,
-          destinationBranch: destinationBranch,
-          pushSuccess: true
-        });
-      }
-    });
-  }
-
-  onDeploy(): void {
-    if (this.branchForm.valid) {
-      this.isDeploying = true;
-      const sourceBranch = this.branchForm.get('sourceBranch')?.value;
-      const destinationBranch = this.branchForm.get('destinationBranch')?.value;
-      const currentUser = sessionStorage.getItem('username') || 'demo';
-      
-      // Prepare branch-to-branch push request
-      const branchToBranchRequest = {
-        repoName: this.gitSelectedRepo,
-        sourceBranch: sourceBranch,
-        destinationBranch: destinationBranch,
-        commitMessage: `Deployment from ${sourceBranch} to ${destinationBranch} - ${new Date().toISOString()}`,
-        createBranchIfNotExists: true,
-        forcePush: true
-      };
-
-      this.githubService.pushBranchToBranch(branchToBranchRequest).subscribe({
-        next: (pushResponse) => {
-          console.log('Branch-to-branch push successful:', pushResponse);
-          if (pushResponse.success) {
-            const successMsg = pushResponse.branchCreated 
-              ? `Branch '${destinationBranch}' created and code deployed from '${sourceBranch}'`
-              : `Code successfully deployed from '${sourceBranch}' to '${destinationBranch}'`;
-            this.service.message(successMsg, 'success');
-          } else {
-            this.service.message('Deployment completed with warnings: ' + pushResponse.message, 'warning');
-          }
-          
-          // Save git config after successful push
-          this.saveGitConfig(sourceBranch, destinationBranch);
-        },
-        error: (error) => {
-          this.isDeploying = false;
-          const errorMsg = error?.error?.message || error?.message || (typeof error?.error === 'string' ? error.error : 'Branch deployment failed');
-          this.service.message('Deployment failed: ' + errorMsg, 'error');
-        }
-      });
-    }
   }
 }
