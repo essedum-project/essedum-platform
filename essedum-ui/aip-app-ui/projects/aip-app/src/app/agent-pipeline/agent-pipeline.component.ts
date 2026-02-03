@@ -28,6 +28,7 @@ import {
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
+import pipelineConfig from './pipeline-config.json';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
@@ -3005,24 +3006,20 @@ public class ZipController {
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
             console.log('  Step 4.2: Streaming service response:', streamingResponse);
             
-            // Determine deployment name based on pipeline mode
-            const deploymentName = this.pipelineMode === 'mcp' 
-              ? 'service-qualification-mcp-5g' 
-              : 'service-qualification-agent-5g';
-            
-            // Extract alias from the response, fallback to mode-specific deployment name
-            const deploymentAlias =  deploymentName;
+            // Generate dynamic deployment name from alias and cname
+            const deploymentAlias = this.generateDeploymentName();
+            console.log('  Step 4.3: Generated dynamic deployment name:', deploymentAlias);
             
             // Now prepare payload with dynamic deployment_name based on pipeline mode
             const apiParams = this.getApiParametersForMode();
             
-            console.log('  Step 4.3: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentName);
+            console.log('  Step 4.4: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentAlias);
             
             const payload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
               deployment_name: deploymentAlias, // Dynamic value from API
               cname: this.currentCname,
               organization: organization,
@@ -3039,17 +3036,15 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use fallback deployment_name if API call fails - mode-specific
+            // Use dynamic deployment_name even in fallback
             const apiParams = this.getApiParametersForMode();
-            const fallbackDeploymentName = this.pipelineMode === 'mcp' 
-              ? 'service-qualification-mcp-5g' 
-              : 'service-qualification-agent-5g';
+            const fallbackDeploymentName = this.generateDeploymentName();
             
             const fallbackPayload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
               deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
@@ -3165,10 +3160,11 @@ public class ZipController {
         let jsonContent = JSON.parse(getResponse.json_content);
         console.log('Parsed existing json_content:', jsonContent);
         
-        // Step 3: Add/update the playgroundUrl
+        // Step 3: Add/update the playgroundUrl with dynamic deployment name
         const environmentUrl = this.getEnvironmentUrl();
-        jsonContent.playgroundurl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-        console.log('Updated json_content with playground URL:', jsonContent);
+        const deploymentName = this.generateDeploymentName();
+        jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentName}/ask`;
+        console.log('Updated json_content with dynamic playground URL:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {
@@ -3654,6 +3650,34 @@ DELIVERABLES
   }
 
   /**
+   * Generate dynamic deployment name from alias and cname
+   * Format: alias-cname with spaces and underscores replaced by hyphens
+   */
+  private generateDeploymentName(): string {
+    if (!this.selectedAgent) {
+      console.error('Cannot generate deployment name: no agent selected');
+      return 'default-deployment';
+    }
+    
+    const alias = this.selectedAgent.alias || '';
+    const cname = this.currentCname || this.selectedAgent.cname || '';
+    
+    if (!alias || !cname) {
+      console.error('Cannot generate deployment name: missing alias or cname');
+      return 'default-deployment';
+    }
+    
+    // Replace spaces and underscores with hyphens in alias
+    const sanitizedAlias = alias.toLowerCase().replace(/[\s_]+/g, '-');
+    const sanitizedCname = cname.toLowerCase().replace(/[\s_]+/g, '-');
+    
+    const deploymentName = `${sanitizedAlias}-${sanitizedCname}`;
+    console.log('Generated deployment name:', deploymentName, 'from alias:', alias, 'and cname:', cname);
+    
+    return deploymentName;
+  }
+
+  /**
    * Get tooltip message for playground button based on deployment status
    */
   getPlaygroundTooltipMessage(): string {
@@ -3743,23 +3767,26 @@ DELIVERABLES
           this.playgroundUrl = jsonContent.playgroundurl;
           console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
-          console.log('fetchPlaygroundUrl - No playgroundurl found, using default');
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using dynamic default');
           const environmentUrl = this.getEnvironmentUrl();
-          this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-          console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
+          const deploymentName = this.generateDeploymentName();
+          this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
+          console.log('fetchPlaygroundUrl - Using dynamic default URL:', this.playgroundUrl);
         }
       } else {
-        console.log('fetchPlaygroundUrl - No json_content in response, using default');
+        console.log('fetchPlaygroundUrl - No json_content in response, using dynamic default');
         const environmentUrl = this.getEnvironmentUrl();
-        this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-        console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
+        const deploymentName = this.generateDeploymentName();
+        this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
+        console.log('fetchPlaygroundUrl - Using dynamic default URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
-      console.log('fetchPlaygroundUrl - Error occurred, using default URL');
+      console.log('fetchPlaygroundUrl - Error occurred, using dynamic default URL');
       const environmentUrl = this.getEnvironmentUrl();
-      this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-      console.log('fetchPlaygroundUrl - Using default URL after error:', this.playgroundUrl);
+      const deploymentName = this.generateDeploymentName();
+      this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
+      console.log('fetchPlaygroundUrl - Using dynamic default URL after error:', this.playgroundUrl);
     }
   }
 
