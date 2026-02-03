@@ -3,11 +3,8 @@ package com.lfn.common.app.controller;
 import com.lfn.common.app.exception.GitHubAuthenticationException;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import com.lfn.common.app.service.GitHubOAuthService;
-import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
-import com.lfn.common.app.web.rest.dto.PullRequest;
-import com.lfn.common.app.web.rest.dto.PullResponse;
-import com.lfn.common.app.web.rest.dto.PushRequest;
-import jakarta.servlet.http.HttpSession;
+import com.lfn.common.app.web.rest.dto.*;
+import com.lfn.common.app.service.GitHubIntegrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +12,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/github")
-@CrossOrigin(origins = "*")
 public class GitHubController {
 
     @Autowired
@@ -134,6 +131,45 @@ public class GitHubController {
         } catch (Exception e) {
             log.error("Error pulling from GitHub", e);
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/push-branch-to-branch")
+    public ResponseEntity<BranchPushResponse> pushBranchToBranch(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "X-GitHub-Username", required = false) String username,
+            @RequestBody BranchPushRequest request,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+
+            // Get username from OAuth if not provided
+            if (username == null || username.isEmpty()) {
+                username = oauthService.getGitHubUsername(cleanToken);
+            }
+
+            BranchPushResponse response = gitHubIntegrationService.pushBranchToBranch(request, cleanToken, username);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in branch-to-branch push", e);
+            BranchPushResponse errorResponse = BranchPushResponse.builder()
+                .success(false)
+                .message(e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .destinationBranch(request.getDestinationBranch())
+                .build();
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("Error pushing branch to branch", e);
+            BranchPushResponse errorResponse = BranchPushResponse.builder()
+                .success(false)
+                .message("Failed to push: " + e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .destinationBranch(request.getDestinationBranch())
+                .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 }

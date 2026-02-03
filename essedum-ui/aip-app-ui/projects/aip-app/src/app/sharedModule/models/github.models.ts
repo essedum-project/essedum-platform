@@ -29,3 +29,23 @@ export interface PullRequest {
   repoUrl: string;
   branch: string;
 }
+
+export interface BranchToBranchPushRequest {
+  repoName: string;
+  sourceBranch: string;
+  destinationBranch: string;
+  commitMessage: string;
+  createBranchIfNotExists?: boolean;
+  forcePush?: boolean;
+}
+
+export interface BranchPushResponse {
+  success: boolean;
+  message: string;
+  repoName: string;
+  sourceBranch: string;
+  destinationBranch: string;
+  commitSha: string;
+  filesChanged: number;
+  branchCreated: boolean;
+}

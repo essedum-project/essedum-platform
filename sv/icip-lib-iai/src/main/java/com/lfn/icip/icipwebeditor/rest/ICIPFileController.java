@@ -72,11 +72,6 @@ import io.micrometer.core.annotation.Timed;
 @RestController
 @Timed
 @RequestMapping(path = "/${icip.pathPrefix}/file")
-@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-        "https://essedum.az.ad.idemo-ppc.com"},
-        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-        allowCredentials = "true",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 
 public class ICIPFileController {
 
