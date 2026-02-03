@@ -722,10 +722,12 @@ export class AipMethodCreateEditComponent {
           );
         },
         (error) => {
-          this.adapterServices.messageNotificaionService(
-            'warning',
-            'Tested!  FAILED'
-          );
+          // Check if error has the new format with error and details
+          if (error?.error?.details) {
+            this.adapterServices.messageNotificaionService('warning', error.error.details);
+          } else if (error?.error?.message) {
+            this.adapterServices.messageNotificaionService('warning', error.error.message);
+          }
         }
       );
     } else {
@@ -750,10 +752,12 @@ export class AipMethodCreateEditComponent {
           );
         },
         (error) => {
-          this.adapterServices.messageNotificaionService(
-            'warning',
-            'Tested!  FAILED'
-          );
+          // Check if error has the new format with error and details
+          if (error?.error?.details) {
+            this.adapterServices.messageNotificaionService('warning', error.error.details);
+          } else if (error?.error?.message) {
+            this.adapterServices.messageNotificaionService('warning', error.error.message);
+          }
         }
       );
     }

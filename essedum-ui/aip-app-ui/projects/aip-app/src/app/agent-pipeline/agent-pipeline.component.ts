@@ -1340,10 +1340,18 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving file:', error);
-      // Show error message
-      this.service.messageService(error);
+      // Check if error has the new format with details
+      if (error?.error?.details) {
+        this.service.message(error.error.details, 'error');
+      } else if (error?.error?.message) {
+        this.service.message(error.error.message, 'error');
+      } else {
+        // If error is not in the expected format, use a generic message
+        const errorMessage = error?.message || 'Failed to save file';
+        this.service.message(errorMessage, 'error');
+      }
     } finally {
       this.isSavingFile = false;
     }
@@ -1421,10 +1429,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         successResponse,
         'File deleted successfully!'
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting file:', error);
-      // Show error message
-      this.service.messageService(error);
+      // Check if error has the new format with details
+      if (error?.error?.details) {
+        this.service.message(error.error.details, 'error');
+      } else if (error?.error?.message) {
+        this.service.message(error.error.message, 'error');
+      } else {
+        const errorMessage = error?.message || 'Failed to delete file';
+        this.service.message(errorMessage, 'error');
+      }
     } finally {
       this.isSavingFile = false;
     }
@@ -1573,6 +1588,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading files:', error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         this.isLoadingFiles = false;
         this.fileSystemData = [];
         this.hasGeneratedAgent = false;
@@ -1813,7 +1834,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error downloading files:', error);
-          this.service.messageService(error);
+          // Check if error has the new format with details
+          if (error?.error?.details) {
+            this.service.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.service.message(error.error.message, 'error');
+          } else {
+            this.service.message('Failed to download files. Please try again.', 'error');
+          }
           // Reset loading state on error
           this.isDownloading = false;
         },
@@ -2402,9 +2430,17 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         const successResponse = { status: 200, body: result || [] };
         this.service.messageService(successResponse, 'File structure updated successfully!');
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to save file structure:', error);
-        this.service.messageService(error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else {
+          const errorMessage = error?.message || 'Failed to update file structure';
+          this.service.message(errorMessage, 'error');
+        }
         
         // Restore original structure on error
         this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
@@ -2891,25 +2927,33 @@ public class ZipController {
       },
       error: (error) => {
         console.error('MinIO push failed, cannot proceed with deployment:', error);
+        console.log('Error object structure:', {
+          status: error.status,
+          error: error.error,
+          message: error.message
+        });
 
-        // Check if this is a parsing error with 200 status (success but unparseable response)
-        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
-            (error.message?.includes('parsing') || error.error?.text)) {
-          console.log('API returned 200 but response parsing failed - treating as success and proceeding');
-          this.addToConsole('✓ Files successfully pushed to MinIO storage (response parsing issue ignored)');
-          this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
-          
-          // Proceed with deployment since the push was actually successful
-          this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
-          this.initializeWebSocket();
+        // Always treat as real error and stop deployment
+        this.deploymentStatus = 'error';
+        this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
+        this.addToConsole('✗ Failed to push files to MinIO storage');
+        
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.addToConsole(`Error: ${error.error.details}`);
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.addToConsole(`Error: ${error.error.message}`);
+          this.service.message(error.error.message, 'error');
+        } else if (error?.message) {
+          this.addToConsole(`Error: ${error.message}`);
+          this.service.message(error.message, 'error');
         } else {
-          // Real error - stop deployment
-          this.deploymentStatus = 'error';
-          this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
-          this.addToConsole('✗ Failed to push files to MinIO storage');
-          this.addToConsole(`Error: ${error.message || 'Unknown error'}`);
-          this.isRunningAndDeploying = false;
+          const errorMessage = 'Unknown error occurred during MinIO push';
+          this.addToConsole(`Error: ${errorMessage}`);
+          this.service.message(errorMessage, 'error');
         }
+        this.isRunningAndDeploying = false;
       }
     });
   }
@@ -3237,20 +3281,22 @@ public class ZipController {
       },
       error: (error) => {
         console.error('MinIO push error:', error);
+        console.log('Error object structure:', {
+          status: error.status,
+          error: error.error,
+          message: error.message
+        });
         
-        // Check if this is a parsing error with 200 status (success but unparseable response)
-        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
-            (error.message?.includes('parsing') || error.error?.text)) {
-          console.log('API returned 200 but response parsing failed - treating as success');
-          
-          // Extract the response text if available
-          const responseText = error.error?.text || 'Upload completed';
-          const successResponse = { status: 200, body: responseText };
-          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+        // Check for error details in the response
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else if (error?.message) {
+          this.service.message(error.message, 'error');
         } else {
-          // Real error - show error message
-          const errorResponse = error.status ? error : { status: 500, body: 'Unknown error' };
-          this.service.messageService(errorResponse, 'Push to MinIO failed. Please try again.');
+          // Fallback to generic error message
+          this.service.message('Push to MinIO failed. Please try again.', 'error');
         }
       }
     });
@@ -3341,19 +3387,21 @@ public class ZipController {
       },
       error: (error) => {
         console.error('Upload failed:', error);
-        let errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
         
-        if (error?.error) {
-          if (typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.error.message) {
-            errorMessage = error.error.message;
-          }
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else if (error?.error && typeof error.error === 'string') {
+          this.service.message(error.error, 'error');
         } else if (error?.message) {
-          errorMessage = error.message;
+          this.service.message(error.message, 'error');
+        } else {
+          // Final fallback
+          const errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
+          this.service.message(errorMessage, 'error');
         }
-        
-        this.service.message(errorMessage, 'error');
         this.isUploadingFiles = false;
       }
     });
@@ -4031,6 +4079,12 @@ DELIVERABLES
           cname,
           error
         );
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
@@ -4246,6 +4300,12 @@ DELIVERABLES
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;

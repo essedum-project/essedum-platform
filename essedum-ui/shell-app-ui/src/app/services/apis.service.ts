@@ -352,7 +352,11 @@ export class ApisService {
           })
         )
         .pipe(
-          catchError((err) => {
+          catchError((err: any) => {
+            if (err?.error && err.error.error && err.error.details) {
+              // Display error.error.details in snackbar
+              console.error(err.error.details);
+            }
             return this.handleAPIError(err);
           })
         );

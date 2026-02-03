@@ -79,8 +79,7 @@ public class MlSpecTemplatesController {
 	}
 	
 	@PostMapping("/add")
-	public ResponseEntity<MlSpecTemplates> createSpecTemplate(@RequestBody MlSpecTemplates mlSpecTemplate)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlSpecTemplates> createSpecTemplate(@RequestBody MlSpecTemplates mlSpecTemplate) {
 		logger.info("creating SpecTemplate:{}", mlSpecTemplate.getDomainname());
 		mlSpecTemplate.setCreatedby(ICIPUtils.getUser(claim));
 		mlSpecTemplate.setCreatedon(Timestamp.from(Instant.now()));
@@ -89,8 +88,7 @@ public class MlSpecTemplatesController {
 				HttpStatus.OK);
 	}
 	@PostMapping("/update")
-	public ResponseEntity<MlSpecTemplates> updateMlAdapter(@RequestBody MlSpecTemplates mlSpecTemplate)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlSpecTemplates> updateMlAdapter(@RequestBody MlSpecTemplates mlSpecTemplate) {
 		logger.info("updating MlSpecTemplate:{}", mlSpecTemplate.getDomainname());
 		return new ResponseEntity<>(mlSpecTemplatesService.updateMlSpecTemplate(mlSpecTemplate), new HttpHeaders(), HttpStatus.OK);
 	}
