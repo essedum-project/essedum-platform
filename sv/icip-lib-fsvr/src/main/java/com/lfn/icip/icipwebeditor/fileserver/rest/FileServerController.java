@@ -1,10 +1,12 @@
 package com.lfn.icip.icipwebeditor.fileserver.rest;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +38,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/${icip.pathPrefix}/fileserver")
 @Tag(name = "fileserver")
 @RefreshScope
-@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-        "https://essedum.az.ad.idemo-ppc.com"},
-        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-        allowCredentials = "true",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class FileServerController {
 	
 	/** The fileserver service. */
@@ -78,20 +75,20 @@ public class FileServerController {
 	 * Uploads File as Temporary File and Temporary Folder to Server
 	 */
 	@PostMapping(value = "/uploadTemp")
-	public ResponseEntity<Map<String,String>> uploadformioTemp(@RequestPart("file") MultipartFile file) throws Exception {
+	public ResponseEntity<Map<String,String>> uploadformioTemp(@RequestPart("file") MultipartFile file) {
 		Map<String,String> fileDetails=fileserverService.uploadTemp(file);
 		return new ResponseEntity<>(fileDetails, HttpStatus.OK);
 	}
 	
 	@PostMapping(value = "/uploadTempFileFromData")
-	public ResponseEntity<Map<String,String>> uploadTempFileFromData(@RequestBody String fileData) throws Exception {
+	public ResponseEntity<Map<String,String>> uploadTempFileFromData(@RequestBody String fileData) {
 		JSONObject jsonObject= new JSONObject(fileData);
 		Map<String,String> fileDetails=fileserverService.uploadTempFileFromData(jsonObject);
 		return new ResponseEntity<>(fileDetails, HttpStatus.OK);
 	}
 	
 	@PostMapping(value = "/uploadMultipleFile")
-	public ResponseEntity<List<Map<String,String>>> uploadMultipleFile(@RequestPart("files") MultipartFile[] files) throws Exception {
+	public ResponseEntity<List<Map<String,String>>> uploadMultipleFile(@RequestPart("files") MultipartFile[] files) {
 		List<Map<String,String>> fileDetailsList = new ArrayList<>();
 		for(MultipartFile filedata:files) {
 			Map<String,String> fileDetails = fileserverService.uploadTemp(filedata);
@@ -112,7 +109,7 @@ public class FileServerController {
 	@PostMapping(value = "/uploadChunks/{org}", consumes = { "multipart/form-data" })
     public ResponseEntity<Map<String,String>> uploadChunkData(@PathVariable(value = "org") String organization,
             @RequestPart("chunkMetadata") String metadata,
-            @RequestPart("file") MultipartFile file) throws Exception {
+            @RequestPart("file") MultipartFile file) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         ICIPChunkMetaData chunkMetaData = mapper.readValue(metadata, ICIPChunkMetaData.class);
         String  fileid = ICIPUtils.removeSpecialCharacter(chunkMetaData.getFileGuid());

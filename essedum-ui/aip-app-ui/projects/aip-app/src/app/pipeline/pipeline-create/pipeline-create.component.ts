@@ -207,30 +207,78 @@ export class PipelineCreateComponent implements OnInit {
           else if (data.type === 'AIAgent' && this.interfaceType === 'pipeline-agent') {
             this.createAgentDummyFile(data);
           }
-          // Handle existing NativeScript logic
-          else if (data.type == "NativeScript") {
+          // Handle existing NativeScript logic - only for copy operation
+          else if (data.type == "NativeScript" && this.data.copy) {
             if (data.json_content) {
               let json_content = JSON.parse(data.json_content)
-              let script_file = json_content.elements[0].attributes.files[0]
-              let script_pipeline_name = script_file.split('_')[0]
-
-              this.Services.readNativeFile(script_pipeline_name, data.organization, script_file).subscribe(
-                resp => {
-                  // this.script = resp;
-                  const textDecoder = new TextDecoder('utf-8');
-                  this.script = textDecoder.decode(resp).split('\n');
-                  json_content.elements[0].attributes.files[0] = data.name + "_" + sessionStorage.getItem('organization') + ".py";
-                  data.json_content = JSON.stringify(json_content)
-
-                  const formData: FormData = new FormData();
-                  let script = this.script.join('\n')
-                  let scriptFile = new Blob([script], { type: 'text/plain' });
-                  formData.set('scriptFile', scriptFile);
-                  this.Services.createNativeFile(data.name, data.organization, json_content.elements[0].attributes.files[0], json_content.elements[0].attributes.filetype, formData).subscribe();
-                  this.Services.update(data).subscribe();
-                }, error => {
+              
+              // Check if files array exists and has elements
+              if (json_content.elements && json_content.elements[0] && 
+                  json_content.elements[0].attributes && json_content.elements[0].attributes.files && 
+                  json_content.elements[0].attributes.files.length > 0) {
+                
+                let script_file = json_content.elements[0].attributes.files[0];
+                
+                // Extract actual filename if it's in JSON array format like '["file.py","file.ipynb"]'
+                let actualFileName = script_file;
+                if (typeof script_file === 'string') {
+                  if (script_file.startsWith('[') && script_file.endsWith(']')) {
+                    try {
+                      const filesArray = JSON.parse(script_file);
+                      // Find the .py file
+                      actualFileName = filesArray.find((f: string) => f.endsWith('.py')) || filesArray[0];
+                    } catch (e) {
+                      // Manual parsing if JSON parse fails
+                      const cleanStr = script_file.slice(1, -1);
+                      const filesArray = cleanStr.split(',').map(f => f.trim().replace(/["\']/g, ''));
+                      actualFileName = filesArray.find(f => f.endsWith('.py')) || filesArray[0];
+                    }
+                  }
                 }
-              );
+                
+                let script_pipeline_name = actualFileName.split('_')[0];
+
+                this.Services.readNativeFile(script_pipeline_name, data.organization, script_file).subscribe(
+                  resp => {
+                    // this.script = resp;
+                    const textDecoder = new TextDecoder('utf-8');
+                    this.script = textDecoder.decode(resp).split('\n');
+                    
+                    // Generate new file name based on new pipeline cname
+                    const newFileName = data.name + "_" + data.organization + ".py";
+                    json_content.elements[0].attributes.files[0] = newFileName;
+                    
+                    // Update json_content with new file name before saving to database
+                    data.json_content = JSON.stringify(json_content);
+
+                    const formData: FormData = new FormData();
+                    let script = this.script.join('\n')
+                    let scriptFile = new Blob([script], { type: 'text/plain' });
+                    formData.set('scriptFile', scriptFile);
+                    
+                    // Create file with new name in mlpipelinenativescriptentity table
+                    this.Services.createNativeFile(data.name, data.organization, newFileName, json_content.elements[0].attributes.filetype, formData).subscribe(
+                      () => {
+                        console.log('Native file created successfully for copy:', newFileName);
+                        // Update pipeline in mlpipeline table with correct json_content
+                        this.Services.update(data).subscribe(
+                          () => {
+                            console.log('Pipeline updated successfully with new file reference:', data.name);
+                          },
+                          (updateError) => {
+                            console.error('Error updating pipeline after file creation:', updateError);
+                          }
+                        );
+                      },
+                      (fileError) => {
+                        console.error('Error creating native file for copy:', fileError);
+                      }
+                    );
+                  }, error => {
+                    console.error('Error reading source file for copy:', error);
+                  }
+                );
+              }
             }
           }
           

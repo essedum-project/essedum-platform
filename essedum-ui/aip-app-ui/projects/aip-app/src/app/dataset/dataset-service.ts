@@ -153,6 +153,9 @@ export class DatasetServices {
           return response;
         })
         .pipe(catchError(err => {
+          if (err.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         }));
 
@@ -236,6 +239,9 @@ export class DatasetServices {
           return response;
         })
         .pipe(catchError(err => {
+          if (err.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         }));
 
@@ -252,12 +258,14 @@ export class DatasetServices {
           return response;
         })
         .pipe(catchError(err => {
+          if (err.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         }));
 
     }
     catch (Exception) {
-      this.message("Some error occured while uploading multiple files", "Error")
     }
   }
 
@@ -886,11 +894,13 @@ export class DatasetServices {
           return response;
         })
         .pipe(catchError(err => {
+          if (err.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         }));
     }
     catch (Exception) {
-      this.message("Some error occured", "Error")
     }
   }
 
