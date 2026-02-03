@@ -117,6 +117,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     isHoveredRun=false;
     isHoveredTag=false;
     defaultRuntimeFromDB: any;
+    isBackHovered=false;
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -740,7 +741,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) this.saveJson(result.data.name);
+      if (result) this.copyPipelineJson(result);
     });
   }
 
@@ -1243,7 +1244,135 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     });
   }
 
-
+  /**
+   * Copy pipeline with proper file handling and json_content updates
+   * This method ensures:
+   *  New file names are generated based on new cname_orgname.py format
+   *  Json_content is updated with new file names
+   */
+  copyPipelineJson(newPipelineData: any) {
+    try {
+      console.log('Starting copyPipelineJson for new pipeline:', newPipelineData);
+      
+      const newCname = newPipelineData.name;
+      const newOrg = newPipelineData.organization;
+      const newFileName = `${newCname}_${newOrg}.py`;
+      
+      console.log('New pipeline details:', { newCname, newOrg, newFileName });
+      
+      if (this.data.files && this.data.files.length > 0) {
+        let oldFileName = this.data.files[0];
+        
+        if (typeof oldFileName === 'string') {
+          if (oldFileName.startsWith('[') && oldFileName.endsWith(']')) {
+            try {
+              const filesArray = JSON.parse(oldFileName);
+              if (Array.isArray(filesArray)) {
+                oldFileName = filesArray.find((f: string) => f.endsWith('.py')) || filesArray[0];
+              }
+            } catch (e) {
+              console.warn('Failed to parse files array as JSON, trying manual parsing:', e);
+              const cleanStr = oldFileName.slice(1, -1); // Remove brackets
+              const filesArray = cleanStr.split(',').map(f => f.trim().replace(/["\']/g, ''));
+              oldFileName = filesArray.find(f => f.endsWith('.py')) || filesArray[0];
+            }
+          }
+        }
+        
+        console.log('Reading old file:', oldFileName);
+        
+        this.service.readNativeFile(
+          this.streamItem.name,
+          this.streamItem.organization,
+          oldFileName
+        ).subscribe({
+          next: (fileContent) => {
+            console.log('Old file content read successfully');
+            
+            const textDecoder = new TextDecoder('utf-8');
+            const scriptContent = textDecoder.decode(fileContent);
+            
+            console.log('Creating new file with name:', newFileName);
+            
+            this.service.createNativeFile(
+              newCname,
+              newOrg,
+              newFileName,
+              this.data.filetype || 'Python3',
+              scriptContent
+            ).subscribe({
+              next: (createResponse) => {
+                console.log('New file created successfully:', createResponse);
+                
+                const updatedData = { ...this.data };
+                updatedData.files = [newFileName];
+                
+                const updatedJsonContent = {
+                  elements: [{ attributes: updatedData }],
+                  environment: this.dynamicEnvArray || [],
+                  default_runtime: this.selectedRunType
+                };
+                
+                newPipelineData.json_content = JSON.stringify(updatedJsonContent);
+                
+                console.log('Updated json_content with new file name:', newPipelineData.json_content);
+                
+                this.service.update(newPipelineData).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Pipeline updated successfully in database:', updateResponse);
+                    this.service.message('Pipeline copied successfully', 'success');
+                    
+                    setTimeout(() => {
+                      this._location.back();
+                    }, 1500);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating pipeline:', updateError);
+                    this.service.message('Pipeline copied but failed to update: ' + updateError, 'error');
+                  }
+                });
+              },
+              error: (createError) => {
+                console.error('Error creating new file:', createError);
+                this.service.message('Error creating file for copied pipeline: ' + createError, 'error');
+              }
+            });
+          },
+          error: (readError) => {
+            console.error('Error reading old file:', readError);
+            this.service.message('Error reading original file: ' + readError, 'error');
+          }
+        });
+      } else {
+        console.log('No files to copy, updating pipeline with empty files array');
+        
+        const updatedData = { ...this.data };
+        updatedData.files = [];
+        
+        const updatedJsonContent = {
+          elements: [{ attributes: updatedData }],
+          environment: this.dynamicEnvArray || [],
+          default_runtime: this.selectedRunType
+        };
+        
+        newPipelineData.json_content = JSON.stringify(updatedJsonContent);
+        
+        this.service.update(newPipelineData).subscribe({
+          next: (updateResponse) => {
+            console.log('Pipeline updated successfully:', updateResponse);
+            this.service.message('Pipeline copied successfully', 'success');
+          },
+          error: (updateError) => {
+            console.error('Error updating pipeline:', updateError);
+            this.service.message('Error copying pipeline: ' + updateError, 'error');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Exception in copyPipelineJson:', error);
+      this.service.message('Error occurred while copying pipeline', 'error');
+    }
+  }
 
   hasChild = (_: number, node: FileNode) => !!node.children && node.children.length > 0;
 }
