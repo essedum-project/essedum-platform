@@ -2916,8 +2916,11 @@ public class ZipController {
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
         console.log('MinIO push successful, proceeding to WebSocket deployment:', response);
-        this.addToConsole(' Files successfully pushed to MinIO storage');
+        this.addToConsole('✓ Files successfully pushed to MinIO storage');
         this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+        
+        // Show success snackbar message
+        this.service.message('Files successfully pushed to MinIO storage', 'success');
         
         // Update status message and proceed to WebSocket
         this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
@@ -2926,14 +2929,33 @@ public class ZipController {
         this.initializeWebSocket();
       },
       error: (error) => {
-        console.error('MinIO push failed, cannot proceed with deployment:', error);
+        console.error('MinIO push error received:', error);
         console.log('Error object structure:', {
           status: error.status,
+          statusText: error.statusText,
           error: error.error,
           message: error.message
         });
 
-        // Always treat as real error and stop deployment
+        // Check if this is actually a success response (200-299 status codes)
+        // Some APIs return success data in error handler due to response format issues
+        if (error.status >= 200 && error.status < 300) {
+          console.log('MinIO push actually succeeded (200-level status), continuing deployment');
+          this.addToConsole('✓ Files successfully pushed to MinIO storage');
+          this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+          
+          // Show success snackbar message
+          this.service.message('Files successfully pushed to MinIO storage', 'success');
+          
+          // Update status message and proceed to WebSocket
+          this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
+          
+          // Continue with WebSocket deployment
+          this.initializeWebSocket();
+          return;
+        }
+
+        // Only treat as real error if status is 4xx or 5xx
         this.deploymentStatus = 'error';
         this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
         this.addToConsole('✗ Failed to push files to MinIO storage');
@@ -3050,7 +3072,17 @@ public class ZipController {
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
             console.log('  Step 4.2: Streaming service response:', streamingResponse);
             
-            // Generate dynamic deployment name from alias and cname
+            // CRITICAL: Update selectedAgent with alias from streaming service API response
+            if (streamingResponse && streamingResponse.alias) {
+              if (!this.selectedAgent) {
+                this.selectedAgent = {} as AgentCard;
+              }
+              this.selectedAgent.alias = streamingResponse.alias;
+              this.selectedAgent.cname = streamingResponse.name || this.currentCname;
+              console.log('  Step 4.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
+            }
+            
+            // Generate dynamic deployment name from alias and cname (now properly populated)
             const deploymentAlias = this.generateDeploymentName();
             console.log('  Step 4.3: Generated dynamic deployment name:', deploymentAlias);
             
@@ -3059,11 +3091,15 @@ public class ZipController {
             
             console.log('  Step 4.4: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentAlias);
             
+            // Generate dynamic target_image_tag from config
+            const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
+            console.log('  Step 4.5: Generated dynamic target_image_tag:', targetImageTag);
+            
             const payload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
               bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
+              target_image_tag: targetImageTag,
               deployment_name: deploymentAlias, // Dynamic value from API
               cname: this.currentCname,
               organization: organization,
@@ -3084,11 +3120,15 @@ public class ZipController {
             const apiParams = this.getApiParametersForMode();
             const fallbackDeploymentName = this.generateDeploymentName();
             
+            // Generate dynamic target_image_tag from config for fallback
+            const fallbackTargetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${fallbackDeploymentName}:${pipelineConfig.containerRegistry.imageVersion}`;
+            console.log('  Step 5 (Fallback): Generated dynamic target_image_tag:', fallbackTargetImageTag);
+            
             const fallbackPayload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
               bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: pipelineConfig.containerRegistry.targetImageTag,
+              target_image_tag: fallbackTargetImageTag,
               deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
@@ -3280,13 +3320,24 @@ public class ZipController {
         this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
       },
       error: (error) => {
-        console.error('MinIO push error:', error);
+        console.error('MinIO push error received:', error);
         console.log('Error object structure:', {
           status: error.status,
+          statusText: error.statusText,
           error: error.error,
           message: error.message
         });
         
+        // Check if this is actually a success response (200-299 status codes)
+        // Some APIs return success data in error handler due to response format issues
+        if (error.status >= 200 && error.status < 300) {
+          console.log('MinIO push actually succeeded (200-level status), showing success message');
+          const successResponse = { status: 200, body: error.error || 'Success' };
+          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+          return;
+        }
+        
+        // Only treat as real error if status is 4xx or 5xx
         // Check for error details in the response
         if (error?.error?.details) {
           this.service.message(error.error.details, 'error');
@@ -3702,25 +3753,53 @@ DELIVERABLES
    * Format: alias-cname with spaces and underscores replaced by hyphens
    */
   private generateDeploymentName(): string {
-    if (!this.selectedAgent) {
-      console.error('Cannot generate deployment name: no agent selected');
+    // Get cname - this maps to 'name' field in streaming services API
+    const cname = this.currentCname || this.selectedAgent?.cname || '';
+    
+    if (!cname) {
+      console.error('Cannot generate deployment name: no cname available');
       return 'default-deployment';
     }
     
-    const alias = this.selectedAgent.alias || '';
-    const cname = this.currentCname || this.selectedAgent.cname || '';
+    // Get agent name from 'alias' field - this is the actual agent name from streaming services API
+    // Example: streaming services API has alias="service_agent_5g" and name="LEOSRVC_59424"
+    let agentName = this.selectedAgent?.alias || '';
     
-    if (!alias || !cname) {
-      console.error('Cannot generate deployment name: missing alias or cname');
-      return 'default-deployment';
+    if (!agentName) {
+      console.error('Cannot generate deployment name: no agent alias available');
+      // Fallback: use cname only
+      const sanitizedCname = cname.toLowerCase()
+        .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
+        .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
+      return `${sanitizedCname}-deployment`;
     }
     
-    // Replace spaces and underscores with hyphens in alias
-    const sanitizedAlias = alias.toLowerCase().replace(/[\s_]+/g, '-');
-    const sanitizedCname = cname.toLowerCase().replace(/[\s_]+/g, '-');
+    // Sanitize agent name (from alias field): lowercase, replace all spaces/underscores with hyphens
+    // Example: "service_agent_5g" → "service-agent-5g"
+    // Example: "service agent 5g" → "service-agent-5g"
+    // Example: "service__agent__5g" → "service-agent-5g"
+    const sanitizedAgentName = agentName.toLowerCase()
+      .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
+      .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
     
-    const deploymentName = `${sanitizedAlias}-${sanitizedCname}`;
-    console.log('Generated deployment name:', deploymentName, 'from alias:', alias, 'and cname:', cname);
+    // Sanitize cname: lowercase, replace all spaces/underscores with hyphens
+    // Example: "LEOSRVC_59424" → "leosrvc-59424"
+    // Example: "LEOSRVC 59424" → "leosrvc-59424"
+    const sanitizedCname = cname.toLowerCase()
+      .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
+      .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
+    
+    // Final format: {agent-alias}-{cname}
+    // Example: "service-agent-5g-leosrvc-59424"
+    const deploymentName = `${sanitizedAgentName}-${sanitizedCname}`;
+    
+    console.log('Generated deployment name:', deploymentName, {
+      originalAgentAlias: agentName,
+      sanitizedAgentName: sanitizedAgentName,
+      originalCname: cname,
+      sanitizedCname: sanitizedCname,
+      finalDeploymentName: deploymentName
+    });
     
     return deploymentName;
   }
