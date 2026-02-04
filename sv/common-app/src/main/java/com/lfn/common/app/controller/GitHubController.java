@@ -149,18 +149,6 @@ public class GitHubController {
 
             BranchPushResponse response = gitHubIntegrationService.pushBranchToBranch(request, cleanToken, username);
             return ResponseEntity.ok(response);
-        } catch (com.lfn.common.app.exception.UnauthorizedAccessException e) {
-            log.error("Access denied for repository: {}", request.getRepoName(), e);
-            BranchPushResponse errorResponse = BranchPushResponse.builder()
-                .success(false)
-                .message(e.getMessage())
-                .documentation_url("https://docs.github.com/rest/collaborators/collaborators#get-repository-permissions-for-a-user")
-                .status("403")
-                .repoName(request.getRepoName())
-                .sourceBranch(request.getSourceBranch())
-                .destinationBranch(request.getDestinationBranch())
-                .build();
-            return ResponseEntity.status(403).body(errorResponse);
         } catch (IllegalArgumentException e) {
             log.error("Validation error in branch-to-branch push", e);
             BranchPushResponse errorResponse = BranchPushResponse.builder()
