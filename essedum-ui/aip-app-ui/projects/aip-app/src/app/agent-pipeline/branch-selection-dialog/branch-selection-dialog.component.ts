@@ -22,6 +22,7 @@ export class BranchSelectionDialogComponent implements OnInit {
   gitSelectedBranch: any;
   environment: string = '';
   isDirectDeploy: boolean = false;
+  errorMsgGithub="Please goto ESSEDUM Codespace tab to push your changes to GitHub repo before triggering deployment";
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -84,7 +85,8 @@ export class BranchSelectionDialogComponent implements OnInit {
         this.isLoadingBranches = false;
       },
       (error) => {
-        this.service.message('Error loading available branches from ' + this.gitSelectedRepo, 'error');
+        this.service.message(this.errorMsgGithub , 'error');
+        console.log(this.errorMsgGithub + this.gitSelectedRepo, error);
         this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
       }
@@ -123,7 +125,8 @@ export class BranchSelectionDialogComponent implements OnInit {
             sourceBranch: this.gitSelectedBranch
           });
         } else {
-          console.error('Error loading source branch configuration:', error);
+          console.log(this.errorMsgGithub, '  Error loading source branch configuration:', error); 
+          this.service.message(this.errorMsgGithub , 'error');
         }
       }
     );
