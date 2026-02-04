@@ -235,6 +235,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   userQuestion = '';
   isAgentThinking = false;
   playgroundUrl = ''; // Store the playground URL from API
+  currentDeploymentName = ''; // Store the deployment name used in WebSocket
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -3084,6 +3085,7 @@ public class ZipController {
             
             // Generate dynamic deployment name from alias and cname (now properly populated)
             const deploymentAlias = this.generateDeploymentName();
+            this.currentDeploymentName = deploymentAlias; // Store for use in playground URL
             console.log('  Step 4.3: Generated dynamic deployment name:', deploymentAlias);
             
             // Now prepare payload with dynamic deployment_name based on pipeline mode
@@ -3119,6 +3121,7 @@ public class ZipController {
             // Use dynamic deployment_name even in fallback
             const apiParams = this.getApiParametersForMode();
             const fallbackDeploymentName = this.generateDeploymentName();
+            this.currentDeploymentName = fallbackDeploymentName; // Store for use in playground URL
             
             // Generate dynamic target_image_tag from config for fallback
             const fallbackTargetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${fallbackDeploymentName}:${pipelineConfig.containerRegistry.imageVersion}`;
@@ -3244,10 +3247,11 @@ public class ZipController {
         let jsonContent = JSON.parse(getResponse.json_content);
         console.log('Parsed existing json_content:', jsonContent);
         
-        // Step 3: Add/update the playgroundUrl with dynamic deployment name
+        // Step 3: Add/update the playgroundUrl with SAME deployment name used in WebSocket
         const environmentUrl = this.getEnvironmentUrl();
-        const deploymentName = this.generateDeploymentName();
+        const deploymentName = this.currentDeploymentName; // Use stored deployment name
         jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentName}/ask`;
+        console.log('Using stored deployment name from WebSocket:', deploymentName);
         console.log('Updated json_content with dynamic playground URL:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
@@ -3769,25 +3773,29 @@ DELIVERABLES
       console.error('Cannot generate deployment name: no agent alias available');
       // Fallback: use cname only
       const sanitizedCname = cname.toLowerCase()
-        .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
-        .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
+        .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+        .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+        .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
       return `${sanitizedCname}-deployment`;
     }
     
-    // Sanitize agent name (from alias field): lowercase, replace all spaces/underscores with hyphens
+    // Sanitize agent name (from alias field): lowercase, replace ALL non-alphanumeric chars with hyphens
     // Example: "service_agent_5g" → "service-agent-5g"
     // Example: "service agent 5g" → "service-agent-5g"
-    // Example: "service__agent__5g" → "service-agent-5g"
+    // Example: ".service__agent__5g." → "service-agent-5g"
     const sanitizedAgentName = agentName.toLowerCase()
-      .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
-      .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
+      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
     
-    // Sanitize cname: lowercase, replace all spaces/underscores with hyphens
+    // Sanitize cname: lowercase, replace ALL non-alphanumeric chars with hyphens
     // Example: "LEOSRVC_59424" → "leosrvc-59424"
-    // Example: "LEOSRVC 59424" → "leosrvc-59424"
+    // Example: "LEO SRVC 59424" → "leo-srvc-59424"
+    // Example: "LEO.SRVC_59424" → "leo-srvc-59424"
     const sanitizedCname = cname.toLowerCase()
-      .replace(/[\s_]+/g, '-')  // Replace all spaces and underscores with hyphens
-      .replace(/-+/g, '-');      // Replace multiple consecutive hyphens with single hyphen
+      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
     
     // Final format: {agent-alias}-{cname}
     // Example: "service-agent-5g-leosrvc-59424"
@@ -3894,26 +3902,23 @@ DELIVERABLES
           this.playgroundUrl = jsonContent.playgroundurl;
           console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
-          console.log('fetchPlaygroundUrl - No playgroundurl found, using dynamic default');
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using stored deployment name');
           const environmentUrl = this.getEnvironmentUrl();
-          const deploymentName = this.generateDeploymentName();
+          const deploymentName = this.currentDeploymentName; // Use stored deployment name
           this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-          console.log('fetchPlaygroundUrl - Using dynamic default URL:', this.playgroundUrl);
+          console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
         }
       } else {
-        console.log('fetchPlaygroundUrl - No json_content in response, using dynamic default');
+        console.log('fetchPlaygroundUrl - No json_content in response, using stored deployment name');
         const environmentUrl = this.getEnvironmentUrl();
-        const deploymentName = this.generateDeploymentName();
+        const deploymentName = this.currentDeploymentName; // Use stored deployment name
         this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-        console.log('fetchPlaygroundUrl - Using dynamic default URL:', this.playgroundUrl);
+        console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
-      console.log('fetchPlaygroundUrl - Error occurred, using dynamic default URL');
-      const environmentUrl = this.getEnvironmentUrl();
-      const deploymentName = this.generateDeploymentName();
-      this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-      console.log('fetchPlaygroundUrl - Using dynamic default URL after error:', this.playgroundUrl);
+      // Don't generate URL without proper data - selectedAgent might not be populated
+      throw error;
     }
   }
 
@@ -3952,9 +3957,15 @@ DELIVERABLES
       // Use the exact playground URL from the streaming services API response
       const apiEndpoint = this.playgroundUrl;
       
-      const payload = {
-        question: question
-      };
+      // Send whatever the user typed directly as the request body
+      // Try to parse as JSON first, if it fails, send as raw string
+      let payload: any;
+      try {
+        payload = JSON.parse(question);
+      } catch (e) {
+        // Not valid JSON, send as plain text string
+        payload = question;
+      }
       
       const headers = {
         'Content-Type': 'application/json'

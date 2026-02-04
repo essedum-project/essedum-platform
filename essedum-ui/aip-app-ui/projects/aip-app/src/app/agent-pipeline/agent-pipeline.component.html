@@ -561,7 +561,7 @@
 
       <div class="chat-input-container">
         <textarea class="chat-input" [(ngModel)]="userQuestion" (keypress)="onPlaygroundKeyPress($event)"
-          placeholder="Ask the agent a question..." rows="2" [disabled]="isAgentThinking"></textarea>
+          placeholder="Type your payload here (JSON, text, or any format)..." rows="2" [disabled]="isAgentThinking"></textarea>
         <button mat-raised-button color="primary" class="send-button" (click)="sendQuestion()"
           [disabled]="!userQuestion.trim() || isAgentThinking">
           <mat-icon>send</mat-icon>
