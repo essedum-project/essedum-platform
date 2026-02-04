@@ -135,9 +135,8 @@
                                   'mcp' ? 'Upload MCP Files' : 'Upload Agent Files') }}</span>
                               </button>
 
-                              <!-- Run and Deploy Button - Only show when files exist -->
+                              <!-- Run and Deploy Button - Always visible, enabled based on deployment status -->
                               <button mat-raised-button class="run-deploy-button"
-                                *ngIf="shouldShowRunPlaygroundButtons()"
                                 [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
                                 (click)="runAndDeploy()" [disabled]="!canRunAndDeploy()"
                                 [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : 'Run and Deploy Agent'"
@@ -145,6 +144,17 @@
                                 <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
                                 <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">{{
                                   isRunningAndDeploying ? 'Running & Deploying' : 'Run & Deploy' }}</span>
+                              </button>
+
+                              <!-- Delete Deployment Button - Always visible, enabled based on deployment status -->
+                              <button mat-raised-button class="delete-deployment-button"
+                                [class.rectangular-button]="hasGeneratedAgent || hasExistingFiles()"
+                                (click)="deleteDeployment()" [disabled]="!canDeleteDeployment()"
+                                [matTooltip]="pipelineMode === 'mcp' ? 'Delete MCP Server Deployment' : 'Delete Agent Deployment'"
+                                matTooltipPosition="above">
+                                <mat-icon>{{ isDeletingDeployment ? 'hourglass_empty' : 'delete_sweep' }}</mat-icon>
+                                <span class="button-label" *ngIf="hasGeneratedAgent || hasExistingFiles()">{{
+                                  isDeletingDeployment ? 'Deleting...' : 'Delete Deployment' }}</span>
                               </button>
 
                               <!-- Playground Button - Only show when files exist -->
@@ -429,7 +439,9 @@
                   <app-playground-tab
                     [pipelineMode]="pipelineMode"
                     [isRunningAndDeploying]="isRunningAndDeploying"
+                    [isDeletingDeployment]="isDeletingDeployment"
                     [canRunAndDeploy]="canRunAndDeploy()"
+                    [canDeleteDeployment]="canDeleteDeployment()"
                     [canOpenPlayground]="canOpenPlayground()"
                     [deploymentStatusMessage]="deploymentStatusMessage"
                     [deploymentStatus]="deploymentStatus"
@@ -440,6 +452,7 @@
                     [isCheckingDeploymentData]="isCheckingDeploymentData"
                     [deploymentEnvironment]="deploymentEnvironment"
                     (runAndDeployClick)="runAndDeploy()"
+                    (deleteDeploymentClick)="deleteDeployment()"
                     (openPlaygroundClick)="openPlayground()">
                   </app-playground-tab>
                 </mat-tab>
