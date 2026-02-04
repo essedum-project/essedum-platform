@@ -54,6 +54,8 @@ export class DeploymentFormComponent implements OnInit {
   // Flag to track if deployment is finished and forms should be disabled
   isDeploymentFinished: boolean = false;
 
+  isEditMode: boolean = false;
+
   // Static text constants - Labels
   readonly AGENT_NAME_LABEL = 'Agent Name';
   readonly AGENT_VERSION_LABEL = 'Agent Version';
@@ -123,6 +125,7 @@ export class DeploymentFormComponent implements OnInit {
   readonly SAVE_SCOPE_BUTTON_LABEL = 'Save Scope & Pre-Checks';
   readonly SAVE_APPROVAL_BUTTON_LABEL = 'Save Approval & Rollback';
   readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
+  readonly UPDATE_BUTTON_LABEL = 'Update';
 
   // Static text constants - Messages
   readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button: Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner';
@@ -238,6 +241,8 @@ export class DeploymentFormComponent implements OnInit {
         if (response) {
           this.deploymentId = response.id;
           this.populateFormWithData(response);
+          this.isDeploymentFinished = true;
+          this.disableAllForms();
           console.log('Deployment form loaded successfully for cname:', cname, 'org:', org);
         }
       },
@@ -262,6 +267,8 @@ export class DeploymentFormComponent implements OnInit {
         if (response) {
           this.deploymentId = response.id;
           this.populateFormWithData(response);
+          this.isDeploymentFinished = true;
+          this.disableAllForms();
           this.service.message('Deployment form loaded successfully', 'success');
         }
       },
@@ -345,6 +352,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.OVERVIEW_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 1;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -370,6 +378,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 2;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -395,6 +404,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 3;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -507,6 +517,7 @@ export class DeploymentFormComponent implements OnInit {
         
         // Disable all forms after successful deployment
         this.isDeploymentFinished = true;
+        this.isEditMode = false;
         this.disableAllForms();
         
         // Emit event to parent component
@@ -526,6 +537,23 @@ export class DeploymentFormComponent implements OnInit {
     this.scopeForm.disable();
     this.approvalForm.disable();
     this.validationForm.disable();
+  }
+
+  /**
+   * Enable all form groups for editing
+   */
+  private enableAllForms(): void {
+    this.overviewForm.enable();
+    this.scopeForm.enable();
+    this.approvalForm.enable();
+    this.validationForm.enable();
+  }
+
+  getSaveButtonLabel(tabIndex: number = 0): string {
+    if (tabIndex < 3) {
+      return 'Next';
+    }
+    return this.isEditMode ? this.UPDATE_BUTTON_LABEL : 'Save';
   }
 
   /**
@@ -633,5 +661,13 @@ export class DeploymentFormComponent implements OnInit {
         this.service.message('Branch deployment initiated successfully', 'success');
       }
     });
+  }
+
+  /**
+   * Enable editing of deployment details
+   */
+  editDeploymentDetails(): void {
+    this.isEditMode = true;
+    this.enableAllForms();
   }
 }
