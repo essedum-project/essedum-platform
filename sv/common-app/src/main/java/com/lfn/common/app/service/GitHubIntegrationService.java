@@ -263,6 +263,45 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Check if user has push access to a repository
+     *
+     * @param token GitHub Personal Access Token
+     * @param repoName Repository name in format "owner/repo"
+     * @return true if user has push access
+     * @throws Exception if access check fails
+     */
+    public boolean hasRepositoryPushAccess(String token, String repoName) throws Exception {
+        try {
+            log.info("Checking repository push access for: {}", repoName);
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(repoName);
+
+            // Check if user has push permission
+            GHPermissionType permission = repo.getPermission(github.getMyself());
+            boolean hasPushAccess = permission == GHPermissionType.ADMIN ||
+                                   permission == GHPermissionType.WRITE;
+
+            log.info("User has {} permission for repository {}", permission, repoName);
+            return hasPushAccess;
+        } catch (GHFileNotFoundException e) {
+            log.error("Repository not found: {}", repoName);
+            throw new IllegalArgumentException("Repository not found: " + repoName);
+        } catch (org.kohsuke.github.HttpException e) {
+            // Handle GitHub API errors (like 403 permission errors)
+            if (e.getResponseCode() == 403) {
+                log.error("Access forbidden when checking repository permissions: {}", e.getMessage());
+                throw new com.lfn.common.app.exception.UnauthorizedAccessException(
+                    "Must have push access to view collaborator permission.");
+            }
+            log.error("GitHub API error checking repository access: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error checking repository access: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
      * Push code from source branch to destination branch within the same repository
      *
      * @param request Branch push request containing repo, source and destination branches
@@ -289,6 +328,12 @@ public class GitHubIntegrationService {
 
             GitHub github = createGitHubInstance(token);
             GHRepository repo = github.getRepository(request.getRepoName());
+
+            // Check if user has push access to the repository
+            if (!hasRepositoryPushAccess(token, request.getRepoName())) {
+                throw new com.lfn.common.app.exception.UnauthorizedAccessException(
+                    "User does not have push access to repository: " + request.getRepoName());
+            }
 
             // Check if source branch exists
             GHBranch sourceBranch;

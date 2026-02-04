@@ -68,5 +68,15 @@ public class BranchPushResponse {
      * Whether destination branch was created
      */
     private boolean branchCreated;
+
+    /**
+     * GitHub API documentation URL (for error responses)
+     */
+    private String documentation_url;
+
+    /**
+     * HTTP status code (for error responses)
+     */
+    private String status;
 }
 
