@@ -3262,8 +3262,9 @@ public class ZipController {
         
         console.log('Sending PUT request to update streaming services:', putPayload);
         
-        // Step 5: PUT the updated data back
-        const putResponse = await this.http.put<any>(streamingServicesUrl, putPayload).toPromise();
+         // Step 5: PUT the updated data back using the update endpoint
+        const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+        const putResponse = await this.http.put<any>(updateUrl, putPayload).toPromise();
         console.log('Streaming services PUT response:', putResponse);
         
         this.addToConsole('Streaming services updated successfully with playground URL!');
