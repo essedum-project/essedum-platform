@@ -400,6 +400,10 @@ public class GitHubIntegrationService {
                 .branchCreated(false)
                 .build();
 
+        } catch (com.lfn.common.app.exception.UnauthorizedAccessException e) {
+            // Re-throw UnauthorizedAccessException as-is so Global Exception Handler can handle it properly
+            log.error("Unauthorized access in branch-to-branch push: {}", e.getMessage());
+            throw e;
         } catch (IllegalArgumentException e) {
             log.error("Validation error in branch-to-branch push: {}", e.getMessage());
             throw e;
