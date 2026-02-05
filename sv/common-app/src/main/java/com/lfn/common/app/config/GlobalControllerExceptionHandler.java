@@ -177,6 +177,11 @@ public class GlobalControllerExceptionHandler {
 		errorResponse.setException(ex.getClass().getSimpleName());
 		errorResponse.setSuggestedAction("You do not have permission to access this resource. Contact your administrator for access.");
 
+		// Add GitHub API documentation URL if this is a GitHub permission error
+		if (ex.getMessage() != null && ex.getMessage().contains("push access to view collaborator permission")) {
+			errorResponse.setDocumentationUrl("https://docs.github.com/rest/collaborators/collaborators#get-repository-permissions-for-a-user");
+		}
+
 		return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
 	}
 

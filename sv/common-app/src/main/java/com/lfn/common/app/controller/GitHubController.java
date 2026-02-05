@@ -4,7 +4,6 @@ import com.lfn.common.app.exception.GitHubAuthenticationException;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import com.lfn.common.app.service.GitHubOAuthService;
 import com.lfn.common.app.web.rest.dto.*;
-import com.lfn.common.app.service.GitHubIntegrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

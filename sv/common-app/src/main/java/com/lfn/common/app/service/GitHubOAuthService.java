@@ -34,8 +34,8 @@ public class GitHubOAuthService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String clientId = System.getenv("GITHUB_CLIENT_ID");
-    private final String  clientSecret = System.getenv("GITHUB_CLIENT_SECRET");
+    private final String clientId = "Ov23lip2ohGZEcIpRhFn";
+    private final String  clientSecret = "6df197a907085d24f06ca3b61f990e923f9626a4";
 
     public GitHubOAuthService() {
         this.restTemplate = createRestTemplate();

@@ -65,6 +65,18 @@ config:
 spring:
   application:
     name: essedum
+  # CORS Configuration - Externalized from controllers
+  cors:
+    # Development origins - includes localhost for local development
+    # Production should override this in application-prod.yml
+    allowed-origins: http://localhost:3000,http://localhost:8087,http://localhost:7860,https://langflow.az.ad.idemo-ppc.com,https://essedum.az.ad.idemo-ppc.com
+    allowed-headers: "*,Authorization,Content-Type,Project,ProjectName,roleId,roleName,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,charset"
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allow-credentials: true
+    max-age: 3600
+    allowedOriginPatterns: "*"
+    allowedHeaders: "*"
+    allowedMethods: "*"
   resources:
     static-locations: ${config.static-locations}
   mvc:
@@ -75,6 +87,7 @@ spring:
       static-locations: ${config.static-locations}
   liquibase:
     enabled: false
+    validate-on-migrate: true
     contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
 
     change-log: "classpath:db/changelog/master.xml"
@@ -125,10 +138,6 @@ spring:
   cache:
     jcache:
       config: classpath:ehcache.xml
-  cors:
-    allowedOriginPatterns: "*"
-    allowedHeaders: "*"
-    allowedMethods: "*"
 
   jackson:
     serialization.write_dates_as_timestamps: false
@@ -286,6 +295,7 @@ model:
 quartz:
   liquibase:
     enabled: false
+    validate-on-migrate: true
     change-log: "classpath:db/changelog/quartz.xml"
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

@@ -16,6 +16,7 @@
 package com.lfn.common.app.web.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -34,6 +35,10 @@ public class ErrorResponse {
     private String path;
     private String exception;
     private String suggestedAction;
+
+    @JsonProperty("documentation_url")
+    private String documentationUrl;
+
     private LocalDateTime timestamp;
 
     public ErrorResponse() {
