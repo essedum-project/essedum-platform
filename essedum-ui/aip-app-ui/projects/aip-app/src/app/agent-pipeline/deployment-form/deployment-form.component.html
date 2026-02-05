@@ -1,15 +1,23 @@
 <div class="deployment-container">
   <!-- Deploy Button - Above tabs -->
   <div class="deploy-button-header" *ngIf="isDeploymentFinished">
-    <button mat-raised-button 
-            color="primary"
-            class="deploy-button"
-            [disabled]="isRunningAndDeploying"
+    <button mat-raised-button            
+            class="finish-button"
+            [disabled]="isRunningAndDeploying || isEditMode"
+            [matTooltip]="'Edit Deployment'"
+            matTooltipPosition="above"
+            (click)="editDeploymentDetails()">
+      Edit Details
+    </button>
+   
+    <button mat-raised-button             
+            class="finish-button"
+            [disabled]="isRunningAndDeploying || isEditMode"
             [matTooltip]="getDeployButtonText()"
             matTooltipPosition="above"
             (click)="openBranchSelectionDialog()">
       {{ getDeployButtonText() }}
-    </button>
+    </button>   
   </div>
 
   <!-- Sub-tabs for deployment forms -->
@@ -90,18 +98,12 @@
             </div>
           </div>
 
-          <div class="form-actions">
+          <div class="form-actions">       
             <button mat-raised-button 
-                    class="finish-button" 
-                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
-                    (click)="finishDeployment()">
-              {{ FINISH_BUTTON_LABEL }}
-            </button>
-            <button mat-raised-button 
-                    class="mat-save-btn mat-button-radius"
-                    [disabled]="isDeploymentFinished"
+                    class="finish-button"
+                    [disabled]="isDeploymentFinished && !isEditMode"
                     (click)="saveOverview()">
-              Save
+              {{ getSaveButtonLabel(0) }}
             </button>
           </div>
           <div class="finish-note" *ngIf="!isAllFormsValid()">
@@ -184,18 +186,12 @@
       
           </div>
 
-          <div class="form-actions">
+          <div class="form-actions">          
             <button mat-raised-button 
-                    class="finish-button" 
-                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
-                    (click)="finishDeployment()">
-              {{ FINISH_BUTTON_LABEL }}
-            </button>
-            <button mat-raised-button 
-                    class="mat-save-btn mat-button-radius"
-                    [disabled]="isDeploymentFinished"
+                    class="finish-button"
+                    [disabled]="isDeploymentFinished && !isEditMode"
                     (click)="saveScope()">
-              Save
+              {{ getSaveButtonLabel(1) }}
             </button>
           </div>
           <div class="finish-note" *ngIf="!isAllFormsValid()">
@@ -247,16 +243,10 @@
 
           <div class="form-actions">
             <button mat-raised-button 
-                    class="finish-button" 
-                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
-                    (click)="finishDeployment()">
-              {{ FINISH_BUTTON_LABEL }}
-            </button>
-            <button mat-raised-button 
-                    class="mat-save-btn mat-button-radius"
-                    [disabled]="isDeploymentFinished"
+                    class="finish-button"
+                    [disabled]="isDeploymentFinished && !isEditMode"
                     (click)="saveApproval()">
-              Save
+              {{ getSaveButtonLabel(2) }}
             </button>
           </div>
           <div class="finish-note" *ngIf="!isAllFormsValid()">
@@ -355,16 +345,16 @@
 
           <div class="form-actions">
             <button mat-raised-button 
+                    class="finish-button"
+                    [disabled]="isDeploymentFinished && !isEditMode"
+                    (click)="saveValidation()">
+              {{ getSaveButtonLabel(3) }}
+            </button> 
+            <button mat-raised-button 
                     class="finish-button" 
-                    [disabled]="!isAllFormsValid() || isDeploymentFinished"
+                    [disabled]="!isAllFormsValid() || (isDeploymentFinished && !isEditMode)"
                     (click)="finishDeployment()">
               {{ FINISH_BUTTON_LABEL }}
-            </button>
-            <button mat-raised-button 
-                    class="mat-save-btn mat-button-radius"
-                    [disabled]="isDeploymentFinished"
-                    (click)="saveValidation()">
-              Save
             </button>
           </div>
           <div class="finish-note" *ngIf="!isAllFormsValid()">
