@@ -18,6 +18,14 @@
             (click)="openBranchSelectionDialog()">
       {{ getDeployButtonText() }}
     </button>   
+     <button mat-raised-button 
+            class="finish-button"
+            [disabled]="isRunningAndDeploying || isEditMode"
+            [matTooltip]="RAISE_PR"
+            matTooltipPosition="above"
+            (click)="openPullRequestDialog()">
+     {{CREATE_PR}}
+    </button>
   </div>
 
   <!-- Sub-tabs for deployment forms -->

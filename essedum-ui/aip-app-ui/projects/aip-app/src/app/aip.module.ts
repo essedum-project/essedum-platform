@@ -158,7 +158,8 @@ import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-v
 import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory-create/agent-directory-create.component';
 import { GeneralComponent } from './agent-directory/general/general.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
-import { DeploymentFormComponent, BranchSelectionDialogComponent } from './agent-pipeline/deployment-form/deployment-form.component';
+import { DeploymentFormComponent } from './agent-pipeline/deployment-form/deployment-form.component';
+import { BranchSelectionDialogComponent } from './agent-pipeline/branch-selection-dialog/branch-selection-dialog.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {

@@ -1,0 +1,44 @@
+:host ::ng-deep .mat-mdc-dialog-container {
+  border-radius: 8px;
+}
+
+:host ::ng-deep mat-dialog-content {
+  overflow: visible !important;
+}
+
+.ml-18 {
+  margin-left: -18px;
+}
+
+:host ::ng-deep .compact-field .mat-mdc-form-field-infix {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  min-height: 40px;
+}
+
+:host ::ng-deep .compact-field .mat-mdc-text-field-wrapper {
+  padding-bottom: 0 !important;
+}
+
+:host ::ng-deep .compact-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .mat-mdc-outlined-button {
+  border-radius: 6px;
+}
+
+:host ::ng-deep .mat-mdc-form-field-hint-wrapper,
+:host ::ng-deep .mat-mdc-form-field-error-wrapper {
+  padding: 0;
+  font-size: 10px;
+}
+
+::ng-deep .mat-mdc-form-field-error {
+    margin-left: 0px !important;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-select {
+    width: 100% !important;
+    margin-left: 3px !important;
+}

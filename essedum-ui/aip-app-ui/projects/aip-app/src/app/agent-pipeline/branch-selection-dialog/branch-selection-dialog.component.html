@@ -1,0 +1,142 @@
+<div *ngIf="!isDirectDeploy">
+<h2 mat-dialog-title style="color: #333; font-size: 20px; font-weight: 600;">Branch Deployment{{ environment ? ' - ' + environment : '' }}</h2>
+<mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
+  <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
+    <p style="margin-top: 16px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
+  </div>
+  
+  <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Source Branch</mat-label>
+        <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select" [disabled]="isLoadingSourceBranches">
+          <mat-option *ngIf="isLoadingSourceBranches">
+            <span>Loading branches...</span>
+          </mat-option>
+          <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+            {{ branch }}
+          </mat-option>
+        </mat-select>
+        <mat-error  *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
+          Source branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Destination Branch</mat-label>
+        <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select" >
+          <mat-option *ngIf="isLoadingSourceBranches" >
+            <span>Loading branches...</span>
+          </mat-option>
+          <mat-option *ngFor="let branch of filteredDestinationBranches" [value]="branch">
+            {{ branch }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
+          Destination branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
+  <button mat-raised-button (click)="onCancel()" style="margin-right: 8px;" [disabled]="isDeploying">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onDeploy()" 
+    [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
+    {{ isDeploying ? 'Deploying...' : 'Deploy' }}
+  </button>
+</mat-dialog-actions>
+
+</div>
+
+
+<div *ngIf="isDirectDeploy">
+<h2 mat-dialog-title style="color: #333; font-size: 20px; font-weight: 600;">Create Pull Request for {{ environment ? ' - ' + environment : '' }}</h2>
+<mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
+  <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
+    <p style="margin-top: 16px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
+  </div>
+  
+  <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Source Branch</mat-label>
+        <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select" [disabled]="isLoadingSourceBranches">
+          <mat-option *ngIf="isLoadingSourceBranches">
+            <span>Loading branches...</span>
+          </mat-option>
+          <mat-option *ngFor="let branch of availableBranches" [value]="branch">
+            {{ branch }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
+          Source branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Destination Branch</mat-label>
+        <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select" >
+          <mat-option *ngIf="isLoadingSourceBranches" >
+            <span>Loading branches...</span>
+          </mat-option>
+          <mat-option *ngFor="let branch of filteredDestinationBranches" [value]="branch">
+            {{ branch }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
+          Destination branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>PR Title</mat-label>
+        <input matInput formControlName="prTitle" placeholder="Enter pull request title" />
+        <mat-error *ngIf="branchForm.get('prTitle')?.hasError('required')">
+          PR title is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>PR Description</mat-label>
+        <textarea 
+          matInput 
+          formControlName="prDescription" 
+          placeholder="Add your pull request description here..."
+          rows="2"
+          style="resize: vertical;"></textarea>
+      </mat-form-field>
+    </div>
+    <div>
+        <i class="fa fa-user" aria-hidden="true" matPrefix style="margin-right: 8px; color: #666;"></i>
+
+        <label>Git User: &nbsp; {{gitUsername}}</label>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
+  <button mat-raised-button (click)="onCancel()" style="margin-right: 8px;" [disabled]="isDeploying">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onCreatePR()" 
+    [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
+    Create Pull Request
+  </button>
+</mat-dialog-actions>
+
+</div>
+
+
+
