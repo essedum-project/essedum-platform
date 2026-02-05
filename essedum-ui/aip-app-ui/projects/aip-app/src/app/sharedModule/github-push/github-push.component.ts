@@ -330,7 +330,21 @@ export class GitHubPushComponent implements OnInit {
           },
           error: (error) => {
             this.isLoading = false;
-            this.errorMessage = 'Push failed: ' + (error.error || error.message);
+            // Extract only the message from the error response
+            let errorMsg = 'Push failed';
+            if (error.error) {
+              try {
+                // If error.error is a string, try to parse it as JSON
+                const errorObj = typeof error.error === 'string' ? JSON.parse(error.error) : error.error;
+                errorMsg = errorObj.message || errorMsg;
+              } catch (e) {
+                // If parsing fails, use error.error as is if it's a string
+                errorMsg = typeof error.error === 'string' ? error.error : error.message || errorMsg;
+              }
+            } else if (error.message) {
+              errorMsg = error.message;
+            }
+            this.errorMessage = errorMsg;
           }
         });
       },

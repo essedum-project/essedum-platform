@@ -5,6 +5,7 @@ import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
 import com.lfn.common.app.web.rest.dto.PullRequest;
 import com.lfn.common.app.web.rest.dto.PullResponse;
 import com.lfn.common.app.web.rest.dto.PushRequest;
+import com.lfn.common.app.web.rest.dto.PushResponse;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,25 +94,35 @@ public class GitHubController {
     }
 
     @PostMapping("/push")
-    public ResponseEntity<String> pushToGitHub(
+    public ResponseEntity<PushResponse> pushToGitHub(
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody PushRequest request,
             HttpSession session) {
         try {
+            log.info("Push request received - Repo: {}, Branch: {}, Files: {}",
+                    request.getRepoName(), request.getBranch(),
+                    request.getFiles() != null ? request.getFiles().size() : 0);
+
             String cleanToken = getToken(token, session);
+            log.info("Token extracted, length: {}, prefix: {}...",
+                    cleanToken.length(),
+                    cleanToken.substring(0, Math.min(10, cleanToken.length())));
 
             // Get username from OAuth if not provided
             if (username == null || username.isEmpty()) {
                 username = oauthService.getGitHubUsername(cleanToken);
+                log.info("Username retrieved from OAuth service: {}", username);
+            } else {
+                log.info("Username provided in header: {}", username);
             }
 
-            gitHubIntegrationService.pushToGitHub(request, cleanToken, username);
-            return ResponseEntity.ok("Successfully pushed to GitHub");
+            PushResponse response = gitHubIntegrationService.pushToGitHub(request, cleanToken, username);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error pushing to GitHub", e);
-            return ResponseEntity.internalServerError()
-                    .body("Failed to push: " + e.getMessage());
+            PushResponse errorResponse = new PushResponse(false, "Failed to push: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 

@@ -20,6 +20,7 @@ import com.lfn.common.app.web.rest.dto.GitHubRepoInfo;
 import com.lfn.common.app.web.rest.dto.PullRequest;
 import com.lfn.common.app.web.rest.dto.PullResponse;
 import com.lfn.common.app.web.rest.dto.PushRequest;
+import com.lfn.common.app.web.rest.dto.PushResponse;
 import okhttp3.OkHttpClient;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
@@ -162,9 +163,10 @@ public class GitHubIntegrationService {
      * @param request Push request containing repo, branch, path/files details
      * @param token GitHub Personal Access Token
      * @param username GitHub username
+     * @return PushResponse containing push details and statistics
      * @throws Exception if push fails
      */
-    public void pushToGitHub(PushRequest request, String token, String username) throws Exception {
+    public PushResponse pushToGitHub(PushRequest request, String token, String username) throws Exception {
         try {
             log.info("Starting push to GitHub - Repo: {}, Branch: {}",
                      request.getRepoName(), request.getBranch());
@@ -173,10 +175,12 @@ public class GitHubIntegrationService {
             GHRepository repo = github.getRepository(request.getRepoName());
             String remoteUrl = repo.getHttpTransportUrl();
 
+            PushResponse response;
+
             // Check if files list is provided (new approach) or localPath (old approach)
             if (request.getFiles() != null && !request.getFiles().isEmpty()) {
                 log.info("Pushing {} files directly from content", request.getFiles().size());
-                gitStorageProvider.pushFileContents(
+                response = gitStorageProvider.pushFileContents(
                     request.getFiles(),
                     remoteUrl,
                     request.getBranch(),
@@ -196,12 +200,18 @@ public class GitHubIntegrationService {
                     token,
                     verifySsl
                 );
+                // Create response for backward compatibility
+                response = new PushResponse(true, "Successfully pushed to GitHub");
+                response.setHasChanges(true);
             } else {
                 throw new IllegalArgumentException("Either 'files' or 'localPath' must be provided in the request");
             }
 
-            log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
-                     request.getRepoName(), request.getBranch());
+            log.info("Push operation completed - Repo: {}, Branch: {}, HasChanges: {}, Modified: {}, Deleted: {}",
+                     request.getRepoName(), request.getBranch(), response.isHasChanges(),
+                     response.getModifiedFilesCount(), response.getDeletedFilesCount());
+
+            return response;
         } catch (Exception e) {
             log.error("Error pushing to GitHub: {}", e.getMessage(), e);
             throw new GitOperationException("Failed to push to GitHub", e);

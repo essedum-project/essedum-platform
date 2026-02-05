@@ -17,6 +17,7 @@ package com.lfn.common.app.service;
 
 import com.lfn.common.app.web.rest.dto.FileContent;
 import com.lfn.common.app.web.rest.dto.PullResponse;
+import com.lfn.common.app.web.rest.dto.PushResponse;
 import java.util.List;
 
 /**
@@ -49,9 +50,10 @@ public interface GitStorageProvider {
      * @param username GitHub username
      * @param token Personal Access Token
      * @param verifySsl Whether to verify SSL certificates
+     * @return PushResponse containing push details and statistics
      * @throws Exception if push operation fails
      */
-    void pushFileContents(List<FileContent> files, String remoteUrl, String branch,
+    PushResponse pushFileContents(List<FileContent> files, String remoteUrl, String branch,
                          String commitMessage, String username, String token, boolean verifySsl) throws Exception;
 
     /**
