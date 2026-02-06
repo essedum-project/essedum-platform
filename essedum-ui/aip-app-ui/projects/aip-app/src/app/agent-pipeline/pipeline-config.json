@@ -4,6 +4,7 @@
     "bucketName": "aiptest"
   },
   "containerRegistry": {
-    "targetImageTag": "acrreq0762935.azurecr.io/test-adk-app:v1"
+    "registryPrefix": "localhost:5000/",
+    "imageVersion": "v1"
   }
 }
