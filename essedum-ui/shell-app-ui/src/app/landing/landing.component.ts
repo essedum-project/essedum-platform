@@ -2056,6 +2056,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
         let fetchdefaultmappings = true;
         let datafromcurrentproject = true;
         let datafromcoreproject = true;
+        
+        // First, collect "Side" configurations for current project
         response.forEach((item) => {
           if (
             item.keys == rolename + " Side" &&
@@ -2067,25 +2069,30 @@ export class LandingComponent implements OnInit, AfterViewInit {
             }
           }
         });
+        
+        // Then, collect and merge "SideConfigurations" 
         let SideConfigurationsmappings = response.filter(
           (item) => item.keys == rolename + " SideConfigurations"
         );
 
-         
-
-        if (sidebarMenutemp.length > 0) this.sidebarMenu = sidebarMenutemp;
-        else if (SideConfigurationsmappings.length > 0) {
+        // Remove duplicates from SideConfigurations
+        if (SideConfigurationsmappings.length > 0) {
           SideConfigurationsmappings = SideConfigurationsmappings.filter(
             (value, index, self) =>
               self.map((x) => x.id).indexOf(value.id) == index
           );
+          
+          // Priority 1: Current project SideConfigurations
           SideConfigurationsmappings.forEach((item) => {
             if (item.project_id.id == currentprojectid) {
               fetchdefaultmappings = false;
+              datafromcurrentproject = true;
               let tempArray = JSON.parse(item.value);
               tempArray.forEach((ele) => sidebarMenutemp.push(ele));
             }
           });
+          
+          // Priority 2: Portfolio level SideConfigurations (only if no project-level found)
           if (!(sidebarMenutemp && sidebarMenutemp.length)) {
             SideConfigurationsmappings.forEach((item) => {
               if (
@@ -2098,15 +2105,21 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             });
           }
+          
+          // Priority 3: Core SideConfigurations (only if no project or portfolio-level found)
           if (!(sidebarMenutemp && sidebarMenutemp.length)) {
             SideConfigurationsmappings.forEach((item) => {
-              if (item.project_name == "Core") {
+              if (item.project_name == "Core" || item.project_name == "core") {
                 fetchdefaultmappings = false;
                 let tempArray = JSON.parse(item.value);
                 tempArray.forEach((ele) => sidebarMenutemp.push(ele));
               }
             });
           }
+        }
+        
+        // Set sidebar menu if we have collected configurations
+        if (sidebarMenutemp.length > 0) {
           this.sidebarMenu = sidebarMenutemp;
           
           // Only perform auto-navigation when all conditions are met
@@ -2116,10 +2129,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
           const isAdmin = this.role21.toLowerCase() === "admin" || 
                         this.role21.toLowerCase() === "it portfolio manager";
           const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
-          
-        
-        
-       
           
           // Only navigate if we're at the main landing page, not changing portfolios/projects, and not an admin
           if (isAtMainLanding && !isChangingSelection && !isAdmin) {
