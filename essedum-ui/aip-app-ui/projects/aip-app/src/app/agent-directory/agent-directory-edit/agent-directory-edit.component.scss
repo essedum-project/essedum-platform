@@ -649,15 +649,16 @@
       visibility: hidden !important;
       opacity: 0 !important;
     }
+    background-color: transparent !important;
   }
 
-  // Disabled fields styling - ensure text is VISIBLE
+  // Disabled fields styling - gray text like deployment form
   .mat-mdc-input-element:disabled,
   .mat-mdc-select-disabled .mat-mdc-select {
     background-color: #f7f7f7ed !important;
-    color: #000000 !important;
+    color: #6c757d !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: #000000 !important;
+    -webkit-text-fill-color: #6c757d !important;
     display: block !important;
     visibility: visible !important;
   }
@@ -665,19 +666,21 @@
   input:disabled,
   input[disabled],
   select:disabled,
-  select[disabled] {
+  select[disabled],
+  textarea:disabled,
+  textarea[disabled] {
     background-color: #f7f7f7ed !important;
-    color: #000000 !important;
+    color: #6c757d !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: #000000 !important;
+    -webkit-text-fill-color: #6c757d !important;
   }
 
   .mat-mdc-select-disabled {
     background-color: #f7f7f7ed !important;
-  }
-
-  .mdc-text-field--disabled {
-    background-color: #f7f7f7ed !important;
+    
+    .mat-mdc-select-value {
+      color: #6c757d !important;
+    }
   }
 
   .mat-mdc-form-field input.mat-mdc-input-element {
@@ -687,6 +690,11 @@
     color: #000000 !important;
     opacity: 1;
     margin-left: 4px !important;
+
+    &:disabled {
+      color: #6c757d !important;
+      -webkit-text-fill-color: #6c757d !important;
+    }
   }
 
   .mat-mdc-form-field textarea.mat-mdc-input-element {
@@ -698,6 +706,11 @@
     margin-left: 4px !important;
     background-color: #f7f7f7ed !important;
     resize: none !important; // Remove resize handle
+
+    &:disabled {
+      color: #6c757d !important;
+      -webkit-text-fill-color: #6c757d !important;
+    }
   }
 
   // Label styles
@@ -714,6 +727,14 @@
     background-color: #f7f7f7ed !important;
     border-radius: 4px !important;
     margin-left: 4px !important;
+
+    &.mat-mdc-select-disabled {
+      color: #6c757d !important;
+
+      .mat-mdc-select-value {
+        color: #6c757d !important;
+      }
+    }
   }
 
   // Tool-params override - WHITE background and remove mat-mdc-form-field effects
@@ -1015,6 +1036,16 @@
   }
 }
 
+
+.remove-btn-icon{
+ font-size: medium !important; 
+ cursor: pointer !important;
+ color: red !important;
+}
+
+.add-btn-icon{
+ font-size: medium !important; cursor: pointer !important;color: #0052cc !important;
+}
 
 ::ng-deep .mat-mdc-form-field-hint-wrapper{
     position: absolute;
