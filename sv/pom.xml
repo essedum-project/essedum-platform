@@ -23,7 +23,7 @@
 		<json.version>20231013</json.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-		<liquibase.version>4.3.5</liquibase.version>
+		<liquibase.version>4.8.0</liquibase.version>
 		<openpojo.version>0.8.13</openpojo.version>
 		<maven-plugin.version>3.2.0</maven-plugin.version>
 		<modelmapper.version>2.3.0</modelmapper.version>
@@ -60,7 +60,7 @@
 		<org.springframework.boot.spring-boot-starter.version>3.4.0</org.springframework.boot.spring-boot-starter.version>
 		<org.springframework.boot.spring-boot-dependencies.version>${spring-boot-dependencies.version}</org.springframework.boot.spring-boot-dependencies.version>
 		<commons-io.commons-io.version>2.17.0</commons-io.commons-io.version><com.google.code.gson.gson.version>2.11.0</com.google.code.gson.gson.version>
-		<org.liquibase.liquibase-core.version>4.3.5</org.liquibase.liquibase-core.version><org.ehcache.ehcache.version>${ehcache.version}</org.ehcache.ehcache.version>
+		<org.liquibase.liquibase-core.version>4.8.0</org.liquibase.liquibase-core.version><org.ehcache.ehcache.version>${ehcache.version}</org.ehcache.ehcache.version>
 		<org.springdoc.springdoc-openapi-ui.version>${springdoc-openapi-ui}</org.springdoc.springdoc-openapi-ui.version>
 		<joda-time.joda-time.version>2.10.6</joda-time.joda-time.version>
 		<org.modelmapper.modelmapper.version>${modelmapper.version}</org.modelmapper.modelmapper.version>
@@ -87,7 +87,7 @@
 		<org.mockito.mockito-all.version>2.0.2-beta</org.mockito.mockito-all.version>
 		<org.springframework.spring-webmvc.version>6.1.14</org.springframework.spring-webmvc.version>
 		<org.springframework.spring-web.version>6.1.14</org.springframework.spring-web.version>
-		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.31</org.apache.tomcat.embed.tomcat-embed-core.version>
+		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.47</org.apache.tomcat.embed.tomcat-embed-core.version>
 		<com.lfn.ai.comm-lib-util.version>${project.version}</com.lfn.ai.comm-lib-util.version>
 		<com.lfn.iamp-lib-usm.version>${project.version}</com.lfn.iamp-lib-usm.version>
 		<com.lfn.icip.icip-lib-evt.version>${project.version}</com.lfn.icip.icip-lib-evt.version>
