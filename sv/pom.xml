@@ -83,7 +83,7 @@
 		<com.opencsv.opencsv.version>5.7.1</com.opencsv.opencsv.version>
 		<com.healthmarketscience.sqlbuilder.sqlbuilder.version>3.0.0</com.healthmarketscience.sqlbuilder.sqlbuilder.version>
 		<com.google.guava.guava.version>33.1.0-jre</com.google.guava.guava.version>
-		<org.eclipse.jgit.org.eclipse.jgit.version>5.13.0.202109080827-r</org.eclipse.jgit.org.eclipse.jgit.version>
+		<org.eclipse.jgit.org.eclipse.jgit.version>5.13.4.202507202350-r</org.eclipse.jgit.org.eclipse.jgit.version>
 		<org.mockito.mockito-all.version>2.0.2-beta</org.mockito.mockito-all.version>
 		<org.springframework.spring-webmvc.version>6.1.14</org.springframework.spring-webmvc.version>
 		<org.springframework.spring-web.version>6.1.14</org.springframework.spring-web.version>
@@ -160,7 +160,7 @@
 	    <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>	    
         <aws-java-sdk.version>1.11.163</aws-java-sdk.version>
         <minio.version>8.2.0</minio.version>       
-	    <commons-fileupload.version>1.5</commons-fileupload.version>
+	    <commons-fileupload.version>1.6.0</commons-fileupload.version>
 	    <jakarta.interceptor-api.version>2.1.0</jakarta.interceptor-api.version>
 	    <spring-mock.version>2.0.4</spring-mock.version>
 	    <azure-ai-textanalytics.version>5.5.0</azure-ai-textanalytics.version>
