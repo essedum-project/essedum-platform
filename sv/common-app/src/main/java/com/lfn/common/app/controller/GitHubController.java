@@ -4,7 +4,7 @@ import com.lfn.common.app.exception.GitHubAuthenticationException;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import com.lfn.common.app.service.GitHubOAuthService;
 import com.lfn.common.app.web.rest.dto.*;
-import com.lfn.common.app.service.GitHubIntegrationService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @Slf4j
