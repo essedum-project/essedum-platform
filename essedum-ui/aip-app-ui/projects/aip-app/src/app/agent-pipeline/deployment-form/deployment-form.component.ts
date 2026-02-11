@@ -54,6 +54,8 @@ export class DeploymentFormComponent implements OnInit {
   // Flag to track if deployment is finished and forms should be disabled
   isDeploymentFinished: boolean = false;
 
+  isEditMode: boolean = false;
+
   // Static text constants - Labels
   readonly AGENT_NAME_LABEL = 'Agent Name';
   readonly AGENT_VERSION_LABEL = 'Agent Version';
@@ -123,6 +125,7 @@ export class DeploymentFormComponent implements OnInit {
   readonly SAVE_SCOPE_BUTTON_LABEL = 'Save Scope & Pre-Checks';
   readonly SAVE_APPROVAL_BUTTON_LABEL = 'Save Approval & Rollback';
   readonly SAVE_VALIDATION_BUTTON_LABEL = 'Save Validation & Compliance';
+  readonly UPDATE_BUTTON_LABEL = 'Update';
 
   // Static text constants - Messages
   readonly FINISH_NOTE_MESSAGE = 'Fill required fields to enable finish button: Agent Name, Agent Version, Deployment Date & Time, Target Nodes, Impacted Services, Approver Name & Role, CAB Approval Reference, Smoke Test Status, Deployment Owner';
@@ -236,6 +239,8 @@ export class DeploymentFormComponent implements OnInit {
         if (response) {
           this.deploymentId = response.id;
           this.populateFormWithData(response);
+          this.isDeploymentFinished = true;
+          this.disableAllForms();
           console.log('Deployment form loaded successfully for cname:', cname, 'org:', org);
         }
       },
@@ -260,6 +265,8 @@ export class DeploymentFormComponent implements OnInit {
         if (response) {
           this.deploymentId = response.id;
           this.populateFormWithData(response);
+          this.isDeploymentFinished = true;
+          this.disableAllForms();
           this.service.message('Deployment form loaded successfully', 'success');
         }
       },
@@ -343,6 +350,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.OVERVIEW_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 1;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -368,6 +376,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.SCOPE_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 2;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -393,6 +402,7 @@ export class DeploymentFormComponent implements OnInit {
             this.deploymentId = response.id;
           }
           this.service.message(this.APPROVAL_SAVED_MESSAGE, 'success');
+          this.selectedTabIndex = 3;
         },
         (error) => {
           this.service.message(this.DEPLOYMENT_SAVED_ERROR_MESSAGE + (error.message || 'Unknown error'), 'error');
@@ -505,6 +515,7 @@ export class DeploymentFormComponent implements OnInit {
         
         // Disable all forms after successful deployment
         this.isDeploymentFinished = true;
+        this.isEditMode = false;
         this.disableAllForms();
         
         // Emit event to parent component
@@ -524,6 +535,23 @@ export class DeploymentFormComponent implements OnInit {
     this.scopeForm.disable();
     this.approvalForm.disable();
     this.validationForm.disable();
+  }
+
+  /**
+   * Enable all form groups for editing
+   */
+  private enableAllForms(): void {
+    this.overviewForm.enable();
+    this.scopeForm.enable();
+    this.approvalForm.enable();
+    this.validationForm.enable();
+  }
+
+  getSaveButtonLabel(tabIndex: number = 0): string {
+    if (tabIndex < 3) {
+      return 'Next';
+    }
+    return this.isEditMode ? this.UPDATE_BUTTON_LABEL : 'Save';
   }
 
   /**
@@ -626,66 +654,20 @@ export class DeploymentFormComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Enable editing of deployment details
+   */
+  editDeploymentDetails(): void {
+    this.isEditMode = true;
+    this.enableAllForms();
+  }
 }
 
 // Inline Branch Selection Dialog Component
 @Component({
   selector: 'branch-selection-dialog',
-  template: `
-    <h2 mat-dialog-title style="color: #333; font-size: 20px; font-weight: 600;">Branch Deployment{{ environment ? ' - ' + environment : '' }}</h2>
-    <mat-dialog-content style="min-height: 200px; padding: 24px; overflow: visible;">
-      <div *ngIf="isLoadingBranches" style="text-align: center; padding: 40px;">
-        <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
-        <p style="margin-top: 16px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
-      </div>
-      
-      <form [formGroup]="branchForm" *ngIf="!isLoadingBranches">
-        <div>
-          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
-            <mat-label>Source Branch</mat-label>
-            <mat-select formControlName="sourceBranch" placeholder="Select Source Branch" class="mat-style-select" [disabled]="isLoadingSourceBranches">
-              <mat-option *ngIf="isLoadingSourceBranches">
-                <span>Loading branches...</span>
-              </mat-option>
-              <mat-option *ngFor="let branch of availableBranches" [value]="branch">
-                {{ branch }}
-              </mat-option>
-            </mat-select>
-            <mat-error class="ml-18" *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
-              Source branch is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div>
-          <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
-            <mat-label>Destination Branch</mat-label>
-            <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select" >
-              <mat-option *ngIf="isLoadingSourceBranches" >
-                <span>Loading branches...</span>
-              </mat-option>
-              <mat-option *ngFor="let branch of filteredDestinationBranches" [value]="branch">
-                {{ branch }}
-              </mat-option>
-            </mat-select>
-            <mat-error class="ml-18" *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
-              Destination branch is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
-      <button mat-raised-button (click)="onCancel()" style="margin-right: 8px;" [disabled]="isDeploying">Cancel</button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        (click)="onDeploy()" 
-        [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
-        {{ isDeploying ? 'Deploying...' : 'Deploy' }}
-      </button>
-    </mat-dialog-actions>
-  `,
+  templateUrl: './branch-selection-dialog.component.html',
   styles: [`
     :host ::ng-deep .mat-mdc-dialog-container {
       border-radius: 8px;
@@ -704,6 +686,8 @@ export class BranchSelectionDialogComponent implements OnInit {
   isDeploying = false;
   isLoadingBranches = false;
   isLoadingSourceBranches = false;
+  isLoadingReviewers = false;
+  availableReviewers: Array<{ id: string; name: string }> = []; // Will be populated from API
   sourceRepoName = ''; // Will be set dynamically with owner/repo format
   gitUsername: any;
   gitSelectedRepo: any;
@@ -720,7 +704,8 @@ export class BranchSelectionDialogComponent implements OnInit {
   ) {
     this.branchForm = this.fb.group({
       sourceBranch: ['', Validators.required],
-      destinationBranch: ['', Validators.required]
+      destinationBranch: ['', Validators.required],
+      reviewer: [''] // Optional - will be populated from API
     });
   }
 
