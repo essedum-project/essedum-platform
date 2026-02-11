@@ -19,6 +19,7 @@ import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
+import com.lfn.icip.icipwebeditor.exception.*;
 import com.lfn.icip.icipwebeditor.folder.service.ICIPFolderService;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
@@ -78,52 +79,79 @@ public class ICIPFolderController {
      * @param zipFile the zip file (optional - multipart upload)
      * @param folderPath the folder path (optional - if not uploading a file)
      * @return the response entity
-     * @throws Exception the exception
      */
     @PostMapping(path = "/upload/{cname}/{org}")
     public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(
             @PathVariable(name = "cname") String cname,
             @PathVariable(name = "org") String org,
             @RequestParam(value = "zipFile", required = false) MultipartFile zipFile,
-            @RequestParam(value = "folderPath", required = false) String folderPath) throws Exception {
+            @RequestParam(value = "folderPath", required = false) String folderPath) {
 
         logger.info("request to upload ai-agent scripts for cname={}, org={}", cname, org);
 
-        // Validate that at least one option is provided
-        if ((zipFile == null || zipFile.isEmpty()) && (folderPath == null || folderPath.isBlank())) {
-            logger.warn("Neither zipFile nor folderPath provided");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        // Check if files already exist for this cname and org
-        List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
-        if (existingFiles != null && !existingFiles.isEmpty()) {
-            logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
-                        existingFiles.size(), cname, org);
-            try {
-                folderService.deleteAllByCnameAndOrg(cname, org);
-                logger.info("Successfully deleted all existing files for cname={}, org={}", cname, org);
-            } catch (Exception e) {
-                logger.error("Error deleting existing files for cname={}, org={}: {}", cname, org, e.getMessage(), e);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null);
+        try {
+            // Validate that at least one option is provided
+            if ((zipFile == null || zipFile.isEmpty()) && (folderPath == null || folderPath.isBlank())) {
+                logger.warn("Neither zipFile nor folderPath provided for cname={}, org={}", cname, org);
+                throw new InvalidRequestException("Either zipFile or folderPath must be provided. Please upload a ZIP file or specify a folder path.");
             }
-        } else {
-            logger.info("No existing files found for cname={}, org={}", cname, org);
-        }
 
-        // Use default path if no specific path is provided
-        String pathToUse = folderPath;
-        if (pathToUse == null || pathToUse.isBlank()) {
-            pathToUse = FileConstants.AI_AGENT_SCRIPT_ZIP_FOLDER_PATH;
-            logger.info("Using default path: {}", pathToUse);
-        } else {
-            logger.info("Using provided folder path: {}", pathToUse);
-        }
+            // Validate cname and org
+            if (cname == null || cname.isBlank()) {
+                throw new InvalidRequestException("Customer name (cname) cannot be null or empty");
+            }
+            if (org == null || org.isBlank()) {
+                throw new InvalidRequestException("Organization (org) cannot be null or empty");
+            }
 
-        return new ResponseEntity<>(
-                folderService.persistInAiAgentScriptTableFromZipOrFolder(zipFile, pathToUse, cname, org),
-                HttpStatus.OK);
+            // Check if files already exist for this cname and org
+            List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
+            if (existingFiles != null && !existingFiles.isEmpty()) {
+                logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
+                            existingFiles.size(), cname, org);
+                try {
+                    folderService.deleteAllByCnameAndOrg(cname, org);
+                    logger.info("Successfully deleted all existing files for cname={}, org={}", cname, org);
+                } catch (Exception e) {
+                    logger.error("Error deleting existing files for cname={}, org={}: {}", cname, org, e.getMessage(), e);
+                    throw new FileDeletionException(
+                            String.format("Failed to delete existing files for cname=%s, org=%s before uploading new files", cname, org),
+                            e
+                    );
+                }
+            } else {
+                logger.info("No existing files found for cname={}, org={}", cname, org);
+            }
+
+            // Use default path if no specific path is provided
+            String pathToUse = folderPath;
+            if (pathToUse == null || pathToUse.isBlank()) {
+                pathToUse = FileConstants.AI_AGENT_SCRIPT_ZIP_FOLDER_PATH;
+                logger.info("Using default path: {}", pathToUse);
+            } else {
+                logger.info("Using provided folder path: {}", pathToUse);
+            }
+
+            List<ICIPAiAgentScript> result = folderService.persistInAiAgentScriptTableFromZipOrFolder(zipFile, pathToUse, cname, org);
+
+            if (result == null || result.isEmpty()) {
+                logger.warn("No scripts were uploaded for cname={}, org={}", cname, org);
+                throw new FileUploadException("No scripts were found or uploaded. Verify the ZIP file or folder contains valid script files.");
+            }
+
+            logger.info("Successfully uploaded {} scripts for cname={}, org={}", result.size(), cname, org);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+
+        } catch (InvalidRequestException | FileDeletionException | FileUploadException e) {
+            // Re-throw custom exceptions to be handled by GlobalControllerException
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error during file upload for cname={}, org={}: {}", cname, org, e.getMessage(), e);
+            throw new FileUploadException(
+                    String.format("Failed to upload AI agent scripts for cname=%s, org=%s", cname, org),
+                    e
+            );
+        }
     }
 
 
@@ -133,67 +161,134 @@ public class ICIPFolderController {
             @PathVariable(name = "org") String org,
             @RequestBody List<ICIPAiAgentScriptDTO> updates
     ) {
-        logger.info("request to bulk update ai-agent script files via JSON: count={}",
-                updates == null ? 0 : updates.size());
+        logger.info("request to bulk update ai-agent script files via JSON for cname={}, org={}, count={}",
+                cname, org, updates == null ? 0 : updates.size());
+
         try {
+            // Validate input parameters
+            if (cname == null || cname.isBlank()) {
+                throw new InvalidRequestException("Customer name (cname) cannot be null or empty");
+            }
+            if (org == null || org.isBlank()) {
+                throw new InvalidRequestException("Organization (org) cannot be null or empty");
+            }
             if (updates == null || updates.isEmpty()) {
-                logger.warn("No updates provided in request body.");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                logger.warn("No updates provided in request body for cname={}, org={}", cname, org);
+                throw new InvalidRequestException("Update list cannot be null or empty. Please provide at least one script to update.");
             }
 
             List<ICIPAiAgentScript> result = folderService.bulkUpdateAiAgentScripts(cname, org, updates);
+
+            logger.info("Successfully updated {} scripts for cname={}, org={}", result.size(), cname, org);
             return new ResponseEntity<>(result, HttpStatus.OK);
 
+        } catch (InvalidRequestException e) {
+            // Re-throw to be handled by GlobalControllerException
+            throw e;
         } catch (Exception ex) {
-            logger.error("Bulk JSON update failed: {}", ex.getMessage(), ex);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            logger.error("Bulk JSON update failed for cname={}, org={}: {}", cname, org, ex.getMessage(), ex);
+            throw new FileUploadException(
+                    String.format("Failed to bulk update scripts for cname=%s, org=%s", cname, org),
+                    ex
+            );
         }
     }
 
     /**
-     * List.
+     * List AI agent scripts for a specific customer and organization.
      *
      * @param cname the cname
      * @param org the org
      * @return the response entity
-     * @throws Exception the exception
      */
     @GetMapping(path = "/list/{cname}/{org}")
     public ResponseEntity<List<ICIPAiAgentScriptDTO>> list(
             @PathVariable("cname") String cname,
-            @PathVariable("org") String org) throws Exception {
-        return ResponseEntity.ok(folderService.listAsDTO(cname, org));
+            @PathVariable("org") String org) {
+
+        logger.info("request to list ai-agent scripts for cname={}, org={}", cname, org);
+
+        try {
+            // Validate input parameters
+            if (cname == null || cname.isBlank()) {
+                throw new InvalidRequestException("Customer name (cname) cannot be null or empty");
+            }
+            if (org == null || org.isBlank()) {
+                throw new InvalidRequestException("Organization (org) cannot be null or empty");
+            }
+
+            List<ICIPAiAgentScriptDTO> scripts = folderService.listAsDTO(cname, org);
+            logger.info("Found {} scripts for cname={}, org={}", scripts.size(), cname, org);
+
+            return ResponseEntity.ok(scripts);
+
+        } catch (InvalidRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error listing scripts for cname={}, org={}: {}", cname, org, e.getMessage(), e);
+            throw new RuntimeException(
+                    String.format("Failed to retrieve scripts for cname=%s, org=%s", cname, org),
+                    e
+            );
+        }
     }
 
     /**
-     * Download file.
+     * Download all scripts as a ZIP file.
      *
      * @param cname the cname
      * @param org the org
      * @return the response entity
-     * @throws Exception the exception
      */
-
     @GetMapping(path = "/download/{cname}/{org}", produces = "application/zip")
     public ResponseEntity<byte[]> downloadAllAsZip(
             @PathVariable("cname") String cname,
             @PathVariable("org") String org
     ) {
-        // Generate ZIP in memory from DB
-        byte[] zipBytes = folderService.exportZip(cname, org);
+        logger.info("request to download all scripts as ZIP for cname={}, org={}", cname, org);
 
-        String fileName = (cname + "-" + org + ".zip").replace(' ', '_');
+        try {
+            // Validate input parameters
+            if (cname == null || cname.isBlank()) {
+                throw new InvalidRequestException("Customer name (cname) cannot be null or empty");
+            }
+            if (org == null || org.isBlank()) {
+                throw new InvalidRequestException("Organization (org) cannot be null or empty");
+            }
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/zip"))
-                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
-                .header("X-Content-Type-Options", "nosniff")
-                .body(zipBytes);
+            // Generate ZIP in memory from DB
+            byte[] zipBytes = folderService.exportZip(cname, org);
+
+            if (zipBytes == null || zipBytes.length == 0) {
+                throw new ResourceNotFoundException(
+                        String.format("No scripts found for cname=%s, org=%s to download", cname, org)
+                );
+            }
+
+            String fileName = (cname + "-" + org + ".zip").replace(' ', '_');
+
+            logger.info("Successfully generated ZIP file: {} ({} bytes)", fileName, zipBytes.length);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                    .header("X-Content-Type-Options", "nosniff")
+                    .body(zipBytes);
+
+        } catch (InvalidRequestException | ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error generating ZIP for cname={}, org={}: {}", cname, org, e.getMessage(), e);
+            throw new FileUploadException(
+                    String.format("Failed to generate ZIP file for cname=%s, org=%s", cname, org),
+                    e
+            );
+        }
     }
 
 
     /**
-     * Delete file.
+     * Delete a specific AI agent script file.
      *
      * @param id the script id
      * @return the response entity
@@ -201,8 +296,27 @@ public class ICIPFolderController {
     @DeleteMapping(path = "/delete/{id}")
     public ResponseEntity<Void> deleteFile(@PathVariable("id") Integer id) {
         logger.info("request to delete ai-agent script file with id: {}", id);
-        folderService.deleteFileById(id);
-        return ResponseEntity.noContent().build();
+
+        try {
+            // Validate input parameter
+            if (id == null || id <= 0) {
+                throw new InvalidRequestException("Script ID must be a positive integer");
+            }
+
+            folderService.deleteFileById(id);
+            logger.info("Successfully deleted script with id: {}", id);
+
+            return ResponseEntity.noContent().build();
+
+        } catch (InvalidRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting script with id={}: {}", id, e.getMessage(), e);
+            throw new FileDeletionException(
+                    String.format("Failed to delete script with id=%d", id),
+                    e
+            );
+        }
     }
 
     /**
@@ -212,6 +326,8 @@ public class ICIPFolderController {
      * @param org the organization
      * @param zipFile the zip file (optional - multipart upload)
      * @param objectKey the object key/path in MinIO
+     * @param type the datasource type
+     * @param alias the datasource alias
      * @return the response entity
      */
     @PostMapping(path = "/push-to-minio/{cname}/{org}")
@@ -223,23 +339,45 @@ public class ICIPFolderController {
             @RequestParam(value="type", required = false, defaultValue ="S3") String type,
             @RequestParam(value="alias", required = false, defaultValue ="Sample-S3") String alias)
     {
-        logger.info("request to push ai-agent scripts to MinIO for cname={}, org={}", cname, org);
+        logger.info("request to push ai-agent scripts to MinIO for cname={}, org={}, type={}, alias={}",
+                    cname, org, type, alias);
 
         try {
+            // Validate input parameters
+            if (cname == null || cname.isBlank()) {
+                throw new InvalidRequestException("Customer name (cname) cannot be null or empty");
+            }
+            if (org == null || org.isBlank()) {
+                throw new InvalidRequestException("Organization (org) cannot be null or empty");
+            }
+
             // Fetch S3/MinIO connection details from DB
             ICIPDatasource datasource = datasourceService.getDatasourceByTypeAndAlias(type, alias, org);
             if (datasource == null) {
-                String message = String.format("No datasource found for cname=%s, org=%s", cname, org);
+                String message = String.format("No datasource found with type=%s, alias=%s for organization=%s",
+                                              type, alias, org);
                 logger.error(message);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+                throw new DatasourceNotFoundException(message);
             }
+
             JSONObject connDetails = new JSONObject(datasource.getConnectionDetails());
             String minioUrl = connDetails.optString("url");
             String minioAccessKey = connDetails.optString("accessKey");
             String minioSecretKey = connDetails.optString("secretKey");
-            String bucketName = "aiptest";
+            String bucketName = connDetails.optString("bucketName", "aiptest");
 
-            logger.info("Using bucket name from connection details: {}", bucketName);
+            // Validate connection details
+            if (minioUrl == null || minioUrl.isBlank()) {
+                throw new DatasourceNotFoundException("MinIO URL is not configured in datasource connection details");
+            }
+            if (minioAccessKey == null || minioAccessKey.isBlank()) {
+                throw new DatasourceNotFoundException("MinIO access key is not configured in datasource connection details");
+            }
+            if (minioSecretKey == null || minioSecretKey.isBlank()) {
+                throw new DatasourceNotFoundException("MinIO secret key is not configured in datasource connection details");
+            }
+
+            logger.info("Using MinIO configuration: url={}, bucket={}", minioUrl, bucketName);
 
             // Generate default object key if not provided
             String finalObjectKey = objectKey;
@@ -253,27 +391,35 @@ public class ICIPFolderController {
             if (zipFile != null && !zipFile.isEmpty()) {
                 // Upload provided zip file
                 logger.info("Uploading provided zip file to MinIO");
-                success = folderService.pushZipToMinIO(zipFile, null, bucketName, finalObjectKey, cname, org, minioUrl, minioAccessKey, minioSecretKey);
+                success = folderService.pushZipToMinIO(zipFile, null, bucketName, finalObjectKey, cname, org,
+                                                       minioUrl, minioAccessKey, minioSecretKey);
             } else {
                 // Export from database and upload
                 logger.info("Exporting from database and uploading to MinIO");
-                success = folderService.exportAndPushToMinIO(cname, org, bucketName, finalObjectKey, minioUrl, minioAccessKey, minioSecretKey);
+                success = folderService.exportAndPushToMinIO(cname, org, bucketName, finalObjectKey,
+                                                             minioUrl, minioAccessKey, minioSecretKey);
             }
 
             if (success) {
-                String message = String.format("Successfully uploaded to MinIO: bucket=%s, objectKey=%s", bucketName, finalObjectKey);
+                String message = String.format("Successfully uploaded to MinIO: bucket=%s, objectKey=%s",
+                                              bucketName, finalObjectKey);
                 logger.info(message);
                 return ResponseEntity.ok(message);
             } else {
-                String message = "Failed to upload to MinIO";
+                String message = String.format("Failed to upload to MinIO for cname=%s, org=%s", cname, org);
                 logger.error(message);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+                throw new MinIOStorageException(message);
             }
 
+        } catch (InvalidRequestException | DatasourceNotFoundException | MinIOStorageException e) {
+            // Re-throw custom exceptions to be handled by GlobalControllerException
+            throw e;
         } catch (Exception ex) {
-            logger.error("Error pushing to MinIO: {}", ex.getMessage(), ex);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + ex.getMessage());
+            logger.error("Error pushing to MinIO for cname={}, org={}: {}", cname, org, ex.getMessage(), ex);
+            throw new MinIOStorageException(
+                    String.format("Failed to push scripts to MinIO for cname=%s, org=%s", cname, org),
+                    ex
+            );
         }
     }
 

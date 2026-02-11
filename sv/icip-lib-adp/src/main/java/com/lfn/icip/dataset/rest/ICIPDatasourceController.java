@@ -34,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,9 +50,9 @@ import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.iamp.usm.domain.DashConstant;
+import com.lfn.icip.dataset.exception.DuplicateAliasException;
+import com.lfn.icip.dataset.exception.SchedulerPausedException;
 import com.lfn.icip.dataset.jobs.ICIPCreateDatasets;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.ICIPPartialDatasource;
@@ -312,42 +311,40 @@ public class ICIPDatasourceController {
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
 	 */
 	@PostMapping("/add")
-	public ResponseEntity<?> createDatasource(@RequestBody ICIPDatasourceDTO datasourceDTO) 
+	public ResponseEntity<ICIPDatasource> createDatasource(@RequestBody ICIPDatasourceDTO datasourceDTO)
 			throws NoSuchAlgorithmException {
 		schedulerPauseStatus = checkStatus("icip.scheduler.pause.status","Core");
-		if(schedulerPauseStatus.equalsIgnoreCase("false")) {
-			String org = datasourceDTO.getOrganization();
-			logger.info("creating datasource ");
-			datasourceDTO.setOrganization(org);
-			datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
-			datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
-			logger.debug("loading modelmapper");
-			ModelMapper modelmapper = new ModelMapper();
-			ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);
-			logger.debug("create datasource method called");
-			Boolean isAliasExist = iICIPDatasourceService.checkAlias(datasourceDTO.getAlias(),datasourceDTO.getOrganization());
-			
-			if(isAliasExist) {
-				return ResponseEntity.status(502).body("Connection Name Already Exist");
-			}
-			else {
-			datasource = datasourcePluginServce.getDataSourceService(datasource).updateDatasource(datasource);
-			datasource = iICIPDatasourceService.save(null, datasource);
-			
-			Map<String, String> params = new HashMap<>();
-			params.put("datasource", datasource.getName());
-			params.put("submittedBy", ICIPUtils.getUser(claim));
-			params.put("org", datasource.getOrganization());
-			InternalEvent event = new InternalEvent(this, "CREATEDATASETS", datasource.getOrganization(), params, ICIPCreateDatasets.class);
-			eventService.getApplicationEventPublisher().publishEvent(event);
-			
-			
-			return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, datasource.getName()))
-					.body(datasource);
-			}
-		} else {
-			return new ResponseEntity<>("Scheduler Paused", HttpStatus.CONFLICT);
+		if(schedulerPauseStatus.equalsIgnoreCase("true")) {
+			throw new SchedulerPausedException("Scheduler is currently paused. Please try again later.");
 		}
+
+		String org = datasourceDTO.getOrganization();
+		logger.info("creating datasource ");
+		datasourceDTO.setOrganization(org);
+		datasourceDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+		datasourceDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+		logger.debug("loading modelmapper");
+		ModelMapper modelmapper = new ModelMapper();
+		ICIPDatasource datasource = modelmapper.map(datasourceDTO, ICIPDatasource.class);
+		logger.debug("create datasource method called");
+		Boolean isAliasExist = iICIPDatasourceService.checkAlias(datasourceDTO.getAlias(),datasourceDTO.getOrganization());
+
+		if(isAliasExist) {
+			throw new DuplicateAliasException("Connection name '" + datasourceDTO.getAlias() + "' already exists. Please use a unique name.");
+		}
+
+		datasource = datasourcePluginServce.getDataSourceService(datasource).updateDatasource(datasource);
+		datasource = iICIPDatasourceService.save(null, datasource);
+
+		Map<String, String> params = new HashMap<>();
+		params.put("datasource", datasource.getName());
+		params.put("submittedBy", ICIPUtils.getUser(claim));
+		params.put("org", datasource.getOrganization());
+		InternalEvent event = new InternalEvent(this, "CREATEDATASETS", datasource.getOrganization(), params, ICIPCreateDatasets.class);
+		eventService.getApplicationEventPublisher().publishEvent(event);
+
+		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, datasource.getName()))
+				.body(datasource);
 	}
 	
 	private String checkStatus(String key, String org) {
@@ -465,19 +462,7 @@ public class ICIPDatasourceController {
 		return new ResponseEntity<>(isVaultEnabled, HttpStatus.OK);
 	}
 
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred");
-		return new ResponseEntity<>("There is an application error, please contact the application admin", new HttpHeaders(), apiError.getStatus());
-	}
+
 
 	/**
 	 * Gets the docs.

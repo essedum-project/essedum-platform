@@ -1,11 +1,14 @@
 <div class="lfx-u-pad-t-8 create-background">
     <div class="lfx-l-level2-middle-col">
         <div class="d-flex justify-content-between align-items-center px-4">
-            <div class="align-items-center d-flex" *ngIf="!edit">
+            <div class="align-items-center d-flex" *ngIf="!edit && !data?.copy">
                 <h2 class="base-color">Create Pipeline </h2>
             </div>
             <div class="align-items-center d-flex" *ngIf="edit">
                 <h2 class="base-color">Edit Pipeline</h2>
+            </div>
+            <div class="align-items-center d-flex" *ngIf="data?.copy">
+                <h2 class="base-color">Copy Pipeline</h2>
             </div>
     
             <div class="d-flex justify-content-end">
@@ -61,7 +64,7 @@
                             onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
                             Cancel
                         </button>
-                        <button  *ngIf="!edit" mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+                        <button  *ngIf="!edit && !data?.copy" mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
                             (click)="saveDetails()"
                             onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
                             onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
@@ -73,6 +76,14 @@
                             onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
                             onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
                             Update
+                        </button>
+                         </div>
+                         <div class="align-items-center d-flex" *ngIf="data?.copy">
+                            <button mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+                            (click)="saveDetails()"
+                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                            Copy
                         </button>
                          </div>
                     </div>

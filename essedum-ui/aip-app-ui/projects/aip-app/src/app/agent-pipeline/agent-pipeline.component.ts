@@ -219,6 +219,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   // WebSocket and Run/Deploy functionality
   private socket: Socket | null = null;
   isRunningAndDeploying = false;
+  isDeletingDeployment = false;
+  runnerServiceStatus = false; // Track runner_service_status from backend
   deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
   deploymentStatusMessage: string = ''; // User-friendly status message for deployment
   isPlaygroundEnabled = false; // Enable playground only after successful deployment
@@ -2828,10 +2830,77 @@ public class ZipController {
 
   /**
    * Check if Run and Deploy button should be enabled
-   * - Enabled when Essedum Codespace tab is visible (hasGeneratedAgent is true)
+   * - Enabled when files exist (hasGeneratedAgent or hasExistingFiles)
+   * - Enabled only when runner_service_status is false (not deployed)
+   * - Disabled while deployment is running
    */
   canRunAndDeploy(): boolean {
-    return this.shouldShowRunPlaygroundButtons() && !this.isRunningAndDeploying;
+    const hasFiles = this.hasGeneratedAgent || this.hasExistingFiles();
+    return hasFiles && !this.isRunningAndDeploying && !this.runnerServiceStatus;
+  }
+
+  /**
+   * Check if Delete Deployment button should be enabled
+   * - Enabled when files exist (hasGeneratedAgent or hasExistingFiles)
+   * - Enabled only when runner_service_status is true (deployed)
+   * - Disabled while deletion is in progress
+   */
+  canDeleteDeployment(): boolean {
+    const hasFiles = this.hasGeneratedAgent || this.hasExistingFiles();
+    return hasFiles && !this.isDeletingDeployment && this.runnerServiceStatus;
+  }
+
+  /**
+   * Delete the current deployment
+   */
+  async deleteDeployment(): Promise<void> {
+    if (!this.canDeleteDeployment() || !this.currentCname) {
+      return;
+    }
+
+    this.isDeletingDeployment = true;
+    const organization = this.getOrganization();
+
+    try {
+      console.log('Deleting deployment for:', this.currentCname);
+      
+      // Fetch current streaming services data
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      const getResponse = await this.http.get<any>(streamingServicesUrl).toPromise();
+      
+      if (getResponse && getResponse.json_content) {
+        let jsonContent = JSON.parse(getResponse.json_content);
+        
+        // Update runner_service_status to false
+        jsonContent.runner_service_status = false;
+        
+        // Remove playground URL
+        delete jsonContent.playgroundurl;
+        
+        const putPayload = {
+          ...getResponse,
+          json_content: JSON.stringify(jsonContent)
+        };
+        
+        // Update via API
+        const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+        await this.http.put<any>(updateUrl, putPayload).toPromise();
+        
+        console.log('Deployment deleted successfully');
+        this.service.messageService({ status: 200, body: 'Success' }, 'Deployment deleted successfully!');
+        
+        // Update local status
+        this.runnerServiceStatus = false;
+        this.isPlaygroundEnabled = false;
+        this.deploymentStatus = 'idle';
+        this.deploymentStatusMessage = '';
+      }
+    } catch (error) {
+      console.error('Error deleting deployment:', error);
+      this.service.messageService(error, 'Failed to delete deployment');
+    } finally {
+      this.isDeletingDeployment = false;
+    }
   }
 
   /**
@@ -3005,12 +3074,13 @@ public class ZipController {
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
             console.log('  Step 4.2: Streaming service response:', streamingResponse);
             
-            // Extract alias from the response
-            const deploymentAlias = streamingResponse?.alias || 'runner-service'; // fallback to default
-            console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
+            // Use alias from selected card (uppercase)
+            const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
             
-            // Now prepare payload with dynamic deployment_name
+            // Now prepare payload with deployment_name from alias
             const apiParams = this.getApiParametersForMode();
+            
+            console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
             
             const payload = {
               minio_endpoint: 'http://100.78.49.20:9000',
@@ -3033,14 +3103,16 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use fallback deployment_name if API call fails
+            // Use alias from selected card (uppercase)
             const apiParams = this.getApiParametersForMode();
+            const fallbackDeploymentName = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+            
             const fallbackPayload = {
               minio_endpoint: 'http://100.78.49.20:9000',
               bucket_name: 'aiptest',
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
               target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
-              deployment_name: 'runner-service', // fallback value
+              deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
@@ -3048,7 +3120,7 @@ public class ZipController {
             };
             
             console.log('  Step 5 (Fallback): Using fallback payload due to API error:', fallbackPayload);
-            this.addToConsole(`Using fallback deployment name: runner-service`);
+            this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
         });
@@ -3155,10 +3227,12 @@ public class ZipController {
         let jsonContent = JSON.parse(getResponse.json_content);
         console.log('Parsed existing json_content:', jsonContent);
         
-        // Step 3: Add/update the playgroundUrl
+        // Step 3: Add/update the playgroundUrl and runner_service_status
         const environmentUrl = this.getEnvironmentUrl();
-        jsonContent.playgroundurl = `${environmentUrl}/apps/runner-service/ask`;
-        console.log('Updated json_content with playground URL:', jsonContent);
+        const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+        jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
+        jsonContent.runner_service_status = true;
+        console.log('Updated json_content with playground URL and runner_service_status:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {
@@ -3168,11 +3242,15 @@ public class ZipController {
         
         console.log('Sending PUT request to update streaming services:', putPayload);
         
-        // Step 5: PUT the updated data back
-        const putResponse = await this.http.put<any>(streamingServicesUrl, putPayload).toPromise();
+           // Step 5: PUT the updated data back using the update endpoint
+        const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+        const putResponse = await this.http.put<any>(updateUrl, putPayload).toPromise();
         console.log('Streaming services PUT response:', putResponse);
         
         this.addToConsole('Streaming services updated successfully with playground URL!');
+        
+        // Update local runner_service_status
+        this.runnerServiceStatus = true;
       } else {
         console.log('No json_content found in streaming services response');
         this.addToConsole('Warning: Could not update streaming services - no json_content found');
@@ -3382,6 +3460,50 @@ public class ZipController {
    */
   shouldShowRunPlaygroundButtons(): boolean {
     return this.hasGeneratedAgent && this.fileSystemData && this.fileSystemData.length > 0;
+  }
+
+  /**
+   * Fetch runner_service_status from API
+   */
+  private async fetchRunnerServiceStatus(): Promise<void> {
+    if (!this.currentCname) {
+      console.warn('Cannot fetch runner_service_status: currentCname is not set');
+      return;
+    }
+
+    try {
+      const organization = this.getOrganization();
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('Fetching runner_service_status from:', streamingServicesUrl);
+      const response = await this.http.get<any>(streamingServicesUrl).toPromise();
+      
+      console.log('API Response:', response);
+      
+      if (response && response.json_content) {
+        const jsonContent = JSON.parse(response.json_content);
+        console.log('Parsed json_content:', jsonContent);
+        
+        this.runnerServiceStatus = jsonContent.runner_service_status === true;
+        console.log('✅ Set runnerServiceStatus to:', this.runnerServiceStatus);
+        console.log('Button states:', {
+          canRunAndDeploy: this.canRunAndDeploy(),
+          canDeleteDeployment: this.canDeleteDeployment(),
+          hasFiles: this.hasGeneratedAgent || this.hasExistingFiles(),
+          isRunningAndDeploying: this.isRunningAndDeploying,
+          isDeletingDeployment: this.isDeletingDeployment
+        });
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+      } else {
+        console.warn('No json_content in response, setting runnerServiceStatus to false');
+        this.runnerServiceStatus = false;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching runner_service_status:', error);
+      this.runnerServiceStatus = false;
+    }
   }
 
   // Methods removed - auto-loading enabled when viewing details
@@ -3666,6 +3788,7 @@ DELIVERABLES
 
   /**
    * Check if playground button should be enabled
+   * Playground is only available for agent pipelines, not MCP
    */
   canOpenPlayground(): boolean {
     return this.shouldShowRunPlaygroundButtons() && this.isPlaygroundEnabled && !this.isRunningAndDeploying;
@@ -3734,20 +3857,23 @@ DELIVERABLES
         } else {
           console.log('fetchPlaygroundUrl - No playgroundurl found, using default');
           const environmentUrl = this.getEnvironmentUrl();
-          this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+          const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+          this.playgroundUrl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
           console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
         }
       } else {
         console.log('fetchPlaygroundUrl - No json_content in response, using default');
         const environmentUrl = this.getEnvironmentUrl();
-        this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+        const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+        this.playgroundUrl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
         console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
       console.log('fetchPlaygroundUrl - Error occurred, using default URL');
       const environmentUrl = this.getEnvironmentUrl();
-      this.playgroundUrl = `${environmentUrl}/apps/runner-service/ask`;
+      const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+      this.playgroundUrl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
       console.log('fetchPlaygroundUrl - Using default URL after error:', this.playgroundUrl);
     }
   }
@@ -3956,11 +4082,15 @@ DELIVERABLES
   }
 
   // Check for existing files and load appropriate state
-  private checkForExistingFilesAndLoadState(cname: string): void {
+  private async checkForExistingFilesAndLoadState(cname: string): Promise<void> {
     console.log('Checking for existing files for cname:', cname);
 
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
+    
+    // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After fetch, runnerServiceStatus is:', this.runnerServiceStatus);
 
     // Try to fetch files for this specific cname - only to check existence
     this.isLoadingFiles = true;
@@ -3986,6 +4116,9 @@ DELIVERABLES
           this.showScriptTabOnly();
         }
         this.isLoadingFiles = false;
+        
+        // Trigger change detection after files are loaded
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.log(
@@ -3996,6 +4129,9 @@ DELIVERABLES
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
+        
+        // Trigger change detection even on error
+        this.cdr.detectChanges();
       },
     });
   }
@@ -4090,15 +4226,83 @@ DELIVERABLES
   }
 
   /**
-   * Handle Deploy button click from Deployment Tab
-   * This triggers the actual deployment process (Run & Deploy)
+   * Handle deployment form finish event
+   * Navigate to Playground tab and show deploy button message
    */
-  onDeployFromDeploymentTab(): void {
-    console.log('🚀 Deploy button clicked from Deployment tab');
-    console.log('🚀 Deployment environment:', this.deploymentEnvironment);
+  onDeploymentFinished(deploymentData: any): void {
+    console.log('🎯 Deployment form finished successfully:', deploymentData);
+    console.log('🎯 Current tabGroup exists:', !!this.tabGroup);
     
-    // Call the existing run and deploy method
-   // this.runAndDeploy();
+    // Set flag to true so the deploy button will show on Playground tab
+    this.hasDeploymentFormData = true;
+    
+    // Extract and store deployment environment from the correct path
+    this.deploymentEnvironment = deploymentData?.deployment_environment || '';
+    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
+    
+    // Trigger change detection to ensure the state is updated
+    this.cdr.detectChanges();
+    
+    // Navigate to Playground tab
+    // Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
+    // Use a longer timeout to ensure ViewChild is initialized and tabs are rendered
+    setTimeout(() => {
+      console.log('🎯 Attempting tab navigation...');
+      console.log('🎯 tabGroup exists:', !!this.tabGroup);
+      
+      if (this.tabGroup) {
+        // Find the Playground tab index dynamically
+        const playgroundTabIndex = this.getPlaygroundTabIndex();
+        console.log('🎯 Calculated Playground tab index:', playgroundTabIndex);
+        console.log('🎯 Current selected index:', this.tabGroup.selectedIndex);
+        console.log('🎯 Total tabs:', this.tabGroup._tabs.length);
+        
+        if (playgroundTabIndex >= 0 && playgroundTabIndex < this.tabGroup._tabs.length) {
+          this.tabGroup.selectedIndex = playgroundTabIndex;
+          console.log('✅ Successfully navigated to Playground tab at index:', playgroundTabIndex);
+          
+          // Force change detection after tab switch
+          this.cdr.detectChanges();
+          
+          // Show success message with deploy button instruction
+          setTimeout(() => {
+            this.service.message(
+              'Deployment configuration saved successfully. Click on the Deploy button to start deployment.',
+              'success'
+            );
+          }, 300);
+        } else {
+          console.error('❌ Invalid playground tab index:', playgroundTabIndex);
+        }
+      } else {
+        console.error('❌ tabGroup is not initialized!');
+      }
+    }, 500);
+  }
+  
+  /**
+   * Get the index of the Playground tab dynamically
+   * Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
+   * Since tabs can be conditionally visible, we need to calculate the index
+   */
+  private getPlaygroundTabIndex(): number {
+    let index = 0;
+    
+    // Builder tab (conditional)
+    if (this.shouldShowBuilderTab) {
+      console.log('  Builder tab is visible, index++');
+      index++;
+    }
+    
+    // Codespace tab (always visible)
+    console.log('  Codespace tab is visible, index++');
+    index++;
+    
+    // Playground tab is next (before Deployment tab in HTML)
+    // Note: Playground is shown when hasGeneratedAgent || hasExistingFiles()
+    console.log('  Playground tab should be at index:', index);
+    
+    return index;
   }
 
   /**
@@ -4175,7 +4379,7 @@ DELIVERABLES
   }
 
   // Automatically load agent data when viewing details
-  private autoLoadAgentData(): void {
+  private async autoLoadAgentData(): Promise<void> {
     if (!this.currentCname) {
       console.error('Cannot auto-load agent data: no cname available');
       this.showScriptTabOnly();
@@ -4187,6 +4391,10 @@ DELIVERABLES
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
+    
+    // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After autoLoadAgentData fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
@@ -4205,19 +4413,25 @@ DELIVERABLES
           this.showScriptTabOnly();
         }
         this.isLoadingFiles = false;
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
       }
     });
   }
 
   // Call the upload API to get full content
   // Auto-load agent data specifically for pipeline cards from dashboard
-  private autoLoadAgentDataForPipelineCard(): void {
+  private async autoLoadAgentDataForPipelineCard(): Promise<void> {
     if (!this.currentCname) {
       console.error('Cannot auto-load pipeline agent data: no cname available');
       this.showScriptTabOnly();
@@ -4232,6 +4446,10 @@ DELIVERABLES
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
+    
+    // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After autoLoadAgentDataForPipelineCard fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
@@ -4250,6 +4468,9 @@ DELIVERABLES
           this.enableCodespaceTabOnly(listResponse);
           
           this.isLoadingFiles = false;
+          
+          // Trigger change detection
+          this.cdr.detectChanges();
         } else {
           // No data from list API, show only script tab and continue with old flow
           console.log('No data from pipeline folder list API, falling back to script tab and old flow');
@@ -4257,6 +4478,9 @@ DELIVERABLES
           this.isLoadingFiles = false;
           // Fall back to the original getStreamService flow
           this.getStreamService();
+          
+          // Trigger change detection
+          this.cdr.detectChanges();
         }
       },
       error: (error) => {

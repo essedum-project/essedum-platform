@@ -26,7 +26,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -44,7 +47,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -62,7 +68,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -80,7 +89,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -105,7 +117,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -123,7 +138,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -160,7 +178,10 @@ export class SchemaRegistryService {
           })
         )
         .pipe(
-          catchError((err) => {
+          catchError((err: any) => {
+            if (err?.error && err.error.error && err.error.details) {
+              this.messageService(err, err.error.details);
+            }
             return this.handleError(err);
           })
         );
@@ -181,7 +202,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -201,7 +225,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -228,7 +255,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -256,7 +286,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -282,7 +315,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -303,7 +339,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -321,7 +360,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -340,7 +382,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );
@@ -364,7 +409,10 @@ export class SchemaRegistryService {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.messageService(err, err.error.details);
+          }
           return this.handleError(err);
         })
       );

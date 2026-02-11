@@ -210,7 +210,14 @@ export class SpecTemplateDescriptionComponent implements OnInit {
               this.toggler();
             },
             (error) => {
-              this.adapterService.messageService(error);
+              // Check if error has the new format with error and details
+              if (error?.error?.details) {
+                this.service.message(error.error.details, 'error');
+              } else if (error?.error?.message) {
+                this.service.message(error.error.message, 'error');
+              } else {
+                this.adapterService.messageService(error);
+              }
             }
           );
       }

@@ -59,23 +59,21 @@ public class MlAdaptersController {
 	@Autowired
 	MlAdaptersService mlAdaptersService;
 
+
 	@PostMapping("/add")
-	public ResponseEntity<MlAdapters> createMlAdapter(@RequestBody MlAdapters mlAdapters)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlAdapters> createMlAdapter(@RequestBody MlAdapters mlAdapters) {
 		logger.info("creating MlAdapter:{}", mlAdapters.getName());
 		return new ResponseEntity<>(mlAdaptersService.save(mlAdapters), new HttpHeaders(), HttpStatus.OK);
 	}
 
 	@PostMapping("/update")
-	public ResponseEntity<MlAdapters> updateMlAdapter(@RequestBody MlAdapters mlAdapters)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlAdapters> updateMlAdapter(@RequestBody MlAdapters mlAdapters) {
 		logger.info("updating MlAdapter:{}", mlAdapters.getName());
 		return new ResponseEntity<>(mlAdaptersService.updateMlAdapter(mlAdapters), new HttpHeaders(), HttpStatus.OK);
 	}
 
 	@PostMapping("/updateAPISpec")
-	public ResponseEntity<MlAdapters> updateAPISpec(@RequestBody MlAdapters mlAdapters)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlAdapters> updateAPISpec(@RequestBody MlAdapters mlAdapters) {
 		logger.info("updating APISpec for MlAdapter:{}", mlAdapters.getName());
 		return new ResponseEntity<>(mlAdaptersService.updateAPISpec(mlAdapters), new HttpHeaders(), HttpStatus.OK);
 	}

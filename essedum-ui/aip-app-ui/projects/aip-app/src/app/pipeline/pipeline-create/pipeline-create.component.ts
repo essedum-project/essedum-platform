@@ -188,7 +188,11 @@ export class PipelineCreateComponent implements OnInit {
         }
         // For new pipeline creation from add button ONLY for pipeline-agent or mcp-pipeline
         else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
-          newCanvas.json_content = JSON.stringify({ 'created_source': 'user_defined' });
+          newCanvas.json_content = JSON.stringify({ 
+            'created_source': 'user_defined',
+            'runner_service_name': this.alias,
+            'runner_service_status': false
+          });
         }
 
         if (this.importedJson) {
@@ -436,7 +440,7 @@ export class PipelineCreateComponent implements OnInit {
     console.log('Dynamic filename:', dynamicFilename);
     
     // Preserve original json_content from add API response (created_source flag)
-    let originalJsonContent = {};
+    let originalJsonContent: any = {};
     try {
       if (pipelineData.json_content) {
         originalJsonContent = JSON.parse(pipelineData.json_content);
@@ -445,9 +449,11 @@ export class PipelineCreateComponent implements OnInit {
       console.warn('Could not parse original json_content:', e);
     }
     
-    // Update the pipeline's json_content with the MCP configuration, preserving created_source
+    // Update the pipeline's json_content with the MCP configuration, preserving all original fields
     pipelineData.json_content = JSON.stringify({
-      ...originalJsonContent,
+      created_source: originalJsonContent.created_source || 'user_defined',
+      runner_service_name: originalJsonContent.runner_service_name || pipelineData.alias,
+      runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
       elements: [{
         type: 'mcpServer',
         name: pipelineData.name,
@@ -527,7 +533,7 @@ export class PipelineCreateComponent implements OnInit {
     console.log('Dynamic filename:', dynamicFilename);
     
     // Preserve original json_content from add API response (created_source flag)
-    let originalJsonContent = {};
+    let originalJsonContent: any = {};
     try {
       if (pipelineData.json_content) {
         originalJsonContent = JSON.parse(pipelineData.json_content);
@@ -536,9 +542,11 @@ export class PipelineCreateComponent implements OnInit {
       console.warn('Could not parse original json_content:', e);
     }
     
-    // Update the pipeline's json_content with the Agent configuration, preserving created_source
+    // Update the pipeline's json_content with the Agent configuration, preserving all original fields
     pipelineData.json_content = JSON.stringify({
-      ...originalJsonContent,
+      created_source: originalJsonContent.created_source || 'user_defined',
+      runner_service_name: originalJsonContent.runner_service_name || pipelineData.alias,
+      runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
       elements: [{
         type: 'AIAgent',
         name: pipelineData.name,

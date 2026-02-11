@@ -1,0 +1,9 @@
+{
+  "minio": {
+    "endpoint": "http://100.78.49.20:9000",
+    "bucketName": "aiptest"
+  },
+  "containerRegistry": {
+    "targetImageTag": "acrreq0762935.azurecr.io/test-adk-app:v1"
+  }
+}

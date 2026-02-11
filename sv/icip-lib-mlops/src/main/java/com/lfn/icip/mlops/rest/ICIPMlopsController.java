@@ -133,13 +133,12 @@ import io.micrometer.core.annotation.Timed;
 //import liquibase.pro.license.keymgr.a;
 import jakarta.transaction.Transactional;
 
+/**
+ * CORS configuration is now centralized in CorsConfig.java
+ * See application-mysql.yml for CORS settings
+ */
 @RestController
 @Timed
-@CrossOrigin(origins = {"http://localhost:3000",  "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-	       "https://essedum.az.ad.idemo-ppc.com"},
-        allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-        allowCredentials = "true",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping("/${icip.pathPrefix}/service/v1")
 @RefreshScope
 public class ICIPMlopsController {
@@ -1868,15 +1867,33 @@ public class ICIPMlopsController {
 
 	@PostMapping("/streamingServices/add")
 	@Transactional
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "http://localhost:8087", "https://langflow.az.ad.idemo-ppc.com",
-            "https://essedum.az.ad.idemo-ppc.com"},
-            allowedHeaders = {"*", "Authorization", "Content-Type", "Project", "ProjectName", "roleId", "roleName", "X-Requested-With", "charset"},
-            allowCredentials = "true",
-            methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 	public ResponseEntity<?> createStreamingServices(@RequestBody ICIPStreamingServicesDTO streamingServicesDTO,
 			@RequestAttribute(required = false, name = "organization") String org)
 			throws URISyntaxException, SQLException {
-		logger.info(streamingServicesDTO.getAlias());
+        // Sanitize alias by replacing all special characters with hyphen (-)
+        String originalAlias = streamingServicesDTO.getAlias();
+        if (originalAlias != null && !originalAlias.trim().isEmpty()) {
+            // Replace all non-alphanumeric characters with hyphen
+            String sanitizedAlias = originalAlias.replaceAll("[^a-zA-Z0-9]", "-");
+            // Remove consecutive hyphens
+            sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+            // Remove leading and trailing hyphens
+            sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+            streamingServicesDTO.setAlias(sanitizedAlias);
+        } else {
+            // If alias is null or empty, use name as alias and sanitize it
+            String name = streamingServicesDTO.getName();
+            if (name != null && !name.trim().isEmpty()) {
+                String sanitizedAlias = name.replaceAll("[^a-zA-Z0-9]", "-");
+                // Remove consecutive hyphens
+                sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+                // Remove leading and trailing hyphens
+                sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+                streamingServicesDTO.setAlias(sanitizedAlias);
+            }
+        }
+
+        logger.info("Sanitized alias: {}", streamingServicesDTO.getAlias());
 		List<ICIPStreamingServices> existlist = streamingServicesService
 				.getPipelinesByAliasAndOrg(streamingServicesDTO.getAlias(), streamingServicesDTO.getOrganization());
 		if (existlist.isEmpty()) {
@@ -1966,12 +1983,30 @@ public class ICIPMlopsController {
 		}
 		streamingServicesDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
 		streamingServicesDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+
+		// Sanitize alias by replacing all special characters with hyphen (-)
 		if (streamingServicesDTO.getAlias() == null || streamingServicesDTO.getAlias().trim().isEmpty()) {
-			streamingServicesDTO.setAlias(streamingServicesDTO.getName());
+			// If alias is null or empty, use name as alias and sanitize it
+			String name = streamingServicesDTO.getName();
+			if (name != null && !name.trim().isEmpty()) {
+				String sanitizedAlias = name.replaceAll("[^a-zA-Z0-9]", "-");
+				// Remove consecutive hyphens
+				sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+				// Remove leading and trailing hyphens
+				sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+				streamingServicesDTO.setAlias(sanitizedAlias);
+			}
 		} else {
-			streamingServicesDTO.setAlias(streamingServicesDTO.getAlias());
+			// Sanitize the provided alias
+			String sanitizedAlias = streamingServicesDTO.getAlias().replaceAll("[^a-zA-Z0-9]", "-");
+			// Remove consecutive hyphens
+			sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+			// Remove leading and trailing hyphens
+			sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+			streamingServicesDTO.setAlias(sanitizedAlias);
 		}
-		logger.info("Updating streaming service : {}", streamingServicesDTO.getName());
+
+		logger.info("Updating streaming service : {} with sanitized alias: {}", streamingServicesDTO.getName(), streamingServicesDTO.getAlias());
 		ModelMapper modelmapper = new ModelMapper();
 		ICIPStreamingServices streamingServices = modelmapper.map(streamingServicesDTO, ICIPStreamingServices.class);
 		ICIPStreamingServices result = streamingServicesService.update(streamingServices);

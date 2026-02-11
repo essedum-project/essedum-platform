@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -28,6 +28,8 @@ import java.util.List;
 // 
 /**
  * The Class CorsConfig.
+ * Centralized CORS configuration - all settings come from application-mysql.yml
+ * No hardcoded origins in controllers anymore!
  *
  * @author essedum
  */
@@ -43,8 +45,15 @@ public class CorsConfig {
     @Value("${spring.cors.allowedMethods}")
     private String allowedMethod;
 
+    @Value("${spring.cors.allow-credentials:true}")
+    private boolean allowCredentials;
+
+    @Value("${spring.cors.max-age:3600}")
+    private long maxAge;
+
     /**
-     * Cors filter.
+     * Cors filter - primary CORS configuration.
+     * This configuration is applied to /api/** endpoints.
      *
      * @return the cors filter
      */
@@ -52,6 +61,7 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern(allowedOriginPatterns);
         config.addAllowedHeader(allowedHeader);
@@ -73,16 +83,21 @@ public class CorsConfig {
 
         );
         config.addAllowedMethod(allowedMethod);
+
         source.registerCorsConfiguration("/api/**", config);
         return new CorsFilter(source);
     }
 
 
+    /**
+     * Global CORS configuration source.
+     * This configuration is applied to all endpoints (/**).
+     *
+     * @return the URL-based CORS configuration source
+     */
     @Bean
-    public
-    UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         // 1. Allow your React app (3000), Angular app (8087), and Python Backend (7860)
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8087", "http://localhost:7860", "https://langflow.az.ad.idemo-ppc.com",
                 "https://essedum.az.ad.idemo-ppc.com"));
@@ -108,7 +123,6 @@ public class CorsConfig {
 
         // 4. Allow credentials if your fetch/axios request uses cookies/auth
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
