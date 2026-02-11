@@ -158,7 +158,7 @@ import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-v
 import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory-create/agent-directory-create.component';
 import { GeneralComponent } from './agent-directory/general/general.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
-import { DeploymentFormComponent } from './agent-pipeline/deployment-form/deployment-form.component';
+import { DeploymentFormComponent, BranchSelectionDialogComponent } from './agent-pipeline/deployment-form/deployment-form.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -270,7 +270,8 @@ PipelineAgentDetailComponent,
     AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
     AgentDirectoryCreateComponent,
     GeneralComponent,AgentDirectoryEditComponent,
-    DeploymentFormComponent
+    DeploymentFormComponent,
+    BranchSelectionDialogComponent
 
   ],
   imports: [

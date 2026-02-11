@@ -38,7 +38,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -425,22 +424,6 @@ public class ICIPJobsController {
 	public ResponseEntity<List<IHiddenJobs>> getCommonJobs(@PathVariable(name = "org") String org) {
 		logger.info("Getting Hidden Logs");
 		return new ResponseEntity<>(iICIPJobsService.getAllHiddenLogs(org), HttpStatus.OK);
-	}
-
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(
-				new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(),
-				new HttpHeaders(),
-				new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
 	}
 
 	@GetMapping(value = "/image", produces = MediaType.IMAGE_JPEG_VALUE)

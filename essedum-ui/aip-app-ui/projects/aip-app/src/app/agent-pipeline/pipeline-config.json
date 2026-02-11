@@ -1,0 +1,10 @@
+{
+  "minio": {
+    "endpoint": "http://100.78.49.20:9000",
+    "bucketName": "aiptest"
+  },
+  "containerRegistry": {
+    "registryPrefix": "localhost:5000/",
+    "imageVersion": "v1"
+  }
+}

@@ -41,7 +41,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -70,6 +73,50 @@ export class Services {
     const org = sessionStorage.getItem('organization');
     return this.https
       .delete(this.dataUrl + '/runtime/delete/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  /**
+   * Save Git Config - Update branch configuration
+   * @param payload - Git config payload with cname, org, bname, etc.
+   */
+  saveGitConfig(payload: any): Observable<any> {
+    return this.https
+      .post(this.baseUrl + '/git-configs/save', payload, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  /**
+   * Get Git Config - Fetch branch configuration by cname and org
+   * @param cname - Container name
+   * @param org - Organization
+   */
+  getGitConfig(cname: string, org: string): Observable<any> {
+    return this.https
+      .get(this.baseUrl + '/git-configs', {
+        params: { cname: cname, org: org },
         observe: 'response',
       })
       .pipe(
@@ -1229,7 +1276,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -1277,7 +1327,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -1292,7 +1345,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -1759,7 +1815,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -1859,7 +1918,10 @@ export class Services {
           })
         )
         .pipe(
-          catchError((err) => {
+          catchError((err: any) => {
+            if (err?.error && err.error.error && err.error.details) {
+              this.message(err.error.details, 'error');
+            }
             return this.handleError(err);
           })
         );
@@ -1874,7 +1936,14 @@ export class Services {
         // .get(this.dataUrl + '/service/v1/plugin/allPlugins/' + org)
         .get(this.dataUrl + '/plugin/allPlugins/' + org)
         .pipe(map((response) => response))
-        .pipe(catchError(this.handleError))
+        .pipe(catchError((error: any) => {
+          if (error?.error?.details) {
+            this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
+          }
+          return this.handleError(error);
+        }))
     );
   }
   getAllPluginsByOrg(org): Observable<any> {
@@ -1888,7 +1957,12 @@ export class Services {
         })
       )
       .pipe(
-        catchError((error) => {
+        catchError((error: any) => {
+          if (error?.error?.details) {
+            this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
+          }
           return this.handleError(error);
         })
       );
@@ -2007,7 +2081,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -2146,7 +2223,14 @@ export class Services {
       )
 
       .pipe(map((response) => response))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
 
   //pipeline.description
@@ -2262,7 +2346,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -2283,7 +2370,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -2302,7 +2392,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -2357,7 +2450,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -2546,7 +2642,14 @@ export class Services {
         status
       )
       .pipe(map((response) => response))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
 
   fetchInternalJobByName(name: string, page, rows): Observable<any> {
@@ -2562,7 +2665,14 @@ export class Services {
 
       .pipe(map((response) => response))
 
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
   fetchInternalJobByName2(name: string, page, rows): Observable<any> {
     return this.https
@@ -2575,7 +2685,14 @@ export class Services {
         { params: { page: page, size: rows } }
       )
       .pipe(map((response) => response))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
 
   //console-tab getJobsByStreamingServiceLen
@@ -2591,7 +2708,12 @@ export class Services {
         })
       )
       .pipe(
-        catchError((error) => {
+        catchError((error: any) => {
+          if (error?.error?.details) {
+            this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
+          }
           return this.handleError(error);
         })
       );
@@ -2607,7 +2729,14 @@ export class Services {
         sessionStorage.getItem('organization')
       )
       .pipe(map((response) => response))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
 
   //console-tab fetchAgentJob
@@ -2636,7 +2765,14 @@ export class Services {
         read
       )
       .pipe(map((response) => response))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((error: any) => {
+        if (error?.error?.details) {
+          this.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.message(error.error.message, 'error');
+        }
+        return this.handleError(error);
+      }));
   }
 
   //job-data-viewer findByCoreid
@@ -2996,7 +3132,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );
@@ -3493,7 +3632,17 @@ export class Services {
   }
 
   deleteApp(id: Number) {
-    return this.https.delete(this.baseUrl + '/app/delete/' + id);
+    return this.https.delete(this.baseUrl + '/app/delete/' + id)
+      .pipe(
+        catchError((error: any) => {
+          if (error?.error?.details) {
+            this.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.message(error.error.message, 'error');
+          }
+          return this.handleError(error);
+        })
+      );
   }
 
   public getMfeAppConfig(): Observable<CustomManifest> {
@@ -3567,7 +3716,10 @@ export class Services {
         })
       )
       .pipe(
-        catchError((err) => {
+        catchError((err: any) => {
+          if (err?.error && err.error.error && err.error.details) {
+            this.message(err.error.details, 'error');
+          }
           return this.handleError(err);
         })
       );

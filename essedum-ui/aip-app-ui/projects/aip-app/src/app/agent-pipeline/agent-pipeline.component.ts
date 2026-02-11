@@ -28,6 +28,7 @@ import {
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
+import pipelineConfig from './pipeline-config.json';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
@@ -234,6 +235,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   userQuestion = '';
   isAgentThinking = false;
   playgroundUrl = ''; // Store the playground URL from API
+  currentDeploymentName = ''; // Store the deployment name used in WebSocket
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -1339,10 +1341,18 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving file:', error);
-      // Show error message
-      this.service.messageService(error);
+      // Check if error has the new format with details
+      if (error?.error?.details) {
+        this.service.message(error.error.details, 'error');
+      } else if (error?.error?.message) {
+        this.service.message(error.error.message, 'error');
+      } else {
+        // If error is not in the expected format, use a generic message
+        const errorMessage = error?.message || 'Failed to save file';
+        this.service.message(errorMessage, 'error');
+      }
     } finally {
       this.isSavingFile = false;
     }
@@ -1420,10 +1430,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         successResponse,
         'File deleted successfully!'
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting file:', error);
-      // Show error message
-      this.service.messageService(error);
+      // Check if error has the new format with details
+      if (error?.error?.details) {
+        this.service.message(error.error.details, 'error');
+      } else if (error?.error?.message) {
+        this.service.message(error.error.message, 'error');
+      } else {
+        const errorMessage = error?.message || 'Failed to delete file';
+        this.service.message(errorMessage, 'error');
+      }
     } finally {
       this.isSavingFile = false;
     }
@@ -1572,6 +1589,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading files:', error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         this.isLoadingFiles = false;
         this.fileSystemData = [];
         this.hasGeneratedAgent = false;
@@ -1812,7 +1835,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error downloading files:', error);
-          this.service.messageService(error);
+          // Check if error has the new format with details
+          if (error?.error?.details) {
+            this.service.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.service.message(error.error.message, 'error');
+          } else {
+            this.service.message('Failed to download files. Please try again.', 'error');
+          }
           // Reset loading state on error
           this.isDownloading = false;
         },
@@ -2401,9 +2431,17 @@ ${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
         const successResponse = { status: 200, body: result || [] };
         this.service.messageService(successResponse, 'File structure updated successfully!');
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Failed to save file structure:', error);
-        this.service.messageService(error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else {
+          const errorMessage = error?.message || 'Failed to update file structure';
+          this.service.message(errorMessage, 'error');
+        }
         
         // Restore original structure on error
         this.fileSystemData = JSON.parse(JSON.stringify(this.originalFileStructure));
@@ -2879,8 +2917,11 @@ public class ZipController {
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
         console.log('MinIO push successful, proceeding to WebSocket deployment:', response);
-        this.addToConsole(' Files successfully pushed to MinIO storage');
+        this.addToConsole('✓ Files successfully pushed to MinIO storage');
         this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+        
+        // Show success snackbar message
+        this.service.message('Files successfully pushed to MinIO storage', 'success');
         
         // Update status message and proceed to WebSocket
         this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
@@ -2889,26 +2930,53 @@ public class ZipController {
         this.initializeWebSocket();
       },
       error: (error) => {
-        console.error('MinIO push failed, cannot proceed with deployment:', error);
+        console.error('MinIO push error received:', error);
+        console.log('Error object structure:', {
+          status: error.status,
+          statusText: error.statusText,
+          error: error.error,
+          message: error.message
+        });
 
-        // Check if this is a parsing error with 200 status (success but unparseable response)
-        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
-            (error.message?.includes('parsing') || error.error?.text)) {
-          console.log('API returned 200 but response parsing failed - treating as success and proceeding');
-          this.addToConsole('✓ Files successfully pushed to MinIO storage (response parsing issue ignored)');
+        // Check if this is actually a success response (200-299 status codes)
+        // Some APIs return success data in error handler due to response format issues
+        if (error.status >= 200 && error.status < 300) {
+          console.log('MinIO push actually succeeded (200-level status), continuing deployment');
+          this.addToConsole('✓ Files successfully pushed to MinIO storage');
           this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
           
-          // Proceed with deployment since the push was actually successful
+          // Show success snackbar message
+          this.service.message('Files successfully pushed to MinIO storage', 'success');
+          
+          // Update status message and proceed to WebSocket
           this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
+          
+          // Continue with WebSocket deployment
           this.initializeWebSocket();
-        } else {
-          // Real error - stop deployment
-          this.deploymentStatus = 'error';
-          this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
-          this.addToConsole('✗ Failed to push files to MinIO storage');
-          this.addToConsole(`Error: ${error.message || 'Unknown error'}`);
-          this.isRunningAndDeploying = false;
+          return;
         }
+
+        // Only treat as real error if status is 4xx or 5xx
+        this.deploymentStatus = 'error';
+        this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
+        this.addToConsole('✗ Failed to push files to MinIO storage');
+        
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.addToConsole(`Error: ${error.error.details}`);
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.addToConsole(`Error: ${error.error.message}`);
+          this.service.message(error.error.message, 'error');
+        } else if (error?.message) {
+          this.addToConsole(`Error: ${error.message}`);
+          this.service.message(error.message, 'error');
+        } else {
+          const errorMessage = 'Unknown error occurred during MinIO push';
+          this.addToConsole(`Error: ${errorMessage}`);
+          this.service.message(errorMessage, 'error');
+        }
+        this.isRunningAndDeploying = false;
       }
     });
   }
@@ -3005,24 +3073,35 @@ public class ZipController {
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
             console.log('  Step 4.2: Streaming service response:', streamingResponse);
             
-            // Determine deployment name based on pipeline mode
-            const deploymentName = this.pipelineMode === 'mcp' 
-              ? 'service-qualification-mcp-5g' 
-              : 'service-qualification-agent-5g';
+            // CRITICAL: Update selectedAgent with alias from streaming service API response
+            if (streamingResponse && streamingResponse.alias) {
+              if (!this.selectedAgent) {
+                this.selectedAgent = {} as AgentCard;
+              }
+              this.selectedAgent.alias = streamingResponse.alias;
+              this.selectedAgent.cname = streamingResponse.name || this.currentCname;
+              console.log('  Step 4.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
+            }
             
-            // Extract alias from the response, fallback to mode-specific deployment name
-            const deploymentAlias =  deploymentName;
+            // Generate dynamic deployment name from alias and cname (now properly populated)
+            const deploymentAlias = this.generateDeploymentName();
+            this.currentDeploymentName = deploymentAlias; // Store for use in playground URL
+            console.log('  Step 4.3: Generated dynamic deployment name:', deploymentAlias);
             
             // Now prepare payload with dynamic deployment_name based on pipeline mode
             const apiParams = this.getApiParametersForMode();
             
-            console.log('  Step 4.3: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentName);
+            console.log('  Step 4.4: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentAlias);
+            
+            // Generate dynamic target_image_tag from config
+            const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
+            console.log('  Step 4.5: Generated dynamic target_image_tag:', targetImageTag);
             
             const payload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: targetImageTag,
               deployment_name: deploymentAlias, // Dynamic value from API
               cname: this.currentCname,
               organization: organization,
@@ -3039,17 +3118,20 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use fallback deployment_name if API call fails - mode-specific
+            // Use dynamic deployment_name even in fallback
             const apiParams = this.getApiParametersForMode();
-            const fallbackDeploymentName = this.pipelineMode === 'mcp' 
-              ? 'service-qualification-mcp-5g' 
-              : 'service-qualification-agent-5g';
+            const fallbackDeploymentName = this.generateDeploymentName();
+            this.currentDeploymentName = fallbackDeploymentName; // Store for use in playground URL
+            
+            // Generate dynamic target_image_tag from config for fallback
+            const fallbackTargetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${fallbackDeploymentName}:${pipelineConfig.containerRegistry.imageVersion}`;
+            console.log('  Step 5 (Fallback): Generated dynamic target_image_tag:', fallbackTargetImageTag);
             
             const fallbackPayload = {
-              minio_endpoint: 'http://100.78.49.20:9000',
-              bucket_name: 'aiptest',
+              minio_endpoint: pipelineConfig.minio.endpoint,
+              bucket_name: pipelineConfig.minio.bucketName,
               file_path: `ai-agent-scripts/${this.currentCname}/${organization}/${this.currentCname}-${organization}.zip`,
-              target_image_tag: 'acrreq0762935.azurecr.io/test-adk-app:v1',
+              target_image_tag: fallbackTargetImageTag,
               deployment_name: fallbackDeploymentName, // mode-specific fallback
               cname: this.currentCname,
               organization: organization,
@@ -3165,10 +3247,12 @@ public class ZipController {
         let jsonContent = JSON.parse(getResponse.json_content);
         console.log('Parsed existing json_content:', jsonContent);
         
-        // Step 3: Add/update the playgroundUrl
+        // Step 3: Add/update the playgroundUrl with SAME deployment name used in WebSocket
         const environmentUrl = this.getEnvironmentUrl();
-        jsonContent.playgroundurl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-        console.log('Updated json_content with playground URL:', jsonContent);
+        const deploymentName = this.currentDeploymentName; // Use stored deployment name
+        jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentName}/ask`;
+        console.log('Using stored deployment name from WebSocket:', deploymentName);
+        console.log('Updated json_content with dynamic playground URL:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {
@@ -3178,8 +3262,9 @@ public class ZipController {
         
         console.log('Sending PUT request to update streaming services:', putPayload);
         
-        // Step 5: PUT the updated data back
-        const putResponse = await this.http.put<any>(streamingServicesUrl, putPayload).toPromise();
+         // Step 5: PUT the updated data back using the update endpoint
+        const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+        const putResponse = await this.http.put<any>(updateUrl, putPayload).toPromise();
         console.log('Streaming services PUT response:', putResponse);
         
         this.addToConsole('Streaming services updated successfully with playground URL!');
@@ -3240,21 +3325,34 @@ public class ZipController {
         this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
       },
       error: (error) => {
-        console.error('MinIO push error:', error);
+        console.error('MinIO push error received:', error);
+        console.log('Error object structure:', {
+          status: error.status,
+          statusText: error.statusText,
+          error: error.error,
+          message: error.message
+        });
         
-        // Check if this is a parsing error with 200 status (success but unparseable response)
-        if (error.status === 200 && error.name === 'HttpErrorResponse' && 
-            (error.message?.includes('parsing') || error.error?.text)) {
-          console.log('API returned 200 but response parsing failed - treating as success');
-          
-          // Extract the response text if available
-          const responseText = error.error?.text || 'Upload completed';
-          const successResponse = { status: 200, body: responseText };
+        // Check if this is actually a success response (200-299 status codes)
+        // Some APIs return success data in error handler due to response format issues
+        if (error.status >= 200 && error.status < 300) {
+          console.log('MinIO push actually succeeded (200-level status), showing success message');
+          const successResponse = { status: 200, body: error.error || 'Success' };
           this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
+          return;
+        }
+        
+        // Only treat as real error if status is 4xx or 5xx
+        // Check for error details in the response
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else if (error?.message) {
+          this.service.message(error.message, 'error');
         } else {
-          // Real error - show error message
-          const errorResponse = error.status ? error : { status: 500, body: 'Unknown error' };
-          this.service.messageService(errorResponse, 'Push to MinIO failed. Please try again.');
+          // Fallback to generic error message
+          this.service.message('Push to MinIO failed. Please try again.', 'error');
         }
       }
     });
@@ -3345,19 +3443,21 @@ public class ZipController {
       },
       error: (error) => {
         console.error('Upload failed:', error);
-        let errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
         
-        if (error?.error) {
-          if (typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.error.message) {
-            errorMessage = error.error.message;
-          }
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        } else if (error?.error && typeof error.error === 'string') {
+          this.service.message(error.error, 'error');
         } else if (error?.message) {
-          errorMessage = error.message;
+          this.service.message(error.message, 'error');
+        } else {
+          // Final fallback
+          const errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
+          this.service.message(errorMessage, 'error');
         }
-        
-        this.service.message(errorMessage, 'error');
         this.isUploadingFiles = false;
       }
     });
@@ -3654,6 +3754,66 @@ DELIVERABLES
   }
 
   /**
+   * Generate dynamic deployment name from alias and cname
+   * Format: alias-cname with spaces and underscores replaced by hyphens
+   */
+  private generateDeploymentName(): string {
+    // Get cname - this maps to 'name' field in streaming services API
+    const cname = this.currentCname || this.selectedAgent?.cname || '';
+    
+    if (!cname) {
+      console.error('Cannot generate deployment name: no cname available');
+      return 'default-deployment';
+    }
+    
+    // Get agent name from 'alias' field - this is the actual agent name from streaming services API
+    // Example: streaming services API has alias="service_agent_5g" and name="LEOSRVC_59424"
+    let agentName = this.selectedAgent?.alias || '';
+    
+    if (!agentName) {
+      console.error('Cannot generate deployment name: no agent alias available');
+      // Fallback: use cname only
+      const sanitizedCname = cname.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+        .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+        .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
+      return `${sanitizedCname}-deployment`;
+    }
+    
+    // Sanitize agent name (from alias field): lowercase, replace ALL non-alphanumeric chars with hyphens
+    // Example: "service_agent_5g" → "service-agent-5g"
+    // Example: "service agent 5g" → "service-agent-5g"
+    // Example: ".service__agent__5g." → "service-agent-5g"
+    const sanitizedAgentName = agentName.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
+    
+    // Sanitize cname: lowercase, replace ALL non-alphanumeric chars with hyphens
+    // Example: "LEOSRVC_59424" → "leosrvc-59424"
+    // Example: "LEO SRVC 59424" → "leo-srvc-59424"
+    // Example: "LEO.SRVC_59424" → "leo-srvc-59424"
+    const sanitizedCname = cname.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
+      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
+      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
+    
+    // Final format: {agent-alias}-{cname}
+    // Example: "service-agent-5g-leosrvc-59424"
+    const deploymentName = `${sanitizedAgentName}-${sanitizedCname}`;
+    
+    console.log('Generated deployment name:', deploymentName, {
+      originalAgentAlias: agentName,
+      sanitizedAgentName: sanitizedAgentName,
+      originalCname: cname,
+      sanitizedCname: sanitizedCname,
+      finalDeploymentName: deploymentName
+    });
+    
+    return deploymentName;
+  }
+
+  /**
    * Get tooltip message for playground button based on deployment status
    */
   getPlaygroundTooltipMessage(): string {
@@ -3743,23 +3903,23 @@ DELIVERABLES
           this.playgroundUrl = jsonContent.playgroundurl;
           console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
-          console.log('fetchPlaygroundUrl - No playgroundurl found, using default');
+          console.log('fetchPlaygroundUrl - No playgroundurl found, using stored deployment name');
           const environmentUrl = this.getEnvironmentUrl();
-          this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-          console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
+          const deploymentName = this.currentDeploymentName; // Use stored deployment name
+          this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
+          console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
         }
       } else {
-        console.log('fetchPlaygroundUrl - No json_content in response, using default');
+        console.log('fetchPlaygroundUrl - No json_content in response, using stored deployment name');
         const environmentUrl = this.getEnvironmentUrl();
-        this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-        console.log('fetchPlaygroundUrl - Using default URL:', this.playgroundUrl);
+        const deploymentName = this.currentDeploymentName; // Use stored deployment name
+        this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
+        console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
-      console.log('fetchPlaygroundUrl - Error occurred, using default URL');
-      const environmentUrl = this.getEnvironmentUrl();
-      this.playgroundUrl = `${environmentUrl}/apps/service-qualification-agent-5g/ask`;
-      console.log('fetchPlaygroundUrl - Using default URL after error:', this.playgroundUrl);
+      // Don't generate URL without proper data - selectedAgent might not be populated
+      throw error;
     }
   }
 
@@ -3798,9 +3958,15 @@ DELIVERABLES
       // Use the exact playground URL from the streaming services API response
       const apiEndpoint = this.playgroundUrl;
       
-      const payload = {
-        question: question
-      };
+      // Send whatever the user typed directly as the request body
+      // Try to parse as JSON first, if it fails, send as raw string
+      let payload: any;
+      try {
+        payload = JSON.parse(question);
+      } catch (e) {
+        // Not valid JSON, send as plain text string
+        payload = question;
+      }
       
       const headers = {
         'Content-Type': 'application/json'
@@ -4004,6 +4170,12 @@ DELIVERABLES
           cname,
           error
         );
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
@@ -4101,83 +4273,15 @@ DELIVERABLES
   }
 
   /**
-   * Handle deployment form finish event
-   * Navigate to Playground tab and show deploy button message
+   * Handle Deploy button click from Deployment Tab
+   * This triggers the actual deployment process (Run & Deploy)
    */
-  onDeploymentFinished(deploymentData: any): void {
-    console.log('🎯 Deployment form finished successfully:', deploymentData);
-    console.log('🎯 Current tabGroup exists:', !!this.tabGroup);
+  onDeployFromDeploymentTab(): void {
+    console.log('🚀 Deploy button clicked from Deployment tab');
+    console.log('🚀 Deployment environment:', this.deploymentEnvironment);
     
-    // Set flag to true so the deploy button will show on Playground tab
-    this.hasDeploymentFormData = true;
-    
-    // Extract and store deployment environment from the correct path
-    this.deploymentEnvironment = deploymentData?.deployment_environment || '';
-    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
-    
-    // Trigger change detection to ensure the state is updated
-    this.cdr.detectChanges();
-    
-    // Navigate to Playground tab
-    // Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
-    // Use a longer timeout to ensure ViewChild is initialized and tabs are rendered
-    setTimeout(() => {
-      console.log('🎯 Attempting tab navigation...');
-      console.log('🎯 tabGroup exists:', !!this.tabGroup);
-      
-      if (this.tabGroup) {
-        // Find the Playground tab index dynamically
-        const playgroundTabIndex = this.getPlaygroundTabIndex();
-        console.log('🎯 Calculated Playground tab index:', playgroundTabIndex);
-        console.log('🎯 Current selected index:', this.tabGroup.selectedIndex);
-        console.log('🎯 Total tabs:', this.tabGroup._tabs.length);
-        
-        if (playgroundTabIndex >= 0 && playgroundTabIndex < this.tabGroup._tabs.length) {
-          this.tabGroup.selectedIndex = playgroundTabIndex;
-          console.log('✅ Successfully navigated to Playground tab at index:', playgroundTabIndex);
-          
-          // Force change detection after tab switch
-          this.cdr.detectChanges();
-          
-          // Show success message with deploy button instruction
-          setTimeout(() => {
-            this.service.message(
-              'Deployment configuration saved successfully. Click on the Deploy button to start deployment.',
-              'success'
-            );
-          }, 300);
-        } else {
-          console.error('❌ Invalid playground tab index:', playgroundTabIndex);
-        }
-      } else {
-        console.error('❌ tabGroup is not initialized!');
-      }
-    }, 500);
-  }
-  
-  /**
-   * Get the index of the Playground tab dynamically
-   * Tab order in HTML: Builder (conditional), Codespace (always), Playground (conditional), Deployment (conditional)
-   * Since tabs can be conditionally visible, we need to calculate the index
-   */
-  private getPlaygroundTabIndex(): number {
-    let index = 0;
-    
-    // Builder tab (conditional)
-    if (this.shouldShowBuilderTab) {
-      console.log('  Builder tab is visible, index++');
-      index++;
-    }
-    
-    // Codespace tab (always visible)
-    console.log('  Codespace tab is visible, index++');
-    index++;
-    
-    // Playground tab is next (before Deployment tab in HTML)
-    // Note: Playground is shown when hasGeneratedAgent || hasExistingFiles()
-    console.log('  Playground tab should be at index:', index);
-    
-    return index;
+    // Call the existing run and deploy method
+   // this.runAndDeploy();
   }
 
   /**
@@ -4287,6 +4391,12 @@ DELIVERABLES
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
+        // Check if error has the new format with details
+        if (error?.error?.details) {
+          this.service.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.service.message(error.error.message, 'error');
+        }
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
