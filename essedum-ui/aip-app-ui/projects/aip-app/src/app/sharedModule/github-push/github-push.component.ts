@@ -79,22 +79,18 @@ export class GitHubPushComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // For pull mode, we don't need authentication
-    if (this.mode === 'pull') {
-      this.showModal = true;
-      return;
-    }
-
-    // For push mode, authentication is required
+    // Both push and pull modes require authentication
     if (!this.isAuthenticated) {
       // User needs to login - trigger login automatically
       this.login();
       return;
     }
 
-    // User already authenticated, show modal with repos
+    // User already authenticated, show modal
     this.showModal = true;
-    if (this.repositories.length === 0) {
+    
+    // Load repositories for push mode
+    if (this.mode === 'push' && this.repositories.length === 0) {
       this.loadRepositories();
     }
   }
