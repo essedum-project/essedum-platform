@@ -43,11 +43,21 @@ export class KeycloakAuthService {
     private oauthServer: OAuthAuthServer;
     private refreshTimer?: NodeJS.Timeout;
     private hasAuthenticatedThisSession: boolean = false;
+    private sessionStatusBar?: vscode.StatusBarItem;
 
     constructor(config: KeycloakConfig, context: vscode.ExtensionContext) {
         this.config = config;
         this.context = context;
         this.oauthServer = new OAuthAuthServer(context.extensionPath, context);
+
+        // Create session status bar item
+        this.sessionStatusBar = vscode.window.createStatusBarItem(
+            vscode.StatusBarAlignment.Right,
+            100
+        );
+        this.sessionStatusBar.command = 'essedum.showSessionInfo';
+        this.sessionStatusBar.tooltip = 'Click to view session details';
+        context.subscriptions.push(this.sessionStatusBar);
 
         // Initialize SSL configuration based on network selection
         initializeSSLBypass(context);
@@ -579,6 +589,62 @@ export class KeycloakAuthService {
     }
 
     /**
+     * Ensure we have a fresh, valid access token before making API calls
+     * This proactively checks and refreshes the token if it's expired or about to expire
+     * Use this before critical API operations to avoid 401 errors
+     * 
+     * @returns Fresh access token
+     * @throws Error if authentication fails and user is not logged in
+     */
+    public async ensureFreshToken(): Promise<string> {
+        try {
+            const tokenData = await this.context.secrets.get(KeycloakAuthService.TOKEN_KEY);
+            
+            if (!tokenData) {
+                logger.info('No token found, user needs to authenticate');
+                throw new Error('Not authenticated. Please login first.');
+            }
+
+            const tokens: StoredTokenData = JSON.parse(tokenData);
+            const now = Date.now();
+            const expirationTime = tokens.timestamp + (tokens.expires_in * 1000);
+            
+            // Use a smaller buffer for proactive refresh (30 seconds)
+            // This ensures we refresh before the token expires
+            const proactiveRefreshBuffer = 30_000; // 30 seconds
+            const refreshThreshold = expirationTime - proactiveRefreshBuffer;
+            
+            const timeUntilExpiry = Math.floor((expirationTime - now) / 1000);
+            
+            // If token is expired or will expire soon, refresh it proactively
+            if (now >= refreshThreshold) {
+                if (tokens.refresh_token && this.hasAuthenticatedThisSession) {
+                    logger.info(`Token expires in ${timeUntilExpiry}s, refreshing proactively...`);
+                    try {
+                        const refreshedTokens = await this.refreshToken(tokens.refresh_token);
+                        logger.info('✓ Proactive token refresh successful');
+                        return refreshedTokens.access_token;
+                    } catch (error) {
+                        logger.error('Proactive token refresh failed:', error);
+                        throw new Error('Session expired and could not be refreshed. Please login again.');
+                    }
+                } else {
+                    logger.info('Token expired and no valid refresh token available');
+                    throw new Error('Session expired. Please login again.');
+                }
+            }
+            
+            // Token is still valid
+            logger.info(`Token valid for ${timeUntilExpiry} more seconds`);
+            return tokens.access_token;
+            
+        } catch (error: any) {
+            logger.error('Error ensuring fresh token:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Validate if current token is still valid
      */
     public async isTokenValid(): Promise<boolean> {
@@ -615,6 +681,150 @@ export class KeycloakAuthService {
             console.error('Error getting authentication status:', error);
             return { isAuthenticated: false };
         }
+    }
+
+    /**
+     * Get remaining session time in a human-readable format
+     * @returns Object with remaining time details or null if not authenticated
+     */
+    public async getSessionTimeRemaining(): Promise<{
+        totalSeconds: number;
+        formatted: string;
+        expiresAt: Date;
+        percentRemaining: number;
+    } | null> {
+        try {
+            const tokenData = await this.context.secrets.get(KeycloakAuthService.TOKEN_KEY);
+            if (!tokenData) {
+                return null;
+            }
+
+            const tokens: StoredTokenData = JSON.parse(tokenData);
+            const now = Date.now();
+            const expirationTime = tokens.timestamp + (tokens.expires_in * 1000);
+            const totalSeconds = Math.floor((expirationTime - now) / 1000);
+
+            if (totalSeconds <= 0) {
+                return null; // Session expired
+            }
+
+            // Calculate percentage of time remaining
+            const totalSessionTime = tokens.expires_in;
+            const percentRemaining = Math.floor((totalSeconds / totalSessionTime) * 100);
+
+            return {
+                totalSeconds,
+                formatted: this.formatDuration(totalSeconds),
+                expiresAt: new Date(expirationTime),
+                percentRemaining
+            };
+        } catch (error) {
+            console.error('Error getting session time remaining:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Format duration in seconds to human-readable string
+     * @param seconds - Total seconds
+     * @returns Formatted string like "2h 30m" or "45m" or "30s"
+     */
+    private formatDuration(seconds: number): string {
+        if (seconds < 0) {
+            return 'Expired';
+        }
+
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${secs}s`;
+        } else {
+            return `${secs}s`;
+        }
+    }
+
+    /**
+     * Show detailed session information to the user
+     */
+    public async showSessionInfo(): Promise<void> {
+        const sessionInfo = await this.getSessionTimeRemaining();
+        
+        if (!sessionInfo) {
+            vscode.window.showInformationMessage('No active session. Please login to continue.');
+            return;
+        }
+
+        const { totalSeconds, formatted, expiresAt, percentRemaining } = sessionInfo;
+
+        let message = `🔐 **Session Active**\n\n`;
+        message += `⏱️  Time Remaining: **${formatted}**\n`;
+        message += `📅 Expires: ${expiresAt.toLocaleString()}\n`;
+        message += `📊 Session Health: ${percentRemaining}%\n\n`;
+
+        if (totalSeconds < 300) { // Less than 5 minutes
+            message += `⚠️ Your session will expire soon. Activity will auto-refresh it.`;
+        } else {
+            message += `✅ Session is healthy. Auto-refresh is active.`;
+        }
+
+        const items: string[] = [];
+        
+        if (totalSeconds < 600) { // Less than 10 minutes
+            items.push('Refresh Now');
+        }
+        items.push('OK');
+
+        const selection = await vscode.window.showInformationMessage(message, ...items);
+        
+        if (selection === 'Refresh Now') {
+            try {
+                await this.ensureFreshToken();
+                vscode.window.showInformationMessage('✅ Session refreshed successfully!');
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`Failed to refresh session: ${error.message}`);
+            }
+        }
+    }
+
+    /**
+     * Update the status bar with current session information
+     */
+    private async updateSessionStatusBar(): Promise<void> {
+        if (!this.sessionStatusBar) {
+            return;
+        }
+
+        const sessionInfo = await this.getSessionTimeRemaining();
+        
+        if (!sessionInfo) {
+            this.sessionStatusBar.hide();
+            return;
+        }
+
+        const { totalSeconds, formatted, percentRemaining } = sessionInfo;
+
+        // Choose icon and color based on remaining time
+        let icon = '$(check)';
+        let backgroundColor: vscode.ThemeColor | undefined;
+
+        if (totalSeconds < 120) { // Less than 2 minutes - critical
+            icon = '$(alert)';
+            backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+        } else if (totalSeconds < 300) { // Less than 5 minutes - warning
+            icon = '$(warning)';
+            backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        } else {
+            icon = '$(clock)';
+        }
+
+        this.sessionStatusBar.text = `${icon} Session: ${formatted}`;
+        this.sessionStatusBar.backgroundColor = backgroundColor;
+        this.sessionStatusBar.tooltip = `Session expires in ${formatted}\nClick for details`;
+        this.sessionStatusBar.show();
     }
 
     /**
@@ -685,97 +895,44 @@ export class KeycloakAuthService {
 
     /**
      * Set up axios interceptors to handle token refresh on 401 errors
-     * This ensures all API calls automatically retry with a fresh token
+     * This ensures all API calls fail fast with clear error messages
+     * Token refresh is now done proactively before API calls
      */
     private setupAxiosInterceptors(): void {
-        logger.info('Setting up axios interceptors for automatic token refresh');
+        logger.info('Setting up axios interceptors for 401 error handling');
 
-        // Response interceptor to catch 401 errors and refresh token
+        // Response interceptor to catch 401 errors
         axios.interceptors.response.use(
             // Success handler - just return the response
             (response) => response,
 
-            // Error handler - check for 401 and refresh token
+            // Error handler - provide clear messages for 401 errors
             async (error) => {
-                const originalRequest = error.config;
+                // Check if this is a 401 error
+                if (error.response?.status === 401) {
+                    logger.warn('Received 401 Unauthorized - token expired or invalid');
 
-                // Check if this is a 401 error and we haven't already tried to refresh
-                if (error.response?.status === 401 && !originalRequest._retry) {
-                    logger.info('Received 401 Unauthorized, attempting token refresh...');
-                    originalRequest._retry = true;
+                    // Clear stored tokens since they're invalid
+                    await this.clearStoredTokens();
 
-                    try {
-                        // Try to get stored tokens
-                        const tokenData = await this.context.secrets.get(KeycloakAuthService.TOKEN_KEY);
-
-                        if (tokenData) {
-                            const tokens = JSON.parse(tokenData);
-
-                            if (tokens.refresh_token) {
-                                logger.info('Refreshing token after 401 error...');
-
-                                // Refresh the token
-                                const newTokens = await this.refreshToken(tokens.refresh_token);
-
-                                // Update the authorization header with new token
-                                if (originalRequest.headers) {
-                                    originalRequest.headers['Authorization'] = `Bearer ${newTokens.access_token}`;
-                                    originalRequest.headers['authorization'] = `Bearer ${newTokens.access_token}`;
-                                }
-
-                                logger.info('Token refreshed successfully, retrying original request');
-
-                                // Retry the original request with new token
-                                return axios(originalRequest);
-                            } else {
-                                console.warn('No refresh token available, user needs to re-authenticate');
-                                await this.clearStoredTokens();
-
-                                // Show user-friendly notification
-                                vscode.window.showWarningMessage(
-                                    'Your session has expired. Please authenticate again.',
-                                    'Login'
-                                ).then(selection => {
-                                    if (selection === 'Login') {
-                                        vscode.commands.executeCommand('essedum.authenticate');
-                                    }
-                                });
-                            }
-                        } else {
-                            console.warn('No tokens found in storage after 401 error');
-
-                            // Show user-friendly notification
-                            vscode.window.showWarningMessage(
-                                'Authentication required. Please authenticate.',
-                                'Login'
-                            ).then(selection => {
-                                if (selection === 'Login') {
-                                    vscode.commands.executeCommand('essedum.authenticate');
-                                }
-                            });
+                    // Show user-friendly notification
+                    vscode.window.showErrorMessage(
+                        'Session expired. Please login again to continue.',
+                        'Login'
+                    ).then(selection => {
+                        if (selection === 'Login') {
+                            vscode.commands.executeCommand('essedum.authenticate');
                         }
-                    } catch (refreshError) {
-                        console.error('Failed to refresh token after 401:', refreshError);
-                        await this.clearStoredTokens();
-
-                        // Show error notification
-                        vscode.window.showErrorMessage(
-                            'Session expired and refresh failed. Please login again.',
-                            'Login'
-                        ).then(selection => {
-                            if (selection === 'Login') {
-                                vscode.commands.executeCommand('essedum.authenticate');
-                            }
-                        });
-                    }
+                    });
                 }
 
-                // For all other errors or if refresh failed, reject the promise
+                // For all errors (including 401), reject immediately without retry
+                // This gives users fast feedback instead of making them wait
                 return Promise.reject(error);
             }
         );
 
-        logger.info('Axios interceptors configured for automatic token refresh');
+        logger.info('Axios interceptors configured for fast-fail on 401');
     }
 
     /**
@@ -790,9 +947,15 @@ export class KeycloakAuthService {
             clearInterval(this.refreshTimer);
         }
 
+        // Initial status bar update
+        this.updateSessionStatusBar();
+
         // Check and refresh tokens periodically
         this.refreshTimer = setInterval(async () => {
             try {
+                // Update status bar with current session info
+                await this.updateSessionStatusBar();
+
                 const tokenData = await this.context.secrets.get(KeycloakAuthService.TOKEN_KEY);
                 if (!tokenData) {
                     return; // No tokens stored
@@ -820,6 +983,9 @@ export class KeycloakAuthService {
                         await this.refreshToken(tokens.refresh_token);
                         logger.info('✓ Proactive token refresh successful');
 
+                        // Update status bar after refresh
+                        await this.updateSessionStatusBar();
+
                         // Optional: Show subtle notification that session was extended
                         vscode.window.setStatusBarMessage(
                             '$(check) Session extended automatically',
@@ -831,8 +997,9 @@ export class KeycloakAuthService {
                         // If refresh fails and token is very close to expiry, notify user
                         if (timeUntilExpiry < TOKEN_EXPIRY_WARNING_THRESHOLD) {
                             vscode.window.showWarningMessage(
-                                'Your session is about to expire. Please save your work.',
-                                'Refresh Now'
+                                `⚠️ Session expiring in ${Math.floor(timeUntilExpiry / 60)} minutes. Please save your work.`,
+                                'Refresh Now',
+                                'Dismiss'
                             ).then(selection => {
                                 if (selection === 'Refresh Now') {
                                     vscode.commands.executeCommand('essedum.authenticate');
@@ -856,6 +1023,11 @@ export class KeycloakAuthService {
             this.refreshTimer = undefined;
             logger.info('Automatic token refresh stopped');
         }
+
+        // Hide status bar when stopping refresh
+        if (this.sessionStatusBar) {
+            this.sessionStatusBar.hide();
+        }
     }
 
     /**
@@ -863,6 +1035,13 @@ export class KeycloakAuthService {
      */
     public async dispose(): Promise<void> {
         this.stopAutomaticTokenRefresh();
+        
+        // Dispose of status bar item
+        if (this.sessionStatusBar) {
+            this.sessionStatusBar.dispose();
+            this.sessionStatusBar = undefined;
+        }
+        
         await this.oauthServer.stopAuthFlow();
     }
 }

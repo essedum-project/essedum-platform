@@ -21,7 +21,7 @@ window.PipelineAgentConstants = {
         LAST_PAGE: 'lastPage',
         VIEW_DETAILS: 'viewDetails',
         OPEN_COPILOT: 'openCopilot',
-        UPLOAD_ADK: 'uploadAdk',
+        UPLOAD_FROM_GITHUB: 'uploadFromGitHub',
         VIEW_ADK: 'viewAdk',
         DOWNLOAD_ADK: 'downloadAdk',
         REFRESH_JSON: 'refreshJson',

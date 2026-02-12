@@ -74,6 +74,8 @@ interface ApiEndpoints {
     EVENTS_STATUS: string;
     FETCH_DATASOURCE: string;
     AUTH_BASE: string;
+    GITHUB_BRANCHES: string;
+    GITHUB_PULL: string;
 }
 
 // Dynamic API Endpoints - these are generated on-demand with the current base URL
@@ -125,7 +127,11 @@ export function getApiEndpoints(): ApiEndpoints {
         FETCH_DATASOURCE: `${apiBaseUrl}/fetchDatasource`,
 
         // Authentication
-        AUTH_BASE: `${baseUrl}/realms/essedum/protocol/openid-connect`
+        AUTH_BASE: `${baseUrl}/realms/essedum/protocol/openid-connect`,
+
+        // GitHub integration
+        GITHUB_BRANCHES: `${baseUrl}/api/github/branches`,
+        GITHUB_PULL: `${baseUrl}/api/github/pull`
     };
 
     return _endpointsCache;

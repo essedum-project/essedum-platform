@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.0.35",
+  "version": "1.0.37",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -64,7 +64,14 @@
       },
       {
         "command": "essedum.checkAuth",
-        "title": "Check Authentication Status"
+        "title": "Check Authentication Status",
+        "category": "Essedum"
+      },
+      {
+        "command": "essedum.showSessionInfo",
+        "title": "Show Session Information",
+        "category": "Essedum",
+        "icon": "$(clock)"
       },
       {
         "command": "essedum.openJobLogs",

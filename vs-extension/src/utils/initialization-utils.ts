@@ -208,8 +208,8 @@ export async function initializePipelineServices(
         }
 
         // Create pipeline services
-        const pipelineService = new PipelineService(context);
-        const pipelineAgentService = new PipelineAgentService(context);
+        const pipelineService = new PipelineService(context, authService);
+        const pipelineAgentService = new PipelineAgentService(context, authService);
 
         // Create pipeline providers
         const pipelineCardsProvider = new PipelineCardsProvider(
@@ -247,8 +247,8 @@ export async function initializePipelineServices(
         logger.warn(MSG.PIPELINE.INIT_FAILED, error);
 
         // Fallback: create services without authentication
-        const pipelineService = new PipelineService(context);
-        const pipelineAgentService = new PipelineAgentService(context);
+        const pipelineService = new PipelineService(context, authService);
+        const pipelineAgentService = new PipelineAgentService(context, authService);
 
         const pipelineCardsProvider = new PipelineCardsProvider(
             context,

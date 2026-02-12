@@ -20,6 +20,7 @@ import { STORAGE_KEYS } from "../constants/extension-constants";
 import { configureSSLEnvironment } from "../utils/ssl-config.util";
 import { ProjectInfo, RoleInfo } from '../interfaces/pipeline-agent.interface';
 import * as ExtensionUtils from '../utils/extension-utils';
+import { KeycloakAuthService } from '../auth/services/keycloak-auth.service';
 
 const logger = ExtensionUtils.createLogger('PipelineAgentService');
 
@@ -49,6 +50,7 @@ type RetryOptions = {
 
 export class PipelineAgentService {
   private context: vscode.ExtensionContext;
+  private authService?: KeycloakAuthService;
   private _token: string = '';
   private _project: ProjectInfo | undefined;
   private _role: RoleInfo | undefined;
@@ -77,8 +79,9 @@ export class PipelineAgentService {
     return getApiEndpoints();
   }
 
-  constructor(context: vscode.ExtensionContext, debug: boolean = false) {
+  constructor(context: vscode.ExtensionContext, authService?: KeycloakAuthService, debug: boolean = false) {
     this.context = context;
+    this.authService = authService;
     this.debug = debug;
     // Load auth data from storage
     this.refreshAuthData();
@@ -125,7 +128,17 @@ export class PipelineAgentService {
   /**
    * Build request headers with auto-refresh of auth data
    */
-  private buildHeaders(overrides: Record<string, string> = {}): Record<string, string> {
+  private async buildHeaders(overrides: Record<string, string> = {}): Promise<Record<string, string>> {
+    // Ensure fresh token before building headers
+    if (this.authService) {
+      try {
+        this._token = await this.authService.ensureFreshToken();
+      } catch (error) {
+        logger.warn('Failed to ensure fresh token:', error);
+        // Fall back to stored token
+      }
+    }
+    
     // Always refresh auth data before building headers to get latest project/role info
     const state = this.context.globalState;
     this._token = state.get<string>(STORAGE_KEYS.ACCESS_TOKEN) || this._token;
@@ -179,17 +192,17 @@ export class PipelineAgentService {
   /**
    * Build Axios config with SSL, params merging, and AbortSignal support
    */
-  private buildAxiosConfig(
+  private async buildAxiosConfig(
     params?: HttpParams | Record<string, any>,
     overrides: Partial<AxiosRequestConfig> = {},
     signal?: AbortSignal
-  ): AxiosRequestConfig {
+  ): Promise<AxiosRequestConfig> {
     // Configure SSL based on network
     configureSSLEnvironment(this.context);
 
     const requestParams: Record<string, unknown> = params ? { ...params } : {};
 
-    const baseHeaders = this.buildHeaders();
+    const baseHeaders = await this.buildHeaders();
     const overrideHeaders = overrides.headers as Record<string, string> | undefined;
 
     // Properly merge headers
@@ -330,7 +343,7 @@ export class PipelineAgentService {
     const response = await this.requestWithRetry<number>(
       'get',
       this.API.PIPELINES_COUNT,
-      this.buildAxiosConfig(params, {}, signal)
+      await this.buildAxiosConfig(params, {}, signal)
     );
 
     return response.data ?? 0;
@@ -348,7 +361,7 @@ export class PipelineAgentService {
     const response = await this.requestWithRetry<any>(
       'get',
       this.API.PIPELINES_LIST,
-      this.buildAxiosConfig(params, {}, signal)
+      await this.buildAxiosConfig(params, {}, signal)
     );
 
     return response.data;
@@ -372,7 +385,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.STREAMING_SERVICES}/${safeName}/${safeOrg}`;
 
-    return this.requestWithRetry<any>('get', url, this.buildAxiosConfig(undefined, {}, signal));
+    return this.requestWithRetry<any>('get', url, await this.buildAxiosConfig(undefined, {}, signal));
   }
 
   /**
@@ -394,7 +407,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FILE_READ}/${safeId}/${safeOrg}`;
 
-    const config = this.buildAxiosConfig(
+    const config = await this.buildAxiosConfig(
       { file: fileName },
       { responseType: 'arraybuffer' },
       signal
@@ -436,7 +449,7 @@ export class PipelineAgentService {
       contentType: 'application/zip'
     });
 
-    const baseHeaders = this.buildHeaders();
+    const baseHeaders = await this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
 
     // Determine which agent to use based on URL protocol
@@ -445,7 +458,7 @@ export class PipelineAgentService {
       ? PipelineAgentService.httpsAgent
       : PipelineAgentService.httpAgent;
 
-    const config = this.buildAxiosConfig(
+    const config = await this.buildAxiosConfig(
       { zipFile: 'null' },
       {
         timeout: 600000, // 10 minutes for large uploads
@@ -490,7 +503,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FOLDER_LIST}/${safeId}/${safeOrg}`;
 
-    const config = this.buildAxiosConfig({}, {}, signal);
+    const config = await this.buildAxiosConfig({}, {}, signal);
 
     try {
       const response = await this.requestWithRetry<AdkFile[]>('get', url, config);
@@ -538,7 +551,7 @@ export class PipelineAgentService {
       filescript: fileContent
     }];
 
-    const config = this.buildAxiosConfig({}, {}, signal);
+    const config = await this.buildAxiosConfig({}, {}, signal);
     return this.requestWithRetry<any>('post', url, config, payload);
   }
 
@@ -561,7 +574,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FILE_DELETE}/${safeId}/${safeOrg}`;
 
-    const config = this.buildAxiosConfig({ filePath }, {}, signal);
+    const config = await this.buildAxiosConfig({ filePath }, {}, signal);
     return this.requestWithRetry<any>('delete', url, config);
   }
 
@@ -584,7 +597,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FOLDER_UPDATE}/${safeId}/${safeOrg}`;
 
-    const config = this.buildAxiosConfig({}, {}, signal);
+    const config = await this.buildAxiosConfig({}, {}, signal);
     return this.requestWithRetry<any>('post', url, config, files);
   }
 
@@ -607,7 +620,7 @@ export class PipelineAgentService {
       project: this._project?.name || this.organization,
       interfacetype: 'pipeline-agent'
     };
-    const config = this.buildAxiosConfig(queryParams, {}, signal);
+    const config = await this.buildAxiosConfig(queryParams, {}, signal);
     return this.requestWithRetry<any>('delete', url, config);
   }
 
@@ -629,7 +642,7 @@ export class PipelineAgentService {
     const safeOrg = encodeURIComponent(this.organization);
     const url = `${this.API.FOLDER_DOWNLOAD}/${safeId}/${safeOrg}`;
 
-    const config = this.buildAxiosConfig(
+    const config = await this.buildAxiosConfig(
       {},
       {
         timeout: 120000,
@@ -675,10 +688,10 @@ export class PipelineAgentService {
       contentType: 'application/json'
     });
 
-    const baseHeaders = this.buildHeaders();
+    const baseHeaders = await this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
 
-    const config = this.buildAxiosConfig(
+    const config = await this.buildAxiosConfig(
       { file: safeFile },
       {
         headers: {
@@ -714,7 +727,7 @@ export class PipelineAgentService {
       cloud_provider: 'internal'
     };
 
-    const config = this.buildAxiosConfig(params, {}, signal);
+    const config = await this.buildAxiosConfig(params, {}, signal);
     const response = await this.requestWithRetry<any>('get', url, config);
     
     // Log the response to debug
@@ -751,7 +764,7 @@ export class PipelineAgentService {
       type: 'mcpServer'
     };
 
-    const config = this.buildAxiosConfig(params, {}, signal);
+    const config = await this.buildAxiosConfig(params, {}, signal);
     const response = await this.requestWithRetry<any>('get', url, config);
     
     // Log the response to debug
@@ -763,6 +776,70 @@ export class PipelineAgentService {
     });
     
     return response?.data || [];
+  }
+
+  /**
+   * Get GitHub repository branches
+   * GET /api/github/branches?repo=owner/repo
+   * @param repoName - Repository name in format "owner/repo"
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns List of branch names
+   */
+  async getGitHubBranches(repoName: string, signal?: AbortSignal): Promise<string[]> {
+    this.refreshAuthData();
+
+    if (!repoName || !repoName.includes('/')) {
+      throw new ServiceError('Invalid repository name. Format should be "owner/repo"', 'ERR_INVALID_PARAMS');
+    }
+
+    const url = `${this.API.GITHUB_BRANCHES}`;
+    const params = { repo: repoName };
+
+    logger.info(`[PipelineAgentService] Fetching GitHub branches for: ${repoName}`);
+    logger.info(`[PipelineAgentService] URL: ${url}?repo=${repoName}`);
+
+    const config = await this.buildAxiosConfig(params, {}, signal);
+    const response = await this.requestWithRetry<any>('get', url, config);
+
+    logger.info('[PipelineAgentService] GitHub branches response:', {
+      branches: response?.data,
+      count: Array.isArray(response?.data) ? response.data.length : 0
+    });
+
+    return response?.data || [];
+  }
+
+  /**
+   * Pull files from GitHub repository
+   * POST /api/aip/service/v1/github/pull
+   * @param request - Repository URL and branch
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns Object containing files array
+   */
+  async pullFromGitHub(request: { repoUrl: string; branch: string }, signal?: AbortSignal): Promise<{ files: any[] }> {
+    this.refreshAuthData();
+
+    if (!request.repoUrl || !request.branch) {
+      throw new ServiceError('repoUrl and branch are required', 'ERR_INVALID_PARAMS');
+    }
+
+    const url = `${this.API.GITHUB_PULL}`;
+
+    logger.info(`[PipelineAgentService] Pulling from GitHub:`, {
+      repoUrl: request.repoUrl,
+      branch: request.branch
+    });
+    logger.info(`[PipelineAgentService] URL: ${url}`);
+
+    const config = await this.buildAxiosConfig({}, {}, signal);
+    const response = await this.requestWithRetry<any>('post', url, config, request);
+
+    logger.info('[PipelineAgentService] GitHub pull response:', {
+      filesCount: response?.data?.files?.length || 0,
+      hasFiles: !!response?.data?.files
+    });
+
+    return response?.data || { files: [] };
   }
 
 }

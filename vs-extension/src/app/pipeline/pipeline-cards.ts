@@ -172,6 +172,42 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     /**
+     * Ensures we have a fresh, valid token before making API calls
+     * Proactively refreshes the token if expired or about to expire
+     * @returns true if token is valid/refreshed, false if authentication failed
+     */
+    private async ensureValidToken(): Promise<boolean> {
+        if (!this._authService) {
+            logger.warn('No auth service available, cannot validate token');
+            return !!this._token;
+        }
+
+        try {
+            // Use the auth service's ensureFreshToken method which handles refresh automatically
+            const freshToken = await this._authService.ensureFreshToken();
+            
+            // Update our token if it was refreshed
+            if (freshToken !== this._token) {
+                logger.info('Token was refreshed, updating local token');
+                this.updateToken(freshToken);
+            }
+            
+            return true;
+        } catch (error: any) {
+            logger.error('Failed to ensure valid token:', error);
+            
+            // If token validation fails, user needs to re-authenticate
+            if (error.message && (error.message.includes('Not authenticated') || error.message.includes('Session expired'))) {
+                this._isAuthenticated = false;
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                await this.showAuthenticationRequired();
+            }
+            
+            return false;
+        }
+    }
+
+    /**
      * Handle external token update (called when token is updated outside this component)
      * @param token - New authentication token
      */
@@ -331,6 +367,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
                         } catch (error: any) {
                             console.error('Error executing fresh authentication:', error);
+                            logger.error('Fresh authentication error details:', {
+                                message: error.message,
+                                stack: error.stack,
+                                authServiceAvailable: !!this._authService
+                            });
 
                             // Show error state in webview
                             if (this._view) {
@@ -340,9 +381,29 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                 });
                             }
 
+                            // Provide more specific error messages
+                            let errorMsg = 'Authentication failed. ';
+                            if (!this._authService) {
+                                errorMsg += 'Authentication service not initialized. Try reloading the window (Ctrl+R).';
+                            } else if (error.message?.includes('token')) {
+                                errorMsg += 'Token refresh failed. Please try logging in again.';
+                            } else if (error.message?.includes('network') || error.message?.includes('ECONNREFUSED')) {
+                                errorMsg += 'Cannot connect to authentication server. Check your network connection.';
+                            } else {
+                                errorMsg += error.message || 'Unknown error occurred.';
+                            }
+
                             vscode.window.showErrorMessage(
-                                `Fresh authentication failed: ${error.message || 'Unknown error'}. Please try using Command Palette (Ctrl+Shift+P) and search for "Essedum: Login".`
-                            );
+                                errorMsg,
+                                'Try Command Palette',
+                                'Reload Window'
+                            ).then(selection => {
+                                if (selection === 'Try Command Palette') {
+                                    vscode.commands.executeCommand('workbench.action.showCommands');
+                                } else if (selection === 'Reload Window') {
+                                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                                }
+                            });
                         }
                         break;
                 }
@@ -384,14 +445,19 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         } else {
             logger.info('Not authenticated, showing authentication required page');
             // Show authentication required page
-            this.showAuthenticationRequired();
+            await this.showAuthenticationRequired();
         }
     }
 
     /**
      * Show authentication required page
      */
-    private showAuthenticationRequired(): void {
+    private async showAuthenticationRequired(): Promise<void> {
+        // Clear authentication state and update VS Code context
+        this._isAuthenticated = false;
+        await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+        logger.info('Authentication context updated to false - logout button will be hidden');
+        
         if (this._view) {
             this._view.webview.html = this.getAuthenticationRequiredHtml();
         }
@@ -518,28 +584,20 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     const loginBtn = document.getElementById('loginBtn');
                     const errorMessage = document.getElementById('errorMessage');
                     
-                    try {
-                        // Hide any previous errors
-                        errorMessage.style.display = 'none';
-                        
-                        // Update button state
-                        loginBtn.textContent = '🔄 Authenticating...';
-                        loginBtn.disabled = true;
-                        
-                        logger.info('Starting authentication flow...');
-                        
-                        // Trigger the login command
-                        vscode.postMessage({ 
-                            command: 'triggerLogin',
-                            timestamp: new Date().toISOString()
-                        });
-                       
-                        
-                    } catch (error) {
-                        console.error('Error starting authentication:', error);
-                        showError('Failed to start authentication. Please try using the Command Palette.');
-                        resetButton();
-                    }
+                    // Hide any previous errors
+                    errorMessage.style.display = 'none';
+                    
+                    // Update button state
+                    loginBtn.textContent = '🔄 Authenticating...';
+                    loginBtn.disabled = true;
+                    
+                    console.log('Starting authentication flow...');
+                    
+                    // Trigger the login command
+                    vscode.postMessage({ 
+                        command: 'triggerLogin',
+                        timestamp: new Date().toISOString()
+                    });
                 }
                 
                 function showError(message) {
@@ -606,7 +664,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 this.updateToken(contextToken);
             } else {
                 logger.info('No valid token found, showing authentication required page');
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             }
         }
@@ -614,7 +672,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         // Double-check we're now authenticated
         if (!this._isAuthenticated) {
             logger.info('Still not authenticated after checking context, showing auth page');
-            this.showAuthenticationRequired();
+            await this.showAuthenticationRequired();
             return;
         }
 
@@ -629,7 +687,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     if (!authStatus.isAuthenticated) {
                         logger.info('Token expired, showing authentication required page');
                         this._isAuthenticated = false;
-                        this.showAuthenticationRequired();
+                        await this.showAuthenticationRequired();
                         return;
                     }
 
@@ -765,7 +823,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 });
 
                 // Show authentication required page
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             } else if (error.response && error.response.status === 401) {
                 console.error('Unauthorized (401) - authentication required');
@@ -781,7 +839,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 });
 
                 // Show authentication required page
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             }
 
@@ -828,6 +886,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
             vscode.window.showErrorMessage('Pipeline not found');
+            return;
+        }
+
+        // Ensure we have a valid token before making API calls
+        const tokenValid = await this.ensureValidToken();
+        if (!tokenValid) {
+            logger.error('Cannot view script details: token validation failed');
+            vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
             return;
         }
 
@@ -2304,6 +2370,14 @@ if __name__ == "__main__":
     // Save script functionality - uploads modified script content 
     private async saveScript(cardId: string, fileName: string, content: string): Promise<void> {
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot save script: token validation failed');
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                return;
+            }
+
             logger.info('💾 Saving script:', fileName);
 
             // Find the pipeline by cardId
@@ -2540,6 +2614,14 @@ if __name__ == "__main__":
             return;
         }
 
+        // Ensure we have a valid token before making API calls
+        const tokenValid = await this.ensureValidToken();
+        if (!tokenValid) {
+            logger.error('Cannot run pipeline: token validation failed');
+            vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+            return;
+        }
+
         const pipelineName = card.alias || card.name;
 
         logger.info('🚀 runPipelineScript called for:', pipelineName);
@@ -2681,6 +2763,13 @@ if __name__ == "__main__":
         }
 
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot open job logs: token validation failed');
+                return;
+            }
+
             // Create and show the job logs viewer with table interface
             const jobLogsViewer = new JobLogsViewer(
                 this._context,
@@ -2845,6 +2934,14 @@ if __name__ == "__main__":
 
     private async generatePipelineScripts(pipelineName: string): Promise<void> {
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot generate scripts: token validation failed');
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                return;
+            }
+
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Generating scripts for ${pipelineName}...`,
@@ -2986,15 +3083,20 @@ if __name__ == "__main__":
             await vscode.commands.executeCommand('essedum.logout');
             logger.info('Logout command executed');
 
+            // Clear internal state
+            this._token = '';
+            this._isAuthenticated = false;
+            this.cards = [];
+
+            // Update authentication context to hide logout button
+            await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+            logger.info('Authentication context cleared - logout button will be hidden');
+
             // Update the webview to show logout page
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
                 logger.info('Logout HTML displayed');
             }
-
-            // Clear internal state
-            this._token = '';
-            this.cards = [];
 
             vscode.window.showInformationMessage('Logged out successfully');
 
@@ -3002,7 +3104,11 @@ if __name__ == "__main__":
             console.error('Error during logout:', error);
             vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
 
-            // Still try to show logout page even if there was an error
+            // Still try to clear state and show logout page even if there was an error
+            this._token = '';
+            this._isAuthenticated = false;
+            await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+            
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
             }

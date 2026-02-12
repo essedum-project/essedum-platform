@@ -258,6 +258,10 @@ function registerCommands(): void {
             id: AppConstants.COMMANDS.CHECK_AUTH, handler: () =>
                 CommandHandlers.handleCheckAuth(authService)
         },
+        {
+            id: 'essedum.showSessionInfo', handler: () =>
+                authService?.showSessionInfo()
+        },
 
         // Navigation
         {

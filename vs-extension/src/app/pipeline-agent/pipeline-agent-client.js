@@ -66,7 +66,7 @@ class PipelineAgentClient {
         this.detailsTitle = document.getElementById('detailsTitle');
         this.pipelineInfo = document.getElementById('pipelineInfo');
         this.openCopilotBtn = document.getElementById('openCopilotBtn');
-        this.uploadAdkBtn = document.getElementById('uploadAdkBtn');
+        this.uploadFromGithubBtn = document.getElementById('uploadFromGithubBtn');
         this.viewAdkBtn = document.getElementById('viewAdkBtn');
         this.downloadAdkBtn = document.getElementById('downloadAdkBtn');
         this.refreshJsonBtn = document.getElementById('refreshJsonBtn');
@@ -100,7 +100,7 @@ class PipelineAgentClient {
 
         // Detail view - Action buttons
         this.openCopilotBtn?.addEventListener('click', () => this.handleOpenCopilot());
-        this.uploadAdkBtn?.addEventListener('click', () => this.handleUploadAdk());
+        this.uploadFromGithubBtn?.addEventListener('click', () => this.handleUploadFromGitHub());
         this.viewAdkBtn?.addEventListener('click', () => this.handleViewAdk());
         this.downloadAdkBtn?.addEventListener('click', () => this.handleDownloadAdk());
         this.refreshJsonBtn?.addEventListener('click', () => this.handleRefreshJson());
@@ -355,11 +355,11 @@ class PipelineAgentClient {
         }
     }
 
-    handleUploadAdk() {
+    handleUploadFromGitHub() {
         if (this.currentAgentData) {
-            console.log('[Pipeline Agent Client] Uploading ADK for:', this.currentAgentData.pipelineId);
+            console.log('[Pipeline Agent Client] Uploading from GitHub for:', this.currentAgentData.pipelineId);
             this.vscode.postMessage({
-                command: this.constants.COMMANDS_TO_EXTENSION.UPLOAD_ADK,
+                command: this.constants.COMMANDS_TO_EXTENSION.UPLOAD_FROM_GITHUB,
                 pipelineId: this.currentAgentData.pipelineId
             });
         }
@@ -400,14 +400,14 @@ class PipelineAgentClient {
         if (this.openCopilotBtn) {
             this.openCopilotBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
         }
-        if (this.uploadAdkBtn) {
-            this.uploadAdkBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
+        if (this.uploadFromGithubBtn) {
+            this.uploadFromGithubBtn.style.display = message.hasFiles ? DISP.NONE : DISP.INLINE_BLOCK;
         }
 
         if (message.hasFiles) {
             console.log(`[Pipeline Agent Client] Edit/Download buttons shown (${message.fileCount} files available)`);
         } else {
-            console.log('[Pipeline Agent Client] Open Copilot/Upload Code buttons shown (no files available)');
+            console.log('[Pipeline Agent Client] Open Copilot/Upload from GitHub buttons shown (no files available)');
         }
     }
 
@@ -453,9 +453,9 @@ class PipelineAgentClient {
     }
 
     enableUploadButton() {
-        if (this.uploadAdkBtn) {
-            this.uploadAdkBtn.disabled = false;
-            this.uploadAdkBtn.style.opacity = '1';
+        if (this.uploadFromGithubBtn) {
+            this.uploadFromGithubBtn.disabled = false;
+            this.uploadFromGithubBtn.style.opacity = '1';
         }
     }
 
