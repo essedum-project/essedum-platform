@@ -650,7 +650,7 @@ export class DeploymentFormComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('Branch deployment result:', result);
-        this.service.message('Branch deployment initiated successfully', 'success');
+        // this.service.message('Branch deployment initiated successfully', 'success');
       }
     });
   }
