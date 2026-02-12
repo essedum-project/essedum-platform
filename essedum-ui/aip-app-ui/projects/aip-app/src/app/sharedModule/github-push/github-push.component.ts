@@ -99,7 +99,7 @@ export class GitHubPushComponent implements OnInit {
    * Get modal title based on mode
    */
   getModalTitle(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Upload from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Clone Repository from GitHub';
   }
 
   /**
@@ -551,7 +551,7 @@ export class GitHubPushComponent implements OnInit {
       },
       (error) => {
         const errorMessage = error?.details || 'There is no saved source branch configuration';
-        this.service.message(errorMessage, 'warning');
+        console.log(errorMessage);
       }
     );
   }
