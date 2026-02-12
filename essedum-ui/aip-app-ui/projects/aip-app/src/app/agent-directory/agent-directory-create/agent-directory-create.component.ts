@@ -186,7 +186,7 @@ export class AgentDirectoryCreateComponent implements OnInit {
       (k >= 65 && k <= 90) ||
       (k >= 97 && k <= 122) ||
       (k >= 48 && k <= 57) ||
-      [8, 9, 13, 16, 17, 20, 95].indexOf(k) > -1
+      [8, 9, 13, 16, 17, 20, 32, 95].indexOf(k) > -1
     );
   }
 

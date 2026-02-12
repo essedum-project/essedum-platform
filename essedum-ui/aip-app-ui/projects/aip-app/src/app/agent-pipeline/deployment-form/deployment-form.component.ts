@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
 import { GitHubService } from '../../sharedModule/services/github.service';
@@ -636,7 +636,7 @@ export class DeploymentFormComponent implements OnInit {
   openBranchSelectionDialog(): void {
     const selectedEnvironment = this.overviewForm.get('deploymentEnvironment')?.value || '';
     const dialogRef = this.dialog.open(BranchSelectionDialogComponent, {
-      width: '550px',
+      width: '495px',
       maxWidth: '90vw',
       disableClose: true,
       panelClass: 'branch-deployment-dialog',
@@ -688,6 +688,8 @@ export class BranchSelectionDialogComponent implements OnInit {
   isLoadingSourceBranches = false;
   isLoadingReviewers = false;
   availableReviewers: Array<{ id: string; name: string }> = []; // Will be populated from API
+  filteredReviewers: Array<{ id: string; name: string }> = []; // Filtered list for search
+  reviewerFilterCtrl = new FormControl('');
   sourceRepoName = ''; // Will be set dynamically with owner/repo format
   gitUsername: any;
   gitSelectedRepo: any;
@@ -703,9 +705,15 @@ export class BranchSelectionDialogComponent implements OnInit {
     private githubService: GitHubService
   ) {
     this.branchForm = this.fb.group({
+      title: ['', Validators.required], // PR title
       sourceBranch: ['', Validators.required],
       destinationBranch: ['', Validators.required],
-      reviewer: [''] // Optional - will be populated from API
+      reviewer: [[]] // Optional - array for multiple reviewers
+    });
+    
+    // Setup reviewer search filter
+    this.reviewerFilterCtrl.valueChanges.subscribe(() => {
+      this.filterReviewers();
     });
   }
 
@@ -723,20 +731,16 @@ export class BranchSelectionDialogComponent implements OnInit {
     this.filteredDestinationBranches = [];
     this.githubService.getBranches(this.gitSelectedRepo).subscribe(
       (branches) => {
+        // Filter source branches - exclude environment branches
         this.availableBranches = branches.filter(branch => {
           const lowerBranch = branch.toLowerCase();
           return !lowerBranch.includes('uat') && 
                  !lowerBranch.includes('staging') && 
                  !lowerBranch.includes('production');
         });
-        if (this.environment) {
-          const envPrefix = this.environment.toLowerCase();
-          this.filteredDestinationBranches = branches.filter(branch => 
-            branch.toLowerCase().includes(envPrefix)
-          );
-        } else {
-          this.filteredDestinationBranches = branches;
-        }
+        
+        // Show ALL branches in destination dropdown (no filtering)
+        this.filteredDestinationBranches = branches;
         
         this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
@@ -774,6 +778,11 @@ export class BranchSelectionDialogComponent implements OnInit {
             });
           }
         }
+        
+        // Load collaborators/reviewers using the repo name from git config
+        if (this.gitSelectedRepo) {
+          this.loadCollaborators(this.gitSelectedRepo);
+        }
       },
       (error) => {
         if (this.gitSelectedBranch) {
@@ -785,6 +794,57 @@ export class BranchSelectionDialogComponent implements OnInit {
           this.service.message(this.ERROR_MSG_GITHUB , 'error');
         }
       }
+    );
+  }
+
+  /**
+   * Load collaborators/reviewers for the repository
+   */
+  loadCollaborators(repo: string): void {
+    this.isLoadingReviewers = true;
+    this.availableReviewers = [];
+    
+    this.githubService.getCollaborators(repo).subscribe(
+      (response: any) => {
+        // Handle different response formats from the API
+        if (Array.isArray(response)) {
+          // Map response to ensure correct format { id, name }
+          this.availableReviewers = response.map((collaborator: any) => {
+            // Handle different possible field names in the API response
+            return {
+              id: collaborator.id || collaborator.login || collaborator.username || collaborator.name,
+              name: collaborator.name || collaborator.login || collaborator.username || collaborator.id
+            };
+          });
+        } else {
+          console.warn('Unexpected collaborators response format:', response);
+          this.availableReviewers = [];
+        }
+        
+        console.log('Loaded collaborators:', this.availableReviewers);
+        this.filteredReviewers = [...this.availableReviewers]; // Initialize filtered list
+        this.isLoadingReviewers = false;
+      },
+      (error) => {
+        console.error('Error loading collaborators:', error);
+        this.service.message('Failed to load reviewers. Please try again.', 'warning');
+        this.isLoadingReviewers = false;
+      }
+    );
+  }
+
+  /**
+   * Filter reviewers based on search input
+   */
+  filterReviewers(): void {
+    const search = this.reviewerFilterCtrl.value?.toLowerCase() || '';
+    if (!search) {
+      this.filteredReviewers = [...this.availableReviewers];
+      return;
+    }
+    this.filteredReviewers = this.availableReviewers.filter(reviewer =>
+      reviewer.name.toLowerCase().includes(search) || 
+      reviewer.id.toLowerCase().includes(search)
     );
   }
 
@@ -848,39 +908,40 @@ export class BranchSelectionDialogComponent implements OnInit {
   onDeploy(): void {
     if (this.branchForm.valid) {
       this.isDeploying = true;
+      const title = this.branchForm.get('title')?.value;
       const sourceBranch = this.branchForm.get('sourceBranch')?.value;
       const destinationBranch = this.branchForm.get('destinationBranch')?.value;
+      const reviewerIds = this.branchForm.get('reviewer')?.value || [];
       const currentUser = sessionStorage.getItem('username') || 'demo';
       
-      // Prepare branch-to-branch push request
-      const branchToBranchRequest = {
+      // Prepare pull request data
+      const pullRequestData: any = {
         repoName: this.gitSelectedRepo,
+        title: title,
         sourceBranch: sourceBranch,
-        destinationBranch: destinationBranch,
-        commitMessage: `Deployment from ${sourceBranch} to ${destinationBranch} - ${new Date().toISOString()}`,
-        createBranchIfNotExists: true,
-        forcePush: true
+        targetBranch: destinationBranch
       };
 
-      this.githubService.pushBranchToBranch(branchToBranchRequest).subscribe({
-        next: (pushResponse) => {
-          console.log('Branch-to-branch push successful:', pushResponse);
-          if (pushResponse.success) {
-            const successMsg = pushResponse.branchCreated 
-              ? `Branch '${destinationBranch}' created and code deployed from '${sourceBranch}'`
-              : `Code successfully deployed from '${sourceBranch}' to '${destinationBranch}'`;
-            this.service.message(successMsg, 'success');
-          } else {
-            this.service.message('Deployment completed with warnings: ' + pushResponse.message, 'warning');
-          }
+      // Add reviewers if selected (send as array)
+      if (reviewerIds && reviewerIds.length > 0) {
+        pullRequestData.reviewers = reviewerIds;
+      }
+
+      // Create pull request
+      this.githubService.createPullRequest(pullRequestData).subscribe({
+        next: (prResponse) => {
+          console.log('Pull request created successfully:', prResponse);
+          const successMsg = prResponse.message || `Pull request created successfully from '${sourceBranch}' to '${destinationBranch}'`;
+          this.service.message(successMsg, 'success');
           
-          // Save git config after successful push
+          // Save git config after successful PR creation
           this.saveGitConfig(sourceBranch, destinationBranch);
         },
         error: (error) => {
           this.isDeploying = false;
-          const errorMsg = error?.error?.message || error?.message || (typeof error?.error === 'string' ? error.error : 'Branch deployment failed');
-          this.service.message('Deployment failed: ' + errorMsg, 'error');
+          const errorMsg = error?.details || error?.error?.message || error?.message || 'Pull request creation failed';
+          this.service.message('Failed to create pull request: ' + errorMsg, 'error');
+          console.error('Pull request creation error:', error);
         }
       });
     }
