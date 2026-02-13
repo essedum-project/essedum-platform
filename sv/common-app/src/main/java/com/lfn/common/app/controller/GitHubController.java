@@ -4,6 +4,7 @@ import com.lfn.common.app.exception.GitHubAuthenticationException;
 import com.lfn.common.app.service.GitHubIntegrationService;
 import com.lfn.common.app.service.GitHubOAuthService;
 import com.lfn.common.app.web.rest.dto.*;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 @Slf4j
@@ -62,6 +62,55 @@ public class GitHubController {
         throw new GitHubAuthenticationException("No GitHub authentication found. Please login with GitHub OAuth or provide a GitHub PAT token.");
     }
 
+    /**
+     * Extract user-friendly error message from GitHub's error JSON response
+     *
+     * @param rawErrorMessage The raw error message from GitHub (JSON format)
+     * @return User-friendly error message
+     */
+    private String extractGitHubErrorMessage(String rawErrorMessage) {
+        try {
+            // Try to parse as JSON
+            if (rawErrorMessage != null && rawErrorMessage.trim().startsWith("{")) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(rawErrorMessage);
+
+                // Check if there are specific error messages in the "errors" array
+                if (rootNode.has("errors") && rootNode.get("errors").isArray()) {
+                    com.fasterxml.jackson.databind.JsonNode errorsArray = rootNode.get("errors");
+                    if (errorsArray.size() > 0) {
+                        // Extract all error messages from the errors array
+                        StringBuilder errorMessages = new StringBuilder();
+                        for (com.fasterxml.jackson.databind.JsonNode errorNode : errorsArray) {
+                            if (errorNode.has("message")) {
+                                if (errorMessages.length() > 0) {
+                                    errorMessages.append(" ");
+                                }
+                                errorMessages.append(errorNode.get("message").asText());
+                            }
+                        }
+                        if (errorMessages.length() > 0) {
+                            return errorMessages.toString();
+                        }
+                    }
+                }
+
+                // Fall back to the main "message" field
+                if (rootNode.has("message")) {
+                    return rootNode.get("message").asText();
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Could not parse GitHub error message as JSON: {}", e.getMessage());
+        }
+
+        // If parsing fails, return the raw message (cleaned up if it's too long)
+        if (rawErrorMessage != null && rawErrorMessage.length() > 200) {
+            return rawErrorMessage.substring(0, 197) + "...";
+        }
+        return rawErrorMessage != null ? rawErrorMessage : "An error occurred";
+    }
+
     @GetMapping("/repos")
     public ResponseEntity<List<GitHubRepoInfo>> getRepositories(
             @RequestHeader(value = "Authorization", required = false) String token,
@@ -77,6 +126,20 @@ public class GitHubController {
             HttpSession session) throws Exception {
         String cleanToken = getToken(token, session);
         return ResponseEntity.ok(gitHubIntegrationService.fetchBranches(cleanToken, repo));
+    }
+
+    @GetMapping("/collaborators")
+    public ResponseEntity<List<GitHubCollaboratorInfo>> getCollaborators(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam("repo") String repo,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+            return ResponseEntity.ok(gitHubIntegrationService.fetchRepositoryCollaborators(cleanToken, repo));
+        } catch (Exception e) {
+            log.error("Error fetching collaborators for repo: {}", repo, e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/push")
@@ -167,6 +230,76 @@ public class GitHubController {
                 .repoName(request.getRepoName())
                 .sourceBranch(request.getSourceBranch())
                 .destinationBranch(request.getDestinationBranch())
+                .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/create-pull-request")
+    public ResponseEntity<CreatePullRequestResponse> createPullRequest(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "X-GitHub-Username", required = false) String username,
+            @RequestBody CreatePullRequestRequest request,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(token, session);
+
+            // Get username from OAuth if not provided
+            if (username == null || username.isEmpty()) {
+                username = oauthService.getGitHubUsername(cleanToken);
+            }
+
+            CreatePullRequestResponse response = gitHubIntegrationService.createPullRequest(request, cleanToken, username);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in pull request creation", e);
+            CreatePullRequestResponse errorResponse = CreatePullRequestResponse.builder()
+                .success(false)
+                .message(e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .build();
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (org.kohsuke.github.HttpException e) {
+            // GitHub API returned an error (e.g., PR already exists, validation failed)
+            log.error("GitHub API error creating pull request: HTTP {} - {}", e.getResponseCode(), e.getMessage(), e);
+
+            // Parse GitHub error response to extract user-friendly message
+            String rawErrorMessage = e.getMessage();
+            int statusCode = e.getResponseCode();
+            String userFriendlyMessage = extractGitHubErrorMessage(rawErrorMessage);
+
+            CreatePullRequestResponse errorResponse = CreatePullRequestResponse.builder()
+                .success(false)
+                .message(userFriendlyMessage)
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .details("GitHub API returned HTTP " + statusCode + ". " +
+                        (statusCode == 422 ? "The request was valid but could not be processed." :
+                         statusCode == 404 ? "Repository or branch not found." :
+                         statusCode == 401 ? "Authentication failed." :
+                         statusCode == 403 ? "Access forbidden." : "Request failed."))
+                .build();
+
+            // Return appropriate HTTP status based on GitHub's response code
+            if (statusCode == 422) {
+                return ResponseEntity.unprocessableEntity().body(errorResponse);
+            } else if (statusCode >= 400 && statusCode < 500) {
+                return ResponseEntity.status(statusCode).body(errorResponse);
+            } else {
+                return ResponseEntity.internalServerError().body(errorResponse);
+            }
+        } catch (Exception e) {
+            log.error("Error creating pull request", e);
+            CreatePullRequestResponse errorResponse = CreatePullRequestResponse.builder()
+                .success(false)
+                .message("Failed to create pull request: " + e.getMessage())
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .details(e.getMessage())
                 .build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }

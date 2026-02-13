@@ -8,7 +8,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class PlaygroundTabComponent {
   @Input() pipelineMode: 'agent' | 'mcp' = 'agent';
   @Input() isRunningAndDeploying: boolean = false;
+  @Input() isDeletingDeployment: boolean = false;
   @Input() canRunAndDeploy: boolean = false;
+  @Input() canDeleteDeployment: boolean = false;
   @Input() canOpenPlayground: boolean = false;
   @Input() deploymentStatusMessage: string = '';
   @Input() deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
@@ -20,10 +22,15 @@ export class PlaygroundTabComponent {
   @Input() deploymentEnvironment: string = '';
   
   @Output() runAndDeployClick = new EventEmitter<void>();
+  @Output() deleteDeploymentClick = new EventEmitter<void>();
   @Output() openPlaygroundClick = new EventEmitter<void>();
 
   onRunAndDeploy(): void {
     this.runAndDeployClick.emit();
+  }
+
+  onDeleteDeployment(): void {
+    this.deleteDeploymentClick.emit();
   }
 
   onOpenPlayground(): void {

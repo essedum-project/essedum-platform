@@ -1,0 +1,83 @@
+<div mat-dialog-title style="display: flex; justify-content: space-between; align-items: center;">
+  <h2 style="color: #333; font-size: 20px; font-weight: 600; margin: 0;">Create Pull Request{{ environment ? ' - ' + environment : '' }}</h2>
+  <button type="button" (click)="onCancel()" [disabled]="isDeploying" 
+    style="background: none; border: none; cursor: pointer; padding: 4px; color: #666; font-size: 20px; line-height: 1;">
+    <mat-icon style="font-size: 20px; width: 20px; height: 20px;">close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content style="min-height: 150px; padding: 16px; overflow: visible;">
+  <div *ngIf="isLoadingBranches" style="text-align: center; padding: 30px;">
+    <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
+    <p style="margin-top: 12px; color: #666;">Loading branches from {{ sourceRepoName || 'repository' }}...</p>
+  </div>
+  
+  <form [formGroup]="branchForm" *ngIf="!isLoadingBranches" style="margin-top: -8px;">
+    <div style="margin-bottom: -8px;">
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Pull Request Title</mat-label>
+        <input matInput formControlName="title" placeholder="Enter PR title..." />
+        <mat-error class="ml-18" *ngIf="branchForm.get('title')?.hasError('required')">
+          Pull request title is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div style="margin-bottom: -8px;">
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Source Branch</mat-label>
+        <input matInput formControlName="sourceBranch" placeholder="Loading source branch..." readonly />
+        <mat-error class="ml-18" *ngIf="branchForm.get('sourceBranch')?.hasError('required')">
+          Source branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div style="margin-bottom: -8px;">
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Destination Branch</mat-label>
+        <mat-select formControlName="destinationBranch" placeholder="Select Destination Branch" class="mat-style-select">
+          <mat-option *ngIf="isLoadingSourceBranches">
+            <span>Loading branches...</span>
+          </mat-option>
+          <mat-option *ngFor="let branch of filteredDestinationBranches" [value]="branch">
+            {{ branch }}
+          </mat-option>
+        </mat-select>
+        <mat-error class="ml-18" *ngIf="branchForm.get('destinationBranch')?.hasError('required')">
+          Destination branch is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div>
+      <mat-form-field appearance="fill" class="lfx-form-field" style="width: 100%;" floatLabel="always">
+        <mat-label>Select Reviewers</mat-label>
+        <mat-select formControlName="reviewer" placeholder="Select Reviewers" class="mat-style-select" 
+                    [disabled]="isLoadingReviewers" multiple>
+          <mat-option>
+            <ngx-mat-select-search 
+              [formControl]="reviewerFilterCtrl"
+              placeholderLabel="Search reviewers..."
+              noEntriesFoundLabel="No reviewers found">
+            </ngx-mat-select-search>
+          </mat-option>
+          <mat-option *ngIf="isLoadingReviewers">
+            <span>Loading reviewers...</span>
+          </mat-option>
+          <mat-option *ngFor="let reviewer of filteredReviewers" [value]="reviewer.id">
+            {{ reviewer.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end" style="border-top: 1px solid #e0e0e0;">
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onDeploy()" 
+    [disabled]="!branchForm.valid || isDeploying || isLoadingBranches">
+    {{ isDeploying ? 'Creating...' : 'Create Pull Request' }}
+  </button>
+</mat-dialog-actions>

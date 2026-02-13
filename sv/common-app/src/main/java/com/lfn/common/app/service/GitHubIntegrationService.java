@@ -65,6 +65,34 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Centralized exception handler that properly handles GitHub API exceptions
+     * Re-throws HttpException for proper status code handling in controller
+     * Wraps other exceptions in GitOperationException
+     *
+     * @param e The exception to handle
+     * @param operation Description of the operation that failed
+     * @param context Additional context (e.g., repo name, branch name)
+     * @throws Exception Re-throws HttpException or wraps in GitOperationException
+     */
+    private void handleGitHubException(Exception e, String operation, String context) throws Exception {
+        if (e instanceof IllegalArgumentException) {
+            // Validation errors - re-throw as-is
+            log.error("Validation error in {}: {}", operation, e.getMessage());
+            throw e;
+        } else if (e instanceof org.kohsuke.github.HttpException) {
+            // GitHub API errors - re-throw to preserve status code
+            org.kohsuke.github.HttpException httpEx = (org.kohsuke.github.HttpException) e;
+            log.error("GitHub API error in {} ({}): HTTP {} - {}",
+                operation, context, httpEx.getResponseCode(), httpEx.getMessage());
+            throw httpEx;
+        } else {
+            // Other exceptions - wrap in GitOperationException
+            log.error("Error in {} ({}): {}", operation, context, e.getMessage(), e);
+            throw new GitOperationException("Failed to " + operation + ": " + context, e);
+        }
+    }
+
+    /**
      * Create an insecure OkHttpClient that bypasses SSL verification
      * WARNING: Use only for development/testing
      */
@@ -122,8 +150,8 @@ public class GitHubIntegrationService {
                 })
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error fetching repositories: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to fetch repositories", e);
+            handleGitHubException(e, "fetch repositories", "");
+            return null; // Never reached, but needed for compilation
         }
     }
 
@@ -145,8 +173,57 @@ public class GitHubIntegrationService {
                 .sorted()
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error fetching branches for repo {}: {}", repoName, e.getMessage(), e);
-            throw new GitOperationException("Failed to fetch branches for repository: " + repoName, e);
+            handleGitHubException(e, "fetch branches", repoName);
+            return null; // Never reached
+        }
+    }
+
+    /**
+     * Fetch repository collaborators who can be added as reviewers
+     *
+     * @param token GitHub Personal Access Token
+     * @param repoName Repository name in format "owner/repo"
+     * @return List of collaborator information (username, name, avatar)
+     * @throws Exception if fetch fails
+     */
+    public List<GitHubCollaboratorInfo> fetchRepositoryCollaborators(String token, String repoName) throws Exception {
+        try {
+            log.info("Fetching collaborators for repository: {}", repoName);
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(repoName);
+
+            // Get current authenticated user to exclude them from the list
+            GHUser currentUser = github.getMyself();
+            String currentUsername = currentUser.getLogin();
+            log.info("Current user: {}", currentUsername);
+
+            // Fetch collaborators (users with write/admin access)
+            List<GitHubCollaboratorInfo> collaborators = repo.getCollaborators().stream()
+                .filter(user -> !user.getLogin().equals(currentUsername)) // Exclude current user
+                .map(user -> {
+                    GitHubCollaboratorInfo info = new GitHubCollaboratorInfo();
+                    info.setLogin(user.getLogin());
+                    try {
+                        info.setName(user.getName() != null ? user.getName() : user.getLogin());
+                    } catch (Exception e) {
+                        info.setName(user.getLogin());
+                    }
+                    info.setAvatarUrl(user.getAvatarUrl());
+                    try {
+                        info.setHtmlUrl(user.getHtmlUrl().toString());
+                    } catch (Exception e) {
+                        info.setHtmlUrl("");
+                    }
+                    return info;
+                })
+                .sorted((a, b) -> a.getLogin().compareToIgnoreCase(b.getLogin()))
+                .collect(Collectors.toList());
+
+            log.info("Found {} collaborators for repository {}", collaborators.size(), repoName);
+            return collaborators;
+        } catch (Exception e) {
+            handleGitHubException(e, "fetch collaborators", repoName);
+            return null; // Never reached
         }
     }
 
@@ -197,8 +274,8 @@ public class GitHubIntegrationService {
             log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
                      request.getRepoName(), request.getBranch());
         } catch (Exception e) {
-            log.error("Error pushing to GitHub: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to push to GitHub", e);
+            handleGitHubException(e, "push to GitHub", request.getRepoName() + ":" + request.getBranch());
+            // Never reached
         }
     }
 
@@ -257,8 +334,8 @@ public class GitHubIntegrationService {
 
             return response;
         } catch (Exception e) {
-            log.error("Error pulling from GitHub: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to pull from GitHub", e);
+            handleGitHubException(e, "pull from GitHub", request.getRepoUrl() + ":" + request.getBranch());
+            return null; // Never reached
         }
     }
 
@@ -400,16 +477,148 @@ public class GitHubIntegrationService {
                 .branchCreated(false)
                 .build();
 
-        } catch (com.lfn.common.app.exception.UnauthorizedAccessException e) {
-            // Re-throw UnauthorizedAccessException as-is so Global Exception Handler can handle it properly
-            log.error("Unauthorized access in branch-to-branch push: {}", e.getMessage());
-            throw e;
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error in branch-to-branch push: {}", e.getMessage());
-            throw e;
         } catch (Exception e) {
-            log.error("Error in branch-to-branch push: {}", e.getMessage(), e);
-            throw new GitOperationException("Failed to push from branch to branch", e);
+            handleGitHubException(e, "push from branch to branch",
+                request.getRepoName() + " (" + request.getSourceBranch() + " -> " + request.getDestinationBranch() + ")");
+            return null; // Never reached
+        }
+    }
+
+    /**
+     * Create a pull request to merge code from source branch to target branch
+     *
+     * @param request Create pull request request containing repo, branches, title, reviewers, etc.
+     * @param token GitHub Personal Access Token
+     * @param username GitHub username
+     * @return CreatePullRequestResponse containing PR details and conflict information
+     * @throws Exception if pull request creation fails
+     */
+    public CreatePullRequestResponse createPullRequest(CreatePullRequestRequest request, String token, String username) throws Exception {
+        try {
+            log.info("Starting pull request creation - Repo: {}, Source: {}, Target: {}",
+                     request.getRepoName(), request.getSourceBranch(), request.getTargetBranch());
+
+            // Validate inputs
+            if (request.getRepoName() == null || request.getRepoName().isEmpty()) {
+                throw new IllegalArgumentException("Repository name is required");
+            }
+            if (request.getSourceBranch() == null || request.getSourceBranch().isEmpty()) {
+                throw new IllegalArgumentException("Source branch name is required");
+            }
+            if (request.getTargetBranch() == null || request.getTargetBranch().isEmpty()) {
+                throw new IllegalArgumentException("Target branch name is required");
+            }
+            if (request.getTitle() == null || request.getTitle().isEmpty()) {
+                throw new IllegalArgumentException("Pull request title is required");
+            }
+            if (request.getSourceBranch().equals(request.getTargetBranch())) {
+                throw new IllegalArgumentException("Source and target branches cannot be the same");
+            }
+
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(request.getRepoName());
+
+            // Verify both branches exist
+            try {
+                repo.getBranch(request.getSourceBranch());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Source branch '" + request.getSourceBranch() + "' does not exist");
+            }
+
+            try {
+                repo.getBranch(request.getTargetBranch());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Target branch '" + request.getTargetBranch() + "' does not exist");
+            }
+
+            // Initialize conflict tracking variables
+            boolean hasMergeConflicts = false;
+            List<String> conflictingFiles = null;
+
+
+            // Create the pull request
+            GHPullRequest pullRequest = repo.createPullRequest(
+                request.getTitle(),
+                request.getSourceBranch(),  // head
+                request.getTargetBranch(),  // base
+                request.getBody() != null ? request.getBody() : "",
+                true,  // maintainer can modify
+                request.isDraft()
+            );
+
+            log.info("Pull request created successfully: #{}", pullRequest.getNumber());
+
+            // Request reviewers if provided
+            List<String> reviewersRequested = null;
+            if (request.getReviewers() != null && !request.getReviewers().isEmpty()) {
+                try {
+                    log.info("Requesting reviewers: {}", request.getReviewers());
+
+                    // Request reviewers by username
+                    pullRequest.requestReviewers(
+                        request.getReviewers().stream()
+                            .map(reviewerUsername -> {
+                                try {
+                                    return github.getUser(reviewerUsername);
+                                } catch (Exception e) {
+                                    log.warn("Could not find user: {}", reviewerUsername);
+                                    return null;
+                                }
+                            })
+                            .filter(user -> user != null)
+                            .collect(Collectors.toList())
+                    );
+
+                    reviewersRequested = request.getReviewers();
+                    log.info("Reviewers requested successfully");
+                } catch (Exception e) {
+                    log.warn("Could not request reviewers: {}", e.getMessage());
+                }
+            }
+
+            // Check if PR is mergeable (this may take a moment for GitHub to compute)
+            Boolean mergeable = null;
+            String mergeableState = null;
+
+            try {
+                // Refresh to get latest mergeable status
+                pullRequest.refresh();
+                mergeable = pullRequest.getMergeable();
+                mergeableState = pullRequest.getMergeableState();
+
+                log.info("PR mergeable status: {}, state: {}", mergeable, mergeableState);
+
+                // If mergeable is false, there are conflicts
+                if (mergeable != null && !mergeable) {
+                    hasMergeConflicts = true;
+                    log.warn("Pull request has merge conflicts");
+                }
+            } catch (Exception e) {
+                log.warn("Could not determine mergeable status: {}", e.getMessage());
+            }
+
+            return CreatePullRequestResponse.builder()
+                .success(true)
+                .message("Pull request created successfully")
+                .repoName(request.getRepoName())
+                .sourceBranch(request.getSourceBranch())
+                .targetBranch(request.getTargetBranch())
+                .pullRequestNumber(pullRequest.getNumber())
+                .pullRequestUrl(pullRequest.getHtmlUrl().toString())
+                .hasMergeConflicts(hasMergeConflicts)
+                .conflictingFiles(conflictingFiles)
+                .mergeable(mergeable)
+                .mergeableState(mergeableState)
+                .reviewersRequested(reviewersRequested)
+                .details(hasMergeConflicts ?
+                    "Pull request created but has merge conflicts. Please resolve conflicts before merging." :
+                    "Pull request is ready for review")
+                .build();
+
+        } catch (Exception e) {
+            handleGitHubException(e, "create pull request",
+                request.getRepoName() + " (" + request.getSourceBranch() + " -> " + request.getTargetBranch() + ")");
+            return null; // Never reached
         }
     }
 }

@@ -265,14 +265,13 @@ PipelineAgentDetailComponent,
     AgentPipelineDashboardComponent,
     PlaygroundTabComponent,
     GitHubPushComponent,
-   
-
-    AgentComponent,AgentDirectoryComponent,AgentDirectoryViewComponent,
+    AgentDirectoryComponent,
+    AgentDirectoryViewComponent,
     AgentDirectoryCreateComponent,
-    GeneralComponent,AgentDirectoryEditComponent,
+    GeneralComponent,
+    AgentDirectoryEditComponent,
     DeploymentFormComponent,
     BranchSelectionDialogComponent
-
   ],
   imports: [
     CommonModule,

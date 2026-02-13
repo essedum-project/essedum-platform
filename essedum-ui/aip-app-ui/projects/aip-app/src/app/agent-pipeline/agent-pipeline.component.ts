@@ -220,6 +220,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   // WebSocket and Run/Deploy functionality
   private socket: Socket | null = null;
   isRunningAndDeploying = false;
+   isDeletingDeployment = false;
+  runnerServiceStatus = false; // Track runner_service_status from backend
   deploymentStatus: 'idle' | 'running' | 'success' | 'error' = 'idle';
   deploymentStatusMessage: string = ''; // User-friendly status message for deployment
   isPlaygroundEnabled = false; // Enable playground only after successful deployment
@@ -2866,10 +2868,227 @@ public class ZipController {
 
   /**
    * Check if Run and Deploy button should be enabled
-   * - Enabled when Essedum Codespace tab is visible (hasGeneratedAgent is true)
+   * - Enabled when files exist (generated or uploaded)
+   * - Disabled when currently running/deploying
+   * - Disabled when already deployed (runnerServiceStatus)
+   * - Disabled when in error state
    */
   canRunAndDeploy(): boolean {
-    return this.shouldShowRunPlaygroundButtons() && !this.isRunningAndDeploying;
+    const hasFiles = this.hasGeneratedAgent || this.hasExistingFiles();
+    return (
+      hasFiles &&
+      !this.isRunningAndDeploying &&
+      !this.runnerServiceStatus &&
+      this.deploymentStatus !== 'error'
+    );
+  }
+
+  /**
+   * Check if Delete Deployment button should be enabled
+   * - Enabled when files exist (hasGeneratedAgent or hasExistingFiles)
+   * - Enabled only when runner_service_status is true (deployed)
+   * - Disabled while deletion is in progress
+   * - Disabled when in error state
+   */
+  canDeleteDeployment(): boolean {
+    const hasFiles = this.hasGeneratedAgent || this.hasExistingFiles();
+    return (
+      hasFiles &&
+      !this.isDeletingDeployment &&
+      this.runnerServiceStatus &&
+      this.deploymentStatus !== 'error'
+    );
+  }
+
+  /**
+   * Delete the current deployment via WebSocket
+   */
+  async deleteDeployment(): Promise<void> {
+    if (!this.canDeleteDeployment() || !this.currentCname) {
+      return;
+    }
+
+    this.isDeletingDeployment = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deleting deployment...';
+    
+    // Clear console and add initial message
+    this.consoleOutput = [];
+    this.addToConsole('Starting deployment deletion process...');
+    
+    const organization = this.getOrganization();
+
+    try {
+      console.log('Initiating deployment deletion for:', this.currentCname);
+      
+      // Initialize WebSocket connection for deletion
+      await this.initializeDeleteWebSocket();
+      
+    } catch (error) {
+      console.error('Error initiating deployment deletion:', error);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to initiate deployment deletion';
+      this.addToConsole(`✗ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.service.messageService(error, 'Failed to delete deployment');
+      this.isDeletingDeployment = false;
+    }
+  }
+
+  /**
+   * Initialize WebSocket connection for deployment deletion
+   */
+  private async initializeDeleteWebSocket(): Promise<void> {
+    console.log('  STARTING DELETE WEBSOCKET INITIALIZATION PROCESS');
+    try {
+      console.log('  Step 1: Fetching datasource credentials for deletion...');
+      
+      // Fetch datasource credentials
+      const credentials = await this.fetchDatasourceCredentials();
+      console.log('  Step 2: Credentials fetched successfully for deletion');
+      
+      console.log('  Step 3: Connecting to WebSocket server for deletion...');
+      
+      const environmentUrl = this.getEnvironmentUrl();
+      console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
+      
+      this.socket = io(environmentUrl, {
+        path: '/apps/builder-service/socket.io',
+        transports: ['websocket', 'polling'],
+        timeout: 60000,
+        forceNew: true,
+        rejectUnauthorized: false,
+        withCredentials: true,
+        reconnection: false,
+      });
+      
+      // Connection successful
+      this.socket.on('connect', () => {
+        console.log('  Step 4: WebSocket connected for deletion! Preparing delete payload...');
+        
+        // Use the same deployment name as used in deployment
+        const deploymentName = this.currentDeploymentName || this.pipelineAlias?.toString() || 'DEFAULT-AGENT';
+        
+        const deletePayload = {
+          deployment_name: deploymentName,
+          namespace: 'aipns'
+        };
+        
+        console.log('  Step 5: Sending delete_deployment event with payload:', deletePayload);
+        this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
+        this.socket?.emit('delete_deployment', deletePayload);
+        console.log('  Step 6: delete_deployment event emitted to WebSocket');
+      });
+      
+      // Delete status event
+      this.socket.on('delete_status', (data: any) => {
+        console.log('Delete status received:', data);
+        this.addToConsole(`Delete Status: ${JSON.stringify(data)}`);
+        
+        if (data.status === 'SUCCESS' || data.status === 'success') {
+          this.addToConsole('✓ Deployment deleted successfully!');
+          
+          // Update streaming services to reflect deletion
+          this.updateStreamingServicesAfterDeletion();
+          
+        } else if (data.status === 'ERROR' || data.status === 'error') {
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Deployment deletion failed';
+          this.addToConsole(`✗ Deletion failed: ${data.message || data.error || 'Unknown error'}`);
+          this.service.message('Failed to delete deployment', 'error');
+          this.isDeletingDeployment = false;
+          this.disconnectWebSocket();
+        }
+      });
+      
+      // Connection error
+      this.socket.on('connect_error', (error: any) => {
+        this.addToConsole(`Connection error: ${error.message}`);
+        this.deploymentStatus = 'error';
+        this.deploymentStatusMessage = 'Connection error occurred during deletion';
+        this.isDeletingDeployment = false;
+        this.service.message('Failed to connect for deletion', 'error');
+      });
+      
+      // Disconnection
+      this.socket.on('disconnect', (reason: string) => {
+        this.addToConsole(`Disconnected: ${reason}`);
+        if (this.isDeletingDeployment) {
+          this.isDeletingDeployment = false;
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Connection lost during deletion';
+        }
+      });
+      
+    } catch (error) {
+      this.addToConsole(`Failed to initialize WebSocket for deletion: ${error}`);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to initialize deletion';
+      this.isDeletingDeployment = false;
+      throw error;
+    }
+  }
+
+  /**
+   * Update streaming services after successful deletion
+   */
+  private async updateStreamingServicesAfterDeletion(): Promise<void> {
+    try {
+      if (!this.currentCname) {
+        return;
+      }
+      
+      const organization = this.getOrganization();
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('Updating streaming services after deletion from:', streamingServicesUrl);
+      this.addToConsole('Updating service configuration...');
+      
+      // Fetch current streaming services data
+      const getResponse = await this.http.get<any>(streamingServicesUrl).toPromise();
+      
+      if (getResponse && getResponse.json_content) {
+        let jsonContent = JSON.parse(getResponse.json_content);
+        
+        // Update runner_service_status to false
+        jsonContent.runner_service_status = false;
+        
+        // Remove playground URL
+        delete jsonContent.playgroundurl;
+        
+        const putPayload = {
+          ...getResponse,
+          json_content: JSON.stringify(jsonContent)
+        };
+        
+        // Update via API
+        const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+        await this.http.put<any>(updateUrl, putPayload).toPromise();
+        
+        console.log('Streaming services updated after deletion');
+        this.addToConsole('✓ Service configuration updated successfully');
+        
+        // Update local status
+        this.runnerServiceStatus = false;
+        this.isPlaygroundEnabled = false;
+        this.deploymentStatus = 'idle';
+        this.deploymentStatusMessage = '';
+        this.isDeletingDeployment = false;
+        
+        this.service.messageService({ status: 200, body: 'Success' }, 'Deployment deleted successfully!');
+        this.disconnectWebSocket();
+        
+      } else {
+        throw new Error('Failed to fetch streaming services data');
+      }
+      
+    } catch (error) {
+      console.error('Error updating streaming services after deletion:', error);
+      this.addToConsole(`✗ Error updating service configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Deletion completed but failed to update configuration';
+      this.isDeletingDeployment = false;
+      this.disconnectWebSocket();
+    }
   }
 
   /**
@@ -2938,45 +3157,45 @@ public class ZipController {
           message: error.message
         });
 
-        // Check if this is actually a success response (200-299 status codes)
-        // Some APIs return success data in error handler due to response format issues
-        if (error.status >= 200 && error.status < 300) {
+        // Check if this is a parsing error with 200 status (success but unparseable response)
+        if (
+          error.status === 200 &&
+          error.name === 'HttpErrorResponse' &&
+          (error.message?.includes('parsing') || error.error?.text)
+        ) {
+          console.log('API returned 200 but response parsing failed - treating as success and proceeding');
+          this.addToConsole('✓ Files successfully pushed to MinIO storage (response parsing issue ignored)');
+          this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
+          this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
+          this.initializeWebSocket();
+        } else if (error.status >= 200 && error.status < 300) {
+          // Some APIs return success data in error handler due to response format issues
           console.log('MinIO push actually succeeded (200-level status), continuing deployment');
           this.addToConsole('✓ Files successfully pushed to MinIO storage');
           this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
-          
-          // Show success snackbar message
           this.service.message('Files successfully pushed to MinIO storage', 'success');
-          
-          // Update status message and proceed to WebSocket
           this.deploymentStatusMessage = 'Files pushed to MinIO, starting deployment...';
-          
-          // Continue with WebSocket deployment
           this.initializeWebSocket();
-          return;
-        }
-
-        // Only treat as real error if status is 4xx or 5xx
-        this.deploymentStatus = 'error';
-        this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
-        this.addToConsole('✗ Failed to push files to MinIO storage');
-        
-        // Check if error has the new format with details
-        if (error?.error?.details) {
-          this.addToConsole(`Error: ${error.error.details}`);
-          this.service.message(error.error.details, 'error');
-        } else if (error?.error?.message) {
-          this.addToConsole(`Error: ${error.error.message}`);
-          this.service.message(error.error.message, 'error');
-        } else if (error?.message) {
-          this.addToConsole(`Error: ${error.message}`);
-          this.service.message(error.message, 'error');
         } else {
-          const errorMessage = 'Unknown error occurred during MinIO push';
-          this.addToConsole(`Error: ${errorMessage}`);
-          this.service.message(errorMessage, 'error');
+          // Real error - stop deployment
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Failed to push files to MinIO. Deployment aborted.';
+          this.addToConsole('✗ Failed to push files to MinIO storage');
+          this.addToConsole(`Error: ${error.message || 'Unknown error'}`);
+          
+          // Check if error has the new format with details
+          if (error?.error?.details) {
+            this.service.message(error.error.details, 'error');
+          } else if (error?.error?.message) {
+            this.service.message(error.error.message, 'error');
+          } else if (error?.message) {
+            this.service.message(error.message, 'error');
+          } else {
+            const errorMessage = 'Unknown error occurred during MinIO push';
+            this.service.message(errorMessage, 'error');
+          }
+          this.isRunningAndDeploying = false;
         }
-        this.isRunningAndDeploying = false;
       }
     });
   }
@@ -3082,16 +3301,13 @@ public class ZipController {
               this.selectedAgent.cname = streamingResponse.name || this.currentCname;
               console.log('  Step 4.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
             }
-            
-            // Generate dynamic deployment name from alias and cname (now properly populated)
-            const deploymentAlias = this.generateDeploymentName();
+            // Use alias from selected card (uppercase)
+            const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
             this.currentDeploymentName = deploymentAlias; // Store for use in playground URL
-            console.log('  Step 4.3: Generated dynamic deployment name:', deploymentAlias);
             
-            // Now prepare payload with dynamic deployment_name based on pipeline mode
+ // Now prepare payload with deployment_name from alias
             const apiParams = this.getApiParametersForMode();
-            
-            console.log('  Step 4.4: Using deployment name for', this.pipelineMode, 'pipeline:', deploymentAlias);
+     console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
             
             // Generate dynamic target_image_tag from config
             const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
@@ -3118,9 +3334,9 @@ public class ZipController {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
             
-            // Use dynamic deployment_name even in fallback
+            // Use alias from selected card (uppercase)
             const apiParams = this.getApiParametersForMode();
-            const fallbackDeploymentName = this.generateDeploymentName();
+            const fallbackDeploymentName = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
             this.currentDeploymentName = fallbackDeploymentName; // Store for use in playground URL
             
             // Generate dynamic target_image_tag from config for fallback
@@ -3247,12 +3463,12 @@ public class ZipController {
         let jsonContent = JSON.parse(getResponse.json_content);
         console.log('Parsed existing json_content:', jsonContent);
         
-        // Step 3: Add/update the playgroundUrl with SAME deployment name used in WebSocket
+           // Step 3: Add/update the playgroundUrl and runner_service_status
         const environmentUrl = this.getEnvironmentUrl();
-        const deploymentName = this.currentDeploymentName; // Use stored deployment name
-        jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentName}/ask`;
-        console.log('Using stored deployment name from WebSocket:', deploymentName);
-        console.log('Updated json_content with dynamic playground URL:', jsonContent);
+        const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+        jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
+        jsonContent.runner_service_status = true;
+        console.log('Updated json_content with playground URL and runner_service_status:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {
@@ -3268,6 +3484,8 @@ public class ZipController {
         console.log('Streaming services PUT response:', putResponse);
         
         this.addToConsole('Streaming services updated successfully with playground URL!');
+         // Update local runner_service_status
+        this.runnerServiceStatus = true;
       } else {
         console.log('No json_content found in streaming services response');
         this.addToConsole('Warning: Could not update streaming services - no json_content found');
@@ -3344,15 +3562,18 @@ public class ZipController {
         
         // Only treat as real error if status is 4xx or 5xx
         // Check for error details in the response
-        if (error?.error?.details) {
-          this.service.message(error.error.details, 'error');
-        } else if (error?.error?.message) {
-          this.service.message(error.error.message, 'error');
-        } else if (error?.message) {
-          this.service.message(error.message, 'error');
+       if (error.status === 200 && error.name === 'HttpErrorResponse' && 
+            (error.message?.includes('parsing') || error.error?.text)) {
+          console.log('API returned 200 but response parsing failed - treating as success');
+          
+          // Extract the response text if available
+          const responseText = error.error?.text || 'Upload completed';
+          const successResponse = { status: 200, body: responseText };
+          this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
         } else {
-          // Fallback to generic error message
-          this.service.message('Push to MinIO failed. Please try again.', 'error');
+      // Real error - show error message
+          const errorResponse = error.status ? error : { status: 500, body: 'Unknown error' };
+          this.service.messageService(errorResponse, 'Push to MinIO failed. Please try again.');
         }
       }
     });
@@ -3442,22 +3663,19 @@ public class ZipController {
         this.isUploadingFiles = false;
       },
       error: (error) => {
-        console.error('Upload failed:', error);
+               let errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
         
         // Check if error has the new format with details
-        if (error?.error?.details) {
-          this.service.message(error.error.details, 'error');
-        } else if (error?.error?.message) {
-          this.service.message(error.error.message, 'error');
-        } else if (error?.error && typeof error.error === 'string') {
-          this.service.message(error.error, 'error');
+         if (error?.error) {
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error.message) {
+            errorMessage = error.error.message;
+          }
         } else if (error?.message) {
-          this.service.message(error.message, 'error');
-        } else {
-          // Final fallback
-          const errorMessage = `Failed to upload ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files`;
-          this.service.message(errorMessage, 'error');
+           errorMessage = error.message;
         }
+           this.service.message(errorMessage, 'error');
         this.isUploadingFiles = false;
       }
     });
@@ -3493,7 +3711,49 @@ public class ZipController {
   shouldShowRunPlaygroundButtons(): boolean {
     return this.hasGeneratedAgent && this.fileSystemData && this.fileSystemData.length > 0;
   }
+ /**
+   * Fetch runner_service_status from API
+   */
+  private async fetchRunnerServiceStatus(): Promise<void> {
+    if (!this.currentCname) {
+      console.warn('Cannot fetch runner_service_status: currentCname is not set');
+      return;
+    }
 
+    try {
+      const organization = this.getOrganization();
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('Fetching runner_service_status from:', streamingServicesUrl);
+      const response = await this.http.get<any>(streamingServicesUrl).toPromise();
+      
+      console.log('API Response:', response);
+      
+      if (response && response.json_content) {
+        const jsonContent = JSON.parse(response.json_content);
+        console.log('Parsed json_content:', jsonContent);
+        
+        this.runnerServiceStatus = jsonContent.runner_service_status === true;
+        console.log('✅ Set runnerServiceStatus to:', this.runnerServiceStatus);
+        console.log('Button states:', {
+          canRunAndDeploy: this.canRunAndDeploy(),
+          canDeleteDeployment: this.canDeleteDeployment(),
+          hasFiles: this.hasGeneratedAgent || this.hasExistingFiles(),
+          isRunningAndDeploying: this.isRunningAndDeploying,
+          isDeletingDeployment: this.isDeletingDeployment
+        });
+        
+        // Trigger change detection
+        this.cdr.detectChanges();
+      } else {
+        console.warn('No json_content in response, setting runnerServiceStatus to false');
+        this.runnerServiceStatus = false;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching runner_service_status:', error);
+      this.runnerServiceStatus = false;
+    }
+  }
   // Methods removed - auto-loading enabled when viewing details
   // generateadkAgent() and clearConsole() methods are no longer needed
 
@@ -3753,65 +4013,6 @@ DELIVERABLES
     // TODO: Implement delete functionality
   }
 
-  /**
-   * Generate dynamic deployment name from alias and cname
-   * Format: alias-cname with spaces and underscores replaced by hyphens
-   */
-  private generateDeploymentName(): string {
-    // Get cname - this maps to 'name' field in streaming services API
-    const cname = this.currentCname || this.selectedAgent?.cname || '';
-    
-    if (!cname) {
-      console.error('Cannot generate deployment name: no cname available');
-      return 'default-deployment';
-    }
-    
-    // Get agent name from 'alias' field - this is the actual agent name from streaming services API
-    // Example: streaming services API has alias="service_agent_5g" and name="LEOSRVC_59424"
-    let agentName = this.selectedAgent?.alias || '';
-    
-    if (!agentName) {
-      console.error('Cannot generate deployment name: no agent alias available');
-      // Fallback: use cname only
-      const sanitizedCname = cname.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
-        .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
-        .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
-      return `${sanitizedCname}-deployment`;
-    }
-    
-    // Sanitize agent name (from alias field): lowercase, replace ALL non-alphanumeric chars with hyphens
-    // Example: "service_agent_5g" → "service-agent-5g"
-    // Example: "service agent 5g" → "service-agent-5g"
-    // Example: ".service__agent__5g." → "service-agent-5g"
-    const sanitizedAgentName = agentName.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
-      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
-      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
-    
-    // Sanitize cname: lowercase, replace ALL non-alphanumeric chars with hyphens
-    // Example: "LEOSRVC_59424" → "leosrvc-59424"
-    // Example: "LEO SRVC 59424" → "leo-srvc-59424"
-    // Example: "LEO.SRVC_59424" → "leo-srvc-59424"
-    const sanitizedCname = cname.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')  // Replace ALL non-alphanumeric characters with hyphens
-      .replace(/^-+|-+$/g, '')      // Remove leading and trailing hyphens
-      .replace(/-+/g, '-');          // Replace multiple consecutive hyphens with single hyphen
-    
-    // Final format: {agent-alias}-{cname}
-    // Example: "service-agent-5g-leosrvc-59424"
-    const deploymentName = `${sanitizedAgentName}-${sanitizedCname}`;
-    
-    console.log('Generated deployment name:', deploymentName, {
-      originalAgentAlias: agentName,
-      sanitizedAgentName: sanitizedAgentName,
-      originalCname: cname,
-      sanitizedCname: sanitizedCname,
-      finalDeploymentName: deploymentName
-    });
-    
-    return deploymentName;
-  }
 
   /**
    * Get tooltip message for playground button based on deployment status
@@ -4133,12 +4334,13 @@ DELIVERABLES
   }
 
   // Check for existing files and load appropriate state
-  private checkForExistingFilesAndLoadState(cname: string): void {
-    console.log('Checking for existing files for cname:', cname);
+  private async checkForExistingFilesAndLoadState(cname: string): Promise<void> {    console.log('Checking for existing files for cname:', cname);
 
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
-
+   // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     // Try to fetch files for this specific cname - only to check existence
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
@@ -4163,6 +4365,8 @@ DELIVERABLES
           this.showScriptTabOnly();
         }
         this.isLoadingFiles = false;
+             // Trigger change detection after files are loaded
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.log(
@@ -4179,6 +4383,8 @@ DELIVERABLES
         // API error or no files exist yet - show script tab only
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
+          // Trigger change detection even on error
+        this.cdr.detectChanges();
       },
     });
   }
@@ -4273,15 +4479,27 @@ DELIVERABLES
   }
 
   /**
-   * Handle Deploy button click from Deployment Tab
-   * This triggers the actual deployment process (Run & Deploy)
+  * Handle deployment form finish event
+   * Store deployment data - user stays on Deployment tab
    */
-  onDeployFromDeploymentTab(): void {
-    console.log('🚀 Deploy button clicked from Deployment tab');
-    console.log('🚀 Deployment environment:', this.deploymentEnvironment);
+ onDeploymentFinished(deploymentData: any): void {
+    console.log('🎯 Deployment form finished successfully:', deploymentData);
     
-    // Call the existing run and deploy method
-   // this.runAndDeploy();
+    // Set flag to true so deploy button on deployment tab can be used
+    this.hasDeploymentFormData = true;
+    
+    // Extract and store deployment environment from the correct path
+    this.deploymentEnvironment = deploymentData?.deployment_environment || '';
+    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
+    
+    // Trigger change detection to ensure the state is updated
+    this.cdr.detectChanges();
+    
+    // Show success message - user stays on deployment tab
+    this.service.message(
+      'Deployment configuration saved successfully. You can now deploy using the Deploy button.',
+      'success'
+    );
   }
 
   /**
@@ -4358,7 +4576,7 @@ DELIVERABLES
   }
 
   // Automatically load agent data when viewing details
-  private autoLoadAgentData(): void {
+   private async autoLoadAgentData(): Promise<void> {
     if (!this.currentCname) {
       console.error('Cannot auto-load agent data: no cname available');
       this.showScriptTabOnly();
@@ -4370,6 +4588,9 @@ DELIVERABLES
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
+        // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After autoLoadAgentData fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
@@ -4388,6 +4609,8 @@ DELIVERABLES
           this.showScriptTabOnly();
         }
         this.isLoadingFiles = false;
+         // Trigger change detection
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error calling folder list API:', error);
@@ -4400,13 +4623,15 @@ DELIVERABLES
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
+            // Trigger change detection
+        this.cdr.detectChanges();
       }
     });
   }
 
   // Call the upload API to get full content
   // Auto-load agent data specifically for pipeline cards from dashboard
-  private autoLoadAgentDataForPipelineCard(): void {
+   private async autoLoadAgentDataForPipelineCard(): Promise<void> {
     if (!this.currentCname) {
       console.error('Cannot auto-load pipeline agent data: no cname available');
       this.showScriptTabOnly();
@@ -4421,6 +4646,9 @@ DELIVERABLES
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
+      // Fetch runner_service_status FIRST and WAIT for it
+    await this.fetchRunnerServiceStatus();
+    console.log('After autoLoadAgentDataForPipelineCard fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     
     // THEN load JSON file from API for script tab (after reset)
     this.loadJsonFileForScript();
@@ -4439,6 +4667,10 @@ DELIVERABLES
           this.enableCodespaceTabOnly(listResponse);
           
           this.isLoadingFiles = false;
+
+               
+          // Trigger change detection
+          this.cdr.detectChanges();
         } else {
           // No data from list API, show only script tab and continue with old flow
           console.log('No data from pipeline folder list API, falling back to script tab and old flow');
@@ -4446,6 +4678,9 @@ DELIVERABLES
           this.isLoadingFiles = false;
           // Fall back to the original getStreamService flow
           this.getStreamService();
+
+                  // Trigger change detection
+          this.cdr.detectChanges();
         }
       },
       error: (error) => {

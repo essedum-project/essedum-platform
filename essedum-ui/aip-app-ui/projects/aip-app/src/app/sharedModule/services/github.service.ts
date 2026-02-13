@@ -124,6 +124,39 @@ export class GitHubService {
   }
 
   /**
+   * Get collaborators/reviewers for a repository
+   * @param repo - Repository name in format 'owner/repo'
+   * Returns array of collaborators with various possible field formats
+   */
+  getCollaborators(repo: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.API_BASE}/collaborators`,
+      {
+        params: { repo: repo },
+        withCredentials: true
+      }
+    );
+  }
+
+  /**
+   * Create a pull request
+   * @param request - Pull request details
+   */
+  createPullRequest(request: {
+    repoName: string;
+    title: string;
+    sourceBranch: string;
+    targetBranch: string;
+    reviewers?: string[];
+  }): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_BASE}/create-pull-request`,
+      request,
+      { withCredentials: true }
+    );
+  }
+
+  /**
    * Open OAuth popup and poll for authentication
    */
   initiateOAuthFlow(): Observable<AuthStatus> {
