@@ -2901,7 +2901,7 @@ public class ZipController {
   }
 
   /**
-   * Delete the current deployment
+   * Delete the current deployment via WebSocket
    */
   async deleteDeployment(): Promise<void> {
     if (!this.canDeleteDeployment() || !this.currentCname) {
@@ -2909,13 +2909,141 @@ public class ZipController {
     }
 
     this.isDeletingDeployment = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deleting deployment...';
+    
+    // Clear console and add initial message
+    this.consoleOutput = [];
+    this.addToConsole('Starting deployment deletion process...');
+    
     const organization = this.getOrganization();
 
     try {
-      console.log('Deleting deployment for:', this.currentCname);
+      console.log('Initiating deployment deletion for:', this.currentCname);
+      
+      // Initialize WebSocket connection for deletion
+      await this.initializeDeleteWebSocket();
+      
+    } catch (error) {
+      console.error('Error initiating deployment deletion:', error);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to initiate deployment deletion';
+      this.addToConsole(`✗ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.service.messageService(error, 'Failed to delete deployment');
+      this.isDeletingDeployment = false;
+    }
+  }
+
+  /**
+   * Initialize WebSocket connection for deployment deletion
+   */
+  private async initializeDeleteWebSocket(): Promise<void> {
+    console.log('  STARTING DELETE WEBSOCKET INITIALIZATION PROCESS');
+    try {
+      console.log('  Step 1: Fetching datasource credentials for deletion...');
+      
+      // Fetch datasource credentials
+      const credentials = await this.fetchDatasourceCredentials();
+      console.log('  Step 2: Credentials fetched successfully for deletion');
+      
+      console.log('  Step 3: Connecting to WebSocket server for deletion...');
+      
+      const environmentUrl = this.getEnvironmentUrl();
+      console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
+      
+      this.socket = io(environmentUrl, {
+        path: '/apps/builder-service/socket.io',
+        transports: ['websocket', 'polling'],
+        timeout: 60000,
+        forceNew: true,
+        rejectUnauthorized: false,
+        withCredentials: true,
+        reconnection: false,
+      });
+      
+      // Connection successful
+      this.socket.on('connect', () => {
+        console.log('  Step 4: WebSocket connected for deletion! Preparing delete payload...');
+        
+        // Use the same deployment name as used in deployment
+        const deploymentName = this.currentDeploymentName || this.pipelineAlias?.toString() || 'DEFAULT-AGENT';
+        
+        const deletePayload = {
+          deployment_name: deploymentName,
+          namespace: 'aipns'
+        };
+        
+        console.log('  Step 5: Sending delete_deployment event with payload:', deletePayload);
+        this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
+        this.socket?.emit('delete_deployment', deletePayload);
+        console.log('  Step 6: delete_deployment event emitted to WebSocket');
+      });
+      
+      // Delete status event
+      this.socket.on('delete_status', (data: any) => {
+        console.log('Delete status received:', data);
+        this.addToConsole(`Delete Status: ${JSON.stringify(data)}`);
+        
+        if (data.status === 'SUCCESS' || data.status === 'success') {
+          this.addToConsole('✓ Deployment deleted successfully!');
+          
+          // Update streaming services to reflect deletion
+          this.updateStreamingServicesAfterDeletion();
+          
+        } else if (data.status === 'ERROR' || data.status === 'error') {
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Deployment deletion failed';
+          this.addToConsole(`✗ Deletion failed: ${data.message || data.error || 'Unknown error'}`);
+          this.service.message('Failed to delete deployment', 'error');
+          this.isDeletingDeployment = false;
+          this.disconnectWebSocket();
+        }
+      });
+      
+      // Connection error
+      this.socket.on('connect_error', (error: any) => {
+        this.addToConsole(`Connection error: ${error.message}`);
+        this.deploymentStatus = 'error';
+        this.deploymentStatusMessage = 'Connection error occurred during deletion';
+        this.isDeletingDeployment = false;
+        this.service.message('Failed to connect for deletion', 'error');
+      });
+      
+      // Disconnection
+      this.socket.on('disconnect', (reason: string) => {
+        this.addToConsole(`Disconnected: ${reason}`);
+        if (this.isDeletingDeployment) {
+          this.isDeletingDeployment = false;
+          this.deploymentStatus = 'error';
+          this.deploymentStatusMessage = 'Connection lost during deletion';
+        }
+      });
+      
+    } catch (error) {
+      this.addToConsole(`Failed to initialize WebSocket for deletion: ${error}`);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to initialize deletion';
+      this.isDeletingDeployment = false;
+      throw error;
+    }
+  }
+
+  /**
+   * Update streaming services after successful deletion
+   */
+  private async updateStreamingServicesAfterDeletion(): Promise<void> {
+    try {
+      if (!this.currentCname) {
+        return;
+      }
+      
+      const organization = this.getOrganization();
+      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      console.log('Updating streaming services after deletion from:', streamingServicesUrl);
+      this.addToConsole('Updating service configuration...');
       
       // Fetch current streaming services data
-      const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
       const getResponse = await this.http.get<any>(streamingServicesUrl).toPromise();
       
       if (getResponse && getResponse.json_content) {
@@ -2936,22 +3064,32 @@ public class ZipController {
         const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
         await this.http.put<any>(updateUrl, putPayload).toPromise();
         
-        console.log('Deployment deleted successfully');
-        this.service.messageService({ status: 200, body: 'Success' }, 'Deployment deleted successfully!');
+        console.log('Streaming services updated after deletion');
+        this.addToConsole('✓ Service configuration updated successfully');
         
         // Update local status
         this.runnerServiceStatus = false;
         this.isPlaygroundEnabled = false;
         this.deploymentStatus = 'idle';
         this.deploymentStatusMessage = '';
+        this.isDeletingDeployment = false;
+        
+        this.service.messageService({ status: 200, body: 'Success' }, 'Deployment deleted successfully!');
+        this.disconnectWebSocket();
+        
+      } else {
+        throw new Error('Failed to fetch streaming services data');
       }
+      
     } catch (error) {
-      console.error('Error deleting deployment:', error);
-      this.service.messageService(error, 'Failed to delete deployment');
-    } finally {
+      console.error('Error updating streaming services after deletion:', error);
+      this.addToConsole(`✗ Error updating service configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Deletion completed but failed to update configuration';
       this.isDeletingDeployment = false;
+      this.disconnectWebSocket();
     }
-    }
+  }
 
   /**
    * Run and Deploy the agent using WebSocket pipeline
