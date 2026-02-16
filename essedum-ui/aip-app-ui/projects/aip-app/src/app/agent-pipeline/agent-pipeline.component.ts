@@ -3310,6 +3310,11 @@ public class ZipController {
             const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
             console.log('  Step 4.5: Generated dynamic target_image_tag:', targetImageTag);
             
+            // Determine deployment name based on pipeline mode
+            const deploymentName = this.pipelineMode === 'mcp' 
+              ? 'service-qualification-mcp-5g' 
+              : 'service-qualification-agent-5g';
+            
             const payload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
               bucket_name: pipelineConfig.minio.bucketName,
@@ -3323,7 +3328,7 @@ public class ZipController {
             };
            
             console.log('  Step 5: Sending start_pipeline event with dynamic payload:', payload);
-            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentAlias}`);
+            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentName}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
             console.log('  Step 6: start_pipeline event emitted to WebSocket');

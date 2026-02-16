@@ -183,3 +183,29 @@ for specific storage backends.
 Copyright (C) 2014-2025 Andrew Gaul
 
 Licensed under the Apache License, Version 2.0
+
+## Essedum Integration and Architecture
+
+In the Essedum platform, S3Proxy serves as a critical infrastructure component to ensure cloud-agnostic storage access.
+
+### Role in Architecture
+
+The Essedum Backend and Job Executors are designed to speak the S3 protocol. Instead of implementing separate clients for Azure Blob Storage, Google Cloud Storage, and AWS S3, they all point to S3Proxy. S3Proxy then translates these requests to the native API of the underlying storage provider.
+
+### Architecture Diagram
+
+```mermaid
+graph LR
+    Backend[Essedum Backend] -->|S3 Protocol| S3Proxy
+    Executor[Job Executor] -->|S3 Protocol| S3Proxy
+
+    S3Proxy -->|Adapter| FS[Local Filesystem (Dev)]
+    S3Proxy -->|Adapter| ABS[Azure Blob Storage]
+    S3Proxy -->|Adapter| GCS[Google Cloud Storage]
+```
+
+### Configuration in Essedum
+
+The Docker image is configured via environment variables to select the backend provider:
+*   `JCLOUDS_PROVIDER`: `filesystem-nio2`, `azureblob`, or `google-cloud-storage`.
+*   `JCLOUDS_IDENTITY` / `JCLOUDS_CREDENTIAL`: Credentials for the target cloud provider.
