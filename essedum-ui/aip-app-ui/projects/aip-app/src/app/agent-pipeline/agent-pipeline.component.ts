@@ -3299,7 +3299,7 @@ public class ZipController {
               console.log('  Step 4.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
             }
             // Use alias from selected card (uppercase)
-            const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+            const deploymentAlias = (this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT').toLowerCase();
             this.currentDeploymentName = deploymentAlias; // Store for use in playground URL
             
  // Now prepare payload with deployment_name from alias
@@ -3333,7 +3333,7 @@ public class ZipController {
             
             // Use alias from selected card (uppercase)
             const apiParams = this.getApiParametersForMode();
-            const fallbackDeploymentName = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
+            const fallbackDeploymentName = (this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT').toLowerCase();
             this.currentDeploymentName = fallbackDeploymentName; // Store for use in playground URL
             
             // Generate dynamic target_image_tag from config for fallback
@@ -3727,41 +3727,12 @@ public class ZipController {
         
         this.runnerServiceStatus = jsonContent.runner_service_status === true;
         console.log('✅ Set runnerServiceStatus to:', this.runnerServiceStatus);
-        
-        // Enable playground when deployment is active and has playground URL
-        if (this.runnerServiceStatus) {
-          // Check if playground URL exists
-          if (jsonContent.playgroundurl) {
-            this.playgroundUrl = jsonContent.playgroundurl;
-            this.isPlaygroundEnabled = true;
-            console.log('✅ Playground enabled - deployment is active with URL:', this.playgroundUrl);
-          } else {
-            // Try to construct URL from deployment name if available
-            const environmentUrl = this.getEnvironmentUrl();
-            const deploymentName = this.currentDeploymentName || this.currentCname;
-            this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-            this.isPlaygroundEnabled = true;
-            console.log('✅ Playground enabled - using constructed URL:', this.playgroundUrl);
-          }
-          this.deploymentStatus = 'success';
-          this.deploymentStatusMessage = 'Agent is deployed and running';
-        } else {
-          // When not deployed, disable playground
-          this.isPlaygroundEnabled = false;
-          this.deploymentStatus = 'idle';
-          this.deploymentStatusMessage = '';
-          console.log('⚠️ Playground disabled - no active deployment');
-        }
-        
         console.log('Button states:', {
           canRunAndDeploy: this.canRunAndDeploy(),
           canDeleteDeployment: this.canDeleteDeployment(),
-          canOpenPlayground: this.canOpenPlayground(),
           hasFiles: this.hasGeneratedAgent || this.hasExistingFiles(),
           isRunningAndDeploying: this.isRunningAndDeploying,
-          isDeletingDeployment: this.isDeletingDeployment,
-          isPlaygroundEnabled: this.isPlaygroundEnabled,
-          playgroundUrl: this.playgroundUrl
+          isDeletingDeployment: this.isDeletingDeployment
         });
         
         // Trigger change detection
@@ -3769,7 +3740,6 @@ public class ZipController {
       } else {
         console.warn('No json_content in response, setting runnerServiceStatus to false');
         this.runnerServiceStatus = false;
-        this.isPlaygroundEnabled = false;
       }
     } catch (error) {
       console.error('❌ Error fetching runner_service_status:', error);
