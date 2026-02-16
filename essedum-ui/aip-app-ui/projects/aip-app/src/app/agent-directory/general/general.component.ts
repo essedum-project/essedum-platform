@@ -115,7 +115,7 @@ export class GeneralComponent implements OnInit, OnChanges {
 
   // Section titles
   sectionTitles = {
-    about: 'About',
+    about: 'Basic Information',
     modules: 'Modules',
     skills: 'Skills',
     selectors: 'Selectors',

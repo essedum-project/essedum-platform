@@ -37,7 +37,7 @@
                 (showSidebarMenu && !isExpanded) ||
                 (iconsidebarrole == selectedrole.name && showSidebarMenu)
               " #sidenav="" class="width parentsidenav selector-3-21" mode="side" opened="true"
-              style="overflow-x: hidden; height: 100% ;width: 62px;" [ngClass]="{
+              style="overflow-x: hidden; height: 100% ;width: 70px;" [ngClass]="{
                 enableSidebarShadow: enableSidebarShadow == true,
                 sidebarbgcolor: sidebarbgcolor == true,
                 sidebarbgcolordefault: sidebarbgcolor != true,
@@ -69,7 +69,7 @@
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                     zIndex: 2000,                   
                     borderRadius: '4px',                    
-                    height: '100vh',
+                    height: 'calc(100vh - 75px)',
                     overflowY: 'auto',
                     overflowX: 'visible'
                   }" (click)="$event.stopPropagation()">
@@ -85,7 +85,7 @@
                           item.label == highlightedLabel
                       }" [style.borderLeft]="
                         item.label == highlightedLabel
-                          ? '5px solid #0052cc'
+                          ? '8px solid #0052cc'
                           : 'none'
                       ">
                       <span [ngStyle]="{
@@ -123,7 +123,7 @@
                   <div class="" [matTooltip]="item.altText ? item.altText : item.label"
                     matTooltipClass="widgettitletooltip" [class.collapsed]="!isExpanded"
                     [class.griddirection]="iconsidebarrole == selectedrole.name" [ngStyle]="{
-                      'border-left-width':'9px',                      
+                      'border-left': item.label == highlightedLabel ? '5px solid #0052cc' : 'none',
                       width: '57.6px'
                     }">
                     <div class="sidebar-itemIcon" style="text-align: -webkit-center"
@@ -161,25 +161,26 @@
                           'sidebar-svg-iconcolordefault':
                             sidebartextcolor != true
                         }" [src]="cleanSVG(item.icon)" alt="" />
-                      <!-- <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                      
+                      <!-- General support for base64 encoded images (PNG, JPG, JPEG) -->
+                      <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
                           item.icon &&
                           (item.icon.includes('data:image/png') ||
                             item.icon.includes('data:image/jpg') ||
                             item.icon.includes('data:image/jpeg')) &&
-                          item.label !== 'Agent Designer'
-                        " [src]="item.icon" alt="" /> -->
+                          item.label !== 'Agent Designer' &&
+                          item.label !== 'Agent MCP Pipelines' &&
+                          item.label !== 'Lite LLM' &&
+                          item.label !== 'Langfuse'
+                        " [src]="item.icon" alt="" 
+                        style="height: 42px !important; width: 42px !important;" />
+                      
+                      <!-- Hardcoded image for Agent Designer -->
                       <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
                           item.label === 'Agent Designer'
                         " src="assets/img/ai-agent-logo.jpg" alt="Agent Designer Icon"
                         style="height: 42px !important; width: 42px !important;" />
                       <div style="margin-top: 0px !important;">
-                        <!-- <img class="sidebar-itemImg sidebar-Icons-list" *ngIf="
-                          item.icon &&
-                          (item.icon.includes('data:image/png') ||
-                            item.icon.includes('data:image/jpg') ||
-                            item.icon.includes('data:image/jpeg')) &&
-                          item.label !== 'Agent MCP Pipelines'
-                        " [src]="item.icon" alt="" /> -->
                       <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
                           item.label === 'Agent MCP Pipelines'
                         " src="assets/img/pipeline_agent.jpg" alt="Pipeline Agent Icon"
