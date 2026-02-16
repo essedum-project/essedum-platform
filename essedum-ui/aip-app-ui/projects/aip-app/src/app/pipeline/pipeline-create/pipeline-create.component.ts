@@ -190,7 +190,7 @@ export class PipelineCreateComponent implements OnInit {
         else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
           newCanvas.json_content = JSON.stringify({ 
             'created_source': 'user_defined',
-            'runner_service_name': this.alias,
+            'runner_service_name': this.alias.toLowerCase(),
             'runner_service_status': false
           });
         }
@@ -452,7 +452,7 @@ export class PipelineCreateComponent implements OnInit {
     // Update the pipeline's json_content with the MCP configuration, preserving all original fields
     pipelineData.json_content = JSON.stringify({
       created_source: originalJsonContent.created_source || 'user_defined',
-      runner_service_name: originalJsonContent.runner_service_name || pipelineData.alias,
+      runner_service_name: originalJsonContent.runner_service_name.toLowerCase() || pipelineData.alias.toLowerCase(),
       runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
       elements: [{
         type: 'mcpServer',
@@ -545,7 +545,7 @@ export class PipelineCreateComponent implements OnInit {
     // Update the pipeline's json_content with the Agent configuration, preserving all original fields
     pipelineData.json_content = JSON.stringify({
       created_source: originalJsonContent.created_source || 'user_defined',
-      runner_service_name: originalJsonContent.runner_service_name || pipelineData.alias,
+      runner_service_name: originalJsonContent.runner_service_name.toLowerCase() || pipelineData.alias.toLowerCase(),
       runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
       elements: [{
         type: 'AIAgent',
