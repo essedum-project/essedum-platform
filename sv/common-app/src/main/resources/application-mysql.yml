@@ -9,18 +9,18 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
+    jdbcurl: jdbc:mysql://mysql-local:3306/telemetrydb
     username: root
-    password: Presto##9511
+    password: password
 
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
   #active-profiles: mysql,oauth2,btf,dbconstants
   static-locations: file:/C:/Users/lfn/common-app/
 
-  datasourceurl: jdbc:mysql://localhost:3306
+  datasourceurl: jdbc:mysql://mysql-local:3306
   datasourceuser: root
-  datasourcepass: Presto##9511
+  datasourcepass: password
   essedumcoredb: essedum_coredb
   essedumquartzdb: essedum_quartzdb
 
@@ -74,7 +74,7 @@ spring:
     resources:
       static-locations: ${config.static-locations}
   liquibase:
-    enabled: true
+    enabled: false
     contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
 
     change-log: "classpath:db/changelog/master.xml"
@@ -285,7 +285,7 @@ model:
     idleTimeout: 60000
 quartz:
   liquibase:
-    enabled: true
+    enabled: false
     change-log: "classpath:db/changelog/quartz.xml"
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
