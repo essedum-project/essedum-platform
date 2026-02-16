@@ -1,1 +1,0 @@
-# CometAPI component tests
