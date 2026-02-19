@@ -5,13 +5,13 @@ import shutil
 import random
 import string
 from datetime import datetime
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from kubernetes import client, config
 import json, base64, requests
 
 app = Flask(__name__)
-#socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_interval=25, ping_timeout=60,) 
+#socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_interval=25, ping_timeout=60,)
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
@@ -45,6 +45,197 @@ def log_to_client(message, step="info"):
     )
 
 
+# REST API endpoint for deleting deployments
+@app.route('/api/delete-deployment', methods=['POST', 'DELETE'])
+def delete_deployment_rest():
+    """
+    REST API endpoint to delete a deployment, service, and associated secrets.
+    Expected JSON body:
+    {
+      "deployment_name": "runner-service",
+      "namespace": "aipns"   # optional, defaults to "aipns"
+    }
+    """
+    try:
+        data = request.get_json()
+        deploy_name = data.get("deployment_name")
+        target_namespace = data.get("namespace", "aipns")
+
+        if not deploy_name:
+            return jsonify({"status": "ERROR", "message": "deployment_name is required"}), 400
+
+        # Sanitize deployment name to match what was used during creation
+        import re
+        deploy_name = deploy_name.lower()
+        deploy_name = re.sub(r'[^a-z0-9-]', '-', deploy_name)
+        if deploy_name[0].isdigit() or deploy_name[0] == '-':
+            deploy_name = 'app-' + deploy_name
+        deploy_name = re.sub(r'-+', '-', deploy_name)
+        deploy_name = deploy_name.strip('-')
+
+        # Load Kubernetes config
+        try:
+            config.load_incluster_config()
+        except Exception:
+            config.load_kube_config()
+
+        k8s_apps = client.AppsV1Api()
+        k8s_core = client.CoreV1Api()
+
+        deletion_results = {
+            "deployment": False,
+            "service": False,
+            "secret": False
+        }
+        errors = []
+
+        # Delete Deployment
+        try:
+            k8s_apps.delete_namespaced_deployment(
+                name=deploy_name,
+                namespace=target_namespace,
+                body=client.V1DeleteOptions(propagation_policy='Foreground')
+            )
+            deletion_results["deployment"] = True
+        except client.exceptions.ApiException as e:
+            if e.status != 404:
+                errors.append(f"Deployment deletion error: {str(e)}")
+
+        # Delete Service
+        try:
+            k8s_core.delete_namespaced_service(
+                name=deploy_name,
+                namespace=target_namespace
+            )
+            deletion_results["service"] = True
+        except client.exceptions.ApiException as e:
+            if e.status != 404:
+                errors.append(f"Service deletion error: {str(e)}")
+
+        # Delete associated Secret
+        secret_name = f"{deploy_name}-secrets"
+        try:
+            k8s_core.delete_namespaced_secret(
+                name=secret_name,
+                namespace=target_namespace
+            )
+            deletion_results["secret"] = True
+        except client.exceptions.ApiException as e:
+            if e.status != 404:
+                errors.append(f"Secret deletion error: {str(e)}")
+
+        # Determine response
+        if errors:
+            return jsonify({
+                "status": "PARTIAL",
+                "deployment_name": deploy_name,
+                "namespace": target_namespace,
+                "deleted": deletion_results,
+                "errors": errors,
+                "message": "Some resources were deleted, but errors occurred"
+            }), 207  # Multi-Status
+        elif deletion_results["deployment"] or deletion_results["service"]:
+            return jsonify({
+                "status": "SUCCESS",
+                "deployment_name": deploy_name,
+                "namespace": target_namespace,
+                "deleted": deletion_results,
+                "message": f"Successfully deleted resources for {deploy_name}"
+            }), 200
+        else:
+            return jsonify({
+                "status": "NOT_FOUND",
+                "deployment_name": deploy_name,
+                "namespace": target_namespace,
+                "message": f"No resources found for {deploy_name}"
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            "status": "ERROR",
+            "message": f"Deletion failed: {str(e)}"
+        }), 500
+
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "service": "builder-service"}), 200
+
+
+# List deployments endpoint
+@app.route('/api/list-deployments', methods=['GET'])
+def list_deployments_rest():
+    """
+    REST API endpoint to list all deployments in a namespace.
+    Query parameters:
+    - namespace: optional, defaults to "aipns"
+    """
+    try:
+        target_namespace = request.args.get("namespace", "aipns")
+
+        # Load Kubernetes config
+        try:
+            config.load_incluster_config()
+        except Exception:
+            config.load_kube_config()
+
+        k8s_apps = client.AppsV1Api()
+        k8s_core = client.CoreV1Api()
+
+        # List all deployments in namespace
+        deployments = k8s_apps.list_namespaced_deployment(namespace=target_namespace)
+
+        result = []
+    for dep in deployments.items:
+            # Get associated service if exists
+            service_exists = False
+            service_url = None
+            try:
+                svc = k8s_core.read_namespaced_service(name=dep.metadata.name, namespace=target_namespace)
+                service_exists = True
+                service_url = f"http://{dep.metadata.name}.{target_namespace}.svc.cluster.local"
+            except client.exceptions.ApiException:
+                pass
+
+            # Check for associated secret
+            secret_name = f"{dep.metadata.name}-secrets"
+            secret_exists = False
+            try:
+                k8s_core.read_namespaced_secret(name=secret_name, namespace=target_namespace)
+                secret_exists = True
+            except client.exceptions.ApiException:
+                pass
+
+            result.append({
+                "name": dep.metadata.name,
+                "namespace": dep.metadata.namespace,
+                "replicas": dep.status.replicas or 0,
+                "ready_replicas": dep.status.ready_replicas or 0,
+                "available_replicas": dep.status.available_replicas or 0,
+                "unavailable_replicas": dep.status.unavailable_replicas or 0,
+                "image": dep.spec.template.spec.containers[0].image if dep.spec.template.spec.containers else None,
+                "created_at": dep.metadata.creation_timestamp.isoformat() if dep.metadata.creation_timestamp else None,
+                "service_exists": service_exists,
+                "service_url": service_url,
+                "secret_exists": secret_exists,
+                "status": "Ready" if (dep.status.ready_replicas or 0) == (dep.status.replicas or 0) and (dep.status.replicas or 0) > 0 else "Not Ready"
+            })
+
+        return jsonify({
+            "status": "SUCCESS",
+            "namespace": target_namespace,
+            "deployments": result,
+            "count": len(result)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "ERROR",
+            "message": f"Failed to list deployments: {str(e)}"
+        }), 500
+
+
 @socketio.on("connect")
 def handle_connect():
     print("Client connected")
@@ -54,6 +245,121 @@ def handle_connect():
 @socketio.on("disconnect")
 def handle_disconnect():
     print("Client disconnected")
+
+
+@socketio.on("delete_deployment")
+def handle_delete_deployment(data):
+    """
+    Delete a deployment, service, and associated secrets.
+    Expected JSON 'data':
+    {
+      "deployment_name": "runner-service",
+      "namespace": "aipns"   # optional, defaults to "aipns"
+    }
+    """
+    try:
+        deploy_name = data.get("deployment_name")
+        target_namespace = data.get("namespace", "aipns")
+
+        if not deploy_name:
+            error_msg = "deployment_name is required"
+            log_to_client(error_msg, step="ERROR")
+            socketio.emit("delete_status", {"status": "ERROR", "message": error_msg})
+            return
+
+        # Sanitize deployment name to match what was used during creation
+        import re
+        deploy_name = deploy_name.lower()
+        deploy_name = re.sub(r'[^a-z0-9-]', '-', deploy_name)
+        if deploy_name[0].isdigit() or deploy_name[0] == '-':
+            deploy_name = 'app-' + deploy_name
+        deploy_name = re.sub(r'-+', '-', deploy_name)
+        deploy_name = deploy_name.strip('-')
+
+        log_to_client(f"Starting deletion of {deploy_name} in namespace {target_namespace}...", step="DELETE_INIT")
+
+        # Load Kubernetes config
+        try:
+            config.load_incluster_config()
+        except Exception:
+            config.load_kube_config()
+
+        k8s_apps = client.AppsV1Api()
+        k8s_core = client.CoreV1Api()
+
+        deletion_results = {
+            "deployment": False,
+            "service": False,
+            "secret": False
+        }
+
+        # Delete Deployment
+        try:
+            k8s_apps.delete_namespaced_deployment(
+                name=deploy_name,
+                namespace=target_namespace,
+                body=client.V1DeleteOptions(propagation_policy='Foreground')
+            )
+            deletion_results["deployment"] = True
+            log_to_client(f"✓ Deployment '{deploy_name}' deleted successfully", step="DELETE")
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                log_to_client(f"⚠ Deployment '{deploy_name}' not found (already deleted?)", step="DELETE")
+            else:
+                log_to_client(f"✗ Failed to delete deployment: {str(e)}", step="DELETE_ERROR")
+
+        # Delete Service
+        try:
+            k8s_core.delete_namespaced_service(
+                name=deploy_name,
+                namespace=target_namespace
+            )
+            deletion_results["service"] = True
+            log_to_client(f"✓ Service '{deploy_name}' deleted successfully", step="DELETE")
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                log_to_client(f"⚠ Service '{deploy_name}' not found (already deleted?)", step="DELETE")
+            else:
+                log_to_client(f"✗ Failed to delete service: {str(e)}", step="DELETE_ERROR")
+
+        # Delete associated Secret (if exists)
+        secret_name = f"{deploy_name}-secrets"
+        try:
+            k8s_core.delete_namespaced_secret(
+                name=secret_name,
+                namespace=target_namespace
+            )
+            deletion_results["secret"] = True
+            log_to_client(f"✓ Secret '{secret_name}' deleted successfully", step="DELETE")
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                log_to_client(f"⚠ Secret '{secret_name}' not found (no secrets to clean up)", step="DELETE")
+            else:
+                log_to_client(f"✗ Failed to delete secret: {str(e)}", step="DELETE_ERROR")
+
+        # Send final status
+        if deletion_results["deployment"] or deletion_results["service"]:
+            log_to_client(f"Deletion completed for {deploy_name}", step="DELETE_COMPLETE")
+            socketio.emit("delete_status", {
+                "status": "SUCCESS",
+                "deployment_name": deploy_name,
+                "namespace": target_namespace,
+                "deleted": deletion_results,
+                "message": f"Successfully deleted resources for {deploy_name}"
+            })
+        else:
+            log_to_client(f"No resources found to delete for {deploy_name}", step="DELETE_COMPLETE")
+            socketio.emit("delete_status", {
+                "status": "NOT_FOUND",
+                "deployment_name": deploy_name,
+                "namespace": target_namespace,
+                "message": f"No resources found for {deploy_name}"
+            })
+
+    except Exception as e:
+        error_msg = f"Deletion failed: {str(e)}"
+        log_to_client(error_msg, step="DELETE_ERROR")
+        socketio.emit("delete_status", {"status": "ERROR", "message": error_msg})
 
 
 @socketio.on("start_pipeline")
@@ -83,7 +389,9 @@ def handle_pipeline_trigger(data):
         )
         s3 = boto3.client(
             "s3",
-            endpoint_url=data.get("minio_endpoint") or os.getenv("MINIO_ENDPOINT"),
+            endpoint_url= os.getenv("MINIO_ENDPOINT"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key= os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION", "us-east-1"),
         )
         local_zip = os.path.join(DOWNLOAD_DIR, "source.zip")
@@ -91,16 +399,34 @@ def handle_pipeline_trigger(data):
         log_to_client("Download complete.", step="DOWNLOAD")
         #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
         deploy_name = data["deployment_name"]
+
+        # Sanitize deployment name to meet Kubernetes DNS-1035 requirements:
+        # - Must start with alphabetic character
+        # - Only lowercase alphanumeric and hyphens
+        # - End with alphanumeric character
+        import re
+        deploy_name = deploy_name.lower()
+        deploy_name = re.sub(r'[^a-z0-9-]', '-', deploy_name)  # Replace invalid chars with hyphen
+        if deploy_name[0].isdigit() or deploy_name[0] == '-':
+            deploy_name = 'app-' + deploy_name  # Prepend 'app-' if starts with digit or hyphen
+        deploy_name = re.sub(r'-+', '-', deploy_name)  # Remove consecutive hyphens
+        deploy_name = deploy_name.strip('-')  # Remove leading/trailing hyphens
+
         target_namespace = data.get("namespace", "aipns")
 
 
-        base_repo = data["target_image_tag"].split(":")[0]  # e.g., acr.../test-adk-app
+        # Replace localhost:5000 with the cluster-internal registry (using ClusterIP for kubelet compatibility)
+        base_repo = data["target_image_tag"].rsplit(":", 1)[0]  # e.g., localhost:5000/test-adk-app
+        base_repo = base_repo.replace("localhost:5000", "10.104.220.183:5000")
+        # Normalize any DNS or NodePort references to ClusterIP
+        base_repo = base_repo.replace("192.168.28.41:32000", "10.104.220.183:5000")
+        base_repo = base_repo.replace("registry.container-registry.svc.cluster.local:5000", "10.104.220.183:5000")
         #tag  =  data["target_image_tag"].split(":")[1]
         #if not acr_tag_exists("acrreq0762935.azurecr.io", base_repo, tag, "/root/.docker/config.json"):
          #raise Exception(f"Push check failed: {image_tag} not present in ACR")
 
         uniq_tag  = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
-        image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., ...:v1-20251217-1905
+        image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., registry.container-registry.svc.cluster.local:5000/test-adk-app:v1-20251217-1905
 
 
         # 3) UNZIP
@@ -190,6 +516,7 @@ def handle_pipeline_trigger(data):
             f"dockerfile={build_context_path}",
             "--output",
             f"type=image,name={image_tag},push=true",
+            "--no-cache",
         ]
 
         process = subprocess.Popen(
@@ -275,9 +602,9 @@ def handle_pipeline_trigger(data):
                     )
                 )
                 k8s_core.create_namespaced_service(namespace=target_namespace, body=svc)
-        
 
-        
+
+
         ok = wait_for_deployment_ready(k8s_apps, deploy_name, target_namespace, 180)
         if not ok:
             raise Exception("Deployment did not become Ready within timeout")
