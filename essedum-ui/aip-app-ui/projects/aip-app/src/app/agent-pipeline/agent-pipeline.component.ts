@@ -2940,13 +2940,7 @@ public class ZipController {
   private async initializeDeleteWebSocket(): Promise<void> {
     console.log('  STARTING DELETE WEBSOCKET INITIALIZATION PROCESS');
     try {
-      console.log('  Step 1: Fetching datasource credentials for deletion...');
-      
-      // Fetch datasource credentials
-      const credentials = await this.fetchDatasourceCredentials();
-      console.log('  Step 2: Credentials fetched successfully for deletion');
-      
-      console.log('  Step 3: Connecting to WebSocket server for deletion...');
+      console.log('  Step 1: Connecting to WebSocket server for deletion...');
       
       const environmentUrl = this.getEnvironmentUrl();
       console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
@@ -2963,7 +2957,7 @@ public class ZipController {
       
       // Connection successful
       this.socket.on('connect', () => {
-        console.log('  Step 4: WebSocket connected for deletion! Preparing delete payload...');
+        console.log('  Step 2: WebSocket connected for deletion! Preparing delete payload...');
         
         // Use the same deployment name as used in deployment
         const deploymentName = this.currentDeploymentName || this.pipelineAlias?.toString() || 'DEFAULT-AGENT';
@@ -2973,10 +2967,10 @@ public class ZipController {
           namespace: 'aipns'
         };
         
-        console.log('  Step 5: Sending delete_deployment event with payload:', deletePayload);
+        console.log('  Step 3: Sending delete_deployment event with payload:', deletePayload);
         this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
         this.socket?.emit('delete_deployment', deletePayload);
-        console.log('  Step 6: delete_deployment event emitted to WebSocket');
+        console.log('  Step 4: delete_deployment event emitted to WebSocket');
       });
       
       // Delete status event
@@ -3200,59 +3194,14 @@ public class ZipController {
   /**
    * Fetch datasource credentials from the API
    */
-  private async fetchDatasourceCredentials(): Promise<{accessKey: string, secretKey: string, url: string}> {
-    try {
-      const apiUrl = this.baseUrl + '/service/v1/fetchDatasource?name=LEOSMPL-78048&org=leo1311';
-      console.log('  FETCHING DATASOURCE CREDENTIALS FROM:', apiUrl);
-      
-      const response = await this.http.get<any[]>(apiUrl).toPromise();
-      console.log('  DATASOURCE API RESPONSE:', response);
-      
-      if (response && response.length > 0) {
-        const datasource = response[0];
-        console.log('  DATASOURCE OBJECT:', datasource);
-        const connectionDetails = JSON.parse(datasource.connectionDetails);
-        console.log('  CONNECTION DETAILS:', connectionDetails);
-        
-        const credentials = {
-          accessKey: connectionDetails.accessKey,
-          secretKey: connectionDetails.secretKey,
-          url: connectionDetails.url
-        };
-        console.log('  EXTRACTED CREDENTIALS:', {
-          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
-          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
-          url: credentials.url
-        });
-        
-        return credentials;
-      } else {
-        console.error('  NO DATASOURCE FOUND IN RESPONSE');
-        throw new Error('No datasource found in response');
-      }
-    } catch (error) {
-      console.error('  ERROR FETCHING DATASOURCE CREDENTIALS:', error);
-      throw new Error(`Failed to fetch datasource credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
   /**
    * Initialize WebSocket connection for deployment pipeline
    */
  private initializeWebSocket(): void {
     console.log('  STARTING WEBSOCKET INITIALIZATION PROCESS');
     try {
-      console.log('  Step 1: Fetching datasource credentials...');
-      // First fetch datasource credentials
-      this.fetchDatasourceCredentials().then((credentials) => {
-        console.log('  Step 2: Credentials fetched successfully:', {
-          accessKey: credentials.accessKey ? 'PRESENT' : 'MISSING',
-          secretKey: credentials.secretKey ? 'PRESENT' : 'MISSING',
-          url: credentials.url
-        });
-       
-        console.log('  Step 3: Connecting to WebSocket server...');
-        // Connect to the WebSocket server after getting credentials
+      console.log('  Step 1: Connecting to WebSocket server...');
+      // Connect to the WebSocket server
       //  const webSocketUrl = 'http://100.78.49.149/';
         //console.log(' WebSocket connecting to URL:', webSocketUrl);
        // this.socket = io(webSocketUrl, {
@@ -3278,16 +3227,16 @@ public class ZipController {
 	});  
         // Connection successful
         this.socket.on('connect', () => {
-          console.log('  Step 4: WebSocket connected! Fetching deployment alias...');
+          console.log('  Step 2: WebSocket connected! Fetching deployment alias...');
           // First fetch the streaming service to get the alias for deployment_name
           const organization = this.getOrganization();
           const streamingServiceUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
           
-          console.log('  Step 4.1: Fetching streaming service alias from:', streamingServiceUrl);
+          console.log('  Step 2.1: Fetching streaming service alias from:', streamingServiceUrl);
           this.addToConsole(`Fetching deployment configuration...`);
           
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
-            console.log('  Step 4.2: Streaming service response:', streamingResponse);
+            console.log('  Step 2.2: Streaming service response:', streamingResponse);
             
             // CRITICAL: Update selectedAgent with alias from streaming service API response
             if (streamingResponse && streamingResponse.alias) {
@@ -3296,7 +3245,7 @@ public class ZipController {
               }
               this.selectedAgent.alias = streamingResponse.alias;
               this.selectedAgent.cname = streamingResponse.name || this.currentCname;
-              console.log('  Step 4.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
+              console.log('  Step 2.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
             }
             // Use alias from selected card (uppercase)
             const deploymentAlias = (this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT').toLowerCase();
@@ -3304,11 +3253,11 @@ public class ZipController {
             
  // Now prepare payload with deployment_name from alias
             const apiParams = this.getApiParametersForMode();
-     console.log('  Step 4.3: Using deployment alias:', deploymentAlias);
+     console.log('  Step 2.3: Using deployment alias:', deploymentAlias);
             
             // Generate dynamic target_image_tag from config
             const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
-            console.log('  Step 4.5: Generated dynamic target_image_tag:', targetImageTag);
+            console.log('  Step 2.4: Generated dynamic target_image_tag:', targetImageTag);
             
             // Determine deployment name based on pipeline mode
             const deploymentName = this.pipelineMode === 'mcp' 
@@ -3327,11 +3276,11 @@ public class ZipController {
               interface: apiParams.interface
             };
            
-            console.log('  Step 5: Sending start_pipeline event with dynamic payload:', payload);
+            console.log('  Step 3: Sending start_pipeline event with dynamic payload:', payload);
             this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentName}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
-            console.log('  Step 6: start_pipeline event emitted to WebSocket');
+            console.log('  Step 4: start_pipeline event emitted to WebSocket');
           }).catch((error) => {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
@@ -3343,7 +3292,7 @@ public class ZipController {
             
             // Generate dynamic target_image_tag from config for fallback
             const fallbackTargetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${fallbackDeploymentName}:${pipelineConfig.containerRegistry.imageVersion}`;
-            console.log('  Step 5 (Fallback): Generated dynamic target_image_tag:', fallbackTargetImageTag);
+            console.log('  Step 3 (Fallback): Generated dynamic target_image_tag:', fallbackTargetImageTag);
             
             const fallbackPayload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
@@ -3357,7 +3306,7 @@ public class ZipController {
               interface: apiParams.interface
             };
             
-            console.log('  Step 5 (Fallback): Using fallback payload due to API error:', fallbackPayload);
+            console.log('  Step 3 (Fallback): Using fallback payload due to API error:', fallbackPayload);
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
@@ -3415,13 +3364,7 @@ public class ZipController {
             this.deploymentStatusMessage = 'Connection lost during deployment. Playground is disabled.';
             this.isPlaygroundEnabled = false;
           }
-        });      }).catch((error) => {
-        this.addToConsole(`Failed to fetch datasource credentials: ${error.message}`);
-        this.deploymentStatus = 'error';
-        this.deploymentStatusMessage = 'Failed to initialize deployment. Playground is disabled.';
-        this.isPlaygroundEnabled = false;
-        this.isRunningAndDeploying = false;
-      });
+        });
  
     } catch (error) {
       this.addToConsole(`Failed to initialize WebSocket: ${error}`);
