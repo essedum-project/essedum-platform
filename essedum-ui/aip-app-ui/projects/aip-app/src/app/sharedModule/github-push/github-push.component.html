@@ -66,10 +66,10 @@
         </button>
       </div>
 
-      <!-- Authenticated or Pull Mode (No Auth Required) -->
-      <div *ngIf="(isAuthenticated && !isLoading) || (mode === 'pull' && !isLoading)" class="content-section">
-        <!-- User Info (Push Mode Only) -->
-        <div class="user-info" *ngIf="mode === 'push'">
+      <!-- Authenticated (Both Push and Pull Mode) -->
+      <div *ngIf="isAuthenticated && !isLoading" class="content-section">
+        <!-- User Info -->
+        <div class="user-info">
           <p>Logged in as: <strong>{{ username }}</strong></p>
           <button class="btn btn-link" (click)="logout()">Logout</button>
         </div>
@@ -96,7 +96,7 @@
 
           <div class="form-group" *ngIf="branches.length > 0">
             <label for="branch-select">Select Branch *</label>
-            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch">
+            <select id="branch-select" class="form-control" [(ngModel)]="selectedBranch" (ngModelChange)="onBranchChange()">
               <option *ngFor="let branch of branches" [value]="branch">
                 {{ branch }}
               </option>
@@ -107,7 +107,7 @@
         <!-- Branch Selection (Pull Mode Only) -->
         <div class="form-group" *ngIf="mode === 'pull' && branches.length > 0">
           <label for="branch-select-pull">Select Branch *</label>
-          <select id="branch-select-pull" class="form-control" [(ngModel)]="selectedBranch">
+          <select id="branch-select-pull" class="form-control" [(ngModel)]="selectedBranch" (ngModelChange)="onBranchChange()">
             <option *ngFor="let branch of branches" [value]="branch">
               {{ branch }}
             </option>
@@ -135,17 +135,10 @@
           </small>
         </div>
 
-        <!-- Local Path (Optional - can be hidden) -->
-        <!-- <div class="form-group">
-          <label for="local-path">Server Path</label>
-          <input type="text" id="local-path" class="form-control" [(ngModel)]="localPath"
-            placeholder="/server/path/to/files">
-          <small class="form-text">Path on server where files are located</small>
-        </div> -->
       </div>
     </div>
 
-    <div class="modal-footer" *ngIf="((isAuthenticated && !isLoading) || (mode === 'pull' && !isLoading))">
+    <div class="modal-footer" *ngIf="isAuthenticated && !isLoading">
       <button class="btn btn-primary" (click)="executeAction()" [disabled]="!canExecuteAction()">
          {{ getButtonText() }}
       </button>

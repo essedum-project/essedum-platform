@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,8 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.dataset.service.IICIPDatasetService;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
 import com.lfn.icip.dataset.service.IICIPSchemaRegistryService;
@@ -178,17 +175,5 @@ public class ICIPGroupModelController {
 		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, entity)).build();
 	}
 
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
 
 }

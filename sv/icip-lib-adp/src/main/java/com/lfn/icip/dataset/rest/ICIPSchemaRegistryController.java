@@ -30,7 +30,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -305,18 +304,5 @@ public class ICIPSchemaRegistryController {
 		return new ResponseEntity<>(schemaRegistryService.getNameAndAlias(groupName, org), new HttpHeaders(), HttpStatus.OK);
 	}
 
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
-	
-	
 
 }

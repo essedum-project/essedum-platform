@@ -24,7 +24,19 @@
         </button>
         
         <button mat-raised-button 
+                color="primary"
+                class="delete-deployment-button action-btn"
+                (click)="onDeleteDeployment()" 
+                [disabled]="!canDeleteDeployment"
+                [matTooltip]="pipelineMode === 'mcp' ? 'Delete MCP Server Deployment' : 'Delete Agent Deployment'" 
+                matTooltipPosition="above">
+          <mat-icon>{{ isDeletingDeployment ? 'hourglass_empty' : 'delete_sweep' }}</mat-icon>
+          <span class="button-label">{{ isDeletingDeployment ? 'Deleting...' : 'Delete Deployment' }}</span>
+        </button>
+        
+        <button mat-raised-button 
                 class="playground-button action-btn"
+                *ngIf="pipelineMode !== 'mcp'"
                 [class.playground-disabled]="!canOpenPlayground"
                 [disabled]="!canOpenPlayground"
                 (click)="onOpenPlayground()"
@@ -32,17 +44,6 @@
                 matTooltipPosition="above">
           <mat-icon>smart_toy</mat-icon>
           <span class="button-label">Open Playground</span>
-        </button>
-        
-        <!-- Deploy Button - Show when deployment form data exists -->
-        <button mat-raised-button 
-                color="primary"
-                class="deploy-button action-btn"
-                *ngIf="hasDeploymentFormData"
-                [disabled]="isRunningAndDeploying || isCheckingDeploymentData"
-                [matTooltip]="deploymentEnvironment ? 'Deploy to ' + deploymentEnvironment : 'Deploy with saved configuration'"
-                matTooltipPosition="above">
-          <span class="button-label">{{ isRunningAndDeploying ? 'Deploying...' : (deploymentEnvironment ? 'Deploy to ' + deploymentEnvironment : 'Deploy') }}</span>
         </button>
       </div>
 

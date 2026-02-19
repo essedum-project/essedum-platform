@@ -1511,6 +1511,8 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
             <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" />
         </modifySql>
     </changeSet>
+    
+    
 
     <!-- Add JSON validation constraints and ON UPDATE trigger for deployment_form -->
     <changeSet author="Essedum (generated)" id="3v0-cip-deployment-form-constraints">
@@ -1531,6 +1533,61 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
         <sql dbms="mysql">
             ALTER TABLE deployment_form
             MODIFY COLUMN updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6);
+        </sql>
+    </changeSet>
+
+    <!-- GitHub Config Table - GitHub Repository Configuration Management -->
+    <changeSet author="Essedum (generated)" id="3v0-cip-github-config-table">
+        <createTable tableName="github_config">
+            <column autoIncrement="true" name="id" type="BIGINT UNSIGNED">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="cname" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="org" type="VARCHAR(255)" />
+            <column name="bname" type="VARCHAR(255)" />
+            <column name="repo" type="VARCHAR(255)" />
+            <column name="gituser" type="VARCHAR(255)" />
+            <column name="createdby" type="VARCHAR(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="createdat" type="TIMESTAMP(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="updatedby" type="VARCHAR(100)" />
+            <column name="updatedat" type="TIMESTAMP(6)" />
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" />
+        </modifySql>
+    </changeSet>
+
+    <!-- GitHub Config Table - Indexes and Constraints -->
+    <changeSet author="Essedum (generated)" id="3v0-cip-github-config-indexes">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="github_config" />
+        </preConditions>
+        <createIndex indexName="idx_github_config_cname" tableName="github_config">
+            <column name="cname" />
+        </createIndex>
+        <createIndex indexName="idx_github_config_org" tableName="github_config">
+            <column name="org" />
+        </createIndex>
+        <createIndex indexName="idx_github_config_cname_org" tableName="github_config" unique="true">
+            <column name="cname" />
+            <column name="org" />
+        </createIndex>
+    </changeSet>
+
+    <!-- GitHub Config Table - Auto-update timestamp -->
+    <changeSet author="Essedum (generated)" id="3v0-cip-github-config-timestamp">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="github_config" />
+        </preConditions>
+        <sql dbms="mysql">
+            ALTER TABLE github_config
+            MODIFY COLUMN updatedat TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6);
         </sql>
     </changeSet>
 

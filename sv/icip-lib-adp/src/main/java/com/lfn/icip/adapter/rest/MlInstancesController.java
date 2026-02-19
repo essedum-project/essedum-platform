@@ -61,15 +61,13 @@ public class MlInstancesController {
 	MlInstancesService mlInstancesService;
 
 	@PostMapping("/add")
-	public ResponseEntity<MlInstance> createMlInstance(@RequestBody MlInstance mlInstance)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlInstance> createMlInstance(@RequestBody MlInstance mlInstance) {
 		logger.info("creating MlInstance:{}", mlInstance.getName());
 		return new ResponseEntity<>(mlInstancesService.save(mlInstance), new HttpHeaders(), HttpStatus.OK);
 	}
 
 	@PostMapping("/update")
-	public ResponseEntity<MlInstance> updateMlAdapter(@RequestBody MlInstance mlInstance)
-			throws NoSuchAlgorithmException {
+	public ResponseEntity<MlInstance> updateMlAdapter(@RequestBody MlInstance mlInstance) {
 		logger.info("updating MlInstance:{}", mlInstance.getName());
 		return new ResponseEntity<>(mlInstancesService.updateMlInstance(mlInstance), new HttpHeaders(), HttpStatus.OK);
 	}

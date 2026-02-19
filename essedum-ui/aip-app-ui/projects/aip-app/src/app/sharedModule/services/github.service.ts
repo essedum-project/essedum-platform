@@ -7,7 +7,9 @@ import {
   AuthStatus,
   OAuthResponse,
   PushRequest,
-  PullRequest
+  PullRequest,
+  BranchToBranchPushRequest,
+  BranchPushResponse
 } from '../models/github.models';
 
 @Injectable({
@@ -93,6 +95,62 @@ export class GitHubService {
   pullFromGitHub(request: PullRequest): Observable<any> {
     return this.http.post(
       `${this.API_BASE}/pull`,
+      request,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Push code from source branch to destination branch
+   * This performs a merge/copy operation from source to destination
+   */
+  pushBranchToBranch(request: BranchToBranchPushRequest): Observable<BranchPushResponse> {
+    return this.http.post<BranchPushResponse>(
+      `${this.API_BASE}/push-branch-to-branch`,
+      request,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Save git configuration (repo, branch, etc.) to database
+   */
+  saveGitConfig(config: any): Observable<any> {
+    return this.http.post(
+      '/api/aip/git-configs/save',
+      config,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Get collaborators/reviewers for a repository
+   * @param repo - Repository name in format 'owner/repo'
+   * Returns array of collaborators with various possible field formats
+   */
+  getCollaborators(repo: string): Observable<any> {
+    return this.http.get<any>(
+      `${this.API_BASE}/collaborators`,
+      {
+        params: { repo: repo },
+        withCredentials: true
+      }
+    );
+  }
+
+  /**
+   * Create a pull request
+   * @param request - Pull request details
+   */
+  createPullRequest(request: {
+    repoName: string;
+    title: string;
+    sourceBranch: string;
+    targetBranch: string;
+    reviewers?: string[];
+  }): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_BASE}/create-pull-request`,
       request,
       { withCredentials: true }
     );

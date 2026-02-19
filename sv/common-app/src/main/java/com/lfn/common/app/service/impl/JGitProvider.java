@@ -201,6 +201,89 @@ public class JGitProvider implements GitStorageProvider {
     }
 
     /**
+     * Automatically detect the default/base branch of the repository
+     * Checks in order: remote HEAD, 'main', 'master', then first available branch
+     *
+     * @param git Git repository instance
+     * @return The name of the default branch, or null if repository is empty
+     */
+    private String detectDefaultBranch(Git git) {
+        try {
+            // First, try to get the default branch from remote HEAD
+            log.info("Detecting default branch from remote HEAD...");
+
+            // List all remote refs
+            for (Ref ref : git.getRepository().getRefDatabase().getRefs()) {
+                String refName = ref.getName();
+
+                // Check if this is the remote HEAD symbolic ref
+                if (refName.equals("refs/remotes/origin/HEAD")) {
+                    // Get what it points to
+                    Ref target = git.getRepository().getRefDatabase().peel(ref);
+                    if (target.isSymbolic()) {
+                        String targetName = target.getTarget().getName();
+                        // Extract branch name from refs/remotes/origin/branch-name
+                        if (targetName.startsWith("refs/remotes/origin/")) {
+                            String branchName = targetName.substring("refs/remotes/origin/".length());
+                            log.info("Detected default branch from remote HEAD: {}", branchName);
+                            return branchName;
+                        }
+                    } else if (ref.getObjectId() != null) {
+                        // If HEAD is pointing to a specific commit, try to find which branch
+                        ObjectId headCommit = ref.getObjectId();
+                        for (Ref branchRef : git.getRepository().getRefDatabase().getRefs()) {
+                            if (branchRef.getName().startsWith("refs/remotes/origin/")
+                                && !branchRef.getName().equals("refs/remotes/origin/HEAD")) {
+                                if (branchRef.getObjectId().equals(headCommit)) {
+                                    String branchName = branchRef.getName().substring("refs/remotes/origin/".length());
+                                    log.info("Detected default branch from HEAD commit: {}", branchName);
+                                    return branchName;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If remote HEAD detection failed, check for common default branches
+            log.info("Remote HEAD not found, checking for common default branches...");
+
+            // Check if 'main' exists
+            for (Ref ref : git.getRepository().getRefDatabase().getRefs()) {
+                if (ref.getName().equals("refs/remotes/origin/main")) {
+                    log.info("Found 'main' branch");
+                    return "main";
+                }
+            }
+
+            // Check if 'master' exists
+            for (Ref ref : git.getRepository().getRefDatabase().getRefs()) {
+                if (ref.getName().equals("refs/remotes/origin/master")) {
+                    log.info("Found 'master' branch");
+                    return "master";
+                }
+            }
+
+            // If neither main nor master exists, return the first remote branch found
+            for (Ref ref : git.getRepository().getRefDatabase().getRefs()) {
+                String refName = ref.getName();
+                if (refName.startsWith("refs/remotes/origin/") && !refName.endsWith("/HEAD")) {
+                    String branchName = refName.substring("refs/remotes/origin/".length());
+                    log.info("Using first available branch as default: {}", branchName);
+                    return branchName;
+                }
+            }
+
+            log.warn("No remote branches found, repository might be empty");
+            return null;
+
+        } catch (Exception e) {
+            log.warn("Failed to detect default branch: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Configure JGit to bypass SSL verification
      * WARNING: Use only for development/testing
      */
@@ -248,17 +331,6 @@ public class JGitProvider implements GitStorageProvider {
 
             // Initialize git repository
             try (Git git = Git.init().setDirectory(repoDir).call()) {
-                // Write all files to the temporary directory
-                for (FileContent file : files) {
-                    Path filePath = tempDir.resolve(file.getPath());
-
-                    // Create parent directories if they don't exist
-                    Files.createDirectories(filePath.getParent());
-
-                    // Write file content
-                    Files.write(filePath, file.getContent().getBytes(StandardCharsets.UTF_8));
-                    log.debug("Created file: {}", file.getPath());
-                }
 
                 // Configure credentials
                 UsernamePasswordCredentialsProvider credentials =
@@ -271,12 +343,97 @@ public class JGitProvider implements GitStorageProvider {
                    .call();
                 log.info("Added remote origin: {}", remoteUrl);
 
-                // Create orphan branch (fresh start)
-                git.checkout()
-                   .setOrphan(true)
-                   .setName(branch)
-                   .call();
-                log.info("Created orphan branch: {}", branch);
+                // Fetch remote branches to get history
+                try {
+                    log.info("Fetching remote branches to maintain commit history...");
+                    git.fetch()
+                       .setRemote("origin")
+                       .setCredentialsProvider(credentials)
+                       .call();
+                    log.info("Successfully fetched remote branches");
+                } catch (Exception e) {
+                    log.warn("Could not fetch remote branches (repository might be empty): {}", e.getMessage());
+                }
+
+                // Try to checkout the target branch or create it from a base branch
+                boolean branchExists = false;
+                try {
+                    // Try to checkout the existing branch
+                    git.checkout()
+                       .setName(branch)
+                       .setCreateBranch(true)
+                       .setStartPoint("origin/" + branch)
+                       .call();
+                    log.info("Checked out existing branch: {}", branch);
+                    branchExists = true;
+                } catch (Exception e) {
+                    // Branch doesn't exist, create it from default/base branch
+                    log.info("Branch '{}' doesn't exist remotely, detecting base branch...", branch);
+
+                    // Automatically detect the default branch
+                    String baseBranch = detectDefaultBranch(git);
+
+                    if (baseBranch != null) {
+                        try {
+                            // Create from detected base branch to maintain history
+                            git.checkout()
+                               .setName(baseBranch)
+                               .setCreateBranch(true)
+                               .setStartPoint("origin/" + baseBranch)
+                               .call();
+                            log.info("Checked out base branch: {}", baseBranch);
+
+                            // Now create target branch from base branch
+                            git.checkout()
+                               .setName(branch)
+                               .setCreateBranch(true)
+                               .setStartPoint(baseBranch)
+                               .call();
+                            log.info("Created branch '{}' from detected base branch '{}' to maintain commit history", branch, baseBranch);
+                        } catch (Exception ex) {
+                            log.warn("Failed to create branch from detected base '{}': {}", baseBranch, ex.getMessage());
+                            // Fall back to orphan branch
+                            git.checkout()
+                               .setOrphan(true)
+                               .setName(branch)
+                               .call();
+                            log.info("Created orphan branch '{}' as fallback", branch);
+                        }
+                    } else {
+                        // Repository is empty, create orphan branch
+                        git.checkout()
+                           .setOrphan(true)
+                           .setName(branch)
+                           .call();
+                        log.info("Created orphan branch '{}' (repository is empty)", branch);
+                    }
+                }
+
+                // Clean existing files (except .git folder) to ensure clean state
+                if (branchExists) {
+                    log.info("Cleaning existing files from working directory...");
+                    File[] existingFiles = repoDir.listFiles();
+                    if (existingFiles != null) {
+                        for (File file : existingFiles) {
+                            if (!file.getName().equals(".git")) {
+                                deleteDirectory(file);
+                            }
+                        }
+                    }
+                }
+
+                // Write all new files to the directory
+                for (FileContent file : files) {
+                    Path filePath = tempDir.resolve(file.getPath());
+
+                    // Create parent directories if they don't exist
+                    Files.createDirectories(filePath.getParent());
+
+                    // Write file content
+                    Files.write(filePath, file.getContent().getBytes(StandardCharsets.UTF_8));
+                    log.debug("Created file: {}", file.getPath());
+                }
+                log.info("Wrote {} files to working directory", files.size());
 
                 // Add all files
                 git.add()

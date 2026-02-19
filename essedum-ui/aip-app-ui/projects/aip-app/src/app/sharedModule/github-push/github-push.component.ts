@@ -3,7 +3,7 @@ import { GitHubService } from '../services/github.service';
 import { GitHubRepository, PushRequest, PullRequest } from '../models/github.models';
 import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.service';
 import JSZip from 'jszip';
-
+import { Services } from '../../services/service';
 @Component({
   selector: 'app-github-push',
   templateUrl: './github-push.component.html',
@@ -12,7 +12,7 @@ import JSZip from 'jszip';
 export class GitHubPushComponent implements OnInit {
   @Input() mode: 'push' | 'pull' = 'push';
   @Output() zipFileCreated = new EventEmitter<File>();
-  
+
   // Authentication state
   isAuthenticated = false;
   username = '';
@@ -29,7 +29,7 @@ export class GitHubPushComponent implements OnInit {
   useCustomMessage = false;
   commitMessage = '';
   localPath = '/server/path/to/files'; // Server-side path
-  
+
   // Pull mode specific
   repoUrl = '';
   extractedRepoName = '';
@@ -41,7 +41,8 @@ export class GitHubPushComponent implements OnInit {
 
   @Input() cname: string;
   constructor(private githubService: GitHubService,
-    private agentPipelineService: AgentPipelineService
+    private agentPipelineService: AgentPipelineService,
+    private service: Services,
   ) { }
 
   ngOnInit(): void {
@@ -57,6 +58,11 @@ export class GitHubPushComponent implements OnInit {
         this.isAuthenticated = status.authenticated;
         if (status.authenticated && status.githubUsername) {
           this.username = status.githubUsername;
+
+          // Store username in sessionStorage
+          sessionStorage.setItem('git_username', this.username);
+          //this.updateGitHubConfig();
+
           this.loadRepositories();
         }
       },
@@ -73,22 +79,18 @@ export class GitHubPushComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    // For pull mode, we don't need authentication
-    if (this.mode === 'pull') {
-      this.showModal = true;
-      return;
-    }
-
-    // For push mode, authentication is required
+    // Both push and pull modes require authentication
     if (!this.isAuthenticated) {
       // User needs to login - trigger login automatically
       this.login();
       return;
     }
 
-    // User already authenticated, show modal with repos
+    // User already authenticated, show modal
     this.showModal = true;
-    if (this.repositories.length === 0) {
+    
+    // Load repositories for push mode
+    if (this.mode === 'push' && this.repositories.length === 0) {
       this.loadRepositories();
     }
   }
@@ -97,7 +99,7 @@ export class GitHubPushComponent implements OnInit {
    * Get modal title based on mode
    */
   getModalTitle(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Upload from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Clone Repository from GitHub';
   }
 
   /**
@@ -127,6 +129,11 @@ export class GitHubPushComponent implements OnInit {
         this.isLoading = false;
         this.isAuthenticated = true;
         this.username = status.githubUsername || '';
+
+        // // Store username in sessionStorage
+        // sessionStorage.setItem('git_username', this.username);
+        //this.updateGitHubConfig();
+
         this.showModal = true;
         this.loadRepositories();
       },
@@ -152,6 +159,12 @@ export class GitHubPushComponent implements OnInit {
         this.branches = [];
         this.resetForm();
         this.isLoading = false;
+
+        // Clear sessionStorage
+        // sessionStorage.removeItem('git_username');
+        // sessionStorage.removeItem('git_selected_Repo');
+        // sessionStorage.removeItem('git_selected_branch');
+        // sessionStorage.removeItem('github_config');
 
         // Show message to user about logging out from GitHub
         this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
@@ -195,11 +208,18 @@ export class GitHubPushComponent implements OnInit {
     if (!this.selectedRepo) {
       this.branches = [];
       this.selectedRepoObject = null;
+      //sessionStorage.removeItem('git_selected_Repo');
+      //this.updateGitHubConfig();
       return;
     }
 
     // Find and store the selected repository object
     this.selectedRepoObject = this.repositories.find(repo => repo.fullName === this.selectedRepo) || null;
+
+    // Store selected repo in sessionStorage
+    //sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
+    this.loadSourceBranch();
+    //this.updateGitHubConfig();
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -207,7 +227,14 @@ export class GitHubPushComponent implements OnInit {
     this.githubService.getBranches(this.selectedRepo).subscribe({
       next: (branches) => {
         this.branches = branches;
-        this.selectedBranch = branches.length > 0 ? branches[0] : '';
+        if (!this.selectedBranch || !branches.includes(this.selectedBranch)) {
+          this.selectedBranch = branches.length > 0 ? branches[0] : '';
+        }
+
+        // Store selected branch in sessionStorage
+        //sessionStorage.setItem('git_selected_branch', this.selectedBranch);
+        //this.updateGitHubConfig();
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -216,6 +243,30 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Handle branch selection change
+   */
+  onBranchChange(): void {
+    if (this.selectedBranch) {
+      // Store selected branch in sessionStorage
+      //sessionStorage.setItem('git_selected_branch', this.selectedBranch);
+      //this.updateGitHubConfig();
+    }
+  }
+
+  /**
+   * Update GitHub config object in sessionStorage
+   */
+  // updateGitHubConfig(): void {
+  //   const githubConfig = {
+  //     git_username: sessionStorage.getItem('git_username') || this.username || '',
+  //     git_selected_Repo: sessionStorage.getItem('git_selected_Repo') || this.selectedRepo || '',
+  //     git_selected_branch: sessionStorage.getItem('git_selected_branch') || this.selectedBranch || ''
+  //   };
+
+  //sessionStorage.setItem('github_config', JSON.stringify(githubConfig));
+  //}
 
   /**
    * Handle repository URL input change (Pull mode only)
@@ -326,6 +377,7 @@ export class GitHubPushComponent implements OnInit {
           next: (response) => {
             this.isLoading = false;
             this.successMessage = response;
+            this.saveGitConfig();
             setTimeout(() => this.closeModal(), 2000);
           },
           error: (error) => {
@@ -371,15 +423,15 @@ export class GitHubPushComponent implements OnInit {
       next: (response) => {
         console.log('Pull response:', response);
         this.successMessage = 'Successfully pulled from GitHub! Creating ZIP file...';
-        
+
         // Convert files to ZIP
         this.createZipFromPulledFiles(response.files).then((zipFile) => {
           this.isLoading = false;
           this.successMessage = 'ZIP file created successfully!';
-          
+
           // Emit the zip file for parent component to handle upload
           this.zipFileCreated.emit(zipFile);
-          
+
           setTimeout(() => this.closeModal(), 2000);
         }).catch((error) => {
           this.isLoading = false;
@@ -398,12 +450,12 @@ export class GitHubPushComponent implements OnInit {
    */
   private async createZipFromPulledFiles(files: any[]): Promise<File> {
     const zip = new JSZip();
-    
+
     // For pull mode, use extracted repo name
-    const repoName = this.mode === 'pull' && this.extractedRepoName 
+    const repoName = this.mode === 'pull' && this.extractedRepoName
       ? this.extractedRepoName.split('/')[1] || 'repository'
       : this.selectedRepo.split('/')[1] || 'repository';
-      
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
     const zipFileName = `${repoName}-${this.selectedBranch}-${timestamp}.zip`;
 
@@ -411,17 +463,17 @@ export class GitHubPushComponent implements OnInit {
     for (const file of files) {
       const filePath = file.path || file.fileName || 'unknown';
       const content = file.content || '';
-      
+
       // Add file to zip with its path
       zip.file(filePath, content);
     }
 
     // Generate the zip file as a Blob
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-    
+
     // Convert Blob to File
     const zipFile = new File([zipBlob], zipFileName, { type: 'application/zip' });
-    
+
     return zipFile;
   }
 
@@ -446,6 +498,64 @@ export class GitHubPushComponent implements OnInit {
       return !!(this.repoUrl && this.extractedRepoName && this.selectedBranch);
     }
   }
+
+  /**
+   * Save git configuration after successful push
+   */
+  saveGitConfig(): void {
+    if (!this.cname || !this.selectedRepo || !this.selectedBranch) {
+      this.service.message('Missing required data for saving git config', 'warning');
+      return;
+    }
+
+    const currentUser = sessionStorage.getItem('username') || 'demo';
+    const gitConfigPayload = {
+      id: null,
+      cname: this.cname,
+      org: sessionStorage.getItem('organization'),
+      bname: this.selectedBranch,
+      repo: this.selectedRepo,
+      gituser: this.username,
+      createdby: currentUser,
+      createdat: new Date().toISOString(),
+      updatedby: currentUser,
+      updatedat: new Date().toISOString()
+    };
+
+    this.githubService.saveGitConfig(gitConfigPayload).subscribe({
+      next: (response) => {
+        this.service.message(
+          'Git config saved successfully.',
+          'success'
+        );
+      },
+      error: (error) => {
+        const errorMessage = error?.details || 'Failed to save git config';
+        this.service.message(errorMessage, 'error');
+      }
+    });
+  }
+
+  /**
+   * Load source branch from API and pre-populate if available
+   */
+  loadSourceBranch(): void {
+    if (!this.cname || !sessionStorage.getItem('organization')) {
+      return;
+    }
+    this.service.getGitConfig(this.cname, sessionStorage.getItem('organization')).subscribe(
+      (response) => {
+        if (response) {
+          this.selectedBranch = response.bname;
+        }
+      },
+      (error) => {
+        const errorMessage = error?.details || 'There is no saved source branch configuration';
+        console.log(errorMessage);
+      }
+    );
+  }
+
 
   /**
    * Reset form

@@ -7,6 +7,59 @@
   overflow: hidden; // Remove all scrollbars
 }
 
+// Finish button styling - rectangular blue like playground Run & Deploy button
+.finish-button {
+  min-width: 120px;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 8px 24px !important;
+  font-size: 14px !important;
+  font-weight: 500;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 4px;
+  color: #ffffff !important;
+  text-transform: none;
+  transition: all 0.3s ease;
+
+  &:not(:disabled) {
+    background-color: #0094ff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+
+    &:hover {
+      background-color: #0078cc !important;
+      box-shadow: 0 2px 8px rgba(0, 148, 255, 0.3);
+    }
+  }
+
+  &:disabled {
+    background-color: #e0e0e0 !important;
+    color: #9e9e9e !important;
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+// Required field asterisk styling
+.required-asterisk {
+  color: #dc3545;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+// Hide default Angular Material required asterisk
+:host ::ng-deep {
+  .mat-form-field-required-marker,
+  .mat-mdc-form-field-required-marker,
+  .mdc-floating-label--required::after,
+  .mat-form-field-label .mat-form-field-required-marker {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
 // Form actions container with finish and save buttons
 .form-actions {
   display: flex;
@@ -16,44 +69,6 @@
   padding: 16px 0;
   margin-top: 16px;
   border-top: 1px solid #e9ecef;
-
-  .finish-button {
-    min-width: 140px;
-    height: 30px !important;
-    min-height: 30px !important;
-    font-size: 12px !important;
-    line-height: 2;
-    font-weight: 400;
-    letter-spacing: 0px;
-    font-family: "Roboto", sans-serif !important;
-    border-radius: 16px;
-    color: #ffffff !important;
-    transition: all 0.3s ease;
-
-    &:not(:disabled) {
-      background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat,
-        #0052cc padding-box !important;
-      background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat padding-box !important;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-
-      &:hover {
-        box-shadow: 0 2px 6px rgba(0, 82, 204, 0.3);
-        transform: translateY(-1px);
-      }
-    }
-
-    &:disabled {
-      background: #e0e0e0 !important;
-      color: #9e9e9e !important;
-      cursor: not-allowed;
-      opacity: 1;
-    }
-  }
-
-  .mat-save-btn {
-    // Existing save button styles remain the same
-  }
 }
 
 // Note message below buttons
@@ -194,6 +209,12 @@
             border-color: #0094ff !important;
           }
         }
+
+        &.mat-mdc-radio-button-disabled {
+          .mdc-label {
+            color: #6c757d !important;
+          }
+        }
       }
     }
 
@@ -226,6 +247,12 @@
 
       .mdc-checkbox__background {
         border-color: #0094ff !important;
+      }
+
+      &.mat-mdc-checkbox-disabled {
+        .mdc-label {
+          color: #6c757d !important;
+        }
       }
     }
 
@@ -302,6 +329,32 @@
     position: relative;
   }
 
+  // Add custom arrow icon using ::after pseudo-element
+  .mat-mdc-select-trigger::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-image: url("/assets/images/Accordion_open.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+  }
+
+  // Remove background color for disabled text fields and select boxes
+  .mdc-text-field--filled.mdc-text-field--disabled {
+    background-color: transparent !important;
+  }
+
+  // Hide arrow for disabled select fields
+  .mat-mdc-select-disabled .mat-mdc-select-trigger::after {
+    display: none !important;
+  }
+
   // Material label styling
   mat-label {
     text-align: left;
@@ -318,6 +371,11 @@
     color: #000000 !important;
     opacity: 1;
     margin-left: 4px !important;
+
+    &:disabled {
+      color: #6c757d !important;
+      -webkit-text-fill-color: #6c757d !important;
+    }
   }
 
   .mat-mdc-form-field input.mat-mdc-input-element::placeholder,
@@ -340,12 +398,25 @@
     margin-left: 4px !important;
     resize: none !important; // Disable resize completely
     min-height: 60px;
+
+    &:disabled {
+      color: #6c757d !important;
+      -webkit-text-fill-color: #6c757d !important;
+    }
   }
 
   .mat-mdc-select {
     background-color: #f7f7f7ed !important;
     border-radius: 4px !important;
     margin-left: 4px !important;
+
+    &.mat-mdc-select-disabled {
+      color: #6c757d !important;
+
+      .mat-mdc-select-value {
+        color: #6c757d !important;
+      }
+    }
   }
 }
 
@@ -474,8 +545,8 @@ textarea.mat-style-input {
     gap: 10px;
 
     .finish-button {
-      min-width: 120px;
-      font-size: 13px;
+      min-width: 110px;
+      font-size: 12px;
       height: 36px;
     }
 
@@ -524,4 +595,16 @@ textarea.mat-style-input {
 ::ng-deep .cdk-overlay-pane .mat-mdc-select-panel {
   max-width: 80% !important;
   min-width: 80% !important;
+}
+
+.deploy-button-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+::ng-deep .mat-mdc-form-field-error {
+    margin-left: -20px !important;
 }

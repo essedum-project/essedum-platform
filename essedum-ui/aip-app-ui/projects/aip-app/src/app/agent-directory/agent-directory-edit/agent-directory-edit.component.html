@@ -352,7 +352,7 @@
                         <tbody>
                             <tr *ngFor="let locator of agentData.locators; let i = index">
                                 <td style="text-align: center" (click)="removeLocator(i)">
-                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-trash fa-2x remove-btn-icon"></i>
                                 </td>
                                 <td>
                                     <select style="height: 3rem" [(ngModel)]="locator.locator_type" class="form-control">
@@ -368,7 +368,7 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center" (click)="addLocator()">
-                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-plus fa-2x add-btn-icon"></i>
                                 </td>
                                 <td colspan="2"></td>
                             </tr>
@@ -407,7 +407,7 @@
                         <tbody>
                             <tr *ngFor="let extension of agentData.extensions; let i = index">
                                 <td style="text-align: center" (click)="removeExtension(i)">
-                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-trash fa-2x remove-btn-icon"></i>
                                 </td>
                                 <td>
                                     <input style="height: 3rem" [(ngModel)]="extension.key" class="form-control"
@@ -425,7 +425,7 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center" (click)="addExtension()">
-                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-plus fa-2x add-btn-icon"></i>
                                 </td>
                                 <td colspan="3"></td>
                             </tr>
@@ -467,7 +467,7 @@
                         <tbody>
                             <tr *ngFor="let sync of agentData.syncs; let i = index">
                                 <td style="text-align: center" (click)="removeSync(i)">
-                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-trash fa-2x remove-btn-icon"></i>
                                 </td>
                                 <td>
                                     <input style="height: 3rem" [(ngModel)]="sync.target" class="form-control"
@@ -483,7 +483,7 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center" (click)="addSync()">
-                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-plus fa-2x add-btn-icon"></i>
                                 </td>
                                 <td colspan="2"></td>
                             </tr>
@@ -525,7 +525,7 @@
                         <tbody>
                             <tr *ngFor="let publication of agentData.publications; let i = index">
                                 <td style="text-align: center" (click)="removePublication(i)">
-                                    <i class="fa fa-trash fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-trash fa-2x remove-btn-icon"></i>
                                 </td>
                                 <td>
                                     <input style="height: 3rem" [(ngModel)]="publication.channel" class="form-control"
@@ -541,7 +541,7 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center" (click)="addPublication()">
-                                    <i class="fa fa-plus fa-2x" style="font-size: large; cursor: pointer;"></i>
+                                    <i class="fa fa-plus fa-2x add-btn-icon"></i>
                                 </td>
                                 <td colspan="2"></td>
                             </tr>

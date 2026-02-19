@@ -20,7 +20,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/github/oauth")
-@CrossOrigin(origins = "*")
 public class GitHubOAuthController {
 
     @Autowired
