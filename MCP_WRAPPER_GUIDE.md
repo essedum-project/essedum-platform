@@ -68,7 +68,7 @@ Containerize the MCP server application.
 
 Create:
 1. Dockerfile with:
-   - Python 3.10+ base image
+   - Python 3.11+ base image
    - Install all dependencies from requirements.txt
    - Copy application code
    - Expose port 8000
@@ -274,4 +274,3 @@ your-project/
 ├── docker-compose.yml         # ✨ Created by Copilot
 └── .dockerignore              # ✨ Created by Copilot
 ```
-
