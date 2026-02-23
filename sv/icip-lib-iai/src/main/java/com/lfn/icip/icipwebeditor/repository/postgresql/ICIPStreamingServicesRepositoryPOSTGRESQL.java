@@ -25,7 +25,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.icip.icipwebeditor.model.ICIPImageSaving;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices3DTO;

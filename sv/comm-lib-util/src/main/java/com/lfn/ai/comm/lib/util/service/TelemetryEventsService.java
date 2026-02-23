@@ -2,7 +2,6 @@ package com.lfn.ai.comm.lib.util.service;
 
 import java.util.Map;
 
-import org.json.JSONObject;
 
 import com.lfn.ai.comm.lib.util.telemetry.domain.OpenTelemetryEvents;
 import com.lfn.ai.comm.lib.util.telemetry.domain.TelemetryEvents;

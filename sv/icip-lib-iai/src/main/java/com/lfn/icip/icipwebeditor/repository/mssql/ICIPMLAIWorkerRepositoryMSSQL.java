@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorker;
-import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorkerConfig;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLAIWorkerRepository;
 
 

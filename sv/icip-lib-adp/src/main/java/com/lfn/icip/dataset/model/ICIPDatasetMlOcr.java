@@ -19,12 +19,10 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import com.lfn.ai.comm.lib.util.listener.AuditListener;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

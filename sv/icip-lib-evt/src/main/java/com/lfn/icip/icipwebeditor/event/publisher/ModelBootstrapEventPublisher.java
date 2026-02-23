@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.lfn.icip.icipwebeditor.event.listener.ModelBootstrapEventListener;
 
 // TODO: Auto-generated Javadoc
 /**

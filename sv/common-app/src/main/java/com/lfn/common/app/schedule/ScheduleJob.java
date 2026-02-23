@@ -1,7 +1,6 @@
 package com.lfn.common.app.schedule;
 
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.iamp.usm.service.UserApiPermissionsService;
 import com.lfn.iamp.usm.service.UsmPermissionApiService;
 
 import org.springframework.beans.factory.annotation.Autowired;

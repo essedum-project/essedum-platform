@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
-import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
 
 // TODO: Auto-generated Javadoc

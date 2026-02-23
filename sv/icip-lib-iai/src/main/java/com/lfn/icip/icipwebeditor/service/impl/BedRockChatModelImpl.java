@@ -22,19 +22,15 @@ import software.amazon.awssdk.regions.Region;
 
 
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.bedrock.BedrockAnthropicMessageChatModel;
 import dev.langchain4j.model.bedrock.BedrockCohereChatModel;
 import dev.langchain4j.model.bedrock.BedrockLlamaChatModel;
 import dev.langchain4j.model.bedrock.BedrockMistralAiChatModel;
 import dev.langchain4j.model.bedrock.BedrockTitanChatModel;
-import dev.langchain4j.model.bedrock.internal.AbstractBedrockChatModel;
-import dev.langchain4j.model.bedrock.internal.AbstractBedrockChatModel.AbstractBedrockChatModelBuilder;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.output.Response;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;

@@ -47,7 +47,6 @@ import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.executor.sync.service.JobSyncExecutorService;
-import com.lfn.icip.icipwebeditor.job.ICIPNativeServiceJob;
 import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
 import com.lfn.icip.icipwebeditor.job.model.ChainObject;
 import com.lfn.icip.icipwebeditor.job.model.ChainObject.ChainJobElement2;

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.properties.ProxyProperties;
 import com.lfn.icip.dataset.service.util.ICIPDataSourceServiceUtil;

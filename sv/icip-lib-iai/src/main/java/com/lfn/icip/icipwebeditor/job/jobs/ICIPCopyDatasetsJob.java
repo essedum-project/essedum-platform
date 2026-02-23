@@ -17,37 +17,15 @@ package com.lfn.icip.icipwebeditor.job.jobs;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import jakarta.persistence.EntityNotFoundException;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.TrustStrategy;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -60,34 +38,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.RestClientUtil;
-import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 //import com.lfn.iamp.ied.service.CopyBlueprintService;
 //import com.lfn.iamp.ied.web.rest.CopyBlueprintResource;
 //import com.lfn.iamp.usm.domain.Project;
 //import com.lfn.iamp.usm.service.ProjectService;
 import com.lfn.icip.dataset.service.impl.ICIPAdpService;
-import com.lfn.icip.icipwebeditor.event.model.InternalEvent;
 import com.lfn.icip.icipwebeditor.event.publisher.InternalEventPublisher;
 import com.lfn.icip.icipwebeditor.job.enums.JobMetadata;
 import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
 import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPInternalJobsService;
 import com.lfn.icip.icipwebeditor.rest.ICIPJobsController;
-import com.lfn.icip.icipwebeditor.service.impl.ICIPIaiService;
-import com.nimbusds.jose.proc.BadJOSEException;
 
 import ch.qos.logback.classic.LoggerContext;
 import lombok.Setter;
 
-import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 
 
 // 

@@ -33,7 +33,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import jakarta.persistence.CascadeType;
 
 // TODO: Auto-generated Javadoc
 /**

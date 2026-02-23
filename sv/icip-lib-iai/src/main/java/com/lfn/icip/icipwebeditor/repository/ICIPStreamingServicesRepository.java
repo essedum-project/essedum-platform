@@ -22,14 +22,12 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.icip.icipwebeditor.model.ICIPApps;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices3DTO;

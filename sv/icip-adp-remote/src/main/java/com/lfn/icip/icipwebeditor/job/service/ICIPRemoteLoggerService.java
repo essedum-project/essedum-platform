@@ -1,24 +1,12 @@
 package com.lfn.icip.icipwebeditor.job.service;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,11 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
@@ -52,7 +35,6 @@ import com.lfn.ai.comm.lib.util.swagger.client.JSON;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourcePluginsService;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
-import com.lfn.icip.dataset.service.util.IICIPDataSourceServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.job.service.util.ICIPInitializeAnnotationServiceUtil;
@@ -62,8 +44,6 @@ import com.lfn.icip.icipwebeditor.repository.ICIPJobsRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPJobRuntimeLoggerService;
 
 import lombok.extern.log4j.Log4j2;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 
 @Log4j2

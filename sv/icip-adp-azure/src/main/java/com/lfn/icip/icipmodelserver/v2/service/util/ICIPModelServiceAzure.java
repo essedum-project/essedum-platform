@@ -51,9 +51,6 @@ import com.lfn.icip.icipwebeditor.model.FedModelsID;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
-import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
-import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedEndpointService;
-import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedModelService;
 
 @Component("azuremodelservice")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

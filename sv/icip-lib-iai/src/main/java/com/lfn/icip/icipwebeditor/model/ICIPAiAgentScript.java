@@ -17,7 +17,6 @@ package com.lfn.icip.icipwebeditor.model;
 
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeScriptDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,7 +27,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.time.Instant;
 
 // TODO: Auto-generated Javadoc
 // 

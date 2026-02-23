@@ -1,18 +1,12 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,7 +28,6 @@ import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
-import com.lfn.icip.icipwebeditor.job.quartz.model.QrtzTriggers;
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorker;
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorkerConfig;
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorkerLogs;

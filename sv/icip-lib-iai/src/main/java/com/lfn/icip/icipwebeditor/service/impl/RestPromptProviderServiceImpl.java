@@ -16,13 +16,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,63 +27,35 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.properties.HttpClientUtil;
 import com.lfn.icip.dataset.properties.ProxyProperties;
-import com.lfn.icip.dataset.service.impl.ICIPDatasetPluginsService;
 import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
-import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
-import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
 import com.lfn.icip.dataset.util.ICIPRestPluginUtils;
 import com.lfn.icip.icipwebeditor.model.ICIPPrompts;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptChatModel;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptService;
 
-import software.amazon.awssdk.regions.Region;
 
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.bedrock.BedrockAnthropicMessageChatModel;
-import dev.langchain4j.model.bedrock.BedrockCohereChatModel;
-import dev.langchain4j.model.bedrock.BedrockLlamaChatModel;
-import dev.langchain4j.model.bedrock.BedrockMistralAiChatModel;
-import dev.langchain4j.model.bedrock.BedrockTitanChatModel;
-import dev.langchain4j.model.bedrock.internal.AbstractBedrockChatModel;
-import dev.langchain4j.model.bedrock.internal.AbstractBedrockChatModel.AbstractBedrockChatModelBuilder;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
-import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.output.Response;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 @Service("restchatmodel")
 public class RestPromptProviderServiceImpl implements ICIPPromptChatModel {

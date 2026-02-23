@@ -20,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;

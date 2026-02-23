@@ -1,10 +1,7 @@
 package com.lfn.icip.icipwebeditor.model;
 
-import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.lfn.ai.comm.lib.util.domain.BaseDomain;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServicesDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

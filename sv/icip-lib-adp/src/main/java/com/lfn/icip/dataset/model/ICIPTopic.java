@@ -2,8 +2,6 @@ package com.lfn.icip.dataset.model;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.lfn.ai.comm.lib.util.domain.BaseDomain;
 import com.lfn.ai.comm.lib.util.listener.AuditListener;
 
 import jakarta.persistence.Column;

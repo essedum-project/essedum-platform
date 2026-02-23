@@ -886,7 +886,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
-                .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withPathStyleAccessEnabled(true)
+                .build();
         long partSize = 100L * 1024 * 1024;
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -1031,7 +1033,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
                         .withEndpointConfiguration(
                                 new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
-                        .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+                        .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                        .withPathStyleAccessEnabled(true)
+                        .build();
                 DeleteObjectRequest delete = new DeleteObjectRequest(bucketName, filePath);
                 s3Client.deleteObject(delete);
                 logger.info("File Deleted Successfully");
@@ -1085,6 +1089,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);
@@ -1169,6 +1174,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);
@@ -1202,6 +1208,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                                 new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
                         .withCredentials(
                                 new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                        .withPathStyleAccessEnabled(true)
                         .build();
                 Date expiration = new Date(System.currentTimeMillis() + 3600000);
 

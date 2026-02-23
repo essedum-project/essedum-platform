@@ -1,7 +1,6 @@
 package com.lfn.icip.dataset.model.dto;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 // TODO: Auto-generated Javadoc
 /**

@@ -4,12 +4,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.slf4j.Marker;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.dto.ICIPDataAuditResponse;
 

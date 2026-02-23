@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,11 +19,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -55,7 +48,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -94,8 +86,6 @@ import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.executor.sync.service.JobSyncExecutorService;
 import com.lfn.icip.icipwebeditor.file.service.ICIPFileService;
-import com.lfn.icip.icipwebeditor.job.ICIPNativeServiceJob.ChainProcess;
-import com.lfn.icip.icipwebeditor.job.ICIPNativeServiceJob.JobRun;
 import com.lfn.icip.icipwebeditor.job.constants.JobConstants;
 import com.lfn.icip.icipwebeditor.job.enums.JobMetadata;
 import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
@@ -116,7 +106,6 @@ import com.lfn.icip.icipwebeditor.model.ICIPAgentJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.lfn.icip.icipwebeditor.service.IICIPEventJobMappingService;
 import com.lfn.icip.icipwebeditor.service.IICIPJobsService;
 import com.lfn.icip.icipwebeditor.service.IICIPStreamingServiceService;
@@ -284,12 +273,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 					if (!status.equalsIgnoreCase("COMPLETED")) {
 						allScriptGenerated = 0;
-						System.out.println("Completed");
+						logger.debug("Script generation completed");
 					}
 				}
 			} catch (Exception e) {
 				allScriptGenerated = 0;
-				System.out.println("error");
+				logger.error("Error during script generation: {}", e.getMessage(), e);
 				// TODO: handle exception
 			}
 		}

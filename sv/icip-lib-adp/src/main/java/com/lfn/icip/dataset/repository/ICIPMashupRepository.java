@@ -16,15 +16,10 @@
 package com.lfn.icip.dataset.repository;
 
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 
-import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.icip.dataset.model.ICIPMashups;
-import com.lfn.icip.dataset.model.ICIPSchemaRegistry;
-import com.lfn.icip.dataset.model.dto.ICIPSchemaRegistryDTO2;
 
 // TODO: Auto-generated Javadoc
 // 

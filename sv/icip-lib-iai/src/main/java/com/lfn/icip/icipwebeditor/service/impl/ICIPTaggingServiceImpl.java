@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 import com.lfn.icip.icipwebeditor.model.ICIPApps;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.ICIPTagsEntity;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLTagsEntityRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPAppService;
 import com.lfn.icip.icipwebeditor.service.IICIPStreamingServiceService;
