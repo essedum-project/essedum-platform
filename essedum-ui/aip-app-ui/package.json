@@ -51,8 +51,8 @@
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "jsoneditor": "^9.7.0",
-    "jsonpath-plus": "^6.0.1",
-    "jspdf": "^2.5.1",
+    "jsonpath-plus": "^10.3.0",
+    "jspdf": "^4.2.0",
     "jsplumb": "^2.15.6",
     "luxon": "^3.5.0",
     "mammoth": "^1.8.0",
@@ -95,8 +95,15 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
     "ngx-build-plus": "^18.0.0",
-    "rxjs-tslint": "0.1.5",
     "typescript": "~5.4.5"
+  },
+  "resolutions": {
+    "form-data": "^4.0.4",
+    "sha.js": "^2.4.12",
+    "pdfjs-dist": "^4.2.67",
+    "dompurify": "^3.2.4",
+    "tar": "^7.5.8",
+    "xlsx": "0.18.5"
   },
   "overrides": {
     "ng-busy": {
@@ -128,6 +135,9 @@
       "@angular/forms": "$@angular/forms",
       "@angular/platform-browser": "$@angular/platform-browser",
       "rxjs": "$rxjs"
+    },
+    "swagger-ui": {
+      "form-data": "^4.0.4"
     }
   }
 }

@@ -47,7 +47,6 @@ import { UserProjectRoleListComponent } from "./components/user-project-role-lis
 import { RoleroleService } from "./services/role-role.service";
 import { OrgUnitService } from "./services/org-unit.service";
 import { UserUnitService } from "./services/user-unit.service";
-import { AipHeaderComponent } from "./components/aip-header/aip-header.component";
 import { ProjectListViewComponent } from "./components/project/project-list-view.component";
 import { ProjectDetailComponent } from "./components/project-detail/project-detail.component";
 import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
@@ -69,14 +68,13 @@ import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatSortModule } from "@angular/material/sort";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatIconModule } from "@angular/material/icon";
-import { AipPaginationComponent } from "./components/aip-pagination/aip-pagination.component";
+import { AipPaginationComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
 import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
 import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm-role-permission.component";
 import { RolePermissionAddComponent } from "./components/usm-role-permission/role-permission-add/role-permission-add/role-permission-add.component";
 import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 import { DashConstantComponent } from "./entities/dash-constant/dash-constant.component";
-import { AipHeadersComponent } from "./shared-modules/aip-header/aip-header.component";
-import { AipPaginationsComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
+import { AipHeaderComponent } from "./shared-modules/aip-header/aip-header.component";
 import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component";
 
 @NgModule({
@@ -108,7 +106,6 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
     MatPaginatorModule,
     MatSortModule,
     MatTabsModule,
-    AipPaginationComponent,
     PortfolioAddComponent,
     AipFilterComponent,
     MatIconModule,
@@ -120,7 +117,6 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
     RoleDetailComponent,
     RoleRoleComponent,
     UserProjectRoleListComponent,
-    AipHeaderComponent,
     ConfirmDeleteDialogComponent,
     ConfirmProjectDeleteDialogComponent,
     ProjectListViewComponent,
@@ -132,10 +128,9 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
     UsmRolePermissionComponent,
     RolePermissionAddComponent,
     DashConstantComponent,
-    AipHeadersComponent,
-    AipPaginationsComponent,
-    ThemeMgmtComponent,
     AipHeaderComponent,
+    ThemeMgmtComponent,
+    AipPaginationComponent,
   ],
   providers: [
     MessageService,
