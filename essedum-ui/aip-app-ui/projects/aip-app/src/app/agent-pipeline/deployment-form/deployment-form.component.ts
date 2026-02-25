@@ -219,12 +219,23 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Log received inputs for debugging
+    console.log('DeploymentFormComponent ngOnInit - cname:', this.cname, 'organisation:', this.organisation);
+    
+    // Validate required inputs
+    if (!this.organisation || this.organisation.trim() === '') {
+      console.warn('Organisation is empty or undefined in deployment form!');
+    }
+    
     // Load deployment form data by cname and org if available
     if (this.cname && this.organisation) {
+      console.log('Loading deployment form with cname:', this.cname, 'org:', this.organisation);
       this.loadDeploymentFormByCnameOrg(this.cname, this.organisation);
     } else if (this.deploymentId) {
       // Fallback to loading by ID if available (edit mode)
       this.loadDeploymentForm(this.deploymentId);
+    } else {
+      console.log('No cname or organisation provided, ready for new form creation');
     }
   }
 
@@ -558,6 +569,11 @@ export class DeploymentFormComponent implements OnInit {
    * Build the complete deployment payload from all forms
    */
   private buildDeploymentPayload(): any {
+    // Validate required fields before building payload
+    if (!this.organisation || this.organisation.trim() === '') {
+      console.error('Organisation is empty when building deployment payload!');
+    }
+    
     const payload: any = {
       cname: this.cname || '',
       org: this.organisation || '',
@@ -759,9 +775,14 @@ export class BranchSelectionDialogComponent implements OnInit {
    */
   loadSourceBranch(): void {
     if (!this.data.cname || !this.data.organisation) {
+      console.warn('Cannot load source branch: Missing cname or organisation', {
+        cname: this.data.cname,
+        organisation: this.data.organisation
+      });
       return;
     }
 
+    console.log('Loading source branch for cname:', this.data.cname, 'org:', this.data.organisation);
     this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
       (response) => {
         this.gitSelectedRepo=response.repo;
@@ -857,6 +878,12 @@ export class BranchSelectionDialogComponent implements OnInit {
    */
   saveGitConfig(sourceBranch: string, destinationBranch: string): void {
     if (!this.data.cname || !this.gitSelectedRepo || !sourceBranch) {
+      console.error('Missing required data for saving git config:', {
+        cname: this.data.cname,
+        org: this.data.organisation,
+        repo: this.gitSelectedRepo,
+        sourceBranch: sourceBranch
+      });
       this.service.message('Missing required data for saving git config', 'warning');
       this.isDeploying = false;
       this.dialogRef.close({

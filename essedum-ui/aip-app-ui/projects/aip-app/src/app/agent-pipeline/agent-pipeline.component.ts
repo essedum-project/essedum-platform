@@ -408,6 +408,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
+    
+    // Initialize organisation from localStorage or default
+    this.organisation = this.getConsistentOrganization();
+    console.log('Initialized organisation:', this.organisation);
+    
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
