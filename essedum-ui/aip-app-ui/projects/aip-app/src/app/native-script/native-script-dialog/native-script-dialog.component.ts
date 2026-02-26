@@ -1,9 +1,8 @@
-import { Component, OnInit, Inject, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, startWith, takeUntil, take } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, startWith} from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Services } from '../../services/service';
 
@@ -211,7 +210,6 @@ export class NativeScriptDialogComponent implements OnInit, OnDestroy {
           this.paramsValue=values;
         }
         this.paramsAlias=this.paramsValue
-        console.log(this.paramsValue)
         this.dialogRef.close({
           "name": this.paramsKey, "value": this.paramsValue, "type": this.paramsType, "alias": this.paramsAlias, "oldName": this.oldKey, "oldValue": this.oldValue, "oldType": this.oldType, "oldAlias": this.oldAlias, "index": this.index
         });

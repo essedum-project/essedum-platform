@@ -1,14 +1,12 @@
-import {
-  ChangeDetectorRef,
+import {  
   Component,
   EventEmitter,
   OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
-  ViewChild,
+  SimpleChanges  
 } from '@angular/core';
-import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
+import { ActivatedRoute,  Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { HttpParams } from '@angular/common/http';
@@ -38,7 +36,7 @@ export class ModelComponent implements OnInit, OnChanges {
   selectedCard: any = [];
   cardToggled: boolean = true;
 
-  // Pagination
+  //Pagination
   pageSize: number = 8;
   pageNumber: number = 1;
   pageArr: number[] = [];
@@ -82,7 +80,6 @@ export class ModelComponent implements OnInit, OnChanges {
     private service: Services,
     private route: ActivatedRoute,
     private router: Router,
-    private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
@@ -153,7 +150,6 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   private initializePagination(): void {
-    // Define how many page numbers to show
     const visiblePages = 5;
     const halfVisible = Math.floor(visiblePages / 2);
 
@@ -161,24 +157,19 @@ export class ModelComponent implements OnInit, OnChanges {
       this.startIndex = 0;
       this.endIndex = visiblePages;
     } else if (this.noOfPages <= visiblePages) {
-      // If we have fewer pages than the visible count, show all
       this.startIndex = 0;
       this.endIndex = this.noOfPages;
     } else if (this.pageNumber <= halfVisible + 1) {
-      // Near the beginning
       this.startIndex = 0;
       this.endIndex = visiblePages;
     } else if (this.pageNumber >= this.noOfPages - halfVisible) {
-      // Near the end
       this.startIndex = this.noOfPages - visiblePages;
       this.endIndex = this.noOfPages;
     } else {
-      // In the middle - center the current page
       this.startIndex = this.pageNumber - halfVisible - 1;
       this.endIndex = this.pageNumber + halfVisible;
     }
 
-    // Ensure indexes are within valid bounds
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
   }
@@ -202,7 +193,6 @@ export class ModelComponent implements OnInit, OnChanges {
       params = params.set('searchquery', this.filter);
     }
 
-    // Set page and size
     params = params.set('page', this.pageNumber);
     params = params.set('size', this.pageSize);
 
@@ -299,7 +289,6 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   editModel(card: any) {
-    console.log(card);
     this.router.navigate(['./edit-model', card.id], {
       relativeTo: this.route,
     });
@@ -335,13 +324,11 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   tagSelectedEvent(event) {
-    console.log('TagSelectedEvent received:', event);
     if (event && typeof event.getSelectedModelDatasource === 'function') {
       this.selectedDatasource = event.getSelectedModelDatasource();
     } else {
       this.selectedDatasource = [];
     }
-    console.log('Selected datasources:', this.selectedDatasource);
     this.pageNumber = 1;
     this.tagrefresh = false;
     this.refresh();

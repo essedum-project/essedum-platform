@@ -44,33 +44,3 @@
 
   </ng-container>
 </div>
-
-
-
-<!-- <ng-template #elseBlock>
-         <div *ngIf="streamItem.type === 'DragAndDrop'; else: binaryTemplate" class="selector-788-282">
-              <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
-                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
-                  [streamItem]="streamItem"></app-pipeline-description>
-          </div>
-          <ng-template #binaryTemplate="">
-              <div *ngIf="streamItem.type === 'Binary'; else: nativeTemplate" class="selector-788-286">
-              </div>
-          </ng-template>
-          <ng-template #nativeTemplate="">
-              <div *ngIf="streamItem.type === 'NativeScript'; else: rScriptTemplate" class="selector-788-288">
-                  <app-native-script [card]="selectedCard" (newItemEvent)="changedToogle($event)"
-                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
-                  [streamItem]="streamItem"></app-native-script>
-              </div>
-          </ng-template>
-          <ng-template #rScriptTemplate="">
-              <div *ngIf="streamItem.type === 'RScript'; else: others" class="selector-788-288">
-              </div>
-          </ng-template>
-          <ng-template #others="">
-              <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
-                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
-                  [streamItem]="streamItem"></app-pipeline-description>
-          </ng-template>
-      </ng-template> -->

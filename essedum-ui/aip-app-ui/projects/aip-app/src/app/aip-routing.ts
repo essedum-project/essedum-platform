@@ -1,10 +1,7 @@
 import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
-import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
 import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
-import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
-import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 import { AipComponent } from './aip.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
@@ -15,8 +12,6 @@ import { AppListComponent } from './apps/app-list/app-list.component';
 import { SpecTemplateComponent } from './spec-template/spec-template.component';
 import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
 import { ViewAppComponent } from './apps/view-app/view-app.component';
-import { ModelEditsComponent } from './model/model-edit/model-edit.component';
-import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
 import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
@@ -58,7 +53,6 @@ const routes: Routes = [
           { path: '', component: ModelComponent },
           { path: 'create', component: ModalConfigComponent },
           { path: 'edit-model/:id', component: ModalConfigComponent },
-          { path: 'preview/:cname/:name', component: ModelCreateComponent }, 
           { path: 'preview/:id', component: ModelDescriptionComponent },
         ],
       },

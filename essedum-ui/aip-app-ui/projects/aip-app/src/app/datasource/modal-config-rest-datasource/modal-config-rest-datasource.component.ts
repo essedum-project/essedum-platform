@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   OnChanges,
-  Inject,
   Input,
   Output,
   EventEmitter,
@@ -168,7 +167,6 @@ export class ModalConfigRestDatasourceComponent
         this.matData.organization
       ).subscribe((res) => {
         this.data = res;
-        //this.apispec = JSON.parse("{}");
         if (this.data.extras == null || this.data.extras == '') {
           this.data.extras = JSON.stringify({
             apispec: {},
@@ -300,7 +298,6 @@ export class ModalConfigRestDatasourceComponent
     this.Services.getDatasetNamesByDatasource(datasource).subscribe((res) => {
       this.datasets = res;
       this.datasets.forEach((opt) => {
-        console.log(opt.type);
         let val = { viewValue: opt.alias, value: opt.alias };
         this.datasetsoptions.push(val);
       });
@@ -322,8 +319,6 @@ export class ModalConfigRestDatasourceComponent
     this.sourceType.attributes[key] = datasource.value;
   }
   setDgInstanceType(key, instanceType) {
-    console.log('instancetypeevent', instanceType);
-
     this.sourceType.attributes[key] = instanceType;
   }
   testConnection() {
@@ -417,7 +412,6 @@ export class ModalConfigRestDatasourceComponent
                 this.data.connectionDetails
               );
               this.sourceType['formats'] = this.sourceType.attributes.formats;
-              console.log('sourceType', this.sourceType.formats);
 
               this.formats = [];
               Object.keys(this.sourceType.attributes.formats).forEach(
@@ -427,7 +421,6 @@ export class ModalConfigRestDatasourceComponent
                   }
                 }
               );
-              console.log('formatselse', this.formats);
             }
           },
           (error) => {
@@ -757,7 +750,6 @@ export class ModalConfigRestDatasourceComponent
   }
 
   setIsExiPort(istrue: any) {
-    console.log('Capability is :', this.capability);
     this.isExiPorts = istrue.checked;
     this.addPorts['exiPort'] = istrue.checked;
   }
@@ -765,7 +757,6 @@ export class ModalConfigRestDatasourceComponent
   setIsDefaultPort(istrue: any) {
     this.addPorts['defaultPort'] = istrue.checked;
     this.isDefaultPorts = istrue.checked;
-    console.log('Set Default Port Button Clicked : ', this.addPorts);
   }
 }
 

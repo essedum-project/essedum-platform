@@ -181,7 +181,6 @@ export class DatasourceConfigComponent implements OnInit {
   lastRefreshTime() {
     setTimeout(() => {
       this.lastRefreshedTime = new Date();
-      console.log('Data refreshed!');
     }, 1000);
   }
 
@@ -197,7 +196,6 @@ export class DatasourceConfigComponent implements OnInit {
       this.schema = JSON.parse(this.matData.connectionDetails);
       this.formData = this.schema
       this.type = this.matData.type;
-      console.log('editType', this.type);
       if (this.type == 'GIT') {
         this.isGithub = false;
       }
@@ -270,7 +268,6 @@ export class DatasourceConfigComponent implements OnInit {
   validatePorts(validatePort: any) {
     this.Services.validatePorts(validatePort).subscribe((response) => {
       if (response.body.available_ports.length) {
-        console.log("Available Ports :", response.body.available_ports)
       }
 
     }, error => {
@@ -290,13 +287,9 @@ export class DatasourceConfigComponent implements OnInit {
       this.data.category = this.sourceType?.category;
       this.data.type = this.sourceType?.type;
       this.data.connectionDetails = this.sourceType?.attributes && JSON.stringify(this.sourceType.attributes);
-      //  this.data.url = this.gitUrl;
       this.data.organization = sessionStorage.getItem("organization");
-      console.log('data', this.data);
       this.Services.createDatasource(this.data).subscribe((res) => {
-        console.log('git', res);
         this.Services.message('Connection created successfully ');
-        console.log('telemetry started');
         if (this.router.url.includes('initiative')) {
           this.responseLink.emit(res);
           this.raiService.changeModalData(true);
@@ -316,7 +309,6 @@ export class DatasourceConfigComponent implements OnInit {
       this.data.category = this.sourceType?.category;
       this.data.type = this.sourceType?.type;
       this.data.extras = this.extras;
-      console.log(this.data);
       if (this.data.category.toLowerCase().endsWith('rest') || this.data.category.toLowerCase().endsWith('git')) {
         if (Object.keys(this.connectionDetails).length !== 0) {
           this.data.connectionDetails = this.connectionDetails;
@@ -380,9 +372,7 @@ export class DatasourceConfigComponent implements OnInit {
           this.portDetails.organization = res.body.organization;
 
           this.portPayload = this.portDetails;
-          console.log("This is portPayload :", this.portPayload);
           this.Services.addPorts(this.portPayload).subscribe((response) => {
-            console.log("This is Port Details Response :", response);
           }
           );
 
@@ -464,7 +454,6 @@ export class DatasourceConfigComponent implements OnInit {
   }
 
   onTypeChange(event: any) {
-    console.log('event', event);
     if (event == 'GIT') this.isGithub = true;
     else this.isGithub = true;
 

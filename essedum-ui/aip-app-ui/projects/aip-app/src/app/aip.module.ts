@@ -15,8 +15,6 @@ import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline
 import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
-import { ModelCreateComponent } from './model/model.create/model.create.component';
-import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 import { NotebookDialogComponent } from './pipeline.description/notebook-dialog/notebook-dialog.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
@@ -28,7 +26,6 @@ import { PipelineService } from './services/pipeline.service';
 import { AgentDirectoryService } from './agent-directory/agent-directory.service';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 import {
   MAT_DIALOG_DATA,
@@ -36,7 +33,6 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 import { TagsComponent } from './tags/tags.component';
@@ -187,12 +183,10 @@ const dbConfig: DBConfig = {
     AipComponent,
     ModelComponent,
     DatasourceConfigComponent,
-    ModelCreateComponent,
     PipelineComponent,
     PipelineAgentComponent,
 PipelineAgentDetailComponent,
     PipelineCreateComponent,
-    PipelineDescriptionComponent,
     NotebookDialogComponent,
     EnlCodeEditorComponent,
     DatasourceComponent,
@@ -200,9 +194,7 @@ PipelineAgentDetailComponent,
     DatasetDescriptionComponent,
     DatasetViewComponent,
     DatasetConfigComponent,
-    ModelEditsComponent,
     ModelDescriptionComponent,
-    ModelDeployComponent,
     TagsComponent,
     SchemaComponent,
     AdapterComponent,

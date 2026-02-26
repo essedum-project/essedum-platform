@@ -2,7 +2,6 @@ import {
   Component,
   EventEmitter,
   Inject,
-  Input,
   OnInit,
   Output,
 } from '@angular/core';
@@ -169,8 +168,8 @@ export class AgentDirectoryCreateComponent implements OnInit {
   }
 
   changeType() {
-    this.agentMcpPipelines = []; // Clear existing options
-    this.selectedPipeline = null; // Clear selected pipeline
+    this.agentMcpPipelines = [];
+    this.selectedPipeline = null; 
     this.pipelineMode = this.mapTypeToInterfaceType(this.type);
 
     this.getAgentPipelineDetailsByType();
@@ -220,7 +219,6 @@ export class AgentDirectoryCreateComponent implements OnInit {
   private mapTypeToInterfaceType(type: string | undefined): string {
     if (!type) return 'pipeline-agent';
     if (type === 'mcpServer') return 'mcp-pipeline';
-    // Default/explicit AIAgent
     return 'pipeline-agent';
   }
 }

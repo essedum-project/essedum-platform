@@ -3,7 +3,6 @@ import {
   EventEmitter,
   Inject,
   Input,
-  OnDestroy,
   OnInit,
   Optional,
   Output,
@@ -20,7 +19,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { App } from '../../apps/app';
 import { AppListComponent } from '../../apps/app-list/app-list.component';
-import { PipelineService } from '../../services/pipeline.service';
 import { HttpParams } from '@angular/common/http';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { Stomp } from '@stomp/stompjs';
@@ -109,7 +107,6 @@ export class CreateAppComponent implements OnInit {
     public router: Router,
     public sanitizer: DomSanitizer,
     @Optional() @SkipSelf() private appListComponent: AppListComponent,
-    private pipelineService: PipelineService,
     private datasetsService: DatasetServices
   ) {}
 
@@ -171,7 +168,6 @@ export class CreateAppComponent implements OnInit {
 
   authentications() {
     this.Services.getPermission('cip').subscribe((cipAuthority) => {
-      // edit/update permission
       if (cipAuthority.includes('edit-app')) this.isAuth = false;
     });
   }
@@ -292,10 +288,8 @@ export class CreateAppComponent implements OnInit {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
 
-    // Clear the queue
     this.uploader.clearQueue();
 
-    // Add the file using the uploader's API
     this.uploader.addToQueue([file]);
     if (this.uploader.queue[0].file.size <= 250000) {
       this.logoUploaded = true;
@@ -413,7 +407,6 @@ export class CreateAppComponent implements OnInit {
           const temp = [];
           this.Services.update(newCanvas).subscribe(
             (response) => {
-              //this.Services.messageService(response, 'Updated Successfully');
               this.Services.updateImage(
                 this.editImgId,
                 this.editCanvas['alias'],
@@ -422,7 +415,6 @@ export class CreateAppComponent implements OnInit {
                 'image/png/jpg',
                 this.finalImage
               ).subscribe((resp) => {});
-              //this.Services.addGroupModelEntity(this.data.canvasData.name, temp).subscribe();
               let newApp = { ...this.appObj };
               newApp.scope = this.editCanvas.scope;
               newApp.tryoutlink = this.editCanvas.tryoutlink;
@@ -506,13 +498,6 @@ export class CreateAppComponent implements OnInit {
     );
   }
   getChains() {
-    // let filter = ""
-    // let org: any = sessionStorage.getItem('organization');
-    // this.Services.getPipelinesByTypeAndInterface(org,'Langchain','chain').subscribe((res) => {
-    //     res.forEach((element: any) => {
-    //       this.chainList.push({ viewValue: element.alias, value: element.name });
-    //     });
-    //   })
     let org: any = sessionStorage.getItem('organization');
     this.Services.getPipelinesByInterfacetype(org, 'chain').subscribe((res) => {
       res.forEach((element: any) => {
@@ -566,7 +551,6 @@ export class CreateAppComponent implements OnInit {
         })
         .catch((err) => {
           this.disableSave = false;
-          console.log('An error occured');
           this.Services.message('Error! while uploading file '+ err, 'error');
           this.uploading = false;
         });
@@ -602,14 +586,10 @@ export class CreateAppComponent implements OnInit {
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect({}, (frame) => {
-      console.log('connected to webSocket server');
-
       this.stompClient.subscribe('/topic/fileUploadStatus', (message) => {
-        console.log(message.body);
         this.Services.message(message.body);
 
         this.stompClient.disconnect(() => {
-          console.log('Disconnected from WebSocket server');
         });
       });
     });
