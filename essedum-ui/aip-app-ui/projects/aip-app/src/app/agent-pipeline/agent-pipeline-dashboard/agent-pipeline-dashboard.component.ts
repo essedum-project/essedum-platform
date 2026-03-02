@@ -1,308 +1,3 @@
-// import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-// import { Services } from '../../services/service';
-// import { HttpParams } from '@angular/common/http';
-// import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-// import { Location } from '@angular/common';
-
-// interface AgentCard {
-//   cid: string;
-//   name: string;
-//   alias: string;
-//   description: string;
-//   type: string;
-//   language: string;
-//   status: string;
-//   version: string;
-//   lastModified: Date;
-//   tags?: string[];
-//   lastmodifiedon?: Date;
-//   createdby?: string;
-//   hover?: boolean;
-// }
-
-// @Component({
-//   selector: 'app-agent-pipeline-dashboard',
-//   templateUrl: './agent-pipeline-dashboard.component.html',
-//   styleUrls: ['./agent-pipeline-dashboard.component.scss'],
-// })
-// export class AgentPipelineDashboardComponent implements OnInit {
-//   @Input() agentCards: AgentCard[] = [];
-//   @Input() CARD_TITLE = 'Agent Pipelines';
-//  // @Input() lastRefreshedTime: Date | null = null;
-//  // @Input() tagrefresh: boolean = false;
-//   @Input() selectedFilterTypes: any = {};
-
-//   @Output() search = new EventEmitter<string>();
-//   @Output() refresh = new EventEmitter<void>();
-//   @Output() add = new EventEmitter<void>();
-//   @Output() tagSelected = new EventEmitter<any>();
-//   @Output() filterStatusChange = new EventEmitter<any>();
-//   @Output() viewDetails = new EventEmitter<AgentCard>();
-//   @Output() edit = new EventEmitter<AgentCard>();
-//   @Output() delete = new EventEmitter<AgentCard>();
-
-
-//   // Pagination
-//   pageSize: number = 8;
-//   pageNumber: number = 1;
-//   pageArr: number[] = [];
-//   pageNumberInput: number = 1;
-//   noOfPages: number = 0;
-//   prevRowsPerPageValue!: number;
-//   itemsPerPage: number[] = [];
-//   noOfItems: number;
-//   startIndex: number;
-//   endIndex: number;
-//   pageNumberChanged: boolean = true;
-
-//    // Data collections
-//   cards: any[] = [];
-//   filteredCards: any[] = [];
-//   users: string[] = [];
-
-//   // Filter state
-//   filt = '';
-//   filtbackup = '';
-//   selectedPipelineAgent: string[] = [];
-//   selectedPipelineAgentType: string[] = [];
-//   selectedTag: string[] = [];
-//   organization: string;
-//   streamItem: any;
-
-
-//     // Component state
-//   hoverStates: boolean[] = [];
-//   hasFilters = false;
-//   loading = true;
-//   lastRefreshedTime: Date | null = null;
-//   cardToggled = true;
-//   tagrefresh = false;
-//   filter: string = '';
-
-
-
-//   constructor(
-//         private service: Services,
-//         private router:Router,
-//         private location:Location,
-//             private route: ActivatedRoute,
-//   ) {}
-
-//   ngOnInit(): void {
-//       this.filteredCards = [];
-//     this.organization = sessionStorage.getItem('organization');
-
-//     if (this.organization) {
-//       //this.handleRouteState();
-//      // this.setupQueryParamHandling();
-//       this.getCountPipelines();
-//       this.getCards();
-//     }
-
-//     //this.loadAuthentications();
-//     this.updateLastRefreshTime();
-//   }
-
-  
-
-//   trackByCardId(index: number, card: AgentCard): string {
-//     return card.cid;
-//   }
-
-//   onSearch(searchTerm: string): void {
-//     this.search.emit(searchTerm);
-//   }
-
-
-//     private refreshUpdated(): void {
-//     this.getCards();
-//     this.getCountPipelines();
-//   }
-
-//   private getCountPipelines(): void {
-//     let params = this.buildHttpParams();
-
-//     params = params.set('cloud_provider', 'internal');
-
-//     this.service.getCountPipelines(params).subscribe((res) => {
-//       this.noOfItems = res;
-//       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-//       this.pageArr = [...Array(this.noOfPages).keys()];
-//       this.initializePagination();
-//     });
-//   }
-
-//     // onViewDetails(card: any): void {
-//     //   this.service.getStreamingServicesByName(card.name).subscribe((res) => {
-//     //     this.streamItem = res;
-//     //     const navigationExtras: NavigationExtras = {
-//     //       queryParams: {
-//     //         page: this.pageNumber,
-//     //         search: this.filter,
-//     //         pipelineType: this.selectedPipelineAgentType.toString(),
-//     //         org: this.organization,
-//     //         roleId: JSON.parse(sessionStorage.getItem('role')).id,
-//     //       },
-//     //       queryParamsHandling: 'merge',
-//     //       state: {
-//     //         cardTitle: 'Pipeline',
-//     //         pipelineAlias: this.streamItem.alias,
-//     //         streamItem: this.streamItem,
-//     //         card: card,
-//     //       },
-//     //       relativeTo: this.route,
-//     //     };
-//     //     if (this.streamItem.type === 'AIAgent') {
-//     //       this.router.navigate(['./view' + '/' + card.name], navigationExtras);
-//     //     }
-//     //   });
-//     // }
-  
-//   private initializePagination(): void {
-//     // Define how many page numbers to show
-//     const visiblePages = 5;
-//     const halfVisible = Math.floor(visiblePages / 2);
-
-//     if (!this.noOfPages) {
-//       this.startIndex = 0;
-//       this.endIndex = visiblePages;
-//     } else if (this.noOfPages <= visiblePages) {
-//       // If we have fewer pages than the visible count, show all
-//       this.startIndex = 0;
-//       this.endIndex = this.noOfPages;
-//     } else if (this.pageNumber <= halfVisible + 1) {
-//       // Near the beginning
-//       this.startIndex = 0;
-//       this.endIndex = visiblePages;
-//     } else if (this.pageNumber >= this.noOfPages - halfVisible) {
-//       // Near the end
-//       this.startIndex = this.noOfPages - visiblePages;
-//       this.endIndex = this.noOfPages;
-//     } else {
-//       // In the middle - center the current page
-//       this.startIndex = this.pageNumber - halfVisible - 1;
-//       this.endIndex = this.pageNumber + halfVisible;
-//     }
-
-//     // Ensure indexes are within valid bounds
-//     this.startIndex = Math.max(0, this.startIndex);
-//     this.endIndex = Math.min(this.noOfPages, this.endIndex);
-
-//     console.log(
-//       'Pagination initialized with startIndex:',
-//       this.startIndex,
-//       'endIndex:',
-//       this.endIndex
-//     );
-//   }
-
-//     private updateLastRefreshTime(): void {
-//     this.lastRefreshedTime = new Date();
-//   }
-
-//   private getCards(): void {
-//     const params = this.buildHttpParams();
-
-//     this.service.getPipelinesCards(params).subscribe((res) => {
-//       const data: any[] = [];
-//       if (res.length) {
-//         res.forEach((element: any) => {
-//           data.push(element);
-//           this.users.push(element.alias);
-//         });
-//       }
-
-//       this.cards = data;
-//       this.filteredCards = data;
-//       this.loading = false;
-
-//       this.updateQueryParam(
-//         this.pageNumber,
-//         this.filter,
-//         this.selectedPipelineAgentType.toString()
-//       );
-//     });
-//   }
-
-//     private updateQueryParam(
-//     page: number = 1,
-//     search: string = '',
-//     pipelineType: string = '',
-//     org: string = this.organization,
-//     roleId: string = JSON.parse(sessionStorage.getItem('role') || '{}').id
-//   ): void {
-//     const url = this.router
-//       .createUrlTree([], {
-//         queryParams: {
-//           page,
-//           search,
-//           pipelineType,
-//           org,
-//           roleId,
-//         },
-//         queryParamsHandling: 'merge',
-//       })
-//       .toString();
-
-//     this.location.replaceState(url);
-//   }
-
-//     private buildHttpParams(): HttpParams {
-//       let params = new HttpParams()
-//         .set('page', this.pageNumber.toString())
-//         .set('size', this.pageSize.toString())
-//         .set('project', this.organization)
-//         .set('isCached', 'true')
-//         .set('adapter_instance', 'internal')
-//         .set('interfacetype', 'pipeline');
-  
-//       if (this.selectedPipelineAgentType.length >= 1) {
-//         params = params.set('type', this.selectedPipelineAgentType.toString());
-//       }
-  
-//       if (this.filter.length >= 1) {
-//         params = params.set('query', this.filter);
-//       }
-  
-//       if (this.selectedTag.length >= 1) {
-//         params = params.set('tags', this.selectedTag.toString());
-//       }
-  
-//       return params;
-//     }
-  
-
-//   onRefresh(): void {
-//     this.refresh.emit();
-//   }
-
-//   onAdd(): void {
-//     this.add.emit();
-//   }
-
-//   onTagSelected(tags: any): void {
-//     this.tagSelected.emit(tags);
-//   }
-
-//   onFilterStatusChange(filters: any): void {
-//     this.filterStatusChange.emit(filters);
-//   }
-
-//   onViewDetails(agent: AgentCard): void {
-//     this.viewDetails.emit(agent);
-//   }
-
-//   onEdit(agent: AgentCard): void {
-//     this.edit.emit(agent);
-//   }
-
-//   onDelete(agent: AgentCard): void {
-//     this.delete.emit(agent);
-//   }
-// }
-
-
-
 import {
   ChangeDetectorRef,
   Component,
@@ -499,13 +194,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     // Ensure indexes are within valid bounds
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
-
-    console.log(
-      'Pagination initialized with startIndex:',
-      this.startIndex,
-      'endIndex:',
-      this.endIndex
-    );
   }
 
   private loadAuthentications(): void {
@@ -711,7 +399,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
 
   onAdd(): void {
     if (this.pipelineMode === 'mcp') {
-      console.log('Opening MCP Pipelines creation dialog');
       
       // Open the pipeline creation dialog with MCP-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -728,14 +415,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('MCP Pipelines created:', result);
           this.service.message('MCP Pipelines created successfully!', 'success');
           // Refresh the cards to show the new MCP pipeline
           this.refresh();
         }
       });
     } else {
-      console.log('Opening Agent Pipelines creation dialog');
       
       // Open the pipeline creation dialog with Agent-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -752,7 +437,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('Agent Pipelines created:', result);
           this.service.message('Agent Pipelines created successfully!', 'success');
           // Refresh the cards to show the new agent pipeline
           this.refresh();
@@ -807,19 +491,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           this.streamItem.type === 'NativeScript' ||
           this.pipelineMode === 'mcp' ||
           (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
-        console.log('Navigating to view details for:', {
-          type: this.streamItem.type,
-          interfacetype: this.streamItem.interfacetype,
-          mode: this.pipelineMode,
-          name: card.name
-        });
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       } else {
-        console.log('Navigation blocked - unsupported combination:', {
-          type: this.streamItem.type,
-          interfacetype: this.streamItem.interfacetype,
-          mode: this.pipelineMode
-        });
       }
     });
   }
@@ -871,7 +544,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
    */
   onPipelineModeChange(event: any): void {
     const newMode = event.value;
-    console.log('Dashboard pipeline mode changed to:', newMode);
     
     // Reset pagination when switching modes
     this.pageNumber = 1;
@@ -889,13 +561,9 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
    * Switch to specific pipeline mode - simplified method
    */
   switchToPipelineMode(mode: 'agent' | 'mcp'): void {
-    console.log('Switching to pipeline mode:', mode);
-    console.log('Current mode before switch:', this.pipelineMode);
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
-      
-      console.log('Mode changed to:', this.pipelineMode);
       
       // Reset pagination when switching modes
       this.pageNumber = 1;
@@ -906,12 +574,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       this.loading = true;
       
       // Show loading message
-      console.log('Loading', mode, 'pipelines...');
       
       // Refresh data with new mode
       this.refresh();
     } else {
-      console.log('Same mode clicked, no change needed');
     }
   }
 

@@ -2,7 +2,7 @@
 import { EventEmitter, Injectable, Output } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, from } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, switchMap, shareReplay } from "rxjs/operators";
 import { of } from 'rxjs';
 import { catchError } from "rxjs/operators";
 import { throwError, Subject } from "rxjs";
@@ -24,12 +24,30 @@ export class ApisService {
   private cancelPendingRequests$ = new Subject<void>();
   displaybreadcrumbs;
   @Output() refreshImage = new EventEmitter<any>();
+  
+  // API Response Cache - stores observables to prevent duplicate requests
+  private apiCache = new Map<string, Observable<any>>();
+  
   constructor(
     private http:HttpClient,
     private https: HttpClient,
     private router: Router,
     private oauthService: OAuthService
   ) { }
+
+  /**
+   * Clear the API cache. Call this when user logs out or changes context
+   */
+  clearCache(): void {
+    this.apiCache.clear();
+  }
+
+  /**
+   * Clear specific cache entry
+   */
+  clearCacheEntry(key: string): void {
+    this.apiCache.delete(key);
+  }
 
   refreshProfileImage() {
     this.refreshImage.emit();
@@ -1051,7 +1069,13 @@ export class ApisService {
   }
 
   getLicenseConfigResource(): Observable<any> {
-    return this.https
+    const cacheKey = 'license-config';
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.https
       .post("/api/license", {
         observe: "response",
         responseType: "text",
@@ -1059,13 +1083,16 @@ export class ApisService {
       .pipe(
         map((response) => {
           return response;
-        })
-      )
-      .pipe(
+        }),
         catchError((err) => {
+          this.clearCacheEntry(cacheKey);
           return this.handleError(err);
-        })
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
       );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
   }
   revoke(): Observable<any> {
     return this.revokeRecursive(200);
@@ -1098,7 +1125,13 @@ export class ApisService {
   }
 
   getStartupConstants(keys: string[]): Observable<any> {
-    return this.https.get("/api/get-startup-constants", {
+    const cacheKey = `startup-constants-${keys.sort().join(',')}`;
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.https.get("/api/get-startup-constants", {
       params: { keys },
       observe: "response",
     })
@@ -1106,28 +1139,45 @@ export class ApisService {
         map((response) => {
           let pr: any = response.body;
           return pr;
-        })
-      )
-      .pipe(
+        }),
         catchError((err) => {
+          this.clearCacheEntry(cacheKey);
           return this.handleError(err);
-        })
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
       );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
   }
   checkDeclaration(userId,role21,organization):Observable<any>
   {
-   return this.http.get('/api/inbox/checkDeclaration',
-     { params: {
-        "userId":userId,
-         "role":role21,
-         "organization":organization
-     },observe:'response'})
-     .pipe(
-       map(response => {
-         return response.body 
-       })
-     )
-}
+    const cacheKey = `checkDeclaration-${userId}-${role21}-${organization}`;
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.http.get('/api/inbox/checkDeclaration',
+      { params: {
+         "userId":userId,
+          "role":role21,
+          "organization":organization
+      },observe:'response'})
+      .pipe(
+        map(response => {
+          return response.body 
+        }),
+        catchError((err) => {
+          this.clearCacheEntry(cacheKey);
+          return this.handleError(err);
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
+  }
 
  saveEntry(rowData: string, action: string, datasetName: string): Observable<any> {
    let apiParams = {action: action, datasetName: datasetName, projectName: sessionStorage.getItem('organization'),rowData:rowData};
@@ -1141,7 +1191,23 @@ export class ApisService {
  }
 
   getDashConstantUsingKey(key: any, project: any): Observable<any> {
-    return this.https.get("/api/get-extension-key?projectId=" + project + "&key=" + key, { responseType: "text" })
+    const cacheKey = `dash-constant-${key}-${project}`;
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.https.get("/api/get-extension-key?projectId=" + project + "&key=" + key, { responseType: "text" })
+      .pipe(
+        catchError((err) => {
+          this.clearCacheEntry(cacheKey);
+          return this.handleError(err);
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
   }
 
 }

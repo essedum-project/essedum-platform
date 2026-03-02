@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, shareReplay } from 'rxjs/operators';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { Datasource } from '../datasource/datasource';
 import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
@@ -20,6 +20,7 @@ export class Services {
   private jwt: any;
   searchValues: any;
   paginationValues: any;
+  private apiCache = new Map<string, Observable<any>>();
 
   constructor(
     private https: HttpClient,
@@ -30,6 +31,14 @@ export class Services {
 
 
   ) { }
+
+  clearCache(): void {
+    this.apiCache.clear();
+  }
+
+  clearCacheEntry(key: string): void {
+    this.apiCache.delete(key);
+  }
 
 
   getMlTags(): Observable<any> {
@@ -2049,24 +2058,34 @@ export class Services {
 
   //to get datasources for pipelines
   getDatasources(): Observable<any> {
-    return this.https
+    const org = sessionStorage.getItem('organization');
+    const cacheKey = `datasources-v1-all-${org}`;
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.https
       .get(this.dataUrl + '/service/v1/datasources/all', {
         headers: new HttpHeaders({
           'Content-Type': 'application/json; charset=utf-8',
         }),
         observe: 'response',
-        params: { org: sessionStorage.getItem('organization') },
+        params: { org: org },
       })
       .pipe(
         map((response) => {
           return response.body;
-        })
-      )
-      .pipe(
+        }),
         catchError((err) => {
+          this.clearCacheEntry(cacheKey);
           return this.handleError(err);
-        })
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
       );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
   }
 
   getPipelineByName(param: HttpParams): Observable<any> {
