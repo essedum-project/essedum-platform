@@ -413,7 +413,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
-    console.log('Initialized organisation:', this.organisation);
     
     this.route.params.subscribe((params) => {
       if (params['cname']) {
@@ -541,17 +540,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     params = params.set('name', this.cardName);
     params = params.set('org', this.organisation);
     this.service.getPipelineByName(params).subscribe((res) => {
-      console.log('res', res);
       // Set cardTitle based on current pipeline mode
       this.cardTitle = this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
-      console.log('Card title set in getPipelineByName to:', this.cardTitle);
       this.card = res[0];
       
       // Update MCP filename if in MCP mode with actual pipeline data
       if (this.pipelineMode === 'mcp' && res && res[0]) {
         const actualName = res[0].name || this.cardName || 'mcp-config';
         this.scriptFileName = `${actualName}.json`;
-        console.log('MCP filename updated from getPipelineByName:', this.scriptFileName);
       }
     });
   }
@@ -587,26 +583,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Ensure we use the consistent filename for the current card
     const expectedFilename = this.generateConsistentFilename();
     if (filename !== expectedFilename) {
-      console.log(
-        'Filename mismatch - expected:',
-        expectedFilename,
-        'got:',
-        filename,
-        'using expected filename instead'
-      );
       filename = expectedFilename;
     }
-
-    console.log(
-      'Reading file:',
-      filename,
-      'for stream:',
-      this.streamItem?.name,
-      'org:',
-      this.streamItem?.organization,
-      'retry:',
-      retryCount
-    );
 
     if (!filename || !this.streamItem?.name || !this.streamItem?.organization) {
       console.error('Missing required parameters for readFile:', {
@@ -633,16 +611,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (resp) => {
-          console.log('File read response received for:', filename);
           try {
             const textDecoder = new TextDecoder('utf-8');
             this.script = textDecoder.decode(resp).split('\n');
             this.loadScript = true;
-            console.log(
-              'Successfully loaded script with',
-              this.script.length,
-              'lines'
-            );
 
             // Update the selected file in the structure
             if (this.fileStructure.length > 0) {
@@ -676,9 +648,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
           // Retry logic for file reading errors
           if (retryCount < 3) {
-            console.log(
-              `Retrying file read in ${(retryCount + 1) * 1000}ms...`
-            );
             setTimeout(() => {
               this.readFile(this.cleanFileName(filename), retryCount + 1);
             }, (retryCount + 1) * 1000);
@@ -704,13 +673,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           this.loadScript = true;
         },
         complete: () => {
-          console.log('readNativeFile observable completed for:', filename);
         },
       });
   }
 
   buildFileStructure() {
-    console.log('Building file structure in NativeScript...', this.streamItem);
     this.fileStructure = [];
 
     if (this.streamItem && this.streamItem.json_content) {
@@ -718,17 +685,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         const jsonContent = JSON.parse(this.streamItem.json_content);
         const files = jsonContent.elements[0]?.attributes?.files;
 
-        console.log('Raw files array from API:', files);
-
         if (files && Array.isArray(files) && files.length > 0) {
           // Process each file entry in the files array
           files.forEach((fileEntry: any, index: number) => {
-            console.log(
-              `Processing file entry ${index}:`,
-              fileEntry,
-              'Type:',
-              typeof fileEntry
-            );
             let fileNames: string[] = [];
 
             // Handle different formats of file entries
@@ -743,7 +702,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                       (name) =>
                         typeof name === 'string' && name.trim().length > 0
                     );
-                    console.log('Parsed as JSON array:', fileNames);
                   } else {
                     fileNames = [fileEntry.trim()];
                   }
@@ -758,7 +716,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                     .split(',')
                     .map((f) => f.trim().replace(/[\"\']/g, ''))
                     .filter((f) => f.length > 0);
-                  console.log('Manually parsed file names:', fileNames);
                 }
               } else if (fileEntry.includes(',')) {
                 // Handle comma-separated without brackets
@@ -766,21 +723,15 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                   .split(',')
                   .map((f) => f.trim())
                   .filter((f) => f.length > 0);
-                console.log(
-                  'Extracted file names from comma-separated format:',
-                  fileNames
-                );
               } else {
                 // Single file name
                 fileNames = [fileEntry.trim()];
-                console.log('Single file name:', fileNames);
               }
             } else if (Array.isArray(fileEntry)) {
               // Handle direct array entries
               fileNames = fileEntry.filter(
                 (name) => typeof name === 'string' && name.trim().length > 0
               );
-              console.log('Direct array format:', fileNames);
             } else {
               console.warn(
                 'File entry is neither string nor array:',
@@ -794,9 +745,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               if (fileName && fileName.length > 0) {
                 const cleanFileName = this.cleanFileName(fileName);
                 const extension = cleanFileName.split('.').pop()?.toLowerCase();
-                console.log(
-                  `Processing file: ${cleanFileName}, extension: ${extension}, original: ${fileName}`
-                );
 
                 if (extension === 'py' || extension === 'ipynb') {
                   // Check if file already exists in structure to avoid duplicates
@@ -810,19 +758,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                       selected: false,
                       type: 'file',
                     });
-                    console.log('Added file to structure:', cleanFileName);
                   }
                 } else {
-                  console.log(
-                    'Skipping file with unsupported extension:',
-                    cleanFileName
-                  );
                 }
               }
             });
           });
-
-          console.log('Built file structure:', this.fileStructure);
 
           // Auto-select the first Python file with a delay to ensure backend is ready
           if (this.fileStructure.length > 0) {
@@ -830,18 +771,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               (file) => file.extension === 'py'
             );
             if (firstPyFile) {
-              console.log('Auto-selecting Python file:', firstPyFile.name);
 
               // Mark as selected immediately for UI
               this.fileStructure.forEach((file) => (file.selected = false));
               firstPyFile.selected = true;
               this.selectedFileNode = firstPyFile; // Ensure selectedFileNode is set
 
-              console.log('Set selectedFileNode to:', this.selectedFileNode);
-
               // If we already have script content, don't reload
               if (this.script && this.script.length > 0) {
-                console.log('Script content already available, not reloading');
                 this.loadScript = true;
                 this.cdr.detectChanges();
               } else {
@@ -851,18 +788,15 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                 }, 1000);
               }
             } else {
-              console.log('No Python file found, setting loadScript to true');
               // If no Python file found, just set loadScript to true for empty editor
               this.loadScript = true;
               this.selectedFileNode = null;
             }
           } else {
-            console.log('No files in structure, setting loadScript to true');
             // No files found, show empty editor
             this.loadScript = true;
           }
         } else {
-          console.log('No files found in json_content or files array is empty');
           this.loadScript = true;
         }
       } catch (error) {
@@ -870,19 +804,16 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         this.loadScript = true;
       }
     } else {
-      console.log('No streamItem or json_content available');
       this.loadScript = true;
     }
 
     this.fileTreeDataSource.data = this.fileStructure;
-    console.log('File tree data source updated:', this.fileTreeDataSource.data);
 
     // Trigger change detection
     this.cdr.detectChanges();
   }
 
   navigateBack(): void {
-    console.log('Navigating back to agent-pipeline dashboard');
     
     // No unsaved changes, navigate immediately
     this.performNavigateBack();
@@ -921,25 +852,20 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.deploymentStatusMessage = ''; // Clear status message
     this.isPlaygroundEnabled = false; // Disable playground
     this.clearFileSelection();
-    console.log('Reset state for dashboard navigation');
   }
 
   onSearch(searchTerm: string): void {
-    console.log('Search:', searchTerm);
     // TODO: Implement search functionality
   }
 
   onRefresh(): void {
     this.lastRefreshedTime = new Date();
-    console.log('Refreshed at:', this.lastRefreshedTime);
     // TODO: Implement refresh functionality
   }
 
   onAdd(): void {
-    console.log('Opening pipeline creation dialog from agent detail view. Mode:', this.pipelineMode);
     
     if (this.pipelineMode === 'mcp') {
-      console.log('Opening MCP Pipelines creation dialog');
       
       // Open the pipeline creation dialog with MCP-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -956,14 +882,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('MCP Pipelines created:', result);
           this.service.message('MCP Pipelines created successfully!', 'success');
           // Navigate back to dashboard to see the new pipeline
           this.navigateBack();
         }
       });
     } else {
-      console.log('Opening Agent Pipelines creation dialog');
       
       // Open the pipeline creation dialog with Agent-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -980,7 +904,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('Agent Pipelines created:', result);
           this.service.message('Agent Pipelines created successfully!', 'success');
           // Navigate back to dashboard to see the new pipeline
           this.navigateBack();
@@ -990,13 +913,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   onTagSelected(tags: any): void {
-    console.log('Tags selected:', tags);
     this.tagrefresh = !this.tagrefresh;
     // TODO: Implement tag filtering
   }
 
   onFilterStatusChange(filters: any): void {
-    console.log('Filters changed:', filters);
     // TODO: Implement filter functionality
   }
 
@@ -1012,11 +933,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Generate new random cname for Code Review Agent
       const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
       this.currentCname = 'CR' + randomSuffix;
-      console.log('Generated new cname for Code Review Agent:', this.currentCname);
     } else {
       // Use fixed cname for other agents
       this.currentCname = agent.cname;
-      console.log('Using fixed cname:', this.currentCname);
     }
 
     // Automatically call APIs to check for existing data
@@ -1034,7 +953,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     this.isSavingFile = true;
     try {
-      console.log('Saving file:', this.selectedFileName);
 
       // Update the node content first
       this.selectedFileNode.content = this.selectedFileContent;
@@ -1049,8 +967,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           this.selectedFilePath
         )
         .toPromise();
-
-      console.log('File saved successfully via bulk update API:', result);
 
       this.isFileModified = false;
       this.isUserModifiedContent = false;
@@ -1090,20 +1006,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       !this.currentCname ||
       !this.selectedFileName
     ) {
-      console.log('Cannot delete: missing file info', {
-        hasFileNode: !!this.selectedFileNode,
-        hasCname: !!this.currentCname,
-        hasFileName: !!this.selectedFileName,
-      });
       return;
     }
 
     if (this.isSavingFile) {
-      console.log('Cannot delete: file is currently being saved');
       return;
     }
-
-    console.log('Showing delete confirmation for:', this.selectedFileName);
     this.showDeleteDialog = true;
   }
 
@@ -1115,19 +1023,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     this.isSavingFile = true; // Reuse the saving flag for UI state
     try {
-      console.log(
-        'Deleting file:',
-        this.selectedFileName,
-        'with ID:',
-        this.selectedFileId
-      );
 
       // Call the delete API with just the file ID
       const result = await this.agentPipelineService
         .deleteFile(this.selectedFileId)
         .toPromise();
-
-      console.log('File deleted successfully:', result);
 
       // Update the file tree with the response
       if (result && Array.isArray(result)) {
@@ -1174,7 +1074,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   // Close file with unsaved changes check
   closeFile(): void {
     if (this.isFileModified) {
-      console.log('Showing save confirmation dialog for file close');
       this.pendingNavigation = null; // No specific navigation target, just closing
       this.showSaveConfirmationDialog = true;
       return;
@@ -1230,16 +1129,13 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     this.isLoadingFiles = true;
-    console.log('Loading files for cname:', this.currentCname, 'mode:', this.pipelineMode);
 
     // Use the same API - the backend will handle the type differentiation
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (apiResponse) => {
-        console.log('API response for files:', apiResponse);
         
         if (apiResponse && Array.isArray(apiResponse) && apiResponse.length > 0) {
           // Files found - enable codespace tab
-          console.log('Files found, enabling codespace tab');
           this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(apiResponse);
           this.expandAllFolders(this.fileSystemData);
           
@@ -1249,7 +1145,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           
         } else {
           // No files found
-          console.log('No files found, maintaining script tab only');
           this.fileSystemData = [];
           this.hasGeneratedAgent = false;
           this.isJsonProcessed = false;
@@ -1289,8 +1184,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       console.warn('No container name available for refreshing files');
       return;
     }
-    
-    console.log('Refreshing file structure for container:', this.currentCname);
     this.loadAgentFiles();
   }
   // Track user modifications for neon green highlighting
@@ -1322,13 +1215,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     // Don't set isUserModifiedContent to prevent whole textarea styling
-
-    console.log('User modification tracking complete:', {
-      modifiedLines: this.userModifiedLines.size,
-      totalOriginalLines: originalLines.length,
-      totalCurrentLines: currentLines.length,
-      modifiedLineNumbers: Array.from(this.userModifiedLines),
-    });
   }
 
   // Get CSS class for user-modified lines
@@ -1400,7 +1286,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     // Block navigation if there are unsaved changes - show custom dialog instead of browser alert
-    console.log('Navigation blocked - unsaved changes detected');
     return false;
   }
 
@@ -1432,7 +1317,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   // Handle discard changes and continue navigation
   discardAndContinue(): void {
-    console.log('Discarding changes and continuing...');
 
     // Restore original content
     this.selectedFileContent = this.originalFileContent;
@@ -1498,7 +1382,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
           // Show success message after download starts
           setTimeout(() => {
-            console.log('Download completed successfully');
             // Create a properly formatted success response for messageService
             const successResponse = { status: 200, body: [] };
             this.service.messageService(
@@ -1587,13 +1470,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(event: any): void {
-    console.log('Tab change requested to index:', event.index);
-    console.log(`Tab switched to index: ${event.index}`);
   }
 
   onJsonChange(event: any): void {
     // Handle JSON content changes from API data only
-    console.log('JSON content changed:', event);
   }
 
   onFileContentChange(event: any): void {
@@ -1610,12 +1490,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   // Handle text content changes for non-Python files
   onTextContentChange(newContent: string): void {
-    console.log(
-      'onTextContentChange called with content length:',
-      newContent.length
-    );
-    console.log('Current content length:', this.selectedFileContent.length);
-    console.log('Original content length:', this.originalFileContent.length);
 
     // Store the previous content for comparison
     const previousContent = this.selectedFileContent;
@@ -1628,29 +1502,16 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.selectedFileContent !== this.originalFileContent;
     const hasChangesFromPrevious = this.selectedFileContent !== previousContent;
 
-    console.log('Content comparison:', {
-      hasChangesFromOriginal,
-      hasChangesFromPrevious,
-      isTyping: hasChangesFromPrevious && hasChangesFromOriginal,
-    });
-
     if (hasChangesFromOriginal) {
       this.isFileModified = true;
       // Don't set isUserModifiedContent to prevent textarea styling
       this.updateDiffTracking(newContent);
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
-
-      console.log('Content changed - flags set:', {
-        isFileModified: this.isFileModified,
-        userModifiedLines: this.userModifiedLines.size,
-      });
     } else {
       // Reset flags if content matches original
       this.isFileModified = false;
       this.userModifiedLines.clear();
-
-      console.log('Content matches original - flags reset');
     }
   }
 
@@ -1831,10 +1692,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     if (this.selectedFileNode === sourceNode) {
       this.selectedFilePath = newPath;
     }
-
-    console.log(
-      `Moved ${sourceNode.name} to ${targetFolder.name}. New path: ${newPath}`
-    );
   }
 
   private removeNodeFromStructure(
@@ -1916,7 +1773,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Call bulk update API to save new structure
     this.agentPipelineService.updateFileStructure(this.currentCname, this.fileSystemData).subscribe({
       next: (result) => {
-        console.log('File structure saved successfully via bulk update API:', result);
         this.showSaveStructureDialog = false;
         this.originalFileStructure = [];
         
@@ -2012,7 +1868,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       navigator.clipboard
         .writeText(this.selectedFileContent)
         .then(() => {
-          console.log('File content copied to clipboard');
           // You can add a snackbar notification here
         })
         .catch((err) => {
@@ -2074,17 +1929,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.currentLineOffset = 0;
     this.updateTotalLineCount();
     setTimeout(() => this.initializeVirtualScrolling(), 100);
-
-    console.log(
-      'Selected file:',
-      this.selectedFileName,
-      'Extension:',
-      this.fileExtension,
-      'Path:',
-      this.selectedFilePath,
-      'Content length:',
-      this.selectedFileContent.length
-    );
   }
 
   isFileSelected(node: FileNode): boolean {
@@ -2166,7 +2010,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     const organization = this.getOrganization();
 
     try {
-      console.log('Initiating deployment deletion for:', this.currentCname);
       
       // Initialize WebSocket connection for deletion
       await this.initializeDeleteWebSocket();
@@ -2185,12 +2028,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Initialize WebSocket connection for deployment deletion
    */
   private async initializeDeleteWebSocket(): Promise<void> {
-    console.log('  STARTING DELETE WEBSOCKET INITIALIZATION PROCESS');
     try {
-      console.log('  Step 1: Connecting to WebSocket server for deletion...');
       
       const environmentUrl = this.getEnvironmentUrl();
-      console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
       
       this.socket = io(environmentUrl, {
         path: '/apps/builder-service/socket.io',
@@ -2207,7 +2047,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       
       // Connection successful
       this.socket.on('connect', () => {
-        console.log('  Step 2: WebSocket connected for deletion! Preparing delete payload...');
         
         // Use the same deployment name as used in deployment
         const deploymentName = this.currentDeploymentName || this.pipelineAlias?.toString() || 'DEFAULT-AGENT';
@@ -2216,16 +2055,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           deployment_name: deploymentName,
           namespace: 'aipns'
         };
-        
-        console.log('  Step 3: Sending delete_deployment event with payload:', deletePayload);
         this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
         this.socket?.emit('delete_deployment', deletePayload);
-        console.log('  Step 4: delete_deployment event emitted to WebSocket');
       });
       
       // Delete status event
       this.socket.on('delete_status', (data: any) => {
-        console.log('Delete status received:', data);
         this.addToConsole(`Delete Status: ${JSON.stringify(data)}`);
         
         if (data.status === 'SUCCESS' || data.status === 'success') {
@@ -2283,8 +2118,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-      
-      console.log('Updating streaming services after deletion from:', streamingServicesUrl);
       this.addToConsole('Updating service configuration...');
       
       // Fetch current streaming services data
@@ -2307,8 +2140,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         // Update via API
         const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
         await this.http.put<any>(updateUrl, putPayload).toPromise();
-        
-        console.log('Streaming services updated after deletion');
         this.addToConsole('✓ Service configuration updated successfully');
         
         // Update local status
@@ -2374,15 +2205,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Get organization from localStorage or use default
     const organization = localStorage.getItem('organisation') || 'leo1311';
     
-    console.log('Step 1: Pushing to MinIO before WebSocket deployment:', {
-      cname: this.currentCname,
-      organization: organization
-    });
-    
     // Call the MinIO upload API first
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
-        console.log('MinIO push successful, proceeding to WebSocket deployment:', response);
         this.addToConsole('✓ Files successfully pushed to MinIO storage');
         this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
         
@@ -2397,13 +2222,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('MinIO push error received:', error);
-        console.log('Error object structure:', {
-          status: error.status,
-          statusText: error.statusText,
-          statusText_includes_OK: error.statusText?.toLowerCase().includes('ok'),
-          error: error.error,
-          message: error.message
-        });
 
         // Check if this is actually a success (status 200-299 OR statusText contains "OK")
         // Backend logs show success but Angular might misinterpret the response
@@ -2414,7 +2232,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           error.message?.includes('parsing');
 
         if (isActualSuccess) {
-          console.log('API actually succeeded despite being in error handler - treating as success');
           this.addToConsole('✓ Files successfully pushed to MinIO storage');
           this.addToConsole('Step 2: Starting WebSocket deployment pipeline...');
           this.service.message('Files successfully pushed to MinIO storage', 'success');
@@ -2451,12 +2268,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Initialize WebSocket connection for deployment pipeline
    */
  private initializeWebSocket(): void {
-    console.log('  STARTING WEBSOCKET INITIALIZATION PROCESS');
     try {
-      console.log('  Step 1: Connecting to WebSocket server...');
       // Connect to the WebSocket server
       //  const webSocketUrl = 'http://100.78.49.149/';
-        //console.log(' WebSocket connecting to URL:', webSocketUrl);
        // this.socket = io(webSocketUrl, {
 //	  transports: ['websocket'],
   //        timeout: 20000,
@@ -2464,7 +2278,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
      //   });
 	  
 	const environmentUrl = this.getEnvironmentUrl();
-	console.log('  Connecting to WebSocket at environment URL:', environmentUrl);
 	
 	// Bulletproof method to ensure HTTPS protocol (not WSS)
 	// Allow websocket transport but force HTTP protocol to prevent wss:// conversion
@@ -2483,16 +2296,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 	});    
         // Connection successful
         this.socket.on('connect', () => {
-          console.log('  Step 2: WebSocket connected! Fetching deployment alias...');
           // First fetch the streaming service to get the alias for deployment_name
           const organization = this.getOrganization();
           const streamingServiceUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-          
-          console.log('  Step 2.1: Fetching streaming service alias from:', streamingServiceUrl);
           this.addToConsole(`Fetching deployment configuration...`);
           
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
-            console.log('  Step 2.2: Streaming service response:', streamingResponse);
             
             // CRITICAL: Update selectedAgent with alias from streaming service API response
             if (streamingResponse && streamingResponse.alias) {
@@ -2501,7 +2310,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               }
               this.selectedAgent.alias = streamingResponse.alias;
               this.selectedAgent.cname = streamingResponse.name || this.currentCname;
-              console.log('  Step 2.2a: Updated selectedAgent with alias:', this.selectedAgent.alias, 'and cname:', this.selectedAgent.cname);
             }
             // Use alias from selected card (uppercase)
             const deploymentAlias = (this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT').toLowerCase();
@@ -2509,11 +2317,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
             
  // Now prepare payload with deployment_name from alias
             const apiParams = this.getApiParametersForMode();
-     console.log('  Step 2.3: Using deployment alias:', deploymentAlias);
             
             // Generate dynamic target_image_tag from config
             const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
-            console.log('  Step 2.4: Generated dynamic target_image_tag:', targetImageTag);
             
             // Determine deployment name based on pipeline mode
             const deploymentName = this.pipelineMode === 'mcp' 
@@ -2531,12 +2337,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               type: apiParams.type,
               interface: apiParams.interface
             };
-           
-            console.log('  Step 3: Sending start_pipeline event with dynamic payload:', payload);
             this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentName}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
-            console.log('  Step 4: start_pipeline event emitted to WebSocket');
           }).catch((error) => {
             console.error('  ERROR: Failed to fetch streaming service alias:', error);
             this.addToConsole(`Error fetching deployment configuration: ${error.message || error}`);
@@ -2548,7 +2351,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
             
             // Generate dynamic target_image_tag from config for fallback
             const fallbackTargetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${fallbackDeploymentName}:${pipelineConfig.containerRegistry.imageVersion}`;
-            console.log('  Step 3 (Fallback): Generated dynamic target_image_tag:', fallbackTargetImageTag);
             
             const fallbackPayload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
@@ -2561,8 +2363,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               type: apiParams.type,
               interface: apiParams.interface
             };
-            
-            console.log('  Step 3 (Fallback): Using fallback payload due to API error:', fallbackPayload);
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
@@ -2706,7 +2506,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         // Silent error - don't show to user during background polling
-        console.log('Background status check failed (expected during deployment):', error.status);
       }
     });
   }
@@ -2776,25 +2575,20 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-      
-      console.log('Fetching streaming services data from:', streamingServicesUrl);
       this.addToConsole('Updating streaming services with playground URL...');
       
       // Step 1: GET the current streaming services data
       const getResponse = await this.http.get<any>(streamingServicesUrl).toPromise();
-      console.log('Streaming services GET response:', getResponse);
       
       if (getResponse && getResponse.json_content) {
         // Step 2: Parse the existing json_content
         let jsonContent = JSON.parse(getResponse.json_content);
-        console.log('Parsed existing json_content:', jsonContent);
         
            // Step 3: Add/update the playgroundUrl and runner_service_status
         const environmentUrl = this.getEnvironmentUrl();
         const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
         jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
         jsonContent.runner_service_status = true;
-        console.log('Updated json_content with playground URL and runner_service_status:', jsonContent);
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {
@@ -2802,18 +2596,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           json_content: JSON.stringify(jsonContent)
         };
         
-        console.log('Sending PUT request to update streaming services:', putPayload);
-        
          // Step 5: PUT the updated data back using the update endpoint
         const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
         const putResponse = await this.http.put<any>(updateUrl, putPayload).toPromise();
-        console.log('Streaming services PUT response:', putResponse);
         
         this.addToConsole('Streaming services updated successfully with playground URL!');
          // Update local runner_service_status
         this.runnerServiceStatus = true;
       } else {
-        console.log('No json_content found in streaming services response');
         this.addToConsole('Warning: Could not update streaming services - no json_content found');
       }
       
@@ -2854,15 +2644,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Get organization from localStorage or use default
     const organization = localStorage.getItem('organisation') || 'leo1311';
     
-    console.log('Pushing to MinIO:', {
-      cname: this.currentCname,
-      organization: organization
-    });
-    
     // Call the API - Handle parsing errors and different response types properly
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
       next: (response) => {
-        console.log('MinIO push successful:', response);
         
         // Always show success message for 200 status - API returned success
         const successResponse = { status: 200, body: response || 'Success' };
@@ -2870,13 +2654,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('MinIO push error received:', error);
-        console.log('Error object structure:', {
-          status: error.status,
-          statusText: error.statusText,
-          statusText_includes_OK: error.statusText?.toLowerCase().includes('ok'),
-          error: error.error,
-          message: error.message
-        });
         
         // Check if this is actually a success (status 200-299 OR statusText contains "OK")
         // Backend logs show success but Angular might misinterpret the response
@@ -2887,7 +2664,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           error.message?.includes('parsing');
         
         if (isActualSuccess) {
-          console.log('API actually succeeded despite being in error handler - treating as success');
           const successResponse = { status: 200, body: error.error || 'Success' };
           this.service.messageService(successResponse, 'Push to MinIO completed successfully!');
         } else {
@@ -2923,7 +2699,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
       this.selectedZipFile = file;
-      console.log('Selected zip file:', file.name, 'Size:', file.size);
     } else {
       this.service.message('Please select a valid ZIP file', 'error');
       this.selectedZipFile = null;
@@ -2934,7 +2709,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Handle ZIP file created from GitHub pull
    */
   onGitHubPullZipCreated(zipFile: File): void {
-    console.log('GitHub pull ZIP file received:', zipFile.name, 'Size:', zipFile.size);
     this.selectedZipFile = zipFile;
     
     // Automatically trigger upload
@@ -2953,18 +2727,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.isUploadingFiles = true;
     const organization = this.getOrganization();
 
-    console.log('Uploading files:', {
-      cname: this.currentCname,
-      organization: organization,
-      fileName: this.selectedZipFile.name,
-      fileSize: this.selectedZipFile.size,
-      mode: this.pipelineMode
-    });
-
     // Call the upload API - the service should handle MCP vs Agent differentiation
     this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile).subscribe({
       next: (response) => {
-        console.log('Upload successful:', response);
         this.service.message(
           `${this.pipelineMode === 'mcp' ? 'MCP server' : 'Agent'} files uploaded successfully!`, 
           'success'
@@ -3044,25 +2809,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     try {
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-      
-      console.log('Fetching runner_service_status from:', streamingServicesUrl);
       const response = await this.http.get<any>(streamingServicesUrl).toPromise();
-      
-      console.log('API Response:', response);
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
-        console.log('Parsed json_content:', jsonContent);
         
         this.runnerServiceStatus = jsonContent.runner_service_status === true;
-        console.log('✅ Set runnerServiceStatus to:', this.runnerServiceStatus);
-        console.log('Button states:', {
-          canRunAndDeploy: this.canRunAndDeploy(),
-          canDeleteDeployment: this.canDeleteDeployment(),
-          hasFiles: this.hasGeneratedAgent || this.hasExistingFiles(),
-          isRunningAndDeploying: this.isRunningAndDeploying,
-          isDeletingDeployment: this.isDeletingDeployment
-        });
         
         // Trigger change detection
         this.cdr.detectChanges();
@@ -3112,12 +2864,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   editAgent(agent: AgentCard): void {
-    console.log('Edit agent:', agent);
     // TODO: Implement edit functionality
   }
 
   deleteAgent(agent: AgentCard): void {
-    console.log('Delete agent:', agent);
     // TODO: Implement delete functionality
   }
 
@@ -3186,11 +2936,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    */
   private async fetchPlaygroundUrl(): Promise<void> {
     try {
-      console.log('fetchPlaygroundUrl - checking agent data:', {
-        currentCname: this.currentCname,
-        selectedAgent: this.selectedAgent,
-        cardName: this.cardName
-      });
       
       if (!this.currentCname) {
         throw new Error('No agent selected - currentCname is empty');
@@ -3199,31 +2944,22 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       const organization = this.getOrganization();
       const apiUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
       
-      console.log('fetchPlaygroundUrl - API URL:', apiUrl);
-      
       const response = await this.http.get<any>(apiUrl).toPromise();
-      console.log('fetchPlaygroundUrl - Streaming services response:', response);
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
-        console.log('fetchPlaygroundUrl - Parsed JSON content:', jsonContent);
         
         if (jsonContent.playgroundurl) {
           this.playgroundUrl = jsonContent.playgroundurl;
-          console.log('fetchPlaygroundUrl - Found playgroundurl:', this.playgroundUrl);
         } else {
-          console.log('fetchPlaygroundUrl - No playgroundurl found, using stored deployment name');
           const environmentUrl = this.getEnvironmentUrl();
           const deploymentName = this.currentDeploymentName; // Use stored deployment name
           this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-          console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
         }
       } else {
-        console.log('fetchPlaygroundUrl - No json_content in response, using stored deployment name');
         const environmentUrl = this.getEnvironmentUrl();
         const deploymentName = this.currentDeploymentName; // Use stored deployment name
         this.playgroundUrl = `${environmentUrl}/apps/${deploymentName}/ask`;
-        console.log('fetchPlaygroundUrl - Using stored deployment name:', deploymentName);
       }
     } catch (error) {
       console.error('Error fetching playground URL:', error);
@@ -3381,12 +3117,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       timestamp: new Date().toISOString(),
     };
 
-    console.log('Pushing to GitHub:', pushData);
-
     // Simulate API call
     setTimeout(() => {
       this.isPushing = false;
-      console.log('Successfully pushed to GitHub!');
       // Show success message or notification
       const successResponse = { status: 200, body: [] };
       this.service.messageService(
@@ -3442,13 +3175,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   // Check for existing files and load appropriate state
-  private async checkForExistingFilesAndLoadState(cname: string): Promise<void> {    console.log('Checking for existing files for cname:', cname);
-
+  private async checkForExistingFilesAndLoadState(cname: string): Promise<void> {
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
    // Fetch runner_service_status FIRST and WAIT for it
     await this.fetchRunnerServiceStatus();
-    console.log('After fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     // Try to fetch files for this specific cname - only to check existence
     this.isLoadingFiles = true;
     this.agentPipelineService.getAgentFiles(cname).subscribe({
@@ -3459,16 +3190,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           Array.isArray(apiResponse) &&
           apiResponse.length > 0
         ) {
-          console.log(
-            'Found existing files for cname:',
-            cname,
-            'Files count:',
-            apiResponse.length
-          );
           // Only enable codespace tab and populate with response data
           this.enableCodespaceTabOnly(apiResponse);
         } else {
-          console.log('No files found in response for cname:', cname);
           // Even if API succeeds but no files, show script tab only
           this.showScriptTabOnly();
         }
@@ -3477,11 +3201,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.log(
-          'API error or no existing files found for cname:',
-          cname,
-          error
-        );
         // Check if error has the new format with details
         if (error?.error?.details) {
           this.service.message(error.error.details, 'error');
@@ -3504,22 +3223,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     // Populate file tree from list API response if data is provided
     if (fileData && Array.isArray(fileData) && fileData.length > 0) {
-      console.log('Populating file structure from list API response:', fileData.length, 'files');
       this.fileSystemData = this.agentPipelineService.buildFileTreeFromApiResponse(fileData);
       this.expandAllFolders(this.fileSystemData); // Expand all folders by default
     } else {
-      console.log('No file data provided, keeping empty file structure');
       this.fileSystemData = []; // Empty initially if no data
     }
     
     // Keep console empty - only WebSocket data from Run and Deploy should appear
     this.consoleOutput = [];
-
-    console.log('Enabled codespace tab for existing agent:', {
-      cname: this.currentCname,
-      hasFiles: this.fileSystemData.length > 0,
-      fileCount: fileData ? fileData.length : 0
-    });
   }
 
   // Show only script tab when no files exist
@@ -3535,13 +3246,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.script = [];
       this.scriptFileName = '';
       this.loadScript = true;
-      console.log('Showing empty script content - no placeholder data');
     }
-
-    console.log(
-      'Showing script tab only - no existing files found for cname:',
-      this.currentCname
-    );
   }
 
   // Reset to initial state (no saved data) - used as starting point
@@ -3561,13 +3266,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.script = [];
       this.scriptFileName = '';
       this.loadScript = true;
-      console.log('Set empty script content for new agent');
     }
-    
-    console.log(
-      'Reset to initial state for agent with cname:',
-      this.currentCname
-    );
   }
 
   // Clear file selection
@@ -3589,14 +3288,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Store deployment data - user stays on Deployment tab
    */
  onDeploymentFinished(deploymentData: any): void {
-    console.log('🎯 Deployment form finished successfully:', deploymentData);
     
     // Set flag to true so deploy button on deployment tab can be used
     this.hasDeploymentFormData = true;
     
     // Extract and store deployment environment from the correct path
     this.deploymentEnvironment = deploymentData?.deployment_environment || '';
-    console.log('🎯 Deployment environment:', this.deploymentEnvironment);
     
     // Trigger change detection to ensure the state is updated
     this.cdr.detectChanges();
@@ -3613,23 +3310,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    */
   private checkDeploymentFormData(): void {
     if (!this.currentCname) {
-      console.log('❌ Cannot check deployment form data: no cname available');
       this.hasDeploymentFormData = false;
       this.deploymentEnvironment = '';
       return;
     }
 
     const organization = this.getOrganization();
-    console.log('🔍 Checking deployment form data for cname:', this.currentCname, 'org:', organization);
-    console.log('🔍 API URL will be: /api/aip/deployment-form?cname=' + this.currentCname + '&org=' + organization);
     
     this.isCheckingDeploymentData = true;
     
     this.service.getDeploymentFormByCnameOrg(this.currentCname, organization).subscribe({
       next: (response) => {
-        console.log('📦 Deployment form API response:', response);
-        console.log('📦 Response type:', typeof response);
-        console.log('📦 Is array:', Array.isArray(response));
         
         // More robust checking - if response exists and is not empty
         let hasData = false;
@@ -3639,15 +3330,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           if (Array.isArray(response)) {
             hasData = response.length > 0;
             data = response[0];
-            console.log('📦 Array response with length:', response.length);
           } else if (typeof response === 'object') {
             hasData = Object.keys(response).length > 0;
             data = response;
-            console.log('📦 Object response with keys:', Object.keys(response).length);
           }
         }
-        
-        console.log('📦 Has data:', hasData);
         
         if (hasData && data) {
           // Set flag to TRUE - button MUST show
@@ -3655,21 +3342,15 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           
           // Try to extract deployment environment (optional)
           this.deploymentEnvironment = data.deployment_environment || '';
-          
-          console.log('✅ Deployment form data EXISTS - Deploy button WILL show');
-          console.log('✅ Deployment environment extracted:', this.deploymentEnvironment || '(none - will show as "Deploy")');
-          console.log('✅ hasDeploymentFormData flag set to:', this.hasDeploymentFormData);
         } else {
           this.hasDeploymentFormData = false;
           this.deploymentEnvironment = '';
-          console.log('❌ No deployment form data found - Deploy button will NOT show');
         }
         
         this.isCheckingDeploymentData = false;
         
         // Force change detection to ensure UI updates
         this.cdr.detectChanges();
-        console.log('🔄 Change detection triggered');
       },
       error: (error) => {
         console.error('❌ Error checking deployment form data:', error);
@@ -3688,27 +3369,22 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.showScriptTabOnly();
       return;
     }
-
-    console.log('Auto-loading agent data for cname:', this.currentCname);
     this.isLoadingFiles = true;
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
         // Fetch runner_service_status FIRST and WAIT for it
     await this.fetchRunnerServiceStatus();
-    console.log('After autoLoadAgentData fetch, runnerServiceStatus is:', this.runnerServiceStatus);
 
     // Only call folder list API to check existence
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (listResponse) => {
-        console.log('Folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
           // Data exists, enable codespace tab and populate with response data
           this.enableCodespaceTabOnly(listResponse);
         } else {
           // No data from list API, show only script tab
-          console.log('No data from folder list API, showing script tab only');
           this.showScriptTabOnly();
         }
         this.isLoadingFiles = false;
@@ -3740,15 +3416,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.showScriptTabOnly();
       return;
     }
-
-    console.log('Auto-loading pipeline agent data for cname:', this.currentCname);
     this.isLoadingFiles = true;
     
     // Reset state first
     this.resetToInitialStateForNewAgent();
       // Fetch runner_service_status FIRST and WAIT for it
     await this.fetchRunnerServiceStatus();
-    console.log('After autoLoadAgentDataForPipelineCard fetch, runnerServiceStatus is:', this.runnerServiceStatus);
     
     // Check if deployment form data exists for the Deploy button
     this.checkDeploymentFormData();
@@ -3756,11 +3429,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Call folder list API first - using the cname as both cname and filename for the API
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
       next: (listResponse) => {
-        console.log('Pipeline folder list API response:', listResponse);
         
         if (listResponse && listResponse.length > 0) {
           // List API succeeded - enable codespace tab and populate with response data
-          console.log('List API succeeded, enabling codespace tab for pipeline card');
           this.enableCodespaceTabOnly(listResponse);
           
           this.isLoadingFiles = false;
@@ -3770,7 +3441,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         } else {
           // No data from list API, show only script tab and continue with old flow
-          console.log('No data from pipeline folder list API, falling back to script tab and old flow');
           this.showScriptTabOnly();
           this.isLoadingFiles = false;
           // Fall back to the original getStreamService flow

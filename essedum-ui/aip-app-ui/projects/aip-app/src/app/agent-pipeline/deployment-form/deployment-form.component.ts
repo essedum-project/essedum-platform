@@ -220,7 +220,6 @@ export class DeploymentFormComponent implements OnInit {
 
   ngOnInit(): void {
     // Log received inputs for debugging
-    console.log('DeploymentFormComponent ngOnInit - cname:', this.cname, 'organisation:', this.organisation);
     
     // Validate required inputs
     if (!this.organisation || this.organisation.trim() === '') {
@@ -229,13 +228,11 @@ export class DeploymentFormComponent implements OnInit {
     
     // Load deployment form data by cname and org if available
     if (this.cname && this.organisation) {
-      console.log('Loading deployment form with cname:', this.cname, 'org:', this.organisation);
       this.loadDeploymentFormByCnameOrg(this.cname, this.organisation);
     } else if (this.deploymentId) {
       // Fallback to loading by ID if available (edit mode)
       this.loadDeploymentForm(this.deploymentId);
     } else {
-      console.log('No cname or organisation provided, ready for new form creation');
     }
   }
 
@@ -252,14 +249,12 @@ export class DeploymentFormComponent implements OnInit {
           this.populateFormWithData(response);
           this.isDeploymentFinished = true;
           this.disableAllForms();
-          console.log('Deployment form loaded successfully for cname:', cname, 'org:', org);
         }
       },
       (error) => {
         console.error('Error loading deployment form:', error);
         // If record not found, keep forms empty for new creation
         if (error.status === 404) {
-          console.log('No existing deployment form found for cname and org, ready for new creation');
           this.deploymentId = null; // Reset to create mode
         }
       }
@@ -285,7 +280,6 @@ export class DeploymentFormComponent implements OnInit {
         console.error('Error loading deployment form:', error);
         // If record not found, keep forms empty for new creation
         if (error.status === 404) {
-          console.log('No existing deployment form found, ready for new creation');
           this.deploymentId = null; // Reset to create mode
         } else {
           this.service.message('Error loading deployment form', 'error');
@@ -342,8 +336,6 @@ export class DeploymentFormComponent implements OnInit {
       infraSupportContacts: data.infra_support_contacts || '',
       auditPocDetails: data.audit_poc_details || ''
     });
-
-    console.log('Forms populated with data for deployment ID:', this.deploymentId);
   }
 
   /**
@@ -513,8 +505,6 @@ export class DeploymentFormComponent implements OnInit {
     }
 
     const deploymentData = this.buildDeploymentPayload();
-
-    console.log('Deployment configuration finished:', deploymentData);
     
     // Call the save API
     this.service.saveDeploymentForm(deploymentData).subscribe(
@@ -665,7 +655,6 @@ export class DeploymentFormComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Branch deployment result:', result);
         // this.service.message('Branch deployment initiated successfully', 'success');
       }
     });
@@ -763,7 +752,6 @@ export class BranchSelectionDialogComponent implements OnInit {
       },
       (error) => {
         this.service.message(this.ERROR_MSG_GITHUB , 'error');
-        console.log(this.ERROR_MSG_GITHUB + this.gitSelectedRepo, error);
         this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
       }
@@ -781,8 +769,6 @@ export class BranchSelectionDialogComponent implements OnInit {
       });
       return;
     }
-
-    console.log('Loading source branch for cname:', this.data.cname, 'org:', this.data.organisation);
     this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
       (response) => {
         this.gitSelectedRepo=response.repo;
@@ -811,7 +797,6 @@ export class BranchSelectionDialogComponent implements OnInit {
             sourceBranch: this.gitSelectedBranch
           });
         } else {
-          console.log(this.ERROR_MSG_GITHUB, '  Error loading source branch configuration:', error); 
           this.service.message(this.ERROR_MSG_GITHUB , 'error');
         }
       }
@@ -841,8 +826,6 @@ export class BranchSelectionDialogComponent implements OnInit {
           console.warn('Unexpected collaborators response format:', response);
           this.availableReviewers = [];
         }
-        
-        console.log('Loaded collaborators:', this.availableReviewers);
         this.filteredReviewers = [...this.availableReviewers]; // Initialize filtered list
         this.isLoadingReviewers = false;
       },
@@ -957,7 +940,6 @@ export class BranchSelectionDialogComponent implements OnInit {
       // Create pull request
       this.githubService.createPullRequest(pullRequestData).subscribe({
         next: (prResponse) => {
-          console.log('Pull request created successfully:', prResponse);
           const successMsg = prResponse.message || `Pull request created successfully from '${sourceBranch}' to '${destinationBranch}'`;
           this.service.message(successMsg, 'success');
           
