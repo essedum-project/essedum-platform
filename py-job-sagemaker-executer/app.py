@@ -847,7 +847,7 @@ def projects_endpoints_undeploy_models_create(endpoint_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -940,7 +940,10 @@ def projects_models_get(model_id):
 @app.route('/api/service/v1/models/register', methods=['post'])
 def projects_models_register_create():
     result=""
+    logger.info('model register called')
+    
     try:
+        logger.info(f"Request args: {request.args}")
         adapter_instance = request.args.get("adapter_instance", None)
         project = request.args.get("project", None)
         isCached = request.args.get("isCached", None)
@@ -964,6 +967,7 @@ def projects_models_register_create():
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
+        print(f"connection details: {str(connections)}")
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
@@ -972,6 +976,7 @@ def projects_models_register_create():
         logger.info(f"Request body is: {str(request_body)}")
         result, status_code = aws.projects_models_register_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
+        print(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
         result = str(err)
@@ -1209,6 +1214,18 @@ def training_train_create():
         logger.info(f"Request body is: {str(request_body)}")
         result, status_code = aws.training_train_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
+        
+        # Log helpful tracking information
+        if status_code == 202 and result.get('sourceID'):
+            job_name = result.get('sourceID')
+            logger.info("=" * 80)
+            logger.info(f"✓ TRAINING JOB STARTED SUCCESSFULLY")
+            logger.info(f"Job Name: {job_name}")
+            logger.info(f"Status: {result.get('status', 'InProgress')}")
+            logger.info(f"To check status, use:")
+            logger.info(f"GET /api/service/v1/pipelines/training/{job_name}/get")
+            logger.info("=" * 80)
+        
         return jsonify(result), status_code
     except Exception as err:
         result = str(err)
@@ -1226,8 +1243,15 @@ def training_cancel_list(training_job_id):
         isCached = request.args.get("isCached", None)
         isInstance = request.args.get("isInstance", None)
         logger.info(f"adapter_instance: {adapter_instance}, project: {project}, isCached: {isCached}, isInstance: {isInstance}")
+        headers = {
+            "Authorization": request.headers.get("Authorization", ""),
+            "Project": request.headers.get("Project", ""),
+            'Projectname': request.headers.get("Projectname", ""),
+            'Rolename': request.headers.get("Rolename", ""),
+            'Roleid': request.headers.get("Roleid", ""),
+            'Referer': request.headers.get("Referer", "")
+        }
         referer = request.headers.get('referer', None)
-        headers=request.headers
         if referer is None:
             referer = request.headers.get('Referer', None)
         logger.info(f'referrer {str(referer)}')
@@ -1235,7 +1259,7 @@ def training_cancel_list(training_job_id):
             result = 'referer is missing in header'
             return jsonify(result), 400
 
-        connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
+        connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."

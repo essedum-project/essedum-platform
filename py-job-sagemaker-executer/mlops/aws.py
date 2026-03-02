@@ -1380,69 +1380,138 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
             )
 
         if access_key and secret_key and region:
+            # Create boto3 session and SageMaker client with proxy config
             if session_token:
-                sagemaker_session = sagemaker.Session(boto_session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"),
-                                aws_session_token=session_token,
-                                config=config
-                                ))
+                boto_session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
             else:
-                sagemaker_session = sagemaker.Session(boto_session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"),
-                                config=config
-                                ))
+                boto_session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            # Use boto3 client directly (with proxy config) instead of high-level SDK
+            sm_client = boto_session.client("sagemaker", verify=False, config=config)
 
             role = request_body.get("RoleArn", "")
-            logger.info(role)
-            bucket = request_body.get("Bucket","")
-            prefix = request_body.get("S3Prefix","")
-            output_path=f's3://{bucket}/{prefix}/output'
-            logger.info(output_path)
-            logger.info("Training is started")
-            # Step 1: Train the model with AutoML
+            logger.info(f"Using IAM Role: {role}")
+            bucket = request_body.get("Bucket", "")
+            prefix = request_body.get("S3Prefix", "")
+            output_path = f's3://{bucket}/{prefix}/output'
+            logger.info(f"Output path: {output_path}")
 
             input_data = request_body.get('inputs', '')
             target_name = request_body.get('target_attribute_name', '')
             content = request_body.get('content_type', '')
 
-            s3_input_train = AutoMLInput(inputs=input_data, target_attribute_name= target_name, content_type= content)
-            logger.info("Training is in progress")
-            automl = AutoML(role = role,
-                            target_attribute_name='SaleType',
-                            sagemaker_session=sagemaker_session,
-                            output_path=f's3://{bucket}/{prefix}/output',
-                            max_candidates = 1)
-            automl.fit(inputs=[s3_input_train])
-            best_model = automl.best_candidate()
-            print(best_model)
+            # Validate target column exists in the CSV header
+            if input_data and target_name:
+                try:
+                    from urllib.parse import urlparse as _urlparse
+                    s3_client = boto_session.client("s3", verify=False, config=config)
+                    parsed = _urlparse(input_data)
+                    s3_bucket = parsed.netloc
+                    s3_key = parsed.path.lstrip('/')
+                    logger.info(f"Reading CSV header from s3://{s3_bucket}/{s3_key}")
 
+                    # Read only the first line (header) to validate columns
+                    resp = s3_client.get_object(Bucket=s3_bucket, Key=s3_key, Range='bytes=0-4096')
+                    first_chunk = resp['Body'].read().decode('utf-8', errors='replace')
+                    header_line = first_chunk.split('\n')[0].strip()
+                    columns = [col.strip().strip('"').strip("'") for col in header_line.split(',')]
+                    logger.info(f"CSV columns found: {columns}")
 
-            model_info = {
-                'sourceID' : best_model.get('CandidateName', ''),
-                'container' : best_model.get('ARN', ' '),
-                'adapter' : adapter_instance,
-                'rawPayload' : json.dumps(best_model, default = str),
-                'syncDate' : best_model.get('LastModifiedTime'),
-                'description': '',
-                'project': project,
-                'type' : 'sagemaker',
-                'createdOn' : best_model.get('CreationTime', ' '),
-                'sourceOrg' : '',
-                #"createdBy": "admin",
-                'name': best_model.get('CandidateName', []),
-                #"modifiedBy": "",
-                'id' : best_model.get('ID'),
-                'sourcename' : best_model.get('CandidateName', []),
-                'status': 'Registered',
-                #"likes": 0,
-                'artifacts':best_model.get('ARN'),
-                'deployment': ''
+                    if target_name not in columns:
+                        return {
+                            "error": f"Target attribute '{target_name}' not found in CSV header.",
+                            "available_columns": columns,
+                            "message": f"Please use one of the available columns as target_attribute_name."
+                        }, 400
+                except Exception as val_err:
+                    logger.warning(f"Could not validate CSV header (non-fatal): {str(val_err)}")
+
+            # Generate a unique job name with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            job_name = f"automl-{project}-{timestamp}" if project else f"automl-job-{timestamp}"
+
+            logger.info(f"Creating AutoML training job: {job_name}")
+            logger.info(f"Input data: {input_data}, Target: {target_name}, Content-Type: {content}")
+
+            # Build AutoML job config for the low-level API
+            automl_job_config = {
+                "AutoMLJobName": job_name,
+                "InputDataConfig": [
+                    {
+                        "DataSource": {
+                            "S3DataSource": {
+                                "S3DataType": "S3Prefix",
+                                "S3Uri": input_data
+                            }
+                        },
+                        "TargetAttributeName": target_name
+                    }
+                ],
+                "OutputDataConfig": {
+                    "S3OutputPath": output_path
+                },
+                "RoleArn": role,
+                "AutoMLJobConfig": {
+                    "CompletionCriteria": {
+                        "MaxCandidates": 1
+                    }
+                }
             }
-            model_info['rawPayload'] = json.dumps(best_model, default = str)
-            logger.info("Training is done successfully")
-            return model_info, 200
+
+            # Add content type if provided — normalize for AutoML accepted values
+            if content:
+                # AutoML only accepts "text/csv;header=present" or "x-application/vnd.amazon+parquet"
+                if content.lower().startswith("text/csv") and "header=" not in content.lower():
+                    content = "text/csv;header=present"
+                automl_job_config["InputDataConfig"][0]["ContentType"] = content
+
+            logger.info(f"Submitting AutoML job via boto3 client: {json.dumps(automl_job_config, default=str)}")
+
+            # Direct API call — non-blocking, returns as soon as job is created on AWS
+            response = sm_client.create_auto_ml_job(**automl_job_config)
+
+            job_arn = response.get("AutoMLJobArn", "")
+            logger.info(f"AutoML job created successfully. ARN: {job_arn}")
+
+            # Return immediately with job info for tracking
+            job_info = {
+                'sourceID': job_name,
+                'container': job_arn,
+                'adapter': adapter_instance,
+                'rawPayload': json.dumps({
+                    'job_name': job_name,
+                    'job_arn': job_arn,
+                    'input_data': input_data,
+                    'target_attribute': target_name,
+                    'output_path': output_path,
+                    'status': 'InProgress'
+                }, default=str),
+                'syncDate': datetime.now().isoformat(),
+                'description': f'AutoML training job for {target_name}',
+                'project': project,
+                'type': 'sagemaker-automl',
+                'createdOn': datetime.now().isoformat(),
+                'sourceOrg': role,
+                'name': job_name,
+                'id': job_name,
+                'sourcename': job_name,
+                'status': 'InProgress',
+                'artifacts': output_path,
+                'deployment': '',
+                'message': f'Training job started successfully. Use GET /training/{job_name}/get to check status.'
+            }
+
+            logger.info(f"Training job {job_name} initiated successfully")
+            return job_info, 202
               
         else:
             logger.info("access key is None")
@@ -1460,8 +1529,8 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
         secret_key = connections.get("secretKey", None)
         region = connections.get("region", None)
         session_token = connections.get("sessionToken", None)
-        print(training_job_id)
-        import boto3
+        logger.info(f"Getting status for job: {training_job_id}")
+        
         config = Config(
                 proxies={
                     'http': PROXY,
@@ -1478,52 +1547,205 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
                     aws_access_key_id=access_key,
                     aws_secret_access_key=secret_key,
                     aws_session_token=session_token,
-                    region_name=region,
-                    config=config
+                    region_name=region
                 )
             else:
                 session = boto3.Session(
                     aws_access_key_id=access_key,
                     aws_secret_access_key=secret_key,
-                    region_name=region,
-                    config=config
+                    region_name=region
                 )
 
             s3_client = session.client("s3", verify=False, config=config)
             client = session.client("sagemaker", verify=False, config=config)
 
-            response = client.describe_training_job(TrainingJobName = training_job_id)
+            # Try to get AutoML job first
+            response = None
+            job_type = 'training'
+            
+            try:
+                logger.info(f"Attempting to describe as AutoML job: {training_job_id}")
+                response = client.describe_auto_ml_job(AutoMLJobName=training_job_id)
+                job_type = 'automl'
+                logger.info(f"Found AutoML job with status: {response.get('AutoMLJobStatus')}")
+            except client.exceptions.ResourceNotFound:
+                logger.info(f"Not an AutoML job, trying regular training job")
+                try:
+                    response = client.describe_training_job(TrainingJobName=training_job_id)
+                    job_type = 'training'
+                    logger.info(f"Found training job with status: {response.get('TrainingJobStatus')}")
+                except Exception as e:
+                    logger.error(f"Failed to find job: {str(e)}")
+                    return {"error": f"Training job '{training_job_id}' not found", "details": str(e)}, 404
+            except Exception as e:
+                logger.error(f"Error checking AutoML job: {str(e)}")
+                # Fallback to regular training job
+                try:
+                    response = client.describe_training_job(TrainingJobName=training_job_id)
+                    job_type = 'training'
+                    logger.info(f"Found training job with status: {response.get('TrainingJobStatus')}")
+                except Exception as e2:
+                    logger.error(f"Failed to find job: {str(e2)}")
+                    return {"error": f"Training job '{training_job_id}' not found", "details": str(e2)}, 404
 
-            dataset_info = {
-                'sourceID' : training_job_id,
-                'container' : response.get('TrainingJobArn', ' '),
-                'adapter' : adapter_instance,
-                'rawPayload' : json.dumps(response, default = str),
-                'syncDate' : response.get('LastModifiedTime'),
-                'description': '',
-                'project': project,
-                'type' : 's3',
-                'createdOn' : response.get('CreationTime', ' '),
-                'sourceOrg' : '',
-                #"createdBy": "admin",
-                'name': training_job_id,
-                #"modifiedBy": "",
-                'id' : response.get('ID'),
-                'sourcename' : training_job_id,
-                'status': 'Registered',
-                #"likes": 0,
-                'artifacts':response.get('TrainingJobArn'),
-                'deployment': ''
-            }
-            dataset_info['rawPayload'] = json.dumps(response, default = str)
+            # Format response based on job type
+            if job_type == 'automl':
+                job_status = response.get('AutoMLJobStatus', 'Unknown')
+                job_arn = response.get('AutoMLJobArn', '')
+                
+                # Get best candidate if job is completed
+                best_candidate = response.get('BestCandidate', {})
+                
+                dataset_info = {
+                    'sourceID': training_job_id,
+                    'container': job_arn,
+                    'adapter': adapter_instance,
+                    'rawPayload': json.dumps(response, default=str),
+                    'syncDate': response.get('LastModifiedTime'),
+                    'description': f"AutoML job status: {job_status}",
+                    'project': project,
+                    'type': 'sagemaker-automl',
+                    'createdOn': response.get('CreationTime'),
+                    'sourceOrg': response.get('RoleArn', ''),
+                    'name': training_job_id,
+                    'id': training_job_id,
+                    'sourcename': training_job_id,
+                    'status': job_status,
+                    'artifacts': job_arn,
+                    'deployment': '',
+                    'jobStatus': job_status,
+                    'failureReason': response.get('FailureReason', ''),
+                    'inputDataConfig': response.get('InputDataConfig', []),
+                    'outputDataConfig': response.get('OutputDataConfig', {}),
+                    'bestCandidate': {
+                        'name': best_candidate.get('CandidateName', ''),
+                        'status': best_candidate.get('CandidateStatus', ''),
+                        'objectiveMetric': best_candidate.get('FinalAutoMLJobObjectiveMetric', {})
+                    } if best_candidate else None
+                }
+            else:  # regular training job
+                job_status = response.get('TrainingJobStatus', 'Unknown')
+                dataset_info = {
+                    'sourceID': training_job_id,
+                    'container': response.get('TrainingJobArn', ' '),
+                    'adapter': adapter_instance,
+                    'rawPayload': json.dumps(response, default=str),
+                    'syncDate': response.get('LastModifiedTime'),
+                    'description': f"Training job status: {job_status}",
+                    'project': project,
+                    'type': 'sagemaker-training',
+                    'createdOn': response.get('CreationTime', ' '),
+                    'sourceOrg': response.get('RoleArn', ''),
+                    'name': training_job_id,
+                    'id': training_job_id,
+                    'sourcename': training_job_id,
+                    'status': job_status,
+                    'artifacts': response.get('ModelArtifacts', {}).get('S3ModelArtifacts', ''),
+                    'deployment': '',
+                    'jobStatus': job_status,
+                    'failureReason': response.get('FailureReason', ''),
+                }
+            
+            logger.info(f"Successfully retrieved job status: {job_status}")
             return dataset_info, 200
         else:
-            logger.info("access key is None")
-            return {"error": "You got an error Kindly check the credentials"}
+            logger.error("Missing AWS credentials")
+            return {"error": "Missing AWS credentials (accessKey, secretKey, or region)"}, 400
     except Exception as err:
-        logger.info(f"Error in deletion of endpoint: {str(err)}")
-        return {"error": str(err)},500          
+        logger.error(f"Error getting training job status: {str(err)}", exc_info=True)
+        return {"error": str(err)}, 500          
     #logging.info("SageMaker Get Pipeline Response: %s", response)
+
+
+
+def training_cancel_list(adapter_instance, project, isCached, isInstance, connections, training_job_id):
+    """Cancel/stop an AutoML training job"""
+    try:
+        access_key = connections.get("accessKey", None)
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+        logger.info(f"Attempting to cancel training job: {training_job_id}")
+        
+        config = Config(
+                proxies={
+                    'http': PROXY,
+                    'https': PROXY
+                },
+                retries={'max_attempts': 3},
+                connect_timeout=60,
+                read_timeout=60
+            )
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    aws_session_token=session_token,
+                    region_name=region
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            client = session.client("sagemaker", verify=False, config=config)
+
+            # Try to stop AutoML job first
+            try:
+                logger.info(f"Attempting to stop AutoML job: {training_job_id}")
+                response = client.stop_auto_ml_job(AutoMLJobName=training_job_id)
+                logger.info(f"AutoML job stop request sent successfully")
+                
+                return {
+                    "message": f"AutoML job '{training_job_id}' stop request sent successfully",
+                    "job_name": training_job_id,
+                    "status": "Stopping"
+                }, 200
+                
+            except client.exceptions.ResourceNotFound:
+                logger.info(f"Not an AutoML job, trying regular training job")
+                try:
+                    response = client.stop_training_job(TrainingJobName=training_job_id)
+                    logger.info(f"Training job stop request sent successfully")
+                    
+                    return {
+                        "message": f"Training job '{training_job_id}' stop request sent successfully",
+                        "job_name": training_job_id,
+                        "status": "Stopping"
+                    }, 200
+                    
+                except Exception as e:
+                    logger.error(f"Failed to stop training job: {str(e)}")
+                    return {"error": f"Training job '{training_job_id}' not found or cannot be stopped", "details": str(e)}, 404
+                    
+            except Exception as e:
+                logger.error(f"Error stopping AutoML job: {str(e)}")
+                # Fallback to regular training job
+                try:
+                    response = client.stop_training_job(TrainingJobName=training_job_id)
+                    logger.info(f"Training job stop request sent successfully")
+                    
+                    return {
+                        "message": f"Training job '{training_job_id}' stop request sent successfully",
+                        "job_name": training_job_id,
+                        "status": "Stopping"
+                    }, 200
+                    
+                except Exception as e2:
+                    logger.error(f"Failed to stop training job: {str(e2)}")
+                    return {"error": f"Failed to stop job '{training_job_id}'", "details": str(e2)}, 500
+
+        else:
+            logger.error("Missing AWS credentials")
+            return {"error": "Missing AWS credentials (accessKey, secretKey, or region)"}, 400
+            
+    except Exception as err:
+        logger.error(f"Error cancelling training job: {str(err)}", exc_info=True)
+        return {"error": str(err)}, 500
 
 
 
@@ -1549,8 +1771,7 @@ def training_delete(adapter_instance, project, isCached, isInstance, connections
                     aws_access_key_id=access_key,
                     aws_secret_access_key=secret_key,
                     region_name=region,
-                    aws_session_token=session_token,
-                    config=config
+                    aws_session_token=session_token
                 )
             else:
                 session = boto3.Session(
