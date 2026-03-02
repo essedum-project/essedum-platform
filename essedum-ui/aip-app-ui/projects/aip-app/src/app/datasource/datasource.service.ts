@@ -2,13 +2,23 @@ import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Datasource } from './datasource';
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class DatasourceService {
   messageService: any;
+  private apiCache = new Map<string, Observable<any>>();
+  
   constructor(private https: HttpClient, @Inject('dataSets') private dataUrl: string) { }
+
+  clearCache(): void {
+    this.apiCache.clear();
+  }
+
+  clearCacheEntry(key: string): void {
+    this.apiCache.delete(key);
+  }
 
   getDatasource(name: string): Observable<any> {
     const org = sessionStorage.getItem("organization");
@@ -87,17 +97,31 @@ export class DatasourceService {
   }
 
   getDatasources(): Observable<any> {
-    return this.https.get(this.dataUrl + '/datasources/all', {
+    const org = sessionStorage.getItem("organization");
+    const cacheKey = `datasources-all-${org}`;
+    
+    if (this.apiCache.has(cacheKey)) {
+      return this.apiCache.get(cacheKey)!;
+    }
+    
+    const request$ = this.https.get(this.dataUrl + '/datasources/all', {
       headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
       observe: 'response',
-      params: { org: sessionStorage.getItem("organization") }
+      params: { org: org }
     })
-      .pipe(map(response => {
-        return response.body;
-      }))
-      .pipe(catchError(err => {
-        return this.handleError(err);
-      }));
+      .pipe(
+        map(response => {
+          return response.body;
+        }),
+        catchError(err => {
+          this.clearCacheEntry(cacheKey);
+          return this.handleError(err);
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
+      );
+    
+    this.apiCache.set(cacheKey, request$);
+    return request$;
   }
 
   getDatasourceByPluginType(type, search, interfacetype, page, size,organization?): Observable<any> {
