@@ -1,0 +1,22 @@
+<!-- Sidebar menu popup -->
+<div>
+  <div class="list-menu-close">
+    <button mat-icon-button class="list-menu-close-btn" (click)="onClose()">
+      <mat-icon class="lfx-fs-18">close</mat-icon>
+    </button>
+  </div>
+  <div class="list-menu-div">
+    <div *ngFor="let item of sidebarMenu; let i = index" (click)="onMenuItemClick($event, item)"
+      [routerLink]="item.url" class="list-menu-item" [ngClass]="{
+        'sidebar-menu-popup-item-active': item.label == highlightedLabel
+      }" [style.borderLeft]="
+        item.label == highlightedLabel ? '8px solid #0052cc' : 'none'
+      ">
+      <span [ngStyle]="{
+          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
+        }">
+        {{ item.label }}
+      </span>
+    </div>
+  </div>
+</div>

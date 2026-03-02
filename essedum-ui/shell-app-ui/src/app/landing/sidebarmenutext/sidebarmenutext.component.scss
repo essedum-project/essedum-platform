@@ -1,0 +1,132 @@
+// Styles from landing.component.scss for text menu popup
+.sidebar-menu-popup {
+  width: 200px;
+  min-width: 200px;
+  padding: 0;
+  margin: 0;
+}
+
+.list-menu-div {
+  font-size: 12px;
+  font-weight: 600;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.list-menu-item {
+  padding: 14px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  span {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-left: 8px;
+  }
+}
+
+.sidebar-menu-popup-item-active {
+  background-color: #e6f2ff;
+}
+
+.list-menu-close {
+  display: flex;
+  justify-content: flex-end;
+  height: 28px;
+  min-height: 28px;
+}
+
+.list-menu-close-btn {
+  margin-top: -8px;
+  margin-right: -8px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: #666;
+
+  &:hover {
+    background-color: #f5f5f5;
+    color: #0052cc;
+  }
+}
+
+.lfx-fs-18 {
+  font-size: 18px !important;
+}
+
+@media (max-width: 1366px) {
+  .list-menu-close {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .list-menu-close {
+    padding: 4px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .list-menu-close-btn {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .list-menu-close {
+    display: flex;
+    justify-content: flex-end;
+    height: 20px;
+    min-height: 20px;
+  }
+
+  .list-menu-close-btn {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  .lfx-fs-18 {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-menu-close {
+    display: flex;
+    justify-content: flex-end;
+    height: 14px;
+    min-height: 14px;
+  }
+
+  .list-menu-close-btn {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+  }
+
+  .lfx-fs-18 {
+    font-size: 8px !important;
+  }
+}
