@@ -65,6 +65,14 @@
         <div class="console-header">
           <mat-icon>terminal</mat-icon>
           <span>Console Output</span>
+          <button mat-icon-button 
+                  class="refresh-console-btn"
+                  (click)="onRefreshConsole()"
+                  [disabled]="isLoadingFiles"
+                  matTooltip="Refresh deployment status"
+                  matTooltipPosition="above">
+            <mat-icon>{{ isLoadingFiles ? 'hourglass_empty' : 'refresh' }}</mat-icon>
+          </button>
         </div>
         <div class="console-output">
           <div *ngFor="let line of consoleOutput" class="console-line">

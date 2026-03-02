@@ -234,6 +234,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   isAgentThinking = false;
   playgroundUrl = ''; // Store the playground URL from API
   currentDeploymentName = ''; // Store the deployment name used in WebSocket
+  private deploymentPollingInterval: any = null; // Polling interval for deployment status
+  private readonly POLLING_INTERVAL_MS = 15000; // Poll every 15 seconds
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -2193,11 +2195,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.socket = io(environmentUrl, {
         path: '/apps/builder-service/socket.io',
         transports: ['websocket', 'polling'],
-        timeout: 60000,
+        timeout: 600000,              // Increased to 10 minutes (600000ms) for long pod creation
         forceNew: true,
         rejectUnauthorized: false,
         withCredentials: true,
-        reconnection: false,
+        reconnection: true,          // Enable auto-reconnection
+        reconnectionAttempts: 10,    // Try reconnecting 10 times
+        reconnectionDelay: 5000,     // Wait 5 seconds between attempts
+        reconnectionDelayMax: 10000, // Max delay of 10 seconds
       });
       
       // Connection successful
@@ -2348,6 +2353,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.addToConsole('Starting deployment process...');
     this.addToConsole('Step 1: Pushing files to MinIO storage...');
     
+    // Start polling for deployment status in background
+    this.startDeploymentPolling();
+    
     // ALWAYS call pushToMinio first before WebSocket APIs
     this.pushToMinioThenDeploy();
   }
@@ -2463,13 +2471,16 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 		  
 	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
-	  transports: ['websocket','polling'],       // <-- force polling only
-	  timeout: 60000,
+	  transports: ['websocket','polling'],
+	  timeout: 600000,              // Increased to 10 minutes (600000ms) for long pod creation
 	  forceNew: true,
 	  rejectUnauthorized: false,
-	  withCredentials: true,         // optional; harmless if cookies are set
-	  reconnection: false,
-	});  
+	  withCredentials: true,
+	  reconnection: true,          // Enable auto-reconnection
+	  reconnectionAttempts: 10,    // Try reconnecting 10 times
+	  reconnectionDelay: 5000,     // Wait 5 seconds between attempts
+	  reconnectionDelayMax: 10000, // Max delay of 10 seconds
+	});    
         // Connection successful
         this.socket.on('connect', () => {
           console.log('  Step 2: WebSocket connected! Fetching deployment alias...');
@@ -2626,6 +2637,131 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.socket.disconnect();
       this.socket = null;
     }
+    // Stop polling when websocket is disconnected
+    this.stopDeploymentPolling();
+  }
+
+  /**
+   * Start polling deployment status during deployment
+   * This ensures status is tracked even if websocket disconnects
+   */
+  private startDeploymentPolling(): void {
+    // Clear any existing polling interval
+    this.stopDeploymentPolling();
+    
+    this.addToConsole('Started background status polling...');
+    
+    // Poll every 15 seconds to check deployment status
+    this.deploymentPollingInterval = setInterval(() => {
+      if (this.isRunningAndDeploying || this.isDeletingDeployment) {
+        this.checkDeploymentStatusSilently();
+      } else {
+        // Stop polling if deployment completed
+        this.stopDeploymentPolling();
+      }
+    }, this.POLLING_INTERVAL_MS);
+  }
+
+  /**
+   * Stop polling deployment status
+   */
+  private stopDeploymentPolling(): void {
+    if (this.deploymentPollingInterval) {
+      clearInterval(this.deploymentPollingInterval);
+      this.deploymentPollingInterval = null;
+    }
+  }
+
+  /**
+   * Check deployment status silently (for background polling)
+   * Similar to refreshDeploymentStatus but doesn't show messages
+   */
+  private checkDeploymentStatusSilently(): void {
+    if (!this.currentCname) {
+      return;
+    }
+
+    const organization = this.getOrganization();
+    const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+    
+    this.http.get<any>(streamingServicesUrl).subscribe({
+      next: (response) => {
+        if (response && response.json_content) {
+          const jsonContent = JSON.parse(response.json_content);
+          const isRunning = jsonContent.runner_service_status === true;
+          
+          // Only update if status changed
+          if (isRunning && !this.isPlaygroundEnabled) {
+            this.runnerServiceStatus = true;
+            this.isPlaygroundEnabled = true;
+            this.deploymentStatus = 'success';
+            this.deploymentStatusMessage = 'Deployment completed successfully!';
+            this.addToConsole('✓ Deployment detected as running (background check)');
+            this.addToConsole(`✓ Playground URL: ${jsonContent.playgroundurl || 'N/A'}`);
+            this.service.message('Deployment is now running!', 'success');
+            this.isRunningAndDeploying = false;
+            this.stopDeploymentPolling();
+          }
+        }
+      },
+      error: (error) => {
+        // Silent error - don't show to user during background polling
+        console.log('Background status check failed (expected during deployment):', error.status);
+      }
+    });
+  }
+
+  /**
+   * Refresh deployment status and console output
+   * This allows users to check status even if websocket disconnected early
+   */
+  refreshDeploymentStatus(): void {
+    if (!this.currentCname) {
+      this.service.message('No deployment to check', 'info');
+      return;
+    }
+
+    this.addToConsole('Checking deployment status...');
+    this.isLoadingFiles = true;
+    
+    const organization = this.getOrganization();
+    const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+    
+    this.http.get<any>(streamingServicesUrl).subscribe({
+      next: (response) => {
+        this.isLoadingFiles = false;
+        
+        if (response && response.json_content) {
+          const jsonContent = JSON.parse(response.json_content);
+          const isRunning = jsonContent.runner_service_status === true;
+          
+          this.runnerServiceStatus = isRunning;
+          this.isPlaygroundEnabled = isRunning;
+          
+          if (isRunning) {
+            this.deploymentStatus = 'success';
+            this.deploymentStatusMessage = 'Deployment is running successfully!';
+            this.addToConsole('✓ Deployment is active and running');
+            this.addToConsole(`✓ Playground URL: ${jsonContent.playgroundurl || 'N/A'}`);
+            this.service.message('Deployment is running successfully!', 'success');
+          } else {
+            this.deploymentStatus = 'idle';
+            this.deploymentStatusMessage = 'No active deployment found';
+            this.addToConsole('ℹ No active deployment detected');
+            this.service.message('No active deployment found. Click "Run & Deploy" to start.', 'info');
+          }
+        } else {
+          this.addToConsole('⚠ Could not retrieve deployment status');
+          this.service.message('Could not retrieve deployment status', 'warning');
+        }
+      },
+      error: (error) => {
+        this.isLoadingFiles = false;
+        console.error('Error checking deployment status:', error);
+        this.addToConsole(`✗ Error checking deployment status: ${error.message || 'Unknown error'}`);
+        this.service.message('Failed to check deployment status', 'error');
+      }
+    });
   }
 
   /**
