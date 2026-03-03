@@ -26,15 +26,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
 import com.lfn.icip.dataset.model.ICIPDatasource;
-import com.lfn.icip.dataset.util.DecryptPassword;
 //import com.mchange.v2.c3p0.test.ConnectionDispersionTest;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 

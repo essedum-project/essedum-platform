@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.icipwebeditor.v1.dto.BaseEntity;
-import com.lfn.icip.icipwebeditor.v1.enums.Entities;
-import com.lfn.icip.icipwebeditor.v1.events.model.TaskActivityEvent;
 import com.lfn.icip.icipwebeditor.v1.service.IICIPMLFederatedEntitiesService;
 
 import io.micrometer.core.annotation.Timed;

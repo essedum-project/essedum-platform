@@ -2,7 +2,6 @@ package com.lfn.icip.icipwebeditor.job.rest;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,10 +12,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
@@ -46,7 +42,6 @@ import com.lfn.icip.dataset.service.impl.ICIPDatasetService;
 import com.lfn.icip.icipwebeditor.event.model.InternalEvent;
 import com.lfn.icip.icipwebeditor.event.publisher.InternalEventPublisher;
 import com.lfn.icip.icipwebeditor.event.service.InternalJobEventService;
-import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
 import com.lfn.icip.icipwebeditor.job.jobs.DataCleanupJob;
 import com.lfn.icip.icipwebeditor.job.jobs.DatasourceLivenessTest;
 import com.lfn.icip.icipwebeditor.job.jobs.FileRemovalJob;
@@ -54,18 +49,13 @@ import com.lfn.icip.icipwebeditor.job.jobs.ICIPBulkCopyDatasets;
 import com.lfn.icip.icipwebeditor.job.jobs.ICIPBulkCopyPipelines;
 import com.lfn.icip.icipwebeditor.job.jobs.ICIPCopyCIPModules;
 import com.lfn.icip.icipwebeditor.job.jobs.ICIPImportPipelines;
-import com.lfn.icip.icipwebeditor.job.model.ICIPChains;
-import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs;
 import com.lfn.icip.icipwebeditor.job.service.IICIPInternalJobsService;
 import com.lfn.icip.icipwebeditor.job.util.InternalJob;
-import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPInternalJobsService;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPIaiService;
-import com.lfn.icip.icipwebeditor.v1.dto.BaseEntity;
 import com.lfn.icip.icipwebeditor.v1.service.IICIPSearchableService;
 
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Flux;
 
 // TODO: Auto-generated Javadoc
 /**

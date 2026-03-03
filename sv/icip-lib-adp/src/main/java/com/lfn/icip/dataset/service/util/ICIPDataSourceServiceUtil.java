@@ -21,15 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 
 // TODO: Auto-generated Javadoc

@@ -25,7 +25,6 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
 import com.lfn.icip.icipwebeditor.model.ICIPPluginScript;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginScriptRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPPluginScriptService;

@@ -63,7 +63,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;

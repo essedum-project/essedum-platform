@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
 
 @Profile("mssql")

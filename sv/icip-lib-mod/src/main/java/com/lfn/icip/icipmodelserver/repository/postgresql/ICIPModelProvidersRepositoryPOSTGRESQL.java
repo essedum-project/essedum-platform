@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import com.lfn.icip.icipmodelserver.repository.ICIPModelProvidersRepository;
-import com.lfn.icip.icipmodelserver.repository.ICIPModelServersRepository;
 
 // TODO: Auto-generated Javadoc
 /**

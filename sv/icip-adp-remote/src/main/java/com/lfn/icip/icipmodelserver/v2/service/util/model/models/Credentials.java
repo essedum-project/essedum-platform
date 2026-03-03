@@ -2,7 +2,6 @@ package com.lfn.icip.icipmodelserver.v2.service.util.model.models;
 
 import javax.annotation.processing.Generated;
 
-import org.json.simple.JSONObject;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

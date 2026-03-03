@@ -1,7 +1,6 @@
 package com.lfn.icip.icipwebeditor.job.model;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import lombok.Getter;
 

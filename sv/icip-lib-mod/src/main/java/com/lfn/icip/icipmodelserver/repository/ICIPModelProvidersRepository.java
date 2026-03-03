@@ -19,10 +19,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
 
 import com.lfn.icip.icipmodelserver.model.ICIPModelProvider;
-import com.lfn.icip.icipmodelserver.model.ICIPModelServers;
 
 // TODO: Auto-generated Javadoc
 /**

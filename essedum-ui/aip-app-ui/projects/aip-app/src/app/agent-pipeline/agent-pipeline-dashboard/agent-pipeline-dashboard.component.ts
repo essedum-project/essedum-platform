@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -195,12 +195,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
 
-    console.log(
-      'Pagination initialized with startIndex:',
-      this.startIndex,
-      'endIndex:',
-      this.endIndex
-    );
   }
 
   private loadAuthentications(): void {
@@ -406,7 +400,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
 
   onAdd(): void {
     if (this.pipelineMode === 'mcp') {
-      console.log('Opening MCP Pipelines creation dialog');
       
       // Open the pipeline creation dialog with MCP-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -423,14 +416,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('MCP Pipelines created:', result);
           this.service.message('MCP Pipelines created successfully!', 'success');
           // Refresh the cards to show the new MCP pipeline
           this.refresh();
         }
       });
     } else {
-      console.log('Opening Agent Pipelines creation dialog');
       
       // Open the pipeline creation dialog with Agent-specific parameters
       const dialogRef = this.dialog.open(PipelineCreateComponent, {
@@ -447,7 +438,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          console.log('Agent Pipelines created:', result);
           this.service.message('Agent Pipelines created successfully!', 'success');
           // Refresh the cards to show the new agent pipeline
           this.refresh();
@@ -502,19 +492,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           this.streamItem.type === 'NativeScript' ||
           this.pipelineMode === 'mcp' ||
           (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
-        console.log('Navigating to view details for:', {
-          type: this.streamItem.type,
-          interfacetype: this.streamItem.interfacetype,
-          mode: this.pipelineMode,
-          name: card.name
-        });
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       } else {
-        console.log('Navigation blocked - unsupported combination:', {
-          type: this.streamItem.type,
-          interfacetype: this.streamItem.interfacetype,
-          mode: this.pipelineMode
-        });
       }
     });
   }
@@ -566,7 +545,6 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
    */
   onPipelineModeChange(event: any): void {
     const newMode = event.value;
-    console.log('Dashboard pipeline mode changed to:', newMode);
     
     // Reset pagination when switching modes
     this.pageNumber = 1;
@@ -584,13 +562,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
    * Switch to specific pipeline mode - simplified method
    */
   switchToPipelineMode(mode: 'agent' | 'mcp'): void {
-    console.log('Switching to pipeline mode:', mode);
-    console.log('Current mode before switch:', this.pipelineMode);
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
       
-      console.log('Mode changed to:', this.pipelineMode);
       
       // Reset pagination when switching modes
       this.pageNumber = 1;
@@ -601,12 +576,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       this.loading = true;
       
       // Show loading message
-      console.log('Loading', mode, 'pipelines...');
       
       // Refresh data with new mode
       this.refresh();
     } else {
-      console.log('Same mode clicked, no change needed');
     }
   }
 

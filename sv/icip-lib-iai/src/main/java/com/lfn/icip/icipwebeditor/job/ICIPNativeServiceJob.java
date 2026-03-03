@@ -15,56 +15,7 @@
 
 package com.lfn.icip.icipwebeditor.job;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.python.util.PythonInterpreter;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.UnableToInterruptJobException;
-import org.quartz.impl.matchers.KeyMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
@@ -90,12 +41,7 @@ import com.lfn.icip.icipwebeditor.job.service.util.ICIPJobServiceUtilGenerated;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPAgentJobsService;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPChainJobsService;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPJobsService;
-import com.lfn.icip.icipwebeditor.model.ICIPAgentJobs;
-import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
-import com.lfn.icip.icipwebeditor.model.ICIPJobs;
-import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
-import com.lfn.icip.icipwebeditor.model.ICIPPipelinePID;
-import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
+import com.lfn.icip.icipwebeditor.model.*;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 import com.lfn.icip.icipwebeditor.repository.ICIPChainJobsRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPJobsPartialRepository;
@@ -105,11 +51,35 @@ import com.lfn.icip.icipwebeditor.service.IICIPStreamingServiceService;
 import com.lfn.icip.icipwebeditor.service.aspect.IAIResolverAspect;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPPipelinePIDService;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPPipelineService;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.python.util.PythonInterpreter;
+import org.quartz.*;
+import org.quartz.impl.matchers.KeyMatcher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.*;
 
 // TODO: Auto-generated Javadoc
 /** The Constant log. */
@@ -276,7 +246,6 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 					ICIPStreamingServices pipelineInfo = streamingServicesService.findbyNameAndOrganization(listjobdto.get(index).getName(),job.getOrg());
 					if(pipelineInfo.getType().equalsIgnoreCase("DragNDropLite") || pipelineInfo.getType().equalsIgnoreCase("DragNDrop")) {
 					fileObj =streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),job.getOrg());
-					System.out.println("hii");
 					if(fileObj==null) {
 						 String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(),job.getOrg(),pipelineInfo.getJsonContent());
 						 JsonObject payload= new JsonObject();
@@ -287,13 +256,12 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 						 
 						 if(!status.equalsIgnoreCase("COMPLETED")) {
 							 allScriptGenerated=0;
-							 System.out.println("Completed");
 						 }
 					}
 					}
 				}
 				catch (Exception e) {
-					System.out.println("error");
+					log.error("Error generating scripts: {}", e.getMessage(), e);
 					allScriptGenerated=0;
 					// TODO: handle exception
 				}

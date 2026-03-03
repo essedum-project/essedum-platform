@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
-import com.lfn.icip.icipwebeditor.model.ICIPImageSaving;
 import com.lfn.icip.icipwebeditor.model.ICIPPluginDetails;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginDetailsRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginRepository;

@@ -25,7 +25,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import com.lfn.iamp.usm.domain.Project;
-import com.lfn.iamp.usm.domain.Project2;
 
 
 // TODO: Auto-generated Javadoc

@@ -15,20 +15,17 @@
 
 package com.lfn.icip.dataset.repository;
  
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDataset2;
-import com.lfn.icip.dataset.model.ICIPMlIntstance;
 import com.lfn.icip.dataset.model.dto.ICIPDatasourceSummary;
 
 // TODO: Auto-generated Javadoc

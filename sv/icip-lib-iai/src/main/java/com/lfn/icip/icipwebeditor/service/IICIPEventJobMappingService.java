@@ -20,7 +20,6 @@ import java.util.List;
 import org.slf4j.Marker;
 
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
-import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
 
 // TODO: Auto-generated Javadoc

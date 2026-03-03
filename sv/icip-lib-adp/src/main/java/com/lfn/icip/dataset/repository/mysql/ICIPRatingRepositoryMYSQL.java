@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lfn.icip.dataset.model.ICIPRating;
 import com.lfn.icip.dataset.model.dto.ICIPRatingDetails;
 import com.lfn.icip.dataset.repository.ICIPRatingRepository;
 

@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Marker;
 
 import com.google.gson.JsonElement;

@@ -109,7 +109,6 @@ import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.lfn.icip.icipwebeditor.service.ICIPImageSavingService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentJobsService;
-import com.lfn.icip.icipwebeditor.service.IICIPAgentDirectoryService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentService;
 import com.lfn.icip.icipwebeditor.service.IICIPAppService;
 import com.lfn.icip.icipwebeditor.service.IICIPEventJobMappingService;
@@ -756,11 +755,13 @@ public class ICIPMlopsController {
     @PostMapping("/models/register")
     public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
                                                  @RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
-        if (fedModeldto.getId() != null) {
+        // FIXED: Corrected logic - Id == null means NEW model (CREATE), Id != null means existing model (UPDATE)
+        if (fedModeldto.getId() == null) {
+            // New model - set created fields
             fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
             fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
-
         } else {
+            // Existing model - set modified fields
             fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
             fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
         }
@@ -1226,20 +1227,18 @@ public class ICIPMlopsController {
 	 * @param selectClauseParams the select clause params
 	 * @return the searched objects
 	 */
-	@GetMapping(path = "models/fileData")
-	public ResponseEntity<?> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
+	@GetMapping(path = "models/fileData", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public ResponseEntity<byte[]> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
 			@RequestParam(required = true, name = "fileName") String fileName,
 	        @RequestParam(required = true, name = "org") String org)
 			 {
-		ResponseEntity<?> resp;
 		try {
-			return iCIPMlOpsRestAdapterService.getS3FileData(modelName,fileName,org);
-			
+			return iCIPMlOpsRestAdapterService.getS3FileDataAsBytes(modelName,fileName,org);
+
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			logger.error("EXCEPTION:", e.getMessage());
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 	
 	@PostMapping(path = "models/upload")

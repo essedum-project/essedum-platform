@@ -15,8 +15,6 @@
 
 package com.lfn.icip.dataset.service.impl;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +35,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -432,6 +429,12 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
         return results.toList();
      }
 	
+	public byte[] getS3FileDataAsBytes(ICIPDataset dataset, String fileName) {
+		// Return raw file bytes without any encoding
+		IICIPDataSetServiceUtil service = this.getDataSetService(dataset);
+		return service.getFileDataAsBytes(dataset, fileName);
+	}
+
 	public List<Object> getS3FileInfo(ICIPDataset dataset, String fileName) {
 		String[] valuesArray = fileName.split(",");
 		JSONArray results = new JSONArray();

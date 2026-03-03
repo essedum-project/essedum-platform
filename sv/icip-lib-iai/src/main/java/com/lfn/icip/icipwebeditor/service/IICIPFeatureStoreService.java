@@ -1,7 +1,6 @@
 package com.lfn.icip.icipwebeditor.service;
 
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.lfn.icip.icipwebeditor.model.ICIPFeatureStore;
 public interface IICIPFeatureStoreService {

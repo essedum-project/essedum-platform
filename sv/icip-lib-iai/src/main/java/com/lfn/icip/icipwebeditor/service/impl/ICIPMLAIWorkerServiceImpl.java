@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorker;
-import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorkerConfig;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLAIWorkerRepository;
 import com.lfn.icip.icipwebeditor.service.ICIPMLAIWorkerService;
 

@@ -38,17 +38,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.PaginationUtil;
-import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmAccessTokens;
 import com.lfn.iamp.usm.domain.UsmPermissionApi;
 import com.lfn.iamp.usm.domain.UsmPermissions;
 import com.lfn.iamp.usm.dto.UsmPermissionApiDTO;
-import com.lfn.iamp.usm.dto.UsmPermissionsDTO;
 import com.lfn.iamp.usm.dto.UsmPersonalAccessTokensDTO;
 import com.lfn.iamp.usm.service.UsmAccessTokensService;
 import com.lfn.iamp.usm.service.UsmPermissionApiService;

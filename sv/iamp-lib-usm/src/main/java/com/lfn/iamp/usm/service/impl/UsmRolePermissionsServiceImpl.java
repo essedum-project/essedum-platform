@@ -39,7 +39,6 @@ import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.UsmRolePermissions;
 import com.lfn.iamp.usm.repository.UsmRolePermissionsRepository;
 import com.lfn.iamp.usm.service.RoleService;
-import com.lfn.iamp.usm.service.UserApiPermissionsService;
 import com.lfn.iamp.usm.service.UsmPermissionApiService;
 import com.lfn.iamp.usm.service.UsmPermissionsService;
 import com.lfn.iamp.usm.service.UsmRolePermissionsService;

@@ -10,7 +10,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,11 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
@@ -43,12 +38,10 @@ import com.lfn.icip.dataset.repository.ICIPDatasourceRepository;
 import com.lfn.icip.icipwebeditor.exception.NoUnassignedPortFoundException;
 import com.lfn.icip.icipwebeditor.exception.ResourceNotFoundException;
 import com.lfn.icip.icipwebeditor.exception.RuntimeListNotFoundException;
-import com.lfn.icip.icipwebeditor.exception.RuntimeNotAssignedException;
 import com.lfn.icip.icipwebeditor.exception.RuntimePortsNotSavedException;
 import com.lfn.icip.icipwebeditor.model.AssignRuntime;
 import com.lfn.icip.icipwebeditor.model.ICIPApps;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntimeModel;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.PortPayload;
 import com.lfn.icip.icipwebeditor.model.ValidatePorts;
@@ -173,7 +166,7 @@ public class ICIPMLFederatedRuntimeService {
 				String connectionEndPoint = triggerProxyConfig2(baseUrl, randomaddress);
 				JSONObject connEndPoint = new JSONObject(connectionEndPoint);
 				String endpointId = connEndPoint.getString("finaladdress");
-				System.out.println(extractedBaseUrl);
+				logger.debug("Extracted base URL: {}", extractedBaseUrl);
 
 				if (exiStartPortRange != null)
 					runtimeOrg.setExiPorts(exiStartPortRange++);
@@ -297,7 +290,7 @@ public class ICIPMLFederatedRuntimeService {
 				String connectionEndPoint = triggerProxyConfig2(baseUrl, randomaddress);
 				JSONObject connEndPoint = new JSONObject(connectionEndPoint);
 				String endpointId = connEndPoint.getString("finaladdress");
-				System.out.println(extractedBaseUrl);
+				logger.debug("Extracted base URL: {}", extractedBaseUrl);
 
 				if (exiStartPortRange != null)
 					runtimeOrg.setExiPorts(exiStartPortRange++);

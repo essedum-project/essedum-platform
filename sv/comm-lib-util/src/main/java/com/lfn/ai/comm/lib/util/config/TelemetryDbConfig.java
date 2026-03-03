@@ -31,7 +31,6 @@ public class TelemetryDbConfig {
 	@Bean(name = "telemetryDataSource")
 	@ConfigurationProperties(prefix = "telemetry.datasource")
 	public DataSource telemetryDataSource() {
-		System.out.println(DataSourceBuilder.create().build());
 		return DataSourceBuilder.create().build();
 	}
 

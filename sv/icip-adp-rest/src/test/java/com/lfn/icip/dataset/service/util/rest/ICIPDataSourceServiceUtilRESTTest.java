@@ -19,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
@@ -33,18 +31,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.codec.DecoderException;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import com.lfn.icip.dataset.model.ICIPDatasource;
-import com.lfn.icip.dataset.properties.ProxyProperties;
 import com.lfn.icip.dataset.service.util.ICIPDataSourceServiceUtilRest;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 
 /**

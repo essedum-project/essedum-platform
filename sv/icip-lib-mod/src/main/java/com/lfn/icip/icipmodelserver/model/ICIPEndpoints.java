@@ -16,7 +16,6 @@
 package com.lfn.icip.icipmodelserver.model;
 
 import java.io.Serializable;
-import java.sql.Blob;
 import java.sql.Timestamp;
 
 import jakarta.persistence.Entity;

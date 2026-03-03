@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import com.lfn.icip.dataset.model.ICIPRelationship;
-import com.lfn.icip.dataset.model.ICIPSchemaForm;
-import com.lfn.icip.dataset.model.ICIPSchemaRegistry;
 
 /**
  * The Interface ICIPRelationshipRepository.

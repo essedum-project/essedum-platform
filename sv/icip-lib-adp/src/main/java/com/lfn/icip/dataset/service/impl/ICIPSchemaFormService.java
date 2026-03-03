@@ -1,10 +1,8 @@
 package com.lfn.icip.dataset.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -13,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
-import com.lfn.icip.dataset.model.ICIPDataset;
-import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.ICIPSchemaForm;
-import com.lfn.icip.dataset.model.ICIPSchemaRegistry;
 import com.lfn.icip.dataset.repository.ICIPSchemaFormRepository;
 import com.lfn.icip.dataset.service.IICIPSchemaFormService;
 

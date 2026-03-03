@@ -19,7 +19,6 @@ import com.lfn.icip.icipwebeditor.model.AgentDirectory;
 import com.lfn.icip.icipwebeditor.model.dto.AgentDirectoryDTO;
 import com.lfn.icip.icipwebeditor.model.dto.AgentSearchRequestDTO;
 import com.lfn.icip.icipwebeditor.model.dto.AgentSearchResponseDTO;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

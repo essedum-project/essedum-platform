@@ -1,49 +1,22 @@
 package com.lfn.icip.icipwebeditor.rest;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.hibernate.internal.build.AllowSysOut;
-import org.json.JSONObject;
+import com.lfn.icip.icipwebeditor.model.AssignRuntime;
+import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
+import com.lfn.icip.icipwebeditor.model.PortPayload;
+import com.lfn.icip.icipwebeditor.model.ValidatePorts;
+import com.lfn.icip.icipwebeditor.model.dto.ICIPRuntimeParams;
+import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedRuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.*;
 
-import com.lfn.icip.dataset.model.ICIPDatasource;
-import com.lfn.icip.dataset.model.dto.ICIPDatasourceDTO;
-import com.lfn.icip.icipwebeditor.exception.AddRuntimeException;
-import com.lfn.icip.icipwebeditor.model.AssignRuntime;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntimeModel;
-import com.lfn.icip.icipwebeditor.model.PortPayload;
-import com.lfn.icip.icipwebeditor.model.ValidatePorts;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPRuntimeParams;
-import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedRuntimeRepository;
-import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedRuntimeService;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/${icip.pathPrefix}/runtime")
@@ -54,14 +27,11 @@ public class ICIPMLFederatedRuntimeController {
 
 	@PostMapping("ports/validateports")
 	public String validatePorts(@RequestBody PortPayload validateport) {
-
-		System.out.println(validateport);
 		return "Ports Validated";
 	}
 
 	@PostMapping("/addports")
 	public ResponseEntity<Map<String, String>> runtime(@RequestBody PortPayload portPayload) throws Exception {
-		System.out.println(portPayload);
 		ICIPRuntimeParams runtimeParams = new ICIPRuntimeParams();
 		runtimeParams.setConnectionId(portPayload.getDatasourceid());
 		runtimeParams.setOrganization(portPayload.getOrganization());

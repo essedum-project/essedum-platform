@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -77,18 +77,11 @@ export class AgentPipelineService {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/upload/${cname}/${orgName}`;
     
-    console.log('Calling agent generation API:', url);
-    console.log('Request payload:', agentRequest);
-    console.log('Using cname from request:', cname);
-    console.log('Making HTTP POST request to:', url);
-    
     return this.http.post<any>(url, agentRequest).pipe(
       // After successful generation, call the list endpoint to get the actual files
       switchMap(response => {
-        console.log('Upload API Response:', response);
         return this.getFilesList(cname).pipe(
           map(filesList => {
-            console.log('Files List API Response:', filesList);
             return {
               success: true,
               message: 'Agent generated successfully',
@@ -112,9 +105,6 @@ export class AgentPipelineService {
   bulkUpdateFiles(cname: string, updates: ICIPAiAgentScript[]): Observable<ICIPAiAgentScript[]> {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/update/${cname}/${orgName}`;
-    
-    console.log('Bulk updating files via API:', url);
-    console.log('Update payload:', updates);
     
     return this.http.post<ICIPAiAgentScript[]>(url, updates).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -183,7 +173,6 @@ export class AgentPipelineService {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
     
-    console.log('Fetching files list from:', url);
     
     return this.http.get<any[]>(url).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -200,7 +189,6 @@ export class AgentPipelineService {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
     
-    console.log('Fetching agent files from:', url);
     
     return this.http.get<any[]>(url).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -218,8 +206,6 @@ export class AgentPipelineService {
     const url = `${this.baseUrl}/folder/upload/${cname}/${orgName}`;
     const params = new HttpParams().set('folderPath', folderPath);
     
-    console.log('Uploading agent folder to:', url);
-    console.log('Folder path:', folderPath);
     
     return this.http.post<any>(url, {}, { params }).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -236,7 +222,6 @@ export class AgentPipelineService {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/download/${cname}/${orgName}/${fileId}`;
     
-    console.log('Downloading file content from:', url);
     
     return this.http.get(url, { responseType: 'text' }).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -250,8 +235,6 @@ export class AgentPipelineService {
    * Extract file content from blob/binary data
    */
   private extractFileContentFromBlob(filescript: any, filename: string): string {
-    console.log('Filename:', filename);
-    console.log('Filescript type:', typeof filescript);
     
     if (!filescript) {
       console.error('No filescript data available for file:', filename);
@@ -261,13 +244,11 @@ export class AgentPipelineService {
     try {
       // Handle string content directly
       if (typeof filescript === 'string') {
-        console.log('✓ Content is already a string, length:', filescript.length);
         return filescript;
       }
       
       // Handle byte array content (most likely scenario)
       if (Array.isArray(filescript)) {
-        console.log('✓ Processing byte array, length:', filescript.length);
         if (filescript.length === 0) {
           return `// Empty file: ${filename}`;
         }
@@ -277,45 +258,37 @@ export class AgentPipelineService {
       
       // Handle blob object structures
       if (typeof filescript === 'object') {
-        console.log('Processing object structure...');
-        console.log('Object keys:', Object.keys(filescript));
         
         // Check for direct byte array in object properties
         const possibleArrayProps = ['bytes', 'data', 'content', 'buffer', 'array'];
         for (const prop of possibleArrayProps) {
           if (filescript[prop] && Array.isArray(filescript[prop])) {
-            console.log(`✓ Found byte array in '${prop}' property, length:`, filescript[prop].length);
             return new TextDecoder('utf-8').decode(new Uint8Array(filescript[prop]));
           }
         }
         
         // Handle nested blob structures (wrappedBlob, binaryStream)
         if (filescript.wrappedBlob && filescript.wrappedBlob.array && Array.isArray(filescript.wrappedBlob.array)) {
-          console.log('✓ Processing wrappedBlob array, length:', filescript.wrappedBlob.array.length);
           return new TextDecoder('utf-8').decode(new Uint8Array(filescript.wrappedBlob.array));
         }
         
         if (filescript.binaryStream && filescript.binaryStream.buf && Array.isArray(filescript.binaryStream.buf)) {
-          console.log('✓ Processing binaryStream buffer, length:', filescript.binaryStream.buf.length);
           return new TextDecoder('utf-8').decode(new Uint8Array(filescript.binaryStream.buf));
         }
         
         // Handle ArrayBuffer
         if (filescript instanceof ArrayBuffer) {
-          console.log('✓ Processing ArrayBuffer, byteLength:', filescript.byteLength);
           return new TextDecoder('utf-8').decode(filescript);
         }
         
         // Handle Uint8Array
         if (filescript instanceof Uint8Array) {
-          console.log('✓ Processing Uint8Array, length:', filescript.length);
           return new TextDecoder('utf-8').decode(filescript);
         }
         
         // Last resort - check if the object has any numeric properties (might be indexed bytes)
         const keys = Object.keys(filescript).filter(key => !isNaN(Number(key)));
         if (keys.length > 0) {
-          console.log('✓ Processing object with numeric indices as byte array, keys:', keys.length);
           const byteArray = keys.map(key => filescript[key]).filter(val => typeof val === 'number');
           if (byteArray.length > 0) {
             return new TextDecoder('utf-8').decode(new Uint8Array(byteArray));
@@ -359,10 +332,8 @@ export class AgentPipelineService {
       return [];
     }
     
-    console.log('Processing API response items:', apiResponse.length);
     
     apiResponse.forEach((item, index) => {
-      console.log(`Processing item ${index + 1}:`, JSON.stringify(item, null, 2));
       
       // The API response uses 'filePath' and 'filename' fields
       const path = item.filePath || item.filename;
@@ -371,16 +342,6 @@ export class AgentPipelineService {
         return;
       }
       
-      console.log('Processing file:', path, 'with id:', item.id);
-      console.log('File item structure:', {
-        id: item.id,
-        filename: item.filename,
-        filePath: item.filePath,
-        organization: item.organization,
-        cname: item.cname,
-        filescriptType: typeof item.filescript,
-        filescriptKeys: item.filescript ? Object.keys(item.filescript) : []
-      });
       
       const pathParts = path.split('/').filter(part => part.length > 0);
       let currentNode = root;
@@ -457,7 +418,6 @@ export class AgentPipelineService {
     const orgName = org || this.getOrganization();
     const url = `${this.baseUrl}/folder/download/${cname}/${orgName}`;
     
-    console.log('Downloading all files as ZIP from:', url);
     
     return this.http.get(url, {
       responseType: 'blob',
@@ -478,12 +438,9 @@ export class AgentPipelineService {
   deleteFile(id: string | number): Observable<any> {
     const url = `${this.baseUrl}/folder/delete/${id}`;
     
-    console.log(`Deleting file with ID: ${id}`);
-    console.log(`DELETE request to: ${url}`);
     
     return this.http.delete<any>(url).pipe(
       map(response => {
-        console.log('Delete file API response:', response);
         return response;
       }),
       catchError((error: HttpErrorResponse) => {
@@ -523,13 +480,6 @@ export class AgentPipelineService {
   uploadAgentFilesZip(cname: string, organization: string, zipFile: File): Observable<any> {
     const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null`;
     
-    console.log('AgentPipelineService - Uploading ZIP file:', {
-      url,
-      cname,
-      organization,
-      fileName: zipFile.name,
-      fileSize: zipFile.size
-    });
 
     // Create FormData for file upload
     const formData = new FormData();
@@ -556,7 +506,6 @@ export class AgentPipelineService {
       }
     }).pipe(
       map((response: any) => {
-        console.log('ZIP upload response:', response);
         return response;
       }),
       catchError((error) => {
@@ -572,11 +521,6 @@ export class AgentPipelineService {
   uploadToMinio(cname: string, organization: string): Observable<any> {
     const url = `${this.baseUrl}/folder/push-to-minio/${cname}/${organization}`;
     
-    console.log('AgentPipelineService - Uploading to MinIO:', {
-      url,
-      cname,
-      organization
-    });
 
     return this.http.post(url, {}, {
       headers: {
@@ -585,7 +529,6 @@ export class AgentPipelineService {
       // Remove responseType: 'text' to allow proper JSON error parsing
     }).pipe(
       map((response: any) => {
-        console.log('MinIO upload response:', response);
         return response;
       }),
       catchError((error: HttpErrorResponse) => {

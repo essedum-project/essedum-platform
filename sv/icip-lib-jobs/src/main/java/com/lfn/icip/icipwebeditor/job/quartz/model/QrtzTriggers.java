@@ -16,7 +16,6 @@
 package com.lfn.icip.icipwebeditor.job.quartz.model;
 
 import java.io.Serializable;
-import java.sql.Blob;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -39,7 +39,7 @@ import java.sql.SQLException;
  *
  * @author essedum
  */
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.lfn.icip.mlops.rest")
 public class MlOpsGlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(MlOpsGlobalExceptionHandler.class);

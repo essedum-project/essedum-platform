@@ -54,7 +54,6 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPChainJobsPartial;
 import com.lfn.icip.icipwebeditor.job.service.util.ICIPInitializeAnnotationServiceUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
-import com.lfn.icip.icipwebeditor.model.ICIPPipelinePID;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.repository.ICIPChainJobsPartialRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPJobsPartialRepository;
@@ -64,10 +63,11 @@ import com.lfn.icip.icipwebeditor.repository.ICIPStreamingServicesRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPOutputArtifactsService;
 import com.lfn.icip.icipwebeditor.service.IICIPStopJobService;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPOutputArtifactsService;
-import com.lfn.icip.icipwebeditor.service.impl.ICIPRuntimeLoggerService;
 import com.lfn.icip.icipwebeditor.service.impl.ICIPStopJobService;
 
 import lombok.extern.log4j.Log4j2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class JobSyncExecutorService.
@@ -76,6 +76,8 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @RefreshScope
 public class JobSyncExecutorService {
+
+	private static final Logger logger = LoggerFactory.getLogger(JobSyncExecutorService.class);
 
 	private static final String REMOTE = "remote";
 
@@ -425,7 +427,7 @@ public class JobSyncExecutorService {
 			String tag = jsonObj.getString("tag");
 			List<ICIPJobsPartial> chainJobs = null;
 			chainJobs = jobsPartialRepository.findByCorrelationid(correlationId);
-			System.out.println(chainJobs);
+			logger.debug("Chain jobs for correlation ID {}: {}", correlationId, chainJobs);
 			chainJobs.stream().parallel().forEach(chainjob -> {
 				String[] parts = chainjob.getRuntime().split("-");
 				if (chainjob.getRuntime().toLowerCase().startsWith(AICLOUD)

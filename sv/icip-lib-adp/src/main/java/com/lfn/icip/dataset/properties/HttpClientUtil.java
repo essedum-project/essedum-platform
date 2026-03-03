@@ -15,7 +15,6 @@
 
 package com.lfn.icip.dataset.properties;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStore;

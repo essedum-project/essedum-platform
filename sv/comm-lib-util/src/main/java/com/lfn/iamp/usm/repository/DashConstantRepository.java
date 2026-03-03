@@ -25,7 +25,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.iamp.usm.domain.DashConstant;
-import com.lfn.iamp.usm.domain.DashConstant2;
 
 
 

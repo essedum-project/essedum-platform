@@ -127,7 +127,7 @@ public class ICIPDataSourceServiceUtilAzure extends ICIPDataSourceServiceUtilRes
 		if (ICIPPluginConstants.REMOTE.equalsIgnoreCase(executionEnvironment)) {
 			logger.info("Connection Test, executionEnvironment:{}", executionEnvironment);
 		try (CloseableHttpResponse response = authenticate(datasource)) {
-			System.out.println(response.getStatusLine().getStatusCode());
+			logger.debug("Azure authentication response status code: {}", response.getStatusLine().getStatusCode());
 			if (response.getStatusLine().getStatusCode() == 200) {
 				return true;
 			}

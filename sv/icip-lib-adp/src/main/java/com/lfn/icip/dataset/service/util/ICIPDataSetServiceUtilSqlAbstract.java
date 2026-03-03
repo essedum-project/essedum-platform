@@ -360,7 +360,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					} else if(metadata.getColumnClassName(i).equals("java.lang.Double") ) {
 						double s = res.getDouble(i);
 						if (isScientificNotation(s)) {
-				            System.out.println(s + " is in scientific notation.");
+				            logger.debug("{} is in scientific notation.", s);
 				            DecimalFormat decimalFormat = new DecimalFormat("#,###.##");
 				            String formattedValue = decimalFormat.format(s);
 				            row.addProperty(metadata.getColumnLabel(i), formattedValue);
