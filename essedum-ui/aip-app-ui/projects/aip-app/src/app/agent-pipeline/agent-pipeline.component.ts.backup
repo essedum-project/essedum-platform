@@ -207,6 +207,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   dynamicJsonContent: any;
   dynamicFileName: any;
   relatedloaded = false;
+  
+  // Builder Tab Visibility Control
+  // Default: HIDDEN (false). Show only when created_source is NOT 'user_defined'
+  shouldShowBuilderTab = false;
 
   
   // Console output for Generate adk Agent
@@ -270,6 +274,37 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   // MCP Pipeline Mode Support
   pipelineMode: 'agent' | 'mcp' = 'agent';
+  mcpJsonConfig: string = '';
+  private hasLoadedApiContent: boolean = false; // Flag to track if API content has been loaded
+  
+  // Script modification tracking
+  isScriptModified = false;
+  originalScriptContent = '';
+
+  // Default MCP JSON configuration template
+  private defaultMcpConfig = {
+    "name": "sample-mcp-server",
+    "version": "1.0.0",
+    "description": "Sample MCP Server Configuration",
+    "tools": [
+      {
+        "name": "sample_tool",
+        "description": "A sample MCP tool",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input parameter for the tool"
+            }
+          },
+          "required": ["input"]
+        }
+      }
+    ],
+    "resources": [],
+    "prompts": []
+  };
 
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
@@ -361,6 +396,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   userModifiedLines: Set<number> = new Set();
   scrollContainer: HTMLElement | null = null;
   
+  // Script unsaved changes dialog
+  showScriptUnsavedDialog = false;
+  pendingScriptAction: (() => void) | null = null;
+  
   // Deployment form data check
   hasDeploymentFormData = false;
   isCheckingDeploymentData = false;
@@ -408,11 +447,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
-    
-    // Initialize organisation from localStorage or default
-    this.organisation = this.getConsistentOrganization();
-    console.log('Initialized organisation:', this.organisation);
-    
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
@@ -441,6 +475,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.currentCname = cardFromState.name; // Use the card name as cname
       this.viewMode = 'detail';
       
+      // Reset loading flags and content state for new card
+      this.resetLoadingState();
+      
       // Update MCP filename if in MCP mode now that we have the actual cname
       if (this.pipelineMode === 'mcp') {
         this.scriptFileName = `${this.currentCname}.json`;
@@ -455,6 +492,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.autoLoadAgentDataForPipelineCard();
     } else {
       // Fall back to old flow for hardcoded agent cards or when no state data
+      
+      // Reset loading flags for new navigation
+      this.resetLoadingState();
       
       // Also try using cardName as currentCname for the new APIs
       if (this.cardName) {
@@ -475,10 +515,23 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Handle browser navigation/refresh with unsaved changes
    */
   handleBeforeUnload(event: BeforeUnloadEvent): void {
-    if (this.isFileModified) {
+    if (this.isScriptModified) {
       event.preventDefault();
-      event.returnValue = 'You have unsaved changes in your files. Are you sure you want to leave?';
+      event.returnValue = 'You have unsaved changes in your configuration. Are you sure you want to leave?';
       return event.returnValue;
+    }
+  }
+  
+  /**
+   * Generic method to check for unsaved changes before any navigation
+   */
+  checkUnsavedChanges(action: () => void): void {
+    if (this.isScriptModified) {
+      console.log('Unsaved changes detected, showing confirmation dialog');
+      this.showScriptUnsavedChangesDialog(action);
+    } else {
+      // No unsaved changes, proceed immediately
+      action();
     }
   }
 
@@ -486,6 +539,70 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+
+      // ============================================================================
+      // Builder Tab Visibility Logic
+      // ============================================================================
+      // DEFAULT: HIDDEN (false)
+      // SHOW: Only when created_source is NOT 'user_defined' (missing, null, empty, or other value)
+      // HIDE: When created_source === 'user_defined'
+      // ============================================================================
+      
+      this.shouldShowBuilderTab = false; // Start hidden
+      
+      console.log('🔍 Checking Builder tab visibility for:', this.cardName);
+      console.log('📦 Raw json_content:', res.json_content);
+      
+      try {
+        if (!res.json_content || res.json_content.trim() === '') {
+          // No json_content or empty string → SHOW tab (langflow/other source)
+          this.shouldShowBuilderTab = true;
+          console.log('✅ Builder tab VISIBLE: json_content is empty/missing (langflow/other)');
+        } else {
+          // Parse json_content
+          const jsonContent = JSON.parse(res.json_content);
+          console.log('📋 Parsed json_content:', JSON.stringify(jsonContent, null, 2));
+          console.log('🔑 Keys in json_content:', Object.keys(jsonContent));
+          
+          // Check created_source field
+          if (jsonContent.hasOwnProperty('created_source')) {
+            const sourceValue = jsonContent.created_source;
+            console.log('🏷️ created_source field found, value:', sourceValue, 'type:', typeof sourceValue);
+            
+            if (sourceValue === 'user_defined') {
+              // Explicitly user_defined → HIDE tab
+              this.shouldShowBuilderTab = false;
+              console.log('❌ Builder tab HIDDEN: created_source === "user_defined"');
+            } else {
+              // Has created_source but NOT user_defined → SHOW tab
+              this.shouldShowBuilderTab = true;
+              console.log('✅ Builder tab VISIBLE: created_source is "' + sourceValue + '" (not user_defined)');
+            }
+          } else {
+            // No created_source field → SHOW tab (langflow/other source)
+            this.shouldShowBuilderTab = true;
+            console.log('✅ Builder tab VISIBLE: created_source field missing (langflow/other)');
+          }
+        }
+      } catch (e) {
+        // Parse error → SHOW tab (fail-safe)
+        this.shouldShowBuilderTab = true;
+        console.error('⚠️ Error parsing json_content, showing Builder tab as fail-safe:', e);
+        console.error('Raw content that failed:', res.json_content);
+      }
+      
+      console.log('🎯 Final decision: shouldShowBuilderTab =', this.shouldShowBuilderTab);
+
+      // Update MCP filename if in MCP mode with actual stream item name
+      if (this.pipelineMode === 'mcp') {
+        const actualName = res.name || this.cardName || 'mcp-config';
+        this.scriptFileName = `${actualName}.json`;
+      }
+
+      // Load saved JSON file content for script tab only if not already loading
+      if (!this.isLoadingJsonFile) {
+        this.loadJsonFileForScript();
+      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
@@ -497,10 +614,138 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Check Builder Tab Visibility - Separate method to be called from multiple places
+   * This fetches the streaming service and checks created_source flag
+   */
+  private checkBuilderTabVisibility(): void {
+    if (!this.currentCname) {
+      console.warn('⚠️ Cannot check Builder tab visibility: no cname available');
+      return;
+    }
+
+    console.log('🔍 Fetching streaming service to check Builder tab visibility for:', this.currentCname);
+    
+    this.service.getStreamingServicesByName(this.currentCname).subscribe({
+      next: (res) => {
+        // Store streamItem for later use
+        this.streamItem = res;
+        this.pipelineAlias = res.alias;
+
+        // ============================================================================
+        // Builder Tab Visibility Logic
+        // ============================================================================
+        // DEFAULT: HIDDEN (false)
+        // SHOW: Only when created_source is NOT 'user_defined' (missing, null, empty, or other value)
+        // HIDE: When created_source === 'user_defined'
+        // ============================================================================
+        
+        this.shouldShowBuilderTab = false; // Start hidden
+        
+        console.log('🔍 Checking Builder tab visibility for:', this.currentCname);
+        console.log('📦 Raw json_content:', res.json_content);
+        
+        try {
+          if (!res.json_content || res.json_content.trim() === '') {
+            // No json_content or empty string → SHOW tab (langflow/other source)
+            this.shouldShowBuilderTab = true;
+            console.log('✅ Builder tab VISIBLE: json_content is empty/missing (langflow/other)');
+          } else {
+            // Parse json_content
+            const jsonContent = JSON.parse(res.json_content);
+            console.log('📋 Parsed json_content:', JSON.stringify(jsonContent, null, 2));
+            console.log('🔑 Keys in json_content:', Object.keys(jsonContent));
+            
+            // Check created_source field
+            if (jsonContent.hasOwnProperty('created_source')) {
+              const sourceValue = jsonContent.created_source;
+              console.log('🏷️ created_source field found, value:', sourceValue, 'type:', typeof sourceValue);
+              
+              if (sourceValue === 'user_defined') {
+                // Explicitly user_defined → HIDE tab
+                this.shouldShowBuilderTab = false;
+                console.log('❌ Builder tab HIDDEN: created_source === "user_defined"');
+              } else {
+                // Has created_source but NOT user_defined → SHOW tab
+                this.shouldShowBuilderTab = true;
+                console.log('✅ Builder tab VISIBLE: created_source is "' + sourceValue + '" (not user_defined)');
+              }
+            } else {
+              // No created_source field → SHOW tab (langflow/other source)
+              this.shouldShowBuilderTab = true;
+              console.log('✅ Builder tab VISIBLE: created_source field missing (langflow/other)');
+            }
+          }
+        } catch (e) {
+          // Parse error → SHOW tab (fail-safe)
+          this.shouldShowBuilderTab = true;
+          console.error('⚠️ Error parsing json_content, showing Builder tab as fail-safe:', e);
+          console.error('Raw content that failed:', res.json_content);
+        }
+        
+        console.log('🎯 Final decision: shouldShowBuilderTab =', this.shouldShowBuilderTab);
+      },
+      error: (error) => {
+        console.error('❌ Error fetching streaming service for Builder tab check:', error);
+        // On error, default to showing the tab (fail-safe)
+        this.shouldShowBuilderTab = true;
+      }
+    });
+  }
+
+  /**
+   * Reset loading state for new card navigation
+   */
+  private resetLoadingState(): void {
+    this.isLoadingJsonFile = false;
+    this.hasLoadedApiContent = false;
+  }
+
+  /**
    * Generate consistent filename for API calls
    */
   private generateConsistentFilename(): string {
     return `${this.currentCname}_${this.organisation}.json`;
+  }
+
+  /**
+   * Handle pipeline mode change between Agent and MCP
+   */
+  onPipelineModeChange(event: any): void {
+    const newMode = event.value;
+    
+    // Update the card title based on mode
+    this.cardTitle = newMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+    
+    // For MCP mode, initialize JSON config if empty and no API content loaded
+    if (newMode === 'mcp' && !this.mcpJsonConfig.trim() && !this.hasLoadedApiContent) {
+      this.mcpJsonConfig = JSON.stringify(this.defaultMcpConfig, null, 2);
+      // Use the actual cname or cardName for filename
+      const actualName = this.currentCname || this.cardName || 'mcp-config';
+      this.scriptFileName = `${actualName}.json`;
+    }
+    // For agent mode, keep existing script functionality unchanged
+    else if (newMode === 'agent') {
+      this.scriptFileName = this.getOriginalScriptFileName();
+    }
+  }
+
+  /**
+   * Handle MCP JSON configuration changes
+   */
+  onMcpJsonChange(newConfig: string): void {
+    this.mcpJsonConfig = newConfig;
+    // Mark as modified if needed for save functionality
+    // You can add validation here if needed
+  }
+
+  /**
+   * Get the original script file name for agent mode
+   */
+  private getOriginalScriptFileName(): string {
+    if (this.data && this.data.files && this.data.files.length > 0) {
+      return this.cleanFileName(this.data.files[0]);
+    }
+    return 'script.py'; // default fallback
   }
 
   /**
@@ -566,7 +811,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.service.message('Uploaded Successfully', 'success');
       this.uploader.clearQueue();
       const cleanedResponse = this.cleanFileName(response);
-      this.readFile(cleanedResponse);
+      // Only read file if we're not already loading and haven't loaded content from API
+      if (!this.isLoadingJsonFile && !this.hasLoadedApiContent) {
+        this.readFile(cleanedResponse);
+      }
     }
   }
 
@@ -582,6 +830,12 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   readFile(filename: string, retryCount = 0) {
+    // Prevent duplicate calls if we're already loading
+    if (this.isLoadingJsonFile) {
+      console.log('Already loading JSON file, skipping readFile call');
+      return;
+    }
+
     // Ensure we use the consistent filename for the current card
     const expectedFilename = this.generateConsistentFilename();
     if (filename !== expectedFilename) {
@@ -619,6 +873,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Set loading flag to prevent duplicate calls
+    this.isLoadingJsonFile = true;
+    
     // Encode filename to handle special characters
     const encodedFilename = encodeURIComponent(filename);
     this.scriptFileName = filename;
@@ -631,11 +888,13 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (resp) => {
+          this.isLoadingJsonFile = false; // Clear loading flag
           console.log('File read response received for:', filename);
           try {
             const textDecoder = new TextDecoder('utf-8');
             this.script = textDecoder.decode(resp).split('\n');
             this.loadScript = true;
+            this.hasLoadedApiContent = true; // Mark that we've loaded content from API
             console.log(
               'Successfully loaded script with',
               this.script.length,
@@ -664,6 +923,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
+          this.isLoadingJsonFile = false; // Clear loading flag
           console.error(
             'Error while reading file:',
             filename,
@@ -845,7 +1105,10 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               } else {
                 // Add delay before reading file to ensure it's available on the server
                 setTimeout(() => {
-                  this.readFile(firstPyFile.name); // readFile now handles cleaning internally
+                  // Only read file if we're not already loading and haven't loaded content from API
+                  if (!this.isLoadingJsonFile && !this.hasLoadedApiContent) {
+                    this.readFile(firstPyFile.name); // readFile now handles cleaning internally
+                  }
                 }, 1000);
               }
             } else {
@@ -879,8 +1142,22 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+
+  onScriptChange(newContent: string): void {
+    console.log('Script content changed, length:', newContent.length);
+  }
+
   navigateBack(): void {
     console.log('Navigating back to agent-pipeline dashboard');
+    
+    // Check for unsaved script changes
+    if (this.isScriptModified) {
+      console.log('Unsaved script changes detected, showing confirmation dialog');
+      this.showScriptUnsavedChangesDialog(() => {
+        this.performNavigateBack();
+      });
+      return;
+    }
     
     // No unsaved changes, navigate immediately
     this.performNavigateBack();
@@ -918,6 +1195,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.deploymentStatus = 'idle'; // Reset deployment status
     this.deploymentStatusMessage = ''; // Clear status message
     this.isPlaygroundEnabled = false; // Disable playground
+    this.isScriptModified = false; // Reset script modification state
+    this.originalScriptContent = ''; // Clear original script content
     this.clearFileSelection();
     console.log('Reset state for dashboard navigation');
   }
@@ -1220,6 +1499,54 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   // updateJsonContent method removed - no placeholder JSON content
+
+  getToolsForAgent(agentName: string): any[] {
+    const toolsMap: any = {
+      'customer-support-agent': [
+        {
+          name: 'search_knowledge_base',
+          description: 'Search the knowledge base for relevant articles',
+        },
+        { name: 'create_ticket', description: 'Create a support ticket' },
+        {
+          name: 'get_customer_info',
+          description: 'Retrieve customer information',
+        },
+      ],
+      'data-analysis-agent': [
+        { name: 'load_dataset', description: 'Load and preprocess datasets' },
+        {
+          name: 'generate_visualizations',
+          description: 'Create charts and graphs',
+        },
+        {
+          name: 'run_statistical_analysis',
+          description: 'Perform statistical computations',
+        },
+      ],
+      'code-review-agent': [
+        {
+          name: 'analyze_code_quality',
+          description: 'Check code quality metrics',
+        },
+        {
+          name: 'detect_vulnerabilities',
+          description: 'Scan for security issues',
+        },
+        {
+          name: 'suggest_improvements',
+          description: 'Provide code optimization suggestions',
+        },
+      ],
+    };
+    return toolsMap[agentName] || [];
+  }
+
+  updateFileSystemData(agent: AgentCard): void {
+    // This method is now replaced by loadAgentFiles()
+    // which is called after successful agent generation
+    this.loadAgentFiles();
+  }
 
   loadAgentFiles(): void {
     if (!this.currentCname) {
@@ -1583,10 +1910,191 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       // Don't proceed if save failed
     }
   }
+  
+  /**
+   * Show script unsaved changes dialog
+   */
+  showScriptUnsavedChangesDialog(action: () => void): void {
+    this.showScriptUnsavedDialog = true;
+    this.pendingScriptAction = action;
+  }
+  
+  /**
+   * Cancel script unsaved dialog
+   */
+  cancelScriptUnsavedDialog(): void {
+    this.showScriptUnsavedDialog = false;
+    this.pendingScriptAction = null;
+  }
+  
+  /**
+   * Save script and proceed with pending action
+   */
+  async saveScriptAndProceed(): Promise<void> {
+    try {
+      await this.saveScriptConfiguration();
+      this.showScriptUnsavedDialog = false;
+      if (this.pendingScriptAction) {
+        this.pendingScriptAction();
+        this.pendingScriptAction = null;
+      }
+    } catch (error) {
+      console.error('Error saving script configuration:', error);
+    }
+  }
+  
+  /**
+   * Discard script changes and proceed
+   */
+  discardScriptAndProceed(): void {
+    console.log('Discarding script changes and continuing...');
+    
+    // Restore original content
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = this.originalScriptContent;
+    } else {
+      this.script = this.originalScriptContent.split('\n');
+    }
+    
+    this.isScriptModified = false;
+    this.showScriptUnsavedDialog = false;
+    
+    if (this.pendingScriptAction) {
+      this.pendingScriptAction();
+      this.pendingScriptAction = null;
+    }
+  }
 
   onTabChange(event: any): void {
     console.log('Tab change requested to index:', event.index);
+    
+    // Check for unsaved script changes before switching tabs
+    if (this.isScriptModified) {
+      console.log('Unsaved script changes detected during tab switch');
+      // Prevent the tab change by reverting to current tab
+      event.source.selectedIndex = event.source.selectedIndex;
+      
+      this.showScriptUnsavedChangesDialog(() => {
+        // After saving or discarding, allow the tab change
+        setTimeout(() => {
+          event.source.selectedIndex = event.index;
+        }, 100);
+      });
+      return;
+    }
+    
     console.log(`Tab switched to index: ${event.index}`);
+  }
+
+  // Simulate byte array response from API
+  simulateByteArrayResponse(fileId: string): number[] {
+    const content = this.getSampleFileContent(fileId);
+    // Convert string to byte array simulation
+    const byteArray = [];
+    for (let i = 0; i < content.length; i++) {
+      byteArray.push(content.charCodeAt(i));
+    }
+    return byteArray;
+  }
+
+  // Convert byte array to string (as would be done in real implementation)
+  convertByteArrayToString(byteArray: number[]): string {
+    return String.fromCharCode(...byteArray);
+  }
+
+  getClassName(agentName: string): string {
+    return (
+      agentName
+        .split('-')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('') + 'Agent'
+    );
+  }
+
+  getMainPyContent(agentName: string): string {
+    const className = this.getClassName(agentName);
+    const tools = this.getToolsForAgent(agentName);
+
+    const toolMethods = tools
+      .map(
+        (tool: any) => `
+    def ${tool.name}(self, *args, **kwargs):
+        """${tool.description}"""
+        # Implementation here
+        return {"status": "success", "data": {}}`
+      )
+      .join('\n');
+
+    return `import os
+from openai import OpenAI
+from dotenv import load_dotenv
+from typing import Dict, Any
+
+# Load environment variables
+load_dotenv()
+
+class ${className}:
+    def __init__(self):
+        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.model = "gpt-4"
+        self.tools = ${JSON.stringify(tools, null, 8)}
+${toolMethods}
+    
+    def process_request(self, message: str) -> str:
+        """Process ${agentName.replace(/-/g, ' ')} request"""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "You are a helpful AI agent."},
+                {"role": "user", "content": message}
+            ],
+            tools=self.tools,
+            tool_choice="auto"
+        )
+        return response.choices[0].message.content
+    
+    def run(self):
+        """Main execution loop"""
+        print("${className} initialized successfully!")
+        print(f"Available tools: {[tool['name'] for tool in self.tools]}")
+
+if __name__ == "__main__":
+    agent = ${className}()
+    agent.run()
+`;
+  }
+
+  getToolsPyContent(agentName: string): string {
+    const tools = this.getToolsForAgent(agentName);
+    const toolFunctions = tools
+      .map(
+        (tool: any) => `
+def ${tool.name}(*args, **kwargs):
+    """${tool.description}"""
+    # Implementation
+    pass`
+      )
+      .join('\n');
+
+    return `"""
+Agent tools and utilities for ${agentName}
+"""
+${toolFunctions}
+
+class AgentToolkit:
+    """Collection of tools for the agent"""
+    
+    def __init__(self):
+        self.tools = {
+${tools.map((t: any) => `            '${t.name}': ${t.name}`).join(',\n')}
+        }
+    
+    def execute_tool(self, tool_name: str, *args, **kwargs):
+        """Execute a tool by name"""
+        if tool_name in self.tools:
+            return self.tools[tool_name](*args, **kwargs)
+        raise ValueError(f"Tool {tool_name} not found")
+`;
   }
 
   onJsonChange(event: any): void {
@@ -2017,6 +2525,253 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           console.error('Failed to copy content: ', err);
         });
     }
+  }
+
+  // Syntax highlighting for JSON
+  highlightJsonSyntax(line: string): string {
+    if (!line.trim()) return '&nbsp;';
+
+    return line
+      .replace(/("[^"]*":\s*)/g, '<span class="json-key">$1</span>')
+      .replace(/:\s*("([^"]*)")/g, ': <span class="json-string">$1</span>')
+      .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+      .replace(
+        /:\s*(true|false|null)/g,
+        ': <span class="json-literal">$1</span>'
+      )
+      .replace(/([{}[\],])/g, '<span class="json-punctuation">$1</span>');
+  }
+
+  // Basic syntax highlighting for other file types
+  highlightCodeSyntax(line: string, extension: string): string {
+    if (!line.trim()) return '&nbsp;';
+
+    let highlightedLine = line;
+
+    // Common patterns for different file types
+    if (extension === 'xml') {
+      highlightedLine = highlightedLine
+        .replace(
+          /(&lt;\/?)([a-zA-Z0-9-]+)/g,
+          '<span class="xml-tag">$1$2</span>'
+        )
+        .replace(/([a-zA-Z-]+)(=)/g, '<span class="xml-attribute">$1</span>$2')
+        .replace(/(="[^"]*")/g, '<span class="xml-value">$1</span>');
+    } else if (extension === 'java') {
+      highlightedLine = highlightedLine
+        .replace(
+          /\b(public|private|protected|static|final|class|interface|extends|implements|import|package)\b/g,
+          '<span class="java-keyword">$1</span>'
+        )
+        .replace(
+          /\b(String|int|boolean|void|Object)\b/g,
+          '<span class="java-type">$1</span>'
+        )
+        .replace(/(\/\/.*$)/g, '<span class="java-comment">$1</span>');
+    } else if (extension === 'properties') {
+      highlightedLine = highlightedLine
+        .replace(
+          /^([^=]+)(=)/g,
+          '<span class="prop-key">$1</span><span class="prop-equals">$2</span>'
+        )
+        .replace(/(#.*$)/g, '<span class="prop-comment">$1</span>');
+    }
+
+    return highlightedLine;
+  }
+
+  saveChanges(): void {
+    console.log('Saving changes...');
+    // Implementation for saving
+  }
+
+  duplicateAgent(): void {
+    console.log('Duplicating agent...');
+    // Implementation for duplication
+  }
+
+  openTagModal(): void {
+    console.log('Opening tag modal...');
+    // Implementation for tags
+  }
+
+  // Generate sample file content based on file ID and type
+  getSampleFileContent(fileId: string): string {
+    const fileMap: { [key: string]: string } = {
+      '1': `<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.example</groupId>
+    <artifactId>zip-upload</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    
+    <name>Zip Upload Service</name>
+    <description>Service for handling zip file uploads and processing</description>
+</project>`,
+      '2': `# Application Configuration
+server.port=8080
+spring.application.name=zip-upload-service
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Database Configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA Configuration
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.h2.console.enabled=true`,
+      '3': `package com.example.zipupload;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ZipUploadApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ZipUploadApplication.class, args);
+    }
+
+}`,
+      '4': `package com.example.zipupload.service;
+
+import org.springframework.stereotype.Service;
+import java.io.*;
+import java.util.zip.*;
+import java.util.List;
+import java.util.ArrayList;
+
+@Service
+public class ZipProcessingService {
+
+    public List<String> extractZipFile(InputStream zipInputStream) throws IOException {
+        List<String> extractedFiles = new ArrayList<>();
+        
+        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (!zipEntry.isDirectory()) {
+                    extractedFiles.add(zipEntry.getName());
+                    // Process file content here
+                }
+                zis.closeEntry();
+            }
+        }
+        
+        return extractedFiles;
+    }
+}`,
+      '5': `package com.example.zipupload.repository;
+
+import com.example.zipupload.entity.FileEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface FileRepository extends JpaRepository<FileEntity, Long> {
+    List<FileEntity> findByUserId(String userId);
+}`,
+      '6': `package com.example.zipupload.entity;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "files")
+public class FileEntity {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "user_id")
+    private String userId;
+    
+    @Column(name = "file_name")
+    private String fileName;
+    
+    @Column(name = "file_path")
+    private String filePath;
+    
+    @Lob
+    @Column(name = "content")
+    private byte[] content;
+    
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+    
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+    
+    public byte[] getContent() { return content; }
+    public void setContent(byte[] content) { this.content = content; }
+}`,
+      '7': `package com.example.zipupload.controller;
+
+import com.example.zipupload.service.ZipProcessingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/zip")
+public class ZipController {
+
+    @Autowired
+    private ZipProcessingService zipProcessingService;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadZip(
+            @RequestParam("userId") String userId,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            List<String> extractedFiles = zipProcessingService.extractZipFile(file.getInputStream());
+            return ResponseEntity.ok("Files processed successfully: " + extractedFiles.size());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing zip file: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Map<String, String>>> getFilesForUser(@PathVariable String userId) {
+        // Implementation here
+        return ResponseEntity.ok(List.of());
+    }
+
+    @GetMapping("/download/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
+        // Implementation here
+        return ResponseEntity.ok(new byte[0]);
+    }
+}`,
+    };
+
+    return (
+      fileMap[fileId] ||
+      `// File content for ID: ${fileId}\n// This is a sample file generated from the API response\n// In a real implementation, this would be fetched from the backend`
+    );
   }
 
   // File system methods
@@ -2939,8 +3694,221 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.runnerServiceStatus = false;
     }
   }
+  // Methods removed - auto-loading enabled when viewing details
+  // generateadkAgent() and clearConsole() methods are no longer needed
 
+  // LLM Selection and Prompt Template methods
+  getPromptTemplate(): string {
+    return `PROJECT STRUCTURE & EXECUTION PROTOCOL
+1. File Structure:
+   - Place all source code in a \`src/\` directory (e.g., \`src/main.py\`, \`src/config.py\`).
+   - Place \`requirements.txt\` and \`.env\` in the project root.
 
+2. Import Safety (CRITICAL):
+   - The user will run the application from the project root using: \`python src/main.py\`
+   - To prevent "ModuleNotFoundError", the \`main.py\` entry point MUST explicitly add the project root to \`sys.path\` before importing internal modules.
+   - Use this snippet at the top of \`src/main.py\`:
+     \`\`\`python
+     import sys
+     import os
+     # Add project root to sys.path to fix imports when running from src/
+     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+     \`\`\`
+
+3. Import Style:
+   - Use absolute imports starting with \`src.\` (e.g., \`from src.config import AppConfig\`) OR relative imports (e.g., \`from .config import AppConfig\`) consistently.
+   
+FILE CREATION PROTOCOL 
+
+You MUST create and save files directly in the current workspace using file blocks.
+For each file, emit a fenced block that starts with an exact header line:
+# file: src/<filename>.py
+
+(or # file: requirements.txt for requirements)
+After generating the block, apply the edit by creating the file in the workspace at that path. Do not merely display content in chat.
+If the agent cannot apply edits automatically, show and execute the VS Code "Create file" action for each block.
+Never skip file creation; confirm by listing the created files with their relative paths at the end.
+
+ROLE & OBJECTIVE
+You are a Senior Python Engineer and AI Systems Architect.
+Convert a raw **Langflow Design JSON** (directed graph) into a production‑ready, modular **Python ADK** codebase. The output MUST work for ANY Langflow design (any number of nodes/agents/tools). For phase‑1, avoid complex conditional branching: detect it, log one line, and linearize execution.
+
+INPUT
+You will receive a Langflow graph JSON containing:
+- Nodes: functions, agents, tools, prompts, LLMs, etc.
+- Edges: data flow dependencies (source -> target).
+
+OUTPUT — EXACTLY 7 FILES
+Generate a multi‑file Python project with EXACTLY these files and NO extras:
+1) \`__init__.py\`
+2) \`workflow_state.py\`
+3) \`config.py\`
+4) \`nodes.py\`
+5) \`graph_builder.py\`
+6) \`main.py\`
+7) \`requirements.txt\`
+
+FILE EMISSION FORMAT (STRICT)
+- For each file, output a fenced code block.
+- The first line in each block MUST be a comment: \`# file: <relative_path/filename>\`
+- Use \`src/\` as the root code directory for all Python files.
+- Example block header:
+  \`\`\`python
+  # file: src/workflow_state.py
+  \`\`\`
+- Output only ASCII characters in code and logs (Windows‑safe). No emojis, arrows, or unicode symbols.
+- After emitting all seven files, print a short ASCII "Build summary" section (no extra prose).
+
+GENERAL RULES (CRITICAL)
+- **Modern libraries only:** Use \`langchain_core\` + \`langchain_openai\`, \`langgraph.graph\` and \`langgraph.prebuilt\` (where tool use requires it), \`pydantic\` v2, and \`pydantic_settings\` v2. Avoid deprecated modules and legacy agent executors.
+- **Environment management:** Read env via \`pydantic_settings.BaseSettings\` (v2). Do NOT call \`os.getenv\` directly in application logic.
+- **Azure/OpenAI dual support:** Prefer Azure OpenAI if credentials exist; else fall back to OpenAI. Never hard‑code model names—read from node JSON or env; provide safe defaults.
+- **No conditional branching (phase‑1):** If routers/conditions exist, log "Branching detected; skipped in phase-1" and build a straight‑through path using primary edge order only.
+- **Idempotent state:** Each node returns a \`dict\` with only keys it produces; graph merges deterministically.
+- **Error handling:** Each node wraps execution in \`try/except\`, logs concise ASCII messages, and returns \`{ "error": "<message>" }\` without crashing the workflow.
+- **Strict imports whitelist:**
+  - \`langchain_core.*\`
+  - \`langchain_openai\` (AzureChatOpenAI, ChatOpenAI)
+  - \`langgraph.graph\`, \`langgraph.prebuilt\`
+  - \`pydantic\`, \`pydantic_settings\`
+  - \`python_dotenv\` (optional dev convenience)
+  - Standard library and \`typing\`
+- **Logging:** Use the \`logging\` module, INFO level default, ASCII messages only.
+
+PROJECT SPECIFICATION & ACCEPTANCE CRITERIA
+
+1) __init__.py
+- Minimal package initialization; export \`create_workflow\` and \`run_workflow\`.
+- ASCII docstring summarizing the package and phase‑1 limitation.
+
+2) workflow_state.py
+- Define \`WorkflowState\` (Pydantic v2 \`BaseModel\`) capturing all keys produced/required by nodes in the JSON.
+- Include \`messages: list[dict] = Field(default_factory=list)\` for chat history.
+- Include all node outputs as \`Optional[...]\` fields (discoverability).
+- Provide:
+  \`\`\`python
+  def update(self, delta: dict) -> "WorkflowState":
+      # merges keys deterministically and returns self
+  \`\`\`
+- Keep it simple; do NOT use \`Annotated\` or \`operator.add\`.
+
+3) config.py
+- Use \`from pydantic_settings import BaseSettings\`
+- Pydantic v2 config style:
+  \`\`\`python
+  class AppConfig(BaseSettings):
+      model_config = ConfigDict(
+          env_file=".env",
+          env_file_encoding="utf-8",
+          case_sensitive=False
+      )
+  \`\`\`
+- Fields with aliases for env vars:
+  - Azure: \`AZURE_OPENAI_API_KEY\`, \`AZURE_OPENAI_ENDPOINT\`, \`AZURE_OPENAI_DEPLOYMENT\`
+  - OpenAI: \`OPENAI_API_KEY\`
+  - Common: \`MODEL_NAME\`, \`TEMPERATURE\`, \`SYSTEM_PROMPT\`, \`TIMEOUT_SECONDS\`
+- Implement \`model_post_init\` for normalization.
+- Implement:
+  - \`is_azure(self) -> bool\`
+  - \`is_openai(self) -> bool\`
+  - \`validate(self) -> None\` (ensures Azure OR OpenAI creds exist; raises \`ValueError\` single‑line if not)
+- Do not hard‑code values; allow node JSON to override via parameters.
+
+4) nodes.py
+- For every JSON node, create:
+  \`\`\`python
+  def node_<sanitized_node_id>(state: WorkflowState, config: AppConfig) -> dict:
+      ...
+      return { "<output_key>": <value>, ... }
+  \`\`\`
+- Add \`get_model(config: AppConfig, node_params: dict | None = None)\` helper:
+  - If Azure creds exist, return \`AzureChatOpenAI\` with endpoint + deployment; take \`model_name\` from node_params or env.
+  - Else return \`ChatOpenAI\` with \`model_name\` from node_params or env.
+  - Apply \`temperature\`, \`timeout\`, etc., from node_params or config defaults.
+- **LLM usage:**
+  - Prompt‑only nodes: format templates safely (guard missing keys) and call \`llm.invoke([{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}])\` or minimal structured messages as supported.
+  - Tool‑using nodes: construct tools list; use \`langgraph.prebuilt.create_react_agent(llm, tools, prompt=<system_prompt>)\`. Do NOT use \`AgentExecutor\`.
+- **Prompt nodes:** Render with \`str.format(**safe_state_dict)\`; if key missing, log and substitute empty string.
+- **Tool nodes:** Implement Python wrappers; if unknown external tool, stub and log "Tool '<name>' not implemented in phase-1", return passthrough.
+- Each node must have \`try/except\` and concise ASCII logging.
+
+5) graph_builder.py
+- \`from langgraph.graph import StateGraph\`
+- Build \`StateGraph(WorkflowState)\` and add nodes via \`functools.partial(node_func, config=config)\`.
+- Add edges exactly per JSON source->target order. If multiple outgoing edges (branching), choose the first listed edge for phase‑1; log and skip others.
+- Determine \`entry_point\` and \`finish_point\`:
+  - If explicit in JSON, use them.
+  - Else infer: entry = first node with no inbound edges; finish = last node with no outbound edges.
+- Provide:
+  - \`def create_workflow(design_json: dict, config: AppConfig):\` → returns compiled graph
+  - \`def visualize_graph_structure(design_json: dict) -> str:\` → returns ASCII topology (one node per line with its successors)
+
+6) main.py
+- CLI \`main()\` via \`argparse\` supporting only \`--debug\` and \`--session-id\`.
+- \`check_dependencies()\` verifies imports; on ImportError, print one ASCII line and \`sys.exit(1)\`.
+- \`load_config()\` instantiates \`AppConfig\` (auto‑loads \`.env\`) and calls \`config.validate()\`.
+- Load \`./design.json\` from the repo root (phase‑1 requirement).
+- Build workflow with \`create_workflow(design_json, config)\`.
+- Interactive input:
+  \`\`\`python
+  input_message = input("Enter your question: ")
+  \`\`\`
+  Append to \`state.messages\`, run the graph, print concise ASCII result.
+- Graceful errors: one‑line guidance, exit non‑zero.
+
+7) requirements.txt
+- Pin modern, compatible versions (use >= to reduce environment breakage):
+  - langchain>=0.3.0
+  - langchain-core>=0.3.0
+  - langchain-openai>=0.2.0
+  - langgraph>=0.2.0
+  - pydantic>=2.0.0
+  - pydantic-settings>=2.0.0
+  - python-dotenv>=1.0.0
+
+JSON INTERPRETATION RULES
+- Map node types:
+  - "LLM", "Chat Model" → model via \`get_model()\`, call \`invoke()\` with message dicts.
+  - "Prompt" → template format node, output string.
+  - "Tool" → Python wrapper; if unknown or external, stub and log once.
+- Extract per‑node parameters (\`model_name\`, \`temperature\`, \`system_prompt\`, etc.) from node config; fallback to env/config defaults.
+- Sanitize node ids to valid Python identifiers: lower‑case; non‑alphanumeric → \`_\`; ensure uniqueness.
+- Infer output keys per node type; include these as optional fields in \`WorkflowState\`.
+
+QUALITY & SAFETY PRE‑FLIGHT (the agent MUST do before finalizing output)
+- No deprecated imports: do NOT use \`langchain.chat_models\`, \`AgentExecutor\`, or legacy submodules.
+- Use \`create_react_agent\` ONLY if tools exist; otherwise call \`llm.invoke\`.
+- Read env via \`pydantic_settings.BaseSettings\`; do NOT use \`os.getenv\` directly.
+- ASCII logging only.
+- Each file begins with \`# file: src/<name>.py\` (or \`# file: requirements.txt\`) and compiles cleanly.
+
+PHASE‑1 LIMITATION
+- If routers/conditions/branches are found, print/log:
+  "Branching detected; skipped in phase-1"
+  Then build a linear workflow using the first‑listed edge path.
+
+DELIVERABLES
+- Output exactly seven files, each in a fenced code block with the required header.
+- After the files, output a brief ASCII "Build summary" with a single paragraph and a bullet list of node functions generated.`;
+  }
+
+  copyPromptTemplate(): void {
+    const promptText = this.getPromptTemplate();
+    
+    // Copy to clipboard using the Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(promptText).then(() => {
+        this.showPromptCopyDialog = true;
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        // Fallback to other copy method
+        this.fallbackCopyToClipboard(promptText);
+      });
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      this.fallbackCopyToClipboard(promptText);
+    }
+  }
 
   private fallbackCopyToClipboard(text: string): void {
     // Create a temporary textarea element
@@ -3420,12 +4388,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
     
-    // Ensure script content is empty for new agents
-    if (!this.loadScript || !this.script || this.script.length === 0) {
+    // Ensure script content is empty for new agents - but don't override API content
+    if (!this.hasLoadedApiContent && (!this.loadScript || !this.script || this.script.length === 0)) {
       this.script = [];
       this.scriptFileName = '';
       this.loadScript = true;
-      console.log('Set empty script content for new agent');
+      console.log('Set empty script content for new agent (no API content loaded)');
+    } else if (this.hasLoadedApiContent) {
+      console.log('Preserving API content during reset - not overriding script array');
     }
     
     console.log(
@@ -3561,6 +4531,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         // Fetch runner_service_status FIRST and WAIT for it
     await this.fetchRunnerServiceStatus();
     console.log('After autoLoadAgentData fetch, runnerServiceStatus is:', this.runnerServiceStatus);
+    
+    // THEN load JSON file from API for script tab (after reset)
+    this.loadJsonFileForScript();
 
     // Only call folder list API to check existence
     this.agentPipelineService.getAgentFiles(this.currentCname).subscribe({
@@ -3608,11 +4581,17 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     console.log('Auto-loading pipeline agent data for cname:', this.currentCname);
     this.isLoadingFiles = true;
     
+    // CRITICAL: Load streaming service FIRST to check created_source for Builder tab visibility
+    this.checkBuilderTabVisibility();
+    
     // Reset state first
     this.resetToInitialStateForNewAgent();
       // Fetch runner_service_status FIRST and WAIT for it
     await this.fetchRunnerServiceStatus();
     console.log('After autoLoadAgentDataForPipelineCard fetch, runnerServiceStatus is:', this.runnerServiceStatus);
+    
+    // THEN load JSON file from API for script tab (after reset)
+    this.loadJsonFileForScript();
     
     // Check if deployment form data exists for the Deploy button
     this.checkDeploymentFormData();
@@ -3652,6 +4631,553 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         this.getStreamService();
       }
     });
+  }
+
+  // Add flag to prevent multiple simultaneous API calls
+  private isLoadingJsonFile = false;
+
+  // Load JSON file from API for script tab - ALWAYS call read API first
+  private loadJsonFileForScript(): void {
+    // Prevent multiple simultaneous calls
+    if (this.isLoadingJsonFile) {
+      return;
+    }
+
+    let orgToUse = this.getConsistentOrganization();
+    this.organisation = orgToUse;
+    
+    if (!this.currentCname || !orgToUse) {
+      this.script = [];
+      this.scriptFileName = '';
+      this.loadScript = true;
+      return;
+    }
+
+    // Create consistent filename using the same method as other API calls
+    const jsonFileName = this.generateConsistentFilename();
+    
+    if (!this.currentCname || !orgToUse || !jsonFileName) {
+      this.script = [];
+      this.scriptFileName = jsonFileName || 'config.json';
+      this.loadScript = true;
+      return;
+    }
+    
+    // Set loading flag to prevent multiple calls
+    this.isLoadingJsonFile = true;
+    
+    console.log('🔍 Always calling read API first for script tab:', {
+      endpoint: `${this.baseUrl}/api/aip/file/create/${this.currentCname}/${orgToUse}/json?file=${jsonFileName}`,
+      cname: this.currentCname,
+      organization: orgToUse,
+      fileName: jsonFileName,
+      mode: this.pipelineMode
+    });
+    
+    // ALWAYS call read API first - show whatever comes from API
+    this.service.readNativeFile(this.currentCname, orgToUse, jsonFileName).subscribe({
+      next: (response) => {
+        this.isLoadingJsonFile = false; // Clear loading flag
+        
+        try {
+          let jsonString = '';
+          if (response instanceof ArrayBuffer) {
+            const decoder = new TextDecoder('utf-8');
+            jsonString = decoder.decode(response);
+          } else if (typeof response === 'string') {
+            jsonString = response;
+          } else {
+            throw new Error('Invalid response format: ' + typeof response);
+          }
+          
+          console.log('📋 API returned content:', {
+            fileName: jsonFileName,
+            contentLength: jsonString.length,
+            hasContent: jsonString.trim().length > 0,
+            contentPreview: jsonString.substring(0, 100) + '...'
+          });
+          
+          // Always show what comes from API - even if empty or invalid
+          this.script = jsonString.split('\n');
+          this.scriptFileName = jsonFileName;
+          this.loadScript = true;
+          this.originalScriptContent = jsonString;
+          this.isScriptModified = false;
+          this.hasLoadedApiContent = true; // Mark that we successfully loaded API content
+          
+          // For MCP mode, set the JSON config from API data
+          if (this.pipelineMode === 'mcp') {
+            this.mcpJsonConfig = jsonString;
+          }
+          
+          console.log('✅ Successfully loaded and displayed API content:', jsonFileName);
+          
+          if (this.cdr) {
+            this.cdr.detectChanges();
+          }
+          
+          if (this.pipelineMode === 'mcp') {
+            setTimeout(() => {
+              if (this.cdr) {
+                this.cdr.markForCheck();
+                this.cdr.detectChanges();
+              }
+            }, 100);
+          }
+        } catch (error) {
+          console.error('Error processing API response:', error);
+          // Even on error, show empty content from API instead of defaults
+          this.script = [];
+          this.scriptFileName = jsonFileName;
+          this.loadScript = true;
+          this.originalScriptContent = '';
+          this.isScriptModified = false;
+          
+          if (this.pipelineMode === 'mcp') {
+            this.mcpJsonConfig = '';
+          }
+          
+          if (this.cdr) {
+            this.cdr.detectChanges();
+          }
+        }
+      },
+      error: (error) => {
+        this.isLoadingJsonFile = false; // Clear loading flag
+        
+        console.log('📄 Read API response (file not found):', {
+          status: error.status,
+          fileName: jsonFileName,
+          message: 'File does not exist yet - showing empty content for viewing'
+        });
+        
+        // For view details: show empty content when file doesn't exist
+        // Default configs are ONLY used during new card creation flow
+        this.script = [];
+        this.scriptFileName = jsonFileName;
+        this.loadScript = true;
+        this.originalScriptContent = '';
+        this.isScriptModified = false;
+        
+        if (this.pipelineMode === 'mcp') {
+          this.mcpJsonConfig = '';
+        }
+        
+        if (this.cdr) {
+          this.cdr.detectChanges();
+        }
+        
+        console.log('📝 Showing empty script content - file not found in API');
+      }
+    });
+  }
+
+  /**
+   * Use default configuration ONLY for new card creation flow
+   * This should NOT be called during view details navigation
+   */
+  private useDefaultConfigurationForNewCard(fileName: string, defaultConfig: any): void {
+    console.log('🆕 Using default configuration for NEW CARD creation:', fileName);
+    const configString = JSON.stringify(defaultConfig, null, 2);
+    this.script = configString.split('\n');
+    this.scriptFileName = fileName;
+    this.loadScript = true;
+    this.originalScriptContent = configString;
+    this.isScriptModified = false;
+    
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = configString;
+    }
+    
+    if (this.cdr) {
+      this.cdr.detectChanges();
+    }
+    
+    console.log('📝 Set default configuration for new card creation flow');
+  }
+
+  /**
+   * Handle script content changes
+   */
+  onScriptContentChange(newContent: string): void {
+    this.script = newContent.split('\n');
+    
+    // Always update both script and mcpJsonConfig to keep them in sync
+    if (this.pipelineMode === 'mcp') {
+      this.mcpJsonConfig = newContent;
+    }
+    
+    // Update the modification flag
+    this.isScriptModified = newContent !== this.originalScriptContent;
+    
+    console.log('Script content changed, isModified:', this.isScriptModified);
+  }
+
+  /**
+   * Get script content as string for agent mode
+   */
+  getScriptAsString(): string {
+    return this.script ? this.script.join('\n') : '';
+  }
+
+  /**
+   * Get the JSON config that should be displayed - ALWAYS prioritizes API data
+   * Empty content when no API data exists (for view details)
+   */
+  getDisplayedJsonConfig(): string {
+    // If we have loaded API content, always use mcpJsonConfig
+    if (this.hasLoadedApiContent && this.mcpJsonConfig && this.mcpJsonConfig.trim() !== '') {
+      console.log('📖 Displaying API content from read call');
+      return this.mcpJsonConfig;
+    }
+    
+    // If mcpJsonConfig is set (user edited content), use that
+    if (this.mcpJsonConfig && this.mcpJsonConfig.trim() !== '') {
+      return this.mcpJsonConfig;
+    }
+    
+    // For view details: show empty content when no API data exists
+    // Default templates are ONLY used during new card creation
+    console.log('📄 No API content found - showing empty content for view details');
+    return '';
+  }
+
+  /**
+   * Save script configuration to server
+   */
+  async saveScriptConfiguration(): Promise<void> {
+    if (!this.isScriptModified) {
+      return;
+    }
+
+    if (!this.streamItem) {
+      try {
+        await this.loadStreamItemForSave();
+      } catch (error) {
+        this.service.message('Unable to save: pipeline information not available', 'error');
+        return;
+      }
+    }
+
+    if (!this.streamItem) {
+      this.service.message('Unable to save: pipeline information not available', 'error');
+      return;
+    }
+
+    try {
+      console.log('Saving script configuration for:', {
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        mode: this.pipelineMode,
+        organization: this.streamItem.organization
+      });
+
+      // Get current content
+      const currentContent = this.pipelineMode === 'mcp' ? this.mcpJsonConfig : this.getScriptAsString();
+      
+      // Use consistent organization method
+      const orgToUse = this.getConsistentOrganization();
+      
+      // Create the filename for the JSON content
+      const fileName = this.pipelineMode === 'mcp' 
+        ? `${this.currentCname}_${orgToUse}.json`
+        : `${this.currentCname}_${orgToUse}.json`;
+
+      console.log('💾 Save configuration details:', {
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        mode: this.pipelineMode,
+        orgToUse: orgToUse,
+        fileName: fileName,
+        contentLength: currentContent.length,
+        contentPreview: currentContent.substring(0, 100) + '...'
+      });
+
+      // Preserve original json_content from API response (including created_source flag)
+      let originalJsonContent = {};
+      try {
+        if (this.streamItem.json_content) {
+          originalJsonContent = JSON.parse(this.streamItem.json_content);
+          console.log('Preserved original json_content fields:', Object.keys(originalJsonContent));
+        }
+      } catch (e) {
+        console.warn('Could not parse original json_content:', e);
+      }
+
+      // Prepare the update payload - preserve created_source if it exists
+      const updatePayload = {
+        lastmodifiedby: sessionStorage.getItem('username') || sessionStorage.getItem('user') || 'user',
+        lastmodifieddate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        alias: this.streamItem.alias,
+        cid: this.streamItem.cid,
+        name: this.streamItem.name,
+        description: this.streamItem.description,
+        json_content: JSON.stringify({
+          ...originalJsonContent, // Preserve created_source and other original fields
+          elements: [{
+            attributes: {
+              filetype: 'json',
+              files: [fileName]
+            }
+          }]
+        }),
+        type: this.streamItem.type,
+        organization: orgToUse,
+        interfacetype: this.streamItem.interfacetype,
+        is_template: this.streamItem.is_template || false
+      };
+
+      console.log('Update payload (with preserved created_source):', updatePayload);
+
+      // First: Call the update API
+      await this.updateStreamingService(updatePayload);
+      
+      // Second: Upload the JSON file using the create API
+      await this.uploadJsonFile(currentContent, fileName);
+      
+      // Mark as saved
+      this.originalScriptContent = currentContent;
+      this.isScriptModified = false;
+      
+      // Show success message
+      this.service.message(`${this.pipelineMode.toUpperCase()} configuration saved and file uploaded successfully!`, 'success');
+      
+      console.log('🎉 Configuration saved and uploaded successfully:', {
+        fileName: fileName,
+        organization: orgToUse,
+        mode: this.pipelineMode,
+        cid: this.streamItem.cid
+      });
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      this.service.message('Failed to save configuration. Please try again.', 'error');
+    }
+  }
+  
+  /**
+   * Upload JSON file using the service's createNativeFile method
+   */
+  private async uploadJsonFile(content: string, fileName: string): Promise<any> {
+    if (!this.streamItem) {
+      throw new Error('StreamItem not available for file upload');
+    }
+
+    // Use consistent organization
+    const orgToUse = this.getConsistentOrganization();
+    
+    // Ensure content is valid JSON string for JSON files
+    let processedContent = content;
+    try {
+      // If content is not empty, validate it's proper JSON
+      if (content && content.trim()) {
+        // Try to parse and stringify to ensure valid JSON format
+        const jsonObj = JSON.parse(content);
+        processedContent = JSON.stringify(jsonObj, null, 2);
+      } else {
+        // If empty content, use empty JSON object
+        processedContent = '{}';
+      }
+    } catch (jsonError) {
+      console.warn('Content is not valid JSON, using as-is:', jsonError);
+      // Use content as-is if it's not JSON
+      processedContent = content || '{}';
+    }
+    
+    console.log('📤 Uploading JSON file using service method (with form-data):', {
+      cname: this.streamItem.name,
+      organization: orgToUse,
+      fileName: fileName,
+      filetype: 'json',
+      originalContentLength: content.length,
+      processedContentLength: processedContent.length,
+      contentPreview: processedContent.substring(0, 100) + '...'
+    });
+
+
+      // Get auth token to verify it exists
+      const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
+      console.log('🔑 Auth token present for file upload:', !!authToken);
+
+
+      // Use the corrected service method which now handles form-data properly
+      const response = await this.service.createNativeFile(
+        this.streamItem.name,  // cname
+        orgToUse,             // org
+        fileName,             // file
+        'json',               // filetype
+        processedContent      // script content
+      ).toPromise();
+
+      console.log('✅ JSON file uploaded successfully using service (form-data):', response);
+      return response;
+      
+   
+  }
+  
+  /**
+   * Load streamItem if not available
+   */
+  private async loadStreamItemForSave(): Promise<void> {
+    if (!this.currentCname) {
+      throw new Error('No cname available');
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.service.getStreamingServicesByName(this.currentCname).subscribe({
+        next: (res) => {
+          console.log('Loaded streamItem for save:', res);
+          this.streamItem = res;
+          resolve();
+        },
+        error: (error) => {
+          console.error('Failed to load streamItem for save:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  /**
+   * Update streaming service via API
+   */
+  private async updateStreamingService(payload: any): Promise<any> {
+    const url = `${this.baseUrl}/service/v1/streamingServices/update`;
+    
+    // Get auth token from session/localStorage
+    const authToken = sessionStorage.getItem('access_token') || localStorage.getItem('access_token_lf');
+    
+    const headers = {
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Authorization': authToken ? `Bearer ${authToken}` : '',
+      'Connection': 'keep-alive',
+      'Content-Type': 'application/json',
+      'Origin': window.location.origin,
+      'Project': sessionStorage.getItem('projectId') || '2',
+      'ProjectName': sessionStorage.getItem('organization') || 'leo1311',
+      'Referer': window.location.href,
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-origin',
+      'User-Agent': navigator.userAgent,
+      'X-Requested-With': 'Leap',
+      'roleId': sessionStorage.getItem('roleId') || '1',
+      'roleName': sessionStorage.getItem('roleName') || 'IT Portfolio Manager'
+    };
+
+    console.log('Making PUT request to:', url);
+    console.log('Headers:', headers);
+    console.log('Payload:', payload);
+
+    try {
+      const response = await this.http.put(url, payload, { headers }).toPromise();
+      console.log('Update API response:', response);
+      return response;
+    } catch (error) {
+      console.error('Update API error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get default MCP configuration
+   * ⚠️ ONLY use this for NEW CARD CREATION workflow, not for view details
+   */
+  private getDefaultMcpConfig(): any {
+    return {
+      "name": this.currentCname || "sample-mcp-server",
+      "version": "1.0.0",
+      "description": "MCP Server Configuration",
+      "mcpServers": {
+        [this.currentCname || "server"]: {
+          "command": "python",
+          "args": ["-m", "mcp_server"],
+          "description": `MCP Server for ${this.currentCname}`,
+          "version": "1.0.0",
+          "tools": [],
+          "resources": []
+        }
+      },
+      "metadata": {
+        "createdBy": "AIP MCP Pipeline Generator",
+        "createdAt": new Date().toISOString(),
+        "pipelineName": this.currentCname,
+        "organization": this.organisation
+      }
+    };
+  }
+
+  /**
+   * Initialize default configuration for NEW CARD creation workflow
+   * This method should ONLY be called when creating a brand new card
+   */
+  private initializeDefaultConfigForNewCard(): void {
+    if (!this.currentCname) {
+      return;
+    }
+    
+    const jsonFileName = this.generateConsistentFilename();
+    let defaultConfig: any;
+    
+    if (this.pipelineMode === 'mcp') {
+      defaultConfig = this.getDefaultMcpConfig();
+    } else {
+      defaultConfig = this.getDefaultAgentConfig();
+    }
+    
+    this.useDefaultConfigurationForNewCard(jsonFileName, defaultConfig);
+    
+    console.log('🆕 Initialized default configuration for new card creation');
+  }
+
+  /**
+   * Get default Agent configuration
+   * ⚠️ ONLY use this for NEW CARD CREATION workflow, not for view details
+   */
+  private getDefaultAgentConfig(): any {
+    return {
+      "name": this.currentCname || "sample-agent",
+      "version": "1.0.0",
+      "description": "AI Agent Configuration",
+      "agent": {
+        "name": this.currentCname || "agent",
+        "type": "AIAgent",
+        "interface": "pipeline-agent",
+        "model": {
+          "provider": "openai",
+          "model_name": "gpt-3.5-turbo",
+          "temperature": 0.7,
+          "max_tokens": 1000
+        },
+        "tools": [
+          {
+            "name": "sample_tool",
+            "description": "A sample tool for the agent",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "Input parameter for the tool"
+                }
+              },
+              "required": ["input"]
+            }
+          }
+        ],
+        "memory": {
+          "type": "conversation",
+          "max_history": 10
+        },
+        "system_prompt": `You are ${this.currentCname || 'an AI agent'}, created to assist users with various tasks.`
+      },
+      "metadata": {
+        "createdBy": "AIP Agent Pipeline Generator",
+        "createdAt": new Date().toISOString(),
+        "pipelineName": this.currentCname,
+        "organization": this.organisation
+      }
+    };
   }
 
   // Call the upload API for pipeline cards

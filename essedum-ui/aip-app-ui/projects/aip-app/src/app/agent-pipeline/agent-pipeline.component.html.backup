@@ -33,6 +33,101 @@
               <!-- Tabs (Show directly on view details) -->
               <mat-tab-group #tabGroup disableRipple (selectedTabChange)="onTabChange($event)">
 
+                <!-- Agent/MCP Builder Tab - Split View (Conditionally visible based on created_source) -->
+                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Builder' : 'Agent Builder'" 
+                         class="lfx-u-header-xl"
+                         *ngIf="shouldShowBuilderTab">
+                  <div class="tab-content mb-5">
+                    <div class="script-split-container">
+
+                      <!-- Left Half - Config File -->
+                      <div class="config-panel">
+                        <div class="file-editor">
+                          <div class="editor-header">
+                            <div class="file-info">
+                              <mat-icon class="file-type-icon">{{ pipelineMode === 'mcp' ? 'code' : 'description'
+                                }}</mat-icon>
+                              <span class="file-name" [title]="scriptFileName">{{scriptFileName}}</span>
+                              <span *ngIf="isScriptModified" class="modified-indicator"
+                                title="Configuration has unsaved changes">●</span>
+                            </div>
+                            <div class="editor-actions">
+                              <button mat-icon-button class="action-button save-button"
+                                [class.save-enabled]="isScriptModified" [class.save-disabled]="!isScriptModified"
+                                (click)="saveScriptConfiguration()" [disabled]="!isScriptModified"
+                                matTooltip="Save Configuration" matTooltipPosition="above">
+                                <mat-icon>save</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="code-editor" style="height: 400px; overflow: hidden;">
+                            <div class="code-content" style="height: 100%; overflow-y: auto;">
+                              <div style="height: max-content">
+                                <!-- MCP Mode - JSON Editor -->
+                                <div *ngIf="pipelineMode === 'mcp'">
+                                  <textarea class="json-config-editor" [ngModel]="getDisplayedJsonConfig()"
+                                    (ngModelChange)="onScriptContentChange($event)"
+                                    placeholder="MCP JSON Configuration..."
+                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                </div>
+                                <!-- Agent Mode - JSON Editor (converted from code editor) -->
+                                <div *ngIf="pipelineMode === 'agent'">
+                                  <textarea class="json-config-editor agent-config-editor"
+                                    [ngModel]="getScriptAsString()" (ngModelChange)="onScriptContentChange($event)"
+                                    placeholder="Agent JSON Configuration..."
+                                    style="width: 100%; height: 380px; font-family: 'Courier New', monospace; font-size: 14px; border: none; outline: none; resize: none; padding: 10px; background-color: #1e1e1e; color: #d4d4d4;"></textarea>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Right Half - Generate adk Console -->
+                      <div class="console-panel">
+                        <div class="generate-agent-container">
+                          <div class="generate-header">
+                            <div class="header-content">
+                              <h2>{{ pipelineMode === 'mcp' ? 'MCP Server Configuration' : 'Agent Configuration' }}</h2>
+                              <p>Configure your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} design below</p>
+                            </div>
+                            <div class="header-actions">
+                              <button mat-icon-button class="refresh-button" (click)="refreshFileStructure()"
+                                matTooltip="Refresh files" matTooltipPosition="above">
+                                <mat-icon>refresh</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- GitHub Copilot Instructions - Always visible -->
+                          <div class="prompt-template-container">
+                            <div class="prompt-instructions">
+                              <p><strong>Instructions for {{ pipelineMode === 'mcp' ? 'MCP Server' : 'Agent' }} Code Generation using Github Copilot:</strong></p>
+                              <ol>
+                                <li><strong>Install Visual Studio Code:</strong> Download and install VS Code</li>
+                                <li><strong>Install Essedum Plugin:</strong> Search for and install the "Essedum" extension from the VS Code marketplace</li>
+                                <li><strong>Generate {{ pipelineMode === 'mcp' ? 'MCP Server' : 'Agent' }}:</strong> Copy the prompt below and paste it into the Essedum Plugin's GitHub Copilot interface to generate your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} files</li>
+                              </ol>
+                            </div>
+                            <!-- Show prompt template for both modes -->
+                            <div class="prompt-template-header">
+                              <mat-icon>description</mat-icon>
+                              <span>Copilot Prompt Template</span>
+                              <button mat-icon-button class="copy-prompt-button" (click)="copyPromptTemplate()"
+                                matTooltip="Copy Prompt" matTooltipPosition="above">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
+                            </div>
+                            <div class="prompt-template-content">
+                              <pre class="prompt-text">{{ getPromptTemplate() }}</pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-tab>
+
                 <!-- Essedum Codespace Tab (Always visible) -->
                 <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'" class="lfx-u-header-xl">
                   <div class="tab-content mb-5">
@@ -498,6 +593,33 @@
           OK
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script Unsaved Changes Dialog -->
+<div class="unsaved-changes-overlay" *ngIf="showScriptUnsavedDialog" (click)="cancelScriptUnsavedDialog()">
+  <div class="unsaved-changes-popup" (click)="$event.stopPropagation()">
+    <div class="unsaved-changes-header">
+      <h3>Unsaved Configuration Changes</h3>
+      <button mat-icon-button (click)="cancelScriptUnsavedDialog()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="unsaved-changes-content">
+      <p>You have unsaved changes in your {{pipelineMode === 'mcp' ? 'MCP' : 'Agent'}} configuration.</p>
+      <p>Do you want to save your changes before proceeding?</p>
+    </div>
+
+    <div class="unsaved-changes-footer">
+      <button mat-stroked-button (click)="discardScriptAndProceed()" class="cancel-btn">
+        Discard Changes
+      </button>
+      <button mat-raised-button color="primary" (click)="saveScriptAndProceed()" class="save-btn">
+        <mat-icon>save</mat-icon>
+        Save & Continue
+      </button>
     </div>
   </div>
 </div>

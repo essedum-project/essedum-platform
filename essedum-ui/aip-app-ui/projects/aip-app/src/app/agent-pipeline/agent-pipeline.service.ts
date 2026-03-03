@@ -250,10 +250,8 @@ export class AgentPipelineService {
    * Extract file content from blob/binary data
    */
   private extractFileContentFromBlob(filescript: any, filename: string): string {
-    console.log('=== EXTRACTING CONTENT FOR FILE ===');
     console.log('Filename:', filename);
     console.log('Filescript type:', typeof filescript);
-    console.log('Filescript value:', filescript);
     
     if (!filescript) {
       console.error('No filescript data available for file:', filename);

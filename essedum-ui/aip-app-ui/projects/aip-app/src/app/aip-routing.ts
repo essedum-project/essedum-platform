@@ -1,6 +1,7 @@
 import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
 import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { AipComponent } from './aip.component';
 import { DatasourceComponent } from './datasource/datasource.component';
@@ -31,7 +32,6 @@ import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-nam
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { AgentComponent } from './agent/agent.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
-import { PipelineAgentDetailComponent } from './agent-pipeline/pipeline-agent-detail/pipeline-agent-detail.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { LitellmComponent } from './litellm/litellm.component';
 import { LangfuseComponent } from './langfuse/langfuse.component';
@@ -71,13 +71,6 @@ const routes: Routes = [
         
           { path: 'view/:cname', component: NativeScriptComponent },
     
-        ],
-      },
-      {
-        path: 'pipeline-agent',
-        children: [
-          { path: '', component: PipelineAgentComponent },
-          { path: 'pipeline-detail/:cname', component: PipelineAgentDetailComponent },
         ],
       },
       {
