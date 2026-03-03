@@ -24,6 +24,7 @@ export class PlaygroundTabComponent {
   @Output() runAndDeployClick = new EventEmitter<void>();
   @Output() deleteDeploymentClick = new EventEmitter<void>();
   @Output() openPlaygroundClick = new EventEmitter<void>();
+  @Output() refreshConsoleClick = new EventEmitter<void>();
 
   onRunAndDeploy(): void {
     this.runAndDeployClick.emit();
@@ -35,6 +36,10 @@ export class PlaygroundTabComponent {
 
   onOpenPlayground(): void {
     this.openPlaygroundClick.emit();
+  }
+
+  onRefreshConsole(): void {
+    this.refreshConsoleClick.emit();
   }
 
   getPlaygroundTooltipMessage(): string {
