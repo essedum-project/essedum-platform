@@ -1226,20 +1226,18 @@ public class ICIPMlopsController {
 	 * @param selectClauseParams the select clause params
 	 * @return the searched objects
 	 */
-	@GetMapping(path = "models/fileData")
-	public ResponseEntity<?> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
+	@GetMapping(path = "models/fileData", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public ResponseEntity<byte[]> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
 			@RequestParam(required = true, name = "fileName") String fileName,
 	        @RequestParam(required = true, name = "org") String org)
 			 {
-		ResponseEntity<?> resp;
 		try {
-			return iCIPMlOpsRestAdapterService.getS3FileData(modelName,fileName,org);
-			
+			return iCIPMlOpsRestAdapterService.getS3FileDataAsBytes(modelName,fileName,org);
+
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			logger.error("EXCEPTION:", e.getMessage());
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 	
 	@PostMapping(path = "models/upload")
