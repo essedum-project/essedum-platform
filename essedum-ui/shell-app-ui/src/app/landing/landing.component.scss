@@ -83,12 +83,10 @@ mat-drawer-container {
 }
 
 .myDIV:hover {
-  /* display: block; */
   opacity: 1;
 }
 
 .myDIV {
-  /* display: none; */
   opacity: 0;
 }
 
@@ -105,9 +103,6 @@ mat-drawer-container {
   z-index: 10;
 }
 
-/* .width{
-  margin-right: 1rem;
-} */
 
 .marginTop {
   margin-top: 50px;
@@ -164,7 +159,6 @@ mat-drawer-container {
 }
 
 .a-height {
-  // height: 35px;
   border: none;
   cursor: pointer;
 }
@@ -219,10 +213,6 @@ mat-drawer-container {
   width: 2rem;
 }
 
-// .a-height:not(:first-child) {
-// 	margin-top: 2.5vh;
-// }
-
 .alignprofile {
   text-align: center;
   font-size: small;
@@ -249,7 +239,6 @@ mat-drawer-container {
   }
 
   .userMobile {
-    // padding: 0;
     margin: 0 0.3vw 0 0vw !important;
     padding: unset !important;
   }
@@ -352,7 +341,6 @@ mat-drawer-container {
 
 .userMobile {
   margin-top: 2px !important;
-  // margin: 0;
 }
 
 .notification-header-btn {
@@ -393,9 +381,6 @@ mat-drawer-container {
   }
 
   @media screen and (min-width: 2000px) {
-    // .a-height {
-    // 	height: 50px !important;
-    // }
 
     .sidebar-background {
       height: 25px !important;
@@ -554,7 +539,6 @@ button.active:focus {
   justify-content: center;
   align-items: center;
   margin-left: 0px;
-  /* font-family: 'Myriad Pro'; */
   font-family: var(--font-type) !important;
   color: var(--header-color);
 }
@@ -632,7 +616,6 @@ button.active:focus {
 
 .card-div1-mat2 {
   width: 68%;
-  /* margin: 2% !important; */
   box-shadow: 0 0 0 0 !important;
   border: 1px solid #e2e2e2;
   border-radius: 1vh;
@@ -640,7 +623,6 @@ button.active:focus {
 
 .a {
   content: "<i class=" fa fa-angle-right " ></i>";
-  /* display: flex; */
   margin-right: 37%;
   height: 100%;
 }
@@ -703,8 +685,6 @@ button.active:focus {
   font-family: Arial, sans-serif;
   flex-direction: column;
   width: 100%;
-  // color: #707070;
-  // font-family: arial;
   background: var(--bg-color) !important;
   color: var(--text-color);
   overflow: auto;
@@ -715,9 +695,6 @@ button.active:focus {
   flex-direction: column;
   width: 100%;
   color: #707070;
-  // font-family: arial;
-  /* background: var(--bg-color) !important; */
-  /* color: var(--text-color); */
 }
 
 .gamLab {
@@ -816,7 +793,6 @@ button.active:focus {
 }
 
 .leftpanel-item i {
-  // color: #737373 ;
   color: var(--text-color);
 }
 
@@ -836,13 +812,9 @@ button.active:focus {
   margin-top: 2px !important;
 }
 
-// .leftpanel-item.active div{
-// 	color:var(--base-color) !important;
-// }
 
 .leftpanel-item.active i {
   color: #737373 !important;
-  // color:var(--base-color) !important;
 }
 
 li.leftpanel-item:hover i {
@@ -884,10 +856,6 @@ li.leftpanel-item.disabled {
   margin-top: 10px !important;
 }
 
-// .le-c-nav__nomar{
-// 	font-size: 10px !important;
-// }
-
 .fontcss {
   font-size: 20px !important;
 }
@@ -898,11 +866,7 @@ li.leftpanel-item.disabled {
   font-size: var(--font-size-grid) !important;
   max-width: unset !important;
   line-height: normal;
-  /* border-radius: var(--font-size-grid) !important; */
-  /* padding-top: var(--tooltip-padding) !important;
-    padding-bottom: var(--tooltip-padding) !important; */
   border: var(--tooltip-border) solid black !important;
-  /* height: var(--tooltip-height) !important; */
   align-items: center;
   display: flex;
 }
@@ -967,8 +931,6 @@ li.leftpanel-item.disabled {
 }
 
 .aip-chatbot-shadow {
-  /* UI Properties */
-  // background: #ffffff 0% 0% no-repeat padding-box;
   box-shadow: -5px 0 25px -5px rgba(0, 0, 0, 0.75) !important;
   border: 0.5px solid #0000001f;
   border-radius: 16px;
@@ -990,7 +952,6 @@ li.leftpanel-item.disabled {
 }
 
 .sidebar-chatbot-icons {
-  // font-size: 2.38rem !important;
   font-size: 2rem !important;
   color: #737373;
   margin: 0 1rem;
@@ -1049,7 +1010,6 @@ li.leftpanel-item.disabled {
 
 .sidebar-item-full-text {
   width: 200px;
-  /* or 100% or whatever fits your expanded sidebar */
 }
 
 .list-menu-div {
@@ -1378,7 +1338,7 @@ li.leftpanel-item.disabled {
   min-width: 100px;
   max-width: 160px;
   transition: width 0.2s;
-  margin-left: 130px;
+  margin-left: 124px;
 
   /* Custom scrollbar styling */
   &::-webkit-scrollbar {
@@ -1499,9 +1459,6 @@ li.leftpanel-item.disabled {
     justify-content: center;
   }
 }
-
-//@import "../../../../node_modules/bootstrap-icons/font/bootstrap-icons.min.css";
-//@import "../../../../node_modules/bootstrap-icons/font/bootstrap-icons.scss";
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 @import url("https://cdn.quilljs.com/1.3.7/quill.snow.css");
 @import url("https://cdn.quilljs.com/1.3.7/quill.bubble.css");
@@ -1559,25 +1516,21 @@ html {
   .aip-ivm-scroll::-webkit-scrollbar {
     height: 0.4rem;
     width: 0.4rem;
-    //   background: #000;
   }
 
   .aip-ivm-scroll::-webkit-scrollbar-thumb {
     background: #dadada;
     -webkit-border-radius: 5ex;
-    //   -webkit-box-shadow: 0.4rem 0.2rem 0.4rem #DADADA;
   }
 
   .aip-ivm-intiative-grid::-webkit-scrollbar {
     height: 0rem;
     width: 0rem;
-    // background: #000;
   }
 
   .aip-ivm-intiative-grid::-webkit-scrollbar-thumb {
     background: #777;
     -webkit-border-radius: 0ex;
-    // -webkit-box-shadow: 0rem 1rem 0.2rem rgba(0, 0, 0, 0.75);
   }
 
   .aip-ivm-intiative-grid {
@@ -1628,7 +1581,6 @@ html {
   }
 
   .aip-label-color {
-    // color: #978989 !important;
     color: var(--text-color-secondary) !important;
   }
 
@@ -1643,21 +1595,17 @@ html {
   .aip-scroll-hover::-webkit-scrollbar {
     height: 0.4rem;
     width: 0.4rem;
-    //   background: #000;
   }
 
   .aip-scroll-hover::-webkit-scrollbar-thumb {
     background: #dadada;
     -webkit-border-radius: 5ex;
-    //   -webkit-box-shadow: 0.4rem 0.2rem 0.4rem #DADADA;
   }
 
   // CARD PAGE CSS
   .aip-top {
-    // margin-top: 2rem;
     height: 100%;
     overflow-y: auto;
-    // background-color: #FAFAFA;
     background-color: var(--background-colour) !important;
   }
 
@@ -1677,7 +1625,6 @@ html {
     cursor: pointer;
     border-radius: 0.8rem;
     width: 5rem;
-    // background-color: #fbf7ff;
     background-color: var(--background-colour) !important;
     cursor: pointer;
   }
@@ -1696,7 +1643,6 @@ html {
   }
 
   .aip-select-adapter-dropDown>option {
-    // background-color: white;
     background-color: var(--background-colour) !important;
   }
 
@@ -1945,8 +1891,6 @@ html {
 
   .aip-input_feild {
     align-items: center;
-    /* UI Properties */
-    // color: var(--base-color);
     text-align: left;
     font: normal normal normal 1.6rem/2.4rem Roboto;
     letter-spacing: 0rem;
@@ -1975,16 +1919,11 @@ html {
     color: var(--text-color-secondary);
   }
 
-  // .mdc-tab__text-label {
-  //   justify-content: center;
-  //   width: 18vw;
-  // }
 
   .aip-cardform-container {
     display: grid;
     grid-template-columns: repeat(auto-fit);
     grid-template-rows: repeat(auto-fit);
-    // justify-content: center;
     grid-row-gap: 1rem;
     grid-column-gap: 2rem;
   }
@@ -2020,15 +1959,6 @@ html {
   }
 }
 
-// ::ng-deep .angular-tree-component {
-//   width: 100%;
-//   position: relative;
-//   display: inline-block;
-//   cursor: pointer;
-//   -webkit-touch-callout: none;
-//   -webkit-user-select: none;
-//   user-select: none;
-// }
 
 ::ng-deep .node-content-wrapper {
   display: inline-block;
@@ -2043,7 +1973,6 @@ html {
   white-space: unset;
   overflow-wrap: break-word;
   word-break: break-word;
-  // text-overflow: clip;
   cursor: pointer;
 }
 
@@ -2051,17 +1980,10 @@ html {
   white-space: unset;
   overflow-wrap: break-word;
   word-break: break-word;
-  // text-overflow: clip;
   cursor: pointer;
 }
 
-// ::ng-deep .tree-node-content > span{
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-//   white-space: nowrap;
-//   width: 9rem;
-//   display: block;
-// }
+
 ::ng-deep .node-wrapper {
   display: flex;
   align-items: flex-start;
@@ -2188,9 +2110,6 @@ div {
 
 ::ng-deep {
   @media (min-width: 2500px) {
-    // html {
-    //   font-size: 100%; /* 1rem = 14px */
-    // }
 
     .aip-doc-container {
       grid-template-columns: repeat(4, 5fr);
@@ -2217,7 +2136,6 @@ div {
   height: auto;
   letter-spacing: normal;
   width: max-content;
-  /* padding-left: 20px; */
 }
 
 ::ng-deep {
@@ -2232,11 +2150,6 @@ div {
     color: #0a142f !important;
   }
 
-  // .le-l-level2-middle-col {
-  //   display: table-cell;
-  //   vertical-align: top;
-  //   height: 100%;
-  // }
 
   .lfx-u-mar-l-8 {
     margin-left: 8px !important;
@@ -2871,7 +2784,6 @@ div {
   .lfx-l-level2-middle-ctr {
     display: table;
     width: 100%;
-    //table-layout: fixed;
   }
 
   .lfx-l-level2-middle-col {
