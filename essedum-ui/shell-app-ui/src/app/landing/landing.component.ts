@@ -455,7 +455,32 @@ export class LandingComponent implements OnInit, AfterViewInit {
     );
     this.sidebarMenuPopupWidth = this.showSidebarMenuList ? "130px" : "0px";
     this.sidebarmaxwidth = this.showSidebarMenuList ? "260px" : "7vw";
-    this.getNotificationsPermision();
+    
+    // Call getNotificationsPermision only once per session to prevent duplicate API calls
+    if (!sessionStorage.getItem('notificationsLoaded')) {
+      this.getNotificationsPermision();
+      sessionStorage.setItem('notificationsLoaded', 'true');
+    } else {
+      // Load cached notification settings if available
+      const cachedNotification = sessionStorage.getItem('showNotification');
+      const cachedNotificationRoles = sessionStorage.getItem('show_notification_icon_roles');
+      const cachedChatbotIcon = sessionStorage.getItem('showHeaderChatbotIcon');
+      const cachedSidebarFullText = sessionStorage.getItem('show_sidebar_full_text');
+      
+      if (cachedNotification !== null) {
+        this.showNotification = cachedNotification === 'true';
+      }
+      if (cachedNotificationRoles !== null) {
+        this.show_notification_icon_roles = cachedNotificationRoles === 'true';
+      }
+      if (cachedChatbotIcon !== null) {
+        this.showHeaderChatbotIcon = cachedChatbotIcon === 'true';
+      }
+      if (cachedSidebarFullText !== null) {
+        this.show_sidebar_full_text = cachedSidebarFullText === 'true';
+      }
+    }
+    
     this.Configurableinformationicon();
     this.screenWidth = screen.width;
     this.checkForZoom();
@@ -1037,6 +1062,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   logout() {
+    // Clear API cache when logging out
+    this.apisService.clearCache();
+    sessionStorage.removeItem('notificationsLoaded');
+    sessionStorage.removeItem('showNotification');
+    sessionStorage.removeItem('show_notification_icon_roles');
+    sessionStorage.removeItem('showHeaderChatbotIcon');
+    sessionStorage.removeItem('show_sidebar_full_text');
+    
     let user;
     user = JSON.parse(sessionStorage.getItem("user") || "");
     if (sessionStorage.getItem("telemetry") == "true") {
@@ -1222,6 +1255,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   valuechangeproject(event: any) {
+    // Clear notification cache when project changes
+    sessionStorage.removeItem('notificationsLoaded');
+    sessionStorage.removeItem('showNotification');
+    sessionStorage.removeItem('show_notification_icon_roles');
+    sessionStorage.removeItem('showHeaderChatbotIcon');
+    sessionStorage.removeItem('show_sidebar_full_text');
+    this.apisService.clearCache();
+    
     this.selectedproject = new Object(event);
     let events;
     try {
@@ -3102,6 +3143,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       .getDashConstantUsingKey("showNotification", project)
       .subscribe((res) => {
         this.showNotification = res === "true" ? true : false;
+        sessionStorage.setItem('showNotification', this.showNotification.toString());
       });
 
     this.apisService
@@ -3111,6 +3153,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         if (roleArray.includes(roleId)) {
           this.show_notification_icon_roles = true;
         }
+        sessionStorage.setItem('show_notification_icon_roles', this.show_notification_icon_roles.toString());
       });
 
     this.apisService
@@ -3119,6 +3162,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         if (res == "false") {
           this.showHeaderChatbotIcon = false;
         }
+        sessionStorage.setItem('showHeaderChatbotIcon', this.showHeaderChatbotIcon.toString());
       });
 
     this.apisService
@@ -3129,6 +3173,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         } else {
           this.show_sidebar_full_text = false;
         }
+        sessionStorage.setItem('show_sidebar_full_text', this.show_sidebar_full_text.toString());
       });
   }
   checkRole() {

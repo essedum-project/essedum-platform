@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
+﻿import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
@@ -219,12 +219,20 @@ export class DeploymentFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Log received inputs for debugging
+    
+    // Validate required inputs
+    if (!this.organisation || this.organisation.trim() === '') {
+      console.warn('Organisation is empty or undefined in deployment form!');
+    }
+    
     // Load deployment form data by cname and org if available
     if (this.cname && this.organisation) {
       this.loadDeploymentFormByCnameOrg(this.cname, this.organisation);
     } else if (this.deploymentId) {
       // Fallback to loading by ID if available (edit mode)
       this.loadDeploymentForm(this.deploymentId);
+    } else {
     }
   }
 
@@ -241,14 +249,12 @@ export class DeploymentFormComponent implements OnInit {
           this.populateFormWithData(response);
           this.isDeploymentFinished = true;
           this.disableAllForms();
-          console.log('Deployment form loaded successfully for cname:', cname, 'org:', org);
         }
       },
       (error) => {
         console.error('Error loading deployment form:', error);
         // If record not found, keep forms empty for new creation
         if (error.status === 404) {
-          console.log('No existing deployment form found for cname and org, ready for new creation');
           this.deploymentId = null; // Reset to create mode
         }
       }
@@ -274,7 +280,6 @@ export class DeploymentFormComponent implements OnInit {
         console.error('Error loading deployment form:', error);
         // If record not found, keep forms empty for new creation
         if (error.status === 404) {
-          console.log('No existing deployment form found, ready for new creation');
           this.deploymentId = null; // Reset to create mode
         } else {
           this.service.message('Error loading deployment form', 'error');
@@ -332,7 +337,6 @@ export class DeploymentFormComponent implements OnInit {
       auditPocDetails: data.audit_poc_details || ''
     });
 
-    console.log('Forms populated with data for deployment ID:', this.deploymentId);
   }
 
   /**
@@ -503,7 +507,6 @@ export class DeploymentFormComponent implements OnInit {
 
     const deploymentData = this.buildDeploymentPayload();
 
-    console.log('Deployment configuration finished:', deploymentData);
     
     // Call the save API
     this.service.saveDeploymentForm(deploymentData).subscribe(
@@ -558,6 +561,11 @@ export class DeploymentFormComponent implements OnInit {
    * Build the complete deployment payload from all forms
    */
   private buildDeploymentPayload(): any {
+    // Validate required fields before building payload
+    if (!this.organisation || this.organisation.trim() === '') {
+      console.error('Organisation is empty when building deployment payload!');
+    }
+    
     const payload: any = {
       cname: this.cname || '',
       org: this.organisation || '',
@@ -649,7 +657,6 @@ export class DeploymentFormComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('Branch deployment result:', result);
         // this.service.message('Branch deployment initiated successfully', 'success');
       }
     });
@@ -747,7 +754,6 @@ export class BranchSelectionDialogComponent implements OnInit {
       },
       (error) => {
         this.service.message(this.ERROR_MSG_GITHUB , 'error');
-        console.log(this.ERROR_MSG_GITHUB + this.gitSelectedRepo, error);
         this.isLoadingSourceBranches = false;
         this.isLoadingBranches = false;
       }
@@ -759,6 +765,10 @@ export class BranchSelectionDialogComponent implements OnInit {
    */
   loadSourceBranch(): void {
     if (!this.data.cname || !this.data.organisation) {
+      console.warn('Cannot load source branch: Missing cname or organisation', {
+        cname: this.data.cname,
+        organisation: this.data.organisation
+      });
       return;
     }
 
@@ -790,7 +800,6 @@ export class BranchSelectionDialogComponent implements OnInit {
             sourceBranch: this.gitSelectedBranch
           });
         } else {
-          console.log(this.ERROR_MSG_GITHUB, '  Error loading source branch configuration:', error); 
           this.service.message(this.ERROR_MSG_GITHUB , 'error');
         }
       }
@@ -821,7 +830,6 @@ export class BranchSelectionDialogComponent implements OnInit {
           this.availableReviewers = [];
         }
         
-        console.log('Loaded collaborators:', this.availableReviewers);
         this.filteredReviewers = [...this.availableReviewers]; // Initialize filtered list
         this.isLoadingReviewers = false;
       },
@@ -857,6 +865,12 @@ export class BranchSelectionDialogComponent implements OnInit {
    */
   saveGitConfig(sourceBranch: string, destinationBranch: string): void {
     if (!this.data.cname || !this.gitSelectedRepo || !sourceBranch) {
+      console.error('Missing required data for saving git config:', {
+        cname: this.data.cname,
+        org: this.data.organisation,
+        repo: this.gitSelectedRepo,
+        sourceBranch: sourceBranch
+      });
       this.service.message('Missing required data for saving git config', 'warning');
       this.isDeploying = false;
       this.dialogRef.close({
@@ -930,7 +944,6 @@ export class BranchSelectionDialogComponent implements OnInit {
       // Create pull request
       this.githubService.createPullRequest(pullRequestData).subscribe({
         next: (prResponse) => {
-          console.log('Pull request created successfully:', prResponse);
           const successMsg = prResponse.message || `Pull request created successfully from '${sourceBranch}' to '${destinationBranch}'`;
           this.service.message(successMsg, 'success');
           

@@ -1172,6 +1172,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                     .withS3Client(AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
                             .withClientConfiguration(new ClientConfiguration().withProtocol(Protocol.HTTP))
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                            .withPathStyleAccessEnabled(true)
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
                             .withPathStyleAccessEnabled(true)
@@ -2253,6 +2254,114 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             logger.error(e.getMessage());
         }
         return fileData;
+    }
+
+    /**
+     * Download file as raw bytes from S3 storage.
+     * Returns the file content as-is without any encoding or transformation.
+     *
+     * @param dataset the dataset containing S3 configuration
+     * @param fileName the name of the file to download
+     * @return byte array containing the raw file content
+     */
+    @Override
+    public byte[] getFileDataAsBytes(ICIPDataset dataset, String fileName) {
+        try {
+            JSONObject attributes = new JSONObject(dataset.getAttributes());
+            JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
+
+            // Set the file name if not already in attributes
+            if (!attributes.has(OBJECT_KEY)) {
+                attributes.put(OBJECT_KEY, fileName);
+            }
+
+            String bucketName = attributes.optString(BUCKET_KEY);
+            String uploadFilePath = attributes.optString("path");
+            String objectKey;
+
+            // Construct object key following existing pattern
+            if (uploadFilePath != null && !uploadFilePath.isEmpty()) {
+                objectKey = uploadFilePath + "/" + attributes.optString(OBJECT_KEY);
+            } else {
+                objectKey = attributes.optString(OBJECT_KEY);
+            }
+
+            // Handle ampersand encoding (existing pattern)
+            if (objectKey.contains("amp")) {
+                objectKey = objectKey.replace(AMPERSAND_ENCODED, "&");
+            }
+
+            String accessKey = connectionDetails.optString(ACCESS_KEY);
+            String secretKey = connectionDetails.optString(SECRET_KEY);
+            String endpointUrl = connectionDetails.optString("url");
+            String region = connectionDetails.optString(REGION_KEY, "us-east-1");
+
+            logger.info("Downloading raw bytes from S3: bucket={}, key={}", bucketName, objectKey);
+
+            // Check if using MinIO or AWS S3 based on connection details
+            if (endpointUrl != null && !endpointUrl.isEmpty()) {
+                // MinIO or S3-compatible endpoint
+                return downloadFromMinIO(endpointUrl, accessKey, secretKey, bucketName, objectKey);
+            } else {
+                // AWS S3
+                return downloadFromS3(accessKey, secretKey, region, bucketName, objectKey);
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to download file as bytes: {}", fileName, e);
+            throw new RuntimeException("Failed to download file: " + fileName, e);
+        }
+    }
+
+    /**
+     * Download file bytes from MinIO or S3-compatible endpoint
+     */
+    private byte[] downloadFromMinIO(String endpointUrl, String accessKey, String secretKey,
+                                      String bucketName, String objectKey) throws Exception {
+
+        MinioClient minioClient = MinioClient.builder()
+            .endpoint(endpointUrl)
+            .credentials(accessKey, secretKey)
+            .build();
+
+        try (InputStream inputStream = minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectKey)
+                    .build())) {
+
+            byte[] fileBytes = inputStream.readAllBytes();
+            logger.info("Downloaded {} bytes from MinIO: {}", fileBytes.length, objectKey);
+            return fileBytes;
+        }
+    }
+
+    /**
+     * Download file bytes from AWS S3
+     */
+    private byte[] downloadFromS3(String accessKey, String secretKey, String region,
+                                   String bucketName, String objectKey) throws Exception {
+
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+
+        try (S3Client s3Client = S3Client.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .serviceConfiguration(S3Configuration.builder()
+                    .pathStyleAccessEnabled(true)
+                    .build())
+                .build()) {
+
+            software.amazon.awssdk.services.s3.model.GetObjectRequest getObjectRequest =
+                software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .build();
+
+            byte[] fileBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
+            logger.info("Downloaded {} bytes from S3: {}", fileBytes.length, objectKey);
+            return fileBytes;
+        }
     }
 
 }

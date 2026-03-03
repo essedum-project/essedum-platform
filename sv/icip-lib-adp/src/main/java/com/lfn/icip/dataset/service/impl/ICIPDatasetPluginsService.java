@@ -429,6 +429,12 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
         return results.toList();
      }
 	
+	public byte[] getS3FileDataAsBytes(ICIPDataset dataset, String fileName) {
+		// Return raw file bytes without any encoding
+		IICIPDataSetServiceUtil service = this.getDataSetService(dataset);
+		return service.getFileDataAsBytes(dataset, fileName);
+	}
+
 	public List<Object> getS3FileInfo(ICIPDataset dataset, String fileName) {
 		String[] valuesArray = fileName.split(",");
 		JSONArray results = new JSONArray();

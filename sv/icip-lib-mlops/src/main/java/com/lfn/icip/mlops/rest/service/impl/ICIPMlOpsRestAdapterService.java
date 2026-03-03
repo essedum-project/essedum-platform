@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -337,6 +338,53 @@ public class ICIPMlOpsRestAdapterService {
         } catch (Exception e) {
             logger.error("EXCEPTION:", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<byte[]> getS3FileDataAsBytes(String modelName, String fileName, String org) {
+        try {
+            ICIPDataset datasetForModel = new ICIPDataset();
+            ICIPDatasource datasource = new ICIPDatasource();
+            List<ICIPMLFederatedModel> iCIPMLFederatedModels = fedModelRepo.getModelByModelNameAndOrganisation(modelName, org);
+            ICIPMLFederatedModel iCIPMLFederatedModel = iCIPMLFederatedModels.getFirst();
+            datasource = datasourceService.getDatasource(iCIPMLFederatedModel.getDatasource(), org);
+            datasetForModel.setDatasource(datasource);
+            datasetForModel.setOrganization(org);
+            datasetForModel.setAttributes(iCIPMLFederatedModel.getAttributes());
+
+            // Get raw file bytes directly from S3
+            byte[] fileBytes = pluginService.getS3FileDataAsBytes(datasetForModel, fileName);
+
+            // Set proper headers for binary download
+            HttpHeaders headers = new HttpHeaders();
+
+            // Set Content-Type using MediaType constant - MUST be octet-stream for binary
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentLength(fileBytes.length);
+            headers.set("Accept-Ranges", "bytes");  // Enable range requests for binary files
+
+            // Set Content-Disposition with exact filename (no modification)
+            // Use URL encoding for special characters
+            String urlEncodedFileName = java.net.URLEncoder.encode(fileName, java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
+            headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                String.format("attachment; filename*=UTF-8''%s", urlEncodedFileName));
+
+            // Add cache control to prevent caching issues
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+
+            // Add custom header with original filename for debugging
+            headers.set("X-Original-Filename", fileName);
+
+            logger.info("Returning raw file bytes for: {} (size: {} bytes, Content-Type: {})",
+                fileName, fileBytes.length, MediaType.APPLICATION_OCTET_STREAM);
+
+            return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("EXCEPTION:", e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
