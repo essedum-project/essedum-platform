@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -173,6 +173,7 @@ export class AgentPipelineService {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
     
+    
     return this.http.get<any[]>(url).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('API Error in getFilesList:', error);
@@ -187,6 +188,7 @@ export class AgentPipelineService {
   getAgentFiles(cname: string): Observable<any[]> {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/list/${cname}/${orgName}`;
+    
     
     return this.http.get<any[]>(url).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -204,6 +206,7 @@ export class AgentPipelineService {
     const url = `${this.baseUrl}/folder/upload/${cname}/${orgName}`;
     const params = new HttpParams().set('folderPath', folderPath);
     
+    
     return this.http.post<any>(url, {}, { params }).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('API Error in uploadAgentFolder:', error);
@@ -218,6 +221,7 @@ export class AgentPipelineService {
   downloadFileContent(cname: string, fileId: string): Observable<string> {
     const orgName = this.getOrganization();
     const url = `${this.baseUrl}/folder/download/${cname}/${orgName}/${fileId}`;
+    
     
     return this.http.get(url, { responseType: 'text' }).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -328,6 +332,7 @@ export class AgentPipelineService {
       return [];
     }
     
+    
     apiResponse.forEach((item, index) => {
       
       // The API response uses 'filePath' and 'filename' fields
@@ -336,6 +341,7 @@ export class AgentPipelineService {
         console.warn('File item missing filePath/filename:', item);
         return;
       }
+      
       
       const pathParts = path.split('/').filter(part => part.length > 0);
       let currentNode = root;
@@ -412,6 +418,7 @@ export class AgentPipelineService {
     const orgName = org || this.getOrganization();
     const url = `${this.baseUrl}/folder/download/${cname}/${orgName}`;
     
+    
     return this.http.get(url, {
       responseType: 'blob',
       headers: {
@@ -430,6 +437,7 @@ export class AgentPipelineService {
    */
   deleteFile(id: string | number): Observable<any> {
     const url = `${this.baseUrl}/folder/delete/${id}`;
+    
     
     return this.http.delete<any>(url).pipe(
       map(response => {
@@ -471,6 +479,7 @@ export class AgentPipelineService {
    */
   uploadAgentFilesZip(cname: string, organization: string, zipFile: File): Observable<any> {
     const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null`;
+    
 
     // Create FormData for file upload
     const formData = new FormData();
@@ -511,6 +520,7 @@ export class AgentPipelineService {
    */
   uploadToMinio(cname: string, organization: string): Observable<any> {
     const url = `${this.baseUrl}/folder/push-to-minio/${cname}/${organization}`;
+    
 
     return this.http.post(url, {}, {
       headers: {

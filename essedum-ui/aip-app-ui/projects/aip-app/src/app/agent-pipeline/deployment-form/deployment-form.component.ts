@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
+﻿import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
@@ -336,6 +336,7 @@ export class DeploymentFormComponent implements OnInit {
       infraSupportContacts: data.infra_support_contacts || '',
       auditPocDetails: data.audit_poc_details || ''
     });
+
   }
 
   /**
@@ -505,6 +506,7 @@ export class DeploymentFormComponent implements OnInit {
     }
 
     const deploymentData = this.buildDeploymentPayload();
+
     
     // Call the save API
     this.service.saveDeploymentForm(deploymentData).subscribe(
@@ -769,6 +771,7 @@ export class BranchSelectionDialogComponent implements OnInit {
       });
       return;
     }
+
     this.service.getGitConfig(this.data.cname, this.data.organisation).subscribe(
       (response) => {
         this.gitSelectedRepo=response.repo;
@@ -826,6 +829,7 @@ export class BranchSelectionDialogComponent implements OnInit {
           console.warn('Unexpected collaborators response format:', response);
           this.availableReviewers = [];
         }
+        
         this.filteredReviewers = [...this.availableReviewers]; // Initialize filtered list
         this.isLoadingReviewers = false;
       },

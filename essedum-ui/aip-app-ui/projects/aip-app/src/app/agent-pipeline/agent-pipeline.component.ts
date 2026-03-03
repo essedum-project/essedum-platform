@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component,
   OnInit,
   OnDestroy,
@@ -147,13 +147,35 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
    * Removes '/api' suffix if present to get the base environment URL
    */
   private getEnvironmentUrl(): string {
-    // Remove '/api/aip' or '/api' suffix if present to get the base environment URL
-    if (this.baseUrl.endsWith('/api/aip')) {
-      return this.baseUrl.slice(0, -8); // Remove '/api/aip'
-    } else if (this.baseUrl.endsWith('/api')) {
-      return this.baseUrl.slice(0, -4); // Remove '/api'
+    
+    // Handle empty or undefined baseUrl - use window.location.origin as fallback
+    if (!this.baseUrl || this.baseUrl.trim() === '') {
+      const fallbackUrl = window.location.origin;
+      console.warn('baseUrl is empty, using window.location.origin:', fallbackUrl);
+      return fallbackUrl;
     }
-    return this.baseUrl;
+    
+    // Check if baseUrl is a relative URL (starts with /)
+    let environmentUrl = this.baseUrl;
+    if (this.baseUrl.startsWith('/')) {
+      // Relative URL - prepend window.location.origin
+      environmentUrl = window.location.origin + this.baseUrl;
+    }
+    
+    // Remove '/api/aip' or '/api' suffix if present to get the base environment URL
+    if (environmentUrl.endsWith('/api/aip')) {
+      environmentUrl = environmentUrl.slice(0, -8); // Remove '/api/aip'
+    } else if (environmentUrl.endsWith('/api')) {
+      environmentUrl = environmentUrl.slice(0, -4); // Remove '/api'
+    }
+    
+    // Final check - if empty after processing, use window.location.origin
+    if (!environmentUrl || environmentUrl.trim() === '') {
+      environmentUrl = window.location.origin;
+      console.warn('Environment URL is empty after processing, using window.location.origin:', environmentUrl);
+    }
+    
+    return environmentUrl;
   }
 
 
@@ -215,6 +237,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   
   // WebSocket and Run/Deploy functionality
   private socket: Socket | null = null;
+  private heartbeatInterval: any = null; // Track heartbeat interval for keep-alive
   isRunningAndDeploying = false;
    isDeletingDeployment = false;
   runnerServiceStatus = false; // Track runner_service_status from backend
@@ -234,8 +257,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   isAgentThinking = false;
   playgroundUrl = ''; // Store the playground URL from API
   currentDeploymentName = ''; // Store the deployment name used in WebSocket
-  private deploymentPollingInterval: any = null; // Polling interval for deployment status
-  private readonly POLLING_INTERVAL_MS = 15000; // Poll every 15 seconds
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -611,7 +632,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (resp) => {
-          try {
+          try{
             const textDecoder = new TextDecoder('utf-8');
             this.script = textDecoder.decode(resp).split('\n');
             this.loadScript = true;
@@ -762,8 +783,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
                 } else {
                 }
               }
-            });
-          });
+            });          });
 
           // Auto-select the first Python file with a delay to ensure backend is ready
           if (this.fileStructure.length > 0) {
@@ -1012,6 +1032,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     if (this.isSavingFile) {
       return;
     }
+
     this.showDeleteDialog = true;
   }
 
@@ -1184,6 +1205,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       console.warn('No container name available for refreshing files');
       return;
     }
+    
     this.loadAgentFiles();
   }
   // Track user modifications for neon green highlighting
@@ -1215,6 +1237,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     }
 
     // Don't set isUserModifiedContent to prevent whole textarea styling
+
   }
 
   // Get CSS class for user-modified lines
@@ -1502,16 +1525,19 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.selectedFileContent !== this.originalFileContent;
     const hasChangesFromPrevious = this.selectedFileContent !== previousContent;
 
+
     if (hasChangesFromOriginal) {
       this.isFileModified = true;
       // Don't set isUserModifiedContent to prevent textarea styling
       this.updateDiffTracking(newContent);
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
+
     } else {
       // Reset flags if content matches original
       this.isFileModified = false;
       this.userModifiedLines.clear();
+
     }
   }
 
@@ -1692,6 +1718,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     if (this.selectedFileNode === sourceNode) {
       this.selectedFilePath = newPath;
     }
+
   }
 
   private removeNodeFromStructure(
@@ -1929,6 +1956,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.currentLineOffset = 0;
     this.updateTotalLineCount();
     setTimeout(() => this.initializeVirtualScrolling(), 100);
+
   }
 
   isFileSelected(node: FileNode): boolean {
@@ -2011,6 +2039,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
     try {
       
+
       // Initialize WebSocket connection for deletion
       await this.initializeDeleteWebSocket();
       
@@ -2035,18 +2064,21 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.socket = io(environmentUrl, {
         path: '/apps/builder-service/socket.io',
         transports: ['websocket', 'polling'],
-        timeout: 600000,              // Increased to 10 minutes (600000ms) for long pod creation
+        timeout: 600000,               // 10 minute initial connection timeout
         forceNew: true,
         rejectUnauthorized: false,
         withCredentials: true,
-        reconnection: true,          // Enable auto-reconnection
-        reconnectionAttempts: 10,    // Try reconnecting 10 times
-        reconnectionDelay: 5000,     // Wait 5 seconds between attempts
-        reconnectionDelayMax: 10000, // Max delay of 10 seconds
+        reconnection: true,            // Enable auto-reconnection to recover from timeouts
+        reconnectionAttempts: 50,      // Try many times (50 attempts)
+        reconnectionDelay: 2000,       // Wait 2 seconds between attempts
+        reconnectionDelayMax: 10000    // Max 10 seconds between attempts
       });
+      
       
       // Connection successful
       this.socket.on('connect', () => {
+        
+        // Don't use custom heartbeat - Socket.IO handles ping/pong internally
         
         // Use the same deployment name as used in deployment
         const deploymentName = this.currentDeploymentName || this.pipelineAlias?.toString() || 'DEFAULT-AGENT';
@@ -2055,6 +2087,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           deployment_name: deploymentName,
           namespace: 'aipns'
         };
+        
         this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
         this.socket?.emit('delete_deployment', deletePayload);
       });
@@ -2081,21 +2114,30 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       
       // Connection error
       this.socket.on('connect_error', (error: any) => {
+        console.error('WebSocket connect_error event (deletion):', error);
+        console.error('Error details:', {
+          message: error.message,
+          type: error.type,
+          description: error.description
+        });
         this.addToConsole(`Connection error: ${error.message}`);
-        this.deploymentStatus = 'error';
-        this.deploymentStatusMessage = 'Connection error occurred during deletion';
-        this.isDeletingDeployment = false;
-        this.service.message('Failed to connect for deletion', 'error');
+      });
+      
+      // Connection timeout
+      this.socket.on('connect_timeout', (timeout: any) => {
+        console.error('WebSocket connect_timeout event (deletion):', timeout);
+        this.addToConsole(`Connection timeout after ${timeout}ms`);
+      });
+      
+      // Error event
+      this.socket.on('error', (error: any) => {
+        console.error('WebSocket error event (deletion):', error);
+        this.addToConsole(`Error: ${error}`);
       });
       
       // Disconnection
       this.socket.on('disconnect', (reason: string) => {
         this.addToConsole(`Disconnected: ${reason}`);
-        if (this.isDeletingDeployment) {
-          this.isDeletingDeployment = false;
-          this.deploymentStatus = 'error';
-          this.deploymentStatusMessage = 'Connection lost during deletion';
-        }
       });
       
     } catch (error) {
@@ -2118,6 +2160,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
       this.addToConsole('Updating service configuration...');
       
       // Fetch current streaming services data
@@ -2140,6 +2183,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         // Update via API
         const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
         await this.http.put<any>(updateUrl, putPayload).toPromise();
+        
         this.addToConsole('✓ Service configuration updated successfully');
         
         // Update local status
@@ -2184,9 +2228,6 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.addToConsole('Starting deployment process...');
     this.addToConsole('Step 1: Pushing files to MinIO storage...');
     
-    // Start polling for deployment status in background
-    this.startDeploymentPolling();
-    
     // ALWAYS call pushToMinio first before WebSocket APIs
     this.pushToMinioThenDeploy();
   }
@@ -2204,6 +2245,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     
     // Get organization from localStorage or use default
     const organization = localStorage.getItem('organisation') || 'leo1311';
+    
     
     // Call the MinIO upload API first
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
@@ -2285,20 +2327,27 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 	this.socket = io(environmentUrl, {
 	  path: '/apps/builder-service/socket.io',
 	  transports: ['websocket','polling'],
-	  timeout: 600000,              // Increased to 10 minutes (600000ms) for long pod creation
+	  timeout: 600000,               // 10 minute initial connection timeout
 	  forceNew: true,
 	  rejectUnauthorized: false,
 	  withCredentials: true,
-	  reconnection: true,          // Enable auto-reconnection
-	  reconnectionAttempts: 10,    // Try reconnecting 10 times
-	  reconnectionDelay: 5000,     // Wait 5 seconds between attempts
-	  reconnectionDelayMax: 10000, // Max delay of 10 seconds
-	});    
+	  reconnection: true,            // Enable auto-reconnection to recover from timeouts
+	  reconnectionAttempts: 50,      // Try many times (50 attempts)
+	  reconnectionDelay: 2000,       // Wait 2 seconds between attempts
+	  reconnectionDelayMax: 10000    // Max 10 seconds between attempts
+	});
+	
+	  
         // Connection successful
         this.socket.on('connect', () => {
+          
+          // Don't use custom heartbeat - Socket.IO handles ping/pong internally
+          // this.startHeartbeat(); // REMOVED - causes issues
+          
           // First fetch the streaming service to get the alias for deployment_name
           const organization = this.getOrganization();
           const streamingServiceUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+          
           this.addToConsole(`Fetching deployment configuration...`);
           
           this.http.get<any>(streamingServiceUrl).toPromise().then((streamingResponse) => {
@@ -2322,9 +2371,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
             const targetImageTag = `${pipelineConfig.containerRegistry.registryPrefix}${deploymentAlias}:${pipelineConfig.containerRegistry.imageVersion}`;
             
             // Determine deployment name based on pipeline mode
-            const deploymentName = this.pipelineMode === 'mcp' 
-              ? 'service-qualification-mcp-5g' 
-              : 'service-qualification-agent-5g';
+            // const deploymentName = this.pipelineMode === 'mcp' 
+            //   ? 'service-qualification-mcp-5g' 
+            //   : 'service-qualification-agent-5g';
             
             const payload = {
               minio_endpoint: pipelineConfig.minio.endpoint,
@@ -2337,7 +2386,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               type: apiParams.type,
               interface: apiParams.interface
             };
-            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentName}`);
+           
+            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentAlias}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
           }).catch((error) => {
@@ -2363,6 +2413,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               type: apiParams.type,
               interface: apiParams.interface
             };
+            
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
             this.socket?.emit('start_pipeline', fallbackPayload);
           });
@@ -2402,24 +2453,78 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           this.disconnectWebSocket();
         });
  
+        // Reconnecting event
+        this.socket.on('reconnect_attempt', (attemptNumber: number) => {
+          this.addToConsole(`Reconnecting... Attempt ${attemptNumber}`);
+        });
+        
+        // Successfully reconnected
+        this.socket.on('reconnect', (attemptNumber: number) => {
+          this.addToConsole(`✓ Reconnected successfully`);
+        });
+        
+        // Failed to reconnect after all attempts
+        this.socket.on('reconnect_failed', () => {
+          console.error('Failed to reconnect after all attempts');
+          this.addToConsole('✗ Connection failed after multiple attempts');
+          if (this.isRunningAndDeploying) {
+            this.deploymentStatus = 'error';
+            this.deploymentStatusMessage = 'Connection lost. Playground is disabled.';
+            this.isPlaygroundEnabled = false;
+            this.isRunningAndDeploying = false;
+          }
+        });
+        
+        // Reconnecting event
+        this.socket.on('reconnect_attempt', (attemptNumber: number) => {
+          this.addToConsole(`Reconnecting... Attempt ${attemptNumber}`);
+        });
+        
+        // Successfully reconnected  
+        this.socket.on('reconnect', (attemptNumber: number) => {
+          this.addToConsole(`✓ Reconnected successfully`);
+        });
+        
+        // Failed to reconnect after all attempts
+        this.socket.on('reconnect_failed', () => {
+          console.error('Failed to reconnect after all attempts');
+          this.addToConsole('✗ Connection failed after multiple attempts');
+          if (this.isRunningAndDeploying) {
+            this.deploymentStatus = 'error';
+            this.deploymentStatusMessage = 'Connection lost. Playground is disabled.';
+            this.isPlaygroundEnabled = false;
+            this.isRunningAndDeploying = false;
+          }
+        });
+        
         // Connection error
         this.socket.on('connect_error', (error: any) => {
+          console.error('WebSocket connect_error event:', error);
+          console.error('Error details:', {
+            message: error.message,
+            type: error.type,
+            description: error.description
+          });
           this.addToConsole(`Connection error: ${error.message}`);
-          this.deploymentStatus = 'error';
-          this.deploymentStatusMessage = 'Connection error occurred. Playground is disabled.';
-          this.isPlaygroundEnabled = false;
-          this.isRunningAndDeploying = false;
+        });
+        
+        // Connection timeout
+        this.socket.on('connect_timeout', (timeout: any) => {
+          console.error('WebSocket connect_timeout event:', timeout);
+          this.addToConsole(`Connection timeout after ${timeout}ms`);
+        });
+        
+        // Error event
+        this.socket.on('error', (error: any) => {
+          console.error('WebSocket error event:', error);
+          this.addToConsole(`Error: ${error}`);
         });
 
         // Disconnection
         this.socket.on('disconnect', (reason: string) => {
           this.addToConsole(`Disconnected: ${reason}`);
-          if (this.isRunningAndDeploying) {
-            this.isRunningAndDeploying = false;
-            this.deploymentStatus = 'error';
-            this.deploymentStatusMessage = 'Connection lost during deployment. Playground is disabled.';
-            this.isPlaygroundEnabled = false;
-          }
+          // Don't stop heartbeat as we removed it
+          // Let reconnection handle it automatically
         });
  
     } catch (error) {
@@ -2430,137 +2535,45 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Start heartbeat to keep WebSocket connection alive
+   */
+  private startHeartbeat(): void {
+    // Clear any existing heartbeat
+    this.stopHeartbeat();
+    
+    
+    // Send heartbeat every 20 seconds to keep connection alive
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket && this.socket.connected) {
+        this.socket.emit('ping', { timestamp: Date.now() });
+      } else {
+        console.warn('WebSocket not connected, stopping heartbeat');
+        this.stopHeartbeat();
+      }
+    }, 20000); // Send heartbeat every 20 seconds
+  }
+
+  /**
+   * Stop heartbeat interval
+   */
+  private stopHeartbeat(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  /**
    * Disconnect WebSocket connection
    */
   private disconnectWebSocket(): void {
+    // No heartbeat to stop since we removed it
+    // this.stopHeartbeat(); // REMOVED
+    
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
     }
-    // Stop polling when websocket is disconnected
-    this.stopDeploymentPolling();
-  }
-
-  /**
-   * Start polling deployment status during deployment
-   * This ensures status is tracked even if websocket disconnects
-   */
-  private startDeploymentPolling(): void {
-    // Clear any existing polling interval
-    this.stopDeploymentPolling();
-    
-    this.addToConsole('Started background status polling...');
-    
-    // Poll every 15 seconds to check deployment status
-    this.deploymentPollingInterval = setInterval(() => {
-      if (this.isRunningAndDeploying || this.isDeletingDeployment) {
-        this.checkDeploymentStatusSilently();
-      } else {
-        // Stop polling if deployment completed
-        this.stopDeploymentPolling();
-      }
-    }, this.POLLING_INTERVAL_MS);
-  }
-
-  /**
-   * Stop polling deployment status
-   */
-  private stopDeploymentPolling(): void {
-    if (this.deploymentPollingInterval) {
-      clearInterval(this.deploymentPollingInterval);
-      this.deploymentPollingInterval = null;
-    }
-  }
-
-  /**
-   * Check deployment status silently (for background polling)
-   * Similar to refreshDeploymentStatus but doesn't show messages
-   */
-  private checkDeploymentStatusSilently(): void {
-    if (!this.currentCname) {
-      return;
-    }
-
-    const organization = this.getOrganization();
-    const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-    
-    this.http.get<any>(streamingServicesUrl).subscribe({
-      next: (response) => {
-        if (response && response.json_content) {
-          const jsonContent = JSON.parse(response.json_content);
-          const isRunning = jsonContent.runner_service_status === true;
-          
-          // Only update if status changed
-          if (isRunning && !this.isPlaygroundEnabled) {
-            this.runnerServiceStatus = true;
-            this.isPlaygroundEnabled = true;
-            this.deploymentStatus = 'success';
-            this.deploymentStatusMessage = 'Deployment completed successfully!';
-            this.addToConsole('✓ Deployment detected as running (background check)');
-            this.addToConsole(`✓ Playground URL: ${jsonContent.playgroundurl || 'N/A'}`);
-            this.service.message('Deployment is now running!', 'success');
-            this.isRunningAndDeploying = false;
-            this.stopDeploymentPolling();
-          }
-        }
-      },
-      error: (error) => {
-        // Silent error - don't show to user during background polling
-      }
-    });
-  }
-
-  /**
-   * Refresh deployment status and console output
-   * This allows users to check status even if websocket disconnected early
-   */
-  refreshDeploymentStatus(): void {
-    if (!this.currentCname) {
-      this.service.message('No deployment to check', 'info');
-      return;
-    }
-
-    this.addToConsole('Checking deployment status...');
-    this.isLoadingFiles = true;
-    
-    const organization = this.getOrganization();
-    const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
-    
-    this.http.get<any>(streamingServicesUrl).subscribe({
-      next: (response) => {
-        this.isLoadingFiles = false;
-        
-        if (response && response.json_content) {
-          const jsonContent = JSON.parse(response.json_content);
-          const isRunning = jsonContent.runner_service_status === true;
-          
-          this.runnerServiceStatus = isRunning;
-          this.isPlaygroundEnabled = isRunning;
-          
-          if (isRunning) {
-            this.deploymentStatus = 'success';
-            this.deploymentStatusMessage = 'Deployment is running successfully!';
-            this.addToConsole('✓ Deployment is active and running');
-            this.addToConsole(`✓ Playground URL: ${jsonContent.playgroundurl || 'N/A'}`);
-            this.service.message('Deployment is running successfully!', 'success');
-          } else {
-            this.deploymentStatus = 'idle';
-            this.deploymentStatusMessage = 'No active deployment found';
-            this.addToConsole('ℹ No active deployment detected');
-            this.service.message('No active deployment found. Click "Run & Deploy" to start.', 'info');
-          }
-        } else {
-          this.addToConsole('⚠ Could not retrieve deployment status');
-          this.service.message('Could not retrieve deployment status', 'warning');
-        }
-      },
-      error: (error) => {
-        this.isLoadingFiles = false;
-        console.error('Error checking deployment status:', error);
-        this.addToConsole(`✗ Error checking deployment status: ${error.message || 'Unknown error'}`);
-        this.service.message('Failed to check deployment status', 'error');
-      }
-    });
   }
 
   /**
@@ -2575,6 +2588,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
       this.addToConsole('Updating streaming services with playground URL...');
       
       // Step 1: GET the current streaming services data
@@ -2595,6 +2609,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           ...getResponse,
           json_content: JSON.stringify(jsonContent)
         };
+        
         
          // Step 5: PUT the updated data back using the update endpoint
         const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
@@ -2643,6 +2658,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     
     // Get organization from localStorage or use default
     const organization = localStorage.getItem('organisation') || 'leo1311';
+    
     
     // Call the API - Handle parsing errors and different response types properly
     this.agentPipelineService.uploadToMinio(this.currentCname, organization).subscribe({
@@ -2727,6 +2743,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.isUploadingFiles = true;
     const organization = this.getOrganization();
 
+
     // Call the upload API - the service should handle MCP vs Agent differentiation
     this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile).subscribe({
       next: (response) => {
@@ -2809,7 +2826,9 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     try {
       const organization = this.getOrganization();
       const streamingServicesUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
       const response = await this.http.get<any>(streamingServicesUrl).toPromise();
+      
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
@@ -2943,6 +2962,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       
       const organization = this.getOrganization();
       const apiUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
       
       const response = await this.http.get<any>(apiUrl).toPromise();
       
@@ -3117,6 +3137,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       timestamp: new Date().toISOString(),
     };
 
+
     // Simulate API call
     setTimeout(() => {
       this.isPushing = false;
@@ -3176,6 +3197,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   // Check for existing files and load appropriate state
   private async checkForExistingFilesAndLoadState(cname: string): Promise<void> {
+
     // Reset to initial state first
     this.resetToInitialStateForNewAgent();
    // Fetch runner_service_status FIRST and WAIT for it
@@ -3231,6 +3253,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     
     // Keep console empty - only WebSocket data from Run and Deploy should appear
     this.consoleOutput = [];
+
   }
 
   // Show only script tab when no files exist
@@ -3247,6 +3270,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.scriptFileName = '';
       this.loadScript = true;
     }
+
   }
 
   // Reset to initial state (no saved data) - used as starting point
@@ -3267,6 +3291,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.scriptFileName = '';
       this.loadScript = true;
     }
+    
   }
 
   // Clear file selection
@@ -3336,12 +3361,14 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           }
         }
         
+        
         if (hasData && data) {
           // Set flag to TRUE - button MUST show
           this.hasDeploymentFormData = true;
           
           // Try to extract deployment environment (optional)
           this.deploymentEnvironment = data.deployment_environment || '';
+          
         } else {
           this.hasDeploymentFormData = false;
           this.deploymentEnvironment = '';
@@ -3369,6 +3396,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.showScriptTabOnly();
       return;
     }
+
     this.isLoadingFiles = true;
     
     // Reset state first
@@ -3416,6 +3444,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.showScriptTabOnly();
       return;
     }
+
     this.isLoadingFiles = true;
     
     // Reset state first

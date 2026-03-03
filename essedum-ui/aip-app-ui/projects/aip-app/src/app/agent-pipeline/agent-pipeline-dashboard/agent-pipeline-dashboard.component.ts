@@ -1,4 +1,4 @@
-import {
+﻿import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -194,6 +194,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     // Ensure indexes are within valid bounds
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
+
   }
 
   private loadAuthentications(): void {
@@ -564,6 +565,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
+      
       
       // Reset pagination when switching modes
       this.pageNumber = 1;
