@@ -17,8 +17,6 @@ package com.lfn.icip.icipwebeditor.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -26,23 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
-import com.lfn.icip.icipwebeditor.model.ICIPApps;
-import com.lfn.icip.icipwebeditor.model.ICIPImageSaving;
 import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
 import com.lfn.icip.icipwebeditor.model.ICIPPluginDetails;
-import com.lfn.icip.icipwebeditor.model.ICIPPluginScript;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginDetailsRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPPluginScriptRepository;

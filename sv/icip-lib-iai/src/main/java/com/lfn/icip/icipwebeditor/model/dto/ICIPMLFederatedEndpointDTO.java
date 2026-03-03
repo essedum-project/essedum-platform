@@ -2,16 +2,10 @@ package com.lfn.icip.icipwebeditor.model.dto;
 
 import java.sql.Timestamp;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lfn.icip.icipwebeditor.model.FedEndpointID;
 
 import groovy.transform.EqualsAndHashCode;
 import lombok.AllArgsConstructor;

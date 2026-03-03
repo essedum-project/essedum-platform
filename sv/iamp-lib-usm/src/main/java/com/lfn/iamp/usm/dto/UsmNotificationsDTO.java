@@ -18,9 +18,7 @@ package com.lfn.iamp.usm.dto;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
-import com.lfn.iamp.usm.domain.Role;
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

@@ -20,7 +20,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
 import com.lfn.icip.icipwebeditor.model.ICIPPluginScript;
 
 // TODO: Auto-generated Javadoc

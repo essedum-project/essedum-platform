@@ -17,8 +17,6 @@ package com.lfn.iamp.usm.domain;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import lombok.EqualsAndHashCode;
 
 import jakarta.persistence.Column;

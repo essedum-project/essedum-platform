@@ -1,9 +1,7 @@
 package com.lfn.iamp.usm.domain;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,10 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lfn.ai.comm.lib.util.listener.AuditListener;
 import com.lfn.iamp.usm.domain.Project;
-import com.lfn.iamp.usm.domain.Project2;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

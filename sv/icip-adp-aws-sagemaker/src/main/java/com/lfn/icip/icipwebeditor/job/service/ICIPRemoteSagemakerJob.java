@@ -1,14 +1,10 @@
 package com.lfn.icip.icipwebeditor.job.service;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,7 +63,6 @@ import com.amazonaws.http.conn.ssl.SdkTLSSocketFactory;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -104,7 +99,6 @@ import com.lfn.icip.icipwebeditor.job.listener.ICIPJobSchedulerListener;
 import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs.MetaData;
 import com.lfn.icip.icipwebeditor.job.model.SagemakerJobMetaData;
 import com.lfn.icip.icipwebeditor.job.model.SagemakerPipelineConfig;
-import com.lfn.icip.icipwebeditor.job.model.SagemakerService;
 import com.lfn.icip.icipwebeditor.job.model.TriggerValues;
 import com.lfn.icip.icipwebeditor.job.model.dto.JobObjectDTO;
 import com.lfn.icip.icipwebeditor.job.model.dto.JobObjectDTO.Jobs;
@@ -114,8 +108,6 @@ import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPAgentJobsService;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPJobsService;
 import com.lfn.icip.icipwebeditor.model.ICIPAgentJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPJobs;
-import com.lfn.icip.icipwebeditor.model.ICIPPipelinePID;
-import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 
 import com.lfn.icip.icipwebeditor.service.aspect.IAIResolverAspect;
@@ -126,19 +118,7 @@ import com.lfn.icip.icipwebeditor.service.impl.ICIPPipelineService;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sagemaker.SageMakerClient;
-import software.amazon.awssdk.services.sagemaker.model.AlgorithmSpecification;
-import software.amazon.awssdk.services.sagemaker.model.CreateTrainingJobRequest;
-import software.amazon.awssdk.services.sagemaker.model.ListModelsRequest;
-import software.amazon.awssdk.services.sagemaker.model.ListModelsResponse;
-import software.amazon.awssdk.services.sagemaker.model.ModelSummary;
-import software.amazon.awssdk.services.sagemaker.model.ResourceConfig;
-import software.amazon.awssdk.services.sagemaker.model.S3DataSource;
-import software.amazon.awssdk.services.sagemaker.model.SageMakerException;
 import software.amazon.awssdk.utils.ImmutableMap;
-import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.cloudwatchlogs.model.CreateLogGroupRequest;
-import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
-import software.amazon.awssdk.services.cloudwatchlogs.model.OutputLogEvent;
 import software.amazon.awssdk.services.sagemaker.model.*;
 
 import java.util.ArrayList;
@@ -147,10 +127,7 @@ import java.util.Collections;
 import software.amazon.awssdk.auth.credentials.*;
 
 import lombok.extern.log4j.Log4j2;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @Log4j2

@@ -42,15 +42,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
-import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.adapter.service.MlAdaptersService;
 import com.lfn.icip.adapter.service.impl.ICIPRestAdapterService;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;

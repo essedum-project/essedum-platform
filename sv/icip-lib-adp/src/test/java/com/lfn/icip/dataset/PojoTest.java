@@ -38,10 +38,7 @@ import com.openpojo.reflection.impl.PojoClassFactory;
 import com.openpojo.reflection.impl.PojoFieldFactory;
 import com.openpojo.reflection.impl.PojoMethodFactory;
 import com.openpojo.validation.Validator;
-import com.openpojo.validation.ValidatorBuilder;
 import com.openpojo.validation.affirm.Affirm;
-import com.openpojo.validation.test.impl.GetterTester;
-import com.openpojo.validation.test.impl.SetterTester;
 import com.openpojo.validation.utils.SameInstanceIdentityHandlerStub;
 import com.openpojo.validation.utils.ValidationHelper;
 

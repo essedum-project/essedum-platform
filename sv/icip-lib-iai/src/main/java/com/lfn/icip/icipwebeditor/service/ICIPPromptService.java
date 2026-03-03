@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import org.slf4j.Marker;
 import org.springframework.data.domain.Pageable;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.icip.icipwebeditor.model.ICIPPrompts;
 

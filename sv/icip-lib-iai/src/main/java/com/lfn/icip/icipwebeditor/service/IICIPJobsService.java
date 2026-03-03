@@ -18,8 +18,6 @@ package com.lfn.icip.icipwebeditor.service;
 import java.io.IOException;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.ICIPJobs;
@@ -27,7 +25,6 @@ import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
 import com.lfn.icip.icipwebeditor.model.dto.IHiddenJobs;
 import com.lfn.icip.icipwebeditor.model.dto.IJobLog;
 
-import okhttp3.Response;
 
 // TODO: Auto-generated Javadoc
 // 

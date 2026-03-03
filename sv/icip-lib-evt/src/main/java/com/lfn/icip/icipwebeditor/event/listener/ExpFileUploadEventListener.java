@@ -38,7 +38,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.lfn.icip.icipwebeditor.event.model.ExpFileUploadEvent;
 
-import lombok.Cleanup;
 import lombok.extern.log4j.Log4j2;
 
 // TODO: Auto-generated Javadoc

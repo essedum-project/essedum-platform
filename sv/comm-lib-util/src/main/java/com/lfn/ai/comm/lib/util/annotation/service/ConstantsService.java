@@ -25,7 +25,6 @@ import org.springframework.data.domain.Pageable;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.DashConstant;
-import com.lfn.iamp.usm.domain.DashConstant2;
 
 /**
  * Service Interface for managing DashConstant.

@@ -17,7 +17,6 @@ import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Mono;
 
 /**
  * Global exception handler for Search controllers.

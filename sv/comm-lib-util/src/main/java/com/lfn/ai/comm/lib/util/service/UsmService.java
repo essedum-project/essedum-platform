@@ -16,15 +16,8 @@
 package com.lfn.ai.comm.lib.util.service;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
-import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.domain.Users;
 

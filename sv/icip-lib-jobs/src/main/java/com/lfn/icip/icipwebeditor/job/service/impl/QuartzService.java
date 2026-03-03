@@ -5,10 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +22,6 @@ import org.quartz.JobKey;
 import org.quartz.ScheduleBuilder;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -43,7 +39,6 @@ import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
-import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.icip.icipwebeditor.fileserver.service.impl.FileServerService;
 import com.lfn.icip.icipwebeditor.job.constants.JobConstants;
 import com.lfn.icip.icipwebeditor.job.enums.JobType;
@@ -54,7 +49,6 @@ import com.lfn.icip.icipwebeditor.job.quartz.model.QrtzTriggers;
 import com.lfn.icip.icipwebeditor.job.quartz.repository.QrtzTriggersRepository;
 import com.lfn.icip.icipwebeditor.job.util.TimeUtils;
 
-import ch.qos.logback.core.util.TimeUtil;
 import lombok.extern.log4j.Log4j2;
 
 // TODO: Auto-generated Javadoc

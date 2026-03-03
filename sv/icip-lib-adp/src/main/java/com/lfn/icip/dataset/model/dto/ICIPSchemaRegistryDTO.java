@@ -22,7 +22,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import com.lfn.ai.comm.lib.util.domain.BaseDomain;
-import com.lfn.icip.dataset.model.ICIPDatasource;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

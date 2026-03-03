@@ -54,7 +54,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 
-import com.amazonaws.SdkClientException;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import jakarta.persistence.EntityNotFoundException;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
@@ -60,18 +59,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.client.RestTemplate;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 //import com.lfn.iamp.ied.service.CopyBlueprintService;
 //import com.lfn.iamp.ied.web.rest.CopyBlueprintResource;
 //import com.lfn.iamp.usm.domain.Project;
 //import com.lfn.iamp.usm.service.ProjectService;
-import com.lfn.icip.dataset.service.impl.ICIPAdpService;
-import com.lfn.icip.icipwebeditor.event.model.InternalEvent;
 import com.lfn.icip.icipwebeditor.event.publisher.InternalEventPublisher;
 import com.lfn.icip.icipwebeditor.job.enums.JobMetadata;
 import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
@@ -272,9 +267,9 @@ public class ICIPCopyPipelinesJob implements Job {
 	                ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
 
 	                if (response.getStatusCode().is2xxSuccessful()) {
-	                    System.out.println("Copy Dashboards API called successfully");
+	                    logger.info("Copy Dashboards API called successfully");
 	                } else {
-	                    System.out.println("Copy Dashboards API failed with status code: " + response.getStatusCode());
+	                    logger.error("Copy Dashboards API failed with status code: {}", response.getStatusCode());
 	                }
 
 			

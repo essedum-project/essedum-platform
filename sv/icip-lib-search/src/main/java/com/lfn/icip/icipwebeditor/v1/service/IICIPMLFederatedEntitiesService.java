@@ -2,7 +2,6 @@ package com.lfn.icip.icipwebeditor.v1.service;
 
 import java.util.List;
 
-import org.json.JSONObject;
 
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEntities;
 import com.lfn.icip.icipwebeditor.v1.dto.BaseEntity;

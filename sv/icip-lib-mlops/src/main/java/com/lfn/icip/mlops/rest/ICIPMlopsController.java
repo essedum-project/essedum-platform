@@ -109,7 +109,6 @@ import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.lfn.icip.icipwebeditor.service.ICIPImageSavingService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentJobsService;
-import com.lfn.icip.icipwebeditor.service.IICIPAgentDirectoryService;
 import com.lfn.icip.icipwebeditor.service.IICIPAgentService;
 import com.lfn.icip.icipwebeditor.service.IICIPAppService;
 import com.lfn.icip.icipwebeditor.service.IICIPEventJobMappingService;

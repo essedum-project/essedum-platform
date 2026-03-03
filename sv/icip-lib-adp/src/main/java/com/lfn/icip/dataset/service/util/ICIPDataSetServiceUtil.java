@@ -18,7 +18,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.json.JSONArray;
 import org.slf4j.Marker;
 
-import com.google.gson.JsonObject;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;

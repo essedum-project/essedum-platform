@@ -16,7 +16,6 @@
 package com.lfn.icip.icipwebeditor.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
 

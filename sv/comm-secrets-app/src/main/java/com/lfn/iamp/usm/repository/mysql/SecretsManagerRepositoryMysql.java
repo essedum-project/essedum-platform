@@ -1,6 +1,5 @@
 package com.lfn.iamp.usm.repository.mysql;
 
-import java.util.Optional;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;

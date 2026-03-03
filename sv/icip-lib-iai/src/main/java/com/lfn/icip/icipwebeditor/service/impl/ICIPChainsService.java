@@ -39,7 +39,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.icipwebeditor.job.model.ICIPChains;
-import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
 import com.lfn.icip.icipwebeditor.repository.ICIPChainsRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPChainsService;
 

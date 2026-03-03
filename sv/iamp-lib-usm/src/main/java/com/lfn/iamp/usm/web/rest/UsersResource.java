@@ -27,7 +27,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;

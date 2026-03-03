@@ -1089,6 +1089,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withCredentials(new AWSStaticCredentialsProvider(credentials))
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);
@@ -1174,6 +1175,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                             .withPathStyleAccessEnabled(true)
                             .withEndpointConfiguration(
                                     new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                            .withPathStyleAccessEnabled(true)
                             .build())
                     .build();
             connectMinio(dataset);

@@ -2,11 +2,9 @@ package com.lfn.icip.icipmodelserver.jobs;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.json.JSONObject;
@@ -35,9 +33,7 @@ import com.lfn.icip.icipwebeditor.job.service.util.ICIPInitializeAnnotationServi
 import com.lfn.icip.icipwebeditor.job.util.InternalJob;
 import com.lfn.icip.icipwebeditor.jobmodel.service.ICIPInternalJobsService;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
-import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 
 import ch.qos.logback.classic.LoggerContext;
 
