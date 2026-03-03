@@ -167,36 +167,6 @@
       font-size: 14px;
       font-weight: 500;
       color: #e0e0e0;
-      flex: 1; // Push the refresh button to the right
-    }
-    
-    .refresh-console-btn {
-      color: #4caf50;
-      transition: all 0.3s ease;
-      
-      mat-icon {
-        color: #4caf50;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-      }
-      
-      &:hover:not(:disabled) {
-        background-color: #3a3a3a;
-        
-        mat-icon {
-          color: #66bb6a;
-        }
-      }
-      
-      &:disabled {
-        color: #5e5e5e;
-        cursor: not-allowed;
-        
-        mat-icon {
-          color: #5e5e5e;
-        }
-      }
     }
   }
   
