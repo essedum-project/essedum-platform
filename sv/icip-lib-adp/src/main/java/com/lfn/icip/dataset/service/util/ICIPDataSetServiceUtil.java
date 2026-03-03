@@ -100,11 +100,14 @@ public abstract class ICIPDataSetServiceUtil implements IICIPDataSetServiceUtil{
 	}
 
 	public JSONArray getFileData(ICIPDataset dataset, String fileName) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-    
-	
+
+	public byte[] getFileDataAsBytes(ICIPDataset dataset, String fileName) {
+		// Default implementation throws exception - must be overridden by subclasses
+		throw new UnsupportedOperationException("getFileDataAsBytes not implemented for this dataset type");
+	}
+
 	public void deleteFiledata(ICIPDataset dataset, String fileName) {
 		
 	}
