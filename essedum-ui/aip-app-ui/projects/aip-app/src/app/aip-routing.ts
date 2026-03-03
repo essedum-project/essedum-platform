@@ -1,8 +1,6 @@
 import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
-import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
-import { PipelineAgentComponent } from './agent-pipeline/pipeline-agent/pipeline-agent.component';
 import { AipComponent } from './aip.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';

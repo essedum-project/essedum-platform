@@ -24,7 +24,7 @@ import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-cr
 import {
   DynamicParamsGrid,
   DynamicSecretsGrid,
-} from '../pipeline.description/pipeline.description.component';
+} from '../native-script/pipeline.models';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
