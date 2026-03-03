@@ -756,11 +756,13 @@ public class ICIPMlopsController {
     @PostMapping("/models/register")
     public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
                                                  @RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
-        if (fedModeldto.getId() != null) {
+        // FIXED: Corrected logic - Id == null means NEW model (CREATE), Id != null means existing model (UPDATE)
+        if (fedModeldto.getId() == null) {
+            // New model - set created fields
             fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
             fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
-
         } else {
+            // Existing model - set modified fields
             fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
             fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
         }
