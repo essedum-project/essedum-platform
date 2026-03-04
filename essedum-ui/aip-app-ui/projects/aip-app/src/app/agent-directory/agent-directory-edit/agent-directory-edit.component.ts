@@ -14,14 +14,13 @@ export class AgentDirectoryEditComponent implements OnInit {
   addView: boolean = false;
   editView: boolean = false;
   agentName: string = '';
-  lang: string = 'json'; // Set language for code editor
-  script: any[] = []; // Script array for code editor
+  lang: string = 'json'; 
+  script: any[] = []; 
   pipelineMode: 'agent' | 'mcp' = 'agent';
   agentMcpPipelines = [];
   assignedAgentMcpPipeline: string = '';
   options = [];
   organization: string = '';
-  // Single object to hold all agent data
   agentData: any = {
     name: '',
     alias: '',
@@ -106,12 +105,10 @@ export class AgentDirectoryEditComponent implements OnInit {
     { value: 'ECDSA', label: 'ECDSA' },
   ];
 
-  // Active section for navigation
   activeSection = 'basic';
 
   isBackHovered: boolean = false;
 
-  // Dynamic table headers (include width and put Actions first for consistent layout)
   locatorsHeaders = [
     { key: 'actions', label: 'Action', width: '10%' },
     { key: 'type', label: 'Type', width: '30%' },
@@ -145,7 +142,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     { key: 'actions', label: 'Actions' },
   ];
 
-  // Section titles
   sectionTitles = {
     basic: 'Basic Information',
     cid: 'CID',
@@ -164,7 +160,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     prompts: 'Prompts'
   };
 
-  // Section collapse states
   sectionStates: { [key: string]: boolean } = {
     'basic': true,
     'cid': true,
@@ -183,7 +178,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     'prompts': true
   };
 
-  // Section hover states for title animation
   sectionHoverStates: { [key: string]: boolean } = {
     'basic': false,
     'cid': false,
@@ -213,7 +207,6 @@ export class AgentDirectoryEditComponent implements OnInit {
   ngOnInit(): void {
     this.organization = sessionStorage.getItem('organization');
     this.loadAgentTypes();
-    // Check if we're in edit mode or create mode
     this.route.params.subscribe((params) => {
       if (params['name']) {
         this.editView = true;
@@ -229,14 +222,12 @@ export class AgentDirectoryEditComponent implements OnInit {
   }
 
   loadAgentTypes() {
-    // Default agent types - can be extended based on API
     this.options = [
       { viewValue: 'Agent', value: 'AIAgent' },
       { viewValue: 'MCP Server', value: 'mcpServer' },
     ];
   }
 
-  // Get agent data from service
   getAgentData(name: string): void {
     const org = sessionStorage.getItem('organization');
 
@@ -259,7 +250,6 @@ export class AgentDirectoryEditComponent implements OnInit {
   }
 
   loadAgentData(apiResponse: any): void {
-    // Parse jsonModel if it's a string, otherwise use as object
     let jsonModelObject = apiResponse.extras_json;
     if (typeof jsonModelObject === 'string') {
       try {
@@ -270,7 +260,6 @@ export class AgentDirectoryEditComponent implements OnInit {
       }
     }
 
-    // Load all data into the agentData object - preserve id fields for updates
     this.agentData = {
       name: apiResponse.name,
       alias: apiResponse.alias,
@@ -288,7 +277,6 @@ export class AgentDirectoryEditComponent implements OnInit {
         apiResponse.extras_json ||
         (apiResponse.extras ? JSON.stringify(apiResponse.extras) : '{}'),
       pipeline_id: apiResponse.pipeline_id || null,
-      // Preserve id fields for all arrays
       modules: (apiResponse.modules || []).map((m) => ({ ...m })),
       skills: (apiResponse.skills || []).map((s) => ({ ...s })),
       locators: (apiResponse.locators || []).map((l) => ({ ...l })),
@@ -310,14 +298,12 @@ export class AgentDirectoryEditComponent implements OnInit {
       jsonModelString: JSON.stringify(jsonModelObject, null, 2),
     };
 
-    // Convert jsonModelString to script array for code editor
     this.script = [this.agentData.jsonModelString];
     this.getAgentPipelineBasedOnType();
     this.getAllListOfAgentMcpPipeline();
   }
 
   initializeNewAgent(): void {
-    // Initialize with empty/default values for new agent
     this.agentData.name = '';
     this.agentData.alias = '';
     this.agentData.version = '1.0.0';
@@ -344,12 +330,10 @@ export class AgentDirectoryEditComponent implements OnInit {
       2
     );
 
-    // Convert jsonModelString to script array for code editor
     this.script = [this.agentData.jsonModelString];
   }
 
   generateCID(): string {
-    // Generate a random CID-like string
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let result = 'b';
     for (let i = 0; i < 61; i++) {
@@ -358,10 +342,8 @@ export class AgentDirectoryEditComponent implements OnInit {
     return result;
   }
 
-  // Module operations
   addModule(): void {
     if (this.newModuleName.trim()) {
-      // Don't include id for new items - backend will assign
       this.agentData.modules.push({ name: this.newModuleName.trim() });
       this.newModuleName = '';
     }
@@ -371,10 +353,8 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.modules.splice(index, 1);
   }
 
-  // Skill operations
   addSkill(): void {
     if (this.newSkillName.trim()) {
-      // Don't include id for new items
       this.agentData.skills.push({ name: this.newSkillName.trim() });
       this.newSkillName = '';
     }
@@ -384,7 +364,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.skills.splice(index, 1);
   }
 
-  // Locator operations
   addLocator(): void {
     this.agentData.locators.push({
       locator_type: '',
@@ -396,7 +375,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.locators.splice(index, 1);
   }
 
-  // Tool operations
   addTool(): void {
     this.agentData.tools.push({
       name: '',
@@ -421,7 +399,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.tools[toolIndex].parameters.splice(paramIndex, 1);
   }
 
-  // Resource operations
   addResource(): void {
     this.agentData.resources.push({
       name: '',
@@ -434,7 +411,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.resources.splice(index, 1);
   }
 
-  // Prompt operations
   addPrompt(): void {
     this.agentData.prompts.push({
       name: '',
@@ -446,10 +422,8 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.prompts.splice(index, 1);
   }
 
-  // Domain operations
   addDomain(): void {
     if (this.newDomainName.trim()) {
-      // Don't include id for new items
       this.agentData.domains.push({
         name: this.newDomainName.trim(),
         description: this.newDomainDescription.trim(),
@@ -463,7 +437,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.domains.splice(index, 1);
   }
 
-  // Sync operations
   addSync(): void {
     this.agentData.syncs.push({
       target: '',
@@ -476,7 +449,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.syncs.splice(index, 1);
   }
 
-  // Publication operations
   addPublication(): void {
     this.agentData.publications.push({
       channel: '',
@@ -489,7 +461,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.publications.splice(index, 1);
   }
 
-  // Extension operations
   addExtension(): void {
     this.agentData.extensions.push({
       key: '',
@@ -502,7 +473,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.extensions.splice(index, 1);
   }
 
-  // Selector operations
   addSelector(): void {
     if (this.newSelectorKey.trim() && this.newSelectorValue.trim()) {
       this.agentData.selectors.push({
@@ -518,9 +488,7 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.selectors.splice(index, 1);
   }
 
-  // Signature operations
   addSignature(): void {
-    // Always add an empty signature row to allow immediate inline editing
     this.agentData.signatures.push({
       algorithm: '',
       value: '',
@@ -532,7 +500,6 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.agentData.signatures.splice(index, 1);
   }
 
-  // Navigation
   scrollToSection(sectionId: string): void {
     this.activeSection = sectionId;
     const element = document.getElementById(sectionId);
@@ -545,9 +512,7 @@ export class AgentDirectoryEditComponent implements OnInit {
     this.sectionStates[sectionId] = !this.sectionStates[sectionId];
   }
 
-  // Actions
   updateAgent(): void {
-    // Validate required fields
     if (
       !this.agentData.alias ||    
       !this.agentData.type 
@@ -557,7 +522,6 @@ export class AgentDirectoryEditComponent implements OnInit {
       return;
     }
 
-    // Parse JSON model string to object
     let jsonModelObject = {};
     try {
       jsonModelObject = JSON.parse(this.agentData.jsonModelString);
@@ -566,7 +530,6 @@ export class AgentDirectoryEditComponent implements OnInit {
       jsonModelObject = {};
     }
 
-    // Prepare the complete agent data payload with snake_case fields
     const agentData = {
       name: this.agentData.name,
       alias: this.agentData.alias,
@@ -592,10 +555,9 @@ export class AgentDirectoryEditComponent implements OnInit {
       extras_json: this.agentData.jsonModelString || JSON.stringify({}),
       pipeline_id: this.agentData.pipeline_id || null,
 
-      // OASF Collections - preserve id fields for existing items
       modules: (this.agentData.modules || []).map((m) => {
         const module: any = { name: m.name };
-        if (m.id) module.id = m.id; // Preserve id if exists
+        if (m.id) module.id = m.id; 
         return module;
       }),
       skills: (this.agentData.skills || []).map((s) => {
@@ -674,11 +636,11 @@ export class AgentDirectoryEditComponent implements OnInit {
               type: p.type,
               description: p.description,
             };
-            if (p.id) param.id = p.id; // Preserve parameter id
+            if (p.id) param.id = p.id;
             return param;
           }),
         };
-        if (t.id) tool.id = t.id; // Preserve tool id
+        if (t.id) tool.id = t.id; 
         return tool;
       }),
       resources: (this.agentData.resources || []).map((r) => {
@@ -700,14 +662,9 @@ export class AgentDirectoryEditComponent implements OnInit {
       }),
     };
 
-    console.log('Saving agent:', agentData);
-
-    // Call service based on mode (using API)
     if (this.editView) {
-      // Update existing agent
       this.agentService.agentDirectoryUpdate(agentData).subscribe(
         (response) => {
-          console.log('Agent updated successfully:', response);
           this.service.message('Agent directory updated successfully');
           this.navigateBack();
         },
@@ -718,10 +675,8 @@ export class AgentDirectoryEditComponent implements OnInit {
         }
       );
     } else if (this.addView) {
-      // Create new agent
       this.agentService.createAgentDirectory(agentData).subscribe(
         (response) => {
-          console.log('Agent created successfully:', response);
           this.service.message('Agent directory created successfully');
           this.navigateBack();
         },
@@ -757,7 +712,6 @@ export class AgentDirectoryEditComponent implements OnInit {
   }
 
   onScriptChange($event) {
-    // Convert script array back to string
     this.script = $event;
     if (Array.isArray($event)) {
       this.agentData.jsonModelString = $event.join('\n');
@@ -765,7 +719,6 @@ export class AgentDirectoryEditComponent implements OnInit {
       this.agentData.jsonModelString = $event;
     }
 
-    // Also update extras_json when JSON model changes
     this.agentData.extras_json = this.agentData.jsonModelString;
   }
 
@@ -776,7 +729,7 @@ export class AgentDirectoryEditComponent implements OnInit {
       .getUnregisteredPipelines(this.organization, interfacetype)
       .subscribe(
         (res) => {
-          this.agentMcpPipelines = []; // Clear before populating
+          this.agentMcpPipelines = []; 
           if (res && Array.isArray(res) && res.length > 0) {
             this.agentMcpPipelines = res;
             this.assignedAgentMcpPipeline = this.agentMcpPipelines.find(
@@ -811,19 +764,16 @@ export class AgentDirectoryEditComponent implements OnInit {
         const assignedPipeline = this.agentMcpPipelines.find(
           (pipeline) => pipeline.cid === this.agentData.pipeline_id
         );
-        // assignedPipeline may be undefined if not found
         this.assignedAgentMcpPipeline = assignedPipeline
           ? assignedPipeline.alias
           : '';
       } else {
-        // No pipelines returned - clear state and show informational message
         this.agentMcpPipelines = [];
         this.assignedAgentMcpPipeline = '';
         this.service.message('No pipelines available for the selected type', 'info');
       }
     },
     (error) => {
-      // Handle API errors gracefully
       console.error('Error fetching pipeline cards:', error);
       this.agentMcpPipelines = [];
       this.assignedAgentMcpPipeline = '';

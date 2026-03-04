@@ -32,14 +32,7 @@
     </div>
     <div *ngIf="isrunApp">
         <div *ngIf="showSpinner && !isVideo" class="loading" id="loading" style="position: relative; z-index: 1000;">
-            <div
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
-                <mat-progress-spinner color="primary" mode="indeterminate" diameter="48">
-                </mat-progress-spinner>
-                <img alt="Loading" src="https://surveys.infosysapps.com/assets/gifs/loading.svg"
-                    style="margin-top: 1em;" />
-                <span style="margin-top: 0.5em;">Loading ...</span>
-            </div>
+             <app-aip-loading></app-aip-loading>
         </div>
 
         <iframe id="iframe" *ngIf="!isVideo" width="100%" height="100%" style="height: 70vh;" frameBorder="0"

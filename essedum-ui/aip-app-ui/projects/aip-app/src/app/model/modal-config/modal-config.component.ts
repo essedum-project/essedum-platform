@@ -1,8 +1,8 @@
-import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef,  OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { Services } from '../../services/service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {  MatDialogRef } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { ReplaySubject, Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -51,8 +51,6 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
   isInEdit: boolean = false;
 
   ngOnInit() {
-
-    // Check for edit-model route with id parameter
     this.route.params.subscribe(params => {
       if (params.id) {
         this.isInEdit = true;
@@ -76,11 +74,11 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
         this.data.datasource = response.datasource.name;
       },
         error => {
-          console.log('Error while fetching model details:', error);
+          this.service.message('Error while fetching model details', 'error');
         });
     }
     catch (Exception) {
-      console.log(Exception)
+      this.service.message('Error occurred', 'error');
     }
   }
 
@@ -138,7 +136,6 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
         this.testSuccessful = true;
       },
         error => {
-          console.log('Test connection error:', error);
           this.service.message(error, 'error');
         });
     }
@@ -171,9 +168,9 @@ export class ModalConfigComponent implements OnInit, OnDestroy {
       },
         error => {
           if (!this.isInEdit)
-            console.log('Error while saving model:', error);
+            this.service.message('Error while saving model', 'error');
           else
-            this.service.message('Error while updating model:', error);
+            this.service.message('Error while updating model', 'error');
           this.service.message(error, 'error');
         });
     }

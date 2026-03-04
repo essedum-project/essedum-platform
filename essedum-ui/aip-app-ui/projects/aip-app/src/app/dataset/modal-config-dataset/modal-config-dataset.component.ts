@@ -526,12 +526,40 @@ else{
 
   }
 
-  makeRandom(lengthOfCode: number, possible: string) {
+  /**
+   * Generates a cryptographically secure random string without bias.
+   * Uses rejection sampling to avoid statistical bias in random character selection.
+   * @param lengthOfCode - The length of the random string to generate
+   * @param possible - The character set to use for generation
+   * @returns A cryptographically secure random string
+   */
+  makeRandom(lengthOfCode: number, possible: string): string {
     let text = "";
     for (let i = 0; i < lengthOfCode; i++) {
-      text += possible.charAt(Math.floor((window.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * possible.length));
+      text += this.getSecureRandomChar(possible);
     }
     return text;
+  }
+
+  /**
+   * Securely selects a random character from a charset using rejection sampling.
+   * This avoids bias that would be introduced by simple division and modulo operations.
+   * @param charset - The character set to select from
+   * @returns A randomly selected character
+   */
+  private getSecureRandomChar(charset: string): string {
+    const randomBuffer = new Uint32Array(1);
+    const maxValue = charset.length;
+    // Calculate limit to avoid bias: largest multiple of maxValue that fits in 32 bits
+    const limit = Math.floor(0x100000000 / maxValue) * maxValue;
+    
+    let randomValue: number;
+    do {
+      window.crypto.getRandomValues(randomBuffer);
+      randomValue = randomBuffer[0];
+    } while (randomValue >= limit); // Reject values that would introduce bias
+    
+    return charset.charAt(randomValue % maxValue);
   }
 
   testConnection() {

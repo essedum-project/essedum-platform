@@ -25,7 +25,7 @@
 
             <img id="clientimage" *ngIf="!isimg" src="assets/img/essedum_icon_small.png"
               class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo" style="margin-left: 8px;" />
-            <span class="responsive-title" style="margin-left: 8px;">ESSEDUM</span>
+            <span class="responsive-title" style="margin-left: 8px;">{{essedumTitle}}</span>
 
           </div>
         </div>
@@ -60,8 +60,10 @@
                       sidebartexticonhovercolor: sidebartexticonhovercolor
                     }"></i>
                 </span>
-                <!-- Sidebar menu popup -->
-                <div *ngIf="showSidebarMenuList" class="sidebar-menu-popup" style=" margin-top: -8px;" [ngStyle]="{
+
+                <!-- Sidebar menu text popup component -->
+               <div
+               *ngIf="showSidebarMenuList" class="sidebar-menu-popup" style=" margin-top: -8px;" [ngStyle]="{
                     position: 'fixed',
                     left: sidebarMenuPopupPosition?.left + 'px',
                     top: sidebarMenuPopupPosition?.top + 'px',
@@ -73,31 +75,17 @@
                     overflowY: 'auto',
                     overflowX: 'visible'
                   }" (click)="$event.stopPropagation()">
-                  <div class="list-menu-close">
-                    <button mat-icon-button class="list-menu-close-btn" (click)="closeSidebarMenuPopup()">
-                      <mat-icon class="lfx-fs-18">close</mat-icon>
-                    </button>
-                  </div>
-                  <div class="list-menu-div">
-                    <div *ngFor="let item of sidebarMenu; let i = index" (click)="onSidebarMenuItemClick($event, item)"
-                      [routerLink]="item.url" class="list-menu-item" [ngClass]="{
-                        'sidebar-menu-popup-item-active':
-                          item.label == highlightedLabel
-                      }" [style.borderLeft]="
-                        item.label == highlightedLabel
-                          ? '8px solid #0052cc'
-                          : 'none'
-                      ">
-                      <span [ngStyle]="{
-                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
-                        }">
-                        {{ item.label }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <!-- Sidebar menu popup closed -->
 
+               
+                <app-sidebar-menu-text                
+                  [showSidebarMenuList]="showSidebarMenuList"
+                  [sidebarMenuPopupPosition]="dynamicSidebarMenuPopupPosition"
+                  [sidebarMenu]="sidebarMenu"
+                  [highlightedLabel]="highlightedLabel"
+                  (close)="closeSidebarMenuPopup()"
+                  (menuItemClick)="onSidebarMenuItemClick($event.event, $event.item)">
+                </app-sidebar-menu-text>
+</div>
                 <!-- Sidenav Icons menu bar -->
                 <div class="a-height sidebar-item-container" [class.sidebar-border]="
                     item.label == highlightedLabel &&
@@ -607,14 +595,7 @@
 
           </div>
 
-          <!--main menus-->
-
-          <!-- <span style="cursor: pointer;">
-            <img src="assets/img/icon-FAQ.svg" alt="faq" style="height: 22px; width: 22px;">
-          </span>
-          <span style="cursor: pointer;">
-            <img src="assets/img/notifications.svg" alt="notifications" style="height: 22px; width: 22px;">
-          </span> -->
+        
           <button mat-icon-button="" [matMenuTriggerFor]="menu" (click)="getSession()" [matTooltip]="user.user_f_name"
             class="userMobile selector-3-80 user-profile-btn
             user-btn-height">

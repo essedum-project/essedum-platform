@@ -16,7 +16,6 @@ import {
   Component,
   Input,
   Output,
-  OnChanges,
   EventEmitter,
   SimpleChanges,
   OnInit,
@@ -27,12 +26,7 @@ import {
 import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
 import { MessageService } from "../../services/message.service";
-import {
-  MatDialog,
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-} from "@angular/material/dialog";
-import { ConfirmDeleteDialogComponent } from "../../support/confirm-delete-dialog.component";
+import {  MatDialog} from "@angular/material/dialog";
 import { HelperService } from "../../services/helper.service";
 import { FormControl } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
@@ -775,6 +769,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       this.filterItem(val);
     }
   }
+
   Search() {
     // Extract module value - could be a string or an object with a module property
     let module = "";
@@ -1248,6 +1243,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       this.lastRefreshedTime = new Date();
     }, 1000);
   }
+  
   onTagSelected(event: TagEventDTO) {
     console.log("onTagSelected event received:", event);
 

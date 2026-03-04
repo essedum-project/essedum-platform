@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Services } from '../../services/service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { angularMaterialRenderers } from '@jsonforms/angular-material';
@@ -11,61 +11,14 @@ import { AgentDirectoryService } from '../agent-directory.service';
   styleUrls: ['./agent-directory-view.component.scss'],
 })
 export class AgentDirectoryViewComponent implements OnInit {
-  edit: boolean = false;
-  connectionName: any;
-  data: any;
-  typeOptions = [];
-  datasourceTypes: any;
-  uischema: any;
-  attributes: any;
-  keys: any[];
-  sourceType: any;
-  category: any;
-  renderers = angularMaterialRenderers;
-  schema: any;
-  formData: any;
-  type: any;
-  datasourceports: any;
-  datasourceportsjson: any;
   isBackHovered: boolean = false;
-  connectionDetails = {};
-  isCdFull: boolean = false;
-  view: boolean = false;
-  isVaultEnabled: boolean = false;
-  testSuccessful: boolean = false;
-  extras = { apispec: {}, apispectemplate: {} };
-  apiSpecTemplate: '';
-  extasforAPIspec: any;
-  apispec: any;
-  component: any = [];
-  relatedComponent: any;
-  ConnectionUnlink: boolean;
-  capability: string[] = [];
-  capabilityPromise: Promise<boolean>;
-  relatedloaded: boolean = false;
-  linkAuth: boolean = false;
   cardName: any;
   organisation: any;
-  hideDetails: boolean = true;
-  portDetails: any;
-  portPayload: any;
-  agentMcpPipelines = [];
-  assignedAgentMcpPipeline: string = '';
-  capabilityOptions = [
-    { viewValue: 'Data', value: 'dataset' },
-    { viewValue: 'Runtime', value: 'runtime' },
-    { viewValue: 'Model', value: 'model' },
-    { viewValue: 'Adapter', value: 'adapter' },
-    { viewValue: 'Prompt Provider', value: 'promptprovider' },
-    { viewValue: 'Endpoint', value: 'endpoint' },
-    { viewValue: 'App', value: 'app' },
-  ];
-  initiativeView: boolean;
+  relatedloaded: boolean = false;
   lastRefreshedTime: Date | null = null;
   agentData: any = null;
   relatedVersions: any[] = [];
 
-  // Dynamic table headers for Related Versions
   relatedVersionsHeaders = [
     { key: 'version', label: 'Version' },
     { key: 'cid', label: 'CID' },
@@ -74,15 +27,12 @@ export class AgentDirectoryViewComponent implements OnInit {
   ];
 
   constructor(
-    private Services: Services,
     private route: ActivatedRoute,
     private router: Router,
     private _location: Location,
-    private cdRef: ChangeDetectorRef,
     private service: Services,
     private agentService: AgentDirectoryService
   ) {
-    // Support both route params and query params for the agent name
     this.route.params.subscribe((params) => {
       if (params['name']) {
         this.cardName = params['name'];

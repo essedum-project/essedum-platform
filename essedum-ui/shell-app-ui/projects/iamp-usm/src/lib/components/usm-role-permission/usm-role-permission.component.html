@@ -8,11 +8,11 @@
                         selectedAdapterType: selectedAdapterType
                       }" (tagSelected)="onTagSelected($event)">
     </app-aip-filter>
-
+    
     <div>
-      <div class="aip-container lfx-u-pad-lr-30 mt-m16"></div>
-      <!-- New Table Layout for Role Permissions -->
-      <div class="table-card">
+    <div class="aip-container lfx-u-pad-lr-30 mt-m16"></div>
+    <!-- New Table Layout for Role Permissions -->
+    <div class="table-card">
         <div class="table-scroll-container">
           <table class="styled-table"
             *ngIf="UsmRolePermissionsList && UsmRolePermissionsList.data && UsmRolePermissionsList.data.length>0; else noData">
@@ -51,7 +51,7 @@
             <div class="no-data">No data available</div>
           </ng-template>
         </div> <!-- Pagination -->
-        <app-aip-pagination
+      <app-aip-pagination
           *ngIf="noOfPages > 0 || (UsmRolePermissionsList && UsmRolePermissionsList.data && UsmRolePermissionsList.data.length > 0)"
           [pageNumber]="pageNumber" [noOfPages]="noOfPages || 1" [pageArr]="pageArr.length > 0 ? pageArr : [0]"
           [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"

@@ -321,8 +321,6 @@ export class AgentDirectoryComponent implements OnInit, OnChanges {
               }
             );
             
-            console.log('[AgentDirectory] Loaded', data.length, 'agents, triggering filter refresh');
-            
             // Notify filter component to refresh
             this.tagrefresh = true;
             setTimeout(() => {

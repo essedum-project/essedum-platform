@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { filter, pairwise } from "rxjs/operators";
 import { Router, RoutesRecognized, NavigationEnd } from "@angular/router";
 import { ApisService } from "./services/apis.service";

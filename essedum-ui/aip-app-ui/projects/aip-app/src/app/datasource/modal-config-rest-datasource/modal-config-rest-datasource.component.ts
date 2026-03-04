@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   OnChanges,
-  Inject,
   Input,
   Output,
   EventEmitter,
@@ -168,7 +167,6 @@ export class ModalConfigRestDatasourceComponent
         this.matData.organization
       ).subscribe((res) => {
         this.data = res;
-        //this.apispec = JSON.parse("{}");
         if (this.data.extras == null || this.data.extras == '') {
           this.data.extras = JSON.stringify({
             apispec: {},
@@ -300,7 +298,6 @@ export class ModalConfigRestDatasourceComponent
     this.Services.getDatasetNamesByDatasource(datasource).subscribe((res) => {
       this.datasets = res;
       this.datasets.forEach((opt) => {
-        console.log(opt.type);
         let val = { viewValue: opt.alias, value: opt.alias };
         this.datasetsoptions.push(val);
       });
@@ -322,8 +319,6 @@ export class ModalConfigRestDatasourceComponent
     this.sourceType.attributes[key] = datasource.value;
   }
   setDgInstanceType(key, instanceType) {
-    console.log('instancetypeevent', instanceType);
-
     this.sourceType.attributes[key] = instanceType;
   }
   testConnection() {
@@ -417,7 +412,6 @@ export class ModalConfigRestDatasourceComponent
                 this.data.connectionDetails
               );
               this.sourceType['formats'] = this.sourceType.attributes.formats;
-              console.log('sourceType', this.sourceType.formats);
 
               this.formats = [];
               Object.keys(this.sourceType.attributes.formats).forEach(
@@ -427,7 +421,6 @@ export class ModalConfigRestDatasourceComponent
                   }
                 }
               );
-              console.log('formatselse', this.formats);
             }
           },
           (error) => {
@@ -694,19 +687,42 @@ export class ModalConfigRestDatasourceComponent
     } else this.Services.message('File format not supported ', 'error');
   }
 
-  makeRandom(lengthOfCode: number, possible: string) {
+  /**
+   * Generates a cryptographically secure random string without bias.
+   * Uses rejection sampling to avoid statistical bias in random character selection.
+   * @param lengthOfCode - The length of the random string to generate
+   * @param possible - The character set to use for generation
+   * @returns A cryptographically secure random string
+   */
+  makeRandom(lengthOfCode: number, possible: string): string {
     let text = '';
     for (let i = 0; i < lengthOfCode; i++) {
-      text += possible.charAt(
-        Math.floor(
-          (window.crypto.getRandomValues(new Uint32Array(1))[0] /
-            (0xffffffff + 1)) *
-            possible.length
-        )
-      );
+      text += this.getSecureRandomChar(possible);
     }
     return text;
   }
+
+  /**
+   * Securely selects a random character from a charset using rejection sampling.
+   * This avoids bias that would be introduced by simple division and modulo operations.
+   * @param charset - The character set to select from
+   * @returns A randomly selected character
+   */
+  private getSecureRandomChar(charset: string): string {
+    const randomBuffer = new Uint32Array(1);
+    const maxValue = charset.length;
+    // Calculate limit to avoid bias: largest multiple of maxValue that fits in 32 bits
+    const limit = Math.floor(0x100000000 / maxValue) * maxValue;
+    
+    let randomValue: number;
+    do {
+      window.crypto.getRandomValues(randomBuffer);
+      randomValue = randomBuffer[0];
+    } while (randomValue >= limit); // Reject values that would introduce bias
+    
+    return charset.charAt(randomValue % maxValue);
+  }
+  
   onOptionChange(event, option?) {
     if (option) {
       this.bodyOption = option;
@@ -757,7 +773,6 @@ export class ModalConfigRestDatasourceComponent
   }
 
   setIsExiPort(istrue: any) {
-    console.log('Capability is :', this.capability);
     this.isExiPorts = istrue.checked;
     this.addPorts['exiPort'] = istrue.checked;
   }
@@ -765,7 +780,6 @@ export class ModalConfigRestDatasourceComponent
   setIsDefaultPort(istrue: any) {
     this.addPorts['defaultPort'] = istrue.checked;
     this.isDefaultPorts = istrue.checked;
-    console.log('Set Default Port Button Clicked : ', this.addPorts);
   }
 }
 
