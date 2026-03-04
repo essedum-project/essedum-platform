@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+		xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 	<changeSet author="Essedum (generated)" id="1614785155891-210">
 		<createIndex indexName="FK4s4h8fusqine0cq9o4u3nh4pr"
-			tableName="bcc_ci_metrics_mapping">
+					 tableName="bcc_ci_metrics_mapping">
 			<column name="metric_id" />
 		</createIndex>
 	</changeSet>
@@ -25,37 +25,37 @@
 	</changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-235">
 		<createIndex indexName="FK8mv5nuacly3olkyjk8sqiixik"
-			tableName="bcc_svg_dashboard_mapping">
+					 tableName="bcc_svg_dashboard_mapping">
 			<column name="dashboard_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-259">
 		<createIndex indexName="FKc7m7817cwk5eu07vuuyjxaua5"
-			tableName="bcc_ci_metrics_mapping">
+					 tableName="bcc_ci_metrics_mapping">
 			<column name="thershold_mapping" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-317">
 		<createIndex indexName="FKijrh2d26mft5suwsnyr64tv05"
-			tableName="bcc_ci_dashboard_mapping">
+					 tableName="bcc_ci_dashboard_mapping">
 			<column name="dashboard_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-318">
 		<createIndex indexName="FKiu90qyaltq0q4mnn22ge31u1o"
-			tableName="bcc_svg_dashboard_mapping">
+					 tableName="bcc_svg_dashboard_mapping">
 			<column name="svg_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-320">
 		<createIndex indexName="FKiwmkj7e0io98x1g4syldocje6"
-			tableName="bcc_svg_ci_mapping">
+					 tableName="bcc_svg_ci_mapping">
 			<column name="svg_dashboard_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-329">
 		<createIndex indexName="FKjql2c7mo7b1qvaib5p0w340i0"
-			tableName="bcc_svg_ci_mapping">
+					 tableName="bcc_svg_ci_mapping">
 			<column name="ci_id" />
 		</createIndex>
 	</changeSet>
@@ -67,7 +67,7 @@
 	</changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-356">
 		<createIndex indexName="FKmsnx4kgc1qnwcp3wlj8cskxtj"
-			tableName="bcc_ci_metrics_mapping">
+					 tableName="bcc_ci_metrics_mapping">
 			<column name="ci_id" />
 		</createIndex>
 	</changeSet>
@@ -85,180 +85,223 @@
 	</changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-398">
 		<createIndex indexName="FKrxaqcxmp3c1yx9s7l63omep1p"
-			tableName="bcc_metrics_master">
+					 tableName="bcc_metrics_master">
 			<column name="dashboard_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-400">
 		<createIndex indexName="FKrytlkl489f3t9jri4bloiwx4q"
-			tableName="bcc_ci_dashboard_mapping">
+					 tableName="bcc_ci_dashboard_mapping">
 			<column name="ci_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-407">
 		<createIndex indexName="FKson2189fj977gt8n8ee4h5m8l"
-			tableName="bcc_svg_elements">
+					 tableName="bcc_svg_elements">
 			<column name="svg_id" />
 		</createIndex>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-440">
 		<addForeignKeyConstraint
-			baseColumnNames="metric_id" baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="bcc_metrics_master" />
+				baseColumnNames="metric_id" baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id" referencedTableName="bcc_metrics_master" />
 	</changeSet>
- <!--<changeSet author="Essedum (generated)" id="1614785155891-442">
-		<addForeignKeyConstraint
-			baseColumnNames="project_id"
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FK4xa2y6as1jhcnkqs2m2idimjf" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="usm_project" />
-	</changeSet>
-	<changeSet author="Essedum (generated)" id="1614785155891-454">
-		<addForeignKeyConstraint
-			baseColumnNames="project_id" baseTableName="bcc_svg_ci_mapping"
-			constraintName="FK7dmmg5xs0qjtjl7n4xao2vvyw" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="usm_project" />
-	</changeSet>-->
+	<!--<changeSet author="Essedum (generated)" id="1614785155891-442">
+           <addForeignKeyConstraint
+               baseColumnNames="project_id"
+               baseTableName="bcc_svg_dashboard_mapping"
+               constraintName="FK4xa2y6as1jhcnkqs2m2idimjf" deferrable="false"
+               initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+               referencedColumnNames="id" referencedTableName="usm_project" />
+       </changeSet>
+       <changeSet author="Essedum (generated)" id="1614785155891-454">
+           <addForeignKeyConstraint
+               baseColumnNames="project_id" baseTableName="bcc_svg_ci_mapping"
+               constraintName="FK7dmmg5xs0qjtjl7n4xao2vvyw" deferrable="false"
+               initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+               referencedColumnNames="id" referencedTableName="usm_project" />
+       </changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-465">
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id"
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FK8mv5nuacly3olkyjk8sqiixik" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id"
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FK8mv5nuacly3olkyjk8sqiixik" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-489">
 		<addForeignKeyConstraint
-			baseColumnNames="thershold_mapping"
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKc7m7817cwk5eu07vuuyjxaua5" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="dbs_threshold_config" />
+				baseColumnNames="thershold_mapping"
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKc7m7817cwk5eu07vuuyjxaua5" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id" referencedTableName="dbs_threshold_config" />
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-548">
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id"
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKijrh2d26mft5suwsnyr64tv05" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id"
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKijrh2d26mft5suwsnyr64tv05" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
+	<changeSet author="satyam.kumar" id="cleanup-invalid-svg-refs">
+		<comment>Delete rows with svg_id not present in bcc_svg to prepare for FK constraint</comment>
+		<sql>
+			DELETE FROM bcc_svg_dashboard_mapping
+			WHERE svg_id IS NOT NULL
+			AND svg_id NOT IN (SELECT id FROM bcc_svg);
+		</sql>
+	</changeSet>
+
 	<changeSet author="Essedum (generated)" id="1614785155891-549">
+		<preConditions onFail="HALT">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM bcc_svg_dashboard_mapping
+				WHERE svg_id IS NOT NULL
+				AND svg_id NOT IN (SELECT id FROM bcc_svg);
+			</sqlCheck>
+		</preConditions>
+
 		<addForeignKeyConstraint
-			baseColumnNames="svg_id" baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FKiu90qyaltq0q4mnn22ge31u1o" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="bcc_svg" />
+				baseColumnNames="svg_id"
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FKiu90qyaltq0q4mnn22ge31u1o"
+				deferrable="false"
+				initiallyDeferred="false"
+				onDelete="RESTRICT"
+				onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="bcc_svg"/>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-551">
 		<addForeignKeyConstraint
-			baseColumnNames="svg_dashboard_id" baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKiwmkj7e0io98x1g4syldocje6" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="bcc_svg_dashboard_mapping" />
+				baseColumnNames="svg_dashboard_id" baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKiwmkj7e0io98x1g4syldocje6" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="bcc_svg_dashboard_mapping" />
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-560">
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKjql2c7mo7b1qvaib5p0w340i0" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKjql2c7mo7b1qvaib5p0w340i0" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
 	</changeSet>
-	 <!--<changeSet author="Essedum (generated)" id="1614785155891-573">
-		<addForeignKeyConstraint
-			baseColumnNames="project_id" baseTableName="bcc_svg"
-			constraintName="FKkwu1ec5cewxcq9v0q7tavaakt" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="usm_project" />
-	</changeSet>-->
+	<!--<changeSet author="Essedum (generated)" id="1614785155891-573">
+       <addForeignKeyConstraint
+           baseColumnNames="project_id" baseTableName="bcc_svg"
+           constraintName="FKkwu1ec5cewxcq9v0q7tavaakt" deferrable="false"
+           initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+           referencedColumnNames="id" referencedTableName="usm_project" />
+   </changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-587">
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
 	</changeSet>
- <!--<changeSet author="Essedum (generated)" id="1614785155891-592">
-		<addForeignKeyConstraint
-			baseColumnNames="project_id" baseTableName="bcc_svg_elements"
-			constraintName="FKnfgcsuv7mtnxwqt6pimkjsg68" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="usm_project" />
-	</changeSet>
-	<changeSet author="Essedum (generated)" id="1614785155891-598">
-		<addForeignKeyConstraint
-			baseColumnNames="project_id" baseTableName="bcc_metrics_master"
-			constraintName="FKof23pxqh6g314cplyhovp2yts" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="usm_project" />
-	</changeSet>-->
+	<!--<changeSet author="Essedum (generated)" id="1614785155891-592">
+           <addForeignKeyConstraint
+               baseColumnNames="project_id" baseTableName="bcc_svg_elements"
+               constraintName="FKnfgcsuv7mtnxwqt6pimkjsg68" deferrable="false"
+               initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+               referencedColumnNames="id" referencedTableName="usm_project" />
+       </changeSet>
+       <changeSet author="Essedum (generated)" id="1614785155891-598">
+           <addForeignKeyConstraint
+               baseColumnNames="project_id" baseTableName="bcc_metrics_master"
+               constraintName="FKof23pxqh6g314cplyhovp2yts" deferrable="false"
+               initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+               referencedColumnNames="id" referencedTableName="usm_project" />
+       </changeSet>-->
 	<changeSet author="Essedum (generated)" id="1614785155891-629">
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id" baseTableName="bcc_metrics_master"
-			constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id" baseTableName="bcc_metrics_master"
+				constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-631">
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKrytlkl489f3t9jri4bloiwx4q" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKrytlkl489f3t9jri4bloiwx4q" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
+	</changeSet>
+	<changeSet author="satyam.kumar" id="cleanup-invalid-svg-elements">
+		<comment>Delete rows from bcc_svg_elements where svg_id does not exist in bcc_svg</comment>
+		<sql>
+			DELETE FROM bcc_svg_elements
+			WHERE svg_id IS NOT NULL
+			AND svg_id NOT IN (SELECT id FROM bcc_svg);
+		</sql>
+	</changeSet>
+
+	<changeSet author="Essedum (generated)" id="1614785155891-638">
+		<addForeignKeyConstraint
+				baseColumnNames="svg_id"
+				baseTableName="bcc_svg_elements"
+				constraintName="FKson2189fj977gt8n8ee4h5m8l"
+				deferrable="false"
+				initiallyDeferred="false"
+				onDelete="RESTRICT"
+				onUpdate="RESTRICT"
+				referencedColumnNames="id"
+				referencedTableName="bcc_svg"/>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-638">
 		<addForeignKeyConstraint
-			baseColumnNames="svg_id" baseTableName="bcc_svg_elements"
-			constraintName="FKson2189fj977gt8n8ee4h5m8l" deferrable="false"
-			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
-			referencedColumnNames="id" referencedTableName="bcc_svg" />
+				baseColumnNames="svg_id" baseTableName="bcc_svg_elements"
+				constraintName="FKson2189fj977gt8n8ee4h5m8l" deferrable="false"
+				initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+				referencedColumnNames="id" referencedTableName="bcc_svg" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-712"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKiwmkj7e0io98x1g4syldocje6" />
+				baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKiwmkj7e0io98x1g4syldocje6" />
 		<addForeignKeyConstraint
-			baseColumnNames="svg_dashboard_id" baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKiwmkj7e0io98x1g4syldocje6" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="bcc_svg_dashboard_mapping" />
+				baseColumnNames="svg_dashboard_id" baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKiwmkj7e0io98x1g4syldocje6" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="bcc_svg_dashboard_mapping" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-713"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKiwmkj7e0io98x1g4syldocje6" />
+				baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKiwmkj7e0io98x1g4syldocje6" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-716"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKjql2c7mo7b1qvaib5p0w340i0" />
+				baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKjql2c7mo7b1qvaib5p0w340i0" />
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKjql2c7mo7b1qvaib5p0w340i0" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKjql2c7mo7b1qvaib5p0w340i0" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-717"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_ci_mapping"
-			constraintName="FKjql2c7mo7b1qvaib5p0w340i0" />
+				baseTableName="bcc_svg_ci_mapping"
+				constraintName="FKjql2c7mo7b1qvaib5p0w340i0" />
 	</changeSet>
 	<!--<changeSet author="essedum" id="1615300415555-724"
 		dbms="!mssql">
@@ -276,22 +319,22 @@
 			baseTableName="bcc_svg" constraintName="FKkwu1ec5cewxcq9v0q7tavaakt" />
 	</changeSet>-->
 	<changeSet author="essedum" id="1615300415555-728"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" />
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-729"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKmsnx4kgc1qnwcp3wlj8cskxtj" />
 	</changeSet>
 	<!--<changeSet author="essedum" id="1615300415555-730"
 		dbms="!mssql">
@@ -311,22 +354,22 @@
 			constraintName="FKof23pxqh6g314cplyhovp2yts" />
 	</changeSet>-->
 	<changeSet author="essedum" id="1615300415555-744"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKrytlkl489f3t9jri4bloiwx4q" />
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKrytlkl489f3t9jri4bloiwx4q" />
 		<addForeignKeyConstraint
-			baseColumnNames="ci_id" baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKrytlkl489f3t9jri4bloiwx4q" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="cfm_configuration_item" />
+				baseColumnNames="ci_id" baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKrytlkl489f3t9jri4bloiwx4q" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="cfm_configuration_item" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-745"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKrytlkl489f3t9jri4bloiwx4q" />
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKrytlkl489f3t9jri4bloiwx4q" />
 	</changeSet>
 	<!--<changeSet author="Essedum (generated)" id="1614785155891-769"
 		dbms="!mssql">
@@ -352,76 +395,76 @@
 			referencedColumnNames="id" referencedTableName="usm_project" />
 	</changeSet>-->
 	<changeSet author="essedum"  id="1614785155891-771"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" />
 		<addForeignKeyConstraint
-			baseColumnNames="metric_id" baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id" referencedTableName="bcc_metrics_master" />
+				baseColumnNames="metric_id" baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id" referencedTableName="bcc_metrics_master" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-772"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FK4s4h8fusqine0cq9o4u3nh4pr" />
 	</changeSet>
 	<changeSet author="essedum"  id="1614785155891-773"
-		dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKc7m7817cwk5eu07vuuyjxaua5" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKc7m7817cwk5eu07vuuyjxaua5" />
 		<addForeignKeyConstraint
-			baseColumnNames="thershold_mapping"
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKc7m7817cwk5eu07vuuyjxaua5" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id" referencedTableName="dbs_threshold_config" />
+				baseColumnNames="thershold_mapping"
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKc7m7817cwk5eu07vuuyjxaua5" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id" referencedTableName="dbs_threshold_config" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-774"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_metrics_mapping"
-			constraintName="FKc7m7817cwk5eu07vuuyjxaua5" />
+				baseTableName="bcc_ci_metrics_mapping"
+				constraintName="FKc7m7817cwk5eu07vuuyjxaua5" />
 	</changeSet>
 	<changeSet author="essedum" id="1614785155891-775"
-	dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKijrh2d26mft5suwsnyr64tv05" />
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKijrh2d26mft5suwsnyr64tv05" />
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id"
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKijrh2d26mft5suwsnyr64tv05" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id"
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKijrh2d26mft5suwsnyr64tv05" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-776"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_ci_dashboard_mapping"
-			constraintName="FKijrh2d26mft5suwsnyr64tv05" />
+				baseTableName="bcc_ci_dashboard_mapping"
+				constraintName="FKijrh2d26mft5suwsnyr64tv05" />
 	</changeSet>
 	<changeSet author="essedum" id="1614785155891-777"
-	dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_metrics_master"
-			constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" />
+				baseTableName="bcc_metrics_master"
+				constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" />
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id" baseTableName="bcc_metrics_master"
-			constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id" baseTableName="bcc_metrics_master"
+				constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-778"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_metrics_master"
-			constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" />
+				baseTableName="bcc_metrics_master"
+				constraintName="FKrxaqcxmp3c1yx9s7l63omep1p" />
 	</changeSet>
 	<!--<changeSet author="essedum" id="1614785155891-779"
 	dbms="!mssql">
@@ -459,40 +502,40 @@
 			constraintName="FK4xa2y6as1jhcnkqs2m2idimjf" />
 	</changeSet>-->
 	<changeSet author="essedum" id="1614785155891-783"
-	dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FK8mv5nuacly3olkyjk8sqiixik" />
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FK8mv5nuacly3olkyjk8sqiixik" />
 		<addForeignKeyConstraint
-			baseColumnNames="dashboard_id"
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FK8mv5nuacly3olkyjk8sqiixik" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id"
-			referencedTableName="dbs_dashboard_configuration" />
+				baseColumnNames="dashboard_id"
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FK8mv5nuacly3olkyjk8sqiixik" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id"
+				referencedTableName="dbs_dashboard_configuration" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-784"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FK8mv5nuacly3olkyjk8sqiixik" />
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FK8mv5nuacly3olkyjk8sqiixik" />
 	</changeSet>
 	<changeSet author="essedum" id="1614785155891-785"
-	dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FKiu90qyaltq0q4mnn22ge31u1o" />		
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FKiu90qyaltq0q4mnn22ge31u1o" />
 		<addForeignKeyConstraint
-			baseColumnNames="svg_id" baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FKiu90qyaltq0q4mnn22ge31u1o" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id" referencedTableName="bcc_svg" />
+				baseColumnNames="svg_id" baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FKiu90qyaltq0q4mnn22ge31u1o" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id" referencedTableName="bcc_svg" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-786"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_dashboard_mapping"
-			constraintName="FKiu90qyaltq0q4mnn22ge31u1o" />
+				baseTableName="bcc_svg_dashboard_mapping"
+				constraintName="FKiu90qyaltq0q4mnn22ge31u1o" />
 	</changeSet>
 	<!--<changeSet author="essedum" id="1614785155891-787"
 	dbms="!mssql">
@@ -512,20 +555,20 @@
 			constraintName="FKnfgcsuv7mtnxwqt6pimkjsg68" />
 	</changeSet>-->
 	<changeSet author="essedum" id="1614785155891-789"
-	dbms="!mssql">
+			   dbms="!mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_elements"
-			constraintName="FKson2189fj977gt8n8ee4h5m8l" />	
+				baseTableName="bcc_svg_elements"
+				constraintName="FKson2189fj977gt8n8ee4h5m8l" />
 		<addForeignKeyConstraint
-			baseColumnNames="svg_id" baseTableName="bcc_svg_elements"
-			constraintName="FKson2189fj977gt8n8ee4h5m8l" deferrable="false"
-			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
-			referencedColumnNames="id" referencedTableName="bcc_svg" />
+				baseColumnNames="svg_id" baseTableName="bcc_svg_elements"
+				constraintName="FKson2189fj977gt8n8ee4h5m8l" deferrable="false"
+				initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+				referencedColumnNames="id" referencedTableName="bcc_svg" />
 	</changeSet>
 	<changeSet author="essedum" id="1615300415555-790"
-		dbms="mssql">
+			   dbms="mssql">
 		<dropForeignKeyConstraint
-			baseTableName="bcc_svg_elements"
-			constraintName="FKson2189fj977gt8n8ee4h5m8l" />
+				baseTableName="bcc_svg_elements"
+				constraintName="FKson2189fj977gt8n8ee4h5m8l" />
 	</changeSet>
 </databaseChangeLog>	
