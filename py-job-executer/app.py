@@ -197,7 +197,7 @@ def terminate_task(task_id):
     try:
         task = db_operations.get_job_by_id(task_id)
         result=''
-        print('task', task)
+        logger.info(f'Terminating task: {task_id}')
         if task is None:
             abort(404)
 
@@ -208,7 +208,7 @@ def terminate_task(task_id):
             parent = psutil.Process(parent_pid)
             if parent !=None:
                 for child in parent.children(recursive=True):  # or parent.children() for recursive=False
-                    print('Killing child with pid: ', child.pid)
+                    logger.info(f'Killing child with pid: {child.pid}')
                     child.kill()
                 parent.kill()
                 process_stop_flag = True
@@ -219,7 +219,7 @@ def terminate_task(task_id):
             future_thread = submitted_futures[task_id]
             try:
                 future_thread.cancel()
-                print(f'{submitted_futures[task_id]} is {submitted_futures[task_id].cancelled}')
+                logger.info(f'Task {task_id} cancellation status: {submitted_futures[task_id].cancelled()}')
 
                 time.sleep(0.1)
                 if not submitted_futures[task_id].cancelled:
@@ -233,7 +233,7 @@ def terminate_task(task_id):
 
             result = {'Task cancelled': process_stop_flag}
 
-        print('result', result)
+        logger.info(f'Task {task_id} cancellation result: {result["Task cancelled"]}')
 
         # To override the error status from task
         task = db_operations.get_job_by_id(task_id)
@@ -253,6 +253,13 @@ def get_task_log(task_id):
         task_folder=str(task_id)
         log_file = WORKING_DIRECTORY / task_folder / 'log.txt'
         
+        # Validate path to prevent directory traversal
+        log_file_resolved = os.path.realpath(log_file)
+        working_dir_resolved = os.path.realpath(WORKING_DIRECTORY)
+        if not log_file_resolved.startswith(working_dir_resolved):
+            logger.warning(f'Potential path traversal attempt detected: {task_id}')
+            return jsonify({'logs': {'content':'Invalid task ID'}}), 403
+        
         with open(log_file,'r', encoding='utf-8', errors='ignore') as f:
             log=f.read()
         
@@ -271,12 +278,27 @@ def get_task_output_artifacts(task_id):
         task_folder=str(task_id)
         output_dir = WORKING_DIRECTORY / task_folder / 'output_dir'
         
+        # Validate path to prevent directory traversal
+        output_dir_resolved = os.path.realpath(output_dir)
+        working_dir_resolved = os.path.realpath(WORKING_DIRECTORY)
+        if not output_dir_resolved.startswith(working_dir_resolved):
+            logger.warning(f'Potential path traversal attempt detected: {task_id}')
+            return jsonify({'error': 'Invalid task ID'}), 403
+        
         result={}
 
         if os.path.exists(output_dir):
             for file in os.listdir(output_dir):
                 if '.' in file:
                     file_path = os.path.join(output_dir, file)
+                    
+                    # Validate file_path to prevent directory traversal via filename
+                    file_path_resolved = os.path.realpath(file_path)
+                    output_dir_resolved = os.path.realpath(output_dir)
+                    if not file_path_resolved.startswith(output_dir_resolved):
+                        logger.warning(f'Potential path traversal in filename detected: {file}')
+                        continue
+                    
                     key = file.split('.')[0]
                     with open(file_path,'r', encoding='utf-8', errors='ignore') as f:
                         log=f.read()
@@ -378,7 +400,7 @@ def create_task():
     if not request.get_json():
         abort(400)
     payload = request.get_json()
-    return create_task_util(payload)
+    return jsonify(create_task_util(payload))
 
 @app.route('/execute', methods=['GET'])
 def get_tasks():
@@ -397,9 +419,12 @@ def adapter_function_execute():
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), 200
     except Exception as err:
-        result = str(err)
+        # Log detailed error for developers
         exc_trace = traceback.format_exc()
-        logger.info(f"Error is: {str(exc_trace)}")
+        logger.error(f"Error executing function: {str(err)}")
+        logger.error(f"Stack trace: {str(exc_trace)}")
+        # Return generic error message to users
+        result = {"error": "An error occurred while executing the function"}
     return jsonify(result), 500
 
 @app.route('/venvs', methods=['DELETE'])
@@ -415,6 +440,15 @@ def delete_venv():
         not_found_venvs = []
         for venv in venvs_to_delete:
             venv_path = os.path.join(venvs_path, venv)
+            
+            # Validate path to prevent directory traversal
+            venv_path_resolved = os.path.realpath(venv_path)
+            venvs_path_resolved = os.path.realpath(venvs_path)
+            if not venv_path_resolved.startswith(venvs_path_resolved):
+                logger.warning(f'Potential path traversal attempt detected: {venv}')
+                not_found_venvs.append(venv)
+                continue
+            
             if os.path.exists(venv_path) and os.path.isdir(venv_path):
                 try:
                     import shutil
