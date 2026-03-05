@@ -370,8 +370,8 @@ export class JobLogsViewer {
             async (message) => {
                 if (message.command === 'refreshConsoleLogs') {
                     try {
-                        const refreshedData = await this.fetchConsoleJob(jobId, 0, 0, 'ERROR', false);
-                        consolePanel.webview.html = this.getConsoleLogsHtml(consolePanel.webview, jobId, refreshedData);
+                        const refreshedData = await this.fetchConsoleJob(this.currentJob.jobId, 0, 0, 'ERROR', false);
+                        consolePanel.webview.html = this.getConsoleLogsHtml(consolePanel.webview, this.currentJob.jobId, refreshedData);
                     } catch (error: any) {
                         vscode.window.showErrorMessage(`Failed to refresh console logs: ${error.message}`);
                     }

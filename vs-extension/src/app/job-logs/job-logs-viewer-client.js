@@ -53,13 +53,19 @@ function hideLoading() {
 function formatDate(dateString) {
     if (!dateString) { return '-'; }
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    // Use user's local time zone for display, include seconds
+    const options = {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
-    });
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    };
+    // Remove comma before time for a cleaner look
+    let formatted = date.toLocaleString('en-US', options).replace(',', '');
+    return formatted;
 }
 
 function getStatusBadgeClass(status) {
@@ -115,13 +121,13 @@ function renderJobs(jobs) {
                     📄
                 </button>
                 ${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ?
-                `<button class="action-btn" onclick="stopJob('${job.jobId}')" title="Stop Job">⏹️</button>` :
+                `<button class="action-btn" onclick="stopJob('${job.id}')" title="Stop Job">⏹️</button>` :
                 ''
             }
             </td>
             <td>
                 ${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ?
-                `<button class="action-btn" onclick="showOutputArtifact('${job.jobId}')" title="Show Output Artifacts">📊</button>` :
+                `<button class="action-btn" onclick="showOutputArtifact('${job.id}')" title="Show Output Artifacts">📊</button>` :
                 '-'
             }
             </td>

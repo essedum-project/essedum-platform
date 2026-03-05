@@ -362,13 +362,13 @@ body {
     background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: var(--radius-xl);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-xxl);
     transition: all var(--transition-normal);
     cursor: pointer;
     position: relative;
     overflow: hidden;
     outline: none;
-    /* min-height: var(--card-min-height); */
+    min-height: var(--card-min-height);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
