@@ -17,7 +17,7 @@ const routes: Routes = [
 @NgModule({
   exports: [RouterModule],
   // The initalNavigation has to be disabled, this is required for OAUTH
-  imports: [RouterModule.forRoot(routes, { useHash: false, initialNavigation: 'disabled' })],
+  imports: [RouterModule.forRoot(routes, { useHash: true, initialNavigation: 'disabled' })],
   declarations: []
 })
 export class AppRoutingModule { }
