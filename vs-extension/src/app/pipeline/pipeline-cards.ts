@@ -1420,15 +1420,30 @@ if __name__ == "__main__":
         </html>`;
     }
 
+    /**
+     * Get or create the local directory for pipeline scripts
+     * Scripts are stored in: <globalStorage>/pipeline-scripts/<pipelineName>/
+     */
+    private getLocalScriptsDirectory(pipelineName: string): vscode.Uri {
+        const scriptsBaseDir = vscode.Uri.joinPath(this._context.globalStorageUri, 'pipeline-scripts', pipelineName);
+        
+        // Ensure directory exists
+        try {
+            if (!fs.existsSync(scriptsBaseDir.fsPath)) {
+                fs.mkdirSync(scriptsBaseDir.fsPath, { recursive: true });
+                logger.info('Created local scripts directory:', scriptsBaseDir.fsPath);
+            }
+        } catch (error: any) {
+            logger.error('Failed to create scripts directory:', error);
+        }
+        
+        return scriptsBaseDir;
+    }
+
     private async openScriptInEditor(scriptFile: ScriptFile): Promise<void> {
         try {
-            // If we have the file system provider, use Essedum scheme
-            if (this._fileProvider && this._currentPipelineName) {
-                await this.openScriptAsEssedumFile(scriptFile);
-            } else {
-                // Fallback to untitled document
-                await this.openScriptAsUntitledDocument(scriptFile);
-            }
+            // Always save scripts locally to persist across navigation
+            await this.openScriptAsLocalFile(scriptFile);
         } catch (error: any) {
             console.error('Failed to open script:', error);
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
@@ -1443,34 +1458,38 @@ if __name__ == "__main__":
     }
 
     /**
-     * Open script as an Essedum file that can only be saved to the server
+     * Open script as a local file that persists across navigation
      */
-    private async openScriptAsEssedumFile(scriptFile: ScriptFile): Promise<void> {
-        if (!this._fileProvider || !this._currentPipelineName) {
-            throw new Error('File provider or pipeline name not available');
+    private async openScriptAsLocalFile(scriptFile: ScriptFile): Promise<void> {
+        if (!this._currentPipelineName) {
+            throw new Error('Pipeline name not available');
         }
 
-        // Register the file with the file system provider
-        const uri = this._fileProvider.registerFile(
-            scriptFile.fileName,
-            scriptFile.content,
-            this._currentPipelineName,
-            this.organization
-        );
+        // Get the local directory for this pipeline
+        const scriptsDir = this.getLocalScriptsDirectory(this._currentPipelineName);
+        const localFilePath = vscode.Uri.joinPath(scriptsDir, scriptFile.fileName);
 
-        // Open the document using the Essedum scheme
-        const doc = await vscode.workspace.openTextDocument(uri);
+        // Save the script content to the local file
+        try {
+            fs.writeFileSync(localFilePath.fsPath, scriptFile.content, 'utf8');
+            logger.info('💾 Saved script to local file:', localFilePath.fsPath);
+        } catch (error: any) {
+            logger.error('Failed to save script locally:', error);
+            throw new Error(`Failed to save script locally: ${error.message}`);
+        }
+
+        // Open the local document
+        const doc = await vscode.workspace.openTextDocument(localFilePath);
 
         // Check if this is a notebook file and open in notebook editor
         if (scriptFile.fileName.endsWith('.ipynb')) {
             logger.info('📓 Opening .ipynb file in notebook editor...');
-            await vscode.commands.executeCommand('vscode.openWith', uri, 'jupyter-notebook', {
-                viewColumn: vscode.ViewColumn.One,
+            await vscode.commands.executeCommand('vscode.openWith', localFilePath, 'jupyter-notebook', {
                 preserveFocus: false
             });
         } else {
             await vscode.window.showTextDocument(doc, {
-                viewColumn: vscode.ViewColumn.One,
+                preview: false,
                 preserveFocus: false
             });
         }
@@ -1545,16 +1564,15 @@ if __name__ == "__main__":
             // Set up notebook save listener for .ipynb files
             const notebookSaveDisposable = vscode.workspace.onDidSaveNotebookDocument(async (savedNotebook) => {
                 // Check if this notebook corresponds to our document URI
-                if (savedNotebook.uri.toString() === doc.uri.toString()) {
+                if (savedNotebook.uri.toString() === localFilePath.toString()) {
                     logger.info('💾 📓 NOTEBOOK SAVE EVENT - Auto-uploading notebook changes...');
 
                     try {
-                        // For .ipynb files, save the full notebook JSON structure
-                        // IMPORTANT: Read from file provider's internal storage (most up-to-date)
-                        const notebookJson = this._fileProvider!.getFileContent(doc.uri);
+                        // For .ipynb files, read the full notebook JSON from the local file
+                        const notebookJson = fs.readFileSync(localFilePath.fsPath, 'utf8');
 
                         if (!notebookJson) {
-                            throw new Error('Could not read notebook content from file provider');
+                            throw new Error('Could not read notebook content from local file');
                         }
 
                         logger.info('📓 Saving full notebook JSON structure');
@@ -1601,9 +1619,9 @@ if __name__ == "__main__":
             });
         }
 
-        // Show a message indicating this is an Essedum file with auto-save
+        // Show a message indicating this is a local file with auto-save to server
         vscode.window.showInformationMessage(
-            `📝 Opened ${scriptFile.fileName} as Essedum file with auto-save. Changes will be uploaded when you save (Ctrl+S).`,
+            `📝 Opened ${scriptFile.fileName} - Changes will be auto-uploaded to server when you save (Ctrl+S).`,
             'Got it!'
         );
     }
@@ -1623,13 +1641,12 @@ if __name__ == "__main__":
             logger.info('📓 Opening .ipynb file in notebook editor...');
             // For untitled notebooks, we need to save first then open in notebook editor
             await vscode.commands.executeCommand('vscode.openWith', doc.uri, 'jupyter-notebook', {
-                viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false
             });
         } else {
-            // Show the document in the main editor (column one)
+            // Show the document in the main editor
             await vscode.window.showTextDocument(doc, {
-                viewColumn: vscode.ViewColumn.One,
+                preview: false,
                 preserveFocus: false
             });
         }
