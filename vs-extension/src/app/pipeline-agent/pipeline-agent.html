@@ -24,6 +24,12 @@
 
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="agents">Agents</button>
+            <button class="tab-button" data-tab="mcp">MCP Servers</button>
+        </div>
+
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="Search pipeline agents...">
             <button class="btn" id="searchBtn">Search</button>
@@ -85,17 +91,17 @@
                     <div class="info-section">
                         <h4>Actions</h4>
                         <div class="action-button-grid">
-                            <button class="btn btn-primary-bg" id="openCopilotBtn">
+                            <button class="btn btn-primary-bg" id="openCopilotBtn" style="display: none;">
                                 Open Copilot
                             </button>
-                            <button class="btn btn-primary-bg" id="uploadAdkBtn">
-                                Upload Agent Code
+                            <button class="btn btn-primary-bg" id="uploadFromGithubBtn" style="display: none;">
+                                Upload from GitHub
                             </button>
                             <button class="btn btn-primary-bg" id="viewAdkBtn" style="display: none;">
-                                View Agent Code
+                                Edit Code
                             </button>
                             <button class="btn btn-primary-bg" id="downloadAdkBtn" style="display: none;">
-                                Download Agent Code
+                                Download Code
                             </button>
                             <button class="btn btn-secondary-bg" id="refreshJsonBtn">
                                 Refresh

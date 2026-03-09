@@ -225,6 +225,8 @@ public interface IICIPDataSetServiceUtil {
 	
 	JSONArray getFileData(ICIPDataset dataset, String fileName);
 
+	byte[] getFileDataAsBytes(ICIPDataset dataset, String fileName);
+
 	void deleteFiledata(ICIPDataset dataset, String fileName);
 
 	JSONArray getFileInfo(ICIPDataset dataset, String value);

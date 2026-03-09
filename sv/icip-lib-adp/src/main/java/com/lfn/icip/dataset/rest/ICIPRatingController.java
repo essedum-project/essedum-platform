@@ -1,9 +1,7 @@
 package com.lfn.icip.dataset.rest;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
-import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.icip.dataset.model.ICIPRating;
 import com.lfn.icip.dataset.model.dto.ICIPRatingDTO;
 import com.lfn.icip.dataset.service.IICIPRatingService;

@@ -2,7 +2,6 @@ package com.lfn.icip.icipmodelserver.v2.model.dto;
 
 import java.util.Map;
 
-import org.json.JSONObject;
 
 import lombok.Data;
 

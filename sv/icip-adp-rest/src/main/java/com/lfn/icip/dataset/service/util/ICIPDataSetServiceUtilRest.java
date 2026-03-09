@@ -15,13 +15,7 @@
 
 package com.lfn.icip.dataset.service.util;
 
-import java.util.List;
-import java.util.Map;
 import java.sql.SQLException;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

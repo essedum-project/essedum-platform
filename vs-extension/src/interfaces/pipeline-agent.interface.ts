@@ -1,10 +1,10 @@
 export interface PipelineAgentCard {
-    type: string;
-    alias: string;
-    createdDate: string;
-    created_by: string;
-    id: string;
-    [key: string]: any;
+  type: string;
+  alias: string;
+  createdDate: string;
+  created_by: string;
+  id: string;
+  [key: string]: any;
 }
 
 /**

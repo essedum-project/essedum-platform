@@ -142,7 +142,7 @@ export class LoginScreenProvider implements vscode.WebviewViewProvider {
     private _getHtmlForWebview(webview: vscode.Webview): string {
         // Use the correct login path - check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._context.extensionPath, 'src'));
-        const loginDir = isDevelopment 
+        const loginDir = isDevelopment
             ? path.join(this._context.extensionPath, 'src', 'auth', 'login')
             : path.join(this._context.extensionPath, 'dist', 'auth', 'login');
 

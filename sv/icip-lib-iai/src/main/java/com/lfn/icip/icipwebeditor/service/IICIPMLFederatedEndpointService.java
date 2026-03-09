@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO;
-import com.lfn.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 
 
 public interface IICIPMLFederatedEndpointService {

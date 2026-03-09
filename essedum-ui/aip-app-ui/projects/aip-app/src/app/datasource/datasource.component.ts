@@ -243,7 +243,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
 
   tagchange() {
     this.tagService.tags.forEach((element: any) => {
-      console.log(element, 'element');
     });
   }
 
@@ -288,7 +287,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
   desc(card: any) {
     this.cardToggled = !this.cardToggled;
     this.selectedCard = card;
-    console.log(this.selectedCard);
   }
   redirect() {
     this.selectedInstance = this.selectedCard.name;
@@ -484,7 +482,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
 
   deleteRuntimes(name:any){
    this.service.deleteRuntimes(name).subscribe((res) =>{
-    console.log("Delete Runtimes : ",res);
    });
   }
 
@@ -521,7 +518,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
    lastRefreshTime() {
     setTimeout(() => {
       this.lastRefreshedTime = new Date();
-      console.log('Data refreshed!');
     }, 1000);
   }
   onFilterStatusChange(hasActiveFilters: boolean) {

@@ -15,7 +15,7 @@ function downloadLogs() {
 }
 
 // Auto-scroll to bottom of logs
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     const logsContainer = document.querySelector('.logs-container');
     if (logsContainer) {
         logsContainer.scrollTop = logsContainer.scrollHeight;

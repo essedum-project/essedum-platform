@@ -18,7 +18,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.json.JSONArray;
 import org.slf4j.Marker;
 
-import com.google.gson.JsonObject;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
@@ -100,11 +99,14 @@ public abstract class ICIPDataSetServiceUtil implements IICIPDataSetServiceUtil{
 	}
 
 	public JSONArray getFileData(ICIPDataset dataset, String fileName) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-    
-	
+
+	public byte[] getFileDataAsBytes(ICIPDataset dataset, String fileName) {
+		// Default implementation throws exception - must be overridden by subclasses
+		throw new UnsupportedOperationException("getFileDataAsBytes not implemented for this dataset type");
+	}
+
 	public void deleteFiledata(ICIPDataset dataset, String fileName) {
 		
 	}

@@ -15,18 +15,11 @@
 
 package com.lfn.icip.icipmodelserver.repository.mysql;
 
-import java.util.List;
 
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.lfn.icip.icipmodelserver.model.ICIPModelProvider;
-import com.lfn.icip.icipmodelserver.model.ICIPModelServers;
 import com.lfn.icip.icipmodelserver.repository.ICIPModelProvidersRepository;
-import com.lfn.icip.icipmodelserver.repository.ICIPModelServersRepository;
-import com.lfn.icip.icipmodelserver.repository.mysql.ICIPModelServersRepositoryMYSQL;
 
 // TODO: Auto-generated Javadoc
 /**

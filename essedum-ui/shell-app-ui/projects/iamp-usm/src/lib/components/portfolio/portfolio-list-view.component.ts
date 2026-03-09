@@ -36,11 +36,9 @@ import { FormControl } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-
 import { Portfolio } from "../../models/portfolio";
 import { PortfolioService } from "../../services/portfolio.service";
 import { TagEventDTO } from "../../models/tagEventDTO.model";
-
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
@@ -165,6 +163,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   hoverStates: boolean[] = Array(10).fill(false);
   @Output() pageChanged = new EventEmitter<any>();
   @Output() pageSizeChanged = new EventEmitter<any>();
+
   ngOnInit() {
     if (!this.UsmPortfolioList) {
       this.UsmPortfolioList = new MatTableDataSource([]);
@@ -264,6 +263,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   showUsmPortfolioList() {}
+
   getUsmPortfolios(id) {
     console.log("Getting portfolio with ID:", id);
     this.busy = this.portfolioService.getUsmPortfolio(id).subscribe(
@@ -708,6 +708,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       }
     );
   }
+
   fetchWave(pageEvent) {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
@@ -757,6 +758,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       }
     );
   }
+
   onRowSelect(event: any) {
     let id = event.id;
     this.router.navigate(["/portfoliolist", id]);
@@ -785,6 +787,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   rowSelected(item: Portfolio) {
     this.router.navigate(["/portfoliolist", item.id]);
   }
+
   setSelectedEntities(event) {}
 
   Search(pageEvent) {
@@ -952,6 +955,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.showDescLengthErrorMessage = false;
     }
   }
+
   deleteSpecialChars(event) {
     var i = event.charCode;
     return this.isValidLetter(i);
@@ -1069,6 +1073,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
 
     return filterParts.join(" | ");
   }
+
   onFilterStatusChange(event: boolean) {
     console.log("Filter status changed:", event);
 
@@ -1080,6 +1085,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.search();
     }
   }
+
   onTagSelected(event: TagEventDTO) {
     if (event) {
       console.log("Portfolio component received TagEventDTO:", event);
@@ -1111,6 +1117,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       );
     }
   }
+  
   private filterPortfolios(): void {
     console.log("filterPortfolios called with values:", {
       searchedName: this.searchedName,

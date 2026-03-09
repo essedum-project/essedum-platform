@@ -1,9 +1,7 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import javax.print.DocFlavor.STRING;
 import org.json.JSONObject;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.lfn.icip.icipwebeditor.model.FedFeatureStore;
 import com.lfn.icip.icipwebeditor.model.ICIPFeatureStore;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.lfn.icip.icipwebeditor.repository.ICIPFeatureStoreRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPFeatureStoreService;
 import com.lfn.icip.icipwebeditor.v1.dto.BaseEntity;

@@ -31,7 +31,6 @@ import org.springframework.stereotype.Repository;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.icip.icipmodelserver.model.ICIPPipelineModel;
 import com.lfn.icip.icipmodelserver.repository.ICIPPipelineModelRepository;
-import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
 
 // TODO: Auto-generated Javadoc
 /**

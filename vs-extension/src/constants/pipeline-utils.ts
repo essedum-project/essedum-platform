@@ -36,21 +36,21 @@ import {
  * @returns Formatted date string
  */
 export function formatDate(
-    dateString: string | Date, 
+    dateString: string | Date,
     format: 'short' | 'long' | 'datetime' = 'short'
 ): string {
     try {
         const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-        
+
         if (isNaN(date.getTime())) {
             return UI_TEXT.LABELS.UNKNOWN;
         }
 
-        const options = format === 'short' 
+        const options = format === 'short'
             ? DATE_FORMAT.OPTIONS.SHORT_DATE
             : format === 'long'
-            ? DATE_FORMAT.OPTIONS.LONG_DATE
-            : DATE_FORMAT.OPTIONS.DATE_TIME;
+                ? DATE_FORMAT.OPTIONS.LONG_DATE
+                : DATE_FORMAT.OPTIONS.DATE_TIME;
 
         return date.toLocaleDateString(DATE_FORMAT.DEFAULT_LOCALE, options);
     } catch (error) {
@@ -112,7 +112,7 @@ export function toTitleCase(str: string): string {
     if (!str) {
         return '';
     }
-    
+
     return str
         .toLowerCase()
         .split(' ')
@@ -129,7 +129,7 @@ export function toSentenceCase(str: string): string {
     if (!str) {
         return '';
     }
-    
+
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
@@ -155,7 +155,7 @@ export function sanitizeHtml(text: string): string {
     if (!text) {
         return '';
     }
-    
+
     return text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -215,8 +215,8 @@ export function postToWebview(webview: vscode.Webview, command: string, data: an
  * @param message - Optional loading message
  */
 export function showWebviewLoading(
-    webview: vscode.Webview, 
-    loading: boolean, 
+    webview: vscode.Webview,
+    loading: boolean,
     message?: string
 ): void {
     postToWebview(webview, WEBVIEW_COMMANDS.UPDATE_CARDS, {
@@ -272,7 +272,7 @@ export function getUserFriendlyErrorMessage(error: any): string {
     if (typeof error === 'string') {
         return error;
     }
-    
+
     if (error?.message) {
         // Check for common error patterns
         if (error.message.includes('401') || error.message.includes('unauthorized')) {
@@ -284,10 +284,10 @@ export function getUserFriendlyErrorMessage(error: any): string {
         if (error.message.includes('network') || error.message.includes('fetch')) {
             return UI_TEXT.ERRORS.NETWORK_ERROR;
         }
-        
+
         return error.message;
     }
-    
+
     return UI_TEXT.ERRORS.FAILED_TO_LOAD;
 }
 
@@ -340,7 +340,7 @@ export function getFileInfo(fileName: string): {
     const extension = lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1) : '';
     const nameWithoutExtension = lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
     const language = getLanguageFromExtension(extension);
-    
+
     return {
         name: fileName,
         extension,
@@ -370,31 +370,31 @@ export function validateScriptContent(content: string, language: string): {
     errors: string[];
 } {
     const errors: string[] = [];
-    
+
     if (!content || content.trim().length === 0) {
         errors.push('Script content cannot be empty');
     }
-    
+
     if (language === 'python') {
         // Basic Python validation
         const lines = content.split('\n');
         let indentLevel = 0;
-        
+
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             const trimmed = line.trim();
-            
+
             if (trimmed.length === 0 || trimmed.startsWith('#')) {
                 continue; // Skip empty lines and comments
             }
-            
+
             // Check for basic syntax issues
             if (trimmed.endsWith(':')) {
                 indentLevel++;
             }
         }
     }
-    
+
     return {
         isValid: errors.length === 0,
         errors
@@ -429,7 +429,7 @@ export function calculatePagination(
     const validCurrentPage = Math.max(1, Math.min(currentPage, totalPages));
     const startIndex = (validCurrentPage - 1) * pageSize;
     const endIndex = Math.min(startIndex + pageSize, totalItems);
-    
+
     return {
         totalPages,
         startIndex,
@@ -456,16 +456,16 @@ export function getPaginationPages(
     if (totalPages <= maxVisible) {
         return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    
+
     const pages: (number | 'ellipsis')[] = [];
     const halfVisible = Math.floor(maxVisible / 2);
-    
+
     // Always show first page
     pages.push(1);
-    
+
     let startPage = Math.max(2, currentPage - halfVisible);
     let endPage = Math.min(totalPages - 1, currentPage + halfVisible);
-    
+
     // Adjust if we're near the beginning or end
     if (currentPage <= halfVisible + 1) {
         endPage = Math.min(maxVisible - 1, totalPages - 1);
@@ -473,27 +473,27 @@ export function getPaginationPages(
     if (currentPage >= totalPages - halfVisible) {
         startPage = Math.max(2, totalPages - maxVisible + 2);
     }
-    
+
     // Add ellipsis if needed
     if (startPage > 2) {
         pages.push('ellipsis');
     }
-    
+
     // Add middle pages
     for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
     }
-    
+
     // Add ellipsis if needed
     if (endPage < totalPages - 1) {
         pages.push('ellipsis');
     }
-    
+
     // Always show last page (if not already added)
     if (totalPages > 1) {
         pages.push(totalPages);
     }
-    
+
     return pages;
 }
 
@@ -555,7 +555,7 @@ export function debounce<T extends (...args: any[]) => any>(
     delay: number
 ): (...args: Parameters<T>) => void {
     let timeoutId: NodeJS.Timeout;
-    
+
     return (...args: Parameters<T>) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => func(...args), delay);

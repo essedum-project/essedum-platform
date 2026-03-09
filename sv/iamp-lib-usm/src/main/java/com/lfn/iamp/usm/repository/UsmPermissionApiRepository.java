@@ -25,7 +25,6 @@ import org.springframework.stereotype.Repository;
 
 import com.lfn.iamp.usm.common.RoleMappedApiPermission;
 import com.lfn.iamp.usm.domain.UsmPermissionApi;
-import com.lfn.iamp.usm.domain.UsmPermissions;
 
 
 

@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 
-import jakarta.persistence.EntityNotFoundException;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;

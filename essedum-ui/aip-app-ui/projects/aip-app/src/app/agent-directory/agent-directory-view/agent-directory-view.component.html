@@ -35,53 +35,7 @@
                   </div>
                 </div>
               </mat-tab>
-              <!-- <mat-tab label="Related Versions" class="lfx-u-header-xl">
-                <div class="tab-content selector-764-41 mb-5">
-                  <div class="col-md-12 p-4">
-                    <div *ngIf="relatedVersions && relatedVersions.length > 0; else noVersions">
-                      <h4 class="mb-3">Version History</h4>
-                      <p class="text-muted mb-4">
-                        Records are grouped using the <span class="d-inline-block">previous_record_cid</span> OASF
-                        property to track version lineage.
-                      </p>
-
-                      <table class="locators-table">
-                        <thead>
-                          <tr>
-                            <th *ngFor="let header of relatedVersionsHeaders">{{ header.label }}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let version of relatedVersions" style="cursor: pointer;"
-                            (click)="navigateToVersion(version)">
-                            <td>
-                              <span class="badge bg-primary">v{{ version.version }}</span>
-                            </td>
-                            <td>
-                              <code class="text-truncate d-inline-block" style="max-width: 360px;"
-                                [title]="version.cid">
-                                {{ version.cid }}
-                              </code>
-                            </td>
-                            <td>
-                              {{ version.lastmodifieddate | date: 'MMM dd, yyyy' }}
-                            </td>
-                            <td>{{ version.creator }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <ng-template #noVersions>
-                      <div class="empty-state">
-                        <h3>No related versions available</h3>
-                        <p class="text-muted">This is the only version of this agent in the directory, or versions are
-                          not linked via <span class="d-inline-block">previous_record_cid</span>.</p>
-                      </div>
-                    </ng-template>
-                  </div>
-                </div>
-              </mat-tab> -->
+         
             </mat-tab-group>
           </div>
         </div>

@@ -1,6 +1,5 @@
 import {
   Component,
-  DebugElement,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -84,7 +83,6 @@ export class AppListComponent implements OnInit {
 
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
-      // update/edit-app permission
       if (cipAuthority.includes('edit-app')) this.editAuth = true;
     });
   }
@@ -128,22 +126,17 @@ export class AppListComponent implements OnInit {
     this.isRefreshing = true;
     this.Authentications();
     this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'] ? params['search'] : '';
         this.selectedTagType = params['type'] ? params['type'].split(',') : [];
         this.selectedTag = params['tagId'] ? params['tagId'].split(',') : [];
-        // this.selectedAdapterInstance = params['adapterInstance']
-        //   ? params['adapterInstance'].split(',')
-        //   : [];
+
       } else {
         this.pageNumber = 1;
         this.filter = '';
       }
     });
-    // this.selectedTagType=this.selectedTagType;
-    // this.updateQueryParam(this.pageNumber,this.filter);
     this.service
       .getConstantByKey(this.appConstantsKey)
       .subscribe((response) => {
@@ -166,7 +159,6 @@ export class AppListComponent implements OnInit {
     search: string = '',
     type: string = '',
     tagId: string = '',
-    // adapterInstance: string = '',
     org: string = this.organization,
     roleId: string = JSON.parse(sessionStorage.getItem('role')).id
   ) {
@@ -177,7 +169,6 @@ export class AppListComponent implements OnInit {
           search: search,
           type: type,
           tagId: tagId,
-          // adapterInstance: adapterInstance,
           org: org,
           roleId: roleId,
         },
@@ -195,7 +186,7 @@ export class AppListComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private el: ElementRef
-  ) {}
+  ) { }
 
   appData = [];
 
@@ -230,7 +221,6 @@ export class AppListComponent implements OnInit {
       });
     });
     this.getCountPipelines();
-    // this.selectedTagType=this.selectedTagType;
     this.updateQueryParam(
       this.pageNumber,
       this.filter,
@@ -242,7 +232,6 @@ export class AppListComponent implements OnInit {
   openApp(app: StreamingServices, type) {
     this.service.getAppByName(app.name).subscribe((resp) => {
       if (resp.scope == 'MFE') {
-        console.log('MFE');
       } else if (resp.scope == 'external' && type == 'runApp') {
         window.open(resp.tryoutlink, '_blank');
         return;
@@ -253,7 +242,6 @@ export class AppListComponent implements OnInit {
           search: this.filter,
           type: this.selectedTagType.toString(),
           tagId: this.selectedTag.toString(),
-          // adapterInstance: this.selectedAdapterInstance.toString(),
           org: this.organization,
           roleId: JSON.parse(sessionStorage.getItem('role')).id,
         },
@@ -264,24 +252,24 @@ export class AppListComponent implements OnInit {
     });
   }
 
-openAddedit(edit: boolean = false, app?: any): void {
-  const dialogRef = this.dialog.open(CreateAppComponent, {
-    height: '80%',
-    width: '60%',
-    minWidth: '60vw',
-    disableClose: true,
-    data: {
-      edit: edit,
-      appName: app?.name,
-      appcid: app?.cid
-    },
-  });
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result==="refresh") {
-      this.ngOnInit();
-    }
-  });
-}
+  openAddedit(edit: boolean = false, app?: any): void {
+    const dialogRef = this.dialog.open(CreateAppComponent, {
+      height: '80%',
+      width: '60%',
+      minWidth: '60vw',
+      disableClose: true,
+      data: {
+        edit: edit,
+        appName: app?.name,
+        appcid: app?.cid
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === "refresh") {
+        this.ngOnInit();
+      }
+    });
+  }
 
   tagSelectedEvent(event) {
     this.selectedTag = event.getSelectedTagList();
@@ -292,10 +280,9 @@ openAddedit(edit: boolean = false, app?: any): void {
 
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
-    // this.selectedTag = [];
-    // this.selectedTagType = [];
     this.ngOnInit();
   }
+
   toggler(isExpanded: boolean) {
     if (isExpanded) {
       return { width: '80%', margin: '0 0 0 20%' };
@@ -366,11 +353,11 @@ openAddedit(edit: boolean = false, app?: any): void {
       this.selectedTag.toString()
     );
   }
+
   getCountPipelines() {
     let params: HttpParams = new HttpParams();
     if (this.filter.length >= 1) params = params.set('query', this.filter);
 
-    // params = params.set('type', 'App');
     params = params.set('page', this.pageNumber);
     params = params.set('size', this.pageSize);
     params = params.set('project', this.organization);
@@ -387,6 +374,7 @@ openAddedit(edit: boolean = false, app?: any): void {
       this.pageArr = [...Array(this.noOfPages).keys()];
     });
   }
+
   changePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
@@ -408,16 +396,19 @@ openAddedit(edit: boolean = false, app?: any): void {
     this.pageNumber = 1;
     this.getAllApps();
   }
+
   selectedButton(i) {
     if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
+
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
       this.changePage();
     }
   }
+
   prevPage() {
     if (this.pageNumber - 1 >= 1) {
       this.pageNumber -= 1;
@@ -533,19 +524,17 @@ openAddedit(edit: boolean = false, app?: any): void {
           this.service.getEventStatus(resp).subscribe((status) => {
             if (status == 'COMPLETED') this.runScript();
             else {
-              console.log(status);
               this.service.message('Script is not generated.', 'error');
             }
           });
         },
         (error) => {
-          // this.service.message('Could not get the results', 'error');
           this.service.message('Error! Could not generate script.', 'error');
         }
       );
   }
+
   runScript() {
-    // if(this.isScript){
     let passType = '';
     if (
       this.streamItem.type != 'Binary' &&
@@ -553,7 +542,6 @@ openAddedit(edit: boolean = false, app?: any): void {
     )
       passType = 'DragAndDrop';
     else passType = this.streamItem.type;
-    // passType = this.type
     this.service
       .runPipeline(
         this.streamItem.alias ? this.streamItem.alias : this.streamItem.name,
@@ -578,16 +566,13 @@ openAddedit(edit: boolean = false, app?: any): void {
                 this.lastest_job = true;
               });
             });
-          // this.getStatus()
         },
         (error) => {
           this.service.message('Some error occured.', 'error');
         }
       );
-    // }else{
-    //   this.service.message('Please generate script to run pipeline.', 'error');
-    // }
   }
+
   getLatestJobId(app) {
     let json = JSON.parse(app.target.json_content);
     if (json.latest_jobid) return json.latest_jobid;
@@ -701,7 +686,6 @@ openAddedit(edit: boolean = false, app?: any): void {
   lastRefreshTime() {
     setTimeout(() => {
       this.lastRefreshedTime = new Date();
-      console.log('Data refreshed!');
     }, 1000);
   }
 

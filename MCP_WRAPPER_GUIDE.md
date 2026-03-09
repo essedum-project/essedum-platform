@@ -274,4 +274,3 @@ your-project/
 ├── docker-compose.yml         # ✨ Created by Copilot
 └── .dockerignore              # ✨ Created by Copilot
 ```
-

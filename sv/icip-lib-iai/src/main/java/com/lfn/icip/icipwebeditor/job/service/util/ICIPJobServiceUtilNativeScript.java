@@ -474,7 +474,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("No .py file found"));
 
-            System.out.println("Extracted .py file: " + pyFileName);
+            log.debug("Extracted .py file: {}", pyFileName);
 			try {
                 // ✅ Fetch input stream for the .py file
                 is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);

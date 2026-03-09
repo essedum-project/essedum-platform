@@ -1,5 +1,3 @@
-// projects/shell/src/app/utils/routes.ts
-
 import { loadRemoteEntry, loadRemoteModule } from '@angular-architects/module-federation';
 import { Routes } from '@angular/router';
 import { routes } from '../landing/landing-routing.module';
@@ -10,9 +8,7 @@ export function buildRoutes(options: CustomManifest): Routes {
 
     for(let i of Object.keys(options)) {
         const entry = options[i];
-        // console.log("entry value",entry); 
-        // console.log("entry entry['title'] value",entry['title']);
-        let r1 : any;
+          let r1 : any;
         if(!entry['type'] || (entry['type'] && entry['type']=='module')){
             let remoteEntry = entry.remoteEntry.includes('http') ? 
                 entry.remoteEntry : 
@@ -26,8 +22,6 @@ export function buildRoutes(options: CustomManifest): Routes {
                     loadChildren: () => 
                         loadRemoteModule({
                             type: 'module',
-                            // type: 'manifest',
-                            // remoteName: i,
                             remoteEntry: remoteEntry,
                             exposedModule: entry.exposedModule
                         })
@@ -44,8 +38,6 @@ export function buildRoutes(options: CustomManifest): Routes {
                     loadChildren: () => 
                         loadRemoteModule({
                             type: 'module',
-                            // type: 'manifest',
-                            // remoteName: i,
                             remoteEntry: remoteEntry,
                             exposedModule: entry.exposedModule
                         })
@@ -84,9 +76,7 @@ export function buildRoutes(options: CustomManifest): Routes {
         }
         
         
-        // console.log("route added", r1);
         routes[0]['children'].push(r1);
     }
-    // console.log("all mfe conf route added", routes);
     return routes;
 }

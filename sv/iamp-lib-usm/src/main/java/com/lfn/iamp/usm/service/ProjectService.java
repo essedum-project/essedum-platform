@@ -25,7 +25,6 @@ import org.springframework.data.domain.Pageable;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.Project;
-import com.lfn.iamp.usm.domain.Project2;
 
 // TODO: Auto-generated Javadoc
 /**

@@ -17,7 +17,6 @@ package com.lfn.iamp.usm.domain;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import lombok.EqualsAndHashCode;
 

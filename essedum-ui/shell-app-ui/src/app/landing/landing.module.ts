@@ -3,6 +3,7 @@ import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angu
 import { CommonModule, DatePipe } from '@angular/common';
 import { LandingComponent } from './landing.component';
 import { AppMenuComponent } from './app-menu/app-menu.component';
+import { SidebarMenuTextComponent } from './sidebarmenutext/sidebarmenutext.component';
 import { LandingRoutingModule } from './landing-routing.module';
 import { AppFooterModule } from './app-footer/app-footer.module';
 import { AppHomeComponent } from './app-home/app-home.component';
@@ -41,6 +42,7 @@ import { DialogModule } from "primeng/dialog"
     AppNavigationComponent,
     SidebarComponent,
     MyProfileComponent,
+    SidebarMenuTextComponent,
   ],
   imports: [
     MatCardModule,

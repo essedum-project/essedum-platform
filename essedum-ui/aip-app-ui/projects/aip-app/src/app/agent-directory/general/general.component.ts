@@ -17,7 +17,6 @@ import { HttpParams } from '@angular/common/http';
 export class GeneralComponent implements OnInit, OnChanges {
   @Input() agentData: any;
 
-  // General Information (fallback defaults)
   name = 'Agent Name';
   alias = 'agent-alias';
   type = 'Agent';
@@ -29,55 +28,25 @@ export class GeneralComponent implements OnInit, OnChanges {
   organization = 'OmAgent Team';
   agentMcpPipelines = [];
   assignedAgentMcpPipeline: string = '';
-
-  // Modules data
   modules: any[] = [];
-
-  // Tools data (dynamic - loaded from agentData)
   tools: any[] = [];
-
-  // Resources data (dynamic - loaded from agentData)
   resources: any[] = [];
-
-  // Prompts data (dynamic - loaded from agentData)
   prompts: any[] = [];
-
-  // Skills data
   skills: any[] = [];
-
-  // Locators data (dynamic - loaded from agentData)
   locators: any[] = [];
-
-  // Domains data (dynamic - loaded from agentData)
   domains: any[] = [];
-
-  // Syncs data (dynamic - loaded from agentData)
   syncs: any[] = [];
-
-  // Publications data (dynamic - loaded from agentData)
   publications: any[] = [];
-
-  // Extensions data (dynamic - loaded from agentData)
   extensions: any[] = [];
-
-  // Selectors data (dynamic - loaded from agentData)
   selectors: any[] = [];
-
-  // Signatures data (dynamic - loaded from agentData)
   signatures: any[] = [];
-
-  // JSON Model data (dynamic only)
   jsonModel: any = {};
-
-  // For editor display
   jsonModelString = '';
   jsonModelLines: string[] = [];
-
   activeSection = 'about';
   aboutDescription =
     'dirctl hub pull baeareia34eoebxwrxakvp1mtqrx3fjzqdklxorpkzyh7eqlzjker6cbcj4';
 
-  // Dynamic table headers
   locatorsHeaders = [
     { key: 'locator_type', label: 'Type' },
     { key: 'url', label: 'URL' },
@@ -113,7 +82,6 @@ export class GeneralComponent implements OnInit, OnChanges {
     { key: 'url', label: 'URL' },
   ];
 
-  // Section titles
   sectionTitles = {
     about: 'Basic Information',
     modules: 'Modules',
@@ -130,11 +98,8 @@ export class GeneralComponent implements OnInit, OnChanges {
     prompts: 'Prompts'
   };
 
-  // Search and filter
   toolSearchQuery = '';
   filteredTools: any[] = [];
-
-  // Sort state for parameters table
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -144,9 +109,7 @@ export class GeneralComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
-    // Populate UI from input if available
     this.organization = sessionStorage.getItem('organization');
-
     this.populateFromAgentData();
   }
 
@@ -234,7 +197,6 @@ export class GeneralComponent implements OnInit, OnChanges {
     }
   }
 
-  // Search tools by name
   searchTools(): void {
     const query = this.toolSearchQuery.toLowerCase().trim();
     if (!query) {
@@ -246,13 +208,10 @@ export class GeneralComponent implements OnInit, OnChanges {
     }
   }
 
-  // Sort parameters table
   sortParameters(tool: any, column: string): void {
     if (this.sortColumn === column) {
-      // Toggle direction if same column
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      // New column, default to ascending
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
@@ -261,7 +220,6 @@ export class GeneralComponent implements OnInit, OnChanges {
       let aValue = a[column];
       let bValue = b[column];
 
-      // Convert to lowercase for string comparison
       if (typeof aValue === 'string') aValue = aValue.toLowerCase();
       if (typeof bValue === 'string') bValue = bValue.toLowerCase();
 
@@ -271,7 +229,6 @@ export class GeneralComponent implements OnInit, OnChanges {
     });
   }
 
-  // Get sort icon for column
   getSortIcon(column: string): string {
     if (this.sortColumn !== column) return 'unfold_more';
     return this.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
@@ -324,7 +281,6 @@ export class GeneralComponent implements OnInit, OnChanges {
             ? assignedPipeline.alias
             : '';
         } else {
-          // No pipelines available
           this.agentMcpPipelines = [];
           this.assignedAgentMcpPipeline = '';
           this.service.message('No pipelines available for the selected type', 'info');

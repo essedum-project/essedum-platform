@@ -4,7 +4,6 @@ import { FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef,MatDialog } from '@angular/material/dialog';
 import { Services } from '../../services/service';
 import * as _ from "lodash";
-import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -16,7 +15,6 @@ export class PipelineCreateComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();
   @Output() modalClosed = new EventEmitter<void>();
   @Input() interfaceType: string = "pipeline";
-  busy: Subscription;
   name = '';
   alias = '';
   description = '';
@@ -93,17 +91,12 @@ export class PipelineCreateComponent implements OnInit {
     
     // Handle MCP-specific setup
     if (this.interfaceType === 'mcp-pipeline') {
-      // Set MCP-specific options
       this.options = [{ viewValue: 'MCP Server', value: 'mcpServer' }];
       this.type = 'mcpServer';
-      console.log('MCP Pipeline creation mode initialized');
     } else if (this.interfaceType === 'pipeline-agent') {
-      // Set Agent-specific options
       this.options = [{ viewValue: 'AI Agent', value: 'AIAgent' }];
       this.type = 'AIAgent';
-      console.log('Agent Pipeline creation mode initialized');
     } else {
-      // Regular pipeline setup
       this.getAllPlugins();
     }
     
@@ -151,16 +144,12 @@ export class PipelineCreateComponent implements OnInit {
           newCanvas.interfacetype = this.interfaceType;
         }
         
-        // Ensure correct type for pipeline-agent interface
         if (this.interfaceType === 'pipeline-agent' && newCanvas.type !== 'AIAgent') {
           newCanvas.type = 'AIAgent';
-          console.log('Corrected type to AIAgent for pipeline-agent interface');
         }
         
-        // Ensure correct type for mcp-pipeline interface
         if (this.interfaceType === 'mcp-pipeline' && newCanvas.type !== 'mcpServer') {
           newCanvas.type = 'mcpServer';
-          console.log('Corrected type to mcpServer for mcp-pipeline interface');
         }
 
         newCanvas.is_template = this.isTemplate;
@@ -188,11 +177,7 @@ export class PipelineCreateComponent implements OnInit {
         }
         // For new pipeline creation from add button ONLY for pipeline-agent or mcp-pipeline
         else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
-          newCanvas.json_content = JSON.stringify({ 
-            'created_source': 'user_defined',
-            'runner_service_name': this.alias.toLowerCase(),
-            'runner_service_status': false
-          });
+          newCanvas.json_content = JSON.stringify({ 'created_source': 'user_defined' });
         }
 
         if (this.importedJson) {
@@ -203,38 +188,68 @@ export class PipelineCreateComponent implements OnInit {
         this.Services.create(newCanvas).subscribe((data) => {
           this.responseLink.emit(data);
           
-          // Handle MCP pipeline creation with dummy file
           if (data.type === 'mcpServer' && this.interfaceType === 'mcp-pipeline') {
             this.createMcpDummyFile(data);
           }
-          // Handle Agent pipeline creation with dummy file
           else if (data.type === 'AIAgent' && this.interfaceType === 'pipeline-agent') {
             this.createAgentDummyFile(data);
           }
-          // Handle existing NativeScript logic
-          else if (data.type == "NativeScript") {
+          else if (data.type == "NativeScript" && this.data.copy) {
             if (data.json_content) {
               let json_content = JSON.parse(data.json_content)
-              let script_file = json_content.elements[0].attributes.files[0]
-              let script_pipeline_name = script_file.split('_')[0]
-
-              this.Services.readNativeFile(script_pipeline_name, data.organization, script_file).subscribe(
-                resp => {
-                  // this.script = resp;
-                  const textDecoder = new TextDecoder('utf-8');
-                  this.script = textDecoder.decode(resp).split('\n');
-                  json_content.elements[0].attributes.files[0] = data.name + "_" + sessionStorage.getItem('organization') + ".py";
-                  data.json_content = JSON.stringify(json_content)
-
-                  const formData: FormData = new FormData();
-                  let script = this.script.join('\n')
-                  let scriptFile = new Blob([script], { type: 'text/plain' });
-                  formData.set('scriptFile', scriptFile);
-                  this.Services.createNativeFile(data.name, data.organization, json_content.elements[0].attributes.files[0], json_content.elements[0].attributes.filetype, formData).subscribe();
-                  this.Services.update(data).subscribe();
-                }, error => {
+              
+              if (json_content.elements && json_content.elements[0] && 
+                  json_content.elements[0].attributes && json_content.elements[0].attributes.files && 
+                  json_content.elements[0].attributes.files.length > 0) {
+                
+                let script_file = json_content.elements[0].attributes.files[0];
+                
+                let actualFileName = script_file;
+                if (typeof script_file === 'string') {
+                  if (script_file.startsWith('[') && script_file.endsWith(']')) {
+                    try {
+                      const filesArray = JSON.parse(script_file);
+                      actualFileName = filesArray.find((f: string) => f.endsWith('.py')) || filesArray[0];
+                    } catch (e) {
+                      const cleanStr = script_file.slice(1, -1);
+                      const filesArray = cleanStr.split(',').map(f => f.trim().replace(/["\']/g, ''));
+                      actualFileName = filesArray.find(f => f.endsWith('.py')) || filesArray[0];
+                    }
+                  }
                 }
-              );
+                
+                let script_pipeline_name = actualFileName.split('_')[0];
+
+                this.Services.readNativeFile(script_pipeline_name, data.organization, script_file).subscribe(
+                  resp => {
+                    const textDecoder = new TextDecoder('utf-8');
+                    this.script = textDecoder.decode(resp).split('\n');
+                    const newFileName = data.name + "_" + data.organization + ".py";
+                    json_content.elements[0].attributes.files[0] = newFileName;
+                    data.json_content = JSON.stringify(json_content);
+                    const formData: FormData = new FormData();
+                    let script = this.script.join('\n')
+                    let scriptFile = new Blob([script], { type: 'text/plain' });
+                    formData.set('scriptFile', scriptFile);
+                    this.Services.createNativeFile(data.name, data.organization, newFileName, json_content.elements[0].attributes.filetype, formData).subscribe(
+                      () => {
+                        this.Services.update(data).subscribe(
+                          () => {
+                          },
+                          (updateError) => {
+                            console.error('Error updating pipeline after file creation:', updateError);
+                          }
+                        );
+                      },
+                      (fileError) => {
+                        console.error('Error creating native file for copy:', fileError);
+                      }
+                    );
+                  }, error => {
+                    console.error('Error reading source file for copy:', error);
+                  }
+                );
+              }
             }
           }
           
@@ -377,6 +392,7 @@ export class PipelineCreateComponent implements OnInit {
     word = word.toString()
     return true
   }
+
   editDetails() {
     try {
       const editCanvas = this.data.canvasData;
@@ -412,13 +428,9 @@ export class PipelineCreateComponent implements OnInit {
    * Create dummy MCP configuration file
    */
   private createMcpDummyFile(pipelineData: any): void {
-    console.log('Creating MCP dummy configuration file for:', pipelineData.name);
-    
-    // Generate dynamic filename for MCP
     const organization = sessionStorage.getItem('organization') || 'defaultorg';
     const dynamicFilename = `${pipelineData.name}_${organization}.json`;
     
-    // MCP dummy configuration content
     const mcpConfig = {
       mcpServers: {
         [pipelineData.name]: {
@@ -436,11 +448,8 @@ export class PipelineCreateComponent implements OnInit {
       organization: organization
     };
     
-    console.log('MCP Configuration:', mcpConfig);
-    console.log('Dynamic filename:', dynamicFilename);
-    
     // Preserve original json_content from add API response (created_source flag)
-    let originalJsonContent: any = {};
+    let originalJsonContent = {};
     try {
       if (pipelineData.json_content) {
         originalJsonContent = JSON.parse(pipelineData.json_content);
@@ -449,11 +458,9 @@ export class PipelineCreateComponent implements OnInit {
       console.warn('Could not parse original json_content:', e);
     }
     
-    // Update the pipeline's json_content with the MCP configuration, preserving all original fields
+    // Update the pipeline's json_content with the MCP configuration, preserving created_source
     pipelineData.json_content = JSON.stringify({
-      created_source: originalJsonContent.created_source || 'user_defined',
-      runner_service_name: originalJsonContent.runner_service_name.toLowerCase() || pipelineData.alias.toLowerCase(),
-      runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
+      ...originalJsonContent,
       elements: [{
         type: 'mcpServer',
         name: pipelineData.name,
@@ -465,8 +472,6 @@ export class PipelineCreateComponent implements OnInit {
     // Update the pipeline using update API
     this.Services.update(pipelineData).subscribe(
       (updateResponse) => {
-        console.log('MCP pipeline updated successfully with configuration:', updateResponse);
-        
         // Create file content using create API
         const jsonContent = JSON.stringify(mcpConfig, null, 2);
         const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
@@ -476,7 +481,6 @@ export class PipelineCreateComponent implements OnInit {
         // Call create API to save the dummy file using name from API response
         this.Services.createNativeFile(pipelineData.name, organization, dynamicFilename, 'json', formData).subscribe(
           (createResponse) => {
-            console.log('MCP dummy file created successfully:', createResponse);
           },
           (createError) => {
             console.error('Error creating MCP dummy file:', createError);
@@ -493,13 +497,9 @@ export class PipelineCreateComponent implements OnInit {
    * Create dummy Agent configuration file
    */
   private createAgentDummyFile(pipelineData: any): void {
-    console.log('Creating Agent dummy configuration file for:', pipelineData.name);
-    
-    // Generate dynamic filename for Agent
     const organization = sessionStorage.getItem('organization') || 'defaultorg';
     const dynamicFilename = `${pipelineData.name}_${organization}.json`;
     
-    // Agent dummy configuration content
     const agentConfig = {
       agent: {
         name: pipelineData.name,
@@ -529,11 +529,7 @@ export class PipelineCreateComponent implements OnInit {
       }
     };
     
-    console.log('Agent Configuration:', agentConfig);
-    console.log('Dynamic filename:', dynamicFilename);
-    
-    // Preserve original json_content from add API response (created_source flag)
-    let originalJsonContent: any = {};
+    let originalJsonContent = {};
     try {
       if (pipelineData.json_content) {
         originalJsonContent = JSON.parse(pipelineData.json_content);
@@ -542,11 +538,8 @@ export class PipelineCreateComponent implements OnInit {
       console.warn('Could not parse original json_content:', e);
     }
     
-    // Update the pipeline's json_content with the Agent configuration, preserving all original fields
     pipelineData.json_content = JSON.stringify({
-      created_source: originalJsonContent.created_source || 'user_defined',
-      runner_service_name: originalJsonContent.runner_service_name.toLowerCase() || pipelineData.alias.toLowerCase(),
-      runner_service_status: originalJsonContent.runner_service_status !== undefined ? originalJsonContent.runner_service_status : false,
+      ...originalJsonContent,
       elements: [{
         type: 'AIAgent',
         name: pipelineData.name,
@@ -555,21 +548,15 @@ export class PipelineCreateComponent implements OnInit {
       }]
     });
     
-    // Update the pipeline using update API
     this.Services.update(pipelineData).subscribe(
       (updateResponse) => {
-        console.log('Agent pipeline updated successfully with configuration:', updateResponse);
-        
-        // Create file content using create API
         const jsonContent = JSON.stringify(agentConfig, null, 2);
         const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
         const formData = new FormData();
         formData.set('scriptFile', jsonBlob, dynamicFilename);
         
-        // Call create API to save the dummy file using name from API response
         this.Services.createNativeFile(pipelineData.name, organization, dynamicFilename, 'json', formData).subscribe(
           (createResponse) => {
-            console.log('Agent dummy file created successfully:', createResponse);
           },
           (createError) => {
             console.error('Error creating Agent dummy file:', createError);

@@ -25,7 +25,7 @@
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 12px;
-    --spacing-lg: 16px;
+    --spacing-lg: 12px;
     --spacing-xl: 20px;
     --spacing-xxl: 24px;
     --spacing-xxxl: 32px;
@@ -62,21 +62,12 @@
     --transition-normal: 0.2s ease;
     --transition-slow: 0.3s ease;
 
-    /* Z-index layers */
-    --z-index-dropdown: 100;
-    --z-index-modal: 200;
-    --z-index-tooltip: 300;
-
     /* Component specific */
-    --card-min-height: 100px;
+    --card-min-height: 140px;
     --button-height: 28px;
     --input-height: 28px;
     --pagination-button-size: 24px;
-    --avatar-size: 32px;
-
-    /* Scrollbar */
-    --scrollbar-width: 4px;
-    --scrollbar-width-hover: 8px;
+    --avatar-size: 24px;
 }
 
 /* ================================
@@ -108,11 +99,9 @@ body {
 
 .container {
     max-width: 100%;
-    margin: 0 auto;
     height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     gap: var(--spacing-lg);
 }
 
@@ -123,13 +112,9 @@ body {
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    /* padding-bottom: var(--spacing-md); */
     border-bottom: 1px solid var(--vscode-panel-border);
-    padding-bottom: var(--spacing-lg);
-    flex-shrink: 0;
-    min-height: 20px;
-    width: 100%;
-    /* Ensure full width */
 }
 
 .header h2,
@@ -148,10 +133,36 @@ body {
 .header-buttons {
     display: flex;
     gap: var(--spacing-sm);
-    align-items: flex-end;
-    flex: 0 0 auto;
-    margin-top: -30px;
+    align-items: center;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-icon {
     cursor: pointer;
+    font-size: var(--font-size-xxl);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+    color: var(--vscode-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--spacing-xl);
+    min-height: var(--spacing-xl);
+}
+
+.refresh-icon:hover {
+    background-color: var(--vscode-list-hoverBackground);
+    transform: rotate(180deg);
+}
+
+.refresh-icon:active {
+    transform: rotate(180deg) scale(0.95);
 }
 
 /* ================================
@@ -340,7 +351,7 @@ body {
     position: relative;
     overflow: hidden;
     outline: none;
-    min-height: var(--card-min-height);
+    /* min-height: var(--card-min-height); */
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -524,67 +535,55 @@ body {
 
 .pagination-container {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs);
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
     border-top: 1px solid var(--vscode-panel-border);
-    background-color: var(--vscode-editor-background);
-    flex-shrink: 0;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
 }
 
 .pagination-info {
-    text-align: center;
+    font-size: var(--font-size-sm);
     color: var(--vscode-descriptionForeground);
-    font-size: var(--font-size-xs);
-    margin: 0;
 }
 
 .pagination-controls {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
-}
-
-.btn-pagination,
-.page-number {
-    min-width: var(--pagination-button-size);
-    height: var(--pagination-button-size);
-    padding: var(--spacing-xs);
-    border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
-    border-radius: var(--radius-md);
-    background-color: var(--vscode-button-secondaryBackground);
-    color: var(--vscode-button-secondaryForeground);
-    cursor: pointer;
-    font-size: var(--font-size-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-normal);
-    text-decoration: none;
-}
-
-.btn-pagination:hover:not(:disabled),
-.page-number:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
-.btn-pagination:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    gap: var(--spacing-sm);
 }
 
 .pagination-pages {
     display: flex;
     gap: var(--spacing-xs);
-    margin: 0 var(--spacing-sm);
 }
 
-.page-number.active {
+.btn-pagination {
+    min-width: var(--pagination-button-size);
+    width: var(--pagination-button-size);
+    height: var(--pagination-button-size);
+    padding: 0;
+    font-size: var(--font-size-sm);
+    background-color: transparent;
+    color: var(--vscode-foreground);
+    border: 1px solid var(--vscode-panel-border);
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
+}
+
+.btn-pagination.active {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border-color: var(--vscode-button-background);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .page-ellipsis {
@@ -922,7 +921,7 @@ body::-webkit-scrollbar {
     }
 
     .header {
-        flex-direction: column;
+        /* flex-direction: column; */
         align-items: stretch;
         gap: var(--spacing-md);
     }
@@ -935,9 +934,9 @@ body::-webkit-scrollbar {
         gap: var(--spacing-sm);
     }
 
-    .pipeline-card {
+    /* .pipeline-card {
         padding: var(--spacing-md);
-    }
+    } */
 
     .pipeline-card-header {
         align-items: stretch;
@@ -957,6 +956,11 @@ body::-webkit-scrollbar {
         /* Allow wrapping if needed */
         justify-content: flex-start;
     }
+
+    /* .pagination-container {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    } */
 }
 
 /* Mobile */
@@ -997,9 +1001,9 @@ body::-webkit-scrollbar {
         font-size: var(--font-size-md);
     }
 
-    .pipeline-card {
+    /* .pipeline-card {
         padding: 12px;
-    }
+    } */
 
     .pipeline-card-header {
         gap: var(--spacing-sm);
@@ -1039,8 +1043,8 @@ body::-webkit-scrollbar {
 
     .btn-pagination,
     .page-number {
-        min-width: var(--spacing-xl);
-        height: var(--spacing-xl);
+        min-width: var(--pagination-button-size);
+        height: var(--pagination-button-size);
         font-size: var(--font-size-xs);
     }
 
@@ -1098,20 +1102,11 @@ body::-webkit-scrollbar {
         padding: var(--spacing-xs);
     }
 
-    .pipeline-card {
+    /* .pipeline-card {
         padding: var(--spacing-sm);
         gap: var(--spacing-xs);
-    }
+    } */
 
-    .pipeline-card-header {
-        /* flex-direction: column; */
-        gap: var(--spacing-xs);
-    }
-
-    .pipeline-type-badge {
-        font-size: var(--font-size-xs);
-        align-self: flex-start;
-    }
 
     /* .pipeline-avatar {
         width: var(--spacing-lg);
@@ -1138,26 +1133,6 @@ body::-webkit-scrollbar {
         display: none;
     }
 
-    .pagination-container {
-        padding: var(--spacing-xs);
-        gap: var(--spacing-xs);
-    }
-
-    .pagination-info {
-        font-size: var(--font-size-xs);
-    }
-
-    .btn-pagination,
-    .page-number {
-        min-width: var(--spacing-lg);
-        height: var(--spacing-lg);
-        font-size: var(--font-size-xs);
-        padding: var(--spacing-xs);
-    }
-
-    .pagination-controls {
-        gap: var(--spacing-xs);
-    }
 }
 
 /* ================================

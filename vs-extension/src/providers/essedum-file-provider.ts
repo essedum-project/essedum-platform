@@ -4,6 +4,7 @@ import { getBaseUrl } from '../constants/api-config';
 import { createHTTPSAgent } from '../utils/ssl-config.util';
 import { STORAGE_KEYS } from '../constants/extension-constants';
 import * as ExtensionUtils from '../utils/extension-utils';
+import { PipelineAgentService } from '../services/pipeline-agent.service';
 
 const axios = require('axios');
 const logger = ExtensionUtils.createLogger('EssedumFileProvider');
@@ -30,6 +31,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
     private _project: any;
     private _role: any;
     private _context?: vscode.ExtensionContext;
+    private _pipelineAgentService?: PipelineAgentService;
 
     constructor(token: string, project: any, role: any, context?: vscode.ExtensionContext) {
         this._token = token;
@@ -43,6 +45,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      */
     public updateToken(token: string): void {
         this._token = token;
+    }
+
+    /**
+     * Set the PipelineAgentService for individual file save operations
+     */
+    public setPipelineAgentService(service: PipelineAgentService): void {
+        this._pipelineAgentService = service;
     }
 
     watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
@@ -66,7 +75,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
     readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         const entries: [string, vscode.FileType][] = [];
-        
+
         // Find all files that are children of this URI
         for (const [fileUri, file] of this._files) {
             const fileUriObj = vscode.Uri.parse(fileUri);
@@ -96,17 +105,17 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
     writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
         const existingFile = this._files.get(uri.toString());
-        
+
         if (!existingFile && !options.create) {
             throw vscode.FileSystemError.FileNotFound();
         }
-        
+
         if (existingFile && !options.overwrite) {
             throw vscode.FileSystemError.FileExists();
         }
 
         const contentStr = Buffer.from(content).toString('utf8');
-        
+
         if (existingFile) {
             // Update existing file
             existingFile.content = contentStr;
@@ -142,7 +151,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Update the file object
         file.uri = newUri;
-        
+
         // Move the file in our map
         this._files.delete(oldUri.toString());
         this._files.set(newUri.toString(), file);
@@ -167,7 +176,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
     public registerFile(fileName: string, content: string, pipelineName: string, organization: string): vscode.Uri {
         const extension = fileName.split('.').pop() || 'txt';
         const uri = vscode.Uri.parse(`essedum:///${pipelineName}/${fileName}`);
-        
+
         const file: EssedumFile = {
             uri,
             content,
@@ -180,7 +189,31 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         this._files.set(uri.toString(), file);
         this._emitter.fire([{ type: vscode.FileChangeType.Created, uri }]);
-        
+
+        return uri;
+    }
+
+    /**
+     * Register ADK file with the file system provider (uses adk:// path prefix)
+     */
+    public registerAdkFile(filePath: string, content: string, pipelineName: string, organization: string): vscode.Uri {
+        const extension = filePath.split('.').pop() || 'txt';
+        const fileName = filePath.split('/').pop() || filePath;
+        const uri = vscode.Uri.parse(`essedum://adk/${pipelineName}/${filePath}`);
+
+        const file: EssedumFile = {
+            uri,
+            content,
+            modified: false,
+            fileName,
+            extension,
+            pipelineName,
+            organization
+        };
+
+        this._files.set(uri.toString(), file);
+        this._emitter.fire([{ type: vscode.FileChangeType.Created, uri }]);
+
         return uri;
     }
 
@@ -188,9 +221,44 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      * Get all files for a specific pipeline that have been modified
      */
     private getModifiedFilesForPipeline(pipelineName: string): EssedumFile[] {
-        return Array.from(this._files.values()).filter(file => 
+        return Array.from(this._files.values()).filter(file =>
             file.pipelineName === pipelineName && file.modified
         );
+    }
+
+    /**
+     * Get all ADK files for a specific pipeline
+     */
+    public getAdkFilesForPipeline(pipelineName: string): EssedumFile[] {
+        return Array.from(this._files.values()).filter(file =>
+            file.uri.toString().includes(`essedum://adk/${pipelineName}`)
+        );
+    }
+
+    /**
+     * Get all modified ADK files for a specific pipeline
+     */
+    public getModifiedAdkFiles(pipelineName: string): EssedumFile[] {
+        return Array.from(this._files.values()).filter(file =>
+            file.uri.toString().includes(`essedum://adk/${pipelineName}`) && file.modified
+        );
+    }
+
+    /**
+     * Clear ADK files for a specific pipeline
+     */
+    public clearAdkFiles(pipelineName: string): void {
+        const toDelete: string[] = [];
+        for (const [uriString, file] of this._files) {
+            if (file.uri.toString().includes(`essedum://adk/${pipelineName}`)) {
+                toDelete.push(uriString);
+            }
+        }
+        toDelete.forEach(uriString => {
+            const uri = vscode.Uri.parse(uriString);
+            this._files.delete(uriString);
+            this._emitter.fire([{ type: vscode.FileChangeType.Deleted, uri }]);
+        });
     }
 
     /**
@@ -198,13 +266,13 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
      */
     public async saveFilesToServer(pipelineName: string): Promise<void> {
         const filesToSave = this.getModifiedFilesForPipeline(pipelineName);
-        
+
         if (filesToSave.length === 0) {
             return;
         }
 
         const savePromises = filesToSave.map(file => this.saveFileToServer(file));
-        
+
         try {
             await Promise.all(savePromises);
             vscode.window.showInformationMessage(
@@ -243,7 +311,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Create FormData for file upload
         const formData = new FormData();
-        
+
         // Create a Blob from the script content
         const scriptBlob = new Blob([file.content], { type: 'text/plain' });
         formData.append('scriptFile', scriptBlob, file.fileName);
@@ -253,7 +321,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
         formData.append('filetype', fileType);
         formData.append('pipelineName', file.pipelineName);
         formData.append('organization', file.organization);
-        
+
         // Debug: log the form data contents
         logger.info('FormData contents:');
         logger.info('- scriptFile:', file.fileName, 'size:', file.content.length);
@@ -263,11 +331,11 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
 
         // Use the correct file create endpoint from curl analysis
         const uploadEndpoint = `/api/aip/file/create/${file.pipelineName}/${file.organization}/${fileType}?file=${file.fileName}`;
-        
+
         logger.info(`Attempting to upload file ${file.fileName} to pipeline ${file.pipelineName} in organization ${file.organization}`);
         logger.info(`Using endpoint: ${uploadEndpoint}`);
         logger.info(`File type: ${fileType}`);
-        
+
         const response = await axios.post(
             uploadEndpoint,
             formData,
@@ -278,7 +346,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
                 timeout: 30000
             }
         );
-        
+
         logger.info(`File ${file.fileName} saved to Essedum server successfully:`, response.data);
     }
 
@@ -302,5 +370,117 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
         };
 
         return extensionMap[extension.toLowerCase()] || 'Text';
+    }
+
+    /**
+     * Save individual ADK file to server using updateAdkFile API
+     * @param file - The file to save
+     * @returns Promise that resolves when save is complete
+     */
+    public async saveIndividualAdkFile(file: EssedumFile): Promise<void> {
+        if (!this._pipelineAgentService) {
+            throw new Error('PipelineAgentService not configured');
+        }
+
+        // Extract file path from URI (remove essedum://adk/{pipelineName}/ prefix)
+        const fullPath = file.uri.path; // e.g., /adk/pipelineName/file.py
+        const pathParts = fullPath.split('/');
+        const filePath = pathParts.slice(3).join('/'); // Remove /adk/pipelineName/
+
+        logger.info(`Saving individual ADK file: ${filePath} for pipeline: ${file.pipelineName}`);
+
+        try {
+            await this._pipelineAgentService.updateAdkFile(
+                file.pipelineName,
+                filePath,
+                file.content
+            );
+
+            // Mark file as saved (not modified)
+            file.modified = false;
+
+            logger.info(`Successfully saved file: ${filePath}`);
+        } catch (error: any) {
+            logger.error(`Failed to save file ${filePath}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Save all ADK files for a pipeline using batch update API
+     */
+    public async saveAdkFilesToServer(pipelineName: string, organization: string): Promise<void> {
+        const modifiedFiles = this.getModifiedAdkFiles(pipelineName);
+
+        if (modifiedFiles.length === 0) {
+            return;
+        }
+
+        logger.info(`Saving ${modifiedFiles.length} modified ADK files for pipeline: ${pipelineName}`);
+
+        const httpsAgent = createHTTPSAgent(this._context);
+
+        const headers = {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${this._token}`,
+            'Content-Type': 'application/json',
+            'Project': this._project.id,
+            'ProjectName': this._project.name,
+            'X-Requested-With': 'Leap',
+            'roleId': this._role.id,
+            'roleName': this._role.name
+        };
+
+        // Build file metadata array for batch update
+        const fileMetadata = modifiedFiles.map(file => {
+            // Extract file path from URI (remove essedum://adk/{pipelineName}/ prefix)
+            const fullPath = file.uri.path; // e.g., /adk/pipelineName/file.py
+            const pathParts = fullPath.split('/');
+            const filePath = pathParts.slice(3).join('/'); // Remove /adk/pipelineName/
+
+            return {
+                filePath: filePath,
+                filescript: file.content,
+                fileType: this.getFileTypeByExtension(file.extension)
+            };
+        });
+
+        const payload = {
+            organization: organization,
+            fileMetadata: fileMetadata
+        };
+
+        logger.info(`Batch update payload:`, JSON.stringify(payload, null, 2));
+
+        try {
+            const response = await axios.put(
+                `/api/aip/updateAdkFolder/${pipelineName}`,
+                payload,
+                {
+                    baseURL: getBaseUrl(),
+                    headers: headers,
+                    httpsAgent: httpsAgent,
+                    timeout: 30000
+                }
+            );
+
+            logger.info(`Batch update response:`, response.data);
+
+            // Mark files as saved
+            modifiedFiles.forEach(file => {
+                file.modified = false;
+            });
+
+            vscode.window.showInformationMessage(
+                `✓ Saved ${modifiedFiles.length} file(s) to server`
+            );
+        } catch (error: any) {
+            logger.error(`Failed to save ADK files:`, error);
+            logger.error(`Error response:`, error.response?.data);
+            vscode.window.showErrorMessage(
+                `Failed to save files: ${error.response?.data?.message || error.message}`
+            );
+            throw error;
+        }
     }
 }

@@ -93,6 +93,21 @@ def get_connection_details_with_token(referer, adapter_instance, project, header
 	os.environ['no_proxy'] = "localhost,essedum.az.ad.idemo-ppc.com,0.0.0.0,10.*,*.ad.infosys.com,10.82.53.110,victlpast02,infyaiplat-tst.ad.infosys.com,infyaiplat.ad.infosys.com"
 	logger.info(f"Inside datasource.py file...")
 	connection_details = {}
+	
+	# Check for environment variable fallback for local testing
+	if os.environ.get('USE_ENV_CREDENTIALS', 'false').lower() == 'true':
+		logger.info("Using environment variables for AWS credentials")
+		connection_details = {
+			"aws_access_key_id": os.environ.get('AWS_ACCESS_KEY_ID', ''),
+			"aws_secret_access_key": os.environ.get('AWS_SECRET_ACCESS_KEY', ''),
+			"region_name": os.environ.get('AWS_REGION', 'us-east-1')
+		}
+		if connection_details.get('aws_access_key_id'):
+			logger.info("Successfully loaded credentials from environment variables")
+			return connection_details
+		else:
+			logger.warning("USE_ENV_CREDENTIALS is true but AWS_ACCESS_KEY_ID not found in environment")
+	
 	try:
 		url = f"{referer}api/aip/services/fetchConnectionDetailsByAdapterInstance?project={project}&adapter_instance={adapter_instance}"
 		if isInstance is not None:
@@ -109,7 +124,8 @@ def get_connection_details_with_token(referer, adapter_instance, project, header
 			headers = dict(headers)
 			if 'Authorization' in headers:
 				del headers['Authorization']
-				
+			
+			logger.info("DB Connections : "+str(DB_CONNECTIONS))
 			headers['access-token'] = DB_CONNECTIONS[referer].get('TOKEN', '')
 			headers['Host']="essedum.az.ad.idemo-ppc.com"
 			logger.info("Using external referer - removed Authorization and added access-token")

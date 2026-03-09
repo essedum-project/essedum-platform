@@ -15,7 +15,6 @@
 
 package com.lfn.icip.adapter.rest;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 

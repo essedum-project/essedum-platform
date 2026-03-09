@@ -22,7 +22,6 @@ import org.slf4j.Marker;
 import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 // TODO: Auto-generated Javadoc
 // 

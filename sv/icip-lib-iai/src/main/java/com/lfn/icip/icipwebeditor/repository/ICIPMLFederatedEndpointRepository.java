@@ -1,7 +1,6 @@
 package com.lfn.icip.icipwebeditor.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.lfn.icip.icipwebeditor.model.FedEndpointID;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
-import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
 
 @NoRepositoryBean
 public interface ICIPMLFederatedEndpointRepository extends JpaRepository<ICIPMLFederatedEndpoint, FedEndpointID> {

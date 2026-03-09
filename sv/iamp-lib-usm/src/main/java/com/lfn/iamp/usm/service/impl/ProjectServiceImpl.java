@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.Project;
-import com.lfn.iamp.usm.domain.Project2;
 import com.lfn.iamp.usm.domain.UserProjectRole;
 import com.lfn.iamp.usm.repository.ProjectRepository;
 import com.lfn.iamp.usm.repository.UserProjectRoleRepository;

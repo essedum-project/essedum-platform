@@ -4,7 +4,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.lfn.icip.icipwebeditor.factory.IICIPOutputArtifactsServiceUtilFactory;
-import com.lfn.icip.icipwebeditor.factory.IICIPStopJobServiceUtilFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;

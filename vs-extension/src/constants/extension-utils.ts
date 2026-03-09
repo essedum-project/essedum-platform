@@ -26,11 +26,11 @@ import { CONTEXT_KEYS, COMMANDS, MESSAGES, DEBUG_CONFIG } from './app-constants'
 export async function updateAuthenticationContext(isAuthenticated: boolean): Promise<void> {
     try {
         await vscode.commands.executeCommand(
-            COMMANDS.VSCODE.SET_CONTEXT, 
-            CONTEXT_KEYS.IS_AUTHENTICATED, 
+            COMMANDS.VSCODE.SET_CONTEXT,
+            CONTEXT_KEYS.IS_AUTHENTICATED,
             isAuthenticated
         );
-        
+
         if (DEBUG_CONFIG.VERBOSE_LOGGING) {
             console.log(MESSAGES.SUCCESS.AUTH_CONTEXT_UPDATED(isAuthenticated));
         }
@@ -38,8 +38,8 @@ export async function updateAuthenticationContext(isAuthenticated: boolean): Pro
         console.error(MESSAGES.ERROR.AUTH_CONTEXT_UPDATE_FAILED, error);
         // Fallback: ensure context is set to false on error
         await vscode.commands.executeCommand(
-            COMMANDS.VSCODE.SET_CONTEXT, 
-            CONTEXT_KEYS.IS_AUTHENTICATED, 
+            COMMANDS.VSCODE.SET_CONTEXT,
+            CONTEXT_KEYS.IS_AUTHENTICATED,
             false
         );
     }
@@ -72,7 +72,7 @@ export async function checkAndUpdateAuthStatus(authService: any): Promise<boolea
  */
 export function getAuthErrorMessage(error: any): string {
     const errorMessage = error?.message || error?.toString() || '';
-    
+
     if (errorMessage.includes('cancelled')) {
         return MESSAGES.ERROR.AUTH_CANCELLED;
     } else if (errorMessage.includes('certificate')) {
@@ -93,22 +93,22 @@ export function getAuthErrorMessage(error: any): string {
  * @param helpUrl - URL to open for help (optional)
  */
 export async function showErrorWithOptions(
-    message: string, 
-    retryCommand?: string, 
+    message: string,
+    retryCommand?: string,
     helpUrl?: string
 ): Promise<void> {
     const options = ['OK'];
-    
+
     if (retryCommand) {
         options.unshift('Retry');
     }
-    
+
     if (helpUrl) {
         options.push('Help');
     }
-    
+
     const selection = await vscode.window.showErrorMessage(message, ...options);
-    
+
     if (selection === 'Retry' && retryCommand) {
         await vscode.commands.executeCommand(retryCommand);
     } else if (selection === 'Help' && helpUrl) {
@@ -146,7 +146,7 @@ export async function showProgressNotification<T>(
  * @returns Promise with the selected action
  */
 export async function showSuccessMessage(
-    message: string, 
+    message: string,
     ...actions: string[]
 ): Promise<string | undefined> {
     return vscode.window.showInformationMessage(message, ...actions);
@@ -178,14 +178,14 @@ export function registerDisposable(context: vscode.ExtensionContext, disposable:
  * @param callback - Command callback function
  */
 export function registerCommand(
-    context: vscode.ExtensionContext, 
-    commandId: string, 
+    context: vscode.ExtensionContext,
+    commandId: string,
     callback: (...args: any[]) => any
 ): void {
     try {
         const disposable = vscode.commands.registerCommand(commandId, callback);
         registerDisposable(context, disposable);
-        
+
         if (DEBUG_CONFIG.VERBOSE_LOGGING) {
             console.log(`${DEBUG_CONFIG.LOG_PREFIXES.EXTENSION} Registered command: ${commandId}`);
         }
@@ -210,7 +210,7 @@ export function registerWebviewViewProvider(
     try {
         const disposable = vscode.window.registerWebviewViewProvider(viewId, provider, options);
         registerDisposable(context, disposable);
-        
+
         if (DEBUG_CONFIG.VERBOSE_LOGGING) {
             console.log(`${DEBUG_CONFIG.LOG_PREFIXES.EXTENSION} Registered webview provider: ${viewId}`);
         }
@@ -235,7 +235,7 @@ export function registerFileSystemProvider(
     try {
         const disposable = vscode.workspace.registerFileSystemProvider(scheme, provider, options);
         registerDisposable(context, disposable);
-        
+
         if (DEBUG_CONFIG.VERBOSE_LOGGING) {
             console.log(`${DEBUG_CONFIG.LOG_PREFIXES.EXTENSION} Registered file system provider: ${scheme}`);
         }
@@ -255,7 +255,7 @@ export function registerFileSystemProvider(
  */
 export function createLogger(component: string) {
     const prefix = `[${component}]`;
-    
+
     return {
         info: (message: string, ...args: any[]) => {
             if (DEBUG_CONFIG.VERBOSE_LOGGING) {

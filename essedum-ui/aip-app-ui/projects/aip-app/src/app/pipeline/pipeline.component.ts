@@ -1,12 +1,10 @@
 import {
-  ChangeDetectorRef,
   Component,
   EventEmitter,
   OnChanges,
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { Services } from '../services/service';
@@ -84,7 +82,6 @@ export class PipelineComponent implements OnInit, OnChanges {
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
-    private changeDetectionRef: ChangeDetectorRef,
     public dialog: MatDialog,
     public tagService: TagsService,
     private location: Location
@@ -159,8 +156,7 @@ export class PipelineComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  private initializePagination(): void {
-    // Define how many page numbers to show
+  private initializePagination(): void {    
     const visiblePages = 5;
     const halfVisible = Math.floor(visiblePages / 2);
 
@@ -168,33 +164,21 @@ export class PipelineComponent implements OnInit, OnChanges {
       this.startIndex = 0;
       this.endIndex = visiblePages;
     } else if (this.noOfPages <= visiblePages) {
-      // If we have fewer pages than the visible count, show all
       this.startIndex = 0;
       this.endIndex = this.noOfPages;
     } else if (this.pageNumber <= halfVisible + 1) {
-      // Near the beginning
       this.startIndex = 0;
       this.endIndex = visiblePages;
     } else if (this.pageNumber >= this.noOfPages - halfVisible) {
-      // Near the end
       this.startIndex = this.noOfPages - visiblePages;
       this.endIndex = this.noOfPages;
     } else {
-      // In the middle - center the current page
       this.startIndex = this.pageNumber - halfVisible - 1;
       this.endIndex = this.pageNumber + halfVisible;
     }
 
-    // Ensure indexes are within valid bounds
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
-
-    console.log(
-      'Pagination initialized with startIndex:',
-      this.startIndex,
-      'endIndex:',
-      this.endIndex
-    );
   }
 
   private loadAuthentications(): void {
@@ -341,30 +325,6 @@ export class PipelineComponent implements OnInit, OnChanges {
     );
   }
 
-  // changedToogle(event: any) {
-  //   this.cardToggled = event;
-  //   this.streamItem = this.streamItem.reset;
-  // }
-
-  // tagchange() {
-  //   this.tagService.tags.forEach((element: any) => {});
-  // }
-
-  // numSequence(n: number): Array<number> {
-  //   return Array(n);
-  // }
-
-  // showMore(category) {
-  //   this.catStatus[category] = !this.catStatus[category];
-  //   if (this.catStatus[category])
-  //     this.tags[category] = this.allTags.filter(
-  //       (tag) => tag.category == category
-  //     );
-  //   else
-  //     this.tags[category] = this.allTags
-  //       .filter((tag) => tag.category == category)
-  //       .slice(0, 10);
-  // }
 
   get paginatedCards(): any[] {
     if (!this.cards || !this.pageSize) {
@@ -472,13 +432,6 @@ export class PipelineComponent implements OnInit, OnChanges {
       }
     });
   }
-
-  // redirect(): void {
-  //   this.selectedInstance = this.selectedCard.name;
-  //   this.router.navigate(['./view', this.CARD_TITLE, this.selectedInstance], {
-  //     relativeTo: this.route,
-  //   });
-  // }
 
   editPipeline(id: string): void {
     this.service.getStreamingServices(id).subscribe(

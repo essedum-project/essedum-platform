@@ -16,7 +16,6 @@
 package com.lfn.icip.icipwebeditor.rest;
 
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -26,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,18 +36,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
-import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPApps;
 import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
-import com.lfn.icip.icipwebeditor.model.ICIPPluginScript;
 import com.lfn.icip.icipwebeditor.model.ICIPStreamingServices;
 import com.lfn.icip.icipwebeditor.repository.ICIPAppsRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedRuntimeRepository;
 import com.lfn.icip.icipwebeditor.repository.ICIPStreamingServicesRepository;
 import com.lfn.icip.icipwebeditor.service.IICIPAppService;
-import com.lfn.icip.icipwebeditor.service.IICIPPluginScriptService;
-import com.lfn.icip.icipwebeditor.service.IICIPPluginService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;

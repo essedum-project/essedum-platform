@@ -16,7 +16,6 @@
 package com.lfn.icip.icipwebeditor.service;
 
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
-import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
     <title>Essedum Navigation</title>
     <link rel="stylesheet" href="{{cssUri}}">
 </head>
+
 <body>
     <div class="navigation-container">
         <div class="header">
@@ -17,7 +20,7 @@
         <div class="nav-card" id="pipeline-card" role="button" tabindex="0">
             <h3>
                 <span class="nav-icon">📊</span>
-                Pipeline Screen
+                Pipelines 
             </h3>
             <p>Manage and execute your data pipelines. View pipeline details, scripts, and run configurations.</p>
         </div>
@@ -25,12 +28,13 @@
         <div class="nav-card" id="pipeline-agent-card" role="button" tabindex="0">
             <h3>
                 <span class="nav-icon">🤖</span>
-                Pipeline Agent Screen
+                Agent MCP Pipelines 
             </h3>
-            <p>Access AI-powered pipeline agents. Manage intelligent automation and agent-based workflows.</p>
+            <p>Build and deploy AI agents using the Model Context Protocol. Create intelligent automations that interact with your data and workflows.</p>
         </div>
     </div>
 
     <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
 </body>
+
 </html>

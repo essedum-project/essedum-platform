@@ -1,15 +1,11 @@
 package com.lfn.icip.dataset.model;
-import java.sql.Timestamp;
-import java.util.List;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -19,7 +15,6 @@ import com.lfn.ai.comm.lib.util.listener.AuditListener;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 @DynamicInsert
 @DynamicUpdate

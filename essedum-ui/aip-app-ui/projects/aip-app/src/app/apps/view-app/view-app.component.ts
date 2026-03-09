@@ -19,7 +19,6 @@ import {
   ActivatedRoute,
   NavigationExtras,
   Router,
-  Routes,
 } from '@angular/router';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { Services } from '../../services/service';
@@ -96,7 +95,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   isMfe: boolean;
   mfeApp: string;
   safeMfeUrl: SafeResourceUrl;
-  routes: Routes;
   componentMfe: ComponentType<any>;
   iFrameUrl: SafeResourceUrl;
   fileName: string = '';
@@ -182,8 +180,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
           this.mfeApp,
           resp['tryoutlink']
         );
-        console.log('view', this.mfeApp);
-        console.log('view', this.componentMfe);
       }
 
       let params: HttpParams = new HttpParams();
@@ -192,7 +188,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
       this.service
         .getStreamingServicesByName(this.appname, resp['organization'])
         .subscribe((respPipeline) => {
-          console.log(respPipeline);
           this.appDescription = respPipeline['description'];
           this.createdBy = respPipeline['created_by'];
           this.createdDate = respPipeline['created_date'];
@@ -250,18 +245,15 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
                             json_content['elements'][0]['attributes'][
                               'arguments'
                             ];
-                          console.log(this.configData);
                         });
                     }
                   },
                   (err) => {
-                    console.log(err);
                     this.service.message(err, 'error');
                   }
                 );
             },
             (err) => {
-              console.log(err);
             }
           );
         });
@@ -273,7 +265,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
             let json_content = JSON.parse(this.streamItem.json_content);
             this.configData =
               json_content['elements'][0]['attributes']['arguments'];
-            console.log(this.configData);
           });
         this.service
           .readScriptFile(this.appname, 'filename')
@@ -284,7 +275,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
           });
 
         this.service.getAppByName(this.appname).subscribe((resp) => {
-          console.log(resp);
           this.appData.id = resp['id'];
           this.appData.name = resp['name'];
           this.appData.tryoutlink = resp['tryoutlink'];
@@ -378,10 +368,8 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         this.cdr.detectChanges();
       },
       complete() {
-        console.log('completed');
       },
       error: (err) => {
-        console.log(err);
       },
     });
   }
@@ -441,15 +429,8 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         this.selectedRunType['dsName']
       )
       .subscribe((pageResponse) => {
-        console.log(pageResponse);
         this.service.message('Job Started', 'success');
       });
-
-    // this.busy = this.service.runpipeline2(this.streamItem.name,this.selectedRunType['type'],this.selectedRunType['dsName']).subscribe(
-    //   pageResponse => {
-    //     console.log(pageResponse)
-    //   }
-    // );
   }
 
   open(content: any): void {
@@ -489,9 +470,7 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   updateUrl() {
-    console.log(this.appData.tryoutlink);
     this.service.saveApp(this.appData).subscribe((resp) => {
-      console.log(resp);
     });
     this.service.getAppRoute(this.appname).subscribe((resp) => {
       this.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(resp);
@@ -506,7 +485,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
     this.service
       .saveNativeScript(this.appname, 'python3', formData)
       .subscribe((resp) => {
-        console.log(resp);
       });
     let json_content = JSON.parse(this.streamItem.json_content);
     json_content['elements'][0]['attributes']['arguments'] = this.configData;

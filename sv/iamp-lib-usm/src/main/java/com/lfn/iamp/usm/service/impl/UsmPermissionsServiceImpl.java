@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
-import com.lfn.iamp.usm.domain.UsmModule;
 import com.lfn.iamp.usm.domain.UsmPermissions;
 import com.lfn.iamp.usm.repository.UsmPermissionsRepository;
 import com.lfn.iamp.usm.service.UserApiPermissionsService;

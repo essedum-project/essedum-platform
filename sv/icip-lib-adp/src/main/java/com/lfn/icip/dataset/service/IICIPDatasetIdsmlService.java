@@ -1,6 +1,5 @@
 package com.lfn.icip.dataset.service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;

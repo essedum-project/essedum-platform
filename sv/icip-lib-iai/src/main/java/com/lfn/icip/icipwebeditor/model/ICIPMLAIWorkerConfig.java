@@ -1,6 +1,5 @@
 package com.lfn.icip.icipwebeditor.model;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;

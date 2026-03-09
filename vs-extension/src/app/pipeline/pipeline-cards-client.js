@@ -301,7 +301,7 @@ class PipelineCardsClient {
             // Store globally for reuse
             window.vscodeApi = this.vscode;
         }
-        
+
         this.initializeElements();
         this.attachEventListeners();
         this.requestInitialLoad();
@@ -584,14 +584,12 @@ class PipelineCardsClient {
         }
 
         if (this.paginationContainer) {
-            Utils.toggleElement(this.paginationContainer, true);
+            Utils.toggleElement(this.paginationContainer, true, 'flex');
         }
 
         // Update pagination info
         if (this.paginationInfo) {
-            const startItem = (pagination.currentPage - 1) * pagination.pageSize + 1;
-            const endItem = Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount);
-            this.paginationInfo.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages} (${startItem}-${endItem} of ${pagination.totalCount} items)`;
+            this.paginationInfo.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages} (${pagination.totalCount} items)`;
         }
 
         // Update button states
@@ -630,32 +628,20 @@ class PipelineCardsClient {
         if (!this.paginationPages) { return; }
 
         const { currentPage, totalPages } = pagination;
-        const maxVisiblePages = 5;
-        let startPage, endPage;
+        const maxVisible = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
-        if (totalPages <= maxVisiblePages) {
-            startPage = 1;
-            endPage = totalPages;
-        } else {
-            const halfVisible = Math.floor(maxVisiblePages / 2);
-
-            if (currentPage <= halfVisible) {
-                startPage = 1;
-                endPage = maxVisiblePages;
-            } else if (currentPage + halfVisible >= totalPages) {
-                startPage = totalPages - maxVisiblePages + 1;
-                endPage = totalPages;
-            } else {
-                startPage = currentPage - halfVisible;
-                endPage = currentPage + halfVisible;
-            }
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
+        // Build HTML string for page numbers
         let pagesHtml = '';
 
         // Add first page and ellipsis if needed
         if (startPage > 1) {
-            pagesHtml += `<button class="page-number" data-page="1">1</button>`;
+            pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
             if (startPage > 2) {
                 pagesHtml += `<span class="page-ellipsis">...</span>`;
             }
@@ -664,7 +650,7 @@ class PipelineCardsClient {
         // Add visible page numbers
         for (let i = startPage; i <= endPage; i++) {
             const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="page-number ${isActive}" data-page="${i}">${i}</button>`;
+            pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
         }
 
         // Add ellipsis and last page if needed
@@ -672,19 +658,24 @@ class PipelineCardsClient {
             if (endPage < totalPages - 1) {
                 pagesHtml += `<span class="page-ellipsis">...</span>`;
             }
-            pagesHtml += `<button class="page-number" data-page="${totalPages}">${totalPages}</button>`;
+            pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
         }
 
+        // Set the HTML
         this.paginationPages.innerHTML = pagesHtml;
 
-        // Add click listeners to page numbers
+        // Add click listeners to all page number buttons
         this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const page = parseInt(e.target.dataset.page);
-                this.vscode.postMessage({
-                    command: 'goToPage',
-                    page: page
-                });
+                // Use currentTarget to always get the button element, not its children
+                const button = e.currentTarget;
+                const page = parseInt(button.dataset.page);
+                if (!isNaN(page)) {
+                    this.vscode.postMessage({
+                        command: 'goToPage',
+                        page: page
+                    });
+                }
             });
         });
     }

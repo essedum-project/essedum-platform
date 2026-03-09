@@ -1,9 +1,7 @@
 import {
-  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   Input,
-  NgZone,
   OnInit,
 } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
@@ -43,6 +41,7 @@ export class ModelDescriptionComponent implements OnInit {
   organisation: string;
   initiativeView: boolean;
   id: string = this.route.snapshot.paramMap.get('id');
+  
   constructor(
     private clipboard: Clipboard,
     private route: ActivatedRoute,
@@ -63,6 +62,7 @@ export class ModelDescriptionComponent implements OnInit {
   calledRelatedComponent = false;
 
   @Output() newItemEvent = new EventEmitter<boolean>();
+  
   copyModel(artifacts: any) {
     this.clipboard.copy(artifacts);
     alert('Model Path Copied to Clipboard');
@@ -73,6 +73,7 @@ export class ModelDescriptionComponent implements OnInit {
       this.ngOnInit();
     }
   }
+
   unlink(data: any) {
     let body = {};
     body['childId'] = data.id;
@@ -86,9 +87,10 @@ export class ModelDescriptionComponent implements OnInit {
           this.ngOnInit();
         }
       },
-      (error) => {}
+      (error) => { }
     );
   }
+
   ngOnInit() {
     this.router.url.includes('initiative')
       ? (this.initiativeView = false)
@@ -110,6 +112,7 @@ export class ModelDescriptionComponent implements OnInit {
       this.avatar = this.cardCreator.charAt(0).toUpperCase();
     }
   }
+
   getRelatedComponent() {
     this.component = [];
     this.service.getRelatedComponent(this.card.id, 'MODEL').subscribe({
@@ -127,6 +130,7 @@ export class ModelDescriptionComponent implements OnInit {
       },
     });
   }
+
   getpermissions() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('model-tag')) this.tagAuth = true;
@@ -136,9 +140,11 @@ export class ModelDescriptionComponent implements OnInit {
       if (cipAuthority.includes('model-unlink')) this.modelUnlink = true;
     });
   }
+
   openModal(content: any): void {
     this.dialog.open(content, { width: '600px', disableClose: false });
   }
+
   navigateBack() {
     this.location.back();
   }
@@ -146,6 +152,7 @@ export class ModelDescriptionComponent implements OnInit {
   getShortName(fullName: string) {
     return fullName.charAt(0).toUpperCase();
   }
+
   redirection(card: any, type: string) {
     this.router.navigate(['../../' + type + '/' + card.name], {
       state: {
@@ -154,6 +161,7 @@ export class ModelDescriptionComponent implements OnInit {
       relativeTo: this.route,
     });
   }
+
   deleteModel(card) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
@@ -167,15 +175,17 @@ export class ModelDescriptionComponent implements OnInit {
               );
             },
             (error) => {
-              this.service.message('Error deleting model '+ error, 'error');
+              this.service.message('Error deleting model ' + error, 'error');
             }
           );
       }
     });
   }
+
   open(content: any): void {
     this.dialog.open(content, { width: '600px', disableClose: false });
   }
+
   refeshrelated(event: any) {
     if (event == true) {
       this.relatedloaded = false;
@@ -184,7 +194,8 @@ export class ModelDescriptionComponent implements OnInit {
       }, 2000);
     }
   }
-downloadModel(card: any) {
+
+  downloadModel(card: any) {
     let obj = JSON.parse(card.attributes).object;
     let extension = obj.split('.').pop();
     let fileName = obj.split('/').toString();
@@ -195,20 +206,21 @@ downloadModel(card: any) {
 
       this.service
         .getModelFileData(card.modelName, `${fileName}`, card.organisation)
-        .subscribe(blob=> {
-              const linkA = document.createElement('a');
-              const url = window.URL.createObjectURL(blob);
-              linkA.href = url
-              linkA.download = fileName;
-              linkA.click();
-              window.URL.revokeObjectURL(url);
-            },
-              err => {
-              this.service.message('Download Failed. Invalid Data', 'error');
-            });
-          
+        .subscribe(blob => {
+          const linkA = document.createElement('a');
+          const url = window.URL.createObjectURL(blob);
+          linkA.href = url
+          linkA.download = fileName;
+          linkA.click();
+          window.URL.revokeObjectURL(url);
+        },
+          err => {
+            this.service.message('Download Failed. Invalid Data', 'error');
+          });
+
     }
   }
+
   getFormattedModelPath(card: any): string {
     try {
       if (card.attributes) {

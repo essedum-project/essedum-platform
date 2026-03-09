@@ -15,14 +15,12 @@
 
 package com.lfn.icip.adapter.rest;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.icip.adapter.service.MlSpecTemplatesService;
-import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.MlAdapters;
 import com.lfn.icip.dataset.model.MlSpecTemplates;
 import com.lfn.icip.dataset.model.MlSpecTemplates2;

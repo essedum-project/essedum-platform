@@ -2,19 +2,14 @@ package com.lfn.icip.icipwebeditor.service.impl;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
 import com.lfn.icip.icipwebeditor.model.ICIPMLAIWorkerLogs;
 import com.lfn.icip.icipwebeditor.repository.ICIPMLAIWorkerLogsRepository;
 import com.lfn.icip.icipwebeditor.service.ICIPMLAIWorkerLogsService;

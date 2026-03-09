@@ -41,8 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.dataset.model.ICIPSchemaForm;
 import com.lfn.icip.dataset.model.ICIPSchemaRegistry;
 import com.lfn.icip.dataset.model.dto.ICIPSchemaFormDTO;

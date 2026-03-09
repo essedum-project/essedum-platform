@@ -3,9 +3,7 @@ import {
   OnInit,
   ViewChild,
   HostListener,
-  ViewContainerRef,
   AfterViewInit,
-  createComponent,
 } from "@angular/core";
 import {
   Router,
@@ -25,13 +23,12 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatMenuTrigger } from "@angular/material/menu";
 import { Subscription, interval } from "rxjs";
 import { MenuService } from "../services/menu.service";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Title } from "@angular/platform-browser";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { DomSanitizer } from "@angular/platform-browser";
 import { AppOAuthService } from "../core/auth.service";
 import { InactivityPopupComponent } from "../popups/inactivity-popup/inactivity-popup.component";
-import { loadRemoteModule } from "@angular-architects/module-federation";
 import { AppConfigService } from "../services/app-config.service";
 import { MyProfileComponent } from "./my-profile/my-profile.component";
 
@@ -41,23 +38,14 @@ import { MyProfileComponent } from "./my-profile/my-profile.component";
   styleUrls: ["./landing.component.scss"],
 })
 export class LandingComponent implements OnInit, AfterViewInit {
-  @ViewChild("menuTrigger", { static: false })
-  menuTrigger!: MatMenuTrigger;
   @ViewChild("drawerLeft", { static: true }) drawerLeft: any;
   @ViewChild("drawerRight", { static: true }) drawerRight: any;
-  @ViewChild("drawer", { static: false })
-  drawer!: MatSidenav;
   @ViewChild("tabsBox") tabsBox: any;
-  @ViewChild("microAppContainer", { read: ViewContainerRef })
-  microAppContainer!: ViewContainerRef;
   currentrole: any;
   breadcrumbs: string = "";
   temp: string = "";
-  rows: any;
   displayDialog = false;
   notificationtotal: any;
-  firstlevel: any;
-  declaration = true;
   hidesidebar: any;
   portfolioName: any;
   projectvalue: any;
@@ -88,9 +76,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   private static hasExecuted: boolean = false;
   private static idleTimer: any = null;
   Configurableinformation: boolean = false;
-  // doroute: boolean = false;
-  // busy: Subscription;
-  // dashconstantbreach: any[];
+  essedumTitle="ESSEDUM";
   showInactivityPopup: boolean = true;
   inactivityTimer: number = 300;
   inactivityPopupTimer: number = 120;
@@ -100,9 +86,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   booltemp: boolean = true;
   private static userLoggedOut: boolean = false;
   zoomFlag: boolean = false;
-  viewdata: boolean;
   showChatBot: boolean = false;
-  clicked: boolean = false;
   showProfileInfo = false;
   showUploadElements = false;
   uploading = false;
@@ -220,22 +204,13 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
   @HostListener("window:unload")
   invalidateToken() {
-    console.log("invalidate tokenn called");
     sessionStorage.setItem("needRouting", "true");
     let activeProfiles = JSON.parse(sessionStorage.getItem("activeProfiles"));
-    /* if (event instanceof NavigationStart) {
-       console.log("Refresh event")
-       return false;
-     }*/
 
-    this.apisService.revoke().subscribe(() => {
-      console.log("jwtToken revoked from backend");
-    });
+    this.apisService.revoke().subscribe(() => {});
     if (activeProfiles.indexOf("oauth2") != -1)
       this.appOAuthService.browserRefresh();
     else localStorage.removeItem("jwtToken");
-    //localStorage.clear();
-    //sessionStorage.clear();
     return false;
   }
 
@@ -368,10 +343,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
   res: any;
   displaybreadcrumbs = false;
   appVersion: any = "3.2.0";
-  yammerList = [];
-  yammerNotifications: String = "0";
-  yammer: any;
-  yammerSubList = [];
 
   showchildren: boolean = false;
   tabs: any = [];
@@ -411,7 +382,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
           this.getTitle(this.router.routerState, this.router.routerState.root) +
           "";
         this.mfeRouteTitle = title;
-        // console.log('title', title);
         if (title != undefined && title != "") {
           this.titleService.setTitle(title);
           this.title = title;
@@ -455,7 +425,32 @@ export class LandingComponent implements OnInit, AfterViewInit {
     );
     this.sidebarMenuPopupWidth = this.showSidebarMenuList ? "130px" : "0px";
     this.sidebarmaxwidth = this.showSidebarMenuList ? "260px" : "7vw";
-    this.getNotificationsPermision();
+    
+    // Call getNotificationsPermision only once per session to prevent duplicate API calls
+    if (!sessionStorage.getItem('notificationsLoaded')) {
+      this.getNotificationsPermision();
+      sessionStorage.setItem('notificationsLoaded', 'true');
+    } else {
+      // Load cached notification settings if available
+      const cachedNotification = sessionStorage.getItem('showNotification');
+      const cachedNotificationRoles = sessionStorage.getItem('show_notification_icon_roles');
+      const cachedChatbotIcon = sessionStorage.getItem('showHeaderChatbotIcon');
+      const cachedSidebarFullText = sessionStorage.getItem('show_sidebar_full_text');
+      
+      if (cachedNotification !== null) {
+        this.showNotification = cachedNotification === 'true';
+      }
+      if (cachedNotificationRoles !== null) {
+        this.show_notification_icon_roles = cachedNotificationRoles === 'true';
+      }
+      if (cachedChatbotIcon !== null) {
+        this.showHeaderChatbotIcon = cachedChatbotIcon === 'true';
+      }
+      if (cachedSidebarFullText !== null) {
+        this.show_sidebar_full_text = cachedSidebarFullText === 'true';
+      }
+    }
+    
     this.Configurableinformationicon();
     this.screenWidth = screen.width;
     this.checkForZoom();
@@ -551,7 +546,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
       "--app-version",
       this.appVersion.replaceAll(".", ",")
     );
-    this.startTelemetry();
     this.getContentResponse();
     this.setTheme();
     this.showLoader();
@@ -745,7 +739,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
         }
       } else if (routeUrlValues.length == 0) {
         if (currentRouteUrl.includes("./ivm/home/ams/survey")) {
-          // console.log("in else part of route");
           sessionStorage.setItem(
             "SeclevelhighlightedLabel",
             "Maturity Assessment"
@@ -759,10 +752,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } catch (error) {}
   }
 
-  startTelemetry() {
-    // this.telemetryService.start();
-  }
-
+ 
   cleanSVG(icon) {
     return this.sanitizer.bypassSecurityTrustResourceUrl(icon as string);
   }
@@ -1037,6 +1027,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   logout() {
+    // Clear API cache when logging out
+    this.apisService.clearCache();
+    sessionStorage.removeItem('notificationsLoaded');
+    sessionStorage.removeItem('showNotification');
+    sessionStorage.removeItem('show_notification_icon_roles');
+    sessionStorage.removeItem('showHeaderChatbotIcon');
+    sessionStorage.removeItem('show_sidebar_full_text');
+    
     let user;
     user = JSON.parse(sessionStorage.getItem("user") || "");
     if (sessionStorage.getItem("telemetry") == "true") {
@@ -1222,6 +1220,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   valuechangeproject(event: any) {
+    // Clear notification cache when project changes
+    sessionStorage.removeItem('notificationsLoaded');
+    sessionStorage.removeItem('showNotification');
+    sessionStorage.removeItem('show_notification_icon_roles');
+    sessionStorage.removeItem('showHeaderChatbotIcon');
+    sessionStorage.removeItem('show_sidebar_full_text');
+    this.apisService.clearCache();
+    
     this.selectedproject = new Object(event);
     let events;
     try {
@@ -1290,7 +1296,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
     this.checkRole();
     this.apisService.getDashConsts().subscribe(() => this.fetchRolesforUser());
-    // this.fetchRolesforUser();
   }
 
   compareObjects(o1: any, o2: any): boolean {
@@ -1678,7 +1683,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
     });
   }
   getSession() {
-    console.log("getSession:", sessionStorage);
     if (sessionStorage.getItem("UpdatedUser")) {
       this.setportfolio();
       sessionStorage.removeItem("UpdatedUser");
@@ -2132,14 +2136,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
           
           // Only navigate if we're at the main landing page, not changing portfolios/projects, and not an admin
           if (isAtMainLanding && !isChangingSelection && !isAdmin) {
-            console.log("Auto-navigating for regular user role");
             // Set flag to indicate navigation is in progress to prevent interference
             sessionStorage.setItem("navigatingInProgress", "true");
             
             // Special case for Dashboard and Configuration menu
             if(this.sidebarMenu.length===2 && this.sidebarMenu[0].label.toLowerCase()==="dashboard"
              && this.sidebarMenu[1].label.toLowerCase()==="configuration"){
-                console.log("Menu has only Dashboard and Configuration, navigating to landing only");
                 this.router.navigate(["/landing"]).then(() => {
                   // Clear the flag after navigation is complete
                   setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
@@ -2276,7 +2278,6 @@ const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");
 
 // Only navigate to portfoliolist if admin is on landing page and not actively navigating elsewhere
 if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
-  console.log("Auto-navigating admin to portfoliolist");
   // Set flag to indicate navigation is in progress to prevent interference
   sessionStorage.setItem("navigatingInProgress", "true");
   this.router.navigate(["/landing/iamp-usm/portfoliolist"]).then(() => {
@@ -2298,13 +2299,11 @@ const navigationInProgress = sessionStorage.getItem("navigatingInProgress") === 
 
 // Check if we need to navigate based on role, portfolio, or project change
 if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress && !isAdmin) {
-  console.log("Navigation triggered by role/portfolio/project change");
   
   // Special case for Dashboard and Configuration menu
   if(this.sidebarMenu && this.sidebarMenu.length === 2 && 
      this.sidebarMenu[0].label && this.sidebarMenu[0].label.toLowerCase() === "dashboard" && 
      this.sidebarMenu[1].label && this.sidebarMenu[1].label.toLowerCase() === "configuration") {
-    console.log("Dashboard+Configuration menu detected, navigating to landing only");
     sessionStorage.setItem("navigatingInProgress", "true");
     this.router.navigate(["/landing"]).then(() => {
       setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
@@ -2316,7 +2315,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   // Regular navigation to first menu item if available
   else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
      this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
-    console.log("Navigating to first menu item");
     sessionStorage.setItem("navigatingInProgress", "true");
     let filterUrl = this.sidebarMenu[0].url.replace('./', '');
     this.router.navigate(["/landing/" + filterUrl]).then(() => {
@@ -2580,25 +2578,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     this.showSubHeader = false;
   }
 
-  // showVersionInfo(): void {
-  //   const dialogRef = this.dialog.open(VersionInfoComponent, {
-  //     maxHeight: "80vh",
-  //     maxWidth: "80vw",
-  //     minWidth: "80vw",
-  //     minHeight: "80vh",
-  //     data: {},
-  //   });
-
-  //   dialogRef.afterClosed().subscribe(result => {
-
-  //   });
-  // }
-
-  // getSwaggerLink() {
-  //   console.log("swagger link")
-  //   let link = 'http://myzul02u:6001/docs';
-  //   window.open(link, '_blank')
-  // }
 
   showTabs(item: any, parent: any = undefined) {
     sessionStorage.setItem("viewtabs", "true");
@@ -2624,7 +2603,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       if (!this.routecount) {
         this.selectedIndex = 0;
         if (this.tabs[0]["stateUrl"]) {
-          // console.log("inside second level if")
           //sbx workbench route
           // Set flag to indicate user is actively navigating to a route
           sessionStorage.setItem("navigatingToRoute", "true");
@@ -2644,7 +2622,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         } else {
           let parentdata = this.getParentOfChild(this.tabs[0]);
           this.displayBreadCrumb(parentdata);
-          // console.log(this.route)
           // Set flag to indicate user is actively navigating to a route
           sessionStorage.setItem("navigatingToRoute", "true");
           this.router.navigate([this.getURLofChild(this.tabs[0])], {
@@ -2656,7 +2633,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
             setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
           });
           if (this.tabs[0] && this.tabs[0].label) {
-            // console.log("inside second level else")
             sessionStorage.setItem(
               "SeclevelhighlightedLabel",
               this.tabs[0].label
@@ -2682,7 +2658,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     
     // Prevent navigation if sidebar is still loading
     if (this.isSidebarLoading) {
-      console.log('Navigation deferred while sidebar is loading');
       return;
     }
     
@@ -3102,6 +3077,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
       .getDashConstantUsingKey("showNotification", project)
       .subscribe((res) => {
         this.showNotification = res === "true" ? true : false;
+        sessionStorage.setItem('showNotification', this.showNotification.toString());
       });
 
     this.apisService
@@ -3111,6 +3087,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         if (roleArray.includes(roleId)) {
           this.show_notification_icon_roles = true;
         }
+        sessionStorage.setItem('show_notification_icon_roles', this.show_notification_icon_roles.toString());
       });
 
     this.apisService
@@ -3119,6 +3096,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         if (res == "false") {
           this.showHeaderChatbotIcon = false;
         }
+        sessionStorage.setItem('showHeaderChatbotIcon', this.showHeaderChatbotIcon.toString());
       });
 
     this.apisService
@@ -3129,6 +3107,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
         } else {
           this.show_sidebar_full_text = false;
         }
+        sessionStorage.setItem('show_sidebar_full_text', this.show_sidebar_full_text.toString());
       });
   }
   checkRole() {
@@ -3168,7 +3147,6 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      console.log("The dialog was closed");
       this.profilePicRefresh();
     });
   }

@@ -301,7 +301,9 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
       this.pageNumber -= 1;
       this.changePage();
     }
-  }  changePage(page?: number) {
+  }  
+  
+  changePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) {
       this.pageNumber = page;
     }
@@ -337,7 +339,6 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
   getRowNumber(index: number): number {
     return (this.pageNumber - 1) * this.pageSize + index + 1;
   }
-
   
   onPrevPage() {
     this.prevPage(); 
@@ -350,6 +351,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
   onChangePage(page: number) {
     this.changePage(page); 
   }
+  
   getButtonStyle(page: number, idx: number) {
     return {
       "font-weight": page === this.pageNumber ? "bold" : "normal"

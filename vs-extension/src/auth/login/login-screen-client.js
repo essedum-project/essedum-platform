@@ -9,11 +9,11 @@
  * @version 1.0.0
  */
 
-(function() {
+(function () {
     'use strict';
 
     const vscode = acquireVsCodeApi();
-    
+
     // Command constants (should match LOGIN_COMMANDS in login-constants.ts)
     const COMMANDS = {
         LOGIN: 'login',
@@ -24,7 +24,7 @@
         SHOW_ERROR: 'showError',
         RESET: 'reset'
     };
-    
+
     // DOM elements
     const networkSelect = document.getElementById('networkSelect');
     const networkInfo = document.getElementById('networkInfo');
@@ -36,37 +36,37 @@
     const loadingSection = document.getElementById('loadingSection');
     const formSection = document.getElementById('formSection');
     const loadingMessage = document.getElementById('loadingMessage');
-    
+
     // Network selection handler
-    networkSelect.addEventListener('change', function() {
+    networkSelect.addEventListener('change', function () {
         const selectedNetwork = this.value;
-        
+
         // Reset info display
         infosysInfo.style.display = 'none';
         lfnInfo.style.display = 'none';
         networkInfo.style.display = 'none';
         networkInfo.className = 'network-info';
-        
+
         if (selectedNetwork) {
             networkInfo.style.display = 'block';
             networkInfo.classList.add(selectedNetwork);
-            
+
             if (selectedNetwork === 'infosys') {
                 infosysInfo.style.display = 'block';
             } else if (selectedNetwork === 'lfn') {
                 lfnInfo.style.display = 'block';
             }
-            
+
             loginBtn.disabled = false;
         } else {
             loginBtn.disabled = true;
         }
-        
+
         hideError();
     });
-    
+
     // Login button handler
-    loginBtn.addEventListener('click', function() {
+    loginBtn.addEventListener('click', function () {
         const selectedNetwork = networkSelect.value;
         if (selectedNetwork) {
             vscode.postMessage({
@@ -75,18 +75,18 @@
             });
         }
     });
-    
+
     // Cancel button handler
-    cancelBtn.addEventListener('click', function() {
+    cancelBtn.addEventListener('click', function () {
         vscode.postMessage({
             command: COMMANDS.CANCEL
         });
     });
-    
+
     // Message handler for extension communication
     window.addEventListener('message', event => {
         const message = event.data;
-        
+
         switch (message.command) {
             case COMMANDS.SHOW_LOADING:
                 showLoading(message.message || 'Authenticating...');
@@ -102,29 +102,29 @@
                 break;
         }
     });
-    
+
     function showLoading(message) {
         loadingMessage.textContent = message;
         formSection.classList.add('disabled');
         loadingSection.classList.add('show');
         hideError();
     }
-    
+
     function hideLoading() {
         formSection.classList.remove('disabled');
         loadingSection.classList.remove('show');
     }
-    
+
     function showError(message) {
         errorMessage.textContent = message;
         errorMessage.classList.add('show');
         hideLoading();
     }
-    
+
     function hideError() {
         errorMessage.classList.remove('show');
     }
-    
+
     function reset() {
         networkSelect.value = '';
         networkInfo.style.display = 'none';
@@ -134,7 +134,7 @@
         hideLoading();
         hideError();
     }
-    
+
     // Notify extension that webview is ready
     vscode.postMessage({
         command: COMMANDS.READY
