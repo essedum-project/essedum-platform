@@ -35,6 +35,7 @@ import {
     getLanguageFromExtension,
 } from '../../constants/pipeline-constants';
 
+import { STORAGE_KEYS } from '../../constants/extension-constants';
 import { getBaseUrl } from '../../constants/api-config';
 import * as ExtensionUtils from '../../utils/extension-utils';
 
@@ -171,6 +172,42 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     /**
+     * Ensures we have a fresh, valid token before making API calls
+     * Proactively refreshes the token if expired or about to expire
+     * @returns true if token is valid/refreshed, false if authentication failed
+     */
+    private async ensureValidToken(): Promise<boolean> {
+        if (!this._authService) {
+            logger.warn('No auth service available, cannot validate token');
+            return !!this._token;
+        }
+
+        try {
+            // Use the auth service's ensureFreshToken method which handles refresh automatically
+            const freshToken = await this._authService.ensureFreshToken();
+            
+            // Update our token if it was refreshed
+            if (freshToken !== this._token) {
+                logger.info('Token was refreshed, updating local token');
+                this.updateToken(freshToken);
+            }
+            
+            return true;
+        } catch (error: any) {
+            logger.error('Failed to ensure valid token:', error);
+            
+            // If token validation fails, user needs to re-authenticate
+            if (error.message && (error.message.includes('Not authenticated') || error.message.includes('Session expired'))) {
+                this._isAuthenticated = false;
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                await this.showAuthenticationRequired();
+            }
+            
+            return false;
+        }
+    }
+
+    /**
      * Handle external token update (called when token is updated outside this component)
      * @param token - New authentication token
      */
@@ -191,6 +228,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
+
+        // Save active view state when pipeline view is opened/resolved
+        // This ensures the view is restored correctly after extension reload
+        this._context.globalState.update(STORAGE_KEYS.ACTIVE_VIEW, 'pipeline').then(() => {
+            logger.info(`${this.logPrefix} Saved active view state: pipeline`);
+        });
 
         webviewView.webview.options = {
             enableScripts: true,
@@ -324,6 +367,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
                         } catch (error: any) {
                             console.error('Error executing fresh authentication:', error);
+                            logger.error('Fresh authentication error details:', {
+                                message: error.message,
+                                stack: error.stack,
+                                authServiceAvailable: !!this._authService
+                            });
 
                             // Show error state in webview
                             if (this._view) {
@@ -333,9 +381,29 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                 });
                             }
 
+                            // Provide more specific error messages
+                            let errorMsg = 'Authentication failed. ';
+                            if (!this._authService) {
+                                errorMsg += 'Authentication service not initialized. Try reloading the window (Ctrl+R).';
+                            } else if (error.message?.includes('token')) {
+                                errorMsg += 'Token refresh failed. Please try logging in again.';
+                            } else if (error.message?.includes('network') || error.message?.includes('ECONNREFUSED')) {
+                                errorMsg += 'Cannot connect to authentication server. Check your network connection.';
+                            } else {
+                                errorMsg += error.message || 'Unknown error occurred.';
+                            }
+
                             vscode.window.showErrorMessage(
-                                `Fresh authentication failed: ${error.message || 'Unknown error'}. Please try using Command Palette (Ctrl+Shift+P) and search for "Essedum: Login".`
-                            );
+                                errorMsg,
+                                'Try Command Palette',
+                                'Reload Window'
+                            ).then(selection => {
+                                if (selection === 'Try Command Palette') {
+                                    vscode.commands.executeCommand('workbench.action.showCommands');
+                                } else if (selection === 'Reload Window') {
+                                    vscode.commands.executeCommand('workbench.action.reloadWindow');
+                                }
+                            });
                         }
                         break;
                 }
@@ -377,14 +445,19 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         } else {
             logger.info('Not authenticated, showing authentication required page');
             // Show authentication required page
-            this.showAuthenticationRequired();
+            await this.showAuthenticationRequired();
         }
     }
 
     /**
      * Show authentication required page
      */
-    private showAuthenticationRequired(): void {
+    private async showAuthenticationRequired(): Promise<void> {
+        // Clear authentication state and update VS Code context
+        this._isAuthenticated = false;
+        await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+        logger.info('Authentication context updated to false - logout button will be hidden');
+        
         if (this._view) {
             this._view.webview.html = this.getAuthenticationRequiredHtml();
         }
@@ -511,28 +584,20 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     const loginBtn = document.getElementById('loginBtn');
                     const errorMessage = document.getElementById('errorMessage');
                     
-                    try {
-                        // Hide any previous errors
-                        errorMessage.style.display = 'none';
-                        
-                        // Update button state
-                        loginBtn.textContent = '🔄 Authenticating...';
-                        loginBtn.disabled = true;
-                        
-                        logger.info('Starting authentication flow...');
-                        
-                        // Trigger the login command
-                        vscode.postMessage({ 
-                            command: 'triggerLogin',
-                            timestamp: new Date().toISOString()
-                        });
-                       
-                        
-                    } catch (error) {
-                        console.error('Error starting authentication:', error);
-                        showError('Failed to start authentication. Please try using the Command Palette.');
-                        resetButton();
-                    }
+                    // Hide any previous errors
+                    errorMessage.style.display = 'none';
+                    
+                    // Update button state
+                    loginBtn.textContent = '🔄 Authenticating...';
+                    loginBtn.disabled = true;
+                    
+                    console.log('Starting authentication flow...');
+                    
+                    // Trigger the login command
+                    vscode.postMessage({ 
+                        command: 'triggerLogin',
+                        timestamp: new Date().toISOString()
+                    });
                 }
                 
                 function showError(message) {
@@ -599,7 +664,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 this.updateToken(contextToken);
             } else {
                 logger.info('No valid token found, showing authentication required page');
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             }
         }
@@ -607,7 +672,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         // Double-check we're now authenticated
         if (!this._isAuthenticated) {
             logger.info('Still not authenticated after checking context, showing auth page');
-            this.showAuthenticationRequired();
+            await this.showAuthenticationRequired();
             return;
         }
 
@@ -622,7 +687,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     if (!authStatus.isAuthenticated) {
                         logger.info('Token expired, showing authentication required page');
                         this._isAuthenticated = false;
-                        this.showAuthenticationRequired();
+                        await this.showAuthenticationRequired();
                         return;
                     }
 
@@ -758,7 +823,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 });
 
                 // Show authentication required page
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             } else if (error.response && error.response.status === 401) {
                 console.error('Unauthorized (401) - authentication required');
@@ -774,7 +839,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 });
 
                 // Show authentication required page
-                this.showAuthenticationRequired();
+                await this.showAuthenticationRequired();
                 return;
             }
 
@@ -821,6 +886,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
             vscode.window.showErrorMessage('Pipeline not found');
+            return;
+        }
+
+        // Ensure we have a valid token before making API calls
+        const tokenValid = await this.ensureValidToken();
+        if (!tokenValid) {
+            logger.error('Cannot view script details: token validation failed');
+            vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
             return;
         }
 
@@ -1347,15 +1420,30 @@ if __name__ == "__main__":
         </html>`;
     }
 
+    /**
+     * Get or create the local directory for pipeline scripts
+     * Scripts are stored in: <globalStorage>/pipeline-scripts/<pipelineName>/
+     */
+    private getLocalScriptsDirectory(pipelineName: string): vscode.Uri {
+        const scriptsBaseDir = vscode.Uri.joinPath(this._context.globalStorageUri, 'pipeline-scripts', pipelineName);
+        
+        // Ensure directory exists
+        try {
+            if (!fs.existsSync(scriptsBaseDir.fsPath)) {
+                fs.mkdirSync(scriptsBaseDir.fsPath, { recursive: true });
+                logger.info('Created local scripts directory:', scriptsBaseDir.fsPath);
+            }
+        } catch (error: any) {
+            logger.error('Failed to create scripts directory:', error);
+        }
+        
+        return scriptsBaseDir;
+    }
+
     private async openScriptInEditor(scriptFile: ScriptFile): Promise<void> {
         try {
-            // If we have the file system provider, use Essedum scheme
-            if (this._fileProvider && this._currentPipelineName) {
-                await this.openScriptAsEssedumFile(scriptFile);
-            } else {
-                // Fallback to untitled document
-                await this.openScriptAsUntitledDocument(scriptFile);
-            }
+            // Always save scripts locally to persist across navigation
+            await this.openScriptAsLocalFile(scriptFile);
         } catch (error: any) {
             console.error('Failed to open script:', error);
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
@@ -1370,34 +1458,38 @@ if __name__ == "__main__":
     }
 
     /**
-     * Open script as an Essedum file that can only be saved to the server
+     * Open script as a local file that persists across navigation
      */
-    private async openScriptAsEssedumFile(scriptFile: ScriptFile): Promise<void> {
-        if (!this._fileProvider || !this._currentPipelineName) {
-            throw new Error('File provider or pipeline name not available');
+    private async openScriptAsLocalFile(scriptFile: ScriptFile): Promise<void> {
+        if (!this._currentPipelineName) {
+            throw new Error('Pipeline name not available');
         }
 
-        // Register the file with the file system provider
-        const uri = this._fileProvider.registerFile(
-            scriptFile.fileName,
-            scriptFile.content,
-            this._currentPipelineName,
-            this.organization
-        );
+        // Get the local directory for this pipeline
+        const scriptsDir = this.getLocalScriptsDirectory(this._currentPipelineName);
+        const localFilePath = vscode.Uri.joinPath(scriptsDir, scriptFile.fileName);
 
-        // Open the document using the Essedum scheme
-        const doc = await vscode.workspace.openTextDocument(uri);
+        // Save the script content to the local file
+        try {
+            fs.writeFileSync(localFilePath.fsPath, scriptFile.content, 'utf8');
+            logger.info('💾 Saved script to local file:', localFilePath.fsPath);
+        } catch (error: any) {
+            logger.error('Failed to save script locally:', error);
+            throw new Error(`Failed to save script locally: ${error.message}`);
+        }
+
+        // Open the local document
+        const doc = await vscode.workspace.openTextDocument(localFilePath);
 
         // Check if this is a notebook file and open in notebook editor
         if (scriptFile.fileName.endsWith('.ipynb')) {
             logger.info('📓 Opening .ipynb file in notebook editor...');
-            await vscode.commands.executeCommand('vscode.openWith', uri, 'jupyter-notebook', {
-                viewColumn: vscode.ViewColumn.One,
+            await vscode.commands.executeCommand('vscode.openWith', localFilePath, 'jupyter-notebook', {
                 preserveFocus: false
             });
         } else {
             await vscode.window.showTextDocument(doc, {
-                viewColumn: vscode.ViewColumn.One,
+                preview: false,
                 preserveFocus: false
             });
         }
@@ -1455,8 +1547,12 @@ if __name__ == "__main__":
                             `✅ Essedum file changes auto-uploaded successfully to ${scriptFile.fileName}!`
                         );
 
-                        // Update stream item and save
-                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        // Update stream item and save (non-blocking - commented out due to PUT API 403 issues)
+                        try {
+                            await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        } catch (updateError: any) {
+                            console.warn('⚠️ Stream item update skipped:', updateError.message);
+                        }
 
                     } catch (error: any) {
                         console.error('❌ Essedum file auto-upload failed:', error);
@@ -1468,16 +1564,15 @@ if __name__ == "__main__":
             // Set up notebook save listener for .ipynb files
             const notebookSaveDisposable = vscode.workspace.onDidSaveNotebookDocument(async (savedNotebook) => {
                 // Check if this notebook corresponds to our document URI
-                if (savedNotebook.uri.toString() === doc.uri.toString()) {
+                if (savedNotebook.uri.toString() === localFilePath.toString()) {
                     logger.info('💾 📓 NOTEBOOK SAVE EVENT - Auto-uploading notebook changes...');
 
                     try {
-                        // For .ipynb files, save the full notebook JSON structure
-                        // IMPORTANT: Read from file provider's internal storage (most up-to-date)
-                        const notebookJson = this._fileProvider!.getFileContent(doc.uri);
+                        // For .ipynb files, read the full notebook JSON from the local file
+                        const notebookJson = fs.readFileSync(localFilePath.fsPath, 'utf8');
 
                         if (!notebookJson) {
-                            throw new Error('Could not read notebook content from file provider');
+                            throw new Error('Could not read notebook content from local file');
                         }
 
                         logger.info('📓 Saving full notebook JSON structure');
@@ -1498,8 +1593,12 @@ if __name__ == "__main__":
                             `✅ Notebook changes auto-uploaded successfully to ${scriptFile.fileName}!`
                         );
 
-                        // Update stream item and save
-                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        // Update stream item and save (non-blocking - commented out due to PUT API 403 issues)
+                        try {
+                            await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+                        } catch (updateError: any) {
+                            console.warn('⚠️ Stream item update skipped:', updateError.message);
+                        }
 
                     } catch (error: any) {
                         console.error('❌ Notebook auto-upload failed:', error);
@@ -1520,9 +1619,9 @@ if __name__ == "__main__":
             });
         }
 
-        // Show a message indicating this is an Essedum file with auto-save
+        // Show a message indicating this is a local file with auto-save to server
         vscode.window.showInformationMessage(
-            `📝 Opened ${scriptFile.fileName} as Essedum file with auto-save. Changes will be uploaded when you save (Ctrl+S).`,
+            `📝 Opened ${scriptFile.fileName} - Changes will be auto-uploaded to server when you save (Ctrl+S).`,
             'Got it!'
         );
     }
@@ -1542,13 +1641,12 @@ if __name__ == "__main__":
             logger.info('📓 Opening .ipynb file in notebook editor...');
             // For untitled notebooks, we need to save first then open in notebook editor
             await vscode.commands.executeCommand('vscode.openWith', doc.uri, 'jupyter-notebook', {
-                viewColumn: vscode.ViewColumn.One,
                 preserveFocus: false
             });
         } else {
-            // Show the document in the main editor (column one)
+            // Show the document in the main editor
             await vscode.window.showTextDocument(doc, {
-                viewColumn: vscode.ViewColumn.One,
+                preview: false,
                 preserveFocus: false
             });
         }
@@ -1742,17 +1840,34 @@ if __name__ == "__main__":
             streamItem.json_content = JSON.stringify(jsonContent);
             streamItem.organization = this.organization;
 
-            // Update the streaming service
-            await this.updateStreamingService(streamItem);
+            // COMMENTED OUT: Update the streaming service (PUT API disabled due to 403 permission issues)
+            // TODO: Re-enable when user has appropriate permissions
+            /*
+            try {
+                await this.updateStreamingService(streamItem);
+                logger.info('✅ Streaming service updated successfully');
+            } catch (updateError: any) {
+                // Log warning but don't fail the entire operation
+                console.warn('⚠️ Failed to update streaming service (continuing anyway):', updateError.message);
+                vscode.window.showWarningMessage(
+                    `⚠️ Pipeline will run, but couldn't update service: ${updateError.message}`,
+                    'Dismiss'
+                );
+            }
+            */
+            logger.info('ℹ️ Streaming service update skipped (PUT API commented out)');
 
             if (run) {
-                logger.info('JSON saved successfully for pipeline run');
+                logger.info('JSON processing completed for pipeline run');
             }
 
         } catch (error: any) {
             console.error('Error in saveJson:', error);
+            // Only throw if not for run, otherwise just warn
             if (run) {
-                throw new Error(`Canvas not updated due to error: ${error.message}`);
+                console.warn('Non-critical error in saveJson, continuing with pipeline run:', error.message);
+            } else {
+                throw error;
             }
         }
     }
@@ -1802,14 +1917,14 @@ if __name__ == "__main__":
 
             const fileName = `${streamItem.name}_${this.organization}.py`;
             logger.info('📤 Creating script file FIRST:', fileName);
-            
+
             // Create FormData for upload
             const formData = new FormData();
             formData.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
                 filename: 'blob',
                 contentType: 'text/plain'
             });
-            
+
             await this._pipelineService.uploadScript(streamItem.name, fileName, formData);
 
             // Step 2: Save JSON 
@@ -1848,8 +1963,17 @@ if __name__ == "__main__":
                             connectionElement.attributes.connections = datasource[0];
                             streamItem.json_content = JSON.stringify(jsonContent);
 
-                            // Update streaming service with new connection data
-                            await this.updateStreamingService(streamItem);
+                            // COMMENTED OUT: Update streaming service with new connection data (PUT API disabled)
+                            // TODO: Re-enable when user has appropriate permissions
+                            /*
+                            try {
+                                await this.updateStreamingService(streamItem);
+                                logger.info('✅ Connection datasource updated successfully');
+                            } catch (updateError) {
+                                console.warn('⚠️ Could not update streaming service with connection data (continuing):', updateError);
+                            }
+                            */
+                            logger.info('ℹ️ Connection datasource update skipped (PUT API commented out)');
                         }
                     } catch (error) {
                         console.warn('Could not update datasource connection:', error);
@@ -2245,20 +2369,32 @@ if __name__ == "__main__":
 
             logger.info('📊 Stream item to update:', streamItem);
 
-            // Call the update streaming service API
+            // COMMENTED OUT: Call the update streaming service API (PUT API disabled due to 403 permission issues)
+            // TODO: Re-enable when user has appropriate permissions
+            /*
             await this.updateStreamingService(streamItem);
-
             logger.info('✅ Stream item updated successfully');
+            */
+            logger.info('ℹ️ Stream item update skipped (PUT API commented out)');
 
         } catch (error: any) {
             console.error('❌ Failed to update stream item:', error);
-            throw error;
+            // Don't throw error - allow file upload to succeed even if update fails
+            console.warn('⚠️ Continuing despite update error (PUT API commented out)');
         }
     }
 
     // Save script functionality - uploads modified script content 
     private async saveScript(cardId: string, fileName: string, content: string): Promise<void> {
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot save script: token validation failed');
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                return;
+            }
+
             logger.info('💾 Saving script:', fileName);
 
             // Find the pipeline by cardId
@@ -2495,6 +2631,14 @@ if __name__ == "__main__":
             return;
         }
 
+        // Ensure we have a valid token before making API calls
+        const tokenValid = await this.ensureValidToken();
+        if (!tokenValid) {
+            logger.error('Cannot run pipeline: token validation failed');
+            vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+            return;
+        }
+
         const pipelineName = card.alias || card.name;
 
         logger.info('🚀 runPipelineScript called for:', pipelineName);
@@ -2636,6 +2780,13 @@ if __name__ == "__main__":
         }
 
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot open job logs: token validation failed');
+                return;
+            }
+
             // Create and show the job logs viewer with table interface
             const jobLogsViewer = new JobLogsViewer(
                 this._context,
@@ -2800,6 +2951,14 @@ if __name__ == "__main__":
 
     private async generatePipelineScripts(pipelineName: string): Promise<void> {
         try {
+            // Ensure we have a valid token before making API calls
+            const tokenValid = await this.ensureValidToken();
+            if (!tokenValid) {
+                logger.error('Cannot generate scripts: token validation failed');
+                vscode.window.showErrorMessage('Your session has expired. Please re-authenticate.');
+                return;
+            }
+
             vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Generating scripts for ${pipelineName}...`,
@@ -2941,15 +3100,20 @@ if __name__ == "__main__":
             await vscode.commands.executeCommand('essedum.logout');
             logger.info('Logout command executed');
 
+            // Clear internal state
+            this._token = '';
+            this._isAuthenticated = false;
+            this.cards = [];
+
+            // Update authentication context to hide logout button
+            await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+            logger.info('Authentication context cleared - logout button will be hidden');
+
             // Update the webview to show logout page
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
                 logger.info('Logout HTML displayed');
             }
-
-            // Clear internal state
-            this._token = '';
-            this.cards = [];
 
             vscode.window.showInformationMessage('Logged out successfully');
 
@@ -2957,7 +3121,11 @@ if __name__ == "__main__":
             console.error('Error during logout:', error);
             vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
 
-            // Still try to show logout page even if there was an error
+            // Still try to clear state and show logout page even if there was an error
+            this._token = '';
+            this._isAuthenticated = false;
+            await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+            
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
             }

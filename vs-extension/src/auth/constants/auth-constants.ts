@@ -29,10 +29,10 @@ export interface NetworkConfig {
 export const AUTH_CONFIG = {
     /** Authentication timeout in milliseconds */
     AUTH_TIMEOUT: 60000,
-    
+
     /** Token refresh threshold in minutes (refresh when token expires within this time) */
     TOKEN_REFRESH_THRESHOLD_MINUTES: 5,
-    
+
     /** Available authentication networks */
     NETWORKS: {
         INFOSYS: {
@@ -75,10 +75,10 @@ export const AUTH_CONFIG = {
             baseURL: environment.networks.server5g.baseURL
         } as NetworkConfig
     },
-    
+
     /** Default network (for backwards compatibility) */
     DEFAULT_NETWORK: 'infosys' as NetworkType,
-    
+
     /** Legacy constants for backwards compatibility */
     ISSUER_URI: environment.networks.infosys.issuerUri,
     CLIENT_ID: environment.networks.infosys.clientId,

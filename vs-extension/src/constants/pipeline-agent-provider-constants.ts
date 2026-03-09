@@ -33,7 +33,7 @@ export const WEBVIEW_COMMANDS = {
     TRIGGER_LOGIN: 'triggerLogin',
     LOGOUT: 'logout',
     OPEN_COPILOT: 'openCopilot',
-    UPLOAD_ADK: 'uploadAdk',
+    UPLOAD_FROM_GITHUB: 'uploadFromGitHub',
     VIEW_ADK: 'viewAdk',
     DOWNLOAD_ADK: 'downloadAdk',
     REFRESH_JSON: 'refreshJson',

@@ -48,12 +48,38 @@ export async function getUserInfo(context: vscode.ExtensionContext, accessToken:
 
         logger.info('User information fetched successfully');
         return result;
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Failed to fetch user information', error);
 
-        // Create authorization error
+        // Check if this is a network/configuration error (Invalid URL, network issues)
+        // vs an actual authorization error (401, 403)
+        if (error.code === 'ERR_INVALID_URL' ||
+            error.message?.includes('Invalid URL') ||
+            error.code === 'ENOTFOUND' ||
+            error.code === 'ETIMEDOUT' ||
+            error.code === 'ECONNREFUSED') {
+            // Re-throw network errors as-is so caller can handle them appropriately
+            throw error;
+        }
+
+        // For HTTP errors, check the status code
+        if (error.response) {
+            const status = error.response.status;
+            if (status === 401 || status === 403) {
+                // Actual authorization error
+                const authError: any = new Error('AUTHORIZATION_FAILED: You are not authorized to access this application. Please contact the administrator.');
+                authError.isAuthorizationError = true;
+                authError.originalError = error;
+                throw authError;
+            }
+            // For other HTTP errors, re-throw as-is
+            throw error;
+        }
+
+        // For unknown errors, treat as authorization error (backward compatibility)
         const authError: any = new Error('AUTHORIZATION_FAILED: You are not authorized to access this application. Please contact the administrator.');
         authError.isAuthorizationError = true;
+        authError.originalError = error;
         throw authError;
     }
 }

@@ -35,16 +35,16 @@ import { getBaseUrl } from "./api-config";
 export const EXTENSION_CONFIG = {
     /** Extension display name */
     DISPLAY_NAME: 'Essedum AI Platform',
-    
+
     /** Extension identifier */
     EXTENSION_ID: 'essedum',
-    
+
     /** Main sidebar view ID */
     SIDEBAR_VIEW_ID: 'essedum-sidebar',
-    
+
     /** Login screen view ID */
     LOGIN_VIEW_ID: 'essedum-login',
-    
+
     /** Explorer view container ID */
     EXPLORER_VIEW_ID: 'essedum-explorer',
 
@@ -56,7 +56,7 @@ export const EXTENSION_CONFIG = {
 
     /** Pipeline agent view ID */
     PIPELINE_AGENT_VIEW_ID: 'essedum-pipeline-agent',
-    
+
     /** File system scheme for virtual files */
     FILE_SYSTEM_SCHEME: 'essedum'
 } as const;
@@ -68,46 +68,46 @@ export const EXTENSION_CONFIG = {
 export const COMMANDS = {
     /** Open the main sidebar panel */
     OPEN_SIDEBAR: 'essedum.openSidebar',
-    
+
     /** Show network selection login screen */
     SHOW_LOGIN_SCREEN: 'essedum.showLoginScreen',
-    
+
     /** Authenticate user with Keycloak */
     LOGIN: 'essedum.login',
-    
+
     /** Authenticate user with specific network */
     LOGIN_WITH_NETWORK: 'essedum.loginWithNetwork',
-    
+
     /** Logout and clear authentication */
     LOGOUT: 'essedum.logout',
-    
+
     /** Check current authentication status */
     CHECK_AUTH: 'essedum.checkAuth',
-    
+
     /** Run a pipeline */
     RUN_PIPELINE: 'essedum.runPipeline',
-    
+
     /** Open job logs viewer */
     OPEN_JOB_LOGS: 'essedum.openJobLogs',
-    
+
     /** Show job logs in terminal */
     SHOW_JOB_LOGS_TERMINAL: 'essedum.showJobLogsInTerminal',
-    
+
     /** Open internal job logs */
     OPEN_INTERNAL_JOB_LOGS: 'essedum.openInternalJobLogs',
-    
+
     /** Debug upload endpoints */
     DEBUG_UPLOAD: 'essedum.debugUpload',
-    
+
     /** Get current configuration */
     GET_CONFIGURATION: 'essedum.getConfiguration',
-    
+
     /** Refresh configuration from server */
     REFRESH_CONFIGURATION: 'essedum.refreshConfiguration',
-    
+
     /** Get user information */
     GET_USER_INFO: 'essedum.getUserInfo',
-    
+
     /** Refresh user information */
     REFRESH_USER_INFO: 'essedum.refreshUserInfo',
 
@@ -128,12 +128,12 @@ export const COMMANDS = {
 
     /** Navigate back to navigation screen */
     BACK_TO_NAVIGATION: 'essedum.backToNavigation',
-    
+
     /** VS Code built-in commands */
     VSCODE: {
         /** Set extension context for conditional UI */
         SET_CONTEXT: 'setContext',
-        
+
         /** Open extension view */
         OPEN_EXTENSION_VIEW: 'workbench.view.extension.essedum-explorer'
     }
@@ -170,7 +170,7 @@ export const UI_CONFIG = {
         SOURCE_CONTROL: 2, // vscode.ProgressLocation.SourceControl
         WINDOW: 10 // vscode.ProgressLocation.Window
     },
-    
+
     /** Standard button labels */
     BUTTONS: {
         OK: 'OK',
@@ -182,7 +182,7 @@ export const UI_CONFIG = {
         VIEW_PIPELINES: 'View Pipelines',
         OPEN_PIPELINES: 'Open Pipelines'
     },
-    
+
     /** Icon identifiers for commands */
     ICONS: {
         SIGN_OUT: '$(sign-out)',
@@ -203,7 +203,7 @@ export const MESSAGES = {
         LOGOUT_SUCCESS: 'Successfully logged out from Essedum AI Platform.',
         AUTH_CONTEXT_UPDATED: (isAuthenticated: boolean) => `Authentication context updated: ${isAuthenticated}`
     },
-    
+
     /** Error messages */
     ERROR: {
         AUTH_FAILED: 'Authentication failed',
@@ -217,28 +217,28 @@ export const MESSAGES = {
         PIPELINE_INIT_FAILED: 'Failed to initialize pipeline provider:',
         LOGIN_REQUIRED: 'Please login first to run pipelines.'
     },
-    
+
     /** Informational messages */
     INFO: {
-        PIPELINE_RUN_INSTRUCTION: (pipelineName: string) => 
+        PIPELINE_RUN_INSTRUCTION: (pipelineName: string) =>
             `To run pipeline "${pipelineName}", use the Run Pipeline button in the script viewer.`,
         AUTH_STATUS_MESSAGE: (isAuthenticated: boolean, isValid: boolean, tokenExpiry?: Date, needsRefresh?: boolean) => {
             let message = `Authentication Status:\n`;
             message += `• Authenticated: ${isAuthenticated ? '✅' : '❌'}\n`;
             message += `• Token Valid: ${isValid ? '✅' : '❌'}\n`;
-            
+
             if (tokenExpiry) {
                 message += `• Token Expires: ${tokenExpiry.toLocaleString()}\n`;
             }
-            
+
             if (needsRefresh) {
                 message += `• Needs Refresh: ⚠️ Yes\n`;
             }
-            
+
             return message;
         }
     },
-    
+
     /** Progress messages */
     PROGRESS: {
         AUTHENTICATING: 'Authenticating with Keycloak',
@@ -258,7 +258,7 @@ export const MESSAGES = {
 export const DEBUG_CONFIG = {
     /** Enable detailed console logging */
     VERBOSE_LOGGING: true,
-    
+
     /** Log prefixes for different components */
     LOG_PREFIXES: {
         EXTENSION: '[Essedum Extension]',
@@ -279,7 +279,7 @@ export const DEBUG_CONFIG = {
 export const EXTERNAL_LINKS = {
     /** Keycloak documentation URL */
     KEYCLOAK_DOCS: 'https://docs.keycloak.org/',
-    
+
     /** Function to get current platform base URL */
     getPlatformBaseUrl: () => getBaseUrl()
 } as const;

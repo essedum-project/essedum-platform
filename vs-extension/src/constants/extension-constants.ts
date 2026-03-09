@@ -49,6 +49,7 @@ export const STORAGE_KEYS = {
     SELECTED_NETWORK: 'selected_network',
     HAS_USED_LOGIN_SCREEN: 'has_used_login_screen',
     TOKEN_VALIDATION_FAILED: 'token_validation_failed',
+    ACTIVE_VIEW: 'active_view',
 
     // Additional Configuration
     DATA_LIMIT: 'dataLimit',

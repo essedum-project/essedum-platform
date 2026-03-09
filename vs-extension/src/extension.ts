@@ -73,7 +73,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
         logger.warn('Activation already in progress, skipping');
         return;
     }
-    
+
     activating = true;
     logger.info(AppConstants.MESSAGES.SUCCESS.EXTENSION_ACTIVATED);
     context = extensionContext;
@@ -128,7 +128,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
                 authService,
                 fileSystemProvider
             );
-            
+
             pipelineService = services.pipelineService;
             pipelineCardsProvider = services.pipelineCardsProvider;
             pipelineAgentService = services.pipelineAgentService;
@@ -168,7 +168,7 @@ export async function activate(extensionContext: vscode.ExtensionContext): Promi
             'Open Logs',
             'Retry Activation'
         );
-        
+
         if (choice === 'Open Logs') {
             await vscode.commands.executeCommand('workbench.action.openLogsFolder');
         } else if (choice === 'Retry Activation') {
@@ -235,41 +235,85 @@ function registerCommands(): void {
 
     const commands = [
         // Internal commands
-        { id: 'essedum.internal.processLogin', handler: (token: string) => 
-            CommandHandlers.processLogin(context, token, updateServices) },
+        {
+            id: 'essedum.internal.processLogin', handler: (token: string) =>
+                CommandHandlers.processLogin(context, token, updateServices)
+        },
 
         // Authentication
         { id: AppConstants.COMMANDS.SHOW_LOGIN_SCREEN, handler: CommandHandlers.showLoginScreen },
-        { id: AppConstants.COMMANDS.LOGIN, handler: () => 
-            CommandHandlers.handleLogin(context, authService, updateServices) },
-        { id: AppConstants.COMMANDS.LOGIN_WITH_NETWORK, handler: (type?: NetworkType) => 
-            CommandHandlers.handleLoginWithNetwork(context, authService, updateServices, type) },
-        { id: AppConstants.COMMANDS.LOGOUT, handler: () => 
-            CommandHandlers.handleLogout(context, authService, updateServices, pipelineCardsProvider) },
-        { id: AppConstants.COMMANDS.CHECK_AUTH, handler: () => 
-            CommandHandlers.handleCheckAuth(authService) },
+        {
+            id: AppConstants.COMMANDS.LOGIN, handler: () =>
+                CommandHandlers.handleLogin(context, authService, updateServices)
+        },
+        {
+            id: AppConstants.COMMANDS.LOGIN_WITH_NETWORK, handler: (type?: NetworkType) =>
+                CommandHandlers.handleLoginWithNetwork(context, authService, updateServices, type)
+        },
+        {
+            id: AppConstants.COMMANDS.LOGOUT, handler: () =>
+                CommandHandlers.handleLogout(context, authService, updateServices, pipelineCardsProvider)
+        },
+        {
+            id: AppConstants.COMMANDS.CHECK_AUTH, handler: () =>
+                CommandHandlers.handleCheckAuth(authService)
+        },
+        {
+            id: 'essedum.showSessionInfo', handler: () =>
+                authService?.showSessionInfo()
+        },
 
         // Navigation
-        { id: AppConstants.COMMANDS.OPEN_SIDEBAR, handler: () => 
-            ExtensionUtils.safeExecuteCommand(AppConstants.COMMANDS.VSCODE.OPEN_EXTENSION_VIEW) },
-        { id: AppConstants.COMMANDS.SHOW_NAVIGATION, handler: CommandHandlers.setNavigationContext },
-        { id: AppConstants.COMMANDS.SHOW_PIPELINE, handler: CommandHandlers.setPipelineContext },
-        { id: AppConstants.COMMANDS.SHOW_PIPELINE_AGENT, handler: CommandHandlers.setPipelineAgentContext },
-        { id: AppConstants.COMMANDS.BACK_TO_NAVIGATION, handler: CommandHandlers.setNavigationContext },
+        {
+            id: AppConstants.COMMANDS.OPEN_SIDEBAR, handler: () =>
+                ExtensionUtils.safeExecuteCommand(AppConstants.COMMANDS.VSCODE.OPEN_EXTENSION_VIEW)
+        },
+        {
+            id: AppConstants.COMMANDS.SHOW_NAVIGATION, handler: () =>
+                CommandHandlers.setNavigationContext(context)
+        },
+        {
+            id: AppConstants.COMMANDS.SHOW_PIPELINE, handler: () =>
+                CommandHandlers.setPipelineContext(context)
+        },
+        {
+            id: AppConstants.COMMANDS.SHOW_PIPELINE_AGENT, handler: () =>
+                CommandHandlers.setPipelineAgentContext(context)
+        },
+        {
+            id: AppConstants.COMMANDS.BACK_TO_NAVIGATION, handler: () =>
+                CommandHandlers.setNavigationContext(context)
+        },
 
         // Pipeline
-        { id: AppConstants.COMMANDS.RUN_PIPELINE, handler: (name?: string) => 
-            CommandHandlers.handleRunPipeline(pipelineCardsProvider, name) },
+        {
+            id: AppConstants.COMMANDS.RUN_PIPELINE, handler: (name?: string) =>
+                CommandHandlers.handleRunPipeline(pipelineCardsProvider, name)
+        },
 
         // User data
-        { id: AppConstants.COMMANDS.GET_USER_INFO, handler: () => 
-            CommandHandlers.handleGetUserInfo(context) },
-        { id: AppConstants.COMMANDS.REFRESH_USER_INFO, handler: () => 
-            CommandHandlers.handleRefreshUserInfo(context) },
-        { id: AppConstants.COMMANDS.CLEAR_USER_DATA, handler: () => 
-            CommandHandlers.handleClearUserData(context) },
-        { id: AppConstants.COMMANDS.DEBUG_USER_DATA, handler: () => 
-            CommandHandlers.handleDebugUserData(context) }
+        {
+            id: AppConstants.COMMANDS.GET_USER_INFO, handler: () =>
+                CommandHandlers.handleGetUserInfo(context)
+        },
+        {
+            id: AppConstants.COMMANDS.REFRESH_USER_INFO, handler: () =>
+                CommandHandlers.handleRefreshUserInfo(context)
+        },
+        {
+            id: AppConstants.COMMANDS.CLEAR_USER_DATA, handler: () =>
+                CommandHandlers.handleClearUserData(context)
+        },
+        {
+            id: AppConstants.COMMANDS.DEBUG_USER_DATA, handler: () =>
+                CommandHandlers.handleDebugUserData(context)
+        },
+
+        // Pipeline Agent       
+        {
+            id: 'essedum.uploadAgentFolder', handler: (uri?: vscode.Uri) =>
+                CommandHandlers.handleUploadAgentFolder(context, pipelineAgentProvider, uri)
+        }
     ];
 
     commands.forEach(({ id, handler }) => {
