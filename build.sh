@@ -1,0 +1,208 @@
+#!/bin/bash
+set -e
+
+# =============================================================================
+# Essedum Platform - Build & Run Script
+# =============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
+ENV_FILE=".env"
+ENV_SAMPLE=".env.sample"
+COMPOSE_FILE="docker-compose.yaml"
+
+# --- Colors for output ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+print_info()  { echo -e "${GREEN}[INFO]${NC}  $1"; }
+print_warn()  { echo -e "${YELLOW}[WARN]${NC}  $1"; }
+print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+usage() {
+    echo ""
+    echo "Usage: $0 [command] [options]"
+    echo ""
+    echo "Commands:"
+    echo "  build       Build all Docker images (without starting)"
+    echo "  up          Build and start all services"
+    echo "  down        Stop and remove all services"
+    echo "  restart     Restart all services"
+    echo "  logs        Show logs (use -f for follow)"
+    echo "  status      Show status of all services"
+    echo "  clean       Stop services and remove images, volumes"
+    echo "  init-env    Create .env from .env.sample"
+    echo ""
+    echo "Options:"
+    echo "  --no-cache  Build without Docker cache"
+    echo "  -d          Run in detached mode (for 'up' command)"
+    echo "  -f          Follow logs (for 'logs' command)"
+    echo ""
+    echo "Examples:"
+    echo "  $0 init-env          # First-time setup: create .env"
+    echo "  $0 up -d             # Build and start in background"
+    echo "  $0 up -d --no-cache  # Full rebuild and start"
+    echo "  $0 logs -f           # Stream live logs"
+    echo "  $0 down              # Stop everything"
+    echo ""
+}
+
+# --- Check prerequisites ---
+check_prerequisites() {
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker is not installed. Please install Docker first."
+        exit 1
+    fi
+
+    if ! docker compose version &> /dev/null 2>&1; then
+        if ! docker-compose version &> /dev/null 2>&1; then
+            print_error "Docker Compose is not available. Please install Docker Compose."
+            exit 1
+        fi
+        COMPOSE_CMD="docker-compose"
+    else
+        COMPOSE_CMD="docker compose"
+    fi
+}
+
+# --- Ensure .env exists ---
+ensure_env() {
+    if [ ! -f "$ENV_FILE" ]; then
+        if [ -f "$ENV_SAMPLE" ]; then
+            print_warn ".env file not found. Creating from .env.sample..."
+            cp "$ENV_SAMPLE" "$ENV_FILE"
+            print_info "Created .env — review and update it before starting services."
+        else
+            print_error "Neither .env nor .env.sample found. Cannot continue."
+            exit 1
+        fi
+    fi
+}
+
+# --- Make entrypoint script executable ---
+ensure_entrypoint() {
+    local entrypoint="essedum-ui/docker-entrypoint.sh"
+    if [ -f "$entrypoint" ]; then
+        chmod +x "$entrypoint"
+    fi
+}
+
+# --- Commands ---
+
+cmd_init_env() {
+    if [ -f "$ENV_FILE" ]; then
+        print_warn ".env already exists. Overwrite? (y/N)"
+        read -r answer
+        if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+            print_info "Skipped."
+            return
+        fi
+    fi
+    if [ ! -f "$ENV_SAMPLE" ]; then
+        print_error ".env.sample not found."
+        exit 1
+    fi
+    cp "$ENV_SAMPLE" "$ENV_FILE"
+    print_info ".env created from .env.sample. Edit it with your configuration:"
+    print_info "  vi $ENV_FILE"
+}
+
+cmd_build() {
+    ensure_env
+    ensure_entrypoint
+    local cache_flag=""
+    if [[ "$*" == *"--no-cache"* ]]; then
+        cache_flag="--no-cache"
+    fi
+    print_info "Building Docker images..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" build $cache_flag
+    print_info "Build complete."
+}
+
+cmd_up() {
+    ensure_env
+    ensure_entrypoint
+    local flags=""
+    local cache_flag=""
+    if [[ "$*" == *"-d"* ]]; then
+        flags="-d"
+    fi
+    if [[ "$*" == *"--no-cache"* ]]; then
+        cache_flag="--no-cache"
+    fi
+    print_info "Building and starting services..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up --build $cache_flag $flags
+    if [[ "$flags" == *"-d"* ]]; then
+        echo ""
+        print_info "Services started in background."
+        print_info "Frontend: http://localhost:${FRONTEND_PORT:-8084}"
+        print_info "Backend:  http://localhost:${BACKEND_PORT:-8082}"
+        print_info "Use '$0 logs -f' to follow logs."
+    fi
+}
+
+cmd_down() {
+    print_info "Stopping services..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down
+    print_info "Services stopped."
+}
+
+cmd_restart() {
+    print_info "Restarting services..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down
+    cmd_up "$@"
+}
+
+cmd_logs() {
+    local flags=""
+    if [[ "$*" == *"-f"* ]]; then
+        flags="-f"
+    fi
+    $COMPOSE_CMD -f "$COMPOSE_FILE" logs $flags
+}
+
+cmd_status() {
+    $COMPOSE_CMD -f "$COMPOSE_FILE" ps
+}
+
+cmd_clean() {
+    print_warn "This will stop all services and remove images and volumes. Continue? (y/N)"
+    read -r answer
+    if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+        print_info "Cancelled."
+        return
+    fi
+    print_info "Cleaning up..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down --rmi local -v
+    print_info "Cleanup complete."
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+check_prerequisites
+
+COMMAND="${1:-}"
+shift 2>/dev/null || true
+
+case "$COMMAND" in
+    build)    cmd_build "$@" ;;
+    up)       cmd_up "$@" ;;
+    down)     cmd_down ;;
+    restart)  cmd_restart "$@" ;;
+    logs)     cmd_logs "$@" ;;
+    status)   cmd_status ;;
+    clean)    cmd_clean ;;
+    init-env) cmd_init_env ;;
+    help|-h|--help) usage ;;
+    *)
+        if [ -n "$COMMAND" ]; then
+            print_error "Unknown command: $COMMAND"
+        fi
+        usage
+        exit 1
+        ;;
+esac

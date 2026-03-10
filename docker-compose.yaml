@@ -1,0 +1,116 @@
+services:
+  essedum-backend-service:
+    build:
+      context: ./sv
+      dockerfile: Dockerfile_oauth2
+    ports:
+      - "${BACKEND_PORT:-8082}:8082"
+    environment:
+      # --- App Paths ---
+      - LEAP_HOME=/app
+      - ESSEDUM_HOME=/app
+      - spring.config.location=/app/conf/
+      - LOG_PATH=/app/log
+
+      # --- Spring Profiles ---
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-mysql,dbjwt,btf,dbconstants,vault}
+
+      # --- Encryption ---
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-essedum}
+      - ENCRYPTION_SALT=${ENCRYPTION_SALT:-defaultsalt}
+
+      # --- License ---
+      - license=${LICENSE:-}
+      - publickey=${PUBLIC_KEY:-}
+
+      # --- Database (MySQL) ---
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL:-jdbc:mysql://mysql:3306}
+      - MYSQL_DATASOURCE_USER=${MYSQL_DATASOURCE_USER:-root}
+      - MYSQL_DATASOURCE_PASS=${MYSQL_DATASOURCE_PASS:-password}
+
+      # --- Database Names (override if your DB names differ) ---
+      - ESSEDUM_CORE_DB=${ESSEDUM_CORE_DB:-essedum_coredb}
+      - ESSEDUM_QUARTZ_DB=${ESSEDUM_QUARTZ_DB:-essedum_quartzdb}
+      - ESSEDUM_BTF_DB=${ESSEDUM_BTF_DB:-essedum_btf}
+      - ESSEDUM_SJS_DB=${ESSEDUM_SJS_DB:-essedum_sjs}
+      - ESSEDUM_REF_DB=${ESSEDUM_REF_DB:-essedum_ref_data}
+
+      # --- Telemetry DB ---
+      - TELEMETRY_DATASOURCE_URL=${TELEMETRY_DATASOURCE_URL:-jdbc:mysql://mysql:3306/telemetrydb}
+
+      # --- Backend Self URLs ---
+      - ESSEDUM_URL=${ESSEDUM_URL:-http://essedum-backend-service:8082/}
+      - COMMON_APP_URL=${COMMON_APP_URL:-http://essedum-backend-service:8081/}
+
+      # --- Python Job Executor ---
+      - PYJOB_EXECUTOR_URL=${PYJOB_EXECUTOR_URL:-http://py-job-executor:5000}
+
+      # --- Vault ---
+      - VAULT_ENABLED=${VAULT_ENABLED:-false}
+      - VAULT_URL=${VAULT_URL:-http://vault:8200}
+      - VAULT_TOKEN=${VAULT_TOKEN:-}
+
+      # --- Kafka ---
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+
+      # --- RabbitMQ ---
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+
+      # --- Server Port ---
+      - BACKEND_SERVER_PORT=${BACKEND_SERVER_PORT:-8081}
+
+      # --- OAuth2 / Keycloak ---
+      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-https://login.essedum-lfn.infosys.com/realms/ESSEDUM}
+      - OAUTH2_JWK_SET_URI=${OAUTH2_JWK_SET_URI:-https://login.essedum-lfn.infosys.com/realms/ESSEDUM/protocol/openid-connect/certs}
+      - OAUTH2_CLIENT_ID=${OAUTH2_CLIENT_ID:-essedum-45}
+      - OAUTH2_SCOPE=${OAUTH2_SCOPE:-openid profile email}
+      - OAUTH2_CLAIM=${OAUTH2_CLAIM:-email||admin}
+      - OAUTH2_CREATE_USER=${OAUTH2_CREATE_USER:-true}
+
+      # --- Logging ---
+      - LOG_LEVEL_SECURITY=${LOG_LEVEL_SECURITY:-DEBUG}
+      - LOG_LEVEL_COMM_LIB=${LOG_LEVEL_COMM_LIB:-ERROR}
+    networks:
+      - essedum-network
+    restart: unless-stopped
+
+  essedum-frontend:
+    build:
+      context: ./essedum-ui
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-8084}:8084"
+    environment:
+      # --- Nginx Proxy Targets ---
+      - BACKEND_SERVICE_URL=${BACKEND_SERVICE_URL:-essedum-backend-service:8082}
+      - LANGFLOW_SERVICE_URL=${LANGFLOW_SERVICE_URL:-essedum-langflow-service:80}
+
+      # --- Auth Config (shell-app runtime) ---
+      - FE_AUTH_REQUIRED=${FE_AUTH_REQUIRED:-false}
+      - FE_AUTH_ISSUER=${FE_AUTH_ISSUER:-https://login.microsoftonline.com/63ce7d59-2f3e-42cd-a8cc-be764cff5eb6/v2.0}
+      - FE_AUTH_CLIENT_ID=${FE_AUTH_CLIENT_ID:-4c08c00f-c434-4846-85cb-544e8feb0843}
+      - FE_AUTH_SCOPE=${FE_AUTH_SCOPE:-4c08c00f-c434-4846-85cb-544e8feb0843/.default}
+
+      # --- Langflow URL (aip-app build-time replacement) ---
+      - FE_LANGFLOW_URL=${FE_LANGFLOW_URL:-/langflow}
+
+      # --- Pipeline Config (aip-app runtime) ---
+      - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT:-http://minio:9000}
+      - FE_MINIO_BUCKET=${FE_MINIO_BUCKET:-aiptest}
+      - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX:-acrreq0762935.azurecr.io/}
+      - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION:-v1}
+    volumes:
+      - ./essedum-ui/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./essedum-ui/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+      - ./essedum-ui/config-templates:/config-templates:ro
+    entrypoint: ["/bin/sh", "/docker-entrypoint.sh"]
+    depends_on:
+      - essedum-backend-service
+    networks:
+      - essedum-network
+    restart: unless-stopped
+
+networks:
+  essedum-network:
+    driver: bridge

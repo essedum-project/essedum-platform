@@ -36,8 +36,18 @@ ENV GCP_PRIVATE_KEY_ID="e0d21673ec720bd0d3431153a9f7818bb418db4e"
 
 COPY --from=builder /app /app/
 WORKDIR /app
-ENV ESSEDUM_HOME=/app
 
-CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=essedum$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.lfn.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,dbjwt,btf,dbconstants,vault -cp common-app-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.Common -Dhttp.nonProxyHosts=aiplatform.az.ad.idemo-ppc.com"]
+# --- Configurable environment variables with defaults ---
+ENV ESSEDUM_HOME=/app
+ENV SPRING_CONFIG_LOCATION=/app/conf/
+ENV ENCRYPTION_KEY=essedum
+ENV ENCRYPTION_SALT=defaultsalt
+ENV LOG_PATH=/app/log
+ENV SPRING_PROFILES_ACTIVE=mysql,dbjwt,btf,dbconstants,vault
+ENV LOG_LEVEL_SECURITY=DEBUG
+ENV LOG_LEVEL_COMM_LIB=ERROR
+ENV HTTP_NON_PROXY_HOSTS=
+
+CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=${SPRING_CONFIG_LOCATION} -Dencryption.key=${ENCRYPTION_KEY} -Dencryption.salt=${ENCRYPTION_SALT} -DLOG_PATH=${LOG_PATH} -Dlogging.level.com.springframework.security=${LOG_LEVEL_SECURITY} -Dlogging.level.com.lfn.ai.comm.lib.util.logger=${LOG_LEVEL_COMM_LIB} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -cp common-app-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.Common"]
 
 EXPOSE 8082

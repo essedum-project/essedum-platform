@@ -1,33 +1,32 @@
 apipermission:
   disable_api_security_validation: false
-ESSEDUM_HOME: /app
-LOG_PATH: /app/log
-ESSEDUM_URL: http://localhost:8080/
-commonAppUrl: "http://localhost:8081/"
+ESSEDUM_HOME: ${ESSEDUM_HOME:/app}
+LOG_PATH: ${LOG_PATH:/app/log}
+ESSEDUM_URL: ${ESSEDUM_URL:http://localhost:8080/}
+commonAppUrl: ${COMMON_APP_URL:http://localhost:8081/}
  
 telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://mysql-local:3306/telemetrydb
-    username: root
-    password: password
+    jdbcurl: ${TELEMETRY_DATASOURCE_URL:jdbc:mysql://mysql-local:3306/telemetrydb}
+    username: ${MYSQL_DATASOURCE_USER:root}
+    password: ${MYSQL_DATASOURCE_PASS:password}
  
 config:
-  active-profiles: mysql,oauth2,btf,dbconstants,vault
+  active-profiles: ${SPRING_PROFILES_ACTIVE:mysql,oauth2,btf,dbconstants,vault}
   #active-profiles: mysql,oauth2,btf,dbconstants
-  #static-locations: file:/D:/common-app/
-  static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
+  static-locations: ${STATIC_LOCATIONS:file:/app/common-app/}
   
-  datasourceurl: jdbc:mysql://mysql-local:3306
-  datasourceuser: root
-  datasourcepass: password
-  essedumcoredb: essedum_coredb
-  essedumquartzdb: essedum_quartzdb
+  datasourceurl: ${MYSQL_DATASOURCE_URL:jdbc:mysql://mysql-local:3306}
+  datasourceuser: ${MYSQL_DATASOURCE_USER:root}
+  datasourcepass: ${MYSQL_DATASOURCE_PASS:password}
+  essedumcoredb: ${ESSEDUM_CORE_DB:essedum_coredb}
+  essedumquartzdb: ${ESSEDUM_QUARTZ_DB:essedum_quartzdb}
   
-  essedumbtfdb: essedum_btf
-  essedumsjsdb: essedum_sjs
-  essedumsrefdb: essedum_ref_data
+  essedumbtfdb: ${ESSEDUM_BTF_DB:essedum_btf}
+  essedumsjsdb: ${ESSEDUM_SJS_DB:essedum_sjs}
+  essedumsrefdb: ${ESSEDUM_REF_DB:essedum_ref_data}
  
   service-auth:
     access-token: aec127c2-c984-33f6-9a3a-355xd1dof097
@@ -80,20 +79,20 @@ spring:
  
     change-log: "classpath:db/changelog/master.xml"
   rabbitmq:
-    host: rabbitmq-server
-    port: 5673
+    host: ${RABBITMQ_HOST:rabbitmq-server}
+    port: ${RABBITMQ_PORT:5672}
     username: rabbitmq-user
     password:
   kafka:
     consumer:
-      bootstrap-servers: cvrictlptm22:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:cvrictlptm22:9092}
       group-id: emfEventConsumer
       auto-offset-reset: latest
       enable.auto.commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
     producer:
-      bootstrap-servers: cvrictlptm22:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:cvrictlptm22:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
     topic:
@@ -113,10 +112,10 @@ spring:
     stream:
       defaultBinder: kafka
       kafka:
-        bootstrap-servers: cvrictlptm22:9092
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:cvrictlptm22:9092}
         binder:
           brokers:
-           - cvrictlptm22:9092
+           - ${KAFKA_BOOTSTRAP_SERVERS:cvrictlptm22:9092}
     vault:
       enabled: false
   devtools:
@@ -197,7 +196,7 @@ server:
     path: /error
   whitelabel:
     enabled: false
-  port: 8081
+  port: ${BACKEND_SERVER_PORT:8081}
   max-http-header-size: 48000   
   session:
     cookie:
@@ -387,7 +386,7 @@ endpoint:
   bcc: "/api"
   cfm: "/api"
   ccl: "/api"  
-port_automation_app_url: http://localhost:5000
+port_automation_app_url: ${PYJOB_EXECUTOR_URL:http://localhost:5000}
  
 jobexecutor:
   org: leo1311

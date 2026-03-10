@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "authRequired": ${FE_AUTH_REQUIRED},
+    "authInIframe": false,
+    "iframeHtmlPath": "assets/login-iframe.html",
+    "issuer": "${FE_AUTH_ISSUER}",
+    "clientId": "${FE_AUTH_CLIENT_ID}",
+    "responseType": "code",
+    "scope": "${FE_AUTH_SCOPE}",
+    "showDebugInformation": true,
+    "timeoutFactor": 0.5,
+    "strictDiscoveryDocumentValidation": false
+  }
+}

@@ -1,9 +1,9 @@
 spring:
   cloud:
     vault:
-      enabled: true
-      uri: http://10.85.12.206:31854
-      token: test
+      enabled: ${VAULT_ENABLED:true}
+      uri: ${VAULT_URL:http://10.85.12.206:31854}
+      token: ${VAULT_TOKEN:test}
       scheme: http
   #      kv:
   #        enabled: true

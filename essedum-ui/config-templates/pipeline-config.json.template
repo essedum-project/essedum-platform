@@ -1,0 +1,10 @@
+{
+  "minio": {
+    "endpoint": "${FE_MINIO_ENDPOINT}",
+    "bucketName": "${FE_MINIO_BUCKET}"
+  },
+  "containerRegistry": {
+    "registryPrefix": "${FE_CONTAINER_REGISTRY_PREFIX}",
+    "imageVersion": "${FE_CONTAINER_REGISTRY_VERSION}"
+  }
+}

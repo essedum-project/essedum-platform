@@ -1,0 +1,121 @@
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+
+http {
+      include       mime.types;
+      default_type  application/octet-stream;
+      sendfile        on;
+      client_max_body_size 500M;
+      keepalive_timeout  60s;
+      autoindex_localtime on;
+      charset UTF-8;
+      source_charset UTF-8;
+
+      # Expires map
+      map $sent_http_content_type $expires {
+             default                    off;
+             text/html                  epoch;
+             text/css                   max;
+             application/javascript     max;
+             ~image/                    max;
+      }
+
+      map $http_upgrade $connection_upgrade {
+             default upgrade;
+             ''      close;
+      }
+
+      # Rate limiting for DDOS protection
+      limit_req_zone $binary_remote_addr zone=one:10m rate=1000r/s;
+
+    server {
+      listen        8082;
+      server_name   localhost;
+      root /app/ui/aip;
+      error_page    404    /404.html;
+
+      location / {
+        autoindex on;
+      }
+    }
+
+    server {
+      listen        8084;
+      server_name   localhost;
+      root /app/ui/common;
+      error_page    404    /404.html;
+
+      location / {
+        autoindex on;
+      }
+
+        location /api/ {
+           proxy_pass http://${BACKEND_SERVICE_URL};
+           add_header Access-Control-Allow-Origin "*";
+           add_header Access-Control-Allow-Methods "GET, PUT, POST";
+           add_header Access-Control-Allow-Headers "X-Custom-Software, X-My-Custom";
+           proxy_set_header Host $host:$server_port;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           add_header Content-Security-Policy upgrade-insecure-requests;
+        }
+
+        location ^~ /cip/api {
+           rewrite ^/cip/api/(.*)$ /api/$1 last;
+        }
+
+        location /aipui/ {
+           proxy_pass http://localhost:8082/;
+           add_header Access-Control-Allow-Origin "*";
+           add_header Access-Control-Allow-Methods "GET, PUT, POST";
+           add_header Access-Control-Allow-Headers "X-Custom-Software, X-My-Custom";
+           proxy_set_header Host $host:$server_port;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           add_header Content-Security-Policy upgrade-insecure-requests;
+        }
+
+        location /langflow {
+           rewrite ^/langflow(/.*)$ $1 break;
+           rewrite ^/langflow$ / break;
+           proxy_pass http://${LANGFLOW_SERVICE_URL};
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection $connection_upgrade;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_read_timeout 86400;
+           add_header Access-Control-Allow-Origin "*" always;
+           add_header Access-Control-Allow-Methods "GET, PUT, POST, DELETE, OPTIONS" always;
+           add_header Access-Control-Allow-Headers "X-Custom-Software, X-My-Custom, Authorization, Content-Type" always;
+        }
+
+        error_page  500 502 503 504 404 /50x.html;
+
+        location = /50x.html {
+              root   html;
+        }
+
+        error_page  404 /404x.html;
+
+        location = /404x.html {
+              root   /ng/html;
+        }
+
+        error_page  403 /403x.html;
+
+        location = /403x.html {
+              root   /ng/html;
+        }
+
+        location /error {
+              root   /ng/html;
+        }
+    }
+}
