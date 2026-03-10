@@ -72,7 +72,7 @@ Every URL, credential, and service address is configurable via environment varia
 | `docker-compose.yaml` | Orchestrates frontend + backend services with all env vars |
 | `.env.sample` | Template with all configurable variables and their defaults |
 | `build.sh` | Convenience script for build, start, stop, logs, etc. |
-| `essedum-ui/nginx.conf.template` | Nginx config with `${BACKEND_SERVICE_URL}` and `${LANGFLOW_SERVICE_URL}` placeholders |
+| `essedum-ui/nginx.conf.template` | Nginx config with `${BACKEND_SERVICE_URL}`, `${LANGFLOW_SERVICE_URL}`, `${LANGFUSE_SERVICE_URL}`, and `${LITELLM_SERVICE_URL}` placeholders |
 | `essedum-ui/docker-entrypoint.sh` | Container startup script that generates configs from templates |
 | `essedum-ui/config-templates/auth-config.json.template` | Runtime auth config template for shell-app |
 | `essedum-ui/config-templates/pipeline-config.json.template` | Runtime pipeline config template for aip-app |
@@ -86,7 +86,7 @@ Every URL, credential, and service address is configurable via environment varia
 | `sv/common-app/.../application-mysql-oauth2.yml` | Same — all URLs use Spring `${VAR:default}` placeholders |
 | `sv/common-app/.../application-oauth2.yml` | OAuth2 issuer, JWK, clientId, scope, claim all use `${VAR:default}` |
 | `sv/common-app/.../application-vault.yml` | Vault enabled, URI, token use `${VAR:default}` |
-| `essedum-ui/aip-app-ui/.../environment.prod.ts` | `langflowUrl` changed to `'__LANGFLOW_URL_PLACEHOLDER__'` for runtime replacement |
+| `essedum-ui/aip-app-ui/.../environment.prod.ts` | `langflowUrl`, `langfuseUrl`, and `litellmUrl` use placeholder values for runtime replacement |
 
 ---
 
@@ -159,11 +159,15 @@ docker compose ps
 | `FRONTEND_PORT` | `8084` | docker-compose | Host port mapped to frontend |
 | `BACKEND_SERVICE_URL` | `essedum-backend-service:8082` | nginx.conf.template | Backend address for nginx proxy |
 | `LANGFLOW_SERVICE_URL` | `essedum-langflow-service:80` | nginx.conf.template | Langflow address for nginx proxy |
+| `LANGFUSE_SERVICE_URL` | `essedum-langfuse-service:3000` | nginx.conf.template | Langfuse address for nginx proxy |
+| `LITELLM_SERVICE_URL` | `essedum-litellm-service:4000` | nginx.conf.template | LiteLLM address for nginx proxy |
 | `FE_AUTH_REQUIRED` | `false` | auth-config.json | Enable/disable authentication |
 | `FE_AUTH_ISSUER` | *(Azure AD URL)* | auth-config.json | OAuth2 issuer URL |
 | `FE_AUTH_CLIENT_ID` | *(Azure AD client)* | auth-config.json | OAuth2 client ID |
 | `FE_AUTH_SCOPE` | *(Azure AD scope)* | auth-config.json | OAuth2 scope |
 | `FE_LANGFLOW_URL` | `/langflow` | JS bundle (sed) | Langflow URL in Angular app |
+| `FE_LANGFUSE_URL` | `https://langfuse.essedum-lfn.infosys.com/` | JS bundle (sed) | Langfuse URL in Angular app |
+| `FE_LITELLM_URL` | `https://litellm.essedum-lfn.infosys.com/ui/` | JS bundle (sed) | LiteLLM URL in Angular app |
 | `FE_MINIO_ENDPOINT` | `http://minio:9000` | pipeline-config.json | MinIO storage endpoint |
 | `FE_MINIO_BUCKET` | `aiptest` | pipeline-config.json | MinIO bucket name |
 | `FE_CONTAINER_REGISTRY_PREFIX` | `acrreq0762935.azurecr.io/` | pipeline-config.json | Container registry prefix |
@@ -246,11 +250,11 @@ The frontend has **three layers** of dynamic configuration, each handled differe
 `nginx.conf.template` contains placeholders like `${BACKEND_SERVICE_URL}`. At container startup, `docker-entrypoint.sh` runs:
 
 ```sh
-envsubst '${BACKEND_SERVICE_URL} ${LANGFLOW_SERVICE_URL}' \
+envsubst '${BACKEND_SERVICE_URL} ${LANGFLOW_SERVICE_URL} ${LANGFUSE_SERVICE_URL} ${LITELLM_SERVICE_URL}' \
   < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 ```
 
-This generates the actual `nginx.conf` with real service addresses, enabling nginx to proxy `/api/` requests to the backend and `/langflow` to the Langflow service.
+This generates the actual `nginx.conf` with real service addresses, enabling nginx to proxy `/api/` requests to the backend and `/langflow`, `/langfuse`, and `/litellm` to their respective services.
 
 #### Layer 2: Runtime JSON Configs (envsubst)
 
@@ -263,18 +267,24 @@ At startup, `docker-entrypoint.sh` runs `envsubst` on each template to produce t
 
 #### Layer 3: Build-Time JS Bundle Replacement (sed)
 
-Some values are baked into Angular's compiled JavaScript during `ng build` (e.g., `langflowUrl` from `environment.prod.ts`). These can't use `envsubst` because they're inside minified JS bundles.
+Some values are baked into Angular's compiled JavaScript during `ng build` (for example `langflowUrl`, `langfuseUrl`, and `litellmUrl` from `environment.prod.ts`). These can't use `envsubst` because they're inside minified JS bundles.
 
 **Solution:** The build uses a placeholder string:
 ```typescript
 // environment.prod.ts
-langflowUrl: '__LANGFLOW_URL_PLACEHOLDER__'
+langflowUrl: '__LANGFLOW_URL_PLACEHOLDER__',
+langfuseUrl: '__LANGFUSE_URL_PLACEHOLDER__',
+litellmUrl: '__LITELLM_URL_PLACEHOLDER__'
 ```
 
-At container startup, `docker-entrypoint.sh` replaces it with the real value using `sed`:
+At container startup, `docker-entrypoint.sh` replaces them with real values using `sed`:
 ```sh
 find /app/ui/aip -name '*.js' -exec \
   sed -i "s|__LANGFLOW_URL_PLACEHOLDER__|${FE_LANGFLOW_URL}|g" {} +
+find /app/ui/aip -name '*.js' -exec \
+  sed -i "s|__LANGFUSE_URL_PLACEHOLDER__|${FE_LANGFUSE_URL}|g" {} +
+find /app/ui/aip -name '*.js' -exec \
+  sed -i "s|__LITELLM_URL_PLACEHOLDER__|${FE_LITELLM_URL}|g" {} +
 ```
 
 ---
@@ -373,6 +383,8 @@ The backend is not reachable from the frontend container. Verify:
 2. `BACKEND_SERVICE_URL` matches the backend service name and port
 3. The backend is fully started (check backend logs)
 
+If `/langfuse` or `/litellm` shows 502, verify `LANGFUSE_SERVICE_URL` and `LITELLM_SERVICE_URL` point to reachable services on the same Docker network.
+
 ### Spring Boot can't connect to MySQL
 
 1. Ensure MySQL is running and accessible from the Docker network
@@ -390,6 +402,14 @@ The backend is not reachable from the frontend container. Verify:
 1. Verify `FE_LANGFLOW_URL` is set in `.env`
 2. Check entrypoint logs: `docker compose logs essedum-frontend | grep langflowUrl`
 3. Inspect a JS bundle: `docker exec essedum-frontend grep -r "LANGFLOW" /app/ui/aip/*.js`
+
+### Langfuse/LiteLLM URLs not replaced in Angular app
+
+1. Verify `FE_LANGFUSE_URL` and `FE_LITELLM_URL` are set in `.env`
+2. Check entrypoint logs for replacement messages for `langfuseUrl` and `litellmUrl`
+3. Inspect JS bundles:
+  - `docker exec essedum-frontend grep -r "LANGFUSE" /app/ui/aip/*.js`
+  - `docker exec essedum-frontend grep -r "LITELLM" /app/ui/aip/*.js`
 
 ### Rebuilding after config changes
 
@@ -430,5 +450,5 @@ essedum-platform/
     ├── config-templates/
     │   ├── auth-config.json.template      # Auth config template
     │   └── pipeline-config.json.template  # Pipeline config template
-    └── aip-app-ui/.../environment.prod.ts # Langflow URL placeholder
+    └── aip-app-ui/.../environment.prod.ts # Langflow/Langfuse/LiteLLM URL placeholders
 ```

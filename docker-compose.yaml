@@ -85,6 +85,8 @@ services:
       # --- Nginx Proxy Targets ---
       - BACKEND_SERVICE_URL=${BACKEND_SERVICE_URL:-essedum-backend-service:8082}
       - LANGFLOW_SERVICE_URL=${LANGFLOW_SERVICE_URL:-essedum-langflow-service:80}
+      - LANGFUSE_SERVICE_URL=${LANGFUSE_SERVICE_URL:-essedum-langfuse-service:3000}
+      - LITELLM_SERVICE_URL=${LITELLM_SERVICE_URL:-essedum-litellm-service:4000}
 
       # --- Auth Config (shell-app runtime) ---
       - FE_AUTH_REQUIRED=${FE_AUTH_REQUIRED:-false}
@@ -94,6 +96,8 @@ services:
 
       # --- Langflow URL (aip-app build-time replacement) ---
       - FE_LANGFLOW_URL=${FE_LANGFLOW_URL:-/langflow}
+      - FE_LANGFUSE_URL=${FE_LANGFUSE_URL:-https://langfuse.essedum-lfn.infosys.com/}
+      - FE_LITELLM_URL=${FE_LITELLM_URL:-https://litellm.essedum-lfn.infosys.com/ui/}
 
       # --- Pipeline Config (aip-app runtime) ---
       - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT:-http://minio:9000}

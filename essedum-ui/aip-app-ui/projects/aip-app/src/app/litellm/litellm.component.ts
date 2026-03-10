@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-litellm',
@@ -9,20 +10,11 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 export class LitellmComponent implements OnInit, AfterViewInit {
   // Embedded LiteLLM interface URL
   currentIframeUrl: SafeResourceUrl;
-  private readonly litellmUrl: string;
+  private readonly litellmUrl = environment.litellmUrl;
 
   @ViewChild('litellmIframeRef') litellmIframeRef!: ElementRef<HTMLIFrameElement>;
 
-  constructor(private sanitizer: DomSanitizer) {
-    // Dynamically construct the LiteLLM URL based on current hostname
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
-
-      // For production, use litellm subdomain
-      this.litellmUrl = `${protocol}//litellm.${hostname}/ui/`;
-    
-  }
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.litellmUrl);

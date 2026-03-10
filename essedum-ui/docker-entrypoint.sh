@@ -4,12 +4,14 @@ set -e
 # =============================================================================
 # 1. Generate nginx config from template
 # =============================================================================
-envsubst '${BACKEND_SERVICE_URL} ${LANGFLOW_SERVICE_URL}' \
+envsubst '${BACKEND_SERVICE_URL} ${LANGFLOW_SERVICE_URL} ${LANGFUSE_SERVICE_URL} ${LITELLM_SERVICE_URL}' \
   < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 echo "[entrypoint] Nginx config generated:"
 echo "  BACKEND_SERVICE_URL=${BACKEND_SERVICE_URL}"
 echo "  LANGFLOW_SERVICE_URL=${LANGFLOW_SERVICE_URL}"
+echo "  LANGFUSE_SERVICE_URL=${LANGFUSE_SERVICE_URL}"
+echo "  LITELLM_SERVICE_URL=${LITELLM_SERVICE_URL}"
 
 # =============================================================================
 # 2. Generate runtime auth-config.json for shell-app (if template exists)
@@ -39,7 +41,7 @@ if [ -f "$PIPELINE_TEMPLATE" ] && [ -d "$(dirname "$PIPELINE_TARGET")" ]; then
 fi
 
 # =============================================================================
-# 4. Replace langflowUrl placeholder in built JS bundles
+# 4. Replace URL placeholders in built JS bundles
 # =============================================================================
 if [ -n "${FE_LANGFLOW_URL}" ]; then
   # The Angular build bakes the default langflowUrl into main*.js
@@ -47,6 +49,18 @@ if [ -n "${FE_LANGFLOW_URL}" ]; then
   find /app/ui/aip -name '*.js' -exec \
     sed -i "s|__LANGFLOW_URL_PLACEHOLDER__|${FE_LANGFLOW_URL}|g" {} +
   echo "[entrypoint] langflowUrl replaced in JS bundles: ${FE_LANGFLOW_URL}"
+fi
+
+if [ -n "${FE_LANGFUSE_URL}" ]; then
+  find /app/ui/aip -name '*.js' -exec \
+    sed -i "s|__LANGFUSE_URL_PLACEHOLDER__|${FE_LANGFUSE_URL}|g" {} +
+  echo "[entrypoint] langfuseUrl replaced in JS bundles: ${FE_LANGFUSE_URL}"
+fi
+
+if [ -n "${FE_LITELLM_URL}" ]; then
+  find /app/ui/aip -name '*.js' -exec \
+    sed -i "s|__LITELLM_URL_PLACEHOLDER__|${FE_LITELLM_URL}|g" {} +
+  echo "[entrypoint] litellmUrl replaced in JS bundles: ${FE_LITELLM_URL}"
 fi
 
 exec nginx -g 'daemon off;'

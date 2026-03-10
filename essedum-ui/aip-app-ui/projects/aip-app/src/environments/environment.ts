@@ -6,7 +6,9 @@ export const environment = {
   production: false,
   baseUrl: "/api/aip",
   datasetsUrl: '/api/aip',
-  langflowUrl: 'http://localhost:3000/'
+  langflowUrl: 'http://localhost:3000/',
+  langfuseUrl: 'http://localhost:3001/',
+  litellmUrl: 'http://localhost:4000/ui/'
 };
 
 
