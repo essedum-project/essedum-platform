@@ -165,7 +165,7 @@ docker compose ps
 | `FE_AUTH_ISSUER` | *(Azure AD URL)* | auth-config.json | OAuth2 issuer URL |
 | `FE_AUTH_CLIENT_ID` | *(Azure AD client)* | auth-config.json | OAuth2 client ID |
 | `FE_AUTH_SCOPE` | *(Azure AD scope)* | auth-config.json | OAuth2 scope |
-| `FE_LANGFLOW_URL` | `/langflow` | JS bundle (sed) | Langflow URL in Angular app |
+| `FE_LANGFLOW_URL` | `https://langflow.essedum-lfn.infosys.com/` | JS bundle (sed) | Langflow URL in Angular app |
 | `FE_LANGFUSE_URL` | `https://langfuse.essedum-lfn.infosys.com/` | JS bundle (sed) | Langfuse URL in Angular app |
 | `FE_LITELLM_URL` | `https://litellm.essedum-lfn.infosys.com/ui/` | JS bundle (sed) | LiteLLM URL in Angular app |
 | `FE_MINIO_ENDPOINT` | `http://minio:9000` | pipeline-config.json | MinIO storage endpoint |
