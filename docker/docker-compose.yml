@@ -24,6 +24,12 @@ services:
       - mysql
       - qdrant
       - keycloak
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   frontend:
     build:
@@ -32,7 +38,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-8084}:8084"
     depends_on:
-      - leap-app-backend-service
+      leap-app-backend-service:
+        condition: service_healthy
 
   py-job-executor:
     build:
