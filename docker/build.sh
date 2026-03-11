@@ -19,16 +19,6 @@ COMPOSE_FILE="${SCRIPT_DIR}/docker-compose.yml"
 ENV_FILE="${SCRIPT_DIR}/.env"
 ENV_SAMPLE="${SCRIPT_DIR}/.env.sample"
 
-# All services defined in docker-compose.yml
-ALL_SERVICES=(
-  mysql
-  qdrant
-  keycloak
-  leap-app-backend-service
-  frontend
-  py-job-executor
-)
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -135,51 +125,17 @@ check_ports() {
 }
 
 # ──────────────────────────────────────────────────────────────
-# Service helpers
+# Compose wrapper
 # ──────────────────────────────────────────────────────────────
 
 compose() {
   ${COMPOSE_CMD} -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" "$@"
 }
 
-get_service_status() {
-  # Returns "running", "exited", "created", "paused", or "" (not found)
-  local svc="$1"
-  compose ps --format json 2>/dev/null \
-    | grep -o "\"State\":\"[^\"]*\"" \
-    | head -1 >/dev/null 2>&1
-
-  # Fallback: parse text output for broader compatibility
-  local state
-  state=$(compose ps -a 2>/dev/null | grep -E "(^|-)${svc}" | awk '{for(i=1;i<=NF;i++) if($i ~ /^(running|exited|created|paused|restarting|dead)$/){print $i}}' | head -1)
-
-  if [ -z "${state}" ]; then
-    # Try JSON format (docker compose v2)
-    state=$(compose ps -a --format json 2>/dev/null | python3 -c "
-import sys, json
-for line in sys.stdin:
-    try:
-        obj = json.loads(line)
-        if obj.get('Service','') == '${svc}' or obj.get('Name','').find('${svc}') >= 0:
-            print(obj.get('State',''))
-            break
-    except: pass
-" 2>/dev/null || true)
-  fi
-
-  echo "${state}"
-}
-
-get_down_services() {
-  local down_services=()
-  for svc in "${ALL_SERVICES[@]}"; do
-    local status
-    status=$(get_service_status "${svc}")
-    if [ "${status}" != "running" ]; then
-      down_services+=("${svc}")
-    fi
-  done
-  echo "${down_services[@]}"
+# Dynamically read all service names from docker-compose.yml so the
+# script never drifts out of sync with the compose file.
+get_all_services() {
+  compose config --services 2>/dev/null | sort
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -189,79 +145,105 @@ get_down_services() {
 do_status() {
   log_step "Service status:"
   echo ""
-  printf "  %-35s %s\n" "SERVICE" "STATUS"
-  printf "  %-35s %s\n" "───────────────────────────────────" "─────────"
-  for svc in "${ALL_SERVICES[@]}"; do
-    local status
-    status=$(get_service_status "${svc}")
-    if [ "${status}" = "running" ]; then
-      printf "  %-35s ${GREEN}%s${NC}\n" "${svc}" "running"
-    elif [ -z "${status}" ]; then
-      printf "  %-35s ${YELLOW}%s${NC}\n" "${svc}" "not created"
-    else
-      printf "  %-35s ${RED}%s${NC}\n" "${svc}" "${status}"
-    fi
-  done
+  compose ps -a
   echo ""
 }
 
 do_start() {
   local build_flag="${1:-}"
-  local down_services
-  down_services=$(get_down_services)
 
-  if [ -z "${down_services}" ]; then
-    log_info "All services are already running. Nothing to do."
-    do_status
-    return 0
+  # Validate compose file first
+  if ! compose config -q 2>/dev/null; then
+    log_error "docker-compose.yml has syntax errors. Fix them before proceeding."
+    compose config 2>&1 | head -20
+    exit 1
   fi
 
-  log_step "Services to start: ${down_services}"
+  log_step "Detected services in docker-compose.yml:"
+  local services
+  services=$(get_all_services)
+  for svc in ${services}; do
+    echo "    - ${svc}"
+  done
+  echo ""
 
+  # Let Docker Compose handle dependency ordering and skip running containers.
+  # "up -d" already:
+  #   - Starts containers that don't exist yet
+  #   - Restarts containers whose config/image changed
+  #   - Skips containers already running with unchanged config
+  #   - Respects depends_on + condition: service_healthy
   if [ "${build_flag}" = "--build" ]; then
-    log_step "Building and starting services …"
-    compose up -d --build ${down_services}
+    log_step "Building images and starting all services …"
+    compose up -d --build --remove-orphans
   else
-    log_step "Starting services …"
-    compose up -d ${down_services}
+    log_step "Starting all services (skipping already running) …"
+    compose up -d --remove-orphans
   fi
 
-  log_info "Waiting for services to become healthy …"
+  local rc=$?
+  if [ ${rc} -ne 0 ]; then
+    log_error "docker compose up failed with exit code ${rc}."
+    log_warn "Showing logs for troubleshooting:"
+    compose logs --tail=30
+    exit ${rc}
+  fi
+
+  log_info "Waiting for all services to become healthy …"
   echo ""
 
   # Wait loop – check every 10s for up to 5 minutes
   local max_wait=300
   local elapsed=0
   local interval=10
+  local all_healthy=false
 
   while [ ${elapsed} -lt ${max_wait} ]; do
-    local still_down
-    still_down=$(get_down_services)
-    if [ -z "${still_down}" ]; then
-      log_info "All services are running!"
-      do_status
-      return 0
+    # Count containers that are NOT in running state
+    local not_running
+    not_running=$(compose ps -a --format json 2>/dev/null \
+      | grep -c '"State":"exited"\|"State":"dead"\|"State":"created"\|"State":"restarting"' \
+      || true)
+
+    # Also check for containers with healthcheck that are not healthy yet
+    local unhealthy
+    unhealthy=$(docker ps --filter "label=com.docker.compose.project" \
+      --filter "health=starting" --format '{{.Names}}' 2>/dev/null | wc -l || echo "0")
+
+    if [ "${not_running:-0}" -eq 0 ] && [ "${unhealthy:-0}" -eq 0 ]; then
+      all_healthy=true
+      break
     fi
-    echo -ne "\r  Waiting … (${elapsed}s / ${max_wait}s) – still starting: ${still_down}   "
+
+    echo -ne "\r  Waiting … (${elapsed}s / ${max_wait}s) – containers starting/unhealthy: $((not_running + unhealthy))   "
     sleep ${interval}
     elapsed=$((elapsed + interval))
   done
-
   echo ""
-  log_warn "Timed out after ${max_wait}s. Some services may still be starting."
-  do_status
 
-  # Print logs for any unhealthy/stopped containers
-  local still_down
-  still_down=$(get_down_services)
-  if [ -n "${still_down}" ]; then
-    log_warn "Showing recent logs for services that are not running:"
-    for svc in ${still_down}; do
+  if ${all_healthy}; then
+    log_info "All services are running!"
+  else
+    log_warn "Timed out after ${max_wait}s. Some services may still be starting."
+    echo ""
+    log_warn "Services NOT running:"
+    # Show exited/restarting containers
+    compose ps -a | grep -vE "running|Up" || true
+    echo ""
+    log_warn "Showing recent logs for failed services:"
+    local failed_services
+    failed_services=$(compose ps -a --format json 2>/dev/null \
+      | grep -E '"State":"exited"|"State":"dead"|"State":"restarting"' \
+      | grep -o '"Service":"[^"]*"' | cut -d'"' -f4 || true)
+    for svc in ${failed_services}; do
       echo ""
       log_step "── ${svc} logs ──"
-      compose logs --tail=20 "${svc}" 2>/dev/null || true
+      compose logs --tail=30 "${svc}" 2>/dev/null || true
     done
   fi
+
+  echo ""
+  do_status
 }
 
 do_stop() {
@@ -273,11 +255,16 @@ do_stop() {
 do_restart() {
   log_step "Restarting all services …"
   compose down
-  do_start
+  do_start "${1:-}"
 }
 
 do_logs() {
-  compose logs -f --tail=100
+  local svc="${1:-}"
+  if [ -n "${svc}" ]; then
+    compose logs -f --tail=100 "${svc}"
+  else
+    compose logs -f --tail=100
+  fi
 }
 
 do_clean() {
@@ -318,13 +305,13 @@ main() {
       ;;
     --restart)
       check_ports
-      do_restart
+      do_restart "${2:-}"
       ;;
     --status)
       do_status
       ;;
     --logs)
-      do_logs
+      do_logs "${2:-}"
       ;;
     --clean)
       do_clean
@@ -339,10 +326,10 @@ main() {
       echo "Options:"
       echo "  (none)        Start services that are down (no rebuild)"
       echo "  --build       Rebuild images then start services that are down"
-      echo "  --restart     Stop and restart all services"
+      echo "  --restart     Stop and restart all services (add --build to rebuild)"
       echo "  --stop        Stop all services"
       echo "  --status      Show status of all services"
-      echo "  --logs        Tail logs of all services"
+      echo "  --logs [svc]  Tail logs (optionally for a single service)"
       echo "  --clean       Stop + remove containers, volumes, local images"
       echo "  --help, -h    Show this help"
       echo ""
