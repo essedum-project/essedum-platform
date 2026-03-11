@@ -112,7 +112,7 @@ At minimum, update:
 - `MYSQL_DATASOURCE_URL` — your MySQL connection string
 - `MYSQL_DATASOURCE_USER` / `MYSQL_DATASOURCE_PASS` — DB credentials
 - `OAUTH2_ISSUER_URI` / `OAUTH2_JWK_SET_URI` — your identity provider URLs
-- `FE_AUTH_ISSUER` / `FE_AUTH_CLIENT_ID` — frontend auth config
+- `FE_AUTH_ISSUER` / `FE_AUTH_CLIENT_ID` — frontend auth config (if auth is enabled)
 
 ### 3. Build and start
 
@@ -162,9 +162,9 @@ docker compose ps
 | `LANGFUSE_SERVICE_URL` | `essedum-langfuse-service:3000` | nginx.conf.template | Langfuse address for nginx proxy |
 | `LITELLM_SERVICE_URL` | `essedum-litellm-service:4000` | nginx.conf.template | LiteLLM address for nginx proxy |
 | `FE_AUTH_REQUIRED` | `false` | auth-config.json | Enable/disable authentication |
-| `FE_AUTH_ISSUER` | *(Azure AD URL)* | auth-config.json | OAuth2 issuer URL |
-| `FE_AUTH_CLIENT_ID` | *(Azure AD client)* | auth-config.json | OAuth2 client ID |
-| `FE_AUTH_SCOPE` | *(Azure AD scope)* | auth-config.json | OAuth2 scope |
+| `FE_AUTH_ISSUER` | *(empty)* | auth-config.json | OAuth2 issuer URL (set in .env if needed) |
+| `FE_AUTH_CLIENT_ID` | *(empty)* | auth-config.json | OAuth2 client ID (set in .env if needed) |
+| `FE_AUTH_SCOPE` | *(empty)* | auth-config.json | OAuth2 scope (set in .env if needed) |
 | `FE_LANGFLOW_URL` | `https://langflow.essedum-lfn.infosys.com/` | JS bundle (sed) | Langflow URL in Angular app |
 | `FE_LANGFUSE_URL` | `https://langfuse.essedum-lfn.infosys.com/` | JS bundle (sed) | Langfuse URL in Angular app |
 | `FE_LITELLM_URL` | `https://litellm.essedum-lfn.infosys.com/ui/` | JS bundle (sed) | LiteLLM URL in Angular app |
@@ -394,7 +394,7 @@ If `/langfuse` or `/litellm` shows 502, verify `LANGFUSE_SERVICE_URL` and `LITEL
 ### Auth not working on frontend
 
 1. Check `FE_AUTH_REQUIRED` is `true` in `.env`
-2. Verify `FE_AUTH_ISSUER` and `FE_AUTH_CLIENT_ID` match your identity provider
+2. Set `FE_AUTH_ISSUER` and `FE_AUTH_CLIENT_ID` in `.env` to match your identity provider
 3. Inspect the generated config: `docker exec essedum-frontend cat /app/ui/common/configs/auth-config.json`
 
 ### Langflow URL not replaced in Angular app
