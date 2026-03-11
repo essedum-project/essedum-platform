@@ -27,6 +27,7 @@ usage() {
     echo "Usage: $0 [command] [options]"
     echo ""
     echo "Commands:"
+    echo "  start       Smart start: check Docker, detect running services, start if needed"
     echo "  build       Build all Docker images (without starting)"
     echo "  up          Build and start all services"
     echo "  down        Stop and remove all services"
@@ -42,6 +43,7 @@ usage() {
     echo "  -f          Follow logs (for 'logs' command)"
     echo ""
     echo "Examples:"
+    echo "  $0 start             # Smart start (recommended)"
     echo "  $0 init-env          # First-time setup: create .env"
     echo "  $0 up -d             # Build and start in background"
     echo "  $0 up -d --no-cache  # Full rebuild and start"
@@ -52,20 +54,130 @@ usage() {
 
 # --- Check prerequisites ---
 check_prerequisites() {
+    print_info "Checking prerequisites..."
+
+    # Check Docker installation
     if ! command -v docker &> /dev/null; then
         print_error "Docker is not installed. Please install Docker first."
+        print_error "  Install guide: https://docs.docker.com/get-docker/"
         exit 1
     fi
+    local docker_version
+    docker_version=$(docker --version 2>/dev/null)
+    print_info "Docker found: $docker_version"
 
+    # Check if Docker daemon is running
+    if ! docker info &> /dev/null; then
+        print_error "Docker daemon is not running. Please start Docker and try again."
+        exit 1
+    fi
+    print_info "Docker daemon is running."
+
+    # Check Docker Compose availability
     if ! docker compose version &> /dev/null 2>&1; then
         if ! docker-compose version &> /dev/null 2>&1; then
             print_error "Docker Compose is not available. Please install Docker Compose."
             exit 1
         fi
         COMPOSE_CMD="docker-compose"
+        local compose_ver
+        compose_ver=$(docker-compose version --short 2>/dev/null || docker-compose version 2>/dev/null)
+        print_info "Docker Compose found (standalone): $compose_ver"
     else
         COMPOSE_CMD="docker compose"
+        local compose_ver
+        compose_ver=$(docker compose version 2>/dev/null)
+        print_info "Docker Compose found: $compose_ver"
     fi
+
+    echo ""
+}
+
+# --- Get list of running services for this project ---
+get_running_services() {
+    $COMPOSE_CMD -f "$COMPOSE_FILE" ps --format '{{.Name}}' 2>/dev/null | grep -v '^$' || true
+}
+
+# --- Show detailed service status ---
+show_service_status() {
+    echo ""
+    print_info "=== Service Status ==="
+    echo ""
+
+    local running_services
+    running_services=$($COMPOSE_CMD -f "$COMPOSE_FILE" ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null || \
+                       $COMPOSE_CMD -f "$COMPOSE_FILE" ps 2>/dev/null)
+
+    if [ -z "$running_services" ]; then
+        print_warn "No services are currently running."
+        return 1
+    fi
+
+    echo "$running_services"
+    echo ""
+
+    # Count running vs total
+    local running_count
+    running_count=$($COMPOSE_CMD -f "$COMPOSE_FILE" ps --status running --format '{{.Name}}' 2>/dev/null | wc -l | tr -d ' ')
+    local total_count
+    total_count=$($COMPOSE_CMD -f "$COMPOSE_FILE" ps --format '{{.Name}}' 2>/dev/null | wc -l | tr -d ' ')
+
+    if [ "$running_count" -eq "$total_count" ] && [ "$total_count" -gt 0 ]; then
+        print_info "All $running_count service(s) are running."
+    elif [ "$total_count" -gt 0 ]; then
+        print_warn "$running_count of $total_count service(s) are running."
+    fi
+
+    echo ""
+    return 0
+}
+
+# --- Smart start command ---
+cmd_start() {
+    print_info "=== Essedum Platform - Smart Start ==="
+    echo ""
+
+    # Step 1: Prerequisites already checked in main block
+
+    # Step 2: Check if services are already running
+    print_info "Checking for already running services..."
+    local running
+    running=$(get_running_services)
+
+    if [ -n "$running" ]; then
+        print_warn "The following services are already running:"
+        echo "$running" | while IFS= read -r svc; do
+            echo "  - $svc"
+        done
+        echo ""
+        print_warn "Use '$0 restart' to restart, or '$0 down' to stop them first."
+        echo ""
+        show_service_status
+        return 0
+    fi
+
+    print_info "No services are currently running."
+    echo ""
+
+    # Step 3: Start services
+    ensure_env
+    ensure_entrypoint
+    print_info "Building and starting all services in detached mode..."
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up --build -d
+
+    echo ""
+    print_info "Waiting for services to initialize..."
+    sleep 5
+
+    # Step 4: Show final status
+    show_service_status
+
+    print_info "Frontend: http://localhost:${FRONTEND_PORT:-8084}"
+    print_info "Backend:  http://localhost:${BACKEND_PORT:-8082}"
+    echo ""
+    print_info "Use '$0 logs -f' to follow logs."
+    print_info "Use '$0 status' to check service status."
+    print_info "Use '$0 down' to stop all services."
 }
 
 # --- Ensure .env exists ---
@@ -165,7 +277,7 @@ cmd_logs() {
 }
 
 cmd_status() {
-    $COMPOSE_CMD -f "$COMPOSE_FILE" ps
+    show_service_status
 }
 
 cmd_clean() {
@@ -189,6 +301,7 @@ COMMAND="${1:-}"
 shift 2>/dev/null || true
 
 case "$COMMAND" in
+    start)    cmd_start ;;
     build)    cmd_build "$@" ;;
     up)       cmd_up "$@" ;;
     down)     cmd_down ;;
