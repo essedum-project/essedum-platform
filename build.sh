@@ -132,6 +132,16 @@ show_service_status() {
     return 0
 }
 
+# --- Get all defined service names from compose file ---
+get_all_services() {
+    $COMPOSE_CMD -f "$COMPOSE_FILE" config --services 2>/dev/null || true
+}
+
+# --- Get running service names (compose service names, not container names) ---
+get_running_service_names() {
+    $COMPOSE_CMD -f "$COMPOSE_FILE" ps --status running --format '{{.Service}}' 2>/dev/null | sort -u || true
+}
+
 # --- Smart start command ---
 cmd_start() {
     print_info "=== Essedum Platform - Smart Start ==="
@@ -139,31 +149,57 @@ cmd_start() {
 
     # Step 1: Prerequisites already checked in main block
 
-    # Step 2: Check if services are already running
-    print_info "Checking for already running services..."
-    local running
-    running=$(get_running_services)
+    ensure_env
+    ensure_entrypoint
 
-    if [ -n "$running" ]; then
-        print_warn "The following services are already running:"
-        echo "$running" | while IFS= read -r svc; do
-            echo "  - $svc"
+    # Step 2: Determine which services are running and which are down
+    print_info "Checking service states..."
+
+    local all_services running_services stopped_services
+    all_services=$(get_all_services)
+    running_services=$(get_running_service_names)
+
+    if [ -z "$all_services" ]; then
+        print_error "No services defined in $COMPOSE_FILE."
+        exit 1
+    fi
+
+    # Compute stopped services (all minus running)
+    stopped_services=""
+    while IFS= read -r svc; do
+        [ -z "$svc" ] && continue
+        if ! echo "$running_services" | grep -qx "$svc"; then
+            stopped_services="$stopped_services $svc"
+        fi
+    done <<< "$all_services"
+
+    # Trim leading space
+    stopped_services=$(echo "$stopped_services" | xargs)
+
+    # Report running services
+    if [ -n "$running_services" ]; then
+        print_info "Already running (will not be touched):"
+        echo "$running_services" | while IFS= read -r svc; do
+            [ -n "$svc" ] && echo "  - $svc"
         done
         echo ""
-        print_warn "Use '$0 restart' to restart, or '$0 down' to stop them first."
+    fi
+
+    # If nothing is stopped, everything is already up
+    if [ -z "$stopped_services" ]; then
+        print_info "All services are already running. Nothing to do."
         echo ""
         show_service_status
         return 0
     fi
 
-    print_info "No services are currently running."
+    print_info "Services to start: $stopped_services"
     echo ""
 
-    # Step 3: Start services
-    ensure_env
-    ensure_entrypoint
-    print_info "Building and starting all services in detached mode..."
-    $COMPOSE_CMD -f "$COMPOSE_FILE" up --build -d
+    # Step 3: Build and start only the stopped services
+    print_info "Building and starting stopped services in detached mode..."
+    # shellcheck disable=SC2086
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up --build -d $stopped_services
 
     echo ""
     print_info "Waiting for services to initialize..."
