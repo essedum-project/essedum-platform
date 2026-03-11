@@ -71,6 +71,9 @@ services:
       # --- Logging ---
       - LOG_LEVEL_SECURITY=${LOG_LEVEL_SECURITY:-DEBUG}
       - LOG_LEVEL_COMM_LIB=${LOG_LEVEL_COMM_LIB:-ERROR}
+    depends_on:
+      - mysql
+      - keycloak
     networks:
       - essedum-network
     restart: unless-stopped
@@ -115,6 +118,39 @@ services:
       - essedum-network
     restart: unless-stopped
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    env_file:
+      - .env
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    command:
+      - "start-dev"
+    networks:
+      - essedum-network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - essedum-network
+    restart: unless-stopped
+
 networks:
   essedum-network:
     driver: bridge
+
+volumes:
+  mysql-data:
