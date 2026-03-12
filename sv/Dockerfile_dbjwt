@@ -1,5 +1,5 @@
 # Stage 1: Build with Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS maven_builder
 
 WORKDIR /sv
 
@@ -11,31 +11,40 @@ RUN mkdir /app
 RUN mkdir /app/conf
 RUN mkdir /app/lib
 RUN mkdir /app/log
+
 RUN cp /sv/common-app/src/main/resources/*.yml /app/conf
 RUN cp /sv/common-app/src/main/resources/*.xml /app/conf
-RUN rm /app/conf/application-mysql-oauth2.yml
-RUN find ~/.m2/repository -name "*.jar" -exec cp {} /app/lib/ \;
-RUN mv /app/lib/common-app*.jar /app
 
-# Use an official OpenJDK 21 base image
-FROM openjdk:21-jdk-slim
+RUN rm /app/conf/application-mysql-oauth2.yml
+
+# Copy the compiled common-app JAR
+RUN cp /sv/common-app/target/common-app*.jar /app/
+
+# Use Maven dependency plugin to copy only runtime dependencies
+RUN cd /sv/common-app && mvn dependency:copy-dependencies -DoutputDirectory=/app/lib -Dmdep.prependGroupId=false -DskipTests -DincludeScope=runtime
+
+
+# Stage 2: Runtime image
+FROM eclipse-temurin:21-jdk
 
 USER root
+
 # Install Nginx
 RUN apt-get update && apt-get install -y nginx && apt-get clean
 
 COPY nginx_backend.conf /etc/nginx/nginx.conf
 
-# Set the Java path
 ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
-# Environment variable for GCP service account JSON
-ENV GCP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCydDekxDLhHeHx\njVpZtArs2dRc2zIV62gbvMDiBudIZt3VbZPEceFc3kEB2po0DQGvsE53srq7EoeN\nbvDyCs6MWVt847/zzbAkaK49bdnFyxOvd4Rqnu1/bNM1qd9iCGkWXdpkkEs8J1uZ\nFVYJeeRjKl/kyorihkibU82v59UfVoVL3HkAkUqvlSMOaHmFfz1ayoEnh9WwXpgd\nmy3G+PHPxlIDD7ezXzClGYUPM2drBzu/uAEWxIdz51N4FIySFvtFCHCTNVI5nLma\nJlD4vlYJpnjx0+A5UvDIoWCsENbQVC0dAZi7huJ0Lv1cgV+WE0Jemt4SSdIGKNfz\nPfAry4NxAgMBAAECggEAEOugEwlfYaT5tXOXq4W8u3R0BFHsT9PATVD6YPQSnfTS\n99ep+ShrG+ke9NQLZwAMtuHartLNjctV+v0X73tC1l/qos7ddnp8Rxd93ek6ityU\ng0Cr14g2MKza4e23do4hmLNRb9OWrp90ufEh9UgPda+g5AqoXI4q+D9b81/h/1SF\nyWWQZhb+LVb/rovfm+9Vo1g5lLsZPuWjgwAMc2d3INp5e93jREogZth+nuBxYJHC\nrR1xq9q2UH9SBo0HNrkD285h4EJs0CK0mLyB/1Xvk0GiCkKI0L5PUS47p8lUVsiY\nfhaNhfFVAjWChKJCeTEAOIouGL4Kgk4aqEgzGUs7oQKBgQD6P7PilHGntLxZbTcU\nV6YRAVBRZ00O4IP/sRlqhc0xYn0VjlJM/r4LqVG5rQmCrWZd934GDfbW2HM1jJTi\nrbjR4RMJnxgTjW7+AVMwNpG1llJuALlEd4Y1WPc06zqNF2WNeIUaXlx4i9bUiaW+\neiuiHf13yQa8KXa218MkUASDvQKBgQC2jh8e4c7hAmDxnBpRfqN4NPts7kKa5VKL\ni0IYJL+LrmToJvw8uNtJXKO6RXJO0sHF2gTNvwtlfvXIz8VL+PUAkkEiyWvjMQTA\npWK2JXZqL4zXcxlUBWY7Fh7OpYYc5SO3LeCeejc6YoOiRHKyBcMmPrQIJ09Phif/\nD/3USJtfxQKBgQCRqmsHROkzeZz5YP1itfJQi7c46yyLsFylhW0J+ICMcovk9Ecr\n0kzFdPXBYtvaWRzxLZMJ6y73uF63mPFBUWX3pU/zlcvp9bXZ3OOTePAwByRMK9er\n5vcULokXIKWgYzIVu0WfJ7Yj5SJT7RuxWGP1pgdYpodpF6mmnMlWZc168QKBgFpI\nIRXpwKFAxubWN6HUCk4ZjbpKfsAR52fBoBdGnUAcKCUzmo0BMtmuKf6l96kJy/Do\nKHYEJEO2rSD5t+4hmjEFI5drm6KJDHuljxLbphtPlsy6TG1kGjHgd63k6FWD8MzX\nsH1Pnd6O9+CZD0wBU4ine+uIXU3L4B3hL7v7iHOtAoGBAIL7n90j46q8sNXs31Oe\nDngMAjX094apURFllqG617z5NpaeoWGnzGD5nSCdT9e+L6vT0UCtUF9UgIh+567P\nkkd708sd9sj60dOYX0sWLHyrfyTNz1XYR0bo5rKilTkk+7aUJxOU5Zl1q/ALn1js\nUqscp8e5+1TOYtHL7nWbSuZk\n-----END PRIVATE KEY-----\n"
+ENV GCP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----..."
 ENV GCP_PRIVATE_KEY_ID="e0d21673ec720bd0d3431153a9f7818bb418db4e"
 
-COPY --from=builder /app /app/
+# Copy from first stage
+COPY --from=maven_builder /app /app/
+
 WORKDIR /app
+
 ENV ESSEDUM_HOME=/app
 
 CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=essedum$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.lfn.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,dbjwt,btf,dbconstants,vault -cp common-app-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.Common -Dhttp.nonProxyHosts=aiplatform.az.ad.idemo-ppc.com"]

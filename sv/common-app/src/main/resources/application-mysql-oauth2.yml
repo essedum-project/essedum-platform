@@ -9,7 +9,7 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://mysql-local:3306/telemetrydb
+    jdbcurl: jdbc:mysql://docker-mysql-1:3306/telemetrydb
     username: root
     password: password
  
@@ -19,7 +19,7 @@ config:
   #static-locations: file:/D:/common-app/
   static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
   
-  datasourceurl: jdbc:mysql://mysql-local:3306
+  datasourceurl: jdbc:mysql://docker-mysql-1:3306
   datasourceuser: root
   datasourcepass: password
   essedumcoredb: essedum_coredb

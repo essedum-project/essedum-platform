@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   leap-app-backend-service:
     build:
@@ -20,16 +18,20 @@ services:
       - logging.level.com.springframework.security=DEBUG
       - logging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR
       - spring.profiles.active=mysql,dbjwt,btf,dbconstants,vault
+      - security.issuer-uri=${EXTERNAL_ISSUER_URI}
+      - security.jwk-set-uri=${EXTERNAL_ISSUER_URI}/protocol/openid-connect/certs
+      - keycloak.external.url=http://10.200.111.174:8180
+      - external.issuer.uri=${EXTERNAL_ISSUER_URI}
+      - baseUrl=${EXTERNAL_BASE_URL}
+      - kcUrl=${EXTERNAL_KC_URL}
+      - authUrl=${EXTERNAL_AUTH_URL}
+      - application.baseUrl=${EXTERNAL_BASE_URL}
+      - application.kcUrl=${EXTERNAL_KC_URL}
+      - application.authUrl=${EXTERNAL_AUTH_URL}
     depends_on:
       - mysql
       - qdrant
       - keycloak
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
 
   frontend:
     build:
@@ -37,9 +39,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT:-8084}:8084"
+      - "${FRONTEND_PORT_AIP_HTTPS:-8083}:8083"
+      - "${FRONTEND_PORT_HTTPS:-8085}:8085"
+    environment:
+      - API_URL=http://leap-app-backend-service:8082/
     depends_on:
-      leap-app-backend-service:
-        condition: service_healthy
+      - leap-app-backend-service
 
   py-job-executor:
     build:
@@ -49,6 +54,47 @@ services:
       - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
     depends_on:
       - mysql
+
+  py-job-sagemaker-executer:
+    build:
+      context: ../py-job-sagemaker-executer
+      dockerfile: Dockerfile
+    ports:
+      - "${PYJOB_SAGEMAKER_EXECUTER_PORT:-5002}:5002"
+    depends_on:
+      - mysql
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - SAGEMAKER_ROLE=${SAGEMAKER_ROLE}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+
+  py-job-vertex-executer:
+    build:
+      context: ../py-job-vertex-executer
+      dockerfile: Dockerfile
+    ports:
+      - "${PYJOB_VERTEX_EXECUTER_PORT:-5007}:5007"
+    depends_on:
+      - mysql
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - VERTEX_LOCATION=${VERTEX_LOCATION}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
 
   mysql:
     image: mysql:8.0
@@ -74,13 +120,83 @@ services:
     env_file:
       - .env
     environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     ports:
       - "${KEYCLOAK_PORT:-8180}:8080"
     command:
       - "start-dev"
 
+  proxy-service:
+    build:
+      context: ../proxy-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+
+  buildkitd:
+    image: moby/buildkit:latest
+    ports:
+      - "1234:1234"
+    environment:
+      - BUILDKITD_FLAGS=--debug
+  
+  builder-service:
+    build:
+      context: ../adk-code-builder-deployer
+      dockerfile: Dockerfile
+    ports:
+      - "${BUILDER_SERVICE_PORT:-5003}:5003"
+    environment:
+      - BUILDKIT_ADDR=tcp://buildkitd:1234
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - buildkitd
+    env_file:
+      - .env
+
+  langflow:
+    image: langflowai/langflow:latest
+    ports:
+      - "${LANGFLOW_PORT:-7860}:7860"
+    environment:
+      - LANGFLOW_ENV=production
+    volumes:
+      - langflow-data:/data
+    restart: unless-stopped
+ 
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: minio
+    command: server /data --console-address :9001
+    ports:
+      - "${MINIO_PORT:-9000}:9000"  # MinIO API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # MinIO Console
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BROWSER=${MINIO_BROWSER:-on}
+      - MINIO_PROMETHEUS_AUTH_TYPE=${MINIO_PROMETHEUS_AUTH_TYPE:-public}
+      - MINIO_SERVER_URL=${MINIO_SERVER_URL}
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    env_file:
+      - .env
+
+
 volumes:
   mysql-data:
   qdrant-data:
+  langflow-data:
+  minio-data:
