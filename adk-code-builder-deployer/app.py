@@ -187,7 +187,7 @@ def list_deployments_rest():
         deployments = k8s_apps.list_namespaced_deployment(namespace=target_namespace)
 
         result = []
-    for dep in deployments.items:
+        for dep in deployments.items:
             # Get associated service if exists
             service_exists = False
             service_url = None

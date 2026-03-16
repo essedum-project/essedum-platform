@@ -9,7 +9,7 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://docker-mysql-1:3306/telemetrydb
+    jdbcurl: jdbc:mysql://${MYSQL_DATASOURCE_URL}/telemetrydb
     username: root
     password: password
  
@@ -19,7 +19,7 @@ config:
   #static-locations: file:/D:/common-app/
   static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
   
-  datasourceurl: jdbc:mysql://docker-mysql-1:3306
+  datasourceurl: jdbc:mysql://${MYSQL_DATASOURCE_URL}
   datasourceuser: root
   datasourcepass: password
   essedumcoredb: essedum_coredb
@@ -204,7 +204,7 @@ server:
       http-only: true
   compression.enabled: true
   compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css,image/svg+xml
-csrf:
+      datasourceurl: jdbc:mysql://${MYSQL_DATASOURCE_URL}
   ignore:
     urls: /engine-rest/**,/api/batch/client/**,/api/webhook/**,/api/authenticate,/api/sre-availability-cal/**,/actuator/**,/api/saveBpmn/**,/api/deployBpmn/**,/app/**,/api/adapter_workflow/**,/api/automation/**,/api/pipelinemodels/**,/api/incidents/**,/api/event/trigger/**,/api/datasets/upload/**,/api/file/**,/api/copyblueprint/**,/api/datasets/saveChunks/**,/api/registerUser,/api/userss/resetPassword,/api/email/**,/api/usm-notificationss,/api/exp/**,/api/users/experiments/**,/api/datasets/search/**,/api/interactiveWorkflow/**,/api/RPAExternalTask/**,/ws/**,/api/workflow/**,/api/inbox/**,/api/datasets/attachmentupload/**,/api/dashboard-configurations/create-template/**,/api/modelservice/**,/api/service/**,/api/adapters/**,/api/mltopics/**,/api/mldatasettopics/**,/api/license/**
  
