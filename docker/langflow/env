@@ -1,0 +1,12 @@
+# PostgreSQL
+POSTGRES_USER=langflow
+POSTGRES_PASSWORD=langflow
+POSTGRES_DB=langflow
+
+# Langflow DB URL
+LANGFLOW_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+# Langflow config
+LANGFLOW_CONFIG_DIR=/app/langflow
+LANGFLOW_AUTO_LOGIN=true # Optional: skip login
+# OPENAI_API_KEY=your-key # Add API keys as needed

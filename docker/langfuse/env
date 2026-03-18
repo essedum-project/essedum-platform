@@ -1,0 +1,46 @@
+
+# ===== Host ports (change if already in use) =====
+WEB_HOST_PORT=3000
+WORKER_HOST_PORT=3030
+POSTGRES_HOST_PORT=5432
+REDIS_HOST_PORT=6379
+CLICKHOUSE_HTTP_PORT=8123
+CLICKHOUSE_NATIVE_PORT=9000
+MINIO_API_PORT=9090
+MINIO_CONSOLE_PORT=9091
+
+# ===== Core credentials (dev defaults; CHANGE for production) =====
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres
+
+CLICKHOUSE_USER=clickhouse
+CLICKHOUSE_PASSWORD=clickhouse
+
+REDIS_PASSWORD=myredissecret
+
+MINIO_ROOT_USER=minio
+MINIO_ROOT_PASSWORD=miniosecret
+MINIO_BUCKET=langfuse
+MINIO_REGION=us-east-1
+
+# ===== Langfuse app settings =====
+NEXTAUTH_URL=http://localhost:${WEB_HOST_PORT}
+NEXTAUTH_SECRET=NSPJyt20fY72NaUAxJd0Xm+dLfmGdJZn0SBQnciXJ3w=
+SALT=vq30Zs/COhk5p+Y6DQeZsKa0cyejIHUiM7V6wCLZwmw=
+ENCRYPTION_KEY=353993f5473cf5841d54bd107d84b57c12cd429e71d2495a316612232cefb25a
+
+# Optional: set to disable anonymous telemetry
+TELEMETRY_ENABLED=true
+LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=false
+
+# S3 upload destinations (events/media/exports) – using the same bucket via MinIO
+LANGFUSE_S3_BUCKET=${MINIO_BUCKET}
+LANGFUSE_S3_ENDPOINT=http://minio:9000
+LANGFUSE_S3_FORCE_PATH_STYLE=true
+
+# Derived connection strings used in compose (do not modify unless you know why)
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+CLICKHOUSE_MIGRATION_URL=clickhouse://clickhouse:${CLICKHOUSE_NATIVE_PORT}
+CLICKHOUSE_URL=http://clickhouse:${CLICKHOUSE_HTTP_PORT}
+REDIS_CONNECTION_STRING=redis://default:${REDIS_PASSWORD}@redis:6379
