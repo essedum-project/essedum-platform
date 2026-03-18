@@ -232,7 +232,7 @@ ensure_env() {
 
 # --- Make entrypoint script executable ---
 ensure_entrypoint() {
-    local entrypoint="essedum-ui/docker-entrypoint.sh"
+    local entrypoint="entrypoint.sh"
     if [ -f "$entrypoint" ]; then
         chmod +x "$entrypoint"
     fi

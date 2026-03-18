@@ -18,16 +18,6 @@ services:
       - logging.level.com.springframework.security=DEBUG
       - logging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR
       - spring.profiles.active=mysql,dbjwt,btf,dbconstants,vault
-      - security.issuer-uri=${EXTERNAL_ISSUER_URI}
-      - security.jwk-set-uri=${EXTERNAL_ISSUER_URI}/protocol/openid-connect/certs
-      - keycloak.external.url=http://10.200.111.174:8180
-      - external.issuer.uri=${EXTERNAL_ISSUER_URI}
-      - baseUrl=${EXTERNAL_BASE_URL}
-      - kcUrl=${EXTERNAL_KC_URL}
-      - authUrl=${EXTERNAL_AUTH_URL}
-      - application.baseUrl=${EXTERNAL_BASE_URL}
-      - application.kcUrl=${EXTERNAL_KC_URL}
-      - application.authUrl=${EXTERNAL_AUTH_URL}
       - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
     depends_on:
       - mysql
@@ -36,14 +26,24 @@ services:
 
   frontend:
     build:
-      context: ../essedum-ui
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: essedum-ui/Dockerfile
     ports:
       - "${FRONTEND_PORT:-8084}:8084"
-      - "${FRONTEND_PORT_AIP_HTTPS:-8083}:8083"
-      - "${FRONTEND_PORT_HTTPS:-8085}:8085"
+      - "${LANGFLOW_HTTPS_PORT:-8086}:8086"
+      - "${LANGFUSE_HTTPS_PORT:-8087}:8087"
+      - "${LITELLM_HTTPS_PORT:-8088}:8088"
+      - "${LANGFUSE_DB_HTTPS_PORT:-8089}:8089"
+    env_file:
+      - .env
     environment:
-      - API_URL=http://leap-app-backend-service:8082/
+      - FE_LANGFLOW_URL=${FE_LANGFLOW_URL}
+      - FE_LANGFUSE_URL=${FE_LANGFUSE_URL}
+      - FE_LITELLM_URL=${FE_LITELLM_URL}
+      - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT}
+      - FE_MINIO_BUCKET=${FE_MINIO_BUCKET}
+      - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX}
+      - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION}
     depends_on:
       - leap-app-backend-service
 
@@ -139,7 +139,7 @@ services:
     depends_on:
       - mysql
 
-  # BuildKit daemon — required by adk-code-builder-deployer to build and push images
+ # BuildKit daemon — required by adk-code-builder-deployer to build and push images
   buildkitd:
     image: moby/buildkit:v0.18.2
     privileged: true
@@ -177,7 +177,7 @@ services:
     volumes:
       - langflow-data:/data
     restart: unless-stopped
- 
+
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
@@ -203,9 +203,52 @@ services:
     env_file:
       - .env
 
+  langfuse-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${LANGFUSE_DB_USER:-langfuse}
+      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD:-langfuse}
+      - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
+    volumes:
+      - langfuse-db-data:/var/lib/postgresql/data
+    ports:
+      - "${LANGFUSE_DB_PORT:-5432}:5432"
+
+  langfuse:
+    image: langfuse/langfuse:2
+    environment:
+      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-langfuse}:${LANGFUSE_DB_PASSWORD:-langfuse}@langfuse-db:5432/${LANGFUSE_DB_NAME:-langfuse}
+      - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET:-mysecret}
+      - SALT=${LANGFUSE_SALT:-mysalt}
+      - NEXTAUTH_URL=${LANGFUSE_URL:-http://localhost:3000}
+    ports:
+      - "${LANGFUSE_PORT:-3000}:3000"
+    depends_on:
+      - langfuse-db
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-http://langfuse:3000}
+    command:
+      - "--config"
+      - "/app/config.yaml"
+      - "--port"
+      - "4000"
+    depends_on:
+      - langfuse
+
 
 volumes:
   mysql-data:
   qdrant-data:
   langflow-data:
   minio-data:
+  langfuse-db-data:
