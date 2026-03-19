@@ -1,0 +1,21 @@
+services:
+  langflow:
+    image: langflowai/langflow:1.1.2
+    container_name: langflow-persistent
+    ports:
+      - "7866:7866"
+    environment:
+      - LANGFLOW_HOST=0.0.0.0
+      - LANGFLOW_PORT=7866
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:password@langflow-postgres:5432/langflowdb
+      - LANGFLOW_LOG_LEVEL=info
+      - LANGFLOW_CACHE_DIR=/app/data/cache
+    volumes:
+      - ./data:/app/data
+    networks:
+      - march16_default
+    restart: unless-stopped
+
+networks:
+  march16_default:
+    external: true
