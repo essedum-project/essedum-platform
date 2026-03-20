@@ -34,8 +34,6 @@ public class GitHubOAuthService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String clientId = System.getenv("GITHUB_CLIENT_ID");
-    private final String  clientSecret = System.getenv("GITHUB_CLIENT_SECRET");
 
     public GitHubOAuthService() {
         this.restTemplate = createRestTemplate();
@@ -106,7 +104,7 @@ public class GitHubOAuthService {
         
         String authUrl = String.format("%s?client_id=%s&redirect_uri=%s&scope=%s&state=%s",
                 oauthConfig.getAuthorizationUri(),
-                clientId,
+                oauthConfig.getClientId(),
                 oauthConfig.getRedirectUri(),
                 oauthConfig.getScope(),
                 state);
@@ -133,8 +131,8 @@ public class GitHubOAuthService {
         headers.set("Accept", "application/json");
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("client_id", clientId);
-        params.add("client_secret", clientSecret);
+        params.add("client_id", oauthConfig.getClientId());
+        params.add("client_secret", oauthConfig.getClientSecret());
         params.add("code", code);
         params.add("redirect_uri", oauthConfig.getRedirectUri());
 

@@ -6,5 +6,8 @@ export const environment = {
   production: true,
   baseUrl: "/api/aip",
   datasetsUrl: '/api/aip',
-  langflowUrl: 'https://YOUR_LANGFLOW_URL_HERE/'  // Replace with actual URL
+  langflowUrl: '__FE_LANGFLOW_URL__',
+  litellmUrl:'__FE_LITELLM_URL__',
+   langfuseUrl:'__FE_LANGFUSE_URL__'
 };
+ 

@@ -290,9 +290,9 @@ public class DeploymentFormService implements IDeploymentFormService {
                 throw new IllegalArgumentException("Deployment datetime is required");
             }
 
-            // Check if deployment form already exists for this cname and org
-            Optional<DeploymentForm> existingFormOpt = deploymentFormRepository.findByCnameAndOrg(
-                    deploymentFormDTO.getCname(), deploymentFormDTO.getOrg());
+            // Check if deployment form already exists for this cname, org and agent name
+            Optional<DeploymentForm> existingFormOpt = deploymentFormRepository.findByCnameAndOrgAndAgentName(
+                    deploymentFormDTO.getCname(), deploymentFormDTO.getOrg(), deploymentFormDTO.getAgentName());
 
             DeploymentFormDTO result;
             if (existingFormOpt.isPresent()) {

@@ -13,7 +13,7 @@
 # GitHub OAuth Client Credentials (Replace with your values)
 github.oauth.client-id=YOUR_GITHUB_CLIENT_ID_HERE
 github.oauth.client-secret=YOUR_GITHUB_CLIENT_SECRET_HERE
-github.oauth.redirect-uri=${commonAppUrl}api/github/oauth/callback
+github.oauth.redirect-uri=https://10.200.111.174:8084/api/github/oauth/callback
 github.oauth.scope=repo,user
 
 # GitHub OAuth URLs (Don't change these)
