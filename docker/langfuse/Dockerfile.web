@@ -1,4 +1,0 @@
-
-FROM langfuse/langfuse:3
-# Minimal wrapper to pin image and enforce UTC; extend here if you need custom CA certificates, etc.
-ENV TZ=UTC

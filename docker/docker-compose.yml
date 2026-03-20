@@ -168,16 +168,6 @@ services:
       - buildkitd
     restart: unless-stopped
 
-  langflow:
-    image: langflowai/langflow:latest
-    ports:
-      - "${LANGFLOW_PORT:-7860}:7860"
-    environment:
-      - LANGFLOW_ENV=production
-    volumes:
-      - langflow-data:/data
-    restart: unless-stopped
-
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
@@ -203,47 +193,45 @@ services:
     env_file:
       - .env
 
-  langfuse-db:
-    image: postgres:16-alpine
-    environment:
-      - POSTGRES_USER=${LANGFUSE_DB_USER:-langfuse}
-      - POSTGRES_PASSWORD=${LANGFUSE_DB_PASSWORD:-langfuse}
-      - POSTGRES_DB=${LANGFUSE_DB_NAME:-langfuse}
-    volumes:
-      - langfuse-db-data:/var/lib/postgresql/data
-    ports:
-      - "${LANGFUSE_DB_PORT:-5432}:5432"
 
-  langfuse:
-    image: langfuse/langfuse:2
-    environment:
-      - DATABASE_URL=postgresql://${LANGFUSE_DB_USER:-langfuse}:${LANGFUSE_DB_PASSWORD:-langfuse}@langfuse-db:5432/${LANGFUSE_DB_NAME:-langfuse}
-      - NEXTAUTH_SECRET=${LANGFUSE_NEXTAUTH_SECRET:-mysecret}
-      - SALT=${LANGFUSE_SALT:-mysalt}
-      - NEXTAUTH_URL=${LANGFUSE_URL:-http://localhost:3000}
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
     ports:
-      - "${LANGFUSE_PORT:-3000}:3000"
-    depends_on:
-      - langfuse-db
+      - "11434:11434"
+    environment:
+      - OLLAMA_MODELS=/root/.ollama
+    volumes:
+      - ../lite-llm/data/ollama:/root/.ollama
 
   litellm:
-    image: ghcr.io/berriai/litellm:main-latest
-    volumes:
-      - ./litellm-config.yaml:/app/config.yaml
+    build:
+      context: ..
+      dockerfile: lite-llm/Dockerfile
+    container_name: litellm
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - ollama
     ports:
       - "${LITELLM_PORT:-4000}:4000"
     environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
+      - OLLAMA_PORT=${OLLAMA_PORT:-11434}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
-      - LANGFUSE_HOST=${LANGFUSE_HOST:-http://langfuse:3000}
-    command:
-      - "--config"
-      - "/app/config.yaml"
-      - "--port"
-      - "4000"
-    depends_on:
-      - langfuse
+      - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
+    command: [
+      "litellm",
+      "--config", "/app/config/config.yaml",
+      "--host", "0.0.0.0",
+      "--port", "4000"
+    ]
+    volumes:
+      - ../lite-llm/config:/app/config:ro
+      - ../lite-llm/data:/app/data
+
 
 
 volumes:
@@ -252,3 +240,4 @@ volumes:
   langflow-data:
   minio-data:
   langfuse-db-data:
+
