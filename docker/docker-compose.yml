@@ -17,8 +17,10 @@ services:
       - publickey=${PUBLIC_KEY}
       - logging.level.com.springframework.security=DEBUG
       - logging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR
-      - spring.profiles.active=mysql,dbjwt,btf,dbconstants,vault
+      - spring.profiles.active=mysql,dbjwt,btf,dbconstants,vault,github
       - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
     depends_on:
       - mysql
       - qdrant
