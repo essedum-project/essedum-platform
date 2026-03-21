@@ -34,7 +34,7 @@ services:
       - "${FRONTEND_PORT:-8084}:8084"
       - "${LANGFLOW_HTTPS_PORT:-8086}:8086"
       - "${LANGFUSE_HTTPS_PORT:-8087}:8087"
-      - "${LITELLM_HTTPS_PORT:-8088}:8088"
+      - "${LITELLM_HTTPS_PORT:-4000}:4000"
       - "${LANGFUSE_DB_HTTPS_PORT:-8089}:8089"
     env_file:
       - .env
@@ -207,25 +207,45 @@ services:
     volumes:
       - ../lite-llm/data/ollama:/root/.ollama
 
+  litellm-postgres:
+    image: postgres:16
+    container_name: litellm-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=litellm
+      - POSTGRES_USER=litellm
+      - POSTGRES_PASSWORD=${LITELLM_DB_PASSWORD:-litellm}
+    volumes:
+      - litellm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   litellm:
-    build:
-      context: ..
-      dockerfile: lite-llm/Dockerfile
+    image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm
     restart: unless-stopped
     env_file:
       - .env
     depends_on:
-      - ollama
-    ports:
-      - "${LITELLM_PORT:-4000}:4000"
+      litellm-postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
       - OLLAMA_PORT=${OLLAMA_PORT:-11434}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
       - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
+      - UI_USERNAME=${LITELLM_UI_USERNAME:-admin}
+      - UI_PASSWORD=${LITELLM_UI_PASSWORD:-admin}
+      - DATABASE_URL=postgresql://litellm:${LITELLM_DB_PASSWORD:-litellm}@litellm-postgres:5432/litellm
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL}
     command: [
-      "litellm",
       "--config", "/app/config/config.yaml",
       "--host", "0.0.0.0",
       "--port", "4000"
@@ -235,11 +255,257 @@ services:
       - ../lite-llm/data:/app/data
 
 
+  langflow-stable-postgres:
+    image: postgres:16
+    container_name: langflow-stable-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  langflow-stable:
+    image: langflowai/langflow:latest
+    container_name: langflow-stable
+    restart: unless-stopped
+    user: "0:0"
+    env_file:
+      - .env
+    ports:
+      - "${LANGFLOW_PORT}:${LANGFLOW_PORT}"
+    volumes:
+      - langflow_stable_data:/app/langflow
+    depends_on:
+      langflow-stable-postgres:
+        condition: service_healthy
+    environment:
+      - LANGFLOW_DATABASE_URL=${LANGFLOW_DATABASE_URL}
+      - LANGFLOW_HOST=${LANGFLOW_HOST}
+      - LANGFLOW_PORT=${LANGFLOW_PORT}
+      - LANGFLOW_SECRET_KEY=${LANGFLOW_SECRET_KEY}
+      - LANGFLOW_CONFIG_DIR=/app/langflow
+
+  langfuse-postgres:
+    image: postgres:15-alpine
+    container_name: langfuse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER:-langfuse}
+      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD:-langfuse123}
+      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB:-langfuse}
+      TZ: UTC
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_POSTGRES_USER:-langfuse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:${LANGFUSE_POSTGRES_PORT:-5434}:5432"
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.9
+    container_name: langfuse-clickhouse
+    restart: unless-stopped
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+      - ./clickhouse/config.d/timezone.xml:/etc/clickhouse-server/config.d/timezone.xml:ro
+    environment:
+      TZ: UTC
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "127.0.0.1:${CLICKHOUSE_HTTP_PORT}:8123"
+      - "127.0.0.1:${CLICKHOUSE_NATIVE_PORT}:9000"
+
+  redis:
+    image: redis:7-alpine
+    container_name: langfuse-redis
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT}:6379"
+
+  langfuse-minio:
+    image: minio/minio:latest
+    container_name: langfuse-minio
+    command: ["server", "/data", "--console-address", ":9001"]
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      TZ: UTC
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "mc alias set local http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} >/dev/null 2>&1 && mc ready local"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-9100}:9000"
+      - "127.0.0.1:${LANGFUSE_MINIO_CONSOLE_PORT:-9101}:9001"
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: langfuse-minio-setup
+    depends_on:
+      langfuse-minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "mc alias set local http://langfuse-minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+       mc mb --ignore-existing local/${MINIO_BUCKET} &&
+       mc anonymous set none local/${MINIO_BUCKET} &&
+       echo 'MinIO bucket ready' && sleep 1"
+    restart: "no"
+
+  langfuse-worker:
+    image: langfuse/langfuse-worker:3
+    container_name: langfuse-worker
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      langfuse-minio:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    environment:
+      TZ: UTC
+      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
+      SALT: ${SALT}
+      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED}
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES}
+      CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL}
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_CLUSTER_ENABLED: "false"
+      REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+      LANGFUSE_S3_BATCH_EXPORT_ENABLED: "true"
+      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_BATCH_EXPORT_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_BATCH_EXPORT_PREFIX: exports/
+      LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WORKER_HOST_PORT}:3030"
+
+  langfuse-web:
+    image: langfuse/langfuse:3
+    container_name: langfuse-web
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      langfuse-minio:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    environment:
+      TZ: UTC
+      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
+      SALT: ${SALT}
+      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED}
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES}
+      CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL}
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_CLUSTER_ENABLED: "false"
+      REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+      LANGFUSE_S3_BATCH_EXPORT_ENABLED: "true"
+      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${MINIO_BUCKET}
+      LANGFUSE_S3_BATCH_EXPORT_REGION: ${MINIO_REGION}
+      LANGFUSE_S3_BATCH_EXPORT_PREFIX: exports/
+      LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
+      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+    restart: unless-stopped
+    ports:
+      - "${WEB_HOST_PORT:-3000}:3000"
+
+
 
 volumes:
   mysql-data:
   qdrant-data:
-  langflow-data:
+  langflow_stable_data:
   minio-data:
+  minio_data:
   langfuse-db-data:
+  litellm-db-data:
+  postgres_data:
+  clickhouse_data:
+  clickhouse_logs:
+  
+
 

@@ -1,3 +1,0 @@
-
-LANGFLOW_PORT=7865
-LANGFLOW_DATABASE_URL=sqlite:////app/data/langflow.db

@@ -3,3 +3,4 @@
 litellm[proxy]>=1.43.19
 uvicorn>=0.29.0
 pydantic>=2.6.0
+prisma>=0.11.0
