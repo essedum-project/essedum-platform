@@ -33,6 +33,7 @@ import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.componen
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { LitellmComponent } from './litellm/litellm.component';
 import { LangfuseComponent } from './langfuse/langfuse.component';
+import { SalusComponent } from './salus/salus.component';
 
 import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
 import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
@@ -94,6 +95,12 @@ const routes: Routes = [
         path: 'langfuse',
         children: [
           { path: '', component: LangfuseComponent }
+        ]
+      },
+      {
+        path: 'salus',
+        children: [
+          { path: '', component: SalusComponent }
         ]
       },
       {
