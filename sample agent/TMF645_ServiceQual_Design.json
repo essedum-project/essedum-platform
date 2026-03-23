@@ -1,0 +1,91 @@
+{
+  "id": "tmf645-servicequal-workflow",
+  "name": "TMF 645 Service Qualification Workflow",
+  "description": "LangGraph workflow for TMF 645 service qualification with validator and qualifier agents",
+  "data": {
+    "nodes": [
+      {
+        "id": "ChatInput-viP4f",
+        "type": "genericNode",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "type": "ChatInput",
+          "display_name": "Chat Input",
+          "description": "Receives TMF 645 service qualification request as JSON"
+        }
+      },
+      {
+        "id": "TMF645Validator",
+        "type": "genericNode",
+        "position": {
+          "x": 400,
+          "y": 100
+        },
+        "data": {
+          "type": "TMF645Validator",
+          "display_name": "TMF 645 Validator",
+          "description": "Validates TMF 645 service qualification request format and required fields"
+        }
+      },
+      {
+        "id": "ServiceQualifier",
+        "type": "genericNode",
+        "position": {
+          "x": 700,
+          "y": 100
+        },
+        "data": {
+          "type": "ServiceQualifier",
+          "display_name": "Service Qualifier",
+          "description": "Qualifies service via API and checks network capacity"
+        }
+      },
+      {
+        "id": "ChatOutput-AVpjO",
+        "type": "genericNode",
+        "position": {
+          "x": 1000,
+          "y": 100
+        },
+        "data": {
+          "type": "ChatOutput",
+          "display_name": "Chat Output",
+          "description": "Returns qualification result to user"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-1",
+        "source": "ChatInput-viP4f",
+        "target": "TMF645Validator",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "id": "edge-2",
+        "source": "TMF645Validator",
+        "target": "ServiceQualifier",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "id": "edge-3",
+        "source": "ServiceQualifier",
+        "target": "ChatOutput-AVpjO",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0",
+    "created_date": "2024",
+    "workflow_type": "tmf645_service_qualification",
+    "entry_point": "ChatInput-viP4f",
+    "exit_point": "ChatOutput-AVpjO"
+  }
+}

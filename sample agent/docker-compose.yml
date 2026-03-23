@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  tmf645-service-qualification:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tmf645-agent
+    ports:
+      - "5000:5000"
+    environment:
+      # Federated API Configuration
+      - FEDERATED_API_URL=http://192.168.14.119:8092
+      
+      # LiteLLM Configuration
+      - USE_VLLM=true
+      - VLLM_URL=http://litellm:4000/chat/completions
+      - VLLM_MODEL_NAME=Llama-3.2-3B-Instruct
+      - VLLM_API_KEY=sk-1234
+      
+      # Langfuse Configuration for LLM Observability
+      - LANGFUSE_SECRET_KEY=sk-lf-5b1de79a-fe1c-40dc-a962-a210b0f4fb45
+      - LANGFUSE_PUBLIC_KEY=pk-lf-438ae41c-3170-474e-80c8-ecc89247ece9
+      - LANGFUSE_HOST=http://langfuse:3000
+      
+      # Azure OpenAI Configuration (optional)
+      # - AZURE_OPENAI_API_KEY=your-key
+      # - AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
+      # - AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
+      # - AZURE_API_VERSION=2024-06-01
+      
+      # Application Configuration
+      - LOG_LEVEL=INFO
+      - FLASK_ENV=production
+      - MODEL_NAME=gpt-4
+      - TEMPERATURE=0.7
+      - MAX_TOKENS=500
+      - TIMEOUT_SECONDS=120
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    restart: unless-stopped
+    
+    networks:
+      - tmf645-network
+
+networks:
+  tmf645-network:
+    driver: bridge
