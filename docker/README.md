@@ -54,10 +54,20 @@ graph TD
 ## Running the Platform
 
 1.  **Configure Environment**:
-    Copy `.env.sample` to `.env` and update values if necessary.
+    Copy `.env.sample` to `.env` and fill in all required values.
     ```bash
     cp .env.sample .env
     ```
+    
+    **Important**: The `.env.sample` file is a template with empty values for sensitive information. You must:
+    - Generate secure random strings for encryption keys (`ENCRYPTION_KEY`, `ENCRYPTION_SALT`, `LICENSE`, `PUBLIC_KEY`)
+    - Set strong passwords for all databases and services (MySQL, Keycloak, ClickHouse, Redis, PostgreSQL, Langfuse, etc.)
+    - Configure external URLs to match your deployment environment (replace placeholder values with your actual host/IP)
+    - Fill in cloud provider credentials if using AWS, Azure, or GCP features
+    - Set up OAuth credentials (GitHub, etc.) if required
+    - Configure MinIO endpoints and credentials for object storage
+    
+    See the inline comments in `.env.sample` for detailed guidance on each variable.
 
 2.  **Start Services**:
     ```bash
