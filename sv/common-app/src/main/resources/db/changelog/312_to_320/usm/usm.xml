@@ -411,6 +411,7 @@
             );
         </sql>
     </changeSet>
+     
         <changeSet id="3v2-usm-2026-23-mar" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -427,7 +428,7 @@
             ) VALUES (
             'IT Portfolio Manager Side',
             'leo1311',
-            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/lite-llm","children":[]}',
+            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/salus","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'leo1311'),
             NULL
             );
@@ -450,7 +451,7 @@
             ) VALUES (
             'IT Portfolio Manager Side',
             'core',
-            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/lite-llm","children":[]}',
+            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/salus","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'core'),
             NULL
             );
