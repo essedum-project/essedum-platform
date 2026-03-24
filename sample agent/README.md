@@ -66,12 +66,12 @@ Create a `.env` file in the project root:
 # LiteLLM Configuration
 USE_VLLM=true
 VLLM_URL=http://litellm:4000/chat/completions
-VLLM_MODEL_NAME=Llama-3.2-3B-Instruct
-VLLM_API_KEY=sk-1234
+VLLM_MODEL_NAME=
+VLLM_API_KEY=
 
 # Langfuse Configuration (Optional - for LLM Observability)
-LANGFUSE_SECRET_KEY=sk-lf-5b1de79a-fe1c-40dc-a962-a210b0f4fb45
-LANGFUSE_PUBLIC_KEY=pk-lf-438ae41c-3170-474e-80c8-ecc89247ece9
+LANGFUSE_SECRET_KEY=
+LANGFUSE_PUBLIC_KEY=
 LANGFUSE_HOST=http://langfuse:3000
 
 # Model Settings
