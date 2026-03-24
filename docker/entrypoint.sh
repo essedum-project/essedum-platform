@@ -14,6 +14,7 @@ replace_placeholder() {
 replace_placeholder '__FE_LANGFLOW_URL__'                "$FE_LANGFLOW_URL"
 replace_placeholder '__FE_LANGFUSE_URL__'                "$FE_LANGFUSE_URL"
 replace_placeholder '__FE_LITELLM_URL__'                 "$FE_LITELLM_URL"
+replace_placeholder '__FE_SALUS_URL__'                   "$FE_SALUS_URL"
 replace_placeholder '__FE_MINIO_ENDPOINT__'              "$FE_MINIO_ENDPOINT"
 replace_placeholder '__FE_MINIO_BUCKET__'                "$FE_MINIO_BUCKET"
 replace_placeholder '__FE_CONTAINER_REGISTRY_PREFIX__'   "$FE_CONTAINER_REGISTRY_PREFIX"

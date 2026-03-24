@@ -8,7 +8,8 @@ export const environment = {
   datasetsUrl: '/api/aip',
   langflowUrl: 'http://localhost:3000/',
   litellmUrl:'__FE_LITELLM_URL__',
-  langfuseUrl:'__FE_LANGFUSE_URL__'
+  langfuseUrl:'__FE_LANGFUSE_URL__',
+  salusUrl:'__FE_SALUS_URL__'
 };
 
 
