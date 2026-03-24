@@ -157,7 +157,7 @@ services:
       context: ../adk-code-builder-deployer
       dockerfile: Dockerfile
     ports:
-      - "${ADK_DEPLOYER_PORT:-5000}:5000"
+      - "${ADK_DEPLOYER_PORT:-5003}:5000"
     env_file:
       - .env
     environment:

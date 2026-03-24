@@ -383,15 +383,28 @@ def handle_pipeline_trigger(data):
         os.makedirs(EXTRACT_DIR, exist_ok=True)
 
         # 2) DOWNLOAD (S3/MinIO)
+        # Resolve MinIO endpoint: env var > env var alias > payload fallback
+        minio_endpoint = (
+            os.getenv("MINIO_ENDPOINT")
+            or os.getenv("MINIO_SERVER_URL")
+            or data.get("minio_endpoint")
+        )
+        if not minio_endpoint:
+            raise Exception("MINIO_ENDPOINT is not configured. Set the MINIO_ENDPOINT environment variable.")
+
+        # Resolve credentials: AWS env vars > MinIO-specific env vars
+        access_key = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("MINIO_ACCESS_KEY") or os.getenv("MINIO_ROOT_USER")
+        secret_key = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("MINIO_SECRET_KEY") or os.getenv("MINIO_ROOT_PASSWORD")
+
         log_to_client(
-            f"Downloading {data['file_path']} from {data.get('minio_endpoint', 's3')}",
+            f"Downloading {data['file_path']} from {minio_endpoint}",
             step="DOWNLOAD",
         )
         s3 = boto3.client(
             "s3",
-            endpoint_url= os.getenv("MINIO_ENDPOINT"),
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key= os.getenv("AWS_SECRET_ACCESS_KEY"),
+            endpoint_url=minio_endpoint,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
             region_name=os.getenv("AWS_REGION", "us-east-1"),
         )
         local_zip = os.path.join(DOWNLOAD_DIR, "source.zip")
