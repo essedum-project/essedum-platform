@@ -47,6 +47,9 @@ services:
       - FE_MINIO_BUCKET=${FE_MINIO_BUCKET}
       - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX}
       - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION}
+    networks:
+      - default
+      - salus-network
     depends_on:
       - leap-app-backend-service
 
@@ -208,6 +211,22 @@ services:
     volumes:
       - ../lite-llm/data/ollama:/root/.ollama
 
+  postgres-litellm:
+    image: postgres:16-alpine
+    container_name: postgres-litellm
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=litellm
+      - POSTGRES_USER=litellm
+      - POSTGRES_PASSWORD=${LITELLM_DB_PASSWORD:-litellm_pass}
+    volumes:
+      - litellm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   litellm:
     build:
       context: ..
@@ -217,14 +236,20 @@ services:
     env_file:
       - .env
     depends_on:
-      - ollama
+      postgres-litellm:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     ports:
       - "${LITELLM_PORT:-4000}:4000"
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
       - OLLAMA_PORT=${OLLAMA_PORT:-11434}
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-1234}
       - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
+      - DATABASE_URL=postgresql://litellm:${LITELLM_DB_PASSWORD:-litellm_pass}@postgres-litellm:5432/litellm
+      - UI_USERNAME=${LITELLM_UI_USERNAME:-admin}
+      - UI_PASSWORD=${LITELLM_UI_PASSWORD:-admin}
     command: [
       "litellm",
       "--config", "/app/config/config.yaml",
@@ -243,4 +268,10 @@ volumes:
   langflow-data:
   minio-data:
   langfuse-db-data:
+  litellm-db-data:
+
+networks:
+  salus-network:
+    external: true
+    name: salus_salus-network
 

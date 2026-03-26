@@ -32,7 +32,7 @@ export class SalusComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.salusIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.salusUrl).origin; } catch { return this.salusUrl; }
+      try { return new URL(this.salusUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {
