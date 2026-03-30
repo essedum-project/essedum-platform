@@ -67,26 +67,32 @@ check_prerequisites() {
     print_info "Docker found: $docker_version"
 
     # Check if Docker daemon is running
+    local DOCKER_PREFIX=""
     if ! docker info &> /dev/null; then
-        print_error "Docker daemon is not running. Please start Docker and try again."
-        exit 1
+        if sudo docker info &> /dev/null 2>&1; then
+            print_warn "Docker not accessible without sudo in this session. Using sudo. (Add user to 'docker' group and re-login to avoid this.)"
+            DOCKER_PREFIX="sudo"
+        else
+            print_error "Docker daemon is not running. Please start Docker and try again."
+            exit 1
+        fi
     fi
     print_info "Docker daemon is running."
 
     # Check Docker Compose availability
-    if ! docker compose version &> /dev/null 2>&1; then
-        if ! docker-compose version &> /dev/null 2>&1; then
+    if ! $DOCKER_PREFIX docker compose version &> /dev/null 2>&1; then
+        if ! $DOCKER_PREFIX docker-compose version &> /dev/null 2>&1; then
             print_error "Docker Compose is not available. Please install Docker Compose."
             exit 1
         fi
-        COMPOSE_CMD="docker-compose"
+        COMPOSE_CMD="$DOCKER_PREFIX docker-compose"
         local compose_ver
-        compose_ver=$(docker-compose version --short 2>/dev/null || docker-compose version 2>/dev/null)
+        compose_ver=$($DOCKER_PREFIX docker-compose version --short 2>/dev/null || $DOCKER_PREFIX docker-compose version 2>/dev/null)
         print_info "Docker Compose found (standalone): $compose_ver"
     else
-        COMPOSE_CMD="docker compose"
+        COMPOSE_CMD="$DOCKER_PREFIX docker compose"
         local compose_ver
-        compose_ver=$(docker compose version 2>/dev/null)
+        compose_ver=$($DOCKER_PREFIX docker compose version 2>/dev/null)
         print_info "Docker Compose found: $compose_ver"
     fi
 

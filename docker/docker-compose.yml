@@ -22,9 +22,12 @@ services:
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
     depends_on:
-      - mysql
-      - qdrant
-      - keycloak
+      mysql:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      keycloak:
+        condition: service_started
 
   frontend:
     build:
@@ -56,7 +59,8 @@ services:
     ports:
       - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   py-job-sagemaker-executer:
     build:
@@ -65,7 +69,8 @@ services:
     ports:
       - "${PYJOB_SAGEMAKER_EXECUTER_PORT:-5002}:5002"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -86,7 +91,8 @@ services:
     ports:
       - "${PYJOB_VERTEX_EXECUTER_PORT:-5007}:5007"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
@@ -110,6 +116,12 @@ services:
       - mysql-data:/var/lib/mysql
     ports:
       - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -139,7 +151,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
  # BuildKit daemon — required by adk-code-builder-deployer to build and push images
   buildkitd:
@@ -161,13 +174,21 @@ services:
     env_file:
       - .env
     environment:
+      - DEPLOY_MODE=${DEPLOY_MODE:-docker}
+      - DOCKER_NETWORK=docker_default
       - BUILDKIT_ADDR=tcp://buildkitd:1234
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+    user: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - buildkitd
+    networks:
+      - default
+      - essedum-net
     restart: unless-stopped
 
   minio:
@@ -506,6 +527,10 @@ volumes:
   postgres_data:
   clickhouse_data:
   clickhouse_logs:
-  
+
+networks:
+  default:
+  essedum-net:
+    name: essedum-net
 
 
