@@ -45,10 +45,14 @@ services:
       - FE_LANGFLOW_URL=${FE_LANGFLOW_URL}
       - FE_LANGFUSE_URL=${FE_LANGFUSE_URL}
       - FE_LITELLM_URL=${FE_LITELLM_URL}
+      - FE_SALUS_URL=${FE_SALUS_URL}
       - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT}
       - FE_MINIO_BUCKET=${FE_MINIO_BUCKET}
       - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX}
       - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION}
+    networks:
+      - default
+      - salus-network
     depends_on:
       - leap-app-backend-service
 
@@ -258,7 +262,7 @@ services:
     environment:
       - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
       - OLLAMA_PORT=${OLLAMA_PORT:-11434}
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-1234}
       - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
       - UI_USERNAME=${LITELLM_UI_USERNAME:-admin}
       - UI_PASSWORD=${LITELLM_UI_PASSWORD:-admin}
@@ -532,5 +536,7 @@ networks:
   default:
   essedum-net:
     name: essedum-net
-
+  salus-network:
+    external: true
+    name: salus_salus-network
 
