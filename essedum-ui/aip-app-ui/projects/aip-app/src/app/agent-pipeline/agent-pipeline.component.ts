@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   OnInit,
   OnDestroy,
@@ -257,6 +257,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   isAgentThinking = false;
   playgroundUrl = ''; // Store the playground URL from API
   currentDeploymentName = ''; // Store the deployment name used in WebSocket
+  
+  // App Pipeline embedded viewer
+  showAppViewer = false;
+  appUrl = '';
+  appPort = ''; // Store app port from deployment
 
   // GitHub Push functionality
   githubRepoName = '';
@@ -292,7 +297,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
   selectedZipFile: File | null = null;
 
   // MCP Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
 
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
@@ -429,6 +434,19 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     // Don't initialize mcpJsonConfig here - let it be set by API data loading
   }
 
+  /**
+   * Get pipeline type display name based on current mode
+   */
+  private getPipelineTypeName(): string {
+    if (this.pipelineMode === 'mcp') {
+      return 'MCP server';
+    } else if (this.pipelineMode === 'app') {
+      return 'app';
+    } else {
+      return 'agent';
+    }
+  }
+
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
     
@@ -452,7 +470,13 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.pipelineMode = historyState.pipelineMode;
       
       // Set cardTitle based on pipeline mode
-      this.cardTitle = this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+      if (this.pipelineMode === 'mcp') {
+        this.cardTitle = 'MCP Pipelines';
+      } else if (this.pipelineMode === 'app') {
+        this.cardTitle = 'App Pipelines';
+      } else {
+        this.cardTitle = 'Agent Pipelines';
+      }
       
       // DO NOT initialize MCP config here - let the API load the real data first
       // Default config will only be set if API call fails
@@ -463,8 +487,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       this.currentCname = cardFromState.name; // Use the card name as cname
       this.viewMode = 'detail';
       
-      // Update MCP filename if in MCP mode now that we have the actual cname
-      if (this.pipelineMode === 'mcp') {
+      // Update filename if in MCP or App mode now that we have the actual cname
+      if (this.pipelineMode === 'mcp' || this.pipelineMode === 'app') {
         this.scriptFileName = `${this.currentCname}.json`;
       }
       
@@ -562,12 +586,18 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     params = params.set('org', this.organisation);
     this.service.getPipelineByName(params).subscribe((res) => {
       // Set cardTitle based on current pipeline mode
-      this.cardTitle = this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+      if (this.pipelineMode === 'mcp') {
+        this.cardTitle = 'MCP Pipelines';
+      } else if (this.pipelineMode === 'app') {
+        this.cardTitle = 'App Pipelines';
+      } else {
+        this.cardTitle = 'Agent Pipelines';
+      }
       this.card = res[0];
       
-      // Update MCP filename if in MCP mode with actual pipeline data
-      if (this.pipelineMode === 'mcp' && res && res[0]) {
-        const actualName = res[0].name || this.cardName || 'mcp-config';
+      // Update filename if in MCP or App mode with actual pipeline data
+      if ((this.pipelineMode === 'mcp' || this.pipelineMode === 'app') && res && res[0]) {
+        const actualName = res[0].name || this.cardName || 'config';
         this.scriptFileName = `${actualName}.json`;
       }
     });
@@ -871,6 +901,8 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.deploymentStatus = 'idle'; // Reset deployment status
     this.deploymentStatusMessage = ''; // Clear status message
     this.isPlaygroundEnabled = false; // Disable playground
+    this.showAppViewer = false; // Hide app viewer
+    this.appUrl = ''; // Clear app URL
     this.clearFileSelection();
   }
 
@@ -903,6 +935,28 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           this.service.message('MCP Pipelines created successfully!', 'success');
+          // Navigate back to dashboard to see the new pipeline
+          this.navigateBack();
+        }
+      });
+    } else if (this.pipelineMode === 'app') {
+      
+      // Open the pipeline creation dialog with App-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'app-pipeline', // App-specific interface type
+          type: 'appPipeline', // App-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.service.message('App Pipelines created successfully!', 'success');
           // Navigate back to dashboard to see the new pipeline
           this.navigateBack();
         }
@@ -1173,7 +1227,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
           // Show warning message
           const warningResponse = {
             status: 'warning',
-            message: `No ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files found`
+            message: `No ${this.getPipelineTypeName()} files found`
           };
           this.service.messageService(warningResponse, 'No Data Found');
         }
@@ -1194,7 +1248,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         this.isJsonProcessed = false;
 
         // Show error message to user
-        console.warn(`Failed to load ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} files: ${error.message || 'Unknown error'}`);
+        console.warn(`Failed to load ${this.getPipelineTypeName()} files: ${error.message || 'Unknown error'}`);
       },
     });
   }
@@ -2223,6 +2277,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     this.deploymentStatusMessage = 'Pushing files to MinIO...';
     this.isPlaygroundEnabled = false; // Disable playground during deployment
     
+    // Hide app viewer during deployment (for app pipeline)
+    if (this.pipelineMode === 'app') {
+      this.showAppViewer = false;
+    }
+    
     // Clear previous console output - console only shows WebSocket data during deployment
     this.consoleOutput = [];
     this.addToConsole('Starting deployment process...');
@@ -2387,7 +2446,7 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
               interface: apiParams.interface
             };
            
-            this.addToConsole(`Starting ${this.pipelineMode === 'mcp' ? 'MCP server' : 'agent'} pipeline with deployment: ${deploymentAlias}`);
+            this.addToConsole(`Starting ${this.getPipelineTypeName()} pipeline with deployment: ${deploymentAlias}`);
             this.addToConsole(`Pipeline type: ${payload.type}, interface: ${payload.interface}`);
             this.socket?.emit('start_pipeline', payload);
           }).catch((error) => {
@@ -2800,6 +2859,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         type: 'mcpServer',
         interface: 'mcp-pipeline'
       };
+    } else if (this.pipelineMode === 'app') {
+      return {
+        type: 'appPipeline',
+        interface: 'app-pipeline'
+      };
     } else {
       return {
         type: 'AIAgent',
@@ -2922,10 +2986,28 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
 
   // Playground methods
   openPlayground(): void {
+    // For App Pipeline, allow opening anytime (no deployment check)
+    if (this.pipelineMode === 'app') {
+      // Clear deployment status message when launching app
+      this.deploymentStatusMessage = '';
+      
+      this.fetchAppUrl().then(() => {
+        this.showAppViewer = true;
+        // Don't add to console since it will be hidden
+      }).catch((error) => {
+        console.error('Failed to fetch app URL:', error);
+        // Show a friendly message if app is not deployed yet
+        this.service.message('App is not deployed yet. Please deploy the app first.', 'warning');
+      });
+      return;
+    }
+    
+    // For agent mode, check if playground is enabled
     if (!this.canOpenPlayground()) {
       return;
     }
     
+    // For agent mode, show playground popup as before
     // First fetch the playground URL from streaming services API
     this.fetchPlaygroundUrl().then(() => {
       this.showPlayground = true;
@@ -2984,6 +3066,46 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error fetching playground URL:', error);
       // Don't generate URL without proper data - selectedAgent might not be populated
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch app URL from streaming services API for App Pipeline
+   */
+  private async fetchAppUrl(): Promise<void> {
+    try {
+      if (!this.currentCname) {
+        throw new Error('No app selected - currentCname is empty');
+      }
+      
+      const organization = this.getOrganization();
+      const apiUrl = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      
+      const response = await this.http.get<any>(apiUrl).toPromise();
+      
+      if (response && response.json_content) {
+        const jsonContent = JSON.parse(response.json_content);
+        
+        // Check if app URL is stored in json_content
+        if (jsonContent.appUrl) {
+          this.appUrl = jsonContent.appUrl;
+        } else if (jsonContent.port) {
+          // Build URL from host + port
+          const environmentUrl = this.getEnvironmentUrl();
+          const host = new URL(environmentUrl).hostname;
+          this.appUrl = `http://${host}:${jsonContent.port}`;
+        } else {
+          // Fallback: use deployment name
+          const environmentUrl = this.getEnvironmentUrl();
+          const deploymentName = this.currentDeploymentName;
+          this.appUrl = `${environmentUrl}/apps/${deploymentName}`;
+        }
+      } else {
+        throw new Error('No app configuration found');
+      }
+    } catch (error) {
+      console.error('Error fetching app URL:', error);
       throw error;
     }
   }

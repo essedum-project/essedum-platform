@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="playground-header">
         <h2 class="playground-title">
-          {{ pipelineMode === 'mcp' ? 'MCP Server Deployment' : 'Agent Deployment & Testing' }}
+          {{ pipelineMode === 'mcp' ? 'MCP Server Deployment' : (pipelineMode === 'app' ? 'App Deployment and Testing' : 'Agent Deployment & Testing') }}
         </h2>
         <p class="playground-subtitle">
-          Deploy your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} and test it in the playground
+          {{ pipelineMode === 'app' ? 'Deploy your app and test it in the embedded viewer' : ('Deploy your ' + (pipelineMode === 'mcp' ? 'MCP server' : 'agent') + ' and test it in the playground') }}
         </p>
       </div>
 
@@ -17,10 +17,10 @@
                 class="run-deploy-button action-btn"
                 (click)="onRunAndDeploy()" 
                 [disabled]="!canRunAndDeploy"
-                [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : 'Run and Deploy Agent'" 
+                [matTooltip]="pipelineMode === 'mcp' ? 'Run and Deploy MCP Server' : (pipelineMode === 'app' ? 'Deploy App' : 'Run and Deploy Agent')" 
                 matTooltipPosition="above">
           <mat-icon>{{ isRunningAndDeploying ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
-          <span class="button-label">{{ isRunningAndDeploying ? 'Running & Deploying' : 'Run & Deploy' }}</span>
+          <span class="button-label">{{ isRunningAndDeploying ? (pipelineMode === 'app' ? 'Deploying...' : 'Running & Deploying') : (pipelineMode === 'app' ? 'Deploy App' : 'Run & Deploy') }}</span>
         </button>
         
         <button mat-raised-button 
@@ -37,13 +37,13 @@
         <button mat-raised-button 
                 class="playground-button action-btn"
                 *ngIf="pipelineMode !== 'mcp'"
-                [class.playground-disabled]="!canOpenPlayground"
-                [disabled]="!canOpenPlayground"
+                [class.playground-disabled]="pipelineMode !== 'app' && !canOpenPlayground"
+                [disabled]="pipelineMode !== 'app' && !canOpenPlayground"
                 (click)="onOpenPlayground()"
                 [matTooltip]="getPlaygroundTooltipMessage()"
                 matTooltipPosition="above">
-          <mat-icon>smart_toy</mat-icon>
-          <span class="button-label">Open Playground</span>
+          <mat-icon>{{ pipelineMode === 'app' ? 'launch' : 'smart_toy' }}</mat-icon>
+          <span class="button-label">{{ pipelineMode === 'app' ? 'Launch App' : 'Open Playground' }}</span>
         </button>
       </div>
 
@@ -61,7 +61,7 @@
       </div>
 
       <!-- Console Output -->
-      <div class="console-container">
+      <div class="console-container" *ngIf="!(pipelineMode === 'app' && showAppViewer)">
         <div class="console-header">
           <mat-icon>terminal</mat-icon>
           <span>Console Output</span>
@@ -76,12 +76,26 @@
             <span class="console-text console-loading">Processing...</span>
           </div>
           <div *ngIf="consoleOutput.length === 0 && !isGenerating && !isLoadingFiles" class="console-empty">
-            <span>Console ready. Click "Run and Deploy" to see output.</span>
+            <span>Console ready. Click "{{ pipelineMode === 'app' ? 'Deploy App' : 'Run and Deploy' }}" to see output.</span>
           </div>
           <div *ngIf="isLoadingFiles" class="console-line">
             <span class="console-prompt">$</span>
-            <span class="console-text console-loading">Loading agent data...</span>
+            <span class="console-text console-loading">Loading {{ pipelineMode === 'app' ? 'app' : 'agent' }} data...</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Embedded App Viewer (Only for App Pipeline) -->
+      <div class="app-viewer-container" *ngIf="pipelineMode === 'app' && showAppViewer && safeAppUrl">
+        <div class="app-viewer-header">
+          <mat-icon>web</mat-icon>
+          <span>Application Preview</span>
+          <a [href]="appUrl" target="_blank" class="open-new-tab" matTooltip="Open in new tab" matTooltipPosition="above">
+            <mat-icon>open_in_new</mat-icon>
+          </a>
+        </div>
+        <div class="app-viewer-iframe-wrapper">
+          <iframe [src]="safeAppUrl" class="app-viewer-iframe" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
     </div>

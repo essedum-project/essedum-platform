@@ -24,6 +24,13 @@
         type="button">
         MCP Pipelines
       </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'app'"
+        (click)="switchToPipelineMode('app')"
+        type="button">
+        App Pipelines
+      </button>
     </div>
   </div>
 
