@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: langflow-ingress
+  namespace: aipns
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: langflow.essedum-lfn.infosys.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: langflow-persistent
+            port:
+              number: 7860
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - langflow.essedum-lfn.infosys.com
+    secretName: essedum-lfn-tls

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langflow-persistent
+  namespace: aipns
+  labels:
+    app: langflow-persistent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langflow-persistent
+  template:
+    metadata:
+      labels:
+        app: langflow-persistent
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          until nc -z postgres.aipns.svc.cluster.local 5432; do
+            echo "PostgreSQL is not ready yet. Waiting..."
+            sleep 2
+          done
+          echo "✅ PostgreSQL is ready!"
+      containers:
+      - name: langflow
+        image: langflowai/langflow:latest
+        ports:
+        - containerPort: 7860
+          name: http
+          protocol: TCP
+        env:
+        - name: LANGFLOW_DATABASE_URL
+          value: "postgresql://langfuse:langfuse@postgres.aipns.svc.cluster.local:5432/langflowdb"
+        - name: LANGFLOW_AUTO_LOGIN
+          value: "true"
+        - name: LANGFLOW_HOST
+          value: "0.0.0.0"
+        - name: LANGFLOW_PORT
+          value: "7860"
+        - name: LANGFLOW_ENV
+          value: "production"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 7860
+            scheme: HTTP
+          initialDelaySeconds: 90
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 7860
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        imagePullPolicy: Always
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
