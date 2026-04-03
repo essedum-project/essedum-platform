@@ -8,9 +8,16 @@ ENV PIP_NO_CACHE_DIR=1         PYTHONDONTWRITEBYTECODE=1         PYTHONUNBUFFERE
 RUN useradd -m appuser
 WORKDIR /app
 
+# Install system deps needed by prisma CLI
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libatomic1 nodejs npm openssl libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install LiteLLM (proxy extras include server deps)
 COPY lite-llm/requirements.txt ./
-RUN pip install --no-cache-dir --upgrade pip         && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && prisma generate --schema /usr/local/lib/python3.11/site-packages/litellm/proxy/schema.prisma
 
 # Copy config
 COPY lite-llm/config ./config

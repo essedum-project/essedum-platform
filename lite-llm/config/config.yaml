@@ -4,6 +4,15 @@
 
 general_settings:
   master_key: ${LITELLM_MASTER_KEY}
+  ui_username: ${UI_USERNAME}
+  ui_password: ${UI_PASSWORD}
+
+litellm_settings:
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
+  langfuse_secret: ${LANGFUSE_SECRET_KEY}
+  langfuse_public_key: ${LANGFUSE_PUBLIC_KEY}
+  langfuse_host: ${LANGFUSE_BASE_URL}
 
 server_settings:
   telemetry: false
