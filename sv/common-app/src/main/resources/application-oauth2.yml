@@ -1,7 +1,7 @@
 # Sample setup with keycloak
 security:
   issuer-uri: https://localhost:8084/realms/ESSEDUM
-  jwk-set-uri: http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+  jwk-set-uri: http://localhost:8080/realms/ESSEDUM/protocol/openid-connect/certs
   clientId: essedum-45
   scope: openid profile email
   claim: email||admin

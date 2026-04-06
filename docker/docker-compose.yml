@@ -141,8 +141,17 @@ services:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_PROXY=edge
+      - KC_HOSTNAME=${EXTERNAL_KC_URL}
+      - KC_HOSTNAME_STRICT=false
+      - KC_DB=mysql
+      - KC_DB_URL=jdbc:mysql://mysql:3306/${KC_DB_NAME}
+      - KC_DB_USERNAME=${KC_DB_USER}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
     ports:
       - "${KEYCLOAK_PORT:-8180}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
     command:
       - "start-dev"
 
