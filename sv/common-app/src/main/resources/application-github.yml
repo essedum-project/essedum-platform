@@ -5,9 +5,9 @@
 # GitHub OAuth Settings
 github:
   oauth:
-    client-id: YOUR_GITHUB_CLIENT_ID_HERE
-    client-secret: YOUR_GITHUB_CLIENT_SECRET_HERE
-    redirect-uri: ${commonAppUrl}api/github/oauth/callback
+    client-id: ${GITHUB_CLIENT_ID}
+    client-secret: ${GITHUB_CLIENT_SECRET}
+    redirect-uri: https://10.200.111.174:8084/api/github/oauth/callback
     authorization-uri: https://github.com/login/oauth/authorize
     token-uri: https://github.com/login/oauth/access_token
     scope: repo,user

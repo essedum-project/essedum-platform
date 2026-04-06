@@ -1,0 +1,3 @@
+
+FROM langfuse/langfuse-worker:3
+ENV TZ=UTC

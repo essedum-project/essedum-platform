@@ -1,0 +1,4 @@
+# Pin to a recent 1.x version; adjust if you need another release
+langflow>=1.0.0
+# Optional: enable Postgres when DATABASE_URL uses postgresql+psycopg2
+psycopg2-binary>=2.9

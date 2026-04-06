@@ -1,0 +1,22 @@
+# Backup files with timestamps
+*-backup-*.yaml
+langflow-ingress-backup-*.yaml
+
+# Database backups
+*.sql
+*_backup_*.sql
+langflow_backup_*.sql
+
+# Temporary files
+*.tmp
+*.swp
+*~
+.DS_Store
+
+# Environment files with sensitive data
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log

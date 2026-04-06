@@ -142,6 +142,7 @@ import { GitHubService } from './sharedModule/services/github.service';
 import { AgentComponent } from './agent/agent.component';
 import { LitellmComponent } from './litellm/litellm.component';
 import { LangfuseComponent } from './langfuse/langfuse.component';
+import { SalusComponent } from './salus/salus.component';
 import { AgentPipelineComponent } from './agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from './agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { GithubLoginComponent } from './agent-pipeline/github-login/github-login.component';
@@ -249,6 +250,7 @@ const dbConfig: DBConfig = {
     AgentComponent,
     LitellmComponent,
     LangfuseComponent,
+    SalusComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
     PlaygroundTabComponent,

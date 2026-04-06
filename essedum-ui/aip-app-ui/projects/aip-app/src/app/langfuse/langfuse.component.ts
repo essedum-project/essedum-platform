@@ -1,5 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { environment } from '../../environments/environment';
+
 
 @Component({
   selector: 'app-langfuse',
@@ -9,18 +11,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 export class LangfuseComponent implements OnInit, AfterViewInit {
   // Embedded Langfuse interface URL
   currentIframeUrl: SafeResourceUrl;
-  private readonly langfuseUrl: string;
+  private readonly langfuseUrl: string = environment.langfuseUrl;
 
   @ViewChild('langfuseIframeRef') langfuseIframeRef!: ElementRef<HTMLIFrameElement>;
 
   constructor(private sanitizer: DomSanitizer) {
-    // Dynamically construct the Langfuse URL based on current hostname
-    const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
-    
 
-      // For production, use langfuse subdomain
-      this.langfuseUrl = `${protocol}//langfuse.${hostname}/`;
+      this.langfuseUrl = environment.langfuseUrl;
     
   }
 

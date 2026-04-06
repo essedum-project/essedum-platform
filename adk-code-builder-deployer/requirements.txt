@@ -1,7 +1,8 @@
-flask
-flask-socketio==5.3.6
-python-socketio==5.11.2
-python-engineio==4.9.0
+flask==3.0.3
+flask-socketio==5.5.1
+python-socketio==5.12.1
+python-engineio==4.11.2
 eventlet==0.36.1
 boto3
 kubernetes
+docker>=7.0.0

@@ -39,5 +39,15 @@ public interface DeploymentFormRepository extends JpaRepository<DeploymentForm, 
      */
     Optional<DeploymentForm> findByCnameAndOrg(String cname, String org);
 
+    /**
+     * Find deployment form by cname, org, and agent name.
+     *
+     * @param cname the customer name
+     * @param org the organization/project name
+     * @param agentName the agent name
+     * @return optional deployment form
+     */
+    Optional<DeploymentForm> findByCnameAndOrgAndAgentName(String cname, String org, String agentName);
+
 }
 
