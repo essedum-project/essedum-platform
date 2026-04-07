@@ -46,7 +46,7 @@ RUN chmod -R 755 /app/ui
 WORKDIR /
 
 # Expose ports
-EXPOSE 8082 8084
+EXPOSE 8082 8083 8084 8085 8086 8087 4000 8089
 
 # Start with entrypoint that replaces env-var placeholders, then launches Nginx
 ENTRYPOINT ["/entrypoint.sh"]
