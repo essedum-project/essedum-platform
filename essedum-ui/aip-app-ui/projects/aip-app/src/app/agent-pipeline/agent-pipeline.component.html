@@ -34,7 +34,7 @@
               <mat-tab-group #tabGroup disableRipple (selectedTabChange)="onTabChange($event)">
 
                 <!-- Essedum Codespace Tab (Always visible) -->
-                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : 'Essedum Codespace'" class="lfx-u-header-xl">
+                <mat-tab [label]="pipelineMode === 'mcp' ? 'MCP Codespace' : (pipelineMode === 'app' ? 'App Codespace' : 'Essedum Codespace')" class="lfx-u-header-xl">
                   <div class="tab-content mb-5">
 
                     <!-- File Structure -->
@@ -52,7 +52,7 @@
                                       *ngIf="!hasGeneratedAgent && !hasExistingFiles()"
                                       (click)="openUploadDialog()"
                                       color="primary"
-                                      [title]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : 'Upload Agent Files (ZIP)'">
+                                      [title]="pipelineMode === 'mcp' ? 'Upload MCP Server Files (ZIP)' : (pipelineMode === 'app' ? 'Upload App Files (ZIP)' : 'Upload Agent Files (ZIP)')">
                                 <mat-icon>upload_file</mat-icon>
                                 <span style="margin-left: 8px;">Upload Files</span>
                               </button>
@@ -219,6 +219,8 @@
                     [hasDeploymentFormData]="hasDeploymentFormData"
                     [isCheckingDeploymentData]="isCheckingDeploymentData"
                     [deploymentEnvironment]="deploymentEnvironment"
+                    [showAppViewer]="showAppViewer"
+                    [appUrl]="appUrl"
                     (runAndDeployClick)="runAndDeploy()"
                     (deleteDeploymentClick)="deleteDeployment()"
                     (openPlaygroundClick)="openPlayground()">
@@ -231,6 +233,7 @@
                     <app-deployment-form 
                       [cname]="currentCname" 
                       [organisation]="organisation"
+                      [pipelineMode]="pipelineMode"
                       (deploymentFinished)="onDeploymentFinished($event)">
                     </app-deployment-form>
                   </div>
@@ -300,7 +303,7 @@
     <div class="playground-header">
       <div class="playground-title">
         <mat-icon>smart_toy</mat-icon>
-        <h2>{{ pipelineAlias || (pipelineMode === 'mcp' ? 'MCP Playground' : 'Agent Playground') }}</h2>
+        <h2>{{ pipelineAlias || (pipelineMode === 'mcp' ? 'MCP Playground' : (pipelineMode === 'app' ? 'App Playground' : 'Agent Playground')) }}</h2>
       </div>
       <button mat-icon-button (click)="closePlayground()" class="close-button">
         <mat-icon>close</mat-icon>
@@ -506,14 +509,14 @@
 <div class="upload-overlay" *ngIf="showUploadDialog" (click)="closeUploadDialog()">
   <div class="upload-dialog" (click)="$event.stopPropagation()">
     <div class="upload-dialog-header">
-      <h3>{{ pipelineMode === 'mcp' ? 'Upload MCP Server Files' : 'Upload Agent Files' }}</h3>
+      <h3>{{ pipelineMode === 'mcp' ? 'Upload MCP Server Files' : (pipelineMode === 'app' ? 'Upload App Files' : 'Upload Agent Files') }}</h3>
       <button mat-icon-button (click)="closeUploadDialog()" class="close-button">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="upload-dialog-content">
-      <p>Select a ZIP file containing your {{ pipelineMode === 'mcp' ? 'MCP server' : 'agent' }} files to upload:</p>
+      <p>Select a ZIP file containing your {{ pipelineMode === 'mcp' ? 'MCP server' : (pipelineMode === 'app' ? 'app' : 'agent') }} files to upload:</p>
 
       <div class="file-input-container">
         <input type="file" #fileInput accept=".zip" (change)="onFileSelected($event)" class="file-input"
