@@ -300,7 +300,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - ./data/pg:/var/lib/postgresql/data
+      - langflow_stable_pg_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
     healthcheck:
@@ -310,10 +310,11 @@ services:
       retries: 5
 
   langflow-stable:
-    image: langflowai/langflow:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.langflow-stable
     container_name: langflow-stable
     restart: unless-stopped
-    user: "0:0"
     env_file:
       - .env
     ports:
@@ -328,7 +329,7 @@ services:
       - LANGFLOW_HOST=${LANGFLOW_HOST}
       - LANGFLOW_PORT=${LANGFLOW_PORT}
       - LANGFLOW_SECRET_KEY=${LANGFLOW_SECRET_KEY}
-      - LANGFLOW_CONFIG_DIR=/app/langflow
+      - LANGFLOW_CONFIG_DIR=${LANGFLOW_CONFIG_DIR}
 
   langfuse-postgres:
     image: postgres:15-alpine
@@ -532,6 +533,7 @@ services:
 volumes:
   mysql-data:
   qdrant-data:
+  langflow_stable_pg_data:
   langflow_stable_data:
   minio-data:
   minio_data:
