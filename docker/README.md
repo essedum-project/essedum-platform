@@ -83,7 +83,7 @@ graph TD
 
 ## Langflow Stable (with PostgreSQL)
 
-Langflow Stable runs as a custom-built container backed by a dedicated PostgreSQL database.
+Langflow Stable runs using the official `langflowai/langflow:latest` image backed by a dedicated PostgreSQL database.
 It is configured entirely via the `.env` file — no separate env file is needed.
 
 ### Service Details
@@ -98,7 +98,7 @@ It is configured entirely via the `.env` file — no separate env file is needed
 | **DB user** | `POSTGRES_USER` (e.g. `langflow`) |
 | **DB internal port** | `POSTGRES_PORT` (default `5432`) |
 | **DB external port** | `POSTGRES_EXTERNAL_PORT` (default `5433`) |
-| **Image** | Built from `Dockerfile.langflow-stable` |
+| **Image** | `langflowai/langflow:latest` (official) |
 | **Data volume** | `langflow_stable_data` → `/app/langflow` |
 | **DB volume** | `langflow_stable_pg_data` → `/var/lib/postgresql/data` |
 
@@ -107,7 +107,7 @@ It is configured entirely via the `.env` file — no separate env file is needed
 ```env
 # Langflow app
 LANGFLOW_HOST=0.0.0.0
-LANGFLOW_PORT=7861
+LANGFLOW_PORT=7860
 LANGFLOW_SECRET_KEY=<run: openssl rand -base64 32>
 LANGFLOW_CONFIG_DIR=/app/langflow
 
@@ -117,16 +117,15 @@ POSTGRES_USER=langflow
 POSTGRES_PASSWORD=<strong-password>
 POSTGRES_PORT=5432
 POSTGRES_EXTERNAL_PORT=5433
-
-# Connection URL — must match the values above
-LANGFLOW_DATABASE_URL=postgresql+psycopg2://langflow:<password>@langflow-stable-postgres:5432/langflowfb
 ```
+
+> `LANGFLOW_DATABASE_URL` is built automatically inside `docker-compose.yml` — no need to set it in `.env`.
 
 ### Start only Langflow Stable
 
 ```bash
 cd docker/
-docker compose up -d --build langflow-stable-postgres langflow-stable
+docker compose up -d langflow-stable-postgres langflow-stable
 ```
 
 ### Check logs
