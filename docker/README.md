@@ -91,7 +91,7 @@ It is configured entirely via the `.env` file — no separate env file is needed
 | Item | Value |
 |---|---|
 | **Container** | `langflow-stable` |
-| **Port** | `LANGFLOW_PORT` (default `7861`) |
+| **Port** | `LANGFLOW_PORT` (default `7860`) |
 | **URL** | `http://<SERVER_IP>:${LANGFLOW_PORT}/` |
 | **Database container** | `langflow-stable-postgres` |
 | **DB name** | `POSTGRES_DB` (e.g. `langflowfb`) |

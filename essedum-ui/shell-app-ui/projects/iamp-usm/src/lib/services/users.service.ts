@@ -384,8 +384,16 @@ export class UsersService {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    let headers = new HttpHeaders();
-    headers = headers.append('example', headerValue);
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    let headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      'example': headerValue
+    });
     return this.https
       .get(`/api/users/pagination/${flag}/${id}/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers,

@@ -175,7 +175,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
   updatePagedData() {
     const startIndex = this.page * this.rowsPerPage;
     const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
-    this.pagedRoles = this.roles.slice(startIndex, endIndex);
+    this.pagedRoles = this.rolesArraySorted.slice(startIndex, endIndex);
     this.lastPage = Math.floor((this.rolesLength - 1) / this.rowsPerPage);
 
 
@@ -596,6 +596,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
     });
     this.rolesArraySorted = this.associatedproject;
     this.rolesLength = this.rolesArraySorted.length;
+    this.totalrecords = this.rolesLength;
     this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
       a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
     );
@@ -603,6 +604,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
     this.roleList.sort = this.sort;
     this.roleList.paginator = this.paginator;
     this.rolesFilter = Object.assign([], this.roles);
+    this.rolesContent = this.rolesArraySorted;
     this.updatePagedData();
 
   }
