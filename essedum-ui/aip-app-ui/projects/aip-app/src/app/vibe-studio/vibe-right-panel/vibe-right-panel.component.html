@@ -1,0 +1,93 @@
+<div class="right-panel">
+  <!-- Empty state -->
+  <div *ngIf="status === 'idle' || status === 'selecting'" class="empty-state">
+    <div class="empty-content">
+      <i class="bi bi-window-stack"></i>
+      <h3>Preview</h3>
+      <p>Your generated app will appear here once the code is built and deployed.</p>
+    </div>
+  </div>
+
+  <!-- Active state (generating / deploying / live) -->
+  <div *ngIf="status !== 'idle' && status !== 'selecting'" class="panel-content">
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'preview'"
+        (click)="activeTab = 'preview'"
+      >
+        <i class="bi bi-eye"></i> Preview
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'code'"
+        (click)="activeTab = 'code'"
+      >
+        <i class="bi bi-code-slash"></i> Code
+        <span *ngIf="files.length" class="file-count">{{ files.length }}</span>
+      </button>
+    </div>
+
+    <!-- Preview Tab -->
+    <div *ngIf="activeTab === 'preview'" class="tab-content preview-tab">
+      <div *ngIf="!previewUrl" class="loading-preview">
+        <div *ngIf="status === 'generating'" class="preview-status">
+          <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+          <p>Generating code...</p>
+        </div>
+        <div *ngIf="status === 'deploying'" class="preview-status">
+          <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+          <p>Deploying your application...</p>
+          <span class="sub-text">Setting up sandbox environment</span>
+        </div>
+        <div *ngIf="status === 'error'" class="preview-status error">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <p>Deployment failed</p>
+          <span class="sub-text">Please try generating again</span>
+        </div>
+      </div>
+      <iframe
+        *ngIf="previewUrl"
+        [src]="previewUrl"
+        class="preview-iframe"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        title="App Preview"
+      ></iframe>
+    </div>
+
+    <!-- Code Tab -->
+    <div *ngIf="activeTab === 'code'" class="tab-content code-tab">
+      <div class="file-explorer">
+        <!-- File List -->
+        <div class="file-list">
+          <div
+            *ngFor="let file of files"
+            class="file-item"
+            [class.selected]="selectedFile?.path === file.path"
+            (click)="selectFile(file)"
+          >
+            <i class="bi" [ngClass]="getFileIcon(file.path)"></i>
+            <span class="file-name" [title]="file.path">{{ getFileName(file.path) }}</span>
+          </div>
+          <div *ngIf="files.length === 0" class="no-files">
+            <i class="bi bi-hourglass-split"></i>
+            <span>Waiting for files...</span>
+          </div>
+        </div>
+
+        <!-- File Content Viewer -->
+        <div class="file-viewer">
+          <div *ngIf="selectedFile" class="file-header">
+            <i class="bi" [ngClass]="getFileIcon(selectedFile.path)"></i>
+            <span>{{ selectedFile.path }}</span>
+          </div>
+          <pre *ngIf="selectedFile" class="file-content"><code>{{ selectedFile.content }}</code></pre>
+          <div *ngIf="!selectedFile" class="no-selection">
+            <p>Select a file to view its content</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

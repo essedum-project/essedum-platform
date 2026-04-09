@@ -1,0 +1,23 @@
+<div class="vibe-studio-container">
+  <!-- Header -->
+  <div class="vibe-header">
+    <div class="header-left">
+      <i class="bi bi-lightning-charge-fill"></i>
+      <h1>Vibe Studio</h1>
+    </div>
+    <button mat-stroked-button class="new-session-btn" (click)="onNewSession()">
+      <i class="bi bi-plus-lg"></i> New Session
+    </button>
+  </div>
+
+  <!-- Split Panels -->
+  <div class="vibe-panels">
+    <div class="panel left" [style.flex-basis.%]="leftPanelWidth">
+      <app-vibe-left-panel></app-vibe-left-panel>
+    </div>
+    <div class="panel-divider" (mousedown)="onDividerMouseDown($event)"></div>
+    <div class="panel right">
+      <app-vibe-right-panel></app-vibe-right-panel>
+    </div>
+  </div>
+</div>

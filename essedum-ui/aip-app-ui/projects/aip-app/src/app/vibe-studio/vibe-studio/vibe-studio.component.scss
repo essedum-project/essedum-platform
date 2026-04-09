@@ -1,0 +1,101 @@
+.vibe-studio-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px); // account for shell header
+  overflow: hidden;
+}
+
+// --- Header ---
+.vibe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    i {
+      font-size: 22px;
+      color: #5c6bc0;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin: 0;
+    }
+  }
+
+  .new-session-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #5c6bc0;
+    border-color: #5c6bc0;
+
+    i {
+      font-size: 14px;
+    }
+  }
+}
+
+// --- Panels ---
+.vibe-panels {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel {
+  overflow: hidden;
+
+  &.left {
+    flex: 0 0 auto;
+    min-width: 0;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  &.right {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.panel-divider {
+  width: 5px;
+  background: #e0e0e0;
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  position: relative;
+
+  &:hover,
+  &:active {
+    background: #5c6bc0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 32px;
+    border-left: 1px solid #999;
+    border-right: 1px solid #999;
+  }
+
+  &:hover::after,
+  &:active::after {
+    border-color: #fff;
+  }
+}

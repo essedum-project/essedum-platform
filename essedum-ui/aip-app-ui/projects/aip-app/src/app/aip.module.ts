@@ -154,6 +154,10 @@ import { AgentDirectoryCreateComponent } from './agent-directory/agent-directory
 import { GeneralComponent } from './agent-directory/general/general.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from './agent-pipeline/deployment-form/deployment-form.component';
+import { VibeStudioComponent } from './vibe-studio/vibe-studio/vibe-studio.component';
+import { VibeLeftPanelComponent } from './vibe-studio/vibe-left-panel/vibe-left-panel.component';
+import { VibeRightPanelComponent } from './vibe-studio/vibe-right-panel/vibe-right-panel.component';
+import { VibeStudioService } from './vibe-studio/services/vibe-studio.service';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -261,7 +265,10 @@ const dbConfig: DBConfig = {
     GeneralComponent,
     AgentDirectoryEditComponent,
     DeploymentFormComponent,
-    BranchSelectionDialogComponent
+    BranchSelectionDialogComponent,
+    VibeStudioComponent,
+    VibeLeftPanelComponent,
+    VibeRightPanelComponent
   ],
   imports: [
     CommonModule,
@@ -347,6 +354,7 @@ const dbConfig: DBConfig = {
     DynamicRemoteLoad,
     AipSnackbarCustomService,
     GitHubService,
+    VibeStudioService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],

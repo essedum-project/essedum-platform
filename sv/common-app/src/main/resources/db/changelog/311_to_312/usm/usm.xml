@@ -195,28 +195,7 @@
         </sql>
     </changeSet>
   
-        <changeSet id="3v2-usm-2026-23-mar" author="Essedum">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*)
-                FROM usm_constant
-                WHERE item_value LIKE '%Salus%'
-                AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311')
-                AND item = 'IT Portfolio Manager Side';
-            </sqlCheck>
-        </preConditions>
-        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
-            INSERT INTO usm_constant (
-            item, project_name, item_value, project_id, portfolio_id
-            ) VALUES (
-            'IT Portfolio Manager Side',
-            'leo1311',
-            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/salus","children":[]}',
-            (SELECT id FROM usm_project WHERE name = 'leo1311'),
-            NULL
-            );
-        </sql>
-    </changeSet>
+       
 
     <changeSet id="3v2-usm-2026-12-jan-core" author="Essedum">
         <preConditions onFail="MARK_RAN">
@@ -240,7 +219,28 @@
             );
         </sql>
     </changeSet>
-
+ <changeSet id="3v2-usm-2026-23-mar" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM usm_constant
+                WHERE item_value LIKE '%Salus%'
+                AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311')
+                AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+            ) VALUES (
+            'IT Portfolio Manager Side',
+            'leo1311',
+            '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/salus","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'leo1311'),
+            NULL
+            );
+        </sql>
+    </changeSet>
     <changeSet id="3v2-usm-2026-23-mar-core" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -258,6 +258,50 @@
             'IT Portfolio Manager Side',
             'core',
             '{"label":"Salus","altText":null,"icon":"codepen","url":"./aip/salus","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'core'),
+            NULL
+            );
+        </sql>
+    </changeSet>
+    <changeSet id="3v2-usm-2026-9-apr" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM usm_constant
+                WHERE item_value LIKE '%Vibe Studio%'
+                AND project_id = (SELECT id FROM usm_project WHERE name = 'leo1311')
+                AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+            ) VALUES (
+            'IT Portfolio Manager Side',
+            'leo1311',
+            '{"label":"Vibe Studio","altText":null,"icon":"codepen","url":"./aip/vibe-studio","children":[]}',
+            (SELECT id FROM usm_project WHERE name = 'leo1311'),
+            NULL
+            );
+        </sql>
+    </changeSet>
+    <changeSet id="3v2-usm-2026-9-apr-core" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM usm_constant
+                WHERE item_value LIKE '%Vibe Studio%'
+                AND project_id = (SELECT id FROM usm_project WHERE name = 'core')
+                AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            INSERT INTO usm_constant (
+            item, project_name, item_value, project_id, portfolio_id
+            ) VALUES (
+            'IT Portfolio Manager Side',
+            'core',
+            '{"label":"Vibe Studio","altText":null,"icon":"codepen","url":"./aip/vibe-studio","children":[]}',
             (SELECT id FROM usm_project WHERE name = 'core'),
             NULL
             );

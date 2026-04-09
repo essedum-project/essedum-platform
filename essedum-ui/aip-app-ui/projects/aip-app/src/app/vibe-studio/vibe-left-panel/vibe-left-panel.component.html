@@ -1,0 +1,111 @@
+<div class="left-panel">
+  <!-- App Type Selection (initial state) -->
+  <div *ngIf="!selectedAppType" class="app-type-selection">
+    <div class="selection-header">
+      <h2>What kind of app do you want to build?</h2>
+      <p>Select a project type to get started</p>
+    </div>
+    <div class="app-type-cards">
+      <div
+        *ngFor="let option of appTypeOptions"
+        class="app-type-card"
+        (click)="selectAppType(option.value)"
+      >
+        <div class="card-icon">
+          <img [src]="option.icon" [alt]="option.label" />
+        </div>
+        <div class="card-body">
+          <h3>{{ option.label }}</h3>
+          <p>{{ option.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Panel (after app type selected) -->
+  <div *ngIf="selectedAppType" class="chat-panel">
+    <!-- Model Selector -->
+    <div class="model-selector">
+      <mat-form-field appearance="fill" class="model-select" floatLabel="always"
+        style="--mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important;">
+        <mat-label class="mat-style-label">Model</mat-label>
+        <mat-select class="mat-style-select" [(value)]="selectedModel" (selectionChange)="onModelChange()">
+          <mat-option *ngFor="let m of models" [value]="m.value">
+            {{ m.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages" #chatContainer>
+      <div *ngIf="messages.length === 0 && status !== 'generating'" class="chat-empty">
+        <mat-icon class="empty-icon">chat</mat-icon>
+        <p>Describe what you want to build and I'll generate the code for you.</p>
+      </div>
+
+      <div *ngFor="let msg of messages" class="chat-message" [ngClass]="msg.role">
+        <div class="message-avatar">
+          <mat-icon *ngIf="msg.role === 'user'">person</mat-icon>
+          <mat-icon *ngIf="msg.role !== 'user'">smart_toy</mat-icon>
+        </div>
+        <div class="message-content">
+          <div class="message-bubble">{{ msg.content }}</div>
+          <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
+        </div>
+      </div>
+
+      <!-- Streaming tokens (live generation) -->
+      <div *ngIf="status === 'generating' && streamingTokens" class="chat-message assistant">
+        <div class="message-avatar">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="message-content">
+          <div class="message-bubble streaming">
+            {{ streamingTokens }}
+            <span class="cursor-blink">|</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status indicators -->
+      <div *ngIf="status === 'generating' && !streamingTokens" class="status-indicator">
+        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        <span>Generating code...</span>
+      </div>
+      <div *ngIf="status === 'deploying'" class="status-indicator">
+        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        <span>Deploying application...</span>
+      </div>
+      <div *ngIf="status === 'live'" class="status-indicator live">
+        <mat-icon>check_circle</mat-icon>
+        <span>Application is live! Check the preview panel.</span>
+      </div>
+      <div *ngIf="status === 'error'" class="status-indicator error">
+        <mat-icon>warning</mat-icon>
+        <span>An error occurred. Please try again.</span>
+      </div>
+    </div>
+
+    <!-- Prompt Input -->
+    <div class="chat-input-area">
+      <textarea
+        #promptInput
+        [(ngModel)]="prompt"
+        (keydown)="onKeyDown($event)"
+        placeholder="Describe what you want to build..."
+        rows="3"
+        [disabled]="status === 'generating' || status === 'deploying'"
+      ></textarea>
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="sendPrompt()"
+        [disabled]="!prompt.trim() || status === 'generating' || status === 'deploying'"
+        class="send-btn"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
