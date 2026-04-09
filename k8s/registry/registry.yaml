@@ -1,0 +1,119 @@
+# In-cluster Docker registry (registry:2) used by BuildKit for image push/pull.
+# All image builds are pushed here and pulled by kubelet via the ClusterIP.
+#
+# CONTAINERD NODE CONFIG (run once per node after deploying this):
+#   CLUSTERIP=$(kubectl get svc registry -n essedum -o jsonpath='{.spec.clusterIP}')
+#   NODE_DIR="/etc/containerd/certs.d/registry.essedum.svc.cluster.local:5000"
+#   sudo mkdir -p $NODE_DIR
+#   sudo tee $NODE_DIR/hosts.toml <<EOF
+#   [host."http://$CLUSTERIP:5000"]
+#     capabilities = ["pull", "resolve"]
+#     skip_verify   = true
+#   EOF
+#   sudo systemctl restart containerd
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry-pv
+  labels:
+    app: registry
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /data/essedum/registry
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - essedum-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-pvc
+  namespace: essedum
+  labels:
+    app: registry
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: essedum
+  labels:
+    app: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: registry
+          image: registry:2
+          ports:
+            - containerPort: 5000
+              name: registry
+          env:
+            - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+              value: /var/lib/registry
+          volumeMounts:
+            - name: registry-storage
+              mountPath: /var/lib/registry
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /v2/
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: registry-storage
+          persistentVolumeClaim:
+            claimName: registry-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: essedum
+  labels:
+    app: registry
+spec:
+  selector:
+    app: registry
+  ports:
+    - name: registry
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP

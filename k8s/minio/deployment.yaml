@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: essedum
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+          args:
+            - server
+            - /data
+            - --console-address
+            - :9001
+          ports:
+            - containerPort: 9000
+              name: api
+            - containerPort: 9001
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: MINIO_ROOT_PASSWORD
+            - name: MINIO_BROWSER
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_BROWSER
+            - name: MINIO_PROMETHEUS_AUTH_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_PROMETHEUS_AUTH_TYPE
+            - name: MINIO_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_SERVER_URL
+            - name: MINIO_BROWSER_REDIRECT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_BROWSER_REDIRECT_URL
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/9000"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/9000"
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 3
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-pvc

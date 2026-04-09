@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: essedum
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: frontend
+          image: essedum/frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8084
+              name: http
+            - containerPort: 8086
+              name: langflow-proxy
+            - containerPort: 8087
+              name: langfuse-proxy
+            - containerPort: 4000
+              name: litellm-proxy
+            - containerPort: 8089
+              name: lf-db-proxy
+          envFrom:
+            - configMapRef:
+                name: essedum-config
+            - secretRef:
+                name: essedum-secret
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+          livenessProbe:
+            exec:
+              command:
+                - nc
+                - -z
+                - "127.0.0.1"
+                - "8084"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - nc
+                - -z
+                - "127.0.0.1"
+                - "8084"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: frontend-nginx-conf
