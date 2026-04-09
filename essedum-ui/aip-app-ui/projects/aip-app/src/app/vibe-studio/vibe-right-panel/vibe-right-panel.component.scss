@@ -67,17 +67,17 @@
   transition: all 0.2s;
 
   &:hover {
-    color: #5c6bc0;
+    color: #0094ff;
     background: #f0f0f0;
   }
 
   &.active {
-    color: #5c6bc0;
-    border-bottom-color: #5c6bc0;
+    color: #0094ff;
+    border-bottom-color: #0094ff;
   }
 
   .file-count {
-    background: #5c6bc0;
+    background: #0094ff;
     color: #fff;
     font-size: 11px;
     padding: 1px 7px;
@@ -111,7 +111,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  color: #5c6bc0;
+  color: #0094ff;
 
   p {
     font-size: 15px;
@@ -172,18 +172,18 @@
   transition: background 0.15s;
 
   &:hover {
-    background: #e8eaf6;
+    background: #e3f2fd;
   }
 
   &.selected {
-    background: #e8eaf6;
-    color: #5c6bc0;
+    background: #e3f2fd;
+    color: #0094ff;
     font-weight: 500;
   }
 
   i {
     font-size: 14px;
-    color: #5c6bc0;
+    color: #0094ff;
     flex-shrink: 0;
   }
 
@@ -225,7 +225,7 @@
   flex-shrink: 0;
 
   i {
-    color: #5c6bc0;
+    color: #0094ff;
   }
 }
 

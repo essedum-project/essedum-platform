@@ -17,7 +17,6 @@
           </div>
           <div class="card-body">
             <h3>{{ option.label }}</h3>
-            <p>{{ option.description }}</p>
           </div>
         </div>
       </div>
@@ -87,7 +86,7 @@
         [(ngModel)]="prompt"
         (keydown)="onKeyDown($event)"
         [placeholder]="selectedAppType ? 'Describe what you want to build...' : 'Select an app type to start typing...'"
-        rows="4"
+        rows="3"
         [disabled]="!selectedAppType || status === 'generating' || status === 'deploying'"
       ></textarea>
 

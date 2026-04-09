@@ -22,13 +22,13 @@
 
     i {
       font-size: 22px;
-      color: #5c6bc0;
+      color: #0094ff;
     }
 
     h1 {
       font-size: 18px;
       font-weight: 600;
-      color: #1a1a2e;
+      color: #1a1a1a;
       margin: 0;
     }
   }
@@ -38,8 +38,8 @@
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #5c6bc0;
-    border-color: #5c6bc0;
+    color: #0094ff;
+    border-color: #0094ff;
 
     i {
       font-size: 14px;
@@ -79,7 +79,7 @@
 
   &:hover,
   &:active {
-    background: #5c6bc0;
+    background: #0094ff;
   }
 
   &::after {
