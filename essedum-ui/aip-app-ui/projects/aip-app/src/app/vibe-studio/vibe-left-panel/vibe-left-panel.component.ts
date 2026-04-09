@@ -75,7 +75,7 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   }
 
   sendPrompt(): void {
-    if (!this.prompt.trim() || this.status === 'generating') return;
+    if (!this.selectedAppType || !this.prompt.trim() || this.status === 'generating') return;
     this.streamingTokens = '';
     this.vibeService.generate(this.prompt.trim());
     this.prompt = '';
