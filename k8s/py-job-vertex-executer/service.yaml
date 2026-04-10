@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: py-job-vertex-executer
+  namespace: essedum
+  labels:
+    app: py-job-vertex-executer
+spec:
+  selector:
+    app: py-job-vertex-executer
+  ports:
+    - name: http
+      port: 5007
+      targetPort: 5007
+  type: ClusterIP

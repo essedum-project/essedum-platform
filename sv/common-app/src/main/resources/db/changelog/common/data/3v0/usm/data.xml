@@ -195,4 +195,195 @@
         INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/get-dash-constants', 'GET', 0, 'gets the dashboard constants', id FROM usm_permissions WHERE module = 'dbs'  AND permission ='get-dash-constants' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY;	
        </sql> 
 	</changeSet>
+
+	<!-- ========================================================== -->
+	<!-- Admin user setup: user, role mappings, and menu permissions -->
+	<!-- ========================================================== -->
+
+	<!-- 1. Ensure admin user id exists -->
+	<changeSet author="Essedum" id="3v0-usm-070420261001">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_users WHERE user_login='admin';
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_users ON;
+		</sql>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_users (id, activated, force_password_change, onboarded, password, user_act_ind, user_email, user_f_name, user_login)
+			VALUES (1, 1, 0, 1, '$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW', 0, 'admin@lfn.com', 'Admin', 'admin');
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_users OFF;
+		</sql>
+	</changeSet>
+
+	<!-- 2. Map admin user to Core portfolio with Admin role -->
+	<changeSet author="Essedum" id="3v0-usm-070420261002">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_user_project_role
+				WHERE user_id = (SELECT id FROM usm_users WHERE user_login='admin')
+				AND project_id = (SELECT id FROM usm_project WHERE name='Core')
+				AND role_id = (SELECT id FROM usm_role WHERE name='Admin' AND project_id IS NULL)
+				AND portfolio_id = (SELECT id FROM usm_portfolio WHERE portfolio_name='Core');
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id)
+			SELECT p.id, pr.id, r.id, u.id
+			FROM usm_portfolio p, usm_project pr, usm_role r, usm_users u
+			WHERE p.portfolio_name='Core' AND pr.name='Core' AND r.name='Admin' AND r.project_id IS NULL AND u.user_login='admin';
+		</sql>
+	</changeSet>
+
+	<!-- 3. Map admin user to Leo1311 portfolio with Admin role -->
+	<changeSet author="Essedum" id="3v0-usm-070420261003">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_user_project_role
+				WHERE user_id = (SELECT id FROM usm_users WHERE user_login='admin')
+				AND project_id = (SELECT id FROM usm_project WHERE name='leo1311')
+				AND role_id = (SELECT id FROM usm_role WHERE name='Admin' AND project_id IS NULL)
+				AND portfolio_id = (SELECT id FROM usm_portfolio WHERE portfolio_name='Leo1311');
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id)
+			SELECT p.id, pr.id, r.id, u.id
+			FROM usm_portfolio p, usm_project pr, usm_role r, usm_users u
+			WHERE p.portfolio_name='Leo1311' AND pr.name='leo1311' AND r.name='Admin' AND r.project_id IS NULL AND u.user_login='admin';
+		</sql>
+	</changeSet>
+
+	<!-- 3b. Map admin user to Leo1311 portfolio with Admin role -->
+	<changeSet author="Essedum" id="3v0-usm-070420261003b">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_user_project_role
+				WHERE user_id = (SELECT id FROM usm_users WHERE user_email='admin@test.com')
+				AND project_id = (SELECT id FROM usm_project WHERE name='leo1311')
+				AND role_id = (SELECT id FROM usm_role WHERE name='Admin' AND project_id IS NULL)
+				AND portfolio_id = (SELECT id FROM usm_portfolio WHERE portfolio_name='Leo1311');
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_user_project_role (portfolio_id, project_id, role_id, user_id)
+			SELECT p.id, pr.id, r.id, u.id
+			FROM usm_portfolio p, usm_project pr, usm_role r, usm_users u
+			WHERE p.portfolio_name='Leo1311' AND pr.name='leo1311' AND r.name='Admin' AND r.project_id IS NULL AND u.user_email='admin@test.com';
+		</sql>
+	</changeSet>
+
+	<!-- 4. Add Admin Side menu constants for leo1311 project -->
+	<changeSet author="Essedum" id="3v0-usm-070420261004">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_constant WHERE item='Admin Side' AND project_name='leo1311';
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Portfolio Management","icon":"file-powerpoint-o","url":"./iamp-usm/portfoliolist"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Project Management","icon":"tasks","url":"./iamp-usm/projectlist"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Role Management","icon":"registered","url":"./iamp-usm/role/list"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"User Management","icon":"users","url":"./iamp-usm/manageUsers"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Secret Management","icon":"key","url":"./iamp-usm/secret"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Permission Management","icon":"shield","url":"./iamp-usm/permissionlist"}', a.id FROM usm_project a WHERE name='leo1311';
+
+			INSERT INTO usm_constant (item, project_name, item_value, project_id)
+			SELECT 'Admin Side', 'leo1311', '{"label":"Menu Configuration","icon":"th-list","url":"./iamp-usm/dashconstant/side"}', a.id FROM usm_project a WHERE name='leo1311';
+		</sql>
+	</changeSet>
+
+	<!-- 4b. Fix Core Admin Side menus  -->
+	<changeSet author="Essedum" id="3v0-usm-070420261004b">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT COUNT(*) FROM usm_constant WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '{\\%';
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			UPDATE usm_constant SET item_value = '{"label":"Portfolio Management","icon":"file-powerpoint-o","url":"./iamp-usm/portfoliolist"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%portfoliolist%';
+			UPDATE usm_constant SET item_value = '{"label":"Project Management","icon":"tasks","url":"./iamp-usm/projectlist"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%projectlist%';
+			UPDATE usm_constant SET item_value = '{"label":"Role Management","icon":"registered","url":"./iamp-usm/role/list"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%role/list%';
+			UPDATE usm_constant SET item_value = '{"label":"User Management","icon":"users","url":"./iamp-usm/manageUsers"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%manageUsers%';
+			UPDATE usm_constant SET item_value = '{"label":"Secret Management","icon":"key","url":"./iamp-usm/secret"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%/secret%';
+			UPDATE usm_constant SET item_value = '{"label":"Permission Management","icon":"shield","url":"./iamp-usm/permissionlist"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%permissionlist%';
+			UPDATE usm_constant SET item_value = '{"label":"Menu Configuration","icon":"th-list","url":"./iamp-usm/dashconstant/side"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%dashconstant%';
+		</sql>
+	</changeSet>
+
+	<!-- 4c. Add Admin Side menu constants for Core if missing entirely -->
+	<changeSet author="Essedum" id="3v0-usm-070420261004c">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_constant WHERE item='Admin Side' AND project_name='Core';
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Portfolio Management","icon":"file-powerpoint-o","url":"./iamp-usm/portfoliolist"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Project Management","icon":"tasks","url":"./iamp-usm/projectlist"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Role Management","icon":"registered","url":"./iamp-usm/role/list"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"User Management","icon":"users","url":"./iamp-usm/manageUsers"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Secret Management","icon":"key","url":"./iamp-usm/secret"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Permission Management","icon":"shield","url":"./iamp-usm/permissionlist"}', a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item, project_name, item_value, project_id) SELECT 'Admin Side', 'Core', '{"label":"Menu Configuration","icon":"th-list","url":"./iamp-usm/dashconstant/side"}', a.id FROM usm_project a WHERE name='Core';
+		</sql>
+	</changeSet>
+
+	<!-- 5. Ensure Admin role id  has all required permissions -->
+	<changeSet author="Essedum" id="3v0-usm-070420261005">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0">
+				SELECT COUNT(*) FROM usm_role_permissions rp
+				INNER JOIN usm_role r ON rp.role = r.id
+				WHERE r.name='Admin' AND r.project_id IS NULL;
+			</sqlCheck>
+		</preConditions>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='usm' AND p.permission='view';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='usm' AND p.permission='create';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='usm' AND p.permission='edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='usm' AND p.permission='delete';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='dbs' AND p.permission='view';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='dbs' AND p.permission='edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='dbs' AND p.permission='delete';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='dbs' AND p.permission='create';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='agent-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='dsr-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='dataset-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='pipeline-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='pipeline-run';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='schema-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='job-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='job-run';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='event-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='event-run';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='cip' AND p.permission='model-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='icm' AND p.permission='cluster-create-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='icm' AND p.permission='problemtype-create-edit';
+			INSERT INTO usm_role_permissions (permission, role) SELECT p.id, r.id FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND r.project_id IS NULL AND p.module='icm' AND p.permission='sop-create-edit';
+		</sql>
+	</changeSet>
+
+	<changeSet author="Essedum" id="3v0-usm-070420261006">
+		<comment>Set role_admin=1 on Admin role so frontend correctly identifies it as a role-admin (fixes User List and Role List not loading)</comment>
+		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+			UPDATE usm_role SET role_admin=1 WHERE name='Admin' AND project_id IS NULL AND (role_admin IS NULL OR role_admin=0);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
+

@@ -78,3 +78,76 @@ graph TD
     *   UI: http://localhost:8084
     *   Backend API: http://localhost:8082
     *   Keycloak: http://localhost:8180
+
+---
+
+## Langflow Stable (with PostgreSQL)
+
+Langflow Stable runs using the official `langflowai/langflow:latest` image backed by a dedicated PostgreSQL database.
+It is configured entirely via the `.env` file — no separate env file is needed.
+
+### Service Details
+
+| Item | Value |
+|---|---|
+| **Container** | `langflow-stable` |
+| **Port** | `LANGFLOW_PORT` (default `7860`) |
+| **URL** | `http://<SERVER_IP>:${LANGFLOW_PORT}/` |
+| **Database container** | `langflow-stable-postgres` |
+| **DB name** | `POSTGRES_DB` (e.g. `langflowfb`) |
+| **DB user** | `POSTGRES_USER` (e.g. `langflow`) |
+| **DB internal port** | `POSTGRES_PORT` (default `5432`) |
+| **DB external port** | `POSTGRES_EXTERNAL_PORT` (default `5433`) |
+| **Image** | `langflowai/langflow:latest` (official) |
+| **Data volume** | `langflow_stable_data` → `/app/langflow` |
+| **DB volume** | `langflow_stable_pg_data` → `/var/lib/postgresql/data` |
+
+### Required `.env` variables
+
+```env
+# Langflow app
+LANGFLOW_HOST=0.0.0.0
+LANGFLOW_PORT=7860
+LANGFLOW_SECRET_KEY=<run: openssl rand -base64 32>
+LANGFLOW_CONFIG_DIR=/app/langflow
+
+# PostgreSQL (langflow-stable-postgres)
+POSTGRES_DB=langflowfb
+POSTGRES_USER=langflow
+POSTGRES_PASSWORD=<strong-password>
+POSTGRES_PORT=5432
+POSTGRES_EXTERNAL_PORT=5433
+```
+
+> `LANGFLOW_DATABASE_URL` is built automatically inside `docker-compose.yml` — no need to set it in `.env`.
+
+### Start only Langflow Stable
+
+```bash
+cd docker/
+docker compose up -d langflow-stable-postgres langflow-stable
+```
+
+### Check logs
+
+```bash
+docker compose logs -f langflow-stable
+```
+
+### Verify PostgreSQL connection
+
+From inside the container:
+```bash
+docker exec -it langflow-stable-postgres psql -U langflow -d langflowfb
+```
+
+From the host machine:
+```bash
+psql -h localhost -p 5433 -U langflow -d langflowfb
+```
+
+### Stop and remove data
+
+```bash
+docker compose down -v
+```

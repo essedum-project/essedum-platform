@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: litellm-config-pv
+  namespace: essedum
+  labels:
+    app: litellm-config
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /data/essedum/litellm/config
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - essedum-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: litellm-config-pvc
+  namespace: essedum
+  labels:
+    app: litellm-config
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      app: litellm-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: litellm-data-pv
+  namespace: essedum
+  labels:
+    app: litellm-data
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /data/essedum/litellm/data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - essedum-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: litellm-data-pvc
+  namespace: essedum
+  labels:
+    app: litellm-data
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      app: litellm-data

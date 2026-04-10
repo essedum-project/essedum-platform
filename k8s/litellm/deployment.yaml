@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  namespace: essedum
+  labels:
+    app: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: litellm
+          image: ghcr.io/berriai/litellm:main-latest
+          args:
+            - "--config"
+            - "/app/config/config.yaml"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "4000"
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: OLLAMA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: OLLAMA_HOST
+            - name: OLLAMA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: OLLAMA_PORT
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LITELLM_MASTER_KEY
+            - name: LITELLM_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LITELLM_LOG_LEVEL
+            - name: UI_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LITELLM_UI_USERNAME
+            - name: UI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LITELLM_UI_PASSWORD
+            - name: LITELLM_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LITELLM_DB_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql://litellm:$(LITELLM_DB_PASSWORD)@litellm-postgres:5432/litellm"
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LANGFUSE_SECRET_KEY
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LANGFUSE_PUBLIC_KEY
+            - name: LANGFUSE_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_BASE_URL
+          volumeMounts:
+            - name: litellm-config
+              mountPath: /app/config
+              readOnly: true
+            - name: litellm-data
+              mountPath: /app/data
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/4000"
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/4000"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: litellm-config
+          persistentVolumeClaim:
+            claimName: litellm-config-pvc
+        - name: litellm-data
+          persistentVolumeClaim:
+            claimName: litellm-data-pvc
