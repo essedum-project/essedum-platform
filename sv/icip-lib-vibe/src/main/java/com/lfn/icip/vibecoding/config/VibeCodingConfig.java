@@ -20,7 +20,7 @@ import java.time.Duration;
 @Configuration
 public class VibeCodingConfig {
 
-    @Value("${vibe.goose.service.url:http://goose-service:3000}")
+    @Value("${vibe.goose.service.url:http://localhost:32505")
     private String gooseServiceUrl;
 
     @Value("${vibe.goose.service.connect-timeout-ms:10000}")
