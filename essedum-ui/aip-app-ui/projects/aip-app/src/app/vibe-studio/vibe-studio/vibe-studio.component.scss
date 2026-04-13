@@ -1,8 +1,9 @@
 .vibe-studio-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px); // account for shell header
+  height: calc(100vh - 64px);
   overflow: hidden;
+  background: #f5f7fa;
 }
 
 // --- Header ---
@@ -47,7 +48,97 @@
   }
 }
 
-// --- Panels ---
+// --- Full-page App Type Picker ---
+.app-type-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  gap: 48px;
+}
+
+.picker-hero {
+  text-align: center;
+
+  .picker-icon {
+    font-size: 48px;
+    color: #0094ff;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 10px;
+  }
+
+  p {
+    font-size: 15px;
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+.picker-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 860px;
+  width: 100%;
+}
+
+.picker-card {
+  background: #fff;
+  border: 2px solid #e3eaf5;
+  border-radius: 16px;
+  padding: 32px 20px 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    border-color: #0094ff;
+    background: #f0f7ff;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 148, 255, 0.15);
+  }
+
+  .picker-card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: #e8f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+  }
+
+  .picker-card-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1565c0;
+    line-height: 1.3;
+  }
+}
+
+// --- Split Panels ---
 .vibe-panels {
   display: flex;
   flex: 1;
@@ -99,3 +190,4 @@
     border-color: #fff;
   }
 }
+

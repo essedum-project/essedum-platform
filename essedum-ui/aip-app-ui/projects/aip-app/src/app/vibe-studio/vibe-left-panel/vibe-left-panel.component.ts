@@ -3,8 +3,6 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { VibeStudioService } from '../services/vibe-studio.service';
 import {
-  APP_TYPE_OPTIONS,
-  AppType,
   VibeChatMessage,
   VibeModel,
   VibeSessionStatus,
@@ -19,7 +17,6 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   @ViewChild('chatContainer') chatContainer!: ElementRef;
   @ViewChild('promptInput') promptInput!: ElementRef;
 
-  readonly appTypeOptions = APP_TYPE_OPTIONS;
   readonly models: { label: string; value: VibeModel }[] = [
     { label: 'Claude', value: 'claude' },
     { label: 'Gemini', value: 'gemini' },
@@ -30,8 +27,6 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   prompt = '';
   messages: VibeChatMessage[] = [];
   status: VibeSessionStatus = 'idle';
-  streamingTokens = '';
-  selectedAppType: AppType | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -49,25 +44,7 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((s) => {
         this.status = s;
-        if (s !== 'generating') {
-          this.streamingTokens = '';
-        }
       });
-
-    this.vibeService.tokenStream$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((token) => {
-        this.streamingTokens += token;
-        this.scrollToBottom();
-      });
-  }
-
-  selectAppType(appType: AppType): void {
-    this.selectedAppType = appType;
-    this.vibeService.setAppType(appType);
-    const label = this.appTypeOptions.find(o => o.value === appType)?.label || appType;
-    const initPrompt = `I want to create a ${label} app`;
-    this.vibeService.generate(initPrompt);
   }
 
   onModelChange(): void {
@@ -75,8 +52,7 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   }
 
   sendPrompt(): void {
-    if (!this.selectedAppType || !this.prompt.trim() || this.status === 'generating') return;
-    this.streamingTokens = '';
+    if (!this.prompt.trim() || this.status === 'generating') return;
     this.vibeService.generate(this.prompt.trim());
     this.prompt = '';
   }

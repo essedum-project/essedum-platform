@@ -1,53 +1,45 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import { Subject, BehaviorSubject } from 'rxjs';
 import {
   VibeSession,
-  VibeGenerateRequest,
-  VibeDeployRequest,
-  VibeSseEvent,
+  VibeChatMessage,
   VibeFile,
   VibeModel,
-  VibeChatMessage,
   VibeSessionStatus,
   AppType,
+  GooseMessage,
+  GooseReplyRequest,
+  GooseAgentStartRequest,
+  GOOSE_PROVIDER_MAP,
 } from '../models/vibe-studio.models';
 
-function generateSessionId(): string {
+function generateRequestId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
 }
 
 @Injectable()
-export class VibeStudioService {
-  private session: VibeSession;
-  private eventSource: EventSourcePolyfill | null = null;
+export class VibeStudioService implements OnDestroy {
 
-  readonly sseEvents$ = new Subject<VibeSseEvent>();
-  readonly status$ = new BehaviorSubject<VibeSessionStatus>('idle');
-  readonly files$ = new BehaviorSubject<VibeFile[]>([]);
-  readonly messages$ = new BehaviorSubject<VibeChatMessage[]>([]);
-  readonly previewUrl$ = new BehaviorSubject<string | null>(null);
+  private session: VibeSession;
+  /** AbortController for the active fetch-based SSE stream. */
+  private replyAbortController: AbortController | null = null;
+
+  readonly sseEvents$   = new Subject<any>();
+  readonly status$      = new BehaviorSubject<VibeSessionStatus>('idle');
+  readonly files$       = new BehaviorSubject<VibeFile[]>([]);
+  readonly messages$    = new BehaviorSubject<VibeChatMessage[]>([]);
+  readonly previewUrl$  = new BehaviorSubject<string | null>(null);
   readonly tokenStream$ = new Subject<string>();
 
   constructor(
     private http: HttpClient,
-    @Inject('envi') private baseUrl: string
+    @Inject('envi') private baseUrl: string,
   ) {
     this.session = this.createNewSession();
   }
 
-  private createNewSession(): VibeSession {
-    return {
-      id: generateSessionId(),
-      appType: null,
-      model: 'claude',
-      messages: [],
-      files: [],
-      previewUrl: null,
-      status: 'idle',
-    };
-  }
+  // ─── Public API ─────────────────────────────────────────────────────────────
 
   getSession(): VibeSession {
     return this.session;
@@ -58,122 +50,61 @@ export class VibeStudioService {
     this.status$.next('selecting');
   }
 
+  /** Change LLM model.  If a Goose session is already running, propagates immediately. */
   setModel(model: VibeModel): void {
     this.session.model = model;
+    if (this.session.id) {
+      this.updateProvider(model);
+    }
   }
 
+  /**
+   * Sends a user message to the Goose agent and opens an SSE stream for the reply.
+   * Starts the agent session on first call (lazy init).
+   *
+   * Alias: `generate()` is kept so left-panel component needs no changes.
+   */
   generate(prompt: string): void {
-    const userMsg: VibeChatMessage = {
-      role: 'user',
-      content: prompt,
-      timestamp: new Date(),
-    };
+    const userMsg: VibeChatMessage = { role: 'user', content: prompt, timestamp: new Date() };
     this.session.messages.push(userMsg);
     this.messages$.next([...this.session.messages]);
     this.status$.next('generating');
 
-    const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${this.session.id}/generate`;
+    this.cancelReply(); // cancel any in-flight reply first
 
-    this.closeEventSource();
-
-    this.eventSource = new EventSourcePolyfill(
-      `${url}?prompt=${encodeURIComponent(prompt)}&model=${this.session.model}`,
-      {
-        headers: this.getHeaders(),
-        withCredentials: true,
-      }
-    );
-
-    let assistantContent = '';
-
-    this.eventSource.onmessage = (event: any) => {
-      const parsed: VibeSseEvent = JSON.parse(event.data);
-      this.sseEvents$.next(parsed);
-
-      switch (parsed.type) {
-        case 'token':
-          assistantContent += parsed.data || '';
-          this.tokenStream$.next(parsed.data || '');
-          break;
-        case 'file':
-          if (parsed.path && parsed.content) {
-            const file: VibeFile = { path: parsed.path, content: parsed.content };
-            this.session.files = [
-              ...this.session.files.filter(f => f.path !== parsed.path),
-              file,
-            ];
-            this.files$.next([...this.session.files]);
-          }
-          break;
-        case 'app_type':
-          if (parsed.data) {
-            this.session.appType = parsed.data as AppType;
-          }
-          break;
-        case 'done':
-          this.closeEventSource();
-          const assistantMsg: VibeChatMessage = {
-            role: 'assistant',
-            content: assistantContent || `Generated ${parsed.fileCount || 0} files.`,
-            timestamp: new Date(),
-          };
-          this.session.messages.push(assistantMsg);
-          this.messages$.next([...this.session.messages]);
-          this.status$.next('deploying');
-          this.deploy();
-          break;
-      }
-    };
-
-    this.eventSource.onerror = () => {
-      this.closeEventSource();
+    this.ensureAgentStarted().then((sessionId) => {
+      this.openReplyStream(sessionId, prompt);
+    }).catch(() => {
       this.status$.next('error');
-    };
-  }
-
-  private deploy(): void {
-    const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${this.session.id}/deploy`;
-    const body: VibeDeployRequest = {
-      files: this.session.files,
-      appType: this.session.appType || 'streamlit',
-    };
-
-    this.http.post<any>(url, body, { observe: 'response' }).subscribe({
-      next: () => {
-        this.listenForPreview();
-      },
-      error: () => {
-        this.status$.next('error');
-      },
     });
   }
 
-  private listenForPreview(): void {
-    const wsUrl = `${this.baseUrl}/service/v1/vibe-coding/sessions/${this.session.id}/status`;
-    const es = new EventSourcePolyfill(wsUrl, {
-      headers: this.getHeaders(),
-      withCredentials: true,
-    });
-
-    es.onmessage = (event: any) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'preview_ready' && data.url) {
-        this.session.previewUrl = data.url;
-        this.session.status = 'live';
-        this.previewUrl$.next(data.url);
-        this.status$.next('live');
-        es.close();
-      }
-    };
-
-    es.onerror = () => {
-      es.close();
-      this.status$.next('error');
-    };
+  /** Cancel the currently streaming Goose reply (if any). */
+  cancelReply(): void {
+    if (this.replyAbortController) {
+      this.replyAbortController.abort();
+      this.replyAbortController = null;
+    }
+    if (this.session.id) {
+      const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${this.session.id}/cancel`;
+      this.http.post(url, { request_id: '' }, { headers: this.getHttpHeaders() })
+        .subscribe({ error: () => {} });
+    }
   }
 
+  /** Stop the running Goose agent for this session. */
+  stopAgent(): void {
+    if (!this.session.id) return;
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/stop`;
+    this.http.post(url, { session_id: this.session.id }, { headers: this.getHttpHeaders() })
+      .subscribe({ error: () => {} });
+    this.session.id = null;
+  }
+
+  /** Reset the local session and stop the running Goose agent. */
   resetSession(): void {
-    this.closeEventSource();
+    this.cancelReply();
+    this.stopAgent();
     this.session = this.createNewSession();
     this.status$.next('idle');
     this.files$.next([]);
@@ -181,27 +112,219 @@ export class VibeStudioService {
     this.previewUrl$.next(null);
   }
 
-  private closeEventSource(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+  ngOnDestroy(): void {
+    this.cancelReply();
+  }
+
+  // ─── Goose agent lifecycle ───────────────────────────────────────────────────
+
+  /**
+   * Ensures a Goose agent session exists.
+   * On first call: POSTs /agent/start and applies the selected model via /agent/update_provider.
+   * Subsequent calls: resolves immediately with the cached session ID.
+   */
+  private ensureAgentStarted(): Promise<string> {
+    if (this.session.id) {
+      return Promise.resolve(this.session.id);
+    }
+
+    return new Promise((resolve, reject) => {
+      const url = `${this.baseUrl}/service/v1/vibe-coding/agent/start`;
+      const body: GooseAgentStartRequest = { working_dir: '.' };
+
+      this.http.post<any>(url, body, { headers: this.getHttpHeaders() }).subscribe({
+        next: (resp) => {
+          const sessionId: string | undefined =
+            resp?.id ?? resp?.session_id ?? resp?.sessionId;
+
+          if (!sessionId) {
+            reject(new Error('Goose did not return a session ID'));
+            return;
+          }
+          this.session.id = sessionId;
+          this.applyModelToSession(sessionId, this.session.model)
+            .then(() => resolve(sessionId))
+            .catch(() => resolve(sessionId)); // non-fatal
+        },
+        error: reject,
+      });
+    });
+  }
+
+  /** Calls /agent/update_provider so the session uses the selected VibeModel. */
+  private applyModelToSession(sessionId: string, model: VibeModel): Promise<void> {
+    const { provider, gooseModel } = GOOSE_PROVIDER_MAP[model];
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/update-provider`;
+    return new Promise((resolve, reject) => {
+      this.http.post(url,
+        { session_id: sessionId, provider, model: gooseModel },
+        { headers: this.getHttpHeaders() },
+      ).subscribe({ next: () => resolve(), error: reject });
+    });
+  }
+
+  /** Hot-swap the provider on an already-running session. */
+  private updateProvider(model: VibeModel): void {
+    if (!this.session.id) return;
+    const { provider, gooseModel } = GOOSE_PROVIDER_MAP[model];
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/update-provider`;
+    this.http.post(url,
+      { session_id: this.session.id, provider, model: gooseModel },
+      { headers: this.getHttpHeaders() },
+    ).subscribe({ error: () => {} });
+  }
+
+  // ─── Goose reply SSE stream ──────────────────────────────────────────────────
+
+  private openReplyStream(sessionId: string, prompt: string): void {
+    const url = `${this.baseUrl}/service/v1/vibe-coding/reply`;
+
+    const userMessage: GooseMessage = {
+      id: generateRequestId(),
+      role: 'user',
+      created: Math.floor(Date.now() / 1000),
+      content: [{ type: 'text', text: prompt }],
+      metadata: { agentVisible: true, userVisible: true },
+    };
+
+    const body: GooseReplyRequest = {
+      session_id: sessionId,
+      user_message: userMessage,
+    };
+
+    this.replyAbortController = new AbortController();
+    const { signal } = this.replyAbortController;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+      ...this.getHttpHeaders(),
+    };
+
+    let assistantText = '';
+
+    fetch(url, { method: 'POST', headers, body: JSON.stringify(body), credentials: 'include', signal })
+      .then((response) => {
+        if (!response.ok || !response.body) {
+          this.status$.next('error');
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        const read = (): void => {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              this.finaliseAssistantMessage(assistantText);
+              return;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data:')) continue;
+              const data = line.slice(5).trim();
+              if (!data || data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                this.sseEvents$.next(parsed);
+                this.extractText(parsed, (chunk) => {
+                  assistantText += chunk;
+                  this.tokenStream$.next(chunk);
+                });
+              } catch {
+                // raw non-JSON chunk — treat as plain text
+                assistantText += data;
+                this.tokenStream$.next(data);
+              }
+            }
+
+            read();
+          }).catch((err: any) => {
+            if (err?.name !== 'AbortError') {
+              this.status$.next('error');
+            }
+          });
+        };
+
+        read();
+      })
+      .catch((err: any) => {
+        if (err?.name !== 'AbortError') {
+          this.status$.next('error');
+        }
+      });
+  }
+
+  /**
+   * Extracts text tokens from a Goose SSE event, supporting both full-message
+   * format `{ role, content: [{ type: "text", text: "..." }] }` and delta
+   * formats `{ type: "text" | "text_delta", text: "..." }`.
+   */
+  private extractText(event: any, emit: (text: string) => void): void {
+    // Full message: { role, content: [...] }
+    if (event.role && Array.isArray(event.content)) {
+      for (const part of event.content) {
+        if ((part.type === 'text' || part.type === 'text_delta') && part.text) {
+          emit(part.text);
+        }
+      }
+      return;
+    }
+    // Delta: { type: 'text' | 'text_delta', text: '...' }
+    if ((event.type === 'text' || event.type === 'text_delta') && event.text) {
+      emit(event.text);
     }
   }
 
-  private getHeaders(): Record<string, string> {
-    const project = JSON.parse(sessionStorage.getItem('project') || '{}');
-    const role = JSON.parse(sessionStorage.getItem('role') || '{}');
+  /** Commits the accumulated assistant text as a chat message and transitions status. */
+  private finaliseAssistantMessage(text: string): void {
+    this.replyAbortController = null;
+
+    if (text) {
+      const msg: VibeChatMessage = { role: 'assistant', content: text, timestamp: new Date() };
+      this.session.messages.push(msg);
+      this.messages$.next([...this.session.messages]);
+
+      // If Goose included a URL in the response, surface it as a preview
+      const urlMatch = text.match(/https?:\/\/[^\s"')\]]+/);
+      if (urlMatch) {
+        this.session.previewUrl = urlMatch[0];
+        this.previewUrl$.next(urlMatch[0]);
+        this.status$.next('live');
+        return;
+      }
+    }
+    this.status$.next('idle');
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+  private createNewSession(): VibeSession {
     return {
-      'Content-Type': 'text/event-stream',
-      Authorization: 'Bearer ' + localStorage.getItem('jwtToken'),
-      Project: project.id?.toString() || '',
-      Roleid: role.id?.toString() || '',
-      Rolename: role.name?.toString() || '',
-      'Access-Token': localStorage.getItem('accessToken') || '',
+      id: null,
+      appType: null,
+      model: 'claude',
+      messages: [],
+      files: [],
+      previewUrl: null,
+      status: 'idle',
     };
   }
 
-  ngOnDestroy(): void {
-    this.closeEventSource();
+  private getHttpHeaders(): Record<string, string> {
+    const project = JSON.parse(sessionStorage.getItem('project') || '{}');
+    const role    = JSON.parse(sessionStorage.getItem('role')    || '{}');
+    return {
+      Authorization:  'Bearer ' + (localStorage.getItem('jwtToken') ?? ''),
+      Project:        project.id?.toString() ?? '',
+      Roleid:         role.id?.toString()    ?? '',
+      Rolename:       role.name?.toString()  ?? '',
+      'Access-Token': localStorage.getItem('accessToken') ?? '',
+    };
   }
 }

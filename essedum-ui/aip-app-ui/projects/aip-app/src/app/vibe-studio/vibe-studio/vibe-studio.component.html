@@ -5,13 +5,34 @@
       <i class="bi bi-lightning-charge-fill"></i>
       <h1>Vibe Studio</h1>
     </div>
-    <button mat-stroked-button class="new-session-btn" (click)="onNewSession()">
+    <button *ngIf="selectedAppType" mat-stroked-button class="new-session-btn" (click)="onNewSession()">
       <i class="bi bi-plus-lg"></i> New Session
     </button>
   </div>
 
-  <!-- Split Panels -->
-  <div class="vibe-panels">
+  <!-- Full-page app type picker (first time / after reset) -->
+  <div *ngIf="!selectedAppType" class="app-type-screen">
+    <div class="picker-hero">
+      <i class="bi bi-stars picker-icon"></i>
+      <h2>What do you want to build?</h2>
+      <p>Pick a project type and start describing your idea</p>
+    </div>
+    <div class="picker-cards">
+      <div
+        *ngFor="let option of appTypeOptions"
+        class="picker-card"
+        (click)="selectAppType(option.value)"
+      >
+        <div class="picker-card-icon">
+          <img [src]="option.icon" [alt]="option.label" />
+        </div>
+        <div class="picker-card-label">{{ option.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split panels (after app type selected) -->
+  <div *ngIf="selectedAppType" class="vibe-panels">
     <div class="panel left" [style.flex-basis.%]="leftPanelWidth">
       <app-vibe-left-panel></app-vibe-left-panel>
     </div>

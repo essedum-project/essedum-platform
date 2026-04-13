@@ -1,6 +1,6 @@
 <div class="right-panel">
   <!-- Empty state -->
-  <div *ngIf="status === 'idle' || status === 'selecting'" class="empty-state">
+  <div *ngIf="status === 'idle' || status === 'selecting' || status === 'error'" class="empty-state">
     <div class="empty-content">
       <i class="bi bi-window-stack"></i>
       <h3>Preview</h3>
@@ -8,8 +8,8 @@
     </div>
   </div>
 
-  <!-- Active state (generating / deploying / live) -->
-  <div *ngIf="status !== 'idle' && status !== 'selecting'" class="panel-content">
+  <!-- Active state (generating / live) -->
+  <div *ngIf="status === 'generating' || status === 'live'" class="panel-content">
     <!-- Tab Bar -->
     <div class="tab-bar">
       <button
@@ -34,17 +34,7 @@
       <div *ngIf="!previewUrl" class="loading-preview">
         <div *ngIf="status === 'generating'" class="preview-status">
           <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
-          <p>Generating code...</p>
-        </div>
-        <div *ngIf="status === 'deploying'" class="preview-status">
-          <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
-          <p>Deploying your application...</p>
-          <span class="sub-text">Setting up sandbox environment</span>
-        </div>
-        <div *ngIf="status === 'error'" class="preview-status error">
-          <i class="bi bi-exclamation-triangle-fill"></i>
-          <p>Deployment failed</p>
-          <span class="sub-text">Please try generating again</span>
+          <p>Generating...</p>
         </div>
       </div>
       <iframe
@@ -71,8 +61,7 @@
             <span class="file-name" [title]="file.path">{{ getFileName(file.path) }}</span>
           </div>
           <div *ngIf="files.length === 0" class="no-files">
-            <i class="bi bi-hourglass-split"></i>
-            <span>Waiting for files...</span>
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
           </div>
         </div>
 
