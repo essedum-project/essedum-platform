@@ -1,13 +1,14 @@
 package com.lfn.icip.vibecoding.rest;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,24 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lfn.icip.vibecoding.dto.VibeDeployRequest;
-import com.lfn.icip.vibecoding.dto.VibePreviewEvent;
-import com.lfn.icip.vibecoding.dto.VibeSseEvent;
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
- * REST controller for Vibe Studio code generation, deployment, and sandbox monitoring.
+ * REST controller exposing the Goose API action-required, agent management,
+ * and reply/chat endpoints to the Vibe Studio frontend.
  * <p>
- * Endpoints:
- * <ul>
- *   <li>GET  /sessions/{sessionId}/generate — SSE stream for AI code generation</li>
- *   <li>POST /sessions/{sessionId}/deploy   — Deploy generated files to sandbox</li>
- *   <li>GET  /sessions/{sessionId}/status   — SSE stream for sandbox readiness</li>
- * </ul>
+ * Base path: {@code /${icip.pathPrefix}/service/v1/vibe-coding}
  * <p>
- * All endpoints are secured via the existing JWT auth filter chain.
+ * All request bodies are forwarded verbatim to the Goose service and responses
+ * are relayed back, preserving original HTTP status codes.
  */
 @RestController
 @RequestMapping("/${icip.pathPrefix}/service/v1/vibe-coding")
@@ -47,102 +43,311 @@ public class VibeCodingController {
         this.vibeCodingService = vibeCodingService;
     }
 
+    // =========================================================================
+    // ACTION REQUIRED
+    // POST /action-required/tool-confirmation
+    //   Request:  { id, sessionId, action: Permission, principalType? }
+    //   Response: {}
+    // =========================================================================
+
+    @PostMapping(value = "/action-required/tool-confirmation",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> toolConfirmation(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Tool confirmation request");
+        return vibeCodingService.post("/action-required/tool-confirmation", request);
+    }
+
+    // =========================================================================
+    // AGENT — lifecycle management
+    // =========================================================================
+
     /**
-     * Endpoint 1: Generate code via ADK — SSE stream.
-     * <p>
-     * The frontend opens an EventSource to this URL. The backend connects to the
-     * ADK Python service and relays SSE events (token, file, app_type, done) back.
-     *
-     * @param sessionId unique session identifier (path variable)
-     * @param prompt    the user's prompt (query parameter)
-     * @param model     the LLM model: "claude" | "gemini" | "azure-oai" (query parameter)
-     * @return SSE stream of VibeSseEvent payloads
+     * Start a new Goose agent session.
+     * Request: { working_dir, recipe?, recipe_id?, recipe_deeplink?, extension_overrides? }
+     * Response: Session
      */
-    @GetMapping(
-        value = "/sessions/{sessionId}/generate",
-        produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
-    public Flux<ServerSentEvent<VibeSseEvent>> generate(
+    @PostMapping(value = "/agent/start",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentStart(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent start request");
+        return vibeCodingService.post("/agent/start", request);
+    }
+
+    /**
+     * Stop a running Goose agent session.
+     * Request: { session_id }
+     * Response: string
+     */
+    @PostMapping(value = "/agent/stop",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentStop(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent stop request");
+        return vibeCodingService.post("/agent/stop", request);
+    }
+
+    /**
+     * Restart a Goose agent session (reloads model and extensions).
+     * Request: { session_id }
+     * Response: { extension_results: [{ name, success, error? }] }
+     */
+    @PostMapping(value = "/agent/restart",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentRestart(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent restart request");
+        return vibeCodingService.post("/agent/restart", request);
+    }
+
+    /**
+     * Resume a previously stopped Goose session.
+     * Request: { session_id, load_model_and_extensions }
+     * Response: { session, extension_results? }
+     */
+    @PostMapping(value = "/agent/resume",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentResume(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent resume request");
+        return vibeCodingService.post("/agent/resume", request);
+    }
+
+    /**
+     * Add an extension to a running Goose session.
+     * Request: { session_id, config: ExtensionConfig }
+     * Response: string
+     */
+    @PostMapping(value = "/agent/add-extension",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentAddExtension(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent add extension request");
+        return vibeCodingService.post("/agent/add_extension", request);
+    }
+
+    /**
+     * Remove an extension from a running Goose session.
+     * Request: { session_id, name }
+     * Response: string
+     */
+    @PostMapping(value = "/agent/remove-extension",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentRemoveExtension(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent remove extension request");
+        return vibeCodingService.post("/agent/remove_extension", request);
+    }
+
+    /**
+     * Update the LLM provider/model for a session.
+     * Request: { session_id, provider, model?, context_limit?, request_params? }
+     * Response: (empty)
+     */
+    @PostMapping(value = "/agent/update-provider",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentUpdateProvider(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent update provider request");
+        return vibeCodingService.post("/agent/update_provider", request);
+    }
+
+    /**
+     * Update session-level settings (e.g. goose_mode).
+     * Request: { session_id, goose_mode? }
+     * Response: (empty)
+     */
+    @PostMapping(value = "/agent/update-session",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentUpdateSession(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent update session request");
+        return vibeCodingService.post("/agent/update_session", request);
+    }
+
+    /**
+     * Update the working directory for a session.
+     * Request: { session_id, working_dir }
+     * Response: (empty)
+     */
+    @PostMapping(value = "/agent/update-working-dir",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentUpdateWorkingDir(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent update working dir request");
+        return vibeCodingService.post("/agent/update_working_dir", request);
+    }
+
+    /**
+     * Sync agent state from the persisted session.
+     * Request: { session_id }
+     * Response: (empty)
+     */
+    @PostMapping(value = "/agent/update-from-session",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentUpdateFromSession(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent update from session request");
+        return vibeCodingService.post("/agent/update_from_session", request);
+    }
+
+    /**
+     * Invoke a specific tool in the Goose session.
+     * Request: { session_id, name, arguments: object }
+     * Response: { content, isError, _meta?, structuredContent? }
+     */
+    @PostMapping(value = "/agent/call-tool",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentCallTool(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent call tool request");
+        return vibeCodingService.post("/agent/call_tool", request);
+    }
+
+    /**
+     * Read a resource from an extension.
+     * Request: { session_id, extension_name, uri }
+     * Response: { uri, text, mimeType?, _meta? }
+     */
+    @PostMapping(value = "/agent/read-resource",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentReadResource(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent read resource request");
+        return vibeCodingService.post("/agent/read_resource", request);
+    }
+
+    /**
+     * List tools available in a session (optionally filtered by extension).
+     * Query: session_id (required), extension_name (optional)
+     * Response: [{ name, description, parameters, input_schema?, permission? }]
+     */
+    @GetMapping(value = "/agent/tools", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentTools(
+            @RequestParam String session_id,
+            @RequestParam(required = false) String extension_name) {
+        logger.info("Agent tools request, session={}", session_id);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("session_id", session_id);
+        if (extension_name != null) params.add("extension_name", extension_name);
+        return vibeCodingService.get("/agent/tools", params);
+    }
+
+    /**
+     * List Goose apps available in a session.
+     * Query: session_id (optional)
+     * Response: { apps: [GooseApp] }
+     */
+    @GetMapping(value = "/agent/list-apps", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentListApps(
+            @RequestParam(required = false) String session_id) {
+        logger.info("Agent list apps request");
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        if (session_id != null) params.add("session_id", session_id);
+        return vibeCodingService.get("/agent/list_apps", params);
+    }
+
+    /**
+     * Export a Goose app as an HTML string.
+     * Response: string (HTML)
+     */
+    @GetMapping(value = "/agent/export-app/{name}", produces = MediaType.TEXT_HTML_VALUE)
+    public Mono<ResponseEntity<String>> agentExportApp(@PathVariable String name) {
+        logger.info("Agent export app request, name={}", name);
+        return vibeCodingService.get("/agent/export_app/" + name, null);
+    }
+
+    /**
+     * Import a Goose app from an HTML payload.
+     * Request: { html }
+     * Response: { name, message }
+     */
+    @PostMapping(value = "/agent/import-app",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> agentImportApp(
+            @RequestBody Map<String, Object> request) {
+        logger.info("Agent import app request");
+        return vibeCodingService.post("/agent/import_app", request);
+    }
+
+    // =========================================================================
+    // REPLY / CHAT
+    // =========================================================================
+
+    /**
+     * Send a message to the Goose agent and receive an SSE stream of MessageEvents.
+     * <p>
+     * This is the primary interaction endpoint — the frontend opens an EventSource
+     * here to send a user prompt and receive a streamed reply.
+     * <p>
+     * Request:  { session_id, user_message: Message, override_conversation?,
+     *             recipe_name?, recipe_version? }
+     * Response: SSE stream of MessageEvent
+     */
+    @PostMapping(value = "/reply",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> reply(@RequestBody Map<String, Object> request) {
+        logger.info("Reply SSE request, session_id={}", request.get("session_id"));
+        return vibeCodingService.ssePost("/reply", request);
+    }
+
+    /**
+     * Queue a reply request in a session (async, non-streaming).
+     * Request:  { request_id, user_message: Message, override_conversation?,
+     *             recipe_name?, recipe_version? }
+     * Response: { request_id }
+     */
+    @PostMapping(value = "/sessions/{sessionId}/reply",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> sessionReply(
             @PathVariable String sessionId,
-            @RequestParam String prompt,
-            @RequestParam String model) {
-
-        String userId = extractUserId();
-        logger.info("Generate request: session={}, model={}, user={}", sessionId, model, userId);
-        return vibeCodingService.generate(sessionId, prompt, model, userId);
+            @RequestBody Map<String, Object> request) {
+        logger.info("Session reply request, session={}", sessionId);
+        return vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
     }
 
     /**
-     * Endpoint 2: Deploy generated files to a sandbox environment.
-     * <p>
-     * The frontend sends the generated files and app type. The backend forwards
-     * them to the Sandbox Orchestrator asynchronously.
-     *
-     * @param sessionId     unique session identifier (path variable)
-     * @param deployRequest request body with files and appType
-     * @return 200 OK on successful submission
+     * Cancel an in-progress reply request in a session.
+     * Request: { request_id }
+     * Response: (empty)
      */
-    @PostMapping("/sessions/{sessionId}/deploy")
-    public ResponseEntity<Void> deploy(
+    @PostMapping(value = "/sessions/{sessionId}/cancel",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<String>> sessionCancel(
             @PathVariable String sessionId,
-            @RequestBody VibeDeployRequest deployRequest) {
-
-        logger.info("Deploy request: session={}, appType={}, files={}",
-                sessionId, deployRequest.appType(),
-                deployRequest.files() != null ? deployRequest.files().size() : 0);
-        vibeCodingService.deploy(sessionId, deployRequest);
-        return ResponseEntity.ok().build();
+            @RequestBody Map<String, Object> request) {
+        logger.info("Session cancel request, session={}", sessionId);
+        return vibeCodingService.post("/sessions/" + sessionId + "/cancel", request);
     }
 
     /**
-     * Endpoint 3: SSE stream for sandbox status monitoring.
-     * <p>
-     * The frontend opens an EventSource after deploy. The backend polls the
-     * Sandbox Orchestrator and emits a single {@code preview_ready} event
-     * when the sandbox pod is live.
-     *
-     * @param sessionId unique session identifier (path variable)
-     * @return SSE stream with a single preview_ready event
+     * Stream message events from an active session (SSE).
+     * Response: SSE stream of [MessageEvent]
      */
-    @GetMapping(
-        value = "/sessions/{sessionId}/status",
-        produces = MediaType.TEXT_EVENT_STREAM_VALUE
-    )
-    public Flux<ServerSentEvent<VibePreviewEvent>> status(
-            @PathVariable String sessionId) {
-
-        logger.info("Status watch request: session={}", sessionId);
-        return vibeCodingService.watchSandboxStatus(sessionId);
-    }
-
-    /**
-     * Extracts the user ID from the current security context.
-     * <p>
-     * Supports both JWT (OAuth2) and standard authentication principals.
-     *
-     * @return the authenticated user's identifier, or "anonymous" if not available
-     */
-    private String extractUserId() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null) {
-                return "anonymous";
-            }
-            // OAuth2 JWT — extract preferred_username or sub claim
-            if (authentication.getCredentials() instanceof Jwt jwt) {
-                String user = jwt.getClaimAsString("preferred_username");
-                if (user == null || user.isBlank()) {
-                    user = jwt.getClaimAsString("sub");
-                }
-                return user != null ? user : "anonymous";
-            }
-            // Fallback to authentication name
-            String name = authentication.getName();
-            return name != null ? name : "anonymous";
-        } catch (Exception e) {
-            logger.warn("Failed to extract userId from security context: {}", e.getMessage());
-            return "anonymous";
-        }
+    @GetMapping(value = "/sessions/{sessionId}/events",
+            produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> sessionEvents(@PathVariable String sessionId) {
+        logger.info("Session events SSE request, session={}", sessionId);
+        return vibeCodingService.sseGet("/sessions/" + sessionId + "/events");
     }
 }
+
 

@@ -1,210 +1,188 @@
 package com.lfn.icip.vibecoding.service;
 
-import java.time.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import com.lfn.icip.vibecoding.dto.AdkGenerateRequest;
-import com.lfn.icip.vibecoding.dto.SandboxProvisionRequest;
-import com.lfn.icip.vibecoding.dto.SandboxProvisionResponse;
-import com.lfn.icip.vibecoding.dto.VibeDeployRequest;
-import com.lfn.icip.vibecoding.dto.VibePreviewEvent;
-import com.lfn.icip.vibecoding.dto.VibeSseEvent;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Service handling Vibe Studio code generation, deployment, and sandbox status monitoring.
+ * Thin relay service that proxies all requests to the Goose API service.
  * <p>
- * Orchestrates communication between:
- * <ul>
- *   <li>ADK Python service — for AI-powered code generation (SSE stream)</li>
- *   <li>Sandbox Orchestrator — for deploying and monitoring sandbox environments</li>
- * </ul>
+ * Each method forwards the request body (when applicable) to the corresponding
+ * Goose endpoint and returns the response verbatim, preserving HTTP status codes.
+ * SSE endpoints are streamed back as {@code Flux<String>} with raw event data.
  */
 @Service
 public class VibeCodingService {
 
     private static final Logger logger = LoggerFactory.getLogger(VibeCodingService.class);
 
-    private final WebClient adkWebClient;
-    private final WebClient sandboxWebClient;
+    private final WebClient gooseWebClient;
 
-    @Value("${vibe.sandbox.status.poll-interval-seconds:3}")
-    private int pollIntervalSeconds;
-
-    @Value("${vibe.sandbox.status.timeout-minutes:5}")
-    private int timeoutMinutes;
-
-    public VibeCodingService(
-            @Qualifier("adkWebClient") WebClient adkWebClient,
-            @Qualifier("sandboxWebClient") WebClient sandboxWebClient) {
-        this.adkWebClient = adkWebClient;
-        this.sandboxWebClient = sandboxWebClient;
+    public VibeCodingService(@Qualifier("gooseWebClient") WebClient gooseWebClient) {
+        this.gooseWebClient = gooseWebClient;
     }
 
     /**
-     * Connects to the ADK Python service and relays the SSE stream of generation events.
-     * <p>
-     * Sends the prompt/model to ADK via POST and returns the streamed SSE events
-     * (token, file, app_type, done) wrapped in {@link ServerSentEvent}.
+     * Relays a POST request with a JSON body to Goose and returns the response.
      *
-     * @param sessionId unique session identifier
-     * @param prompt    the user's prompt for code generation
-     * @param model     the LLM model to use
-     * @param userId    the authenticated user's ID
-     * @return a Flux of SSE events for the frontend to consume
+     * @param path Goose endpoint path
+     * @param body request body (may be null for no-body POST endpoints)
+     * @return relay of the Goose JSON response with its original status code
      */
-    public Flux<ServerSentEvent<VibeSseEvent>> generate(
-            String sessionId, String prompt, String model, String userId) {
-
-        logger.info("Starting code generation for session={}, model={}, userId={}", sessionId, model, userId);
-
-        AdkGenerateRequest adkRequest = new AdkGenerateRequest(prompt, model, sessionId, userId);
-
-        return adkWebClient.post()
-                .uri("/vibe-coding/generate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .bodyValue(adkRequest)
-                .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<String>>() {})
-                .mapNotNull(sse -> {
-                    try {
-                        String data = sse.data();
-                        if (data == null || data.isBlank()) {
-                            return null;
-                        }
-                        com.fasterxml.jackson.databind.ObjectMapper mapper =
-                                new com.fasterxml.jackson.databind.ObjectMapper();
-                        VibeSseEvent event = mapper.readValue(data, VibeSseEvent.class);
-                        return ServerSentEvent.<VibeSseEvent>builder()
-                                .data(event)
-                                .build();
-                    } catch (Exception e) {
-                        logger.warn("Failed to parse ADK SSE event: {}", e.getMessage());
-                        return null;
-                    }
-                })
-                .doOnError(WebClientResponseException.class, ex ->
-                        logger.error("ADK service error for session={}: {} - {}",
-                                sessionId, ex.getStatusCode(), ex.getResponseBodyAsString()))
-                .doOnError(ex ->
-                        logger.error("Error during generation for session={}: {}", sessionId, ex.getMessage()))
-                .onErrorResume(ex -> {
-                    VibeSseEvent errorEvent = VibeSseEvent.error(
-                            "Code generation failed: " + ex.getMessage());
-                    return Flux.just(
-                            ServerSentEvent.<VibeSseEvent>builder()
-                                    .data(errorEvent)
-                                    .build()
-                    );
-                })
-                .doOnComplete(() ->
-                        logger.info("Generation stream completed for session={}", sessionId));
-    }
-
-    /**
-     * Forwards the generated files to the Sandbox Orchestrator for provisioning.
-     * <p>
-     * This is a fire-and-forget operation. The frontend monitors sandbox readiness
-     * via the {@link #watchSandboxStatus(String)} SSE endpoint.
-     *
-     * @param sessionId unique session identifier
-     * @param request   the deploy request containing files and app type
-     */
-    public void deploy(String sessionId, VibeDeployRequest request) {
-        logger.info("Deploying session={}, appType={}, fileCount={}",
-                sessionId, request.appType(), request.files() != null ? request.files().size() : 0);
-
-        SandboxProvisionRequest provisionRequest = new SandboxProvisionRequest(
-                sessionId, request.files(), request.appType());
-
-        sandboxWebClient.post()
-                .uri("/sandbox/provision")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(provisionRequest)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnSuccess(response ->
-                        logger.info("Sandbox provision request accepted for session={}", sessionId))
-                .doOnError(WebClientResponseException.class, ex ->
-                        logger.error("Sandbox provision error for session={}: {} - {}",
-                                sessionId, ex.getStatusCode(), ex.getResponseBodyAsString()))
-                .doOnError(ex ->
-                        logger.error("Error deploying session={}: {}", sessionId, ex.getMessage()))
-                .subscribe();
-    }
-
-    /**
-     * Polls the Sandbox Orchestrator status endpoint until the sandbox is live.
-     * <p>
-     * Emits a single {@code preview_ready} event when the sandbox becomes available,
-     * then completes the stream. Times out after the configured duration.
-     *
-     * @param sessionId unique session identifier
-     * @return a Flux that emits a single preview_ready SSE event
-     */
-    public Flux<ServerSentEvent<VibePreviewEvent>> watchSandboxStatus(String sessionId) {
-        logger.info("Starting sandbox status watch for session={}", sessionId);
-
-        return Flux.interval(Duration.ofSeconds(pollIntervalSeconds))
-                .flatMap(tick -> checkSandboxStatus(sessionId))
-                .filter(response -> "live".equals(response.status()))
-                .take(1)
-                .map(response -> {
-                    logger.info("Sandbox is live for session={}, previewUrl={}",
-                            sessionId, response.previewUrl());
-                    return ServerSentEvent.<VibePreviewEvent>builder()
-                            .data(VibePreviewEvent.ready(response.previewUrl()))
-                            .build();
-                })
-                .timeout(Duration.ofMinutes(timeoutMinutes))
-                .onErrorResume(ex -> {
-                    String message;
-                    if (ex instanceof java.util.concurrent.TimeoutException) {
-                        message = "Sandbox provisioning timed out after " + timeoutMinutes + " minutes";
-                        logger.warn(message + " for session={}", sessionId);
-                    } else {
-                        message = "Sandbox status check failed: " + ex.getMessage();
-                        logger.error(message + " for session={}", sessionId, ex);
-                    }
-                    return Flux.just(
-                            ServerSentEvent.<VibePreviewEvent>builder()
-                                    .data(VibePreviewEvent.error(message))
-                                    .build()
-                    );
-                })
-                .doOnComplete(() ->
-                        logger.info("Sandbox status watch completed for session={}", sessionId));
-    }
-
-    /**
-     * Checks the current sandbox status from the orchestrator.
-     *
-     * @param sessionId the session to check
-     * @return a Mono of the sandbox status response
-     */
-    private Mono<SandboxProvisionResponse> checkSandboxStatus(String sessionId) {
-        return sandboxWebClient.get()
-                .uri("/sandbox/{sessionId}/status", sessionId)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(SandboxProvisionResponse.class)
-                .doOnError(ex ->
-                        logger.debug("Sandbox status poll error for session={}: {}", sessionId, ex.getMessage()))
+    public Mono<ResponseEntity<String>> post(String path, Object body) {
+        logger.debug("Goose POST {}", path);
+        var spec = gooseWebClient.post()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON);
+        var request = (body != null)
+                ? spec.bodyValue(body)
+                : spec.bodyValue("");
+        return request
+                .exchangeToMono(response -> response.toEntity(String.class))
+                .doOnError(ex -> logger.error("Goose POST {} error: {}", path, ex.getMessage()))
+                .onErrorResume(WebClientResponseException.class, ex ->
+                        Mono.just(ResponseEntity.status(ex.getStatusCode())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(ex.getResponseBodyAsString())))
                 .onErrorResume(ex ->
-                        Mono.just(new SandboxProvisionResponse(null, "pending")));
+                        Mono.just(ResponseEntity.internalServerError()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}")));
+    }
+
+    /**
+     * Relays a GET request to Goose, forwarding optional query parameters.
+     *
+     * @param path        Goose endpoint path
+     * @param queryParams optional query parameters to forward
+     * @return relay of the Goose JSON response with its original status code
+     */
+    public Mono<ResponseEntity<String>> get(String path, MultiValueMap<String, String> queryParams) {
+        logger.debug("Goose GET {}", path);
+        return gooseWebClient.get()
+                .uri(uriBuilder -> {
+                    var b = uriBuilder.path(path);
+                    if (queryParams != null && !queryParams.isEmpty()) {
+                        b.queryParams(queryParams);
+                    }
+                    return b.build();
+                })
+                .exchangeToMono(response -> response.toEntity(String.class))
+                .doOnError(ex -> logger.error("Goose GET {} error: {}", path, ex.getMessage()))
+                .onErrorResume(WebClientResponseException.class, ex ->
+                        Mono.just(ResponseEntity.status(ex.getStatusCode())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(ex.getResponseBodyAsString())))
+                .onErrorResume(ex ->
+                        Mono.just(ResponseEntity.internalServerError()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}")));
+    }
+
+    /**
+     * Relays a PUT request with a JSON body to Goose.
+     *
+     * @param path Goose endpoint path
+     * @param body request body
+     * @return relay of the Goose JSON response with its original status code
+     */
+    public Mono<ResponseEntity<String>> put(String path, Object body) {
+        logger.debug("Goose PUT {}", path);
+        var spec = gooseWebClient.put()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON);
+        var request = (body != null)
+                ? spec.bodyValue(body)
+                : spec.bodyValue("");
+        return request
+                .exchangeToMono(response -> response.toEntity(String.class))
+                .doOnError(ex -> logger.error("Goose PUT {} error: {}", path, ex.getMessage()))
+                .onErrorResume(WebClientResponseException.class, ex ->
+                        Mono.just(ResponseEntity.status(ex.getStatusCode())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(ex.getResponseBodyAsString())))
+                .onErrorResume(ex ->
+                        Mono.just(ResponseEntity.internalServerError()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}")));
+    }
+
+    /**
+     * Relays a DELETE request to Goose.
+     *
+     * @param path Goose endpoint path
+     * @return relay of the Goose response (no body) with its original status code
+     */
+    public Mono<ResponseEntity<Void>> delete(String path) {
+        logger.debug("Goose DELETE {}", path);
+        return gooseWebClient.delete()
+                .uri(path)
+                .exchangeToMono(response -> response.toBodilessEntity())
+                .doOnError(ex -> logger.error("Goose DELETE {} error: {}", path, ex.getMessage()))
+                .onErrorResume(WebClientResponseException.class, ex ->
+                        Mono.just(ResponseEntity.<Void>status(ex.getStatusCode()).build()))
+                .onErrorResume(ex ->
+                        Mono.just(ResponseEntity.<Void>internalServerError().build()));
+    }
+
+    /**
+     * Relays a POST request to Goose and streams the SSE response back.
+     * <p>
+     * Used for {@code POST /reply} which returns a stream of {@code MessageEvent} lines.
+     *
+     * @param path Goose SSE endpoint path
+     * @param body request body
+     * @return Flux of raw SSE lines streamed from Goose
+     */
+    public Flux<String> ssePost(String path, Object body) {
+        logger.debug("Goose SSE POST {}", path);
+        var spec = gooseWebClient.post()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM);
+        var request = (body != null)
+                ? spec.bodyValue(body)
+                : spec.bodyValue("");
+        return request
+                .retrieve()
+                .bodyToFlux(String.class)
+                .doOnError(ex -> logger.error("Goose SSE POST {} error: {}", path, ex.getMessage()))
+                .onErrorResume(ex ->
+                        Flux.just("data: {\"type\":\"error\",\"message\":\"" + sanitize(ex.getMessage()) + "\"}\n\n"));
+    }
+
+    /**
+     * Relays a GET request to Goose and streams the SSE response back.
+     * <p>
+     * Used for {@code GET /sessions/{id}/events}.
+     *
+     * @param path Goose SSE endpoint path
+     * @return Flux of raw SSE lines streamed from Goose
+     */
+    public Flux<String> sseGet(String path) {
+        logger.debug("Goose SSE GET {}", path);
+        return gooseWebClient.get()
+                .uri(path)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .doOnError(ex -> logger.error("Goose SSE GET {} error: {}", path, ex.getMessage()))
+                .onErrorResume(ex ->
+                        Flux.just("data: {\"type\":\"error\",\"message\":\"" + sanitize(ex.getMessage()) + "\"}\n\n"));
+    }
+
+    private static String sanitize(String msg) {
+        if (msg == null) return "unknown error";
+        return msg.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
 

@@ -395,16 +395,9 @@ jobexecutor:
   runtimeList: azure, ams
 
 vibe:
-  adk:
+  goose:
     service:
-      url: http://adk-service:8000
-      connect-timeout-ms: 10000
-      response-timeout-seconds: 300
-  sandbox:
-    orchestrator:
-      url: http://sandbox-orchestrator:8080
-      connect-timeout-ms: 10000
-    status:
-      poll-interval-seconds: 3
-      timeout-minutes: 5
+      url: http://localhost:32505/        # Goose API service base URL
+      connect-timeout-ms: 10000               # TCP connect timeout (ms)
+      response-timeout-seconds: 300           # Max wait for Goose response (seconds)
 

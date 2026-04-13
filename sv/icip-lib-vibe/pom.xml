@@ -18,7 +18,7 @@
 		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
 	<dependencies>
-		<!-- WebFlux for Flux<ServerSentEvent> and WebClient for ADK SSE -->
+		<!-- WebFlux for Flux (SSE streaming) and WebClient for Goose API relay -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>

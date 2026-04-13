@@ -13,64 +13,44 @@ import reactor.netty.http.client.HttpClient;
 import java.time.Duration;
 
 /**
- * Configuration for Vibe Coding external service clients.
+ * Configuration for Vibe Studio Goose service client.
  * <p>
- * Provides WebClient beans pre-configured for the ADK Python service
- * and the Sandbox Orchestrator.
+ * Provides a single WebClient bean pre-configured for the Goose API service.
  */
 @Configuration
 public class VibeCodingConfig {
 
-    @Value("${vibe.adk.service.url:http://adk-service:8000}")
-    private String adkServiceUrl;
+    @Value("${vibe.goose.service.url:http://goose-service:3000}")
+    private String gooseServiceUrl;
 
-    @Value("${vibe.sandbox.orchestrator.url:http://sandbox-orchestrator:8080}")
-    private String sandboxOrchestratorUrl;
+    @Value("${vibe.goose.service.connect-timeout-ms:10000}")
+    private int gooseConnectTimeoutMs;
 
-    @Value("${vibe.adk.service.connect-timeout-ms:10000}")
-    private int adkConnectTimeoutMs;
-
-    @Value("${vibe.adk.service.response-timeout-seconds:300}")
-    private int adkResponseTimeoutSeconds;
-
-    @Value("${vibe.sandbox.orchestrator.connect-timeout-ms:10000}")
-    private int sandboxConnectTimeoutMs;
+    @Value("${vibe.goose.service.response-timeout-seconds:300}")
+    private int gooseResponseTimeoutSeconds;
 
     /**
-     * WebClient configured for consuming SSE streams from the ADK Python service.
-     * Increased buffer size and extended timeouts for large streaming responses.
+     * WebClient configured for the Goose API service.
+     * <p>
+     * Uses a 16 MB in-memory buffer to handle large SSE streams containing
+     * generated code or conversation history. The extended response timeout
+     * accommodates long-running AI generation sessions.
      */
-    @Bean("adkWebClient")
-    public WebClient adkWebClient() {
-        // 16 MB buffer for large SSE streams
+    @Bean("gooseWebClient")
+    public WebClient gooseWebClient() {
         ExchangeStrategies strategies = ExchangeStrategies.builder()
                 .codecs(configurer -> configurer.defaultCodecs()
                         .maxInMemorySize(16 * 1024 * 1024))
                 .build();
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, adkConnectTimeoutMs)
-                .responseTimeout(Duration.ofSeconds(adkResponseTimeoutSeconds));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, gooseConnectTimeoutMs)
+                .responseTimeout(Duration.ofSeconds(gooseResponseTimeoutSeconds));
 
         return WebClient.builder()
-                .baseUrl(adkServiceUrl)
+                .baseUrl(gooseServiceUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(strategies)
-                .build();
-    }
-
-    /**
-     * WebClient configured for REST calls to the Sandbox Orchestrator.
-     */
-    @Bean("sandboxWebClient")
-    public WebClient sandboxWebClient() {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, sandboxConnectTimeoutMs)
-                .responseTimeout(Duration.ofSeconds(30));
-
-        return WebClient.builder()
-                .baseUrl(sandboxOrchestratorUrl)
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
 }
