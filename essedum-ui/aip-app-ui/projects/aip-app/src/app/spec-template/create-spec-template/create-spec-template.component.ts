@@ -29,11 +29,11 @@ export class CreateSpecTemplateComponent implements OnInit {
   desciptionValidator = [Validators.required];
   regString: any = '';
   regexPatternString: any;
-  regexPattern = `^(?!REX)[a-zA-Z0-9\_\-]+$`;
-  regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9\_\-]+$`;
+  regexPattern = `^(?!REX)[a-zA-Z0-9_-]+$`;
+  regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9_-]+$`;
   regexPatternObj: RegExp;
   regexPatternForExistingNames = `^(?!REX).+$`;
-  regexPatternForValidAlphabets = `^[a-zA-Z0-9\_\-]+$`;
+  regexPatternForValidAlphabets = `^[a-zA-Z0-9_-]+$`;
   regexPatternForValidAlphabetsObj: RegExp;
   regexPatternForExistingNamesObj: RegExp;
   errMsg: string = 'Name is required field.';
