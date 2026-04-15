@@ -25,6 +25,8 @@ export class VibeStudioService implements OnDestroy {
   /** AbortController for the active fetch-based SSE stream. */
   private replyAbortController: AbortController | null = null;
   private streamingAssistantIndex: number | null = null;
+  /** setInterval handle for list_apps polling while a reply is streaming. */
+  private listAppsPollingHandle: ReturnType<typeof setInterval> | null = null;
 
   readonly sseEvents$   = new Subject<any>();
   readonly status$      = new BehaviorSubject<VibeSessionStatus>('idle');
@@ -75,6 +77,7 @@ export class VibeStudioService implements OnDestroy {
 
     this.ensureAgentStarted().then((sessionId) => {
       this.openReplyStream(sessionId, prompt);
+      this.startListAppsPolling(sessionId);
     }).catch(() => {
       this.status$.next('error');
     });
@@ -82,6 +85,7 @@ export class VibeStudioService implements OnDestroy {
 
   /** Cancel the currently streaming Goose reply locally (if any). */
   cancelReply(): void {
+    this.stopListAppsPolling();
     if (this.replyAbortController) {
       this.replyAbortController.abort();
       this.replyAbortController = null;
@@ -114,6 +118,7 @@ export class VibeStudioService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopListAppsPolling();
     this.cancelReply();
   }
 
@@ -292,10 +297,138 @@ export class VibeStudioService implements OnDestroy {
       const parsed = JSON.parse(rawData);
       this.sseEvents$.next(parsed);
       this.extractText(parsed, emit);
+      this.extractFiles(parsed);
     } catch {
       // raw non-JSON chunk — treat as plain text
       emit(rawData);
     }
+  }
+
+  // ─── File extraction from Goose tool events ──────────────────────────────────
+
+  /**
+   * Walks a Goose SSE event looking for toolRequest content parts that write files.
+   * Supports: write_file, create_file, str_replace_editor (command=write/create),
+   * developer__text_editor, and any *_editor tool with a `file_text` field.
+   */
+  private extractFiles(event: any): void {
+    if (!event) return;
+
+    // Unwrap common wrappers
+    if (event.message && typeof event.message === 'object') {
+      this.extractFiles(event.message);
+    }
+    if (event.data && typeof event.data === 'object') {
+      this.extractFiles(event.data);
+    }
+
+    // Full message shape: { role, content: [...] }
+    if (Array.isArray(event.content)) {
+      for (const part of event.content) {
+        if (part?.type === 'toolRequest' && part.toolUse) {
+          this.extractFileFromToolUse(part.toolUse);
+        }
+      }
+    }
+
+    // Bare toolUse at top level
+    if (event.toolUse) {
+      this.extractFileFromToolUse(event.toolUse);
+    }
+  }
+
+  private extractFileFromToolUse(toolUse: any): void {
+    if (!toolUse?.name || !toolUse?.input) return;
+    const name = (toolUse.name as string).toLowerCase();
+    const input = toolUse.input;
+
+    // write_file / create_file: { path, content }
+    if ((name === 'write_file' || name === 'create_file') &&
+        typeof input.path === 'string' && typeof input.content === 'string') {
+      this.upsertFile(input.path, input.content);
+      return;
+    }
+
+    // str_replace_editor / text_editor / developer__text_editor:
+    //   { command: 'write'|'create', path, file_text }
+    if ((name.includes('editor') || name.includes('text_editor')) &&
+        typeof input.path === 'string' && typeof input.file_text === 'string' &&
+        (input.command === 'write' || input.command === 'create' || !input.command)) {
+      this.upsertFile(input.path, input.file_text);
+      return;
+    }
+
+    // Fallback: any tool with a path + file_text field
+    if (typeof input.path === 'string' && typeof input.file_text === 'string') {
+      this.upsertFile(input.path, input.file_text);
+    }
+  }
+
+  /**
+   * After the full streamed text is available, extract fenced code blocks that are
+   * preceded by a recognisable filename header so casual text-mode responses also
+   * surface files (e.g. when the agent describes a file then shows its content).
+   *
+   * Patterns matched (all are optional leading annotations):
+   *   **src/App.jsx**          bold filename before the fence
+   *   `src/App.jsx`            backtick filename before the fence
+   *   ### src/App.jsx          heading filename before the fence
+   *   // src/App.jsx           comment as first line inside the fence
+   *   # src/App.jsx            hash comment as first line inside the fence
+   */
+  private extractFilesFromMarkdown(text: string): void {
+    if (!text) return;
+
+    const FILE_PAT = '[\\w][\\w./\\-]*\\.\\w{1,10}';
+
+    // Leading annotation before the fence: **name**, `name`, ### name
+    // Using string concatenation to avoid backtick-inside-template-literal issues
+    const prefixPattern = '(?:\\*{1,2}|[`]|#{1,4}\\s+)(' + FILE_PAT + ')(?:\\*{1,2}|[`])?\\s*(?::|\\s*\\n)';
+    const prefixRe = new RegExp(prefixPattern, 'gm');
+
+    // Build a list of (offset, filename) from prefix annotations
+    const prefixes: Array<{ offset: number; name: string }> = [];
+    let pm: RegExpExecArray | null;
+    while ((pm = prefixRe.exec(text)) !== null) {
+      prefixes.push({ offset: pm.index, name: pm[1] });
+    }
+
+    // Walk every fenced code block
+    const blockRe = /```(?:\w+)?\n([\s\S]*?)```/g;
+    let bm: RegExpExecArray | null;
+    while ((bm = blockRe.exec(text)) !== null) {
+      const blockStart = bm.index;
+      const blockContent = bm[1];
+
+      // Check for a prefix annotation within 120 chars before this fence
+      const nearby = prefixes.find(p => blockStart - p.offset >= 0 && blockStart - p.offset <= 120);
+      if (nearby) {
+        this.upsertFile(nearby.name, blockContent);
+        continue;
+      }
+
+      // Check first line of block for a filename comment (// file.js or # file.py)
+      const firstLine = blockContent.split('\n')[0].trim();
+      const commentMatch = firstLine.match(/^(?:\/\/|#)\s*([\w][\w./\-]*\.\w{1,10})\s*$/);
+      if (commentMatch) {
+        const contentWithoutComment = blockContent.slice(firstLine.length).replace(/^\n/, '');
+        this.upsertFile(commentMatch[1], contentWithoutComment);
+      }
+    }
+  }
+
+  private upsertFile(path: string, content: string): void {
+    // Normalise path (strip leading ./ or /)
+    const normPath = path.replace(/^\.?\//, '');
+    const current = [...this.files$.value];
+    const idx = current.findIndex(f => f.path === normPath);
+    if (idx >= 0) {
+      current[idx] = { path: normPath, content };
+    } else {
+      current.push({ path: normPath, content });
+    }
+    this.session.files = current;
+    this.files$.next(current);
   }
 
   /**
@@ -363,6 +496,10 @@ export class VibeStudioService implements OnDestroy {
   private finaliseAssistantMessage(text: string): void {
     this.replyAbortController = null;
 
+    // Scan full streamed text for fenced code blocks with filename headers
+    this.extractFilesFromMarkdown(text);
+
+    // Commit the assistant message bubble
     if (this.streamingAssistantIndex !== null) {
       if (text) {
         this.session.messages[this.streamingAssistantIndex].content = text;
@@ -371,22 +508,14 @@ export class VibeStudioService implements OnDestroy {
       }
       this.streamingAssistantIndex = null;
       this.messages$.next([...this.session.messages]);
-
-      if (text) {
-        const urlMatch = text.match(/https?:\/\/[^\s"')\]]+/);
-        if (urlMatch) {
-          this.session.previewUrl = urlMatch[0];
-          this.previewUrl$.next(urlMatch[0]);
-          this.status$.next('live');
-          return;
-        }
-      }
     } else if (text) {
       const msg: VibeChatMessage = { role: 'assistant', content: text, timestamp: new Date() };
       this.session.messages.push(msg);
       this.messages$.next([...this.session.messages]);
+    }
 
-      // If Goose included a URL in the response, surface it as a preview
+    // Check for a live preview URL first
+    if (text) {
       const urlMatch = text.match(/https?:\/\/[^\s"')\]]+/);
       if (urlMatch) {
         this.session.previewUrl = urlMatch[0];
@@ -395,7 +524,220 @@ export class VibeStudioService implements OnDestroy {
         return;
       }
     }
+
+    // Stop the polling interval now that the stream is done.
+    this.stopListAppsPolling();
+
+    // Always call list_apps once more after the stream ends (final sweep).
+    // Stay in 'generating' state while files load so the UI shows progress.
+    if (this.session.id) {
+      this.listAppsAndFetchFiles(this.session.id, () => this.status$.next('idle'));
+      return;
+    }
+
     this.status$.next('idle');
+  }
+
+  // ─── list_apps polling during streaming ─────────────────────────────────────
+
+  /**
+   * Polls /agent/list-apps every 4 s while the agent is streaming.
+   * Files appear in the Code panel as soon as Goose writes them.
+   */
+  private startListAppsPolling(sessionId: string): void {
+    this.stopListAppsPolling();
+    this.listAppsPollingHandle = setInterval(() => {
+      this.listAppsAndFetchFiles(sessionId, () => { /* no status change during polling */ });
+    }, 4000);
+  }
+
+  private stopListAppsPolling(): void {
+    if (this.listAppsPollingHandle !== null) {
+      clearInterval(this.listAppsPollingHandle);
+      this.listAppsPollingHandle = null;
+    }
+  }
+
+  // ─── Post-stream file loading via list_apps + call-tool ─────────────────────
+
+  /**
+   * Calls GET /agent/list-apps?session_id=<id>, extracts every file path,
+   * reads file content via /agent/call-tool (developer__text_editor view),
+   * upserts into files$, then calls done().
+   *
+   * Handles all known Goose list_apps response shapes:
+   *   • Array of app objects:  [{ name, files: ["path", ...] | { "path": "content" } }]
+   *   • Wrapped:               { apps: [...] }
+   *   • Files with content:    { files: { "path": "content" } }
+   */
+  private listAppsAndFetchFiles(sessionId: string, done: () => void): void {
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/list-apps`;
+    this.http
+      .get<any>(url, {
+        params: { session_id: sessionId },
+        headers: this.getHttpHeaders() as any,
+      })
+      .subscribe({
+        next: (resp) => {
+          const pathsToFetch = this.extractFilePathsFromListApps(resp);
+          if (pathsToFetch.length > 0) {
+            this.fetchFilesFromServer(sessionId, pathsToFetch, done);
+          } else {
+            done();
+          }
+        },
+        error: () => done(),
+      });
+  }
+
+  /**
+   * Walks any list_apps response shape and:
+   *  - if content already present → calls upsertFile immediately
+   *  - if only a path → adds to the returned array for later fetching
+   */
+  private extractFilePathsFromListApps(resp: any): string[] {
+    const pathsToFetch: string[] = [];
+
+    const processApp = (app: any): void => {
+      // Derive the app's root directory name from name or path
+      let appDir = '';
+      if (typeof app.name === 'string' && app.name.trim()) {
+        appDir = app.name.trim();
+      } else if (typeof app.path === 'string' && app.path) {
+        appDir = app.path.split('/').pop() ?? '';
+      }
+
+      const qualify = (filePath: string): string => {
+        // Strip leading absolute prefix, keep everything from appDir onward
+        if (filePath.startsWith('/')) {
+          const idx = appDir ? filePath.indexOf('/' + appDir + '/') : -1;
+          if (idx >= 0) {
+            return filePath.slice(idx + 1); // e.g. "simple-react-app/src/App.jsx"
+          }
+          return filePath.replace(/^\/+/, ''); // strip leading slash
+        }
+        // Already relative — prefix with appDir if not already prefixed
+        if (appDir && !filePath.startsWith(appDir + '/')) {
+          return appDir + '/' + filePath;
+        }
+        return filePath;
+      };
+
+      if (app.files && typeof app.files === 'object' && !Array.isArray(app.files)) {
+        // { files: { "path": "content" } } — content already available
+        for (const [filePath, content] of Object.entries(app.files)) {
+          if (typeof content === 'string' && content.trim()) {
+            this.upsertFile(qualify(filePath), content);
+          } else {
+            const p = qualify(filePath);
+            if (!pathsToFetch.includes(p)) pathsToFetch.push(p);
+          }
+        }
+      } else if (Array.isArray(app.files)) {
+        // { files: ["path", ...] } — only paths, need to fetch content
+        for (const f of app.files) {
+          if (typeof f === 'string') {
+            const p = qualify(f);
+            if (!pathsToFetch.includes(p)) pathsToFetch.push(p);
+          }
+        }
+      }
+    };
+
+    if (Array.isArray(resp)) {
+      resp.forEach(processApp);
+    } else if (resp?.apps && Array.isArray(resp.apps)) {
+      resp.apps.forEach(processApp);
+    } else if (resp && typeof resp === 'object') {
+      processApp(resp);
+    }
+
+    return pathsToFetch;
+  }
+
+  /**
+   * Calls POST /agent/call-tool sequentially for each path to read file content
+   * from the Goose server filesystem, then invokes `done` when all are fetched.
+   */
+  private fetchFilesFromServer(sessionId: string, paths: string[], done: () => void): void {
+    const fetchNext = (index: number): void => {
+      if (index >= paths.length) {
+        done();
+        return;
+      }
+
+      const path = paths[index];
+      const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
+      const body = {
+        session_id: sessionId,
+        tool_name: 'developer__text_editor',
+        input: { command: 'view', path },
+      };
+
+      this.http.post<any>(url, body, { headers: this.getHttpHeaders() }).subscribe({
+        next: (resp) => {
+          const content = this.extractContentFromToolResponse(resp);
+          if (content !== null && content !== undefined && content.trim() !== '') {
+            this.upsertFile(path, content);
+          }
+          fetchNext(index + 1);
+        },
+        error: () => fetchNext(index + 1),
+      });
+    };
+
+    fetchNext(0);
+  }
+
+  /**
+   * Tries to extract a plain-text file content string out of whatever shape
+   * the Goose /agent/call_tool endpoint returns.
+   */
+  private extractContentFromToolResponse(resp: any): string | null {
+    if (!resp) return null;
+    if (typeof resp === 'string') return resp;
+
+    // Direct string fields
+    if (typeof resp.output   === 'string') return resp.output;
+    if (typeof resp.content  === 'string') return resp.content;
+    if (typeof resp.result   === 'string') return resp.result;
+    if (typeof resp.text     === 'string') return resp.text;
+
+    // Nested result: { result: { content|output: "..." } }
+    if (resp.result && typeof resp.result === 'object') {
+      if (typeof resp.result.content === 'string') return resp.result.content;
+      if (typeof resp.result.output  === 'string') return resp.result.output;
+      if (typeof resp.result.text    === 'string') return resp.result.text;
+    }
+
+    // { toolResult: { content: [...] | "..." } }
+    if (resp.toolResult) {
+      if (typeof resp.toolResult.content === 'string') return resp.toolResult.content;
+      if (Array.isArray(resp.toolResult.content)) {
+        const parts = resp.toolResult.content
+          .map((c: any) => c?.text ?? c?.content ?? '')
+          .filter(Boolean);
+        if (parts.length) return parts.join('\n');
+      }
+    }
+
+    // Array content: { content: [{ type: "text", text: "..." }] }
+    if (Array.isArray(resp.content)) {
+      const parts = resp.content
+        .map((c: any) => c?.text ?? c?.content ?? '')
+        .filter(Boolean);
+      if (parts.length) return parts.join('\n');
+    }
+
+    // messages array: { messages: [{ content: [...] }] }
+    if (Array.isArray(resp.messages)) {
+      for (const msg of resp.messages) {
+        const extracted = this.extractContentFromToolResponse(msg);
+        if (extracted) return extracted;
+      }
+    }
+
+    return null;
   }
 
   private startStreamingAssistantMessage(): void {

@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { marked } from 'marked';
 import { VibeStudioService } from '../services/vibe-studio.service';
 import {
   VibeChatMessage,
@@ -27,10 +29,14 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   prompt = '';
   messages: VibeChatMessage[] = [];
   status: VibeSessionStatus = 'idle';
+  inputFocused = false;
 
   private destroy$ = new Subject<void>();
 
-  constructor(private vibeService: VibeStudioService) {}
+  constructor(
+    private vibeService: VibeStudioService,
+    private sanitizer: DomSanitizer,
+  ) {}
 
   ngOnInit(): void {
     this.vibeService.messages$
@@ -45,6 +51,12 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
       .subscribe((s) => {
         this.status = s;
       });
+  }
+
+  renderMarkdown(text: string): SafeHtml {
+    const result = marked.parse(text);
+    const html = typeof result === 'string' ? result : '';
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   onModelChange(): void {

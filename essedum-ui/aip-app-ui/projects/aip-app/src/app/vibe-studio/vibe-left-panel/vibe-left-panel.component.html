@@ -1,70 +1,86 @@
-<div class="left-panel">
-  <div class="content-area">
-    <!-- Chat Panel -->
-    <div class="chat-panel">
-      <!-- Chat Messages -->
-      <div class="chat-messages" #chatContainer>
-        <div *ngIf="messages.length === 0 && status !== 'generating'" class="chat-empty">
-          <mat-icon class="empty-icon">chat</mat-icon>
-          <p>Describe what you want to build and I'll generate the code for you.</p>
-        </div>
+<div class="copilot-panel">
 
-        <div *ngFor="let msg of messages" class="chat-message" [ngClass]="msg.role">
-          <div class="message-avatar">
-            <mat-icon *ngIf="msg.role === 'user'">person</mat-icon>
-            <mat-icon *ngIf="msg.role !== 'user'">smart_toy</mat-icon>
-          </div>
-          <div class="message-content">
-            <div class="message-bubble">{{ msg.content }}</div>
-            <span class="message-time">{{ msg.timestamp | date:'shortTime' }}</span>
-          </div>
-        </div>
+  <!-- ── Messages ── -->
+  <div class="messages-area" #chatContainer>
 
-        <!-- Generating indicator -->
-        <div *ngIf="status === 'generating'" class="status-indicator">
-          <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-          <span>Generating...</span>
-        </div>
-      </div>
+    <!-- Empty / welcome state -->
+    <div *ngIf="messages.length === 0" class="welcome-state">
+      <span class="welcome-avatar"><i class="bi bi-robot"></i></span>
+      <h3>Vibe Studio</h3>
+      <p>Describe what you'd like to build and I'll generate the code for you.</p>
     </div>
+
+    <!-- Chat turns -->
+    <div
+      *ngFor="let msg of messages; let last = last"
+      class="message-turn"
+      [class.user-turn]="msg.role === 'user'"
+      [class.assistant-turn]="msg.role === 'assistant'"
+    >
+
+      <!-- ── User message ── -->
+      <ng-container *ngIf="msg.role === 'user'">
+        <div class="turn-meta">
+          <span class="user-dot"></span>
+          <span class="turn-label">You</span>
+        </div>
+        <div class="user-text">{{ msg.content }}</div>
+      </ng-container>
+
+      <!-- ── Assistant message ── -->
+      <ng-container *ngIf="msg.role === 'assistant'">
+        <div class="turn-meta">
+          <span class="assistant-avatar"><i class="bi bi-robot"></i></span>
+          <span class="turn-label">Vibe Studio</span>
+        </div>
+        <div class="assistant-body">
+          <!-- Typing dots while waiting for first token -->
+          <div *ngIf="!msg.content && status === 'generating' && last" class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <!-- Rendered markdown -->
+          <div
+            *ngIf="msg.content"
+            class="markdown-content"
+            [innerHTML]="renderMarkdown(msg.content)"
+          ></div>
+          <!-- Blinking cursor while streaming -->
+          <span *ngIf="last && status === 'generating' && msg.content" class="stream-cursor"></span>
+        </div>
+      </ng-container>
+
+    </div>
+
   </div>
 
-  <!-- Prompt Input -->
-  <div class="chat-input-area">
-    <div class="prompt-shell" [class.disabled]="status === 'generating'">
+  <!-- ── Input ── -->
+  <div class="input-area">
+    <div
+      class="input-shell"
+      [class.input-focused]="inputFocused"
+      [class.is-generating]="status === 'generating'"
+    >
       <textarea
         #promptInput
-        class="prompt-textarea"
+        class="prompt-input"
         [(ngModel)]="prompt"
         (keydown)="onKeyDown($event)"
-        placeholder="Describe what you want to build..."
-        rows="3"
+        (focus)="inputFocused = true"
+        (blur)="inputFocused = false"
+        placeholder="Ask Vibe Studio…"
+        rows="1"
         [disabled]="status === 'generating'"
       ></textarea>
-
-      <div class="prompt-controls">
-        <!-- Model selector — hidden for now
-        <div class="model-selector-inline">
-          <mat-form-field appearance="fill" class="model-select" floatLabel="never"
-            style="--mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important;">
-            <mat-select class="mat-style-select" [(value)]="selectedModel" (selectionChange)="onModelChange()">
-              <mat-option *ngFor="let m of models" [value]="m.value">
-                {{ m.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        -->
-        <button
-          mat-mini-fab
-          color="primary"
-          (click)="sendPrompt()"
-          [disabled]="!prompt.trim() || status === 'generating'"
-          class="send-btn"
-        >
-          <mat-icon>arrow_upward</mat-icon>
-        </button>
-      </div>
+      <button
+        class="send-btn"
+        (click)="sendPrompt()"
+        [disabled]="!prompt.trim() || status === 'generating'"
+        title="Send (Enter)"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
     </div>
+    <div class="input-hint">⏎&nbsp;Send &nbsp;·&nbsp; ⇧⏎&nbsp;New line</div>
   </div>
+
 </div>
