@@ -76,7 +76,7 @@ export class VibeStudioService implements OnDestroy {
     this.cancelReply(); // abort any in-flight reply stream first
 
     this.ensureAgentStarted().then((sessionId) => {
-      this.openReplyStream(sessionId, prompt);
+      this.openReplyStream(sessionId, prompt + ' - send all code files generated here');
       this.startListAppsPolling(sessionId);
     }).catch(() => {
       this.status$.next('error');
