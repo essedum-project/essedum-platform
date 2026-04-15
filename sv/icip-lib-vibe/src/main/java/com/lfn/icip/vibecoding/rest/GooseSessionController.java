@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
-import reactor.core.publisher.Mono;
 
 /**
  * REST controller exposing Goose session-management endpoints to the Vibe Studio frontend.
@@ -51,7 +50,7 @@ public class GooseSessionController {
      * Response: { sessions: [Session] }
      */
     @GetMapping(value = "/sessions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> listSessions() {
+    public ResponseEntity<String> listSessions() {
         logger.info("List sessions request");
         return vibeCodingService.get("/sessions", null);
     }
@@ -61,7 +60,7 @@ public class GooseSessionController {
      * Response: Session
      */
     @GetMapping(value = "/sessions/{sessionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> getSession(@PathVariable String sessionId) {
+    public ResponseEntity<String> getSession(@PathVariable String sessionId) {
         logger.info("Get session request, session={}", sessionId);
         return vibeCodingService.get("/sessions/" + sessionId, null);
     }
@@ -71,7 +70,7 @@ public class GooseSessionController {
      * Response: (empty)
      */
     @DeleteMapping("/sessions/{sessionId}")
-    public Mono<ResponseEntity<Void>> deleteSession(@PathVariable String sessionId) {
+    public ResponseEntity<Void> deleteSession(@PathVariable String sessionId) {
         logger.info("Delete session request, session={}", sessionId);
         return vibeCodingService.delete("/sessions/" + sessionId);
     }
@@ -82,7 +81,7 @@ public class GooseSessionController {
      */
     @GetMapping(value = "/sessions/{sessionId}/export",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> exportSession(@PathVariable String sessionId) {
+    public ResponseEntity<String> exportSession(@PathVariable String sessionId) {
         logger.info("Export session request, session={}", sessionId);
         return vibeCodingService.get("/sessions/" + sessionId + "/export", null);
     }
@@ -93,7 +92,7 @@ public class GooseSessionController {
      */
     @GetMapping(value = "/sessions/{sessionId}/extensions",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> getSessionExtensions(@PathVariable String sessionId) {
+    public ResponseEntity<String> getSessionExtensions(@PathVariable String sessionId) {
         logger.info("Get session extensions request, session={}", sessionId);
         return vibeCodingService.get("/sessions/" + sessionId + "/extensions", null);
     }
@@ -110,7 +109,7 @@ public class GooseSessionController {
     @PostMapping(value = "/sessions/{sessionId}/fork",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> forkSession(
+    public ResponseEntity<String> forkSession(
             @PathVariable String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Fork session request, session={}", sessionId);
@@ -125,7 +124,7 @@ public class GooseSessionController {
     @PutMapping(value = "/sessions/{sessionId}/name",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> renameSession(
+    public ResponseEntity<String> renameSession(
             @PathVariable String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Rename session request, session={}", sessionId);
@@ -140,7 +139,7 @@ public class GooseSessionController {
     @PutMapping(value = "/sessions/{sessionId}/user-recipe-values",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> setUserRecipeValues(
+    public ResponseEntity<String> setUserRecipeValues(
             @PathVariable String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Set user recipe values request, session={}", sessionId);
@@ -157,7 +156,7 @@ public class GooseSessionController {
      * Response: [Session]
      */
     @GetMapping(value = "/sessions/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> searchSessions(
+    public ResponseEntity<String> searchSessions(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String limit,
             @RequestParam(required = false) String after_date,
@@ -176,7 +175,7 @@ public class GooseSessionController {
      * Response: { totalSessions, totalTokens }
      */
     @GetMapping(value = "/sessions/insights", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> sessionInsights() {
+    public ResponseEntity<String> sessionInsights() {
         logger.info("Session insights request");
         return vibeCodingService.get("/sessions/insights", null);
     }
@@ -189,7 +188,7 @@ public class GooseSessionController {
     @PostMapping(value = "/sessions/import",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> importSession(
+    public ResponseEntity<String> importSession(
             @RequestBody Map<String, Object> request) {
         logger.info("Import session request");
         return vibeCodingService.post("/sessions/import", request);

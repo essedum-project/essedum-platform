@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
-import reactor.core.publisher.Mono;
-
 /**
  * REST controller exposing Goose config-management endpoints to the Vibe Studio frontend.
  * <p>
@@ -51,7 +49,7 @@ public class GooseConfigController {
      * Response: { config: map<string, any> }
      */
     @GetMapping(value = "/config", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> getConfig() {
+    public ResponseEntity<String> getConfig() {
         logger.info("Get config request");
         return vibeCodingService.get("/config", null);
     }
@@ -64,7 +62,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/read",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configRead(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configRead(@RequestBody Map<String, Object> request) {
         logger.info("Config read request");
         return vibeCodingService.post("/config/read", request);
     }
@@ -77,7 +75,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/upsert",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configUpsert(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configUpsert(@RequestBody Map<String, Object> request) {
         logger.info("Config upsert request");
         return vibeCodingService.post("/config/upsert", request);
     }
@@ -90,7 +88,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/remove",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configRemove(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configRemove(@RequestBody Map<String, Object> request) {
         logger.info("Config remove request");
         return vibeCodingService.post("/config/remove", request);
     }
@@ -100,7 +98,7 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/init", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configInit() {
+    public ResponseEntity<String> configInit() {
         logger.info("Config init request");
         return vibeCodingService.post("/config/init", null);
     }
@@ -110,7 +108,7 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/backup", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configBackup() {
+    public ResponseEntity<String> configBackup() {
         logger.info("Config backup request");
         return vibeCodingService.post("/config/backup", null);
     }
@@ -120,7 +118,7 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/recover", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configRecover() {
+    public ResponseEntity<String> configRecover() {
         logger.info("Config recover request");
         return vibeCodingService.post("/config/recover", null);
     }
@@ -130,7 +128,7 @@ public class GooseConfigController {
      * Response: string
      */
     @GetMapping(value = "/config/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configValidate() {
+    public ResponseEntity<String> configValidate() {
         logger.info("Config validate request");
         return vibeCodingService.get("/config/validate", null);
     }
@@ -147,7 +145,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/set-provider",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configSetProvider(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configSetProvider(@RequestBody Map<String, Object> request) {
         logger.info("Config set provider request");
         return vibeCodingService.post("/config/set_provider", request);
     }
@@ -157,7 +155,7 @@ public class GooseConfigController {
      * Response: [{ name, is_configured, provider_type, metadata: {...} }]
      */
     @GetMapping(value = "/config/providers", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviders() {
+    public ResponseEntity<String> configProviders() {
         logger.info("Config providers request");
         return vibeCodingService.get("/config/providers", null);
     }
@@ -168,7 +166,7 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/providers/{name}/models",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviderModels(@PathVariable String name) {
+    public ResponseEntity<String> configProviderModels(@PathVariable String name) {
         logger.info("Config provider models request, provider={}", name);
         return vibeCodingService.get("/config/providers/" + name + "/models", null);
     }
@@ -179,7 +177,7 @@ public class GooseConfigController {
      */
     @PostMapping(value = "/config/providers/{name}/oauth",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviderOauth(@PathVariable String name) {
+    public ResponseEntity<String> configProviderOauth(@PathVariable String name) {
         logger.info("Config provider OAuth request, provider={}", name);
         return vibeCodingService.post("/config/providers/" + name + "/oauth", null);
     }
@@ -190,7 +188,7 @@ public class GooseConfigController {
      */
     @PostMapping(value = "/config/providers/{name}/cleanup",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviderCleanup(@PathVariable String name) {
+    public ResponseEntity<String> configProviderCleanup(@PathVariable String name) {
         logger.info("Config provider cleanup request, provider={}", name);
         return vibeCodingService.post("/config/providers/" + name + "/cleanup", null);
     }
@@ -203,7 +201,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/check-provider",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configCheckProvider(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configCheckProvider(@RequestBody Map<String, Object> request) {
         logger.info("Config check provider request");
         return vibeCodingService.post("/config/check_provider", request);
     }
@@ -215,7 +213,7 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/provider-catalog",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviderCatalog(
+    public ResponseEntity<String> configProviderCatalog(
             @RequestParam(required = false) String format) {
         logger.info("Config provider catalog request");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -229,7 +227,7 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/provider-catalog/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configProviderCatalogEntry(@PathVariable String id) {
+    public ResponseEntity<String> configProviderCatalogEntry(@PathVariable String id) {
         logger.info("Config provider catalog entry request, id={}", id);
         return vibeCodingService.get("/config/provider-catalog/" + id, null);
     }
@@ -242,7 +240,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/canonical-model-info",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configCanonicalModelInfo(
+    public ResponseEntity<String> configCanonicalModelInfo(
             @RequestBody Map<String, Object> request) {
         logger.info("Config canonical model info request");
         return vibeCodingService.post("/config/canonical-model-info", request);
@@ -257,7 +255,7 @@ public class GooseConfigController {
      * Response: { extensions: [ExtensionEntry], warnings?: [string] }
      */
     @GetMapping(value = "/config/extensions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configExtensions() {
+    public ResponseEntity<String> configExtensions() {
         logger.info("Config extensions request");
         return vibeCodingService.get("/config/extensions", null);
     }
@@ -270,7 +268,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/extensions",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configAddExtension(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configAddExtension(@RequestBody Map<String, Object> request) {
         logger.info("Config add extension request");
         return vibeCodingService.post("/config/extensions", request);
     }
@@ -281,7 +279,7 @@ public class GooseConfigController {
      */
     @DeleteMapping(value = "/config/extensions/{name}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Void>> configRemoveExtension(@PathVariable String name) {
+    public ResponseEntity<Void> configRemoveExtension(@PathVariable String name) {
         logger.info("Config remove extension request, name={}", name);
         return vibeCodingService.delete("/config/extensions/" + name);
     }
@@ -298,7 +296,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/permissions",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configPermissions(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configPermissions(@RequestBody Map<String, Object> request) {
         logger.info("Config permissions request");
         return vibeCodingService.post("/config/permissions", request);
     }
@@ -308,7 +306,7 @@ public class GooseConfigController {
      * Response: { prompts: [{ name, description, default_content, is_customized, user_content? }] }
      */
     @GetMapping(value = "/config/prompts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configPrompts() {
+    public ResponseEntity<String> configPrompts() {
         logger.info("Config prompts request");
         return vibeCodingService.get("/config/prompts", null);
     }
@@ -318,7 +316,7 @@ public class GooseConfigController {
      * Response: { name, content, default_content, is_customized }
      */
     @GetMapping(value = "/config/prompts/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configGetPrompt(@PathVariable String name) {
+    public ResponseEntity<String> configGetPrompt(@PathVariable String name) {
         logger.info("Config get prompt request, name={}", name);
         return vibeCodingService.get("/config/prompts/" + name, null);
     }
@@ -331,7 +329,7 @@ public class GooseConfigController {
     @PutMapping(value = "/config/prompts/{name}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configUpdatePrompt(
+    public ResponseEntity<String> configUpdatePrompt(
             @PathVariable String name,
             @RequestBody Map<String, Object> request) {
         logger.info("Config update prompt request, name={}", name);
@@ -343,7 +341,7 @@ public class GooseConfigController {
      * Response: string
      */
     @DeleteMapping(value = "/config/prompts/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Void>> configDeletePrompt(@PathVariable String name) {
+    public ResponseEntity<Void> configDeletePrompt(@PathVariable String name) {
         logger.info("Config delete prompt request, name={}", name);
         return vibeCodingService.delete("/config/prompts/" + name);
     }
@@ -354,7 +352,7 @@ public class GooseConfigController {
      * Response: { commands: [{ command, help, command_type }] }
      */
     @GetMapping(value = "/config/slash-commands", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configSlashCommands(
+    public ResponseEntity<String> configSlashCommands(
             @RequestParam(required = false) String working_dir) {
         logger.info("Config slash commands request");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -372,7 +370,7 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/custom-providers/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configGetCustomProvider(@PathVariable String id) {
+    public ResponseEntity<String> configGetCustomProvider(@PathVariable String id) {
         logger.info("Config get custom provider request, id={}", id);
         return vibeCodingService.get("/config/custom-providers/" + id, null);
     }
@@ -386,7 +384,7 @@ public class GooseConfigController {
     @PostMapping(value = "/config/custom-providers",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configCreateCustomProvider(
+    public ResponseEntity<String> configCreateCustomProvider(
             @RequestBody Map<String, Object> request) {
         logger.info("Config create custom provider request");
         return vibeCodingService.post("/config/custom-providers", request);
@@ -400,7 +398,7 @@ public class GooseConfigController {
     @PutMapping(value = "/config/custom-providers/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> configUpdateCustomProvider(
+    public ResponseEntity<String> configUpdateCustomProvider(
             @PathVariable String id,
             @RequestBody Map<String, Object> request) {
         logger.info("Config update custom provider request, id={}", id);
@@ -413,7 +411,7 @@ public class GooseConfigController {
      */
     @DeleteMapping(value = "/config/custom-providers/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Void>> configDeleteCustomProvider(@PathVariable String id) {
+    public ResponseEntity<Void> configDeleteCustomProvider(@PathVariable String id) {
         logger.info("Config delete custom provider request, id={}", id);
         return vibeCodingService.delete("/config/custom-providers/" + id);
     }

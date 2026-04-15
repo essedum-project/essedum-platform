@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
-import reactor.core.publisher.Mono;
-
 /**
  * REST controller exposing Goose schedule endpoints to the Vibe Studio frontend.
  * <p>
@@ -51,7 +49,7 @@ public class GooseScheduleController {
      * Response: { jobs: [ScheduledJob] }
      */
     @GetMapping(value = "/schedule/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleList() {
+    public ResponseEntity<String> scheduleList() {
         logger.info("Schedule list request");
         return vibeCodingService.get("/schedule/list", null);
     }
@@ -64,7 +62,7 @@ public class GooseScheduleController {
     @PostMapping(value = "/schedule/create",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleCreate(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> scheduleCreate(@RequestBody Map<String, Object> request) {
         logger.info("Schedule create request");
         return vibeCodingService.post("/schedule/create", request);
     }
@@ -74,7 +72,7 @@ public class GooseScheduleController {
      * Response: (empty)
      */
     @DeleteMapping("/schedule/delete/{id}")
-    public Mono<ResponseEntity<Void>> scheduleDelete(@PathVariable String id) {
+    public ResponseEntity<Void> scheduleDelete(@PathVariable String id) {
         logger.info("Schedule delete request, id={}", id);
         return vibeCodingService.delete("/schedule/delete/" + id);
     }
@@ -87,7 +85,7 @@ public class GooseScheduleController {
     @PutMapping(value = "/schedule/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleUpdate(
+    public ResponseEntity<String> scheduleUpdate(
             @PathVariable String id,
             @RequestBody Map<String, Object> request) {
         logger.info("Schedule update request, id={}", id);
@@ -100,7 +98,7 @@ public class GooseScheduleController {
      */
     @GetMapping(value = "/schedule/{id}/inspect",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleInspect(@PathVariable String id) {
+    public ResponseEntity<String> scheduleInspect(@PathVariable String id) {
         logger.info("Schedule inspect request, id={}", id);
         return vibeCodingService.get("/schedule/" + id + "/inspect", null);
     }
@@ -111,7 +109,7 @@ public class GooseScheduleController {
      */
     @PostMapping(value = "/schedule/{id}/pause",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> schedulePause(@PathVariable String id) {
+    public ResponseEntity<String> schedulePause(@PathVariable String id) {
         logger.info("Schedule pause request, id={}", id);
         return vibeCodingService.post("/schedule/" + id + "/pause", null);
     }
@@ -122,7 +120,7 @@ public class GooseScheduleController {
      */
     @PostMapping(value = "/schedule/{id}/unpause",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleUnpause(@PathVariable String id) {
+    public ResponseEntity<String> scheduleUnpause(@PathVariable String id) {
         logger.info("Schedule unpause request, id={}", id);
         return vibeCodingService.post("/schedule/" + id + "/unpause", null);
     }
@@ -133,7 +131,7 @@ public class GooseScheduleController {
      */
     @PostMapping(value = "/schedule/{id}/kill",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleKill(@PathVariable String id) {
+    public ResponseEntity<String> scheduleKill(@PathVariable String id) {
         logger.info("Schedule kill request, id={}", id);
         return vibeCodingService.post("/schedule/" + id + "/kill", null);
     }
@@ -144,7 +142,7 @@ public class GooseScheduleController {
      */
     @PostMapping(value = "/schedule/{id}/run-now",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleRunNow(@PathVariable String id) {
+    public ResponseEntity<String> scheduleRunNow(@PathVariable String id) {
         logger.info("Schedule run-now request, id={}", id);
         return vibeCodingService.post("/schedule/" + id + "/run_now", null);
     }
@@ -158,7 +156,7 @@ public class GooseScheduleController {
      */
     @GetMapping(value = "/schedule/{id}/sessions",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> scheduleJobSessions(
+    public ResponseEntity<String> scheduleJobSessions(
             @PathVariable String id,
             @RequestParam(required = false) String limit) {
         logger.info("Schedule job sessions request, id={}", id);

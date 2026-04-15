@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
-import reactor.core.publisher.Mono;
-
 /**
  * REST controller exposing Goose system, diagnostics, and telemetry endpoints
  * to the Vibe Studio frontend.
@@ -47,7 +45,7 @@ public class GooseSystemController {
      * Response: string
      */
     @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> status() {
+    public ResponseEntity<String> status() {
         logger.info("Status request");
         return vibeCodingService.get("/status", null);
     }
@@ -59,7 +57,7 @@ public class GooseSystemController {
      *             enabled_extensions: [string] }
      */
     @GetMapping(value = "/system/info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> systemInfo() {
+    public ResponseEntity<String> systemInfo() {
         logger.info("System info request");
         return vibeCodingService.get("/system_info", null);
     }
@@ -70,7 +68,7 @@ public class GooseSystemController {
      */
     @GetMapping(value = "/diagnostics/{sessionId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> diagnostics(@PathVariable String sessionId) {
+    public ResponseEntity<String> diagnostics(@PathVariable String sessionId) {
         logger.info("Diagnostics request, session={}", sessionId);
         return vibeCodingService.get("/diagnostics/" + sessionId, null);
     }
@@ -87,7 +85,7 @@ public class GooseSystemController {
     @PostMapping(value = "/telemetry/event",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> telemetryEvent(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> telemetryEvent(@RequestBody Map<String, Object> request) {
         logger.info("Telemetry event request, event={}", request.get("event_name"));
         return vibeCodingService.post("/telemetry/event", request);
     }
@@ -101,7 +99,7 @@ public class GooseSystemController {
      * Response: { hostname, url, secret }
      */
     @PostMapping(value = "/tunnel/start", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> tunnelStart() {
+    public ResponseEntity<String> tunnelStart() {
         logger.info("Tunnel start request");
         return vibeCodingService.post("/tunnel/start", null);
     }
@@ -115,7 +113,7 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-openrouter", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> handleOpenRouter() {
+    public ResponseEntity<String> handleOpenRouter() {
         logger.info("Handle OpenRouter OAuth callback");
         return vibeCodingService.post("/handle_openrouter", null);
     }
@@ -125,7 +123,7 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-nanogpt", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> handleNanoGpt() {
+    public ResponseEntity<String> handleNanoGpt() {
         logger.info("Handle NanoGPT OAuth callback");
         return vibeCodingService.post("/handle_nanogpt", null);
     }
@@ -135,7 +133,7 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-tetrate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> handleTetrate() {
+    public ResponseEntity<String> handleTetrate() {
         logger.info("Handle Tetrate OAuth callback");
         return vibeCodingService.post("/handle_tetrate", null);
     }

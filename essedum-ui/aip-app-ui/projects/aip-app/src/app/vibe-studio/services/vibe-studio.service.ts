@@ -24,6 +24,7 @@ export class VibeStudioService implements OnDestroy {
   private session: VibeSession;
   /** AbortController for the active fetch-based SSE stream. */
   private replyAbortController: AbortController | null = null;
+  private streamingAssistantIndex: number | null = null;
 
   readonly sseEvents$   = new Subject<any>();
   readonly status$      = new BehaviorSubject<VibeSessionStatus>('idle');
@@ -70,7 +71,7 @@ export class VibeStudioService implements OnDestroy {
     this.messages$.next([...this.session.messages]);
     this.status$.next('generating');
 
-    this.cancelReply(); // cancel any in-flight reply first
+    this.cancelReply(); // abort any in-flight reply stream first
 
     this.ensureAgentStarted().then((sessionId) => {
       this.openReplyStream(sessionId, prompt);
@@ -79,16 +80,16 @@ export class VibeStudioService implements OnDestroy {
     });
   }
 
-  /** Cancel the currently streaming Goose reply (if any). */
+  /** Cancel the currently streaming Goose reply locally (if any). */
   cancelReply(): void {
     if (this.replyAbortController) {
       this.replyAbortController.abort();
       this.replyAbortController = null;
     }
-    if (this.session.id) {
-      const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${this.session.id}/cancel`;
-      this.http.post(url, { request_id: '' }, { headers: this.getHttpHeaders() })
-        .subscribe({ error: () => {} });
+    if (this.streamingAssistantIndex !== null) {
+      this.session.messages.splice(this.streamingAssistantIndex, 1);
+      this.streamingAssistantIndex = null;
+      this.messages$.next([...this.session.messages]);
     }
   }
 
@@ -202,6 +203,7 @@ export class VibeStudioService implements OnDestroy {
     };
 
     let assistantText = '';
+    this.startStreamingAssistantMessage();
 
     fetch(url, { method: 'POST', headers, body: JSON.stringify(body), credentials: 'include', signal })
       .then((response) => {
@@ -217,31 +219,23 @@ export class VibeStudioService implements OnDestroy {
         const read = (): void => {
           reader.read().then(({ done, value }) => {
             if (done) {
+              // Flush any remaining buffered SSE event before finalizing.
+              this.processSseChunk(buffer, (chunk) => {
+                assistantText += chunk;
+                this.tokenStream$.next(chunk);
+                this.updateStreamingAssistantMessage(assistantText);
+              });
               this.finaliseAssistantMessage(assistantText);
               return;
             }
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
-
-            for (const line of lines) {
-              if (!line.startsWith('data:')) continue;
-              const data = line.slice(5).trim();
-              if (!data || data === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(data);
-                this.sseEvents$.next(parsed);
-                this.extractText(parsed, (chunk) => {
-                  assistantText += chunk;
-                  this.tokenStream$.next(chunk);
-                });
-              } catch {
-                // raw non-JSON chunk — treat as plain text
-                assistantText += data;
-                this.tokenStream$.next(data);
-              }
-            }
+            const processed = this.processSseChunk(buffer, (chunk) => {
+              assistantText += chunk;
+              this.tokenStream$.next(chunk);
+              this.updateStreamingAssistantMessage(assistantText);
+            });
+            buffer = processed.remaining;
 
             read();
           }).catch((err: any) => {
@@ -260,21 +254,105 @@ export class VibeStudioService implements OnDestroy {
       });
   }
 
+  private processSseChunk(
+    chunk: string,
+    emit: (text: string) => void
+  ): { remaining: string } {
+    const normalized = chunk.replace(/\r\n/g, '\n');
+    const events = normalized.split('\n\n');
+    const remaining = events.pop() ?? '';
+
+    for (const rawEvent of events) {
+      const dataLines: string[] = [];
+      const lines = rawEvent.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).trimStart());
+        }
+      }
+
+      if (!dataLines.length) {
+        continue;
+      }
+
+      const data = dataLines.join('\n').trim();
+      if (!data || data === '[DONE]') {
+        continue;
+      }
+
+      this.extractAndEmitText(data, emit);
+    }
+
+    return { remaining };
+  }
+
+  private extractAndEmitText(rawData: string, emit: (text: string) => void): void {
+    try {
+      const parsed = JSON.parse(rawData);
+      this.sseEvents$.next(parsed);
+      this.extractText(parsed, emit);
+    } catch {
+      // raw non-JSON chunk — treat as plain text
+      emit(rawData);
+    }
+  }
+
   /**
    * Extracts text tokens from a Goose SSE event, supporting both full-message
    * format `{ role, content: [{ type: "text", text: "..." }] }` and delta
    * formats `{ type: "text" | "text_delta", text: "..." }`.
    */
   private extractText(event: any, emit: (text: string) => void): void {
+    if (!event) {
+      return;
+    }
+
+    // OpenAI-style: { choices: [{ delta: { content: "..." } }] }
+    if (Array.isArray(event.choices)) {
+      for (const choice of event.choices) {
+        const deltaContent = choice?.delta?.content;
+        if (typeof deltaContent === 'string' && deltaContent) {
+          emit(deltaContent);
+        }
+        const messageContent = choice?.message?.content;
+        if (typeof messageContent === 'string' && messageContent) {
+          emit(messageContent);
+        }
+      }
+    }
+
+    // Nested wrappers: { message: {...} } or { data: {...} }
+    if (event.message && typeof event.message === 'object') {
+      this.extractText(event.message, emit);
+    }
+    if (event.data && typeof event.data === 'object') {
+      this.extractText(event.data, emit);
+    }
+
     // Full message: { role, content: [...] }
     if (event.role && Array.isArray(event.content)) {
       for (const part of event.content) {
         if ((part.type === 'text' || part.type === 'text_delta') && part.text) {
           emit(part.text);
         }
+        if (typeof part?.content === 'string' && part.content) {
+          emit(part.content);
+        }
       }
-      return;
     }
+
+    // Generic content shapes
+    if (typeof event.content === 'string' && event.content) {
+      emit(event.content);
+    }
+    if (typeof event.text === 'string' && event.text) {
+      emit(event.text);
+    }
+    if (typeof event.delta === 'string' && event.delta) {
+      emit(event.delta);
+    }
+
     // Delta: { type: 'text' | 'text_delta', text: '...' }
     if ((event.type === 'text' || event.type === 'text_delta') && event.text) {
       emit(event.text);
@@ -285,7 +363,25 @@ export class VibeStudioService implements OnDestroy {
   private finaliseAssistantMessage(text: string): void {
     this.replyAbortController = null;
 
-    if (text) {
+    if (this.streamingAssistantIndex !== null) {
+      if (text) {
+        this.session.messages[this.streamingAssistantIndex].content = text;
+      } else {
+        this.session.messages.splice(this.streamingAssistantIndex, 1);
+      }
+      this.streamingAssistantIndex = null;
+      this.messages$.next([...this.session.messages]);
+
+      if (text) {
+        const urlMatch = text.match(/https?:\/\/[^\s"')\]]+/);
+        if (urlMatch) {
+          this.session.previewUrl = urlMatch[0];
+          this.previewUrl$.next(urlMatch[0]);
+          this.status$.next('live');
+          return;
+        }
+      }
+    } else if (text) {
       const msg: VibeChatMessage = { role: 'assistant', content: text, timestamp: new Date() };
       this.session.messages.push(msg);
       this.messages$.next([...this.session.messages]);
@@ -300,6 +396,23 @@ export class VibeStudioService implements OnDestroy {
       }
     }
     this.status$.next('idle');
+  }
+
+  private startStreamingAssistantMessage(): void {
+    const msg: VibeChatMessage = { role: 'assistant', content: '', timestamp: new Date() };
+    this.session.messages.push(msg);
+    this.streamingAssistantIndex = this.session.messages.length - 1;
+    this.messages$.next([...this.session.messages]);
+  }
+
+  private updateStreamingAssistantMessage(text: string): void {
+    if (this.streamingAssistantIndex === null) {
+      this.startStreamingAssistantMessage();
+    }
+    if (this.streamingAssistantIndex !== null) {
+      this.session.messages[this.streamingAssistantIndex].content = text;
+      this.messages$.next([...this.session.messages]);
+    }
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────

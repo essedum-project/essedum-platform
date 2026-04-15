@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
-import reactor.core.publisher.Mono;
-
 /**
  * REST controller exposing Goose recipe endpoints to the Vibe Studio frontend.
  * <p>
@@ -46,7 +44,7 @@ public class GooseRecipeController {
      *             slash_command?, schedule_cron? }] }
      */
     @GetMapping(value = "/recipes/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesList() {
+    public ResponseEntity<String> recipesList() {
         logger.info("Recipes list request");
         return vibeCodingService.get("/recipes/list", null);
     }
@@ -59,7 +57,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/parse",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesParse(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesParse(@RequestBody Map<String, Object> request) {
         logger.info("Recipes parse request");
         return vibeCodingService.post("/recipes/parse", request);
     }
@@ -72,7 +70,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/create",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesCreate(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesCreate(@RequestBody Map<String, Object> request) {
         logger.info("Recipes create request");
         return vibeCodingService.post("/recipes/create", request);
     }
@@ -85,7 +83,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/save",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesSave(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSave(@RequestBody Map<String, Object> request) {
         logger.info("Recipes save request");
         return vibeCodingService.post("/recipes/save", request);
     }
@@ -98,7 +96,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/delete",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesDelete(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesDelete(@RequestBody Map<String, Object> request) {
         logger.info("Recipes delete request");
         return vibeCodingService.post("/recipes/delete", request);
     }
@@ -111,7 +109,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/encode",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesEncode(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesEncode(@RequestBody Map<String, Object> request) {
         logger.info("Recipes encode request");
         return vibeCodingService.post("/recipes/encode", request);
     }
@@ -124,7 +122,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/decode",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesDecode(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesDecode(@RequestBody Map<String, Object> request) {
         logger.info("Recipes decode request");
         return vibeCodingService.post("/recipes/decode", request);
     }
@@ -137,7 +135,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/scan",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesScan(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesScan(@RequestBody Map<String, Object> request) {
         logger.info("Recipes scan request");
         return vibeCodingService.post("/recipes/scan", request);
     }
@@ -150,7 +148,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/to-yaml",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesToYaml(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesToYaml(@RequestBody Map<String, Object> request) {
         logger.info("Recipes to-yaml request");
         return vibeCodingService.post("/recipes/to-yaml", request);
     }
@@ -163,7 +161,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/schedule",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesSchedule(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSchedule(@RequestBody Map<String, Object> request) {
         logger.info("Recipes schedule request");
         return vibeCodingService.post("/recipes/schedule", request);
     }
@@ -176,7 +174,7 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/slash-command",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> recipesSlashCommand(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSlashCommand(@RequestBody Map<String, Object> request) {
         logger.info("Recipes slash command request");
         return vibeCodingService.post("/recipes/slash-command", request);
     }
