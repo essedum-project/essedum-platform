@@ -35,7 +35,7 @@
         <!-- Loading spinner before any files -->
         <div *ngIf="status === 'generating' && !files.length" class="tree-loading">
           <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
-          <span>Generating…</span>
+          <span>Generating</span>
         </div>
 
         <!-- File tree -->
@@ -48,9 +48,7 @@
             (click)="onNodeClick(node)"
           >
             <!-- Folder toggle arrow (VS Code style rotating triangle) -->
-            <span *ngIf="node.isDir" class="vsc-arrow" [class.vsc-arrow-open]="isDirExpanded(node)">
-              <i class="bi bi-caret-right-fill"></i>
-            </span>
+            <span *ngIf="node.isDir" class="vsc-arrow" [class.vsc-arrow-open]="isDirExpanded(node)"></span>
             <!-- File spacer -->
             <span *ngIf="!node.isDir" class="vsc-arrow vsc-arrow-spacer"></span>
 
@@ -119,7 +117,7 @@
       <div *ngIf="!previewUrl" class="preview-empty">
         <div *ngIf="status === 'generating'">
           <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
-          <p>Generating…</p>
+          <p>Generating</p>
         </div>
         <div *ngIf="status !== 'generating'">
           <i class="bi bi-display"></i>

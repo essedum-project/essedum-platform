@@ -52,6 +52,7 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
         }
         const firstLoad = !this.selectedFile;
         this.rebuildTree();
+        this.activeTab = 'code';
         if (firstLoad) {
           // Auto-expand all dirs and select first file on first load
           this.expandAll();
@@ -77,7 +78,10 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
       .subscribe((url) => {
         if (url) {
           this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-          this.activeTab = 'preview';
+          // Only auto-switch to preview if no files are loaded yet
+          if (!this.files.length) {
+            this.activeTab = 'preview';
+          }
         }
       });
 
