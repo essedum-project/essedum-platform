@@ -25,15 +25,16 @@ export class VibeStudioService implements OnDestroy {
   /** AbortController for the active fetch-based SSE stream. */
   private replyAbortController: AbortController | null = null;
   private streamingAssistantIndex: number | null = null;
-  /** setInterval handle for list_apps polling while a reply is streaming. */
-  private listAppsPollingHandle: ReturnType<typeof setInterval> | null = null;
 
-  readonly sseEvents$   = new Subject<any>();
-  readonly status$      = new BehaviorSubject<VibeSessionStatus>('idle');
-  readonly files$       = new BehaviorSubject<VibeFile[]>([]);
-  readonly messages$    = new BehaviorSubject<VibeChatMessage[]>([]);
-  readonly previewUrl$  = new BehaviorSubject<string | null>(null);
-  readonly tokenStream$ = new Subject<string>();
+  readonly sseEvents$         = new Subject<any>();
+  readonly status$            = new BehaviorSubject<VibeSessionStatus>('idle');
+  readonly files$             = new BehaviorSubject<VibeFile[]>([]);
+  readonly messages$          = new BehaviorSubject<VibeChatMessage[]>([]);
+  readonly previewUrl$        = new BehaviorSubject<string | null>(null);
+  readonly tokenStream$       = new Subject<string>();
+  readonly sessionId$         = new BehaviorSubject<string | null>(null);
+  /** Emits the complete final file list exactly once when a generation round fully completes. */
+  readonly generationComplete$ = new Subject<VibeFile[]>();
 
   constructor(
     private http: HttpClient,
@@ -67,8 +68,8 @@ export class VibeStudioService implements OnDestroy {
    *
    * Alias: `generate()` is kept so left-panel component needs no changes.
    */
-  generate(prompt: string): void {
-    const userMsg: VibeChatMessage = { role: 'user', content: prompt, timestamp: new Date() };
+  generate(prompt: string, displayText?: string): void {
+    const userMsg: VibeChatMessage = { role: 'user', content: displayText ?? prompt, timestamp: new Date() };
     this.session.messages.push(userMsg);
     this.messages$.next([...this.session.messages]);
     this.status$.next('generating');
@@ -77,7 +78,6 @@ export class VibeStudioService implements OnDestroy {
 
     this.ensureAgentStarted().then((sessionId) => {
       this.openReplyStream(sessionId, prompt + ' - send all code files generated here');
-      this.startListAppsPolling(sessionId);
     }).catch(() => {
       this.status$.next('error');
     });
@@ -85,7 +85,6 @@ export class VibeStudioService implements OnDestroy {
 
   /** Cancel the currently streaming Goose reply locally (if any). */
   cancelReply(): void {
-    this.stopListAppsPolling();
     if (this.replyAbortController) {
       this.replyAbortController.abort();
       this.replyAbortController = null;
@@ -115,10 +114,10 @@ export class VibeStudioService implements OnDestroy {
     this.files$.next([]);
     this.messages$.next([]);
     this.previewUrl$.next(null);
+    this.sessionId$.next(null);
   }
 
   ngOnDestroy(): void {
-    this.stopListAppsPolling();
     this.cancelReply();
   }
 
@@ -148,6 +147,7 @@ export class VibeStudioService implements OnDestroy {
             return;
           }
           this.session.id = sessionId;
+          this.sessionId$.next(sessionId);
           this.applyModelToSession(sessionId, this.session.model)
             .then(() => resolve(sessionId))
             .catch(() => resolve(sessionId)); // non-fatal
@@ -213,7 +213,7 @@ export class VibeStudioService implements OnDestroy {
     fetch(url, { method: 'POST', headers, body: JSON.stringify(body), credentials: 'include', signal })
       .then((response) => {
         if (!response.ok || !response.body) {
-          this.status$.next('error');
+          this.finaliseAssistantMessage(assistantText);
           return;
         }
 
@@ -245,7 +245,7 @@ export class VibeStudioService implements OnDestroy {
             read();
           }).catch((err: any) => {
             if (err?.name !== 'AbortError') {
-              this.status$.next('error');
+              this.finaliseAssistantMessage(assistantText);
             }
           });
         };
@@ -254,7 +254,7 @@ export class VibeStudioService implements OnDestroy {
       })
       .catch((err: any) => {
         if (err?.name !== 'AbortError') {
-          this.status$.next('error');
+          this.finaliseAssistantMessage(assistantText);
         }
       });
   }
@@ -514,47 +514,33 @@ export class VibeStudioService implements OnDestroy {
       this.messages$.next([...this.session.messages]);
     }
 
-    // Check for a live preview URL first
+    // Check for a live preview URL
     if (text) {
       const urlMatch = text.match(/https?:\/\/[^\s"')\]]+/);
       if (urlMatch) {
         this.session.previewUrl = urlMatch[0];
         this.previewUrl$.next(urlMatch[0]);
         this.status$.next('live');
-        return;
+        // still fall through to call list_apps below
       }
     }
 
-    // Stop the polling interval now that the stream is done.
-    this.stopListAppsPolling();
-
-    // Always call list_apps once more after the stream ends (final sweep).
-    // Stay in 'generating' state while files load so the UI shows progress.
+    // Call list_apps after every reply to get all generated files.
     if (this.session.id) {
-      this.listAppsAndFetchFiles(this.session.id, () => this.status$.next('idle'));
+      this.listAppsAndFetchFiles(this.session.id, () => {
+        // Emit the complete file list before transitioning to idle
+        if (this.files$.value.length) {
+          this.generationComplete$.next([...this.files$.value]);
+        }
+        if (this.status$.value !== 'live') {
+          this.status$.next('idle');
+        }
+      });
       return;
     }
 
-    this.status$.next('idle');
-  }
-
-  // ─── list_apps polling during streaming ─────────────────────────────────────
-
-  /**
-   * Polls /agent/list-apps every 4 s while the agent is streaming.
-   * Files appear in the Code panel as soon as Goose writes them.
-   */
-  private startListAppsPolling(sessionId: string): void {
-    this.stopListAppsPolling();
-    this.listAppsPollingHandle = setInterval(() => {
-      this.listAppsAndFetchFiles(sessionId, () => { /* no status change during polling */ });
-    }, 4000);
-  }
-
-  private stopListAppsPolling(): void {
-    if (this.listAppsPollingHandle !== null) {
-      clearInterval(this.listAppsPollingHandle);
-      this.listAppsPollingHandle = null;
+    if (this.status$.value !== 'live') {
+      this.status$.next('idle');
     }
   }
 
@@ -781,5 +767,40 @@ export class VibeStudioService implements OnDestroy {
       Rolename:       role.name?.toString()  ?? '',
       'Access-Token': localStorage.getItem('accessToken') ?? '',
     };
+  }
+
+  /**
+   * Bundles all generated files into a ZIP and uploads to the folder/upload endpoint.
+   * Uses the same auth headers as every other vibe-coding API call.
+   */
+  async uploadFilesAsZip(files: VibeFile[], cname: string): Promise<void> {
+    if (!files.length || !cname) return;
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+      for (const file of files) {
+        zip.file(file.path, file.content);
+      }
+      const blob = await zip.generateAsync({ type: 'blob' });
+
+      // Resolve org — same priority order as the rest of the platform
+      const project = JSON.parse(sessionStorage.getItem('project') || '{}');
+      const org: string =
+        project?.organization ||
+        sessionStorage.getItem('organization') ||
+        localStorage.getItem('organisation') ||
+        'default';
+
+      const url = `${this.baseUrl}/folder/upload/${cname}/${org}?zipFile=null`;
+      const formData = new FormData();
+      formData.append('zipFile', new File([blob], `${cname}.zip`, { type: 'application/zip' }));
+
+      // getHttpHeaders() provides Authorization (jwtToken), Access-Token, Project, Roleid, Rolename.
+      // Do NOT set Content-Type — browser must set it with the multipart boundary.
+      this.http.post(url, formData, { headers: this.getHttpHeaders() })
+        .subscribe({ error: () => {} });
+    } catch {
+      // non-fatal — never disrupts the existing generation flow
+    }
   }
 }
