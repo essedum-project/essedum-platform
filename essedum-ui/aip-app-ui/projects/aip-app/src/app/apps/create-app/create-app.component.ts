@@ -14,7 +14,6 @@ import { FormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Services } from '../../services/service';
 import { FileUploader } from 'ng2-file-upload';
-import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { App } from '../../apps/app';
@@ -129,7 +128,7 @@ export class CreateAppComponent implements OnInit {
       if (this.data.type) {
         this.type = this.data.type;
       }
-      let databckp = _.cloneDeep(this.data);
+      let databckp = structuredClone(this.data);
       if (this.data?.action) {
         this.data.canvasData = databckp;
         delete this.data.canvasData.created_date;

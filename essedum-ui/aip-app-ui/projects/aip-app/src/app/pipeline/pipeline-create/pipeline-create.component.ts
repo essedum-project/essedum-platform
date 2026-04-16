@@ -3,7 +3,6 @@ import { StreamingServices } from '../../streaming-services/streaming-service';
 import { FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef,MatDialog } from '@angular/material/dialog';
 import { Services } from '../../services/service';
-import * as _ from "lodash";
 import { Router } from '@angular/router';
 
 @Component({
@@ -82,7 +81,7 @@ export class PipelineCreateComponent implements OnInit {
           }
         }
       }
-      let databckp = _.cloneDeep(this.data)
+      let databckp = structuredClone(this.data)
       if (this.data?.action) {
         this.data.canvasData = databckp
         delete this.data.canvasData.created_date

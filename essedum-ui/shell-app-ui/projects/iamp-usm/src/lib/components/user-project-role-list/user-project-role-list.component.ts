@@ -28,7 +28,6 @@ import { RoleService } from "../../services/role.service";
 import { HelperService } from "../../services/helper.service";
 import { FormControl } from "@angular/forms";
 import { Msg } from "../../shared-modules/services/msg";
-import * as _ from "lodash";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
 import { Portfolio } from "../../models/portfolio";
 import { Observable, ReplaySubject, Subject, Subscription } from "rxjs";
