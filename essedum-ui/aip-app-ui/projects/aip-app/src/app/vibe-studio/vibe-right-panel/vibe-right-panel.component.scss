@@ -15,14 +15,14 @@ $sb-fg-muted   : #858585;
 $sb-border     : #3e3e3e;
 $folder-color  : #dcb67a;
 
-// editor — Dracula theme (exact match to agent-pipeline $bg-editor / $text-editor)
-$ed-bg         : #282a36;
-$ed-fg         : #f8f8f2;
+// editor — VS Code Dark+ theme (exact VS Code colors)
+$ed-bg         : #1e1e1e;
+$ed-fg         : #d4d4d4;
 $ed-bg-strip   : #2d2d2d;
 $ed-border     : #3e3e3e;
 $ed-lnum-bg    : #1e1e1e;
 $ed-lnum-fg    : #858585;
-$ed-lnum-sep   : #3e3e3e;
+$ed-lnum-sep   : #404040;
 $ed-row-hover  : rgba(255, 255, 255, 0.04);
 
 $code-font     : 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace;
@@ -177,8 +177,8 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
 .tree-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 24px;
+  gap: 3px;
+  height: 22px;
   cursor: pointer;
   padding-right: 8px;
   color: $sb-fg;
@@ -196,13 +196,30 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
   }
 }
 
-.chevron {
+// VS Code-style rotating triangle arrow
+.vsc-arrow {
   width: 16px;
+  height: 22px;
   flex-shrink: 0;
-  text-align: center;
-  font-size: 10px;
-  color: $sb-fg-muted;
-  &.spacer { visibility: hidden; }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 10px;
+    color: $sb-fg;
+    transition: transform 0.12s ease;
+    transform: rotate(0deg);
+    display: block;
+  }
+
+  &.vsc-arrow-open i {
+    transform: rotate(90deg);
+  }
+
+  &.vsc-arrow-spacer {
+    visibility: hidden;
+  }
 }
 
 .tree-icon {
@@ -245,9 +262,10 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
+  padding: 0 16px;
+  height: 35px;
   font-size: 12px;
-  color: #888;
+  color: #8c8c8c;
   white-space: nowrap;
   font-family: $ui-font;
   border-right: 1px solid $ed-border;
@@ -255,8 +273,8 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
   &.active {
     background: $ed-bg;
     color: $ed-fg;
-    border-top: 2px solid $accent;
-    font-weight: 500;
+    border-top: 1px solid $accent;
+    font-weight: 400;
   }
 
   .tree-icon { font-size: 13px; }
@@ -310,12 +328,12 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
 .line-num {
   user-select: none;
   text-align: right;
-  padding: 0 14px 0 8px;
+  padding: 0 16px 0 0;
   color: $ed-lnum-fg;
   font-family: $code-font;
-  font-size: 12px;
-  line-height: 20px;
-  min-width: 44px;
+  font-size: 13px;
+  line-height: 19px;
+  min-width: 48px;
   white-space: nowrap;
   vertical-align: top;
   border-right: 1px solid $ed-lnum-sep;
@@ -330,8 +348,8 @@ $ui-font       : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-ser
 
 .code-text {
   font-family: $code-font;
-  font-size: 12.5px;
-  line-height: 20px;
+  font-size: 13px;
+  line-height: 19px;
   color: $ed-fg;
   white-space: pre;
   display: block;

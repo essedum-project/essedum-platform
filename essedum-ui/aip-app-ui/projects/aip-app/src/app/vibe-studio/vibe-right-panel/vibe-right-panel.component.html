@@ -16,7 +16,7 @@
     <div class="tab-bar">
       <button class="tab-btn" [class.active]="activeTab === 'code'" (click)="activeTab = 'code'">
         <i class="bi bi-files"></i>
-        Explorer
+        Codespace
         <span *ngIf="files.length" class="file-badge">{{ files.length }}</span>
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'preview'" (click)="activeTab = 'preview'">
@@ -30,7 +30,7 @@
 
       <!-- Sidebar: VS Code explorer -->
       <div class="vsc-sidebar">
-        <div class="explorer-title">EXPLORER</div>
+        <div class="explorer-title">CODESPACE</div>
 
         <!-- Loading spinner before any files -->
         <div *ngIf="status === 'generating' && !files.length" class="tree-loading">
@@ -47,12 +47,12 @@
             [style.padding-left]="indentPx(node.depth)"
             (click)="onNodeClick(node)"
           >
-            <!-- Folder toggle chevron -->
-            <span *ngIf="node.isDir" class="chevron">
-              <i class="bi" [ngClass]="isDirExpanded(node) ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+            <!-- Folder toggle arrow (VS Code style rotating triangle) -->
+            <span *ngIf="node.isDir" class="vsc-arrow" [class.vsc-arrow-open]="isDirExpanded(node)">
+              <i class="bi bi-caret-right-fill"></i>
             </span>
-            <!-- File spacer (no chevron) -->
-            <span *ngIf="!node.isDir" class="chevron spacer"></span>
+            <!-- File spacer -->
+            <span *ngIf="!node.isDir" class="vsc-arrow vsc-arrow-spacer"></span>
 
             <!-- Icon -->
             <i *ngIf="node.isDir"
@@ -100,7 +100,7 @@
             <tbody>
               <tr *ngFor="let line of codeLines; let i = index" class="code-row">
                 <td class="line-num">{{ i + 1 }}</td>
-                <td class="line-code"><span class="code-text" [style.color]="codeColor">{{ line }}</span></td>
+                <td class="line-code"><span class="code-text" [innerHTML]="tokenizedLines[i]"></span></td>
               </tr>
             </tbody>
           </table>
