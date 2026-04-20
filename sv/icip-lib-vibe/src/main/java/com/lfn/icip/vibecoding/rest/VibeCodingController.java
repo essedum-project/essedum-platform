@@ -257,6 +257,16 @@ public class VibeCodingController {
         logger.info("Session events SSE request, session={}", sessionId);
         return vibeCodingService.sseGet("/sessions/" + sessionId + "/events");
     }
+
+    /**
+     * Get the preview of the generated app for a session.
+     */
+    @GetMapping(value = "/sessions/{sessionId}/preview",
+            produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> sessionPreview(@PathVariable String sessionId) {
+        logger.info("Session preview request, session={}", sessionId);
+        return vibeCodingService.get("/sessions/" + sessionId + "/preview", null);
+    }
 }
 
 
