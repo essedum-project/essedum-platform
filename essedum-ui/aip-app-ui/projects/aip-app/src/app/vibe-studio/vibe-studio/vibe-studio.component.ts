@@ -18,6 +18,8 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   leftPanelWidth = 35;
   private isDragging = false;
   private destroy$ = new Subject<void>();
+  /** cancels the per-session messages$ subscription on new-session / re-select */
+  private sessionReset$ = new Subject<void>();
   /** cname returned by the streaming-services create API */
   private registeredCname: string | null = null;
   /** app name extracted from the user's requirements message */
@@ -33,23 +35,6 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Register in streaming services using the app name from the user's 2nd message
-    // (msg[0]=card prompt, msg[1]=user requirements answer which contains the app name).
-    // This fires WELL before code generation completes, eliminating the race condition.
-    this.vibeService.messages$
-      .pipe(
-        takeUntil(this.destroy$),
-        map(msgs => msgs.filter(m => m.role === 'user')),
-        filter(userMsgs => userMsgs.length >= 2),
-        take(1),
-      )
-      .subscribe(userMsgs => {
-        const sessionId = this.vibeService.sessionId$.getValue();
-        if (!sessionId || !this.selectedAppType) return;
-        this.appName = this.extractAppName(userMsgs[1].content);
-        this.registerInStreamingServices(sessionId);
-      });
-
     // When generation fully completes, buffer the files and attempt upload.
     // tryFlushUpload() will also be called when registeredCname arrives, so
     // whichever of the two (files, cname) is last wins — no race condition.
@@ -105,6 +90,27 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
 
   selectAppType(appType: AppType): void {
     this.selectedAppType = appType;
+    // Cancel any leftover subscription from a previous session and start a fresh one.
+    this.sessionReset$.next();
+
+    // Register in streaming services using the app name from the user's 2nd message
+    // (msg[0]=card prompt, msg[1]=user requirements answer which contains the app name).
+    // Re-subscribed here so it works on every new session, not just the first one.
+    this.vibeService.messages$
+      .pipe(
+        takeUntil(this.destroy$),
+        takeUntil(this.sessionReset$),
+        map(msgs => msgs.filter(m => m.role === 'user')),
+        filter(userMsgs => userMsgs.length >= 2),
+        take(1),
+      )
+      .subscribe(userMsgs => {
+        const sessionId = this.vibeService.sessionId$.getValue();
+        if (!sessionId || !this.selectedAppType) return;
+        this.appName = this.extractAppName(userMsgs[1].content);
+        this.registerInStreamingServices(sessionId);
+      });
+
     this.vibeService.setAppType(appType);
     const label = this.appTypeOptions.find(o => o.value === appType)?.label || appType;
     // Initial prompt: gather requirements before generating any code.
@@ -159,17 +165,15 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     return this.buildUniqueName(word ?? 'App');
   }
 
-  /** Title-cases a single noun and appends a short unique suffix (MMDD-hex). */
+  /** Title-cases a single noun and appends a 3-char unique suffix. */
   private buildUniqueName(noun: string): string {
     const titled = noun.charAt(0).toUpperCase() + noun.slice(1).toLowerCase();
-    const now = new Date();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const rand = Math.floor(Math.random() * 0xfff).toString(16).padStart(3, '0');
-    return `${titled}-${mm}${dd}${rand}`;
+    const suffix = Date.now().toString(36).slice(-3);
+    return `${titled}-${suffix}`;
   }
 
   onNewSession(): void {
+    this.sessionReset$.next();
     this.selectedAppType = null;
     this.registeredCname = null;
     this.appName = null;
@@ -199,6 +203,8 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sessionReset$.next();
+    this.sessionReset$.complete();
     this.destroy$.next();
     this.destroy$.complete();
     this.vibeService.resetSession();
