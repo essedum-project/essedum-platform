@@ -16,7 +16,6 @@ import {
   NavigationCancel,
   ActivationEnd,
 } from "@angular/router";
-import * as _ from "lodash-es";
 import { ApisService } from "../services/apis.service";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MatDialog } from "@angular/material/dialog";
@@ -1318,7 +1317,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
       let defaultroleindex = -1;
       if (value.length > 0) {
         let defaultrole = value[0].role;
-        defaultroleindex = _.findIndex(this.roleList, (r) => {
+        defaultroleindex = this.roleList.findIndex((r) => {
           return r.id == defaultrole;
         });
       }
@@ -1328,7 +1327,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
       } catch (e: any) {
         console.error("JSON.parse error - ", e.message);
       }
-      let idx = _.findIndex(this.roleList, (r) => {
+      let idx = this.roleList.findIndex((r) => {
         return r.name == role.name;
       });
       if (defaultroleindex != -1) {
@@ -1352,7 +1351,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     let defaultroleindex = -1;
     if (value.length > 0) {
       let defaultrole = value[0].role;
-      defaultroleindex = _.findIndex(this.roleList, (r) => {
+      defaultroleindex = this.roleList.findIndex((r) => {
         return r.id == defaultrole;
       });
     }
@@ -1362,7 +1361,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.parse error - ", e.message);
     }
-    let idx = _.findIndex(this.roleList, (r) => {
+    let idx = this.roleList.findIndex((r) => {
       return r.name == role.name;
     });
     if (defaultroleindex != -1) {
@@ -1393,7 +1392,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
         let defaultroleindex = -1;
         if (value.length > 0) {
           let defaultrole = value[0].role;
-          defaultroleindex = _.findIndex(this.roleList, (r) => {
+          defaultroleindex = this.roleList.findIndex((r) => {
             return r.id == defaultrole;
           });
         }
@@ -1403,7 +1402,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
         } catch (e: any) {
           console.error("JSON.parse error - ", e.message);
         }
-        let idx = _.findIndex(this.roleList, (r) => {
+        let idx = this.roleList.findIndex((r) => {
           if (r.id == rolll) {
             return r.name;
           }

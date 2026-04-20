@@ -273,9 +273,13 @@ export class DefaultComponent {
 
   makeRandom(lengthOfCode: number, possible: string) {
     let text = "";
-    for (let i = 0; i < lengthOfCode; i++) {
-      text += possible.charAt(Math.floor((window.crypto.getRandomValues(new Uint32Array(1))[0] /
-      (0xffffffff + 1)) * possible.length));
+    const maxUnbiased = Math.floor(0x100000000 / possible.length) * possible.length;
+    const randomValues = new Uint32Array(1);
+    while (text.length < lengthOfCode) {
+      window.crypto.getRandomValues(randomValues);
+      if (randomValues[0] < maxUnbiased) {
+        text += possible.charAt(randomValues[0] % possible.length);
+      }
     }
     return text;
   }
