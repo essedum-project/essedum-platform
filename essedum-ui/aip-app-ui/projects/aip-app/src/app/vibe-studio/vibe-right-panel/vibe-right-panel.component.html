@@ -114,7 +114,38 @@
 
     <!-- ── Preview tab ── -->
     <div *ngIf="activeTab === 'preview'" class="preview-pane">
-      <div *ngIf="!previewUrl" class="preview-empty">
+
+      <!-- Deployment in progress -->
+      <div *ngIf="deploymentStatus === 'deploying'" class="preview-empty deployment-ongoing">
+        <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+        <p class="deployment-label">Deployment is ongoing...</p>
+      </div>
+
+      <!-- Deployment error -->
+      <div *ngIf="deploymentStatus === 'error'" class="preview-empty deployment-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <p>Error occurred during deployment.</p>
+      </div>
+
+      <!-- Deployment success with result -->
+      <div *ngIf="deploymentStatus === 'success' && deploymentResult" class="deployment-result">
+        <ng-container *ngIf="isDeploymentUrl(deploymentResult); else resultText">
+          <iframe
+            [src]="sanitizeDeploymentUrl(deploymentResult)"
+            class="preview-iframe"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            title="Deployment Preview"
+          ></iframe>
+        </ng-container>
+        <ng-template #resultText>
+          <div class="deployment-result-body">
+            <pre>{{ deploymentResult | json }}</pre>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Default empty / no deployment triggered yet -->
+      <div *ngIf="deploymentStatus === 'idle' && !previewUrl" class="preview-empty">
         <div *ngIf="status === 'generating'">
           <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
           <p>Generating</p>
@@ -124,8 +155,10 @@
           <p>No preview available yet.<br>Switch to <strong>Explorer</strong> to view files.</p>
         </div>
       </div>
+
+      <!-- Legacy iframe preview from previewUrl$ -->
       <iframe
-        *ngIf="previewUrl"
+        *ngIf="deploymentStatus === 'idle' && previewUrl"
         [src]="previewUrl"
         class="preview-iframe"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"

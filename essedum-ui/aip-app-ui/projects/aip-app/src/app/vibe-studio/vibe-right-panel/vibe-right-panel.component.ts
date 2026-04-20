@@ -28,6 +28,8 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
   activeTab: 'preview' | 'code' = 'preview';
   codeLines: string[] = [];
   tokenizedLines: SafeHtml[] = [];
+  deploymentStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+  deploymentResult: any = null;
   private selectedExt = '';
 
   private expandedDirs = new Set<string>();
@@ -88,6 +90,19 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
     this.vibeService.status$
       .pipe(takeUntil(this.destroy$))
       .subscribe((s) => (this.status = s));
+
+    this.vibeService.deploymentStatus$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((s) => {
+        this.deploymentStatus = s;
+        if (s === 'deploying' || s === 'success' || s === 'error') {
+          this.activeTab = 'preview';
+        }
+      });
+
+    this.vibeService.deploymentResult$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => (this.deploymentResult = result));
   }
 
   // ─── Tree building ──────────────────────────────────────────────────────────
@@ -416,6 +431,16 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
 
   indentPx(depth: number): string {
     return `${depth * 16 + 8}px`;
+  }
+
+  /** Returns true when the deployment result is a plain URL string (render in iframe). */
+  isDeploymentUrl(result: any): boolean {
+    return typeof result === 'string' && /^https?:\/\//i.test(result.trim());
+  }
+
+  /** Sanitizes a deployment URL for iframe use. */
+  sanitizeDeploymentUrl(result: any): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(result as string);
   }
 
   ngOnDestroy(): void {

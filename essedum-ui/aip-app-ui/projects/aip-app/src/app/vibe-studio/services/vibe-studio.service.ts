@@ -35,6 +35,10 @@ export class VibeStudioService implements OnDestroy {
   readonly sessionId$         = new BehaviorSubject<string | null>(null);
   /** Emits the complete final file list exactly once when a generation round fully completes. */
   readonly generationComplete$ = new Subject<VibeFile[]>();
+  /** Deployment status after the ZIP upload triggers /sessions/{id}/preview. */
+  readonly deploymentStatus$  = new BehaviorSubject<'idle' | 'deploying' | 'success' | 'error'>('idle');
+  /** Raw response from /sessions/{id}/preview on success. */
+  readonly deploymentResult$  = new BehaviorSubject<any>(null);
 
   constructor(
     private http: HttpClient,
@@ -115,6 +119,8 @@ export class VibeStudioService implements OnDestroy {
     this.messages$.next([]);
     this.previewUrl$.next(null);
     this.sessionId$.next(null);
+    this.deploymentStatus$.next('idle');
+    this.deploymentResult$.next(null);
   }
 
   ngOnDestroy(): void {
@@ -797,10 +803,33 @@ export class VibeStudioService implements OnDestroy {
 
       // getHttpHeaders() provides Authorization (jwtToken), Access-Token, Project, Roleid, Rolename.
       // Do NOT set Content-Type — browser must set it with the multipart boundary.
+      const sessionId = this.session.id;
       this.http.post(url, formData, { headers: this.getHttpHeaders() })
-        .subscribe({ error: () => {} });
+        .subscribe({
+          next: () => { if (sessionId) this.triggerPreview(sessionId); },
+          error: () => { if (sessionId) this.triggerPreview(sessionId); },
+        });
     } catch {
       // non-fatal — never disrupts the existing generation flow
     }
+  }
+
+  /**
+   * Calls GET /sessions/{sessionId}/preview immediately after the ZIP upload.
+   * Emits deployment progress via deploymentStatus$ and the raw result via deploymentResult$.
+   */
+  private triggerPreview(sessionId: string): void {
+    this.deploymentStatus$.next('deploying');
+    const url = `${this.baseUrl}/sessions/${sessionId}/preview`;
+    this.http.get<any>(url, { headers: this.getHttpHeaders() as any })
+      .subscribe({
+        next: (result) => {
+          this.deploymentResult$.next(result);
+          this.deploymentStatus$.next('success');
+        },
+        error: () => {
+          this.deploymentStatus$.next('error');
+        },
+      });
   }
 }
