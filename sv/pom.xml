@@ -101,6 +101,7 @@
 		<com.lfn.icip.icip-lib-mod.version>${project.version}</com.lfn.icip.icip-lib-mod.version>
 		<com.lfn.icip.icip-lib-iai.version>${project.version}</com.lfn.icip.icip-lib-iai.version>
 		<com.lfn.icip.icip-lib-mlops.version>${project.version}</com.lfn.icip.icip-lib-mlops.version>
+		<com.lfn.icip.icip-lib-vibe.version>${project.version}</com.lfn.icip.icip-lib-vibe.version>
 		<com.lfn.icip.plugins.icip-adp-rest.version>${project.version}</com.lfn.icip.plugins.icip-adp-rest.version>
 		<com.lfn.icip.plugins.icip-adp-remote.version>${project.version}</com.lfn.icip.plugins.icip-adp-remote.version>
 		<com.lfn.icip.plugins.icip-adp-s3.version>${project.version}</com.lfn.icip.plugins.icip-adp-s3.version>
@@ -189,7 +190,8 @@
 		<module>common-lib-rest</module>
 		<module>icip-lib-mod</module>
 		<module>icip-lib-mlops</module>
-		
+		<module>icip-lib-vibe</module>
+
 		<module>icip-adp-rest</module>
 		<module>icip-adp-s3</module>
 		<module>icip-adp-remote</module>
@@ -634,6 +636,11 @@
 				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-mlops</artifactId>
 				<version>${com.lfn.icip.icip-lib-mlops.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.lfn.icip</groupId>
+				<artifactId>icip-lib-vibe</artifactId>
+				<version>${com.lfn.icip.icip-lib-vibe.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.lfn.icip.plugins</groupId>

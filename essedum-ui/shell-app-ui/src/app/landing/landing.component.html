@@ -160,7 +160,8 @@
                           item.label !== 'Agent MCP Pipelines' &&
                           item.label !== 'Lite LLM' &&
                           item.label !== 'Langfuse' &&
-                          item.label !== 'Salus'
+                          item.label !== 'Salus' &&
+                          item.label !== 'Vibe Studio'
                         " [src]="item.icon" alt="" 
                         style="height: 42px !important; width: 42px !important;" />
                       
@@ -187,6 +188,11 @@
                           item.label === 'Salus'
                         " src="assets/img/salus.png" alt="Salus Icon"
                         style="height: 42px !important; width: 42px !important;" />
+
+                                <img class="sidebar-itemImg sidebar-Icons-list "  *ngIf="
+                          item.label === 'Vibe Studio'
+                        " src="assets/img/vibe.png" alt="Vibe Studio Icon"
+                        style="height: 42px !important; width: 42px !important;" />
                       </div>
                       <i *ngIf="
                           item.icon &&
@@ -198,6 +204,7 @@
                           item.label !== 'Lite LLM' &&
                           item.label !== 'Langfuse' &&
                           item.label !== 'Salus' &&
+                          item.label !== 'Vibe Studio' &&
                           !item.icon.includes('data:image/')
                         " class="fa fa-{{ item.icon }} fa-2x" [ngStyle]="{
                           color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
