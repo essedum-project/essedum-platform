@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -36,6 +37,9 @@ public class GooseSessionController {
     private static final Logger logger = LoggerFactory.getLogger(GooseSessionController.class);
 
     private final VibeCodingService vibeCodingService;
+
+    @Value("${vibe.goose.working-dir:/home/engne2/essedum/goose}")
+    private String workingDir;
 
     public GooseSessionController(VibeCodingService vibeCodingService) {
         this.vibeCodingService = vibeCodingService;
@@ -192,5 +196,17 @@ public class GooseSessionController {
             @RequestBody Map<String, Object> request) {
         logger.info("Import session request");
         return vibeCodingService.post("/sessions/import", request);
+    }
+
+    /**
+     * Preview the generated app for a session.
+     * Calls the Goose preview API with the configured working directory.
+     */
+    @PostMapping(value = "/sessions/{sessionId}/preview",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> sessionPreview(@PathVariable String sessionId) {
+        logger.info("Session preview request, session={}", sessionId);
+        Map<String, String> body = Map.of("working_dir", workingDir);
+        return vibeCodingService.post("/sessions/" + sessionId + "/preview", body);
     }
 }

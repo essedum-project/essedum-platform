@@ -815,16 +815,18 @@ export class VibeStudioService implements OnDestroy {
   }
 
   /**
-   * Calls GET /sessions/{sessionId}/preview immediately after the ZIP upload.
+   * Calls POST /sessions/{sessionId}/preview immediately after the ZIP upload.
    * Emits deployment progress via deploymentStatus$ and the raw result via deploymentResult$.
    */
   private triggerPreview(sessionId: string): void {
     this.deploymentStatus$.next('deploying');
-    const url = `${this.baseUrl}/sessions/${sessionId}/preview`;
-    this.http.get<any>(url, { headers: this.getHttpHeaders() as any })
+    const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${sessionId}/preview`;
+    const body = { working_dir: '/home/engne2/essedum/goose' };
+    this.http.post<any>(url, body, { headers: this.getHttpHeaders() as any })
       .subscribe({
         next: (result) => {
-          this.deploymentResult$.next(result);
+          const deployUrl = result?.deployUrl ?? result;
+          this.deploymentResult$.next(deployUrl);
           this.deploymentStatus$.next('success');
         },
         error: () => {
