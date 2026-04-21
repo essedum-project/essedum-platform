@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goose-ui
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goose-ui
+  template:
+    metadata:
+      labels:
+        app: goose-ui
+    spec:
+      containers:
+      - name: goose-ui
+        image: localhost:5000/goose-ui:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8501
+        env:
+        - name: GOOSE_URL
+          value: "http://goosed-service.aipns.svc.cluster.local:3005"
+        - name: GOOSE_SERVER__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-secret
+              key: secret-key
+        - name: GOOSE_WORKING_DIR
+          value: "/home/goose"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goose-ui-service
+  namespace: aipns
+spec:
+  selector:
+    app: goose-ui
+  ports:
+  - protocol: TCP
+    port: 8501
+    targetPort: 8501
+  type: LoadBalancer

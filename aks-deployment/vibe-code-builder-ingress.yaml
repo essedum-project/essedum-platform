@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vibe-code-builder-ingress
+  namespace: aipns
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    # WebSocket support
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/websocket-services: "vibe-code-builder-service"
+    nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-lfn-tls
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: vibe-code-builder-service
+            port:
+              number: 80
+        path: /apps/vibe-code-builder-service(/|$)(.*)
+        pathType: ImplementationSpecific

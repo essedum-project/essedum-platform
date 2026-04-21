@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goosed
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goosed
+  template:
+    metadata:
+      labels:
+        app: goosed
+    spec:
+      containers:
+      - name: goosed
+        image: localhost:5000/goosed:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3005
+        env:
+        - name: GOOSE_HOST
+          value: "0.0.0.0"
+        - name: GOOSE_PORT
+          value: "3005"
+        - name: GOOSE_TLS
+          value: "false"
+        - name: GOOSE_SERVER__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-secret
+              key: secret-key
+        - name: OLLAMA_HOST
+          value: "http://192.168.28.36:11434"
+        - name: GOOSE_MINIO_UPLOAD_ENABLED
+          value: "true"
+        - name: GOOSE_MINIO_ENDPOINT
+          value: "http://minio-service:9000"
+        - name: GOOSE_MINIO_BUCKET
+          value: "aiptest"
+        - name: GOOSE_MINIO_REGION
+          value: "us-east-1"
+        - name: GOOSE_MINIO_TLS_SKIP_VERIFY
+          value: "false"
+        - name: GOOSE_WORKING_DIR
+          value: "/home/goose"
+        - name: GOOSE_MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-minio-secret
+              key: access-key
+        - name: GOOSE_MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-minio-secret
+              key: secret-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goosed-service
+  namespace: aipns
+spec:
+  selector:
+    app: goosed
+  ports:
+  - protocol: TCP
+    port: 3005
+    targetPort: 3005
+  type: LoadBalancer

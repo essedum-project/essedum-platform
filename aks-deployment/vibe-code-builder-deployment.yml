@@ -1,0 +1,47 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibe-code-builder-service
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vibe-code-builder
+  template:
+    metadata:
+      labels:
+        app: vibe-code-builder
+    spec:
+      serviceAccountName: builder-sa  # Grants permission per RBAC
+      containers:
+        - name: vibe-code-builder
+          image:  localhost:5000/vibe-code-builder-service:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: vibe-code-builder-secret
+          volumeMounts:
+            - name: dockerfile-template
+              mountPath: /opt/fallback
+      volumes:
+        - name: dockerfile-template
+          configMap:
+            name: vibe-code-builder-dockerfile-template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vibe-code-builder-service
+  namespace: aipns
+spec:
+  selector:
+    app: vibe-code-builder
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: LoadBalancer
+  sessionAffinity: ClientIP
