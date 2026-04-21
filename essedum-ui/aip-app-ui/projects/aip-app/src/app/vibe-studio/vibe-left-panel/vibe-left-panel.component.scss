@@ -1,0 +1,626 @@
+// ─── VS Code Copilot-inspired chat panel ─────────────────────────────────────
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+$bg:             #f3f3f3;
+$surface:        #ffffff;
+$border:         #e1e1e1;
+$text:           #1f1f1f;
+$text-muted:     #737373;
+$accent:         #0066bf;
+$code-bg:        #f0f0f0;
+
+// ─── Panel shell ─────────────────────────────────────────────────────────────
+.copilot-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $bg;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  color: $text;
+}
+
+// ─── Messages area ───────────────────────────────────────────────────────────
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar         { width: 4px; }
+  &::-webkit-scrollbar-track   { background: transparent; }
+  &::-webkit-scrollbar-thumb   { background: #ccc; border-radius: 4px; }
+  &:hover::-webkit-scrollbar-thumb { background: #aaa; }
+}
+
+// ─── Empty / welcome ─────────────────────────────────────────────────────────
+.welcome-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 28px;
+  text-align: center;
+  color: $text-muted;
+
+  .welcome-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0066bf 0%, #00b4d8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+
+    i {
+      font-size: 22px;
+      color: #fff;
+    }
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: $text;
+    margin: 0 0 8px;
+  }
+
+  p {
+    font-size: 13px;
+    max-width: 240px;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+// ─── Turn containers ─────────────────────────────────────────────────────────
+.message-turn {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  & + .message-turn {
+    border-top: 1px solid $border;
+  }
+}
+
+.turn-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.turn-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// ─── User turn ───────────────────────────────────────────────────────────────
+.user-turn {
+  background: $surface;
+
+  .user-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    flex-shrink: 0;
+  }
+
+  .user-text {
+    padding-left: 25px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: $text;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+// ─── Assistant turn ──────────────────────────────────────────────────────────
+.assistant-turn {
+  background: $bg;
+
+  .assistant-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #0066bf 0%, #00b4d8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      font-size: 11px;
+      color: #fff;
+    }
+  }
+}
+
+.assistant-body {
+  padding-left: 25px;
+  position: relative;
+}
+
+// ─── Markdown content ────────────────────────────────────────────────────────
+.markdown-content {
+  font-size: 13px;
+  line-height: 1.7;
+  color: $text;
+  word-break: break-word;
+
+  ::ng-deep {
+    p {
+      margin: 0 0 10px;
+      &:last-child { margin-bottom: 0; }
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      margin: 14px 0 6px;
+      line-height: 1.3;
+      color: $text;
+    }
+    h1 { font-size: 17px; }
+    h2 { font-size: 15px; }
+    h3 { font-size: 13px; }
+
+    ul, ol {
+      margin: 6px 0;
+      padding-left: 20px;
+    }
+    li { margin-bottom: 3px; }
+
+    // Inline code
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace;
+      font-size: 12px;
+      background: $code-bg;
+      border: 1px solid darken($code-bg, 8%);
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #c5246a;
+    }
+
+    // Code blocks
+    pre {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 10px 0;
+
+      &::-webkit-scrollbar       { height: 4px; }
+      &::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
+      code {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 12px;
+        color: #d4d4d4;
+        line-height: 1.6;
+      }
+    }
+
+    blockquote {
+      border-left: 3px solid $accent;
+      margin: 8px 0;
+      padding: 4px 12px;
+      color: $text-muted;
+      font-style: italic;
+      background: rgba(0, 102, 191, 0.04);
+      border-radius: 0 4px 4px 0;
+    }
+
+    a {
+      color: $accent;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid $border;
+      margin: 12px 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px 0;
+      font-size: 12px;
+
+      th, td {
+        border: 1px solid $border;
+        padding: 6px 10px;
+        text-align: left;
+      }
+      th {
+        background: $code-bg;
+        font-weight: 600;
+      }
+      tr:nth-child(even) td {
+        background: rgba(0, 0, 0, 0.02);
+      }
+    }
+
+    strong { font-weight: 600; }
+    em     { font-style: italic; }
+
+    img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+  }
+}
+
+// ─── Typing dots ─────────────────────────────────────────────────────────────
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0 2px;
+
+  span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: $accent;
+    animation: dot-bounce 1.4s ease-in-out infinite;
+    opacity: 0.4;
+
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+@keyframes dot-bounce {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-5px); }
+}
+
+// ─── Streaming cursor ────────────────────────────────────────────────────────
+.stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: $accent;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  border-radius: 1px;
+  animation: cursor-blink 0.9s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
+
+// ─── Input area ──────────────────────────────────────────────────────────────
+.input-area {
+  flex-shrink: 0;
+  padding: 10px 12px 8px;
+  border-top: 1px solid $border;
+  background: $surface;
+}
+
+.input-shell {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fafafa;
+  padding: 8px 8px 8px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &.input-focused {
+    border-color: $accent;
+    box-shadow: 0 0 0 3px rgba(0, 102, 191, 0.1);
+    background: $surface;
+  }
+
+  &.is-generating {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+}
+
+.prompt-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  color: $text;
+  min-height: 20px;
+  max-height: 120px;
+  overflow-y: auto;
+
+  &::placeholder { color: #aaa; }
+  &:disabled     { cursor: not-allowed; color: #aaa; }
+
+  &::-webkit-scrollbar       { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+}
+
+.send-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: $accent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s, opacity 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    color: #fff;
+  }
+
+  &:hover:not(:disabled) {
+    background: darken($accent, 10%);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) { transform: translateY(0); }
+
+  &:disabled {
+    background: #c8c8c8;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.input-hint {
+  font-size: 10px;
+  color: #c0c0c0;
+  text-align: center;
+  margin-top: 5px;
+  letter-spacing: 0.2px;
+}
+
+
+.content-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+// --- Chat Panel ---
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  flex: 1;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #9e9e9e;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    max-width: 300px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.chat-message {
+  display: flex;
+  gap: 10px;
+  max-width: 90%;
+
+  &.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+
+    .message-bubble {
+      background: #0094ff;
+      color: #fff;
+      border-radius: 16px 16px 4px 16px;
+    }
+
+    .message-time {
+      text-align: right;
+    }
+  }
+
+  &.assistant {
+    align-self: flex-start;
+
+    .message-bubble {
+      background: #fff;
+      color: #1a1a1a;
+      border-radius: 16px 16px 16px 4px;
+      border: 1px solid #e0e0e0;
+    }
+  }
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e3f2fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #0094ff;
+  }
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-bubble {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &.streaming {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+  }
+}
+
+.message-time {
+  font-size: 11px;
+  color: #9e9e9e;
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #0094ff;
+  background: #e3f2fd;
+  align-self: flex-start;
+
+  &.live {
+    color: #2e7d32;
+    background: #e8f5e9;
+  }
+
+  &.error {
+    color: #c62828;
+    background: #ffebee;
+  }
+}
+
+// --- Chat Input ---
+.chat-input-area {
+  display: block;
+  padding: 10px 14px;
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0;
+
+  .prompt-shell {
+    position: relative;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fafafa;
+    transition: border-color 0.2s;
+
+    &:focus-within {
+      border-color: #0094ff;
+    }
+
+    &.disabled {
+      opacity: 0.7;
+    }
+  }
+
+  .prompt-textarea {
+    width: 100%;
+    min-height: 84px;
+    resize: none;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 12px 44px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    background: transparent;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  .prompt-controls {
+    position: absolute;
+    right: 8px;
+    bottom: 5px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .send-btn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    box-shadow: none;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #fff;
+    }
+  }
+}

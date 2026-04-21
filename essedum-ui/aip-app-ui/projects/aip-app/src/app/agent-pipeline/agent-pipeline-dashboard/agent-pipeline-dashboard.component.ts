@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -25,12 +25,18 @@ import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline
 export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   // Constants
   get CARD_TITLE() {
-    return this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Agent Pipelines';
+    if (this.pipelineMode === 'mcp') {
+      return 'MCP Pipelines';
+    } else if (this.pipelineMode === 'app') {
+      return 'App Pipelines';
+    } else {
+      return 'Agent Pipelines';
+    }
   }
   readonly SERVICE_V1 = 'pipelineagent';
 
   // Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -421,6 +427,28 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           this.refresh();
         }
       });
+    } else if (this.pipelineMode === 'app') {
+      
+      // Open the pipeline creation dialog with App-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '600px',
+        height: '500px',
+        disableClose: true,
+        data: {
+          interfacetype: 'app-pipeline', // App-specific interface type
+          type: 'appPipeline', // App-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.service.message('App Pipelines created successfully!', 'success');
+          // Refresh the cards to show the new app pipeline
+          this.refresh();
+        }
+      });
     } else {
       
       // Open the pipeline creation dialog with Agent-specific parameters
@@ -449,8 +477,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   onTagSelected(event: any): void {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
     
-    // Only update pipeline agent type for agent mode, not for MCP mode
-    if (this.pipelineMode !== 'mcp') {
+    // Only update pipeline agent type for agent mode, not for MCP or App mode
+    if (this.pipelineMode !== 'mcp' && this.pipelineMode !== 'app') {
       this.selectedPipelineAgentType = event.getSelectedAdapterType();
     }
     
@@ -477,7 +505,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: this.pipelineMode === 'mcp' ? 'MCP Pipelines' : 'Pipeline Agent',
+          cardTitle: this.pipelineMode === 'mcp' ? 'MCP Pipelines' : (this.pipelineMode === 'app' ? 'App Pipelines' : 'Pipeline Agent'),
           pipelineAlias: this.streamItem.alias,
           streamItem: this.streamItem,
           card: card,
@@ -486,11 +514,13 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         relativeTo: this.route,
       };
       
-      // Navigate for both Agent and MCP pipeline types
+      // Navigate for Agent, MCP, and App pipeline types
       if (this.streamItem.type === 'AIAgent' || 
           this.streamItem.type === 'mcpServer' || 
+          this.streamItem.type === 'appPipeline' ||
           this.streamItem.type === 'NativeScript' ||
           this.pipelineMode === 'mcp' ||
+          this.pipelineMode === 'app' ||
           (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       } else {
@@ -561,7 +591,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   /**
    * Switch to specific pipeline mode - simplified method
    */
-  switchToPipelineMode(mode: 'agent' | 'mcp'): void {
+  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app'): void {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
@@ -591,6 +621,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return {
         type: 'mcpServer',
         interfacetype: 'mcp-pipeline'
+      };
+    } else if (this.pipelineMode === 'app') {
+      return {
+        type: 'appPipeline',
+        interfacetype: 'app-pipeline'
       };
     } else {
       return {

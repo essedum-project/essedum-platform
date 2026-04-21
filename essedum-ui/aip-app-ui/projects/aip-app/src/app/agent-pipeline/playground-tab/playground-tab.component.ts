@@ -1,4 +1,5 @@
-﻿import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-playground-tab',
@@ -6,7 +7,7 @@
   styleUrls: ['./playground-tab.component.scss']
 })
 export class PlaygroundTabComponent {
-  @Input() pipelineMode: 'agent' | 'mcp' = 'agent';
+  @Input() pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
   @Input() isRunningAndDeploying: boolean = false;
   @Input() isDeletingDeployment: boolean = false;
   @Input() canRunAndDeploy: boolean = false;
@@ -20,10 +21,24 @@ export class PlaygroundTabComponent {
   @Input() hasDeploymentFormData: boolean = false;
   @Input() isCheckingDeploymentData: boolean = false;
   @Input() deploymentEnvironment: string = '';
+  @Input() showAppViewer: boolean = false;
+  @Input() set appUrl(url: string) {
+    this._appUrl = url;
+    this.safeAppUrl = url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  }
+  
+  get appUrl(): string {
+    return this._appUrl;
+  }
+  
+  private _appUrl: string = '';
+  safeAppUrl: SafeResourceUrl | null = null;
   
   @Output() runAndDeployClick = new EventEmitter<void>();
   @Output() deleteDeploymentClick = new EventEmitter<void>();
   @Output() openPlaygroundClick = new EventEmitter<void>();
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   onRunAndDeploy(): void {
     this.runAndDeployClick.emit();
@@ -38,10 +53,17 @@ export class PlaygroundTabComponent {
   }
 
   getPlaygroundTooltipMessage(): string {
+    // For App Pipeline, always show launch tooltip
+    if (this.pipelineMode === 'app') {
+      return 'Launch Application';
+    }
+    
     if (this.canOpenPlayground) {
-      return this.pipelineMode === 'mcp' 
-        ? 'Open MCP Server Playground' 
-        : 'Open Agent Playground';
+      if (this.pipelineMode === 'mcp') {
+        return 'Open MCP Server Playground';
+      } else {
+        return 'Open Agent Playground';
+      }
     }
     
     if (this.deploymentStatus === 'running') {
@@ -52,8 +74,10 @@ export class PlaygroundTabComponent {
       return 'Deployment failed. Please try running and deploying again.';
     }
     
-    return this.pipelineMode === 'mcp'
-      ? 'Run and Deploy MCP server first to enable playground'
-      : 'Run and Deploy agent first to enable playground';
+    if (this.pipelineMode === 'mcp') {
+      return 'Run and Deploy MCP server first to enable playground';
+    } else {
+      return 'Run and Deploy agent first to enable playground';
+    }
   }
 }

@@ -15,7 +15,6 @@ import { TagsService } from '../services/tags.service';
 import { AdapterServices } from '../sharedModule/services/adapter-service';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
-import * as _ from 'lodash';
 import { AipDeleteConfirmationComponent } from '../sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 
 @Component({

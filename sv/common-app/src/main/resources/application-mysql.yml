@@ -392,3 +392,12 @@ jobexecutor:
   org: leo1311
   enabled: true
   runtimeList: azure, ams
+
+vibe:
+  goose:
+    service:
+      url: http://localhost:30132        # Goose API service base URL
+      connect-timeout-ms: 10000               # TCP connect timeout (ms)
+      response-timeout-seconds: 300           # Max wait for Goose response (seconds)
+      secret-key: sk-1234                     # X-Secret-Key header for Goose API auth
+

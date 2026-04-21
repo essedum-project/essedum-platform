@@ -1,0 +1,170 @@
+<div class="right-panel">
+
+  <!-- ── Empty state ── -->
+  <div *ngIf="(status === 'idle' || status === 'error') && !files.length" class="empty-state">
+    <div class="empty-content">
+      <i class="bi bi-layout-split"></i>
+      <h3>No Preview</h3>
+      <p>Generated files and app preview will appear here.</p>
+    </div>
+  </div>
+
+  <!-- ── Panel (generating / live / files loaded) ── -->
+  <div *ngIf="status === 'generating' || status === 'live' || files.length > 0" class="panel-content">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn" [class.active]="activeTab === 'code'" (click)="activeTab = 'code'">
+        <i class="bi bi-files"></i>
+        Codespace
+        <span *ngIf="files.length" class="file-badge">{{ files.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'preview'" (click)="activeTab = 'preview'">
+        <i class="bi bi-display"></i>
+        Preview
+      </button>
+    </div>
+
+    <!-- ── Code / Explorer tab ── -->
+    <div *ngIf="activeTab === 'code'" class="code-pane">
+
+      <!-- Sidebar: VS Code explorer -->
+      <div class="vsc-sidebar">
+        <div class="explorer-title">CODESPACE</div>
+
+        <!-- Loading spinner before any files -->
+        <div *ngIf="status === 'generating' && !files.length" class="tree-loading">
+          <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+          <span>Generating</span>
+        </div>
+
+        <!-- File tree -->
+        <div class="tree-scroll">
+          <div
+            *ngFor="let node of treeNodes"
+            class="tree-row"
+            [class.tree-selected]="!node.isDir && selectedFile?.path === node.fullPath"
+            [style.padding-left]="indentPx(node.depth)"
+            (click)="onNodeClick(node)"
+          >
+            <!-- Folder toggle arrow (VS Code style rotating triangle) -->
+            <span *ngIf="node.isDir" class="vsc-arrow" [class.vsc-arrow-open]="isDirExpanded(node)"></span>
+            <!-- File spacer -->
+            <span *ngIf="!node.isDir" class="vsc-arrow vsc-arrow-spacer"></span>
+
+            <!-- Icon -->
+            <i *ngIf="node.isDir"
+               class="bi tree-icon folder-icon"
+               [ngClass]="isDirExpanded(node) ? 'bi-folder2-open' : 'bi-folder2'">
+            </i>
+            <i *ngIf="!node.isDir"
+               class="bi tree-icon"
+               [ngClass]="getFileIcon(node.fullPath).cls"
+               [style.color]="getFileIcon(node.fullPath).color">
+            </i>
+
+            <!-- Name -->
+            <span class="tree-name" [title]="node.fullPath">{{ node.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor: file content with line numbers -->
+      <div class="vsc-editor">
+
+        <!-- Breadcrumb / tab header -->
+        <div *ngIf="selectedFile" class="editor-tabs">
+          <div class="editor-tab active">
+            <i class="bi tree-icon"
+               [ngClass]="getFileIcon(selectedFile.path).cls"
+               [style.color]="getFileIcon(selectedFile.path).color">
+            </i>
+            <span>{{ getFileName(selectedFile.path) }}</span>
+          </div>
+        </div>
+
+        <!-- Breadcrumb path -->
+        <div *ngIf="selectedFile" class="breadcrumb-bar">
+          <ng-container *ngFor="let seg of selectedFile.path.split('/'); let last = last; let i = index">
+            <i *ngIf="i === 0" class="bi bi-folder2" style="margin-right:3px;opacity:0.7"></i>
+            <span [class.crumb-active]="last">{{ seg }}</span>
+            <i *ngIf="!last" class="bi bi-chevron-right crumb-sep"></i>
+          </ng-container>
+        </div>
+
+        <!-- Code with line numbers -->
+        <div *ngIf="selectedFile" class="code-scroll">
+          <table class="code-table" cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr *ngFor="let line of codeLines; let i = index" class="code-row">
+                <td class="line-num">{{ i + 1 }}</td>
+                <td class="line-code"><span class="code-text" [innerHTML]="tokenizedLines[i]"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- No file selected -->
+        <div *ngIf="!selectedFile" class="editor-empty">
+          <i class="bi bi-file-earmark-code"></i>
+          <p>Select a file from the explorer</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Preview tab ── -->
+    <div *ngIf="activeTab === 'preview'" class="preview-pane">
+
+      <!-- Deployment in progress -->
+      <div *ngIf="deploymentStatus === 'deploying'" class="preview-empty deployment-ongoing">
+        <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+        <p class="deployment-label">Deployment is ongoing...</p>
+      </div>
+
+      <!-- Deployment error -->
+      <div *ngIf="deploymentStatus === 'error'" class="preview-empty deployment-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <p>Error occurred during deployment.</p>
+      </div>
+
+      <!-- Deployment success with result -->
+      <div *ngIf="deploymentStatus === 'success' && deploymentResult" class="deployment-result">
+        <ng-container *ngIf="isDeploymentUrl(deploymentResult); else resultText">
+          <iframe
+            [src]="sanitizeDeploymentUrl(deploymentResult)"
+            class="preview-iframe"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            title="Deployment Preview"
+          ></iframe>
+        </ng-container>
+        <ng-template #resultText>
+          <div class="deployment-result-body">
+            <pre>{{ deploymentResult | json }}</pre>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Default empty / no deployment triggered yet -->
+      <div *ngIf="deploymentStatus === 'idle' && !previewUrl" class="preview-empty">
+        <div *ngIf="status === 'generating'">
+          <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+          <p>Generating</p>
+        </div>
+        <div *ngIf="status !== 'generating'">
+          <i class="bi bi-display"></i>
+          <p>No preview available yet.<br>Switch to <strong>Explorer</strong> to view files.</p>
+        </div>
+      </div>
+
+      <!-- Legacy iframe preview from previewUrl$ -->
+      <iframe
+        *ngIf="deploymentStatus === 'idle' && previewUrl"
+        [src]="previewUrl"
+        class="preview-iframe"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        title="App Preview"
+      ></iframe>
+    </div>
+
+  </div>
+</div>

@@ -594,18 +594,17 @@ export class DatasetDescriptionComponent implements OnInit {
     }
 
   generateHash() {
-    return Array.apply(0, Array(5))
-      .map(function () {
-        return (function (charset) {
-          let min = 0;
-          let max = charset.length - 1;
-          let rand =
-            window.crypto.getRandomValues(new Uint32Array(1))[0] /
-            (0xffffffff + 1);
-          return charset.charAt(Math.floor(rand * (max - min + 1)) + min);
-        })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-      })
-      .join("");
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const maxUnbiased = Math.floor(0x100000000 / charset.length) * charset.length;
+    const randomValues = new Uint32Array(1);
+    let result = "";
+    while (result.length < 5) {
+      window.crypto.getRandomValues(randomValues);
+      if (randomValues[0] < maxUnbiased) {
+        result += charset.charAt(randomValues[0] % charset.length);
+      }
+    }
+    return result;
   }
 
 

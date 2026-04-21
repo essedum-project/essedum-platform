@@ -355,7 +355,7 @@ export class EnlCodeEditorComponent
   }
 
   private processCodeContent(code: string): string[] {
-    return code.replace(/"/g, '"').split('\n');
+    return code.split('\n');
   }
 
   private updateScript(codeArray: string[]): void {

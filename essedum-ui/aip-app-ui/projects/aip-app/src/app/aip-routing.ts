@@ -38,6 +38,7 @@ import { SalusComponent } from './salus/salus.component';
 import { AgentDirectoryComponent } from './agent-directory/agent-directory.component';
 import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-view/agent-directory-view.component';
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
+import { VibeStudioComponent } from './vibe-studio/vibe-studio/vibe-studio.component';
 
 
 const routes: Routes = [
@@ -201,6 +202,12 @@ const routes: Routes = [
           { path: 'view/:name/:view', component: ConnectionViewComponent },
           { path: 'edit/:name/:edit', component: ConnectionViewComponent },
           { path: 'preview/:name', component: ConnectionViewComponent },
+        ],
+      },
+      {
+        path: 'vibe-studio',
+        children: [
+          { path: '', component: VibeStudioComponent },
         ],
       },
 

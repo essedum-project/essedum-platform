@@ -34,14 +34,14 @@ export class InstanceCreateEditComponent implements OnInit {
   runtimesForConnection: any;
   createAuth = false;
   listOfNames: string[] = [];
-  regexPattern = `^(?!REX)[a-zA-Z0-9\_\-]+$`;
-  regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9\_\-]+$`;
+  regexPattern = `^(?!REX)[a-zA-Z0-9_-]+$`;
+  regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9_-]+$`;
   regexPatternString: any;
   regexPatternObj: any;
   nameValidator: any;
   regString: string = '';
   regexPatternForExistingNames = `^(?!REX).+$`;
-  regexPatternForValidAlphabets = `^[a-zA-Z0-9\_\-]+$`;
+  regexPatternForValidAlphabets = `^[a-zA-Z0-9_-]+$`;
   regexPatternForExistingNamesObj: any;
   regexPatternForValidAlphabetsObj: any;
   nameFlag: boolean = false;

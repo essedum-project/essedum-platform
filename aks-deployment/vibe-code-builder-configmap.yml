@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vibe-code-builder-dockerfile-template
+  namespace: aipns
+data:
+  Dockerfile: |
+    FROM python:3.12-slim
+
+    WORKDIR /app
+
+    COPY requirements.txt* ./
+    RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
+
+    COPY . .
+
+    EXPOSE 8080
+
+    CMD ["python", "{{ENTRYPOINT}}"]

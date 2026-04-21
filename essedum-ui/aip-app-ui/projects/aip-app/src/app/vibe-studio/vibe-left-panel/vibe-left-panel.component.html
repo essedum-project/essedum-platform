@@ -1,0 +1,86 @@
+<div class="copilot-panel">
+
+  <!-- ── Messages ── -->
+  <div class="messages-area" #chatContainer>
+
+    <!-- Empty / welcome state -->
+    <div *ngIf="messages.length === 0" class="welcome-state">
+      <span class="welcome-avatar"><i class="bi bi-robot"></i></span>
+      <h3>Vibe Studio</h3>
+      <p>Describe what you'd like to build and I'll generate the code for you.</p>
+    </div>
+
+    <!-- Chat turns -->
+    <div
+      *ngFor="let msg of messages; let last = last"
+      class="message-turn"
+      [class.user-turn]="msg.role === 'user'"
+      [class.assistant-turn]="msg.role === 'assistant'"
+    >
+
+      <!-- ── User message ── -->
+      <ng-container *ngIf="msg.role === 'user'">
+        <div class="turn-meta">
+          <span class="user-dot"></span>
+          <span class="turn-label">You</span>
+        </div>
+        <div class="user-text">{{ msg.content }}</div>
+      </ng-container>
+
+      <!-- ── Assistant message ── -->
+      <ng-container *ngIf="msg.role === 'assistant'">
+        <div class="turn-meta">
+          <span class="assistant-avatar"><i class="bi bi-robot"></i></span>
+          <span class="turn-label">Vibe Studio</span>
+        </div>
+        <div class="assistant-body">
+          <!-- Typing dots while waiting for first token -->
+          <div *ngIf="!msg.content && status === 'generating' && last" class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <!-- Rendered markdown -->
+          <div
+            *ngIf="msg.content"
+            class="markdown-content"
+            [innerHTML]="renderMarkdown(msg.content)"
+          ></div>
+          <!-- Blinking cursor while streaming -->
+          <span *ngIf="last && status === 'generating' && msg.content" class="stream-cursor"></span>
+        </div>
+      </ng-container>
+
+    </div>
+
+  </div>
+
+  <!-- ── Input ── -->
+  <div class="input-area">
+    <div
+      class="input-shell"
+      [class.input-focused]="inputFocused"
+      [class.is-generating]="status === 'generating'"
+    >
+      <textarea
+        #promptInput
+        class="prompt-input"
+        [(ngModel)]="prompt"
+        (keydown)="onKeyDown($event)"
+        (focus)="inputFocused = true"
+        (blur)="inputFocused = false"
+        placeholder="Ask Vibe Studio…"
+        rows="1"
+        [disabled]="status === 'generating'"
+      ></textarea>
+      <button
+        class="send-btn"
+        (click)="sendPrompt()"
+        [disabled]="!prompt.trim() || status === 'generating'"
+        title="Send (Enter)"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+    </div>
+    <div class="input-hint">⏎&nbsp;Send &nbsp;·&nbsp; ⇧⏎&nbsp;New line</div>
+  </div>
+
+</div>

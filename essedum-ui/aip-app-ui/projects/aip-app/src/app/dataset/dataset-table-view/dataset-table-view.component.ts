@@ -5,7 +5,6 @@ import { Services } from '../../services/service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from "@angular/common";
 import { MatTableDataSource } from '@angular/material/table';
-import * as _ from "lodash";
 import { Project } from '../../DTO/project';
 import { DatasetServices } from '../dataset-service';
 import { MatDialog } from '@angular/material/dialog';
@@ -151,7 +150,7 @@ export class DatasetTableViewComponent implements OnInit {
     else this.fullscreenView = false;
     if (!this.fullscreenView) this.sidebarHeight = { "margin-top": "28vh", "height": "72vh" };
     this.searchIncidentObj = {};
-    this.sampleQueries = _.cloneDeep(this.samples);
+    this.sampleQueries = structuredClone(this.samples);
   }
 
 

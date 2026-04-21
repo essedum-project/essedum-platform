@@ -3,7 +3,6 @@ import { StreamingServices } from '../../streaming-services/streaming-service';
 import { FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef,MatDialog } from '@angular/material/dialog';
 import { Services } from '../../services/service';
-import * as _ from "lodash";
 import { Router } from '@angular/router';
 
 @Component({
@@ -82,7 +81,7 @@ export class PipelineCreateComponent implements OnInit {
           }
         }
       }
-      let databckp = _.cloneDeep(this.data)
+      let databckp = structuredClone(this.data)
       if (this.data?.action) {
         this.data.canvasData = databckp
         delete this.data.canvasData.created_date
@@ -96,6 +95,9 @@ export class PipelineCreateComponent implements OnInit {
     } else if (this.interfaceType === 'pipeline-agent') {
       this.options = [{ viewValue: 'AI Agent', value: 'AIAgent' }];
       this.type = 'AIAgent';
+    } else if (this.interfaceType === 'app-pipeline') {
+      this.options = [{ viewValue: 'App Pipeline', value: 'appPipeline' }];
+      this.type = 'appPipeline';
     } else {
       this.getAllPlugins();
     }
@@ -151,6 +153,10 @@ export class PipelineCreateComponent implements OnInit {
         if (this.interfaceType === 'mcp-pipeline' && newCanvas.type !== 'mcpServer') {
           newCanvas.type = 'mcpServer';
         }
+        
+        if (this.interfaceType === 'app-pipeline' && newCanvas.type !== 'appPipeline') {
+          newCanvas.type = 'appPipeline';
+        }
 
         newCanvas.is_template = this.isTemplate;
         const temp = [];
@@ -175,8 +181,8 @@ export class PipelineCreateComponent implements OnInit {
             }
           }
         }
-        // For new pipeline creation from add button ONLY for pipeline-agent or mcp-pipeline
-        else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline') && (!this.data || !this.data.sourceToCopy)) {
+        // For new pipeline creation from add button ONLY for pipeline-agent, mcp-pipeline, or app-pipeline
+        else if ((this.interfaceType === 'pipeline-agent' || this.interfaceType === 'mcp-pipeline' || this.interfaceType === 'app-pipeline') && (!this.data || !this.data.sourceToCopy)) {
           newCanvas.json_content = JSON.stringify({ 'created_source': 'user_defined' });
         }
 
@@ -193,6 +199,9 @@ export class PipelineCreateComponent implements OnInit {
           }
           else if (data.type === 'AIAgent' && this.interfaceType === 'pipeline-agent') {
             this.createAgentDummyFile(data);
+          }
+          else if (data.type === 'appPipeline' && this.interfaceType === 'app-pipeline') {
+            this.createAppDummyFile(data);
           }
           else if (data.type == "NativeScript" && this.data.copy) {
             if (data.json_content) {
@@ -565,6 +574,83 @@ export class PipelineCreateComponent implements OnInit {
       },
       (error) => {
         console.error('Error updating Agent pipeline with configuration:', error);
+      }
+    );
+  }
+
+  /**
+   * Create dummy App Pipeline configuration file
+   */
+  private createAppDummyFile(pipelineData: any): void {
+    const organization = sessionStorage.getItem('organization') || 'defaultorg';
+    const dynamicFilename = `${pipelineData.name}_${organization}.json`;
+    
+    const appConfig = {
+      appPipeline: {
+        name: pipelineData.name,
+        alias: pipelineData.alias,
+        description: pipelineData.description,
+        type: "appPipeline",
+        interface: "app-pipeline",
+        version: "1.0.0",
+        configuration: {
+          runtime: "nodejs",
+          entrypoint: "index.js",
+          dependencies: [],
+          environment: {}
+        },
+        endpoints: [],
+        services: []
+      },
+      metadata: {
+        created_by: "AIP App Pipeline Generator",
+        created_at: new Date().toISOString(),
+        organization: organization,
+        environment: "development"
+      }
+    };
+    
+    // Preserve original json_content from add API response (created_source flag)
+    let originalJsonContent = {};
+    try {
+      if (pipelineData.json_content) {
+        originalJsonContent = JSON.parse(pipelineData.json_content);
+      }
+    } catch (e) {
+      console.warn('Could not parse original json_content:', e);
+    }
+    
+    // Update the pipeline's json_content with the App configuration, preserving created_source
+    pipelineData.json_content = JSON.stringify({
+      ...originalJsonContent,
+      elements: [{
+        type: 'appPipeline',
+        name: pipelineData.name,
+        config: appConfig,
+        filename: dynamicFilename
+      }]
+    });
+    
+    // Update the pipeline using update API
+    this.Services.update(pipelineData).subscribe(
+      (updateResponse) => {
+        // Create file content using create API
+        const jsonContent = JSON.stringify(appConfig, null, 2);
+        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+        const formData = new FormData();
+        formData.set('scriptFile', jsonBlob, dynamicFilename);
+        
+        // Call create API to save the dummy file using name from API response
+        this.Services.createNativeFile(pipelineData.name, organization, dynamicFilename, 'json', formData).subscribe(
+          (createResponse) => {
+          },
+          (createError) => {
+            console.error('Error creating App Pipeline dummy file:', createError);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error updating App Pipeline with configuration:', error);
       }
     );
   }

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Services } from '../../services/service';
@@ -32,6 +32,7 @@ export class DeploymentFormComponent implements OnInit {
  // @Output() deployClick = new EventEmitter<void>();
   @Input() cname: string = ''; // Container name from parent
   @Input() organisation: string = ''; // Organisation from parent
+  @Input() pipelineMode: 'agent' | 'mcp' | 'app' = 'agent'; // Pipeline mode from parent
   @Input() isRunningAndDeploying: boolean = false;
   @Input() isCheckingDeploymentData: boolean = false;
   @Input() hasDeploymentFormData: boolean = false;
@@ -56,13 +57,19 @@ export class DeploymentFormComponent implements OnInit {
 
   isEditMode: boolean = false;
 
-  // Static text constants - Labels
-  readonly AGENT_NAME_LABEL = 'Agent Name';
-  readonly AGENT_VERSION_LABEL = 'Agent Version';
+  // Dynamic text constants - Labels (based on pipeline mode)
+  get AGENT_NAME_LABEL(): string {
+    return this.pipelineMode === 'app' ? 'App Name' : 'Agent Name';
+  }
+  get AGENT_VERSION_LABEL(): string {
+    return this.pipelineMode === 'app' ? 'App Version' : 'Agent Version';
+  }
   readonly DEPLOYMENT_ENVIRONMENT_LABEL = 'Deployment Environment';
   readonly DEPLOYMENT_DATETIME_LABEL = 'Deployment Date & Time';
   readonly BUILD_RELEASE_ID_LABEL = 'Build/Release ID';
-  readonly AGENT_PACKAGE_LOCATION_LABEL = 'Agent Package Location';
+  get AGENT_PACKAGE_LOCATION_LABEL(): string {
+    return this.pipelineMode === 'app' ? 'App Package Location' : 'Agent Package Location';
+  }
   readonly HASH_CHECKSUM_LABEL = 'Hash/Checksum';
   readonly TARGET_NODES_LABEL = 'Target Nodes/Hosts';
   readonly IMPACTED_SERVICES_LABEL = 'Impacted Services';
@@ -75,7 +82,9 @@ export class DeploymentFormComponent implements OnInit {
   readonly CAB_APPROVAL_REFERENCE_LABEL = 'CAB Approval Reference';
   readonly CHANGE_REQUEST_ID_LABEL = 'Change Request ID';
   readonly ROLLBACK_PROCEDURE_REFERENCE_LABEL = 'Rollback Procedure Reference';
-  readonly PREVIOUS_STABLE_VERSION_LABEL = 'Previous Stable Agent Version';
+  get PREVIOUS_STABLE_VERSION_LABEL(): string {
+    return this.pipelineMode === 'app' ? 'Previous Stable App Version' : 'Previous Stable Agent Version';
+  }
   readonly SMOKE_TEST_STATUS_LABEL = 'Smoke Test Status';
   readonly PERFORMANCE_TEST_SUMMARY_LABEL = 'Performance Test Summary';
   readonly SSL_TLS_CERTIFICATE_CHECK_LABEL = 'SSL/TLS Certificate Check';
@@ -86,13 +95,17 @@ export class DeploymentFormComponent implements OnInit {
   readonly INFRA_SUPPORT_CONTACTS_LABEL = 'Infra & Support Contacts';
   readonly AUDIT_POC_DETAILS_LABEL = 'Audit POC Details';
 
-  // Static text constants - Placeholders
-  readonly AGENT_NAME_PLACEHOLDER = 'Enter Agent Name...';
+  // Dynamic text constants - Placeholders (based on pipeline mode)
+  get AGENT_NAME_PLACEHOLDER(): string {
+    return this.pipelineMode === 'app' ? 'Enter App Name...' : 'Enter Agent Name...';
+  }
   readonly AGENT_VERSION_PLACEHOLDER = 'e.g., 1.0.0';
   readonly DEPLOYMENT_ENVIRONMENT_PLACEHOLDER = 'Select Environment';
   readonly DEPLOYMENT_DATETIME_PLACEHOLDER = 'Select Date & Time';
   readonly BUILD_RELEASE_ID_PLACEHOLDER = 'Enter Build/Release ID...';
-  readonly AGENT_PACKAGE_LOCATION_PLACEHOLDER = 'Enter Package Location URL...';
+  get AGENT_PACKAGE_LOCATION_PLACEHOLDER(): string {
+    return this.pipelineMode === 'app' ? 'Enter App Package Location URL...' : 'Enter Package Location URL...';
+  }
   readonly HASH_CHECKSUM_PLACEHOLDER = 'Enter Hash/Checksum...';
   readonly TARGET_NODES_PLACEHOLDER = 'Select Target Nodes';
   readonly IMPACTED_SERVICES_PLACEHOLDER = 'Select Impacted Services';
