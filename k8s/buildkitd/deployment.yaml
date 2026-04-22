@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buildkitd
+  namespace: essedum
+  labels:
+    app: buildkitd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buildkitd
+  template:
+    metadata:
+      labels:
+        app: buildkitd
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: buildkitd
+          image: moby/buildkit:v0.18.2
+          args:
+            - --addr
+            - tcp://0.0.0.0:1234
+            - --config
+            - /etc/buildkit/buildkitd.toml
+          volumeMounts:
+            - name: buildkitd-config
+              mountPath: /etc/buildkit/buildkitd.toml
+              subPath: buildkitd.toml
+              readOnly: true
+          ports:
+            - containerPort: 1234
+              name: buildkit
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          readinessProbe:
+            exec:
+              command:
+                - buildctl
+                - --addr
+                - tcp://127.0.0.1:1234
+                - debug
+                - workers
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: buildkitd-config
+          configMap:
+            name: buildkitd-config

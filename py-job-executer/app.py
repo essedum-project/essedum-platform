@@ -275,7 +275,13 @@ def get_task_log(task_id):
 @app.route('/execute/<task_id>/getOutputArtifacts', methods=['GET'])
 def get_task_output_artifacts(task_id):
     try:
-        task_folder=str(task_id)
+        # Validate task_id is a well-formed UUID before using it in any path construction
+        try:
+            uuid.UUID(task_id)
+        except ValueError:
+            return jsonify({'error': 'Invalid task ID'}), 400
+
+        task_folder = str(task_id)
         output_dir = WORKING_DIRECTORY / task_folder / 'output_dir'
         
         # Validate path to prevent directory traversal

@@ -300,7 +300,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - ./data/pg:/var/lib/postgresql/data
+      - langflow_stable_pg_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
     healthcheck:
@@ -324,11 +324,11 @@ services:
       langflow-stable-postgres:
         condition: service_healthy
     environment:
-      - LANGFLOW_DATABASE_URL=${LANGFLOW_DATABASE_URL}
+      - LANGFLOW_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@langflow-stable-postgres:${POSTGRES_PORT}/${POSTGRES_DB}
       - LANGFLOW_HOST=${LANGFLOW_HOST}
       - LANGFLOW_PORT=${LANGFLOW_PORT}
       - LANGFLOW_SECRET_KEY=${LANGFLOW_SECRET_KEY}
-      - LANGFLOW_CONFIG_DIR=/app/langflow
+      - LANGFLOW_CONFIG_DIR=${LANGFLOW_CONFIG_DIR}
 
   langfuse-postgres:
     image: postgres:15-alpine
@@ -532,6 +532,7 @@ services:
 volumes:
   mysql-data:
   qdrant-data:
+  langflow_stable_pg_data:
   langflow_stable_data:
   minio-data:
   minio_data:

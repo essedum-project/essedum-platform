@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: essedum
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      initContainers:
+        - name: mysql-init
+          image: mysql:8.0
+          command:
+            - sh
+            - -c
+            - |
+              cp /init-scripts/init.sql /docker-entrypoint-initdb.d/init.sql
+          volumeMounts:
+            - name: init-scripts
+              mountPath: /init-scripts
+            - name: init-d
+              mountPath: /docker-entrypoint-initdb.d
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: MYSQL_ROOT_PASSWORD
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: init-d
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -h
+                - localhost
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: init-scripts
+          configMap:
+            name: mysql-init-scripts
+        - name: init-d
+          emptyDir: {}

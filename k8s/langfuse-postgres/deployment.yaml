@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langfuse-postgres
+  namespace: essedum
+  labels:
+    app: langfuse-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langfuse-postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: langfuse-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: langfuse-postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: LANGFUSE_POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_POSTGRES_DB
+            - name: TZ
+              value: "UTC"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - langfuse
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - langfuse
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: langfuse-postgres-pvc

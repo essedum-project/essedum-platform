@@ -586,7 +586,7 @@ public class UsersResource {
 	 */
 	@GetMapping("/users/pagination/{Portfolio}/{id}/page")
 	@Timed
-	public ResponseEntity<?> getProjectUsersList(@Parameter Pageable pageable, @PathVariable Boolean Portfolio, @PathVariable Integer id)
+	public ResponseEntity<?> getProjectUsersList(@Parameter Pageable pageable, @PathVariable("Portfolio") Boolean Portfolio, @PathVariable("id") Integer id)
 			throws JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
 			UnsupportedEncodingException {
@@ -623,7 +623,7 @@ public class UsersResource {
 	 */
 	@GetMapping("/users/filter/{Portfolio}/{id}/page")
 	@Timed
-	public ResponseEntity<?> getProjectOrPortUsersList(@PathVariable Boolean Portfolio, @PathVariable Integer id)
+	public ResponseEntity<?> getProjectOrPortUsersList(@PathVariable("Portfolio") Boolean Portfolio, @PathVariable("id") Integer id)
 			throws JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
 			UnsupportedEncodingException {

@@ -79,7 +79,7 @@ public final class CustomAuthorizationManager implements AuthorizationManager<Re
 				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
 			return new AuthorizationDecision(true);
 		
-		String urlForValidation=authorizationContext.getRequest().getQueryString() == null ? authorizationContext.getRequest().getRequestURI() :authorizationContext.getRequest().getRequestURI().concat("?".concat(authorizationContext.getRequest().getQueryString()));
+		String urlForValidation=authorizationContext.getRequest().getRequestURI();
 
 		//Fetch the whitelistedURL - does not require authentication nor authorization - permitAll
 		List<String> whitelistedURL = configurationApisService.getWhiteListedUrl(); 

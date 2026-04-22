@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-setup
+  namespace: essedum
+  labels:
+    app: minio-setup
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: minio-setup
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      restartPolicy: OnFailure
+      containers:
+        - name: minio-setup
+          image: minio/mc:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mc alias set local http://langfuse-minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+              mc mb --ignore-existing local/${MINIO_BUCKET} &&
+              mc anonymous set none local/${MINIO_BUCKET} &&
+              echo 'MinIO bucket ready'
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-secret
+                  key: MINIO_ROOT_PASSWORD
+            - name: MINIO_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_BUCKET
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"

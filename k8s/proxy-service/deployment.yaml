@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-service
+  namespace: essedum
+  labels:
+    app: proxy-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy-service
+  template:
+    metadata:
+      labels:
+        app: proxy-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: proxy-service
+          image: essedum/proxy-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: essedum-config
+            - secretRef:
+                name: essedum-secret
+          env:
+            - name: TARGET_NAMESPACE
+              value: "essedum"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/8080"
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/8080"
+            initialDelaySeconds: 10
+            periodSeconds: 10
