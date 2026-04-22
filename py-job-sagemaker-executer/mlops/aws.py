@@ -44,7 +44,7 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
         region = connections.get("region")
         session_token = connections.get("sessionToken")
 
-        logger.info(f"Starting projects_datasets_create with Ak:{access_key}")
+        logger.info(f"Starting projects_datasets_create with Ak")
         config = Config(
                 proxies={
                     'http': PROXY,
@@ -2327,12 +2327,24 @@ def training_automl_simplified_create(adapter_instance, project, isCached, isIns
         if request_body.get("model_deploy_config"):
             automl_job_config["ModelDeployConfig"] = request_body["model_deploy_config"]
         
-        logger.info(f"Creating AutoML job with config: {automl_job_config}")
+        safe_log_config = {
+            k: ("[REDACTED]" if k in ("RoleArn",) else
+                {sk: ("[REDACTED]" if sk in ("VolumeKmsKeyId", "KmsKeyId") else sv)
+                 for sk, sv in v.items()} if isinstance(v, dict) else v)
+            for k, v in automl_job_config.items()
+            if k != "OutputDataConfig" or True
+        }
+        if "OutputDataConfig" in safe_log_config and isinstance(safe_log_config["OutputDataConfig"], dict):
+            safe_log_config["OutputDataConfig"] = {
+                k: ("[REDACTED]" if k == "KmsKeyId" else v)
+                for k, v in safe_log_config["OutputDataConfig"].items()
+            }
+        logger.info(f"Creating AutoML job with config: {safe_log_config}")
         
         # Create the AutoML job
         response = sagemaker_client.create_auto_ml_job(**automl_job_config)
         
-        logger.info(f"AutoML job created successfully: {response}")
+        logger.info(f"AutoML job created successfully: job_arn={response.get('AutoMLJobArn')}")
         
         # Return success response
         result = {

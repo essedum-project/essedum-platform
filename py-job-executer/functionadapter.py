@@ -47,8 +47,17 @@ def scriptgeneration(request_payload, save_path, fileid):
     import_lines = [imports['key'] for imports in request_payload["Imports"]]
     requirements = [requirements['key'] for requirements in request_payload["Requirements"]]
     # requirements = [{requirements}]
+    import re
+    _valid_package = re.compile(r'^[A-Za-z0-9_\-\.]+([><=!~]{1,2}[A-Za-z0-9_\-\.]+)?$')
     for module in requirements:
-        subprocess.run(sys.executable + ' -m pip install '+ module + ' -i https://infyartifactory.ad.infosys.com/artifactory/api/pypi/pypi-remote/simple --trusted-host infyartifactory.ad.infosys.com',shell=True)
+        if not _valid_package.match(module):
+            raise ValueError(f"Invalid package name rejected to prevent injection: {module!r}")
+        subprocess.run(
+            [sys.executable, '-m', 'pip', 'install', module,
+             '-i', 'https://infyartifactory.ad.infosys.com/artifactory/api/pypi/pypi-remote/simple',
+             '--trusted-host', 'infyartifactory.ad.infosys.com'],
+            shell=False
+        )
     
     functions = [request_payload["Script"]]
     import_lines = [l for l in set(import_lines) if l != '']

@@ -2,6 +2,7 @@
 import os
 import asyncio
 import logging
+import posixpath
 from aiohttp import web, ClientSession, ClientTimeout, TCPConnector, WSMsgType
 from yarl import URL  # comes with aiohttp; used to attach query string safely
 
@@ -9,6 +10,27 @@ from yarl import URL  # comes with aiohttp; used to attach query string safely
 NS = os.getenv("TARGET_NAMESPACE", "aipns")
 ALLOWLIST = os.getenv("ALLOWLIST")  # e.g., "runner-service,builder-service"
 ALLOW = set(ALLOWLIST.split(",")) if ALLOWLIST else None
+
+def is_valid_service_name(name: str) -> bool:
+    """
+    Validate that `name` is a safe service identifier.
+
+    We restrict to a DNS-label-like pattern commonly used for Kubernetes
+    service names: 1–63 chars, lowercase letters, digits, and hyphens,
+    starting and ending with an alphanumeric character.
+    This prevents injection of schemes, slashes, or dots that could
+    influence the upstream URL beyond the intended namespace.
+    """
+    if not name:
+        return False
+    if len(name) > 63:
+        return False
+    allowed = set("abcdefghijklmnopqrstuvwxyz0123456789-")
+    if any(ch not in allowed for ch in name):
+        return False
+    if not (name[0].isalnum() and name[-1].isalnum()):
+        return False
+    return True
 
 # hop-by-hop headers must not be forwarded by proxies
 HOP_BY_HOP = {
@@ -28,6 +50,19 @@ def sanitize_headers(headers: web.BaseRequest.headers):
 async def health(_request):
     return web.json_response({"status": "ok"})
 
+def sanitize_subpath(subpath: str) -> str:
+    """
+    Normalize subpath to prevent path traversal attacks.
+    Strips leading slashes and removes '..' / '.' segments so that
+    user-supplied paths cannot escape the intended upstream scope.
+    """
+    if not subpath:
+        return ""
+    # posixpath.normpath resolves '..', '.', and duplicate slashes.
+    # Prepend '/' so normpath treats the input as absolute, then remove it.
+    normalized = posixpath.normpath("/" + subpath)
+    return normalized.lstrip("/")
+
 def build_upstream(service: str, subpath: str) -> str:
     """Build upstream URL base for service + subpath."""
     sub = f"/{subpath}" if subpath else "/"
@@ -40,8 +75,13 @@ async def http_proxy(request: web.Request):
     service = request.match_info.get("service")
     subpath = request.match_info.get("subpath", "")
 
+    if not is_valid_service_name(service):
+        return web.Response(text=f"Invalid service name '{service}'", status=400)
+    
     if ALLOW is not None and service not in ALLOW:
         return web.Response(text=f"Service '{service}' not allowed", status=403)
+
+    subpath = sanitize_subpath(subpath)
 
     # NOTE: For Socket.IO polling, subpath will be "socket.io"
     target = build_upstream(service, subpath)
@@ -86,8 +126,13 @@ async def websocket_proxy(request: web.Request) -> web.StreamResponse:
         service = parts[0]
         subpath = parts[1] if len(parts) > 1 else ""
 
+    if not is_valid_service_name(service):
+        return web.Response(text=f"Invalid service name '{service}'", status=400)
+    
     if ALLOW is not None and service not in ALLOW:
         return web.Response(text=f"Service '{service}' not allowed", status=403)
+
+    subpath = sanitize_subpath(subpath)
 
     # For Socket.IO WS, upstream must be /socket.io
     # (Keep any additional subpath segments after 'socket.io/' if present.)

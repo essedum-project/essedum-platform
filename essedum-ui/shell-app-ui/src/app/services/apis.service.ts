@@ -280,8 +280,6 @@ export class ApisService {
           let tempDashConst = this.dashconstants.filter((item) => !item.keys.toLowerCase().endsWith("default"));
           if (tempDashConst && tempDashConst.length && tempDashConst[0].project_id.id == project)
             return of(this.dashconstants);
-          else if (this.fetchConst && projectname != "Core" && tempDashConst[0].project_id.name == "Core")
-            return of(this.dashconstants);
           else {
             this.fetchConst = false;
             let result = this.callDashConstantApi(project);

@@ -378,11 +378,11 @@ def projects_datasets_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -413,7 +413,7 @@ def projects_datasets_list_list():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections)
@@ -445,7 +445,7 @@ def projects_datasets_get(dataset_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_datasets_get(adapter_instance, project, isCached, isInstance, connections, dataset_id)
@@ -478,7 +478,7 @@ def projects_datasets_delete(dataset_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_datasets_delete(adapter_instance, project, isCached, isInstance, connections, dataset_id)
@@ -519,11 +519,11 @@ def projects_datasets_export_create(dataset_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_datasets_export_create(adapter_instance, project, isCached, isInstance, connections, dataset_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -563,11 +563,11 @@ def projects_endpoints_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -599,7 +599,7 @@ def projects_endpoints_list_list():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_endpoints_list_lists(adapter_instance, project, isCached, isInstance, connections)
@@ -634,7 +634,7 @@ def projects_endpoints_get(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_id)
@@ -668,7 +668,7 @@ def projects_endpoints_delete(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_endpoints_delete(adapter_instance, project, isCached, isInstance, connections, endpoint_id, isOnline)
@@ -713,11 +713,11 @@ def projects_endpoints_deploy_model_create(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -759,11 +759,11 @@ def projects_endpoints_explain_create(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_endpoints_explain_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body, isOnline)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -804,11 +804,11 @@ def projects_endpoints_infer_create(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_endpoints_infer_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -849,11 +849,11 @@ def projects_endpoints_undeploy_models_create(endpoint_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_endpoints_undeploy_models_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body, isOnline)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -887,14 +887,14 @@ def projects_models_list():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
-        logger.info(f"connection details: {str(connections)}")
-        print(f"connection details: {str(connections)}")
+        logger.info("connection details: [REDACTED]")
+        # connection details logging removed (sensitive)
         result, status_code = aws.projects_models_list(adapter_instance, project, isCached, isInstance, connections)
         logger.info(f"result: {str(result)}")
-        print(f"result: {str(result)}")
+        # print(f"result: {str(result)}")
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
@@ -923,7 +923,7 @@ def projects_models_get(model_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_models_get(adapter_instance, project, isCached, isInstance, connections, model_id)
@@ -967,13 +967,13 @@ def projects_models_register_create():
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
-        print(f"connection details: {str(connections)}")
+        # connection details logging removed (sensitive)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_models_register_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         print(f"Response from mlops/<>.py is: {str(result)} !!!")
@@ -1006,7 +1006,7 @@ def projects_models_delete(model_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_models_delete(adapter_instance, project, isCached, isInstance, connections, model_id)
@@ -1046,11 +1046,11 @@ def projects_models_export_create(model_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_models_export_create(adapter_instance, project, isCached, isInstance, connections, model_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -1089,11 +1089,11 @@ def training_automl_simplified_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.training_automl_simplified_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -1133,7 +1133,7 @@ def training_custom_script_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
@@ -1166,7 +1166,7 @@ def training_istlist():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.training_istlist(adapter_instance, project, isCached, isInstance, connections)
@@ -1207,11 +1207,11 @@ def training_train_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.training_train_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         
@@ -1261,7 +1261,7 @@ def training_cancel_list(training_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.training_cancel_list(adapter_instance, project, isCached, isInstance, connections, training_job_id)
@@ -1295,7 +1295,7 @@ def training_delete(training_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.training_delete(adapter_instance, project, isCached, isInstance, connections, training_job_id)
@@ -1330,7 +1330,7 @@ def training_get_list(training_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.training_get_list(adapter_instance, project, isCached, isInstance, connections, training_job_id)
@@ -1375,11 +1375,11 @@ def projects_inferencePipelines_create():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_inferencePipelines_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -1411,7 +1411,7 @@ def projects_inferencePipelines_list_list():
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_inferencePipelines_list_list(adapter_instance, project, isCached, isInstance, connections)
@@ -1445,7 +1445,7 @@ def projects_inferencePipelines_delete(inference_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_inferencePipelines_delete(adapter_instance, project, isCached, isInstance, connections, inference_job_id)
@@ -1486,11 +1486,11 @@ def projects_inferencePipelines_cancel(inference_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result, status_code = aws.projects_inferencePipelines_cancel(adapter_instance, project, isCached, isInstance, connections, inference_job_id, request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -1528,7 +1528,7 @@ def projects_inferencePipelines_get(inference_job_id):
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, headers, isInstance)
         if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
+            logger.info("Connections details is empty.")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
         result, status_code = aws.projects_inferencePipelines_get(adapter_instance, project, isCached, isInstance, connections, inference_job_id)
@@ -1546,7 +1546,7 @@ def adapter_function_execute():
     result=""
     try:
         request_body = request.get_json()
-        logger.info(f"Request body is: {str(request_body)}")
+        logger.info(f"Request received with keys: {list(request_body.keys()) if isinstance(request_body, dict) else type(request_body).__name__}")
         result = function_execute(request_body)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), 200
