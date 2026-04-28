@@ -51,6 +51,7 @@ jobs:
 
       - name: Verify kubeconfig
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           if [ ! -f "$KUBECONFIG" ]; then
             echo "::error::KUBECONFIG not found at $KUBECONFIG"
             exit 1
@@ -59,11 +60,13 @@ jobs:
 
       - name: Get cluster context
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           echo "Cluster: $(kubectl config current-context)"
           echo "Namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
 
       - name: Create/update ConfigMap from deployment config
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE=${K8S_NAMESPACE:-essedum}
           if [ -f "k8s/config/app-config.yaml" ]; then
             kubectl apply -f k8s/config/app-config.yaml -n "$NAMESPACE" || true
@@ -127,6 +130,7 @@ jobs:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
           echo "Deploying to namespace: $NAMESPACE"
           
@@ -152,6 +156,7 @@ jobs:
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
           echo "Waiting for deployments to stabilize..."
           

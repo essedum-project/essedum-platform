@@ -222,6 +222,7 @@ jobs:
 
       - name: Verify kubeconfig available
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           if [ ! -f "$KUBECONFIG" ]; then
             echo "::warning::KUBECONFIG not available in CI environment"
             echo "Dry-run validation will be performed locally"
@@ -229,6 +230,7 @@ jobs:
 
       - name: Validate Kubernetes manifests syntax
         run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
           echo "Validating aks-deployment manifests..."
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ -f "$manifest" ]; then
