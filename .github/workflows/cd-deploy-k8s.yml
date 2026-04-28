@@ -40,7 +40,7 @@ jobs:
     needs: check-readiness
     if: ${{ needs.check-readiness.outputs.ready == 'true' }}
     runs-on: [self-hosted, essedum-runner]
-    environment: production
+    environment: CONTAINER_REGISTRY
 
     steps:
       - name: Checkout latest code
