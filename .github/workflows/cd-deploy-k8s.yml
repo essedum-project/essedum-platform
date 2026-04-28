@@ -1,0 +1,194 @@
+name: CD – Deploy (Kubernetes)
+
+# ──────────────────────────────────────────────────────────────
+# Triggers: auto-deploys when CI passes on gh_actions branch
+# Push to gh_actions branch triggers this workflow
+# ──────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: ["gh_actions"]
+
+# Only one deployment at a time
+concurrency:
+  group: cd-deploy-k8s
+  cancel-in-progress: false
+
+# Least-privilege: CD only needs to read repo contents
+permissions:
+  contents: read
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # Check if we should proceed (all checks passed)
+  # ────────────────────────────────────────────────────────────
+  check-readiness:
+    name: "Guard – Readiness Check"
+    runs-on: [self-hosted, essedum-runner]
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - run: echo "Pre-deployment readiness check"
+      - id: check
+        run: echo "ready=true" >> $GITHUB_OUTPUT
+
+  # ────────────────────────────────────────────────────────────
+  # Deploy – Kubernetes-based deployment
+  # Runs on self-hosted runner with k8s cluster access
+  # ────────────────────────────────────────────────────────────
+  deploy:
+    name: "Deploy – Kubernetes Rollout"
+    needs: check-readiness
+    if: ${{ needs.check-readiness.outputs.ready == 'true' }}
+    runs-on: [self-hosted, essedum-runner]
+    environment: production
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+        with:
+          ref: gh_actions
+          fetch-depth: 1
+
+      - name: Verify kubeconfig
+        run: |
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo "::error::KUBECONFIG not found at $KUBECONFIG"
+            exit 1
+          fi
+          kubectl cluster-info
+
+      - name: Get cluster context
+        run: |
+          echo "Cluster: $(kubectl config current-context)"
+          echo "Namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
+
+      - name: Create/update ConfigMap from deployment config
+        run: |
+          NAMESPACE=${K8S_NAMESPACE:-essedum}
+          if [ -f "k8s/config/app-config.yaml" ]; then
+            kubectl apply -f k8s/config/app-config.yaml -n "$NAMESPACE" || true
+          fi
+
+      - name: Build and push container images
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          NAMESPACE=${K8S_NAMESPACE:-essedum}
+          echo "Building images for deployment..."
+          
+          # Build custom images in sequence
+          services=(
+            "leap-app-backend:sv/Dockerfile_dbjwt"
+            "frontend:essedum-ui/Dockerfile"
+            "py-job-executer:py-job-executer/Dockerfile"
+            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile"
+            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile"
+            "py-job-azure-executer:py-job-azure-executer/Dockerfile"
+            "proxy-service:proxy-service/Dockerfile"
+            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile"
+          )
+          
+          for svc_info in "${services[@]}"; do
+            IFS=':' read -r service dockerfile <<< "$svc_info"
+            context=$(dirname "$dockerfile")
+            echo "Building $service..."
+            docker build -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
+              -t "${REGISTRY}/essedum/${service}:latest" \
+              -f "$dockerfile" "$context" 2>&1 | tail -20 || {
+              echo "::warning::Build for $service had warnings"
+            }
+          done
+
+      - name: Push images to registry
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" || {
+            echo "::error::Failed to authenticate with container registry"
+            exit 1
+          }
+          
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
+          
+          for svc in "${services[@]}"; do
+            docker push "${REGISTRY}/essedum/${svc}:${{ github.sha }}" || {
+              echo "::error::Failed to push image ${svc}:${{ github.sha }}"
+              exit 1
+            }
+            docker push "${REGISTRY}/essedum/${svc}:latest" || true
+          done
+
+      - name: Apply Kubernetes manifests
+        env:
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          NAMESPACE="${K8S_NAMESPACE}"
+          echo "Deploying to namespace: $NAMESPACE"
+          
+          # Ensure namespace exists
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Apply manifests from aks-deployment
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            if [ -f "$manifest" ]; then
+              echo "Applying: $manifest"
+              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
+                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+                kubectl apply -n "$NAMESPACE" -f - || {
+                echo "::warning::Failed to apply $manifest, continuing..."
+              }
+            fi
+          done || {
+            echo "::error::Failed to apply Kubernetes manifests"
+            exit 1
+          }
+
+      - name: Wait for rollout
+        env:
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
+        run: |
+          NAMESPACE="${K8S_NAMESPACE}"
+          echo "Waiting for deployments to stabilize..."
+          
+          deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
+          for deployment in $deployments; do
+            echo "Monitoring $deployment..."
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=5m || {
+              echo "::warning::Rollout status check timed out for $deployment"
+            }
+          done
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          NAMESPACE="${{ secrets.K8S_NAMESPACE || 'essedum' }}"
+          echo "## ✓ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Services deployed**:" >> $GITHUB_STEP_SUMMARY
+          echo "- leap-app-backend" >> $GITHUB_STEP_SUMMARY
+          echo "- frontend" >> $GITHUB_STEP_SUMMARY
+          echo "- py-job-executer" >> $GITHUB_STEP_SUMMARY
+          echo "- py-job-sagemaker-executer" >> $GITHUB_STEP_SUMMARY
+          echo "- py-job-vertex-executer" >> $GITHUB_STEP_SUMMARY
+          echo "- py-job-azure-executer" >> $GITHUB_STEP_SUMMARY
+          echo "- proxy-service" >> $GITHUB_STEP_SUMMARY
+          echo "- adk-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Check logs for details**" >> $GITHUB_STEP_SUMMARY

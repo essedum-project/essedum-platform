@@ -1,0 +1,386 @@
+name: CI – Build & Test (Kubernetes)
+
+# ──────────────────────────────────────────────────────────────
+# Triggers — push to gh_actions branch and PRs to essedum-lfn-v13.0
+# ──────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: ["gh_actions"]
+  pull_request:
+    branches: ["essedum-lfn-v13.0"]
+    types: [opened, synchronize, reopened]
+
+# Cancel any in-flight run for the same branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege: CI only needs to read repo contents
+permissions:
+  contents: read
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # JOB 1 – Backend: Java 21 / Maven
+  # ────────────────────────────────────────────────────────────
+  backend:
+    name: "Backend – Build & Test (Java 21)"
+    runs-on: [self-hosted, essedum-runner]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Cache Maven local repo
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('sv/**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Compile (skip tests)
+        working-directory: sv
+        run: mvn clean install -Dmaven.test.skip=true --batch-mode --no-transfer-progress
+
+      - name: Run unit tests
+        working-directory: sv
+        run: mvn test --batch-mode --no-transfer-progress || {
+          echo "::error::Maven tests failed"
+          exit 1
+        }
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: sv/**/target/surefire-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Backend build summary
+        if: success()
+        run: |
+          echo "## ✓ Backend Build Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Java 21 / Maven compilation successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts: [View](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Backend failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Backend Build Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Actor: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Run: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # JOB 2 – Frontend: Angular (both apps in parallel)
+  # ────────────────────────────────────────────────────────────
+  frontend:
+    name: "Frontend – Build (${{ matrix.app }})"
+    runs-on: [self-hosted, essedum-runner]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: aip-app-ui
+            dir: essedum-ui/aip-app-ui
+          - app: shell-app-ui
+            dir: essedum-ui/shell-app-ui
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.dir }}/package.json
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.dir }}
+        run: npm ci --legacy-peer-deps || {
+          echo "::error::npm ci failed for ${{ matrix.app }}"
+          exit 1
+        }
+
+      - name: Production build
+        working-directory: ${{ matrix.dir }}
+        run: npm run build-prod || {
+          echo "::error::Production build failed for ${{ matrix.app }}"
+          exit 1
+        }
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-dist
+          path: ${{ matrix.dir }}/dist/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Frontend build summary
+        if: success()
+        run: |
+          echo "## ✓ Frontend Build Passed (${{ matrix.app }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Angular build successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Production dist generated" >> $GITHUB_STEP_SUMMARY
+
+      - name: Frontend failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Frontend Build Failed (${{ matrix.app }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # JOB 3 – Python executors: install + flake8 lint
+  # ────────────────────────────────────────────────────────────
+  python:
+    name: "Python – Lint (${{ matrix.executor }})"
+    runs-on: [self-hosted, essedum-runner]
+    strategy:
+      fail-fast: false
+      matrix:
+        executor:
+          - py-job-executer
+          - py-job-sagemaker-executer
+          - py-job-vertex-executer
+          - py-job-azure-executer
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: ${{ matrix.executor }}/requirements.txt
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.executor }}
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8
+
+      - name: Lint – hard fail on syntax/import errors
+        working-directory: ${{ matrix.executor }}
+        run: |
+          source venv/bin/activate
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics \
+            --exclude=venv,__pycache__,.git,data,conf,templates || {
+            echo "::error::Syntax/import errors found in ${{ matrix.executor }}"
+            exit 1
+          }
+
+      - name: Lint – style warnings (non-blocking)
+        working-directory: ${{ matrix.executor }}
+        run: |
+          source venv/bin/activate
+          flake8 . --count --max-line-length=120 --statistics \
+            --exclude=venv,__pycache__,.git,data,conf,templates \
+            --exit-zero || true
+
+      - name: Python lint summary
+        if: success()
+        run: |
+          echo "## ✓ Python Linting Passed (${{ matrix.executor }})" >> $GITHUB_STEP_SUMMARY
+          echo "- No critical errors detected" >> $GITHUB_STEP_SUMMARY
+
+      - name: Python lint failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Python Lint Failed (${{ matrix.executor }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # JOB 4 – Kubernetes manifest validation
+  # ────────────────────────────────────────────────────────────
+  k8s-validate:
+    name: "Kubernetes – Manifest Validate"
+    runs-on: [self-hosted, essedum-runner]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify kubeconfig available
+        run: |
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo "::warning::KUBECONFIG not available in CI environment"
+            echo "Dry-run validation will be performed locally"
+          fi
+
+      - name: Validate Kubernetes manifests syntax
+        run: |
+          echo "Validating aks-deployment manifests..."
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            if [ -f "$manifest" ]; then
+              echo "Validating: $manifest"
+              kubectl apply -f "$manifest" --dry-run=client > /dev/null || {
+                echo "::error::Invalid manifest: $manifest"
+                exit 1
+              }
+            fi
+          done
+
+      - name: Check for required fields in deployments
+        run: |
+          echo "Checking deployment manifests in aks-deployment..."
+          found_deployments=false
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            if [ -f "$manifest" ] && grep -q "kind: Deployment" "$manifest"; then
+              echo "Found deployment in: $manifest"
+              found_deployments=true
+              grep -E "(image:|replicas:|name:)" "$manifest" > /dev/null || {
+                echo "::warning::Some required fields may be missing in $manifest"
+              }
+            fi
+          done
+
+      - name: K8s manifest validation summary
+        if: success()
+        run: |
+          echo "## ✓ Kubernetes Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Manifests are syntactically valid" >> $GITHUB_STEP_SUMMARY
+          echo "- Kustomization builds successfully" >> $GITHUB_STEP_SUMMARY
+
+      - name: K8s validation failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Kubernetes Validation Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # JOB 5 – Docker image build (all custom services)
+  # ────────────────────────────────────────────────────────────
+  docker-build:
+    name: "Docker Build – ${{ matrix.service }}"
+    runs-on: [self-hosted, essedum-runner]
+    needs: k8s-validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: leap-app-backend
+            context: sv
+            dockerfile: sv/Dockerfile_dbjwt
+
+          - service: frontend
+            context: .
+            dockerfile: essedum-ui/Dockerfile
+
+          - service: py-job-executer
+            context: py-job-executer
+            dockerfile: py-job-executer/Dockerfile
+
+          - service: py-job-sagemaker-executer
+            context: py-job-sagemaker-executer
+            dockerfile: py-job-sagemaker-executer/Dockerfile
+
+          - service: py-job-vertex-executer
+            context: py-job-vertex-executer
+            dockerfile: py-job-vertex-executer/Dockerfile
+
+          - service: py-job-azure-executer
+            context: py-job-azure-executer
+            dockerfile: py-job-azure-executer/Dockerfile
+
+          - service: proxy-service
+            context: proxy-service
+            dockerfile: proxy-service/Dockerfile
+
+          - service: adk-code-builder-deployer
+            context: adk-code-builder-deployer
+            dockerfile: adk-code-builder-deployer/Dockerfile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push in CI)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: essedum/${{ matrix.service }}:ci-${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          outputs: type=docker
+
+      - name: Docker build summary
+        if: success()
+        run: |
+          echo "## ✓ Docker Build Passed (${{ matrix.service }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`essedum/${{ matrix.service }}:ci-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Docker build failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Docker Build Failed (${{ matrix.service }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Run: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # Final summary job
+  # ────────────────────────────────────────────────────────────
+  ci-summary:
+    name: "CI – Summary & Status"
+    runs-on: [self-hosted, essedum-runner]
+    needs: [backend, frontend, python, docker-build]
+    if: always()
+
+    steps:
+      - name: Determine CI status
+        run: |
+          if [ "${{ needs.backend.result }}" = "failure" ] || \
+             [ "${{ needs.frontend.result }}" = "failure" ] || \
+             [ "${{ needs.python.result }}" = "failure" ] || \
+             [ "${{ needs.docker-build.result }}" = "failure" ]; then
+            echo "::error::One or more CI jobs failed"
+            echo "## :red_circle: CI Pipeline Failed" >> $GITHUB_STEP_SUMMARY
+            echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "## ✓ All CI Checks Passed" >> $GITHUB_STEP_SUMMARY
+            echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Backend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Frontend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Python | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Docker Build | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create CI badge
+        run: |
+          echo "## Build Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actor**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

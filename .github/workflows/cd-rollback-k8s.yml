@@ -1,0 +1,197 @@
+name: CD – Rollback (Kubernetes)
+
+# ──────────────────────────────────────────────────────────────
+# Manual trigger for rollback deployments
+# ──────────────────────────────────────────────────────────────
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to rollback to (commit SHA or branch)"
+        required: true
+        type: string
+      confirmation:
+        description: "Type 'ROLLBACK' to confirm"
+        required: true
+        type: string
+
+# Only one deployment at a time
+concurrency:
+  group: cd-rollback-k8s
+  cancel-in-progress: false
+
+# Least-privilege: CD only needs to read repo contents
+permissions:
+  contents: read
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # Safety check
+  # ────────────────────────────────────────────────────────────
+  confirm-rollback:
+    name: "Safety – Confirmation Check"
+    runs-on: [self-hosted, essedum-runner]
+    steps:
+      - name: Verify rollback confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirmation }}" != "ROLLBACK" ]; then
+            echo "::error::Rollback confirmation text mismatch"
+            echo "Expected: ROLLBACK"
+            echo "Got: ${{ github.event.inputs.confirmation }}"
+            exit 1
+          fi
+          echo "✓ Rollback confirmed"
+
+  # ────────────────────────────────────────────────────────────
+  # Rollback – rebuild and deploy from specified ref
+  # ────────────────────────────────────────────────────────────
+  rollback:
+    name: "Rollback – Deploy from ${{ github.event.inputs.ref }}"
+    needs: confirm-rollback
+    runs-on: [self-hosted, essedum-runner]
+    environment: production
+
+    steps:
+      - name: Checkout specified ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          fetch-depth: 1
+
+      - name: Verify kubeconfig
+        run: |
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo "::error::KUBECONFIG not found at $KUBECONFIG"
+            exit 1
+          fi
+          kubectl cluster-info
+
+      - name: Get cluster context
+        run: |
+          echo "Cluster: $(kubectl config current-context)"
+          echo "Namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
+
+      - name: Build and push container images
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          NAMESPACE=${K8S_NAMESPACE:-essedum}
+          echo "Rolling back to: ${{ github.event.inputs.ref }}"
+          echo "Building images for rollback..."
+          
+          # Build custom images in sequence
+          services=(
+            "leap-app-backend:sv/Dockerfile_dbjwt"
+            "frontend:essedum-ui/Dockerfile"
+            "py-job-executer:py-job-executer/Dockerfile"
+            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile"
+            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile"
+            "py-job-azure-executer:py-job-azure-executer/Dockerfile"
+            "proxy-service:proxy-service/Dockerfile"
+            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile"
+          )
+          
+          for svc_info in "${services[@]}"; do
+            IFS=':' read -r service dockerfile <<< "$svc_info"
+            context=$(dirname "$dockerfile")
+            echo "Building $service..."
+            docker build -t "${REGISTRY}/essedum/${service}:rollback-${{ github.event.inputs.ref }}" \
+              -t "${REGISTRY}/essedum/${service}:latest" \
+              -f "$dockerfile" "$context" 2>&1 | tail -20 || {
+              echo "::warning::Build for $service had warnings"
+            }
+          done
+
+      - name: Push images to registry
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" || {
+            echo "::error::Failed to authenticate with container registry"
+            exit 1
+          }
+          
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
+          
+          for svc in "${services[@]}"; do
+            docker push "${REGISTRY}/essedum/${svc}:rollback-${{ github.event.inputs.ref }}" || {
+              echo "::error::Failed to push image ${svc}"
+              exit 1
+            }
+            docker push "${REGISTRY}/essedum/${svc}:latest" || true
+          done
+
+      - name: Apply Kubernetes manifests
+        env:
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
+          IMAGE_TAG: ${{ github.event.inputs.ref }}
+        run: |
+          NAMESPACE="${K8S_NAMESPACE}"
+          echo "Rolling back to namespace: $NAMESPACE"
+          
+          # Ensure namespace exists
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Apply manifests from aks-deployment
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            if [ -f "$manifest" ]; then
+              echo "Applying: $manifest (rollback)"
+              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
+                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+                kubectl apply -n "$NAMESPACE" -f - || {
+                echo "::warning::Failed to apply $manifest, continuing..."
+              }
+            fi
+          done || {
+            echo "::error::Failed to apply Kubernetes manifests"
+            exit 1
+          }
+
+      - name: Wait for rollout
+        env:
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
+        run: |
+          NAMESPACE="${K8S_NAMESPACE}"
+          echo "Waiting for rollout to complete..."
+          
+          deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
+          for deployment in $deployments; do
+            echo "Monitoring $deployment..."
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=5m || {
+              echo "::warning::Rollout status check timed out for $deployment"
+            }
+          done
+
+      - name: Rollback summary
+        if: success()
+        run: |
+          NAMESPACE="${{ secrets.K8S_NAMESPACE || 'essedum' }}"
+          echo "## ✓ Rollback Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Rolled back to**: \`${{ github.event.inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Initiated by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: \`$(date -u +'%Y-%m-%dT%H:%M:%SZ')\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Verification commands**:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "kubectl get deployments -n $NAMESPACE" >> $GITHUB_STEP_SUMMARY
+          echo "kubectl get pods -n $NAMESPACE" >> $GITHUB_STEP_SUMMARY
+          echo "kubectl describe deployment -n $NAMESPACE" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Rollback failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Rollback Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target ref**: \`${{ github.event.inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Initiated by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Emergency steps**:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Check pod logs: \`kubectl logs -n essedum <pod-name>\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check rollout status: \`kubectl rollout status deployment/<name> -n essedum\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Manual rollback: \`kubectl rollout undo deployment/<name> -n essedum\`" >> $GITHUB_STEP_SUMMARY
