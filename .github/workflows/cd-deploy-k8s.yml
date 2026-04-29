@@ -88,24 +88,24 @@ jobs:
           echo "Registry: $REGISTRY"
           echo "Building images for deployment..."
           
-          # Build custom images in sequence
+          # Build custom images - format: "name:dockerfile:context"
           services=(
-            "leap-app-backend:sv/Dockerfile_dbjwt"
-            "frontend:essedum-ui/Dockerfile"
-            "py-job-executer:py-job-executer/Dockerfile"
-            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile"
-            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile"
-            "py-job-azure-executer:py-job-azure-executer/Dockerfile"
-            "proxy-service:proxy-service/Dockerfile"
-            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile"
+            "leap-app-backend:sv/Dockerfile_dbjwt:."
+            "frontend:essedum-ui/Dockerfile:."
+            "py-job-executer:py-job-executer/Dockerfile:."
+            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile:."
+            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile:."
+            "py-job-azure-executer:py-job-azure-executer/Dockerfile:."
+            "proxy-service:proxy-service/Dockerfile:proxy-service"
+            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile:adk-code-builder-deployer"
           )
           
           for svc_info in "${services[@]}"; do
-            IFS=':' read -r service dockerfile <<< "$svc_info"
-            echo "Building $service from $dockerfile..."
+            IFS=':' read -r service dockerfile context <<< "$svc_info"
+            echo "Building $service from $dockerfile with context $context..."
             docker build -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
               -t "${REGISTRY}/essedum/${service}:latest" \
-              -f "$dockerfile" . || {
+              -f "$dockerfile" "$context" || {
               echo "::error::Failed to build $service"
               exit 1
             }

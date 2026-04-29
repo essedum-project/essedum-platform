@@ -32,7 +32,7 @@ USER root
 # Install Nginx
 RUN apt-get update && apt-get install -y nginx && apt-get clean
 
-COPY nginx_backend.conf /etc/nginx/nginx.conf
+COPY sv/nginx_backend.conf /etc/nginx/nginx.conf
 
 ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"

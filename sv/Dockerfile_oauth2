@@ -30,13 +30,13 @@ RUN mkdir -p /app/conf /app/lib /app/log && \
 FROM eclipse-temurin:21-jdk
 
 RUN apt-get update && apt-get install -y nginx && apt-get clean
-COPY nginx_backend.conf /etc/nginx/nginx.conf
+COPY sv/nginx_backend.conf /etc/nginx/nginx.conf
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
 # Import SSL cert
-COPY lfn-keycloak2.crt $JAVA_HOME/bin/
+COPY sv/lfn-keycloak2.crt $JAVA_HOME/bin/
 RUN keytool -importcert -trustcacerts \
     -file $JAVA_HOME/bin/lfn-keycloak2.crt \
     -alias "lfn-keycloak" \
