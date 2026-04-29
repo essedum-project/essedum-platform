@@ -78,15 +78,24 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          set -e
+          set -ex  # Exit on error and print commands
+          
+          echo "=== Environment Debug ==="
+          echo "REGISTRY=${REGISTRY:-EMPTY}"
+          echo "REGISTRY_USERNAME=${REGISTRY_USERNAME:-EMPTY}"
+          echo "Docker version: $(docker --version)"
+          echo "PWD: $PWD"
+          echo ""
           
           if [ -z "$REGISTRY" ]; then
             echo "::error::REGISTRY secret is empty!"
             exit 1
           fi
           
+          echo "=== Build Configuration ==="
           echo "Registry: $REGISTRY"
           echo "Building images for deployment..."
+          echo ""
           
           # Build custom images - format: "name:dockerfile:context"
           services=(
@@ -102,15 +111,36 @@ jobs:
           
           for svc_info in "${services[@]}"; do
             IFS=':' read -r service dockerfile context <<< "$svc_info"
-            echo "Building $service from $dockerfile with context $context..."
-            docker build -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
+            echo ">>> Building $service"
+            echo "    Dockerfile: $dockerfile"
+            echo "    Context: $context"
+            
+            # Verify files exist
+            if [ ! -f "$dockerfile" ]; then
+              echo "::error::Dockerfile not found: $dockerfile"
+              exit 1
+            fi
+            
+            if [ ! -d "$context" ]; then
+              echo "::error::Context directory not found: $context"
+              exit 1
+            fi
+            
+            # Run the build with full output
+            docker build \
+              -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
               -t "${REGISTRY}/essedum/${service}:latest" \
-              -f "$dockerfile" "$context" || {
-              echo "::error::Failed to build $service"
+              -f "$dockerfile" "$context" 2>&1 || {
+              echo ""
+              echo "::error::Failed to build $service - see output above for details"
               exit 1
             }
-            echo "✓ Built: ${REGISTRY}/essedum/${service}:${{ github.sha }}"
+            echo "✓ Successfully built: ${REGISTRY}/essedum/${service}:${{ github.sha }}"
+            echo ""
           done
+          
+          echo "=== Build Summary ==="
+          docker images | grep "${REGISTRY}/essedum" || echo "No images found in registry prefix"
 
       - name: Push images to registry
         env:
@@ -118,35 +148,50 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          set -e
+          set -ex  # Exit on error and print commands
+          
+          echo "=== Registry Push Configuration ==="
+          echo "Registry: ${REGISTRY:-EMPTY}"
+          echo "Username: ${REGISTRY_USERNAME:-EMPTY}"
+          echo ""
           
           if [ -z "$REGISTRY" ]; then
             echo "::error::REGISTRY secret is empty!"
             exit 1
           fi
           
-          echo "Logging into registry: $REGISTRY"
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" || {
+          echo ">>> Authenticating to registry..."
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" 2>&1 || {
             echo "::error::Failed to authenticate with container registry"
             exit 1
           }
+          echo "✓ Authentication successful"
+          echo ""
           
-          echo "Pushing images to registry..."
+          echo ">>> Images before push:"
+          docker images | grep "${REGISTRY}/essedum" || true
+          echo ""
+          
+          echo ">>> Starting image push to registry..."
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
           
           for svc in "${services[@]}"; do
             echo "Pushing ${REGISTRY}/essedum/${svc}:${{ github.sha }}..."
-            docker push "${REGISTRY}/essedum/${svc}:${{ github.sha }}" || {
-              echo "::error::Failed to push image ${svc}"
+            docker push "${REGISTRY}/essedum/${svc}:${{ github.sha }}" 2>&1 || {
+              echo "::error::Failed to push image ${svc}:${{ github.sha }}"
               exit 1
             }
             echo "Pushing ${REGISTRY}/essedum/${svc}:latest..."
-            docker push "${REGISTRY}/essedum/${svc}:latest" || {
-              echo "::error::Failed to push latest tag for ${svc}"
+            docker push "${REGISTRY}/essedum/${svc}:latest" 2>&1 || {
+              echo "::error::Failed to push image ${svc}:latest"
               exit 1
             }
             echo "✓ Pushed: ${REGISTRY}/essedum/${svc}"
           done
+          
+          echo ""
+          echo "=== Push Summary ==="
+          echo "All images successfully pushed to $REGISTRY"
 
       - name: Apply Kubernetes manifests
         env:
