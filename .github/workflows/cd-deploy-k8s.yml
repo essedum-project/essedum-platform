@@ -102,11 +102,10 @@ jobs:
           
           for svc_info in "${services[@]}"; do
             IFS=':' read -r service dockerfile <<< "$svc_info"
-            context=$(dirname "$dockerfile")
             echo "Building $service from $dockerfile..."
             docker build -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
               -t "${REGISTRY}/essedum/${service}:latest" \
-              -f "$dockerfile" "$context" || {
+              -f "$dockerfile" . || {
               echo "::error::Failed to build $service"
               exit 1
             }
