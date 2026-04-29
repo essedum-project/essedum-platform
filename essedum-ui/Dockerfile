@@ -24,6 +24,9 @@ RUN yarn cache clean && \
     yarn config set registry https://registry.npmjs.org/ && \
     echo "Installing dependencies with yarn..."
 
+# Increase Node memory for builds
+ENV NODE_OPTIONS="--max-old-space-size=16384"
+
 # Try to install with verbose output to see actual error
 RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install.log || { \
     echo ""; \
@@ -33,7 +36,14 @@ RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install.log || { \
     exit 1; \
   }
 
-RUN yarn run build-prod
+RUN echo "=== Running build-prod ===" && \
+    yarn run build-prod 2>&1 | tee /tmp/build.log || { \
+    echo ""; \
+    echo "=== BUILD FAILED ==="; \
+    echo "Last 500 lines of build output:"; \
+    tail -500 /tmp/build.log; \
+    exit 1; \
+  }
 
 WORKDIR /shell-app-ui
 
@@ -52,6 +62,9 @@ RUN yarn cache clean && \
     yarn config set registry https://registry.npmjs.org/ && \
     echo "Installing dependencies with yarn..."
 
+# Increase Node memory for builds
+ENV NODE_OPTIONS="--max-old-space-size=16384"
+
 # Try to install with verbose output to see actual error
 RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install-shell.log || { \
     echo ""; \
@@ -61,7 +74,14 @@ RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install-shell.log || { \
     exit 1; \
   }
 
-RUN yarn run build-prod
+RUN echo "=== Running build-prod ===" && \
+    yarn run build-prod 2>&1 | tee /tmp/build-shell.log || { \
+    echo ""; \
+    echo "=== BUILD FAILED ==="; \
+    echo "Last 500 lines of build output:"; \
+    tail -500 /tmp/build-shell.log; \
+    exit 1; \
+  }
 
 RUN npm run build-prod
 
