@@ -1,44 +1,67 @@
 # Use official Node image - LTS version for better compatibility
 FROM node:20.12.2-alpine AS build
 
+# Install build tools and yarn
+RUN apk add --no-cache python3 make g++ git yarn
+
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
 # Diagnostic info
-RUN echo "=== AIP App UI Build ===" && ls -la && cat package.json
+RUN echo "=== Directory Structure ===" && \
+    pwd && \
+    ls -la && \
+    echo "" && \
+    echo "=== package.json ===" && \
+    head -30 package.json && \
+    echo "" && \
+    echo "=== yarn version ===" && \
+    yarn --version && node --version
 
-# Clean npm cache and set registry
-RUN npm cache clean --force && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm config get registry
+# Clean yarn cache and set registry
+RUN yarn cache clean && \
+    yarn config set registry https://registry.npmjs.org/ && \
+    echo "Installing dependencies with yarn..."
 
-# Install dependencies with legacy peer deps support
-RUN npm install --legacy-peer-deps || { \
-    echo "=== NPM Install Failed ==="; \
-    cat /root/.npm/_logs/*debug*.log 2>/dev/null | tail -200 || echo "No logs found"; \
+# Try to install with verbose output to see actual error
+RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install.log || { \
+    echo ""; \
+    echo "=== YARN INSTALL FAILED ==="; \
+    echo "Last 300 lines of install output:"; \
+    tail -300 /tmp/install.log; \
     exit 1; \
   }
 
-RUN npm run build-prod
+RUN yarn run build-prod
 
 WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
 # Diagnostic info
-RUN echo "=== Shell App UI Build ===" && ls -la && cat package.json
+RUN echo "=== Directory Structure ===" && \
+    pwd && \
+    ls -la && \
+    echo "" && \
+    echo "=== package.json ===" && \
+    head -30 package.json
 
-# Force public npm registry and override lodash/lodash-es to avoid hardcoded JFrog URL deps
-RUN npm cache clean --force && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm config get registry
+# Clean yarn cache and set registry
+RUN yarn cache clean && \
+    yarn config set registry https://registry.npmjs.org/ && \
+    echo "Installing dependencies with yarn..."
 
-RUN npm install --legacy-peer-deps || { \
-    echo "=== NPM Install Failed ==="; \
-    cat /root/.npm/_logs/*debug*.log 2>/dev/null | tail -200 || echo "No logs found"; \
+# Try to install with verbose output to see actual error
+RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install-shell.log || { \
+    echo ""; \
+    echo "=== YARN INSTALL FAILED ==="; \
+    echo "Last 300 lines of install output:"; \
+    tail -300 /tmp/install-shell.log; \
     exit 1; \
   }
+
+RUN yarn run build-prod
 
 RUN npm run build-prod
 
