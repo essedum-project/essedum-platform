@@ -14,7 +14,11 @@ RUN npm cache clean --force && \
     npm config get registry
 
 # Install dependencies with legacy peer deps support
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps || { \
+    echo "=== NPM Install Failed ==="; \
+    cat /root/.npm/_logs/*debug*.log 2>/dev/null | tail -200 || echo "No logs found"; \
+    exit 1; \
+  }
 
 RUN npm run build-prod
 
@@ -30,7 +34,11 @@ RUN npm cache clean --force && \
     npm config set registry https://registry.npmjs.org/ && \
     npm config get registry
 
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps || { \
+    echo "=== NPM Install Failed ==="; \
+    cat /root/.npm/_logs/*debug*.log 2>/dev/null | tail -200 || echo "No logs found"; \
+    exit 1; \
+  }
 
 RUN npm run build-prod
 
