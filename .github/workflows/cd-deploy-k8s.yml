@@ -92,10 +92,10 @@ jobs:
           services=(
             "leap-app-backend:sv/Dockerfile_dbjwt:."
             "frontend:essedum-ui/Dockerfile:."
-            "py-job-executer:py-job-executer/Dockerfile:."
-            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile:."
-            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile:."
-            "py-job-azure-executer:py-job-azure-executer/Dockerfile:."
+            "py-job-executer:py-job-executer/Dockerfile:py-job-executer"
+            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile:py-job-sagemaker-executer"
+            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile:py-job-vertex-executer"
+            "py-job-azure-executer:py-job-azure-executer/Dockerfile:py-job-azure-executer"
             "proxy-service:proxy-service/Dockerfile:proxy-service"
             "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile:adk-code-builder-deployer"
           )

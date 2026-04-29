@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files
-COPY . .
+COPY sv /sv
 
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2 \

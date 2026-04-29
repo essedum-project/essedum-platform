@@ -3,7 +3,7 @@ FROM maven:3.9.6-eclipse-temurin-21 AS maven_builder
 
 WORKDIR /sv
 
-COPY . .
+COPY sv /sv
 
 RUN mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
 
