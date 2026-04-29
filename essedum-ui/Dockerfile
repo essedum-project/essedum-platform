@@ -1,11 +1,20 @@
-# Use official Node image
-FROM node:24.1.0-alpine AS build
+# Use official Node image - LTS version for better compatibility
+FROM node:20.12.2-alpine AS build
 
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN npm install --legacy-peer-deps --verbose
+# Diagnostic info
+RUN echo "=== AIP App UI Build ===" && ls -la && cat package.json
+
+# Clean npm cache and set registry
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config get registry
+
+# Install dependencies with legacy peer deps support
+RUN npm install --legacy-peer-deps
 
 RUN npm run build-prod
 
@@ -13,7 +22,15 @@ WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN npm install --legacy-peer-deps --verbose
+# Diagnostic info
+RUN echo "=== Shell App UI Build ===" && ls -la && cat package.json
+
+# Force public npm registry and override lodash/lodash-es to avoid hardcoded JFrog URL deps
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config get registry
+
+RUN npm install --legacy-peer-deps
 
 RUN npm run build-prod
 
