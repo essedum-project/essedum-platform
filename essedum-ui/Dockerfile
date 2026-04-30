@@ -1,6 +1,9 @@
 # Use official Node image
 FROM node:20-alpine AS build
 
+# Increase Node memory
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
@@ -9,7 +12,7 @@ COPY essedum-ui/aip-app-ui/ ./
 RUN echo "=== Installing AIP App UI ===" && \
     npm config set registry https://registry.npmjs.org/ && \
     npm cache clean --force && \
-    npm install --legacy-peer-deps 2>&1 | grep -E "added|up to date|warn|ERR" || true
+    npm install --legacy-peer-deps
 
 RUN npm run build-prod
 
@@ -21,7 +24,7 @@ COPY essedum-ui/shell-app-ui/ ./
 RUN echo "=== Installing Shell App UI ===" && \
     npm config set registry https://registry.npmjs.org/ && \
     npm cache clean --force && \
-    npm install --legacy-peer-deps 2>&1 | grep -E "added|up to date|warn|ERR" || true
+    npm install --legacy-peer-deps
 
 RUN npm run build-prod
 
