@@ -7080,7 +7080,7 @@ lodash-es@^4.17.21:
 
 lodash-es@^4.17.23:
   version "4.18.1"
-  resolved "https://infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
+  resolved "https://registry.npmjs.org/lodash-es/-/lodash-es-4.18.1.tgz#b962eeb80d9d983a900bf342961fb7418ca10b1d"
   integrity sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==
 
 lodash.clonedeep@^4.5.0:
@@ -7105,7 +7105,7 @@ lodash@^4.15.0, lodash@^4.17.21:
 
 lodash@^4.18.1:
   version "4.18.1"
-  resolved "https://infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
+  resolved "https://registry.npmjs.org/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
 
 log-symbols@^4.1.0:
