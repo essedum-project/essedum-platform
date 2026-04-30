@@ -9,8 +9,7 @@ WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN rm -f .npmrc ~/.npmrc .yarnrc ~/.yarnrc /usr/local/share/.config/yarn/global/.yarnrc 2>/dev/null || true && \
-    yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
+RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
 
 RUN yarn run build-prod
 
@@ -18,8 +17,7 @@ WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN rm -f .npmrc ~/.npmrc .yarnrc ~/.yarnrc /usr/local/share/.config/yarn/global/.yarnrc 2>/dev/null || true && \
-    yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
+RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
 
 RUN yarn run build-prod
 
