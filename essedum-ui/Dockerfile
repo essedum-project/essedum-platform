@@ -5,10 +5,9 @@ WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN npm config set registry https://registry.npmjs.org/ 
-
-RUN npm install --legacy-peer-deps --verbose
-
+RUN rm -f .npmrc ~/.npmrc && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install --legacy-peer-deps --verbose
 
 RUN npm run build-prod
 
@@ -16,9 +15,9 @@ WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN npm config set registry https://registry.npmjs.org/ 
-
-RUN npm install --legacy-peer-deps --verbose
+RUN rm -f .npmrc ~/.npmrc && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install --legacy-peer-deps --verbose
 
 RUN npm run build-prod
 
