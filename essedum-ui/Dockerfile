@@ -5,21 +5,21 @@ WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN rm -f .npmrc ~/.npmrc && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm install --legacy-peer-deps --verbose
+RUN rm -f .npmrc ~/.npmrc .yarnrc && \
+    yarn config set registry https://registry.npmjs.org/ && \
+    yarn install --frozen-lockfile --network-timeout 600000
 
-RUN npm run build-prod
+RUN yarn run build-prod
 
 WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN rm -f .npmrc ~/.npmrc && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm install --legacy-peer-deps --verbose
+RUN rm -f .npmrc ~/.npmrc .yarnrc && \
+    yarn config set registry https://registry.npmjs.org/ && \
+    yarn install --frozen-lockfile --network-timeout 600000
 
-RUN npm run build-prod
+RUN yarn run build-prod
 
 COPY essedum-ui/nginx_ui.conf /
 
