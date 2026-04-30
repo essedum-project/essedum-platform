@@ -4,7 +4,8 @@ WORKDIR /py-job-executer
 
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 

@@ -10,7 +10,7 @@ gradio
 pandas
 sqlalchemy
 pymysql
-azureml-dataset-runtime==1.60.0
+azureml-dataset-runtime
 azureml-core
 azureml-pipeline
 azure-ai-ml
