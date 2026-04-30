@@ -16,11 +16,21 @@ RUN npm config set registry https://registry.npmjs.org/ && \
 
 # Install dependencies for aip-app-ui
 RUN echo ">>> Installing aip-app-ui dependencies..." && \
-    npm install
+    npm install --legacy-peer-deps --verbose --no-audit --no-fund 2>&1 || { \
+    echo ""; \
+    echo "=== NPM INSTALL FAILED ==="; \
+    echo "Showing npm debug logs:"; \
+    find /root/.npm/_logs -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -200; \
+    exit 1; \
+  }
 
 # Build aip-app-ui
 RUN echo ">>> Building aip-app..." && \
-    npm run build-prod
+    npm run build-prod 2>&1 | tail -150 || { \
+    echo ""; \
+    echo "=== BUILD FAILED ==="; \
+    exit 1; \
+  }
 
 WORKDIR /shell-app-ui
 
@@ -28,11 +38,21 @@ COPY essedum-ui/shell-app-ui/ ./
 
 # Install dependencies for shell-app-ui
 RUN echo ">>> Installing shell-app-ui dependencies..." && \
-    npm install
+    npm install --legacy-peer-deps --verbose --no-audit --no-fund 2>&1 || { \
+    echo ""; \
+    echo "=== NPM INSTALL FAILED ==="; \
+    echo "Showing npm debug logs:"; \
+    find /root/.npm/_logs -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -200; \
+    exit 1; \
+  }
 
 # Build shell-app-ui
 RUN echo ">>> Building common-app..." && \
-    npm run build-prod
+    npm run build-prod 2>&1 | tail -150 || { \
+    echo ""; \
+    echo "=== BUILD FAILED ==="; \
+    exit 1; \
+  }
 
 # Copy nginx config for use in runtime stage
 COPY essedum-ui/nginx_ui.conf /nginx_ui.conf
