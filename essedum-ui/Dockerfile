@@ -1,11 +1,15 @@
 # Use official Node image
-FROM node:24.1.0-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN npm install --legacy-peer-deps --verbose
+# Install dependencies
+RUN echo "=== Installing AIP App UI ===" && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm cache clean --force && \
+    npm install --legacy-peer-deps 2>&1 | grep -E "added|up to date|warn|ERR" || true
 
 RUN npm run build-prod
 
@@ -13,7 +17,11 @@ WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN npm install --legacy-peer-deps --verbose
+# Install dependencies  
+RUN echo "=== Installing Shell App UI ===" && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm cache clean --force && \
+    npm install --legacy-peer-deps 2>&1 | grep -E "added|up to date|warn|ERR" || true
 
 RUN npm run build-prod
 
