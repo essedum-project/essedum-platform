@@ -1,18 +1,20 @@
 # Use official Node image
-FROM node:20-alpine AS build
+FROM node:24.1.0-alpine AS build
 
-# Increase Node memory
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Import corporate CA certificates for npm to work behind Zscaler proxy
+COPY custom-certs/ /usr/local/share/ca-certificates/
+RUN apk add --no-cache --allow-untrusted ca-certificates 2>/dev/null || true && \
+    cat /usr/local/share/ca-certificates/*.crt >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-# Install dependencies
-RUN echo "=== Installing AIP App UI ===" && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm cache clean --force && \
-    npm install --legacy-peer-deps
+RUN npm config set registry https://registry.npmjs.org/ 
+
+RUN npm install --legacy-peer-deps --verbose
+
 
 RUN npm run build-prod
 
@@ -20,17 +22,20 @@ WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-# Install dependencies  
-RUN echo "=== Installing Shell App UI ===" && \
-    npm config set registry https://registry.npmjs.org/ && \
-    npm cache clean --force && \
-    npm install --legacy-peer-deps
+RUN npm config set registry https://registry.npmjs.org/ 
+
+RUN npm install --legacy-peer-deps --verbose
 
 RUN npm run build-prod
 
 COPY essedum-ui/nginx_ui.conf /
 
 FROM nginx:alpine
+
+# Import corporate CA certificates for apk to work behind Zscaler proxy
+COPY custom-certs/ /usr/local/share/ca-certificates/
+RUN cat /usr/local/share/ca-certificates/*.crt >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true && \
+    update-ca-certificates 2>/dev/null || true
 
 RUN apk add --no-cache openssl && \
     mkdir -p /etc/nginx/ssl && \
