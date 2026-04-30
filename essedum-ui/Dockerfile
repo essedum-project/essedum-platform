@@ -1,12 +1,6 @@
 # Use official Node image
 FROM node:24.1.0-alpine AS build
 
-# Import corporate CA certificates for npm to work behind Zscaler proxy
-COPY custom-certs/ /usr/local/share/ca-certificates/
-RUN apk add --no-cache --allow-untrusted ca-certificates 2>/dev/null || true && \
-    cat /usr/local/share/ca-certificates/*.crt >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
-ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
-
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
@@ -31,11 +25,6 @@ RUN npm run build-prod
 COPY essedum-ui/nginx_ui.conf /
 
 FROM nginx:alpine
-
-# Import corporate CA certificates for apk to work behind Zscaler proxy
-COPY custom-certs/ /usr/local/share/ca-certificates/
-RUN cat /usr/local/share/ca-certificates/*.crt >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true && \
-    update-ca-certificates 2>/dev/null || true
 
 RUN apk add --no-cache openssl && \
     mkdir -p /etc/nginx/ssl && \
