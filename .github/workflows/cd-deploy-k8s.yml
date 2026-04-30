@@ -201,24 +201,83 @@ jobs:
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
           echo "Deploying to namespace: $NAMESPACE"
-          
-          # Ensure namespace exists
+
+          # Ensure app namespace exists
           kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-          
-          # Apply manifests from aks-deployment
-          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+
+          # ── Step 1: Apply infra files that define their own namespaces ──
+          # These must NOT have -n override applied
+          INFRA_FILES=(
+            "aks-deployment/ingress-nginx-deploy.yaml"
+            "aks-deployment/metallib-config.yaml"
+          )
+          for manifest in "${INFRA_FILES[@]}"; do
             if [ -f "$manifest" ]; then
-              echo "Applying: $manifest"
+              echo "Applying infra manifest (own namespace): $manifest"
               sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
                 sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
-                kubectl apply -n "$NAMESPACE" -f - || {
+                kubectl apply -f - || {
                 echo "::warning::Failed to apply $manifest, continuing..."
               }
             fi
-          done || {
-            echo "::error::Failed to apply Kubernetes manifests"
-            exit 1
-          }
+          done
+
+          # ── Step 2: Remove stale ingress admission webhook if present ──
+          # Prevents: "failed calling webhook validate.nginx.ingress.kubernetes.io"
+          kubectl delete validatingwebhookconfiguration ingress-nginx-admission \
+            --ignore-not-found || true
+
+          # ── Step 3: Apply PVC-containing files with server-side apply ──
+          # Prevents: "persistentvolumeclaims is forbidden: only dynamically provisioned pvc can be resized"
+          PVC_FILES=(
+            "aks-deployment/clickhouse-deployment.yaml"
+            "aks-deployment/litellm-deployment.yaml"
+            "aks-deployment/litellm-postgres-deployment.yaml"
+            "aks-deployment/langfuse-postgres-deployment.yaml"
+            "aks-deployment/langfuse-minio-deployment.yaml"
+            "aks-deployment/langflow_file_pv.yaml"
+            "aks-deployment/mysql_file_pv.yaml"
+            "aks-deployment/qdrantfilepv.yaml"
+          )
+          for manifest in "${PVC_FILES[@]}"; do
+            if [ -f "$manifest" ]; then
+              echo "Applying PVC manifest (server-side): $manifest"
+              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
+                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+                kubectl apply -n "$NAMESPACE" --server-side --force-conflicts -f - || {
+                echo "::warning::Failed to apply $manifest, continuing..."
+              }
+            fi
+          done
+
+          # ── Step 4: Apply all remaining app manifests ──
+          SKIP_FILES=(
+            "aks-deployment/ingress-nginx-deploy.yaml"
+            "aks-deployment/metallib-config.yaml"
+            "aks-deployment/clickhouse-deployment.yaml"
+            "aks-deployment/litellm-deployment.yaml"
+            "aks-deployment/litellm-postgres-deployment.yaml"
+            "aks-deployment/langfuse-postgres-deployment.yaml"
+            "aks-deployment/langfuse-minio-deployment.yaml"
+            "aks-deployment/langflow_file_pv.yaml"
+            "aks-deployment/mysql_file_pv.yaml"
+            "aks-deployment/qdrantfilepv.yaml"
+          )
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            if [ ! -f "$manifest" ]; then continue; fi
+            # Skip files already handled above
+            skip=false
+            for skip_file in "${SKIP_FILES[@]}"; do
+              if [ "$manifest" = "$skip_file" ]; then skip=true; break; fi
+            done
+            if $skip; then continue; fi
+            echo "Applying: $manifest"
+            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
+              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              kubectl apply -n "$NAMESPACE" -f - || {
+              echo "::warning::Failed to apply $manifest, continuing..."
+            }
+          done
 
       - name: Wait for rollout
         env:
