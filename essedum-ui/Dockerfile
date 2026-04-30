@@ -1,5 +1,5 @@
 # Use official Node image
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 # Force yarn to use public registry, ignoring any global/system .yarnrc with Artifactory
 ENV YARN_REGISTRY=https://registry.npmjs.org/

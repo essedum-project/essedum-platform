@@ -101,23 +101,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: ${{ matrix.dir }}/package.json
+          node-version: "22"
+          cache: "yarn"
+          cache-dependency-path: ${{ matrix.dir }}/yarn.lock
 
       - name: Install dependencies
         working-directory: ${{ matrix.dir }}
-        run: npm ci --legacy-peer-deps || {
-          echo "::error::npm ci failed for ${{ matrix.app }}"
+        run: yarn install --frozen-lockfile --network-timeout 600000 || {
+          echo "::error::yarn install failed for ${{ matrix.app }}"
           exit 1
         }
 
       - name: Production build
         working-directory: ${{ matrix.dir }}
-        run: npm run build-prod || {
+        run: yarn run build-prod || {
           echo "::error::Production build failed for ${{ matrix.app }}"
           exit 1
         }
