@@ -1,47 +1,41 @@
 # Use official Node image - LTS version for better compatibility
 FROM node:20.12.2-alpine AS build
 
-# Install build tools and yarn
-RUN apk add --no-cache python3 make g++ git yarn
+# Install build tools
+RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
 # Diagnostic info
-RUN echo "=== Directory Structure ===" && \
+RUN echo "=== AIP App UI ===" && \
     pwd && \
     ls -la && \
-    echo "" && \
-    echo "=== package.json ===" && \
-    head -30 package.json && \
-    echo "" && \
-    echo "=== yarn version ===" && \
-    yarn --version && node --version
+    echo "Node: $(node --version)" && \
+    echo "NPM: $(npm --version)"
 
-# Clean yarn cache and set registry
-RUN yarn cache clean && \
-    yarn config set registry https://registry.npmjs.org/ && \
-    echo "Installing dependencies with yarn..."
+# Set npm registry and increase memory
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm cache clean --force
 
-# Increase Node memory for builds
 ENV NODE_OPTIONS="--max-old-space-size=16384"
 
-# Try to install with verbose output to see actual error
-RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install.log || { \
+# Install dependencies
+RUN echo ">>> npm install aip-app-ui..." && \
+    npm install 2>&1 | head -50 && npm install 2>&1 | tail -50 || { \
     echo ""; \
-    echo "=== YARN INSTALL FAILED ==="; \
-    echo "Last 300 lines of install output:"; \
-    tail -300 /tmp/install.log; \
+    echo "INSTALL FAILED - showing npm logs:"; \
+    ls -la /root/.npm/_logs/ 2>/dev/null || echo "No logs dir"; \
+    find /root/.npm/_logs -name "*.log" -exec tail -100 {} \; 2>/dev/null || true; \
     exit 1; \
   }
 
-RUN echo "=== Running build-prod ===" && \
-    yarn run build-prod 2>&1 | tee /tmp/build.log || { \
+# Build the application
+RUN echo ">>> Building aip-app..." && \
+    npm run build-prod 2>&1 | tail -100 || { \
     echo ""; \
-    echo "=== BUILD FAILED ==="; \
-    echo "Last 500 lines of build output:"; \
-    tail -500 /tmp/build.log; \
+    echo "BUILD FAILED"; \
     exit 1; \
   }
 
@@ -50,40 +44,33 @@ WORKDIR /shell-app-ui
 COPY essedum-ui/shell-app-ui/ ./
 
 # Diagnostic info
-RUN echo "=== Directory Structure ===" && \
+RUN echo "=== Shell App UI ===" && \
     pwd && \
     ls -la && \
-    echo "" && \
-    echo "=== package.json ===" && \
-    head -30 package.json
+    echo "Node: $(node --version)" && \
+    echo "NPM: $(npm --version)"
 
-# Clean yarn cache and set registry
-RUN yarn cache clean && \
-    yarn config set registry https://registry.npmjs.org/ && \
-    echo "Installing dependencies with yarn..."
+# Set npm registry
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm cache clean --force
 
-# Increase Node memory for builds
-ENV NODE_OPTIONS="--max-old-space-size=16384"
-
-# Try to install with verbose output to see actual error
-RUN yarn install --frozen-lockfile 2>&1 | tee /tmp/install-shell.log || { \
+# Install dependencies  
+RUN echo ">>> npm install shell-app-ui..." && \
+    npm install 2>&1 | head -50 && npm install 2>&1 | tail -50 || { \
     echo ""; \
-    echo "=== YARN INSTALL FAILED ==="; \
-    echo "Last 300 lines of install output:"; \
-    tail -300 /tmp/install-shell.log; \
+    echo "INSTALL FAILED - showing npm logs:"; \
+    ls -la /root/.npm/_logs/ 2>/dev/null || echo "No logs dir"; \
+    find /root/.npm/_logs -name "*.log" -exec tail -100 {} \; 2>/dev/null || true; \
     exit 1; \
   }
 
-RUN echo "=== Running build-prod ===" && \
-    yarn run build-prod 2>&1 | tee /tmp/build-shell.log || { \
+# Build the application
+RUN echo ">>> Building common-app..." && \
+    npm run build-prod 2>&1 | tail -100 || { \
     echo ""; \
-    echo "=== BUILD FAILED ==="; \
-    echo "Last 500 lines of build output:"; \
-    tail -500 /tmp/build-shell.log; \
+    echo "BUILD FAILED"; \
     exit 1; \
   }
-
-RUN npm run build-prod
 
 COPY essedum-ui/nginx_ui.conf /
 
