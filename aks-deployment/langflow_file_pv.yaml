@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: langflow-pv
-  namespace: aipns
+  namespace: essedum
 spec:
   capacity:
     storage: 10Gi
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: langflow-pvc
-  namespace: aipns
+  namespace: essedum
 spec:
   accessModes:
     - ReadWriteMany

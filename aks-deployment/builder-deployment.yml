@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: builder-service
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -15,11 +15,10 @@ spec:
         app: builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
-      imagePullSecrets:
-        - name: regcred               # Secret for pulling this image (if private)
+      imagePullSecrets: []
       containers:
         - name: builder
-          image:  acrreq0762935.azurecr.io/builder-service:v2
+          image: localhost:32000/builder-service:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
@@ -51,14 +50,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: builder-service
-  namespace: aipns
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  namespace: essedum
 spec:
   selector:
     app: builder
   ports:
     - port: 80
       targetPort: 5000
-  type: LoadBalancer
+  type: ClusterIP
   sessionAffinity: ClientIP

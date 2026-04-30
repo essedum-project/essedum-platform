@@ -3,17 +3,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: goose-ui-ingress
-  namespace: aipns
+  namespace: essedum
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-    nginx.ingress.kubernetes.io/proxy-set-headers: "aipns/goose-websocket-headers"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "essedum/goose-websocket-headers"
 spec:
   ingressClassName: nginx
   rules:
-  - host: goose.essedum-lfn.infosys.com
+  - host: goose.essedum.local
     http:
       paths:
       - path: /
@@ -23,17 +23,13 @@ spec:
             name: goose-ui-service
             port:
               number: 8501
-  tls:
-  - hosts:
-    - goose.essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls
 ---
 # Ingress for goosed API - strips /api prefix before forwarding to goosed
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: goosed-api-ingress
-  namespace: aipns
+  namespace: essedum
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
@@ -42,7 +38,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: goose.essedum-lfn.infosys.com
+  - host: goose.essedum.local
     http:
       paths:
       - path: /api(/|$)(.*)
@@ -52,7 +48,3 @@ spec:
             name: goosed-service
             port:
               number: 3005
-  tls:
-  - hosts:
-    - goose.essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls

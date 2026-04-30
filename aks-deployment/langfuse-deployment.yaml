@@ -1,0 +1,299 @@
+## ── langfuse-web Deployment ─────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langfuse-web
+  namespace: essedum
+  labels:
+    app: langfuse-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langfuse-web
+  template:
+    metadata:
+      labels:
+        app: langfuse-web
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z langfuse-postgres.essedum.svc.cluster.local 5432; do
+                echo 'waiting for langfuse-postgres...'; sleep 3
+              done
+              echo 'langfuse-postgres ready'
+      containers:
+        - name: langfuse-web
+          image: langfuse/langfuse:3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: TZ
+              value: "UTC"
+            - name: DATABASE_URL
+              value: "postgresql://langfuse:REDACTED_LANGFUSE_PG_PASSWORD@langfuse-postgres:5432/langfuse"
+            - name: SALT
+              value: "REDACTED_LANGFUSE_SALT"
+            - name: ENCRYPTION_KEY
+              value: "REDACTED_LANGFUSE_ENCRYPTION_KEY"
+            - name: TELEMETRY_ENABLED
+              value: "false"
+            - name: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
+              value: "false"
+            - name: CLICKHOUSE_MIGRATION_URL
+              value: "clickhouse://default:REDACTED_CLICKHOUSE_PASSWORD@clickhouse:9000"
+            - name: CLICKHOUSE_URL
+              value: "http://default:REDACTED_CLICKHOUSE_PASSWORD@clickhouse:8123"
+            - name: CLICKHOUSE_USER
+              value: "default"
+            - name: CLICKHOUSE_PASSWORD
+              value: "REDACTED_CLICKHOUSE_PASSWORD"
+            - name: CLICKHOUSE_CLUSTER_ENABLED
+              value: "false"
+            - name: REDIS_CONNECTION_STRING
+              value: "redis://:REDACTED_REDIS_PASSWORD@redis:6379"
+            # S3 Event Upload
+            - name: LANGFUSE_S3_EVENT_UPLOAD_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE
+              value: "true"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
+              value: "events/"
+            # S3 Media Upload
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE
+              value: "true"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
+              value: "media/"
+            # S3 Batch Export
+            - name: LANGFUSE_S3_BATCH_EXPORT_ENABLED
+              value: "true"
+            - name: LANGFUSE_S3_BATCH_EXPORT_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_BATCH_EXPORT_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_BATCH_EXPORT_PREFIX
+              value: "exports/"
+            - name: LANGFUSE_S3_BATCH_EXPORT_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE
+              value: "true"
+            - name: NEXTAUTH_URL
+              value: "http://langfuse.essedum.local"
+            - name: NEXTAUTH_SECRET
+              value: "REDACTED_LANGFUSE_NEXTAUTH_SECRET"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/3000"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+---
+## langfuse-web Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: langfuse-web
+  namespace: essedum
+  labels:
+    app: langfuse-web
+spec:
+  selector:
+    app: langfuse-web
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+## ── langfuse-worker Deployment ──────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langfuse-worker
+  namespace: essedum
+  labels:
+    app: langfuse-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langfuse-worker
+  template:
+    metadata:
+      labels:
+        app: langfuse-worker
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z langfuse-postgres.essedum.svc.cluster.local 5432; do
+                echo 'waiting for langfuse-postgres...'; sleep 3
+              done
+              echo 'langfuse-postgres ready'
+      containers:
+        - name: langfuse-worker
+          image: langfuse/langfuse-worker:3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3030
+              name: http
+          env:
+            - name: TZ
+              value: "UTC"
+            - name: DATABASE_URL
+              value: "postgresql://langfuse:REDACTED_LANGFUSE_PG_PASSWORD@langfuse-postgres:5432/langfuse"
+            - name: SALT
+              value: "REDACTED_LANGFUSE_SALT"
+            - name: ENCRYPTION_KEY
+              value: "REDACTED_LANGFUSE_ENCRYPTION_KEY"
+            - name: TELEMETRY_ENABLED
+              value: "false"
+            - name: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
+              value: "false"
+            - name: CLICKHOUSE_MIGRATION_URL
+              value: "clickhouse://default:REDACTED_CLICKHOUSE_PASSWORD@clickhouse:9000"
+            - name: CLICKHOUSE_URL
+              value: "http://default:REDACTED_CLICKHOUSE_PASSWORD@clickhouse:8123"
+            - name: CLICKHOUSE_USER
+              value: "default"
+            - name: CLICKHOUSE_PASSWORD
+              value: "REDACTED_CLICKHOUSE_PASSWORD"
+            - name: CLICKHOUSE_CLUSTER_ENABLED
+              value: "false"
+            - name: REDIS_CONNECTION_STRING
+              value: "redis://:REDACTED_REDIS_PASSWORD@redis:6379"
+            # S3 Event Upload
+            - name: LANGFUSE_S3_EVENT_UPLOAD_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE
+              value: "true"
+            - name: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
+              value: "events/"
+            # S3 Media Upload
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE
+              value: "true"
+            - name: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
+              value: "media/"
+            # S3 Batch Export
+            - name: LANGFUSE_S3_BATCH_EXPORT_ENABLED
+              value: "true"
+            - name: LANGFUSE_S3_BATCH_EXPORT_BUCKET
+              value: "langfuse"
+            - name: LANGFUSE_S3_BATCH_EXPORT_REGION
+              value: "us-east-1"
+            - name: LANGFUSE_S3_BATCH_EXPORT_PREFIX
+              value: "exports/"
+            - name: LANGFUSE_S3_BATCH_EXPORT_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT
+              value: "http://langfuse-minio:9000"
+            - name: LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID
+              value: "langfuse-minio"
+            - name: LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY
+              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+            - name: LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE
+              value: "true"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/3030"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+---
+## langfuse-worker Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: langfuse-worker
+  namespace: essedum
+  labels:
+    app: langfuse-worker
+spec:
+  selector:
+    app: langfuse-worker
+  ports:
+    - name: http
+      port: 3030
+      targetPort: 3030
+  type: ClusterIP

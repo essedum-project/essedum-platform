@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vibe-code-builder-dockerfile-template
-  namespace: aipns
+  namespace: essedum
 data:
   Dockerfile: |
     FROM python:3.12-slim

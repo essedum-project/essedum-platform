@@ -1,0 +1,122 @@
+## PersistentVolume + PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: litellm-postgres-pv
+  labels:
+    app: litellm-postgres
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /data/essedum/litellm-postgres
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - essedum-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: litellm-postgres-pvc
+  namespace: essedum
+  labels:
+    app: litellm-postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      app: litellm-postgres
+---
+## Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm-postgres
+  namespace: essedum
+  labels:
+    app: litellm-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm-postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: litellm-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+        - name: litellm-postgres
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "litellm"
+            - name: POSTGRES_USER
+              value: "litellm"
+            - name: POSTGRES_PASSWORD
+              value: "REDACTED_LITELLM_DB_PASSWORD"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - litellm
+                - -d
+                - litellm
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: litellm-postgres-pvc
+---
+## Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm-postgres
+  namespace: essedum
+  labels:
+    app: litellm-postgres
+spec:
+  selector:
+    app: litellm-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP

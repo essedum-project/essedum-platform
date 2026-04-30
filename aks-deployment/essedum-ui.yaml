@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: essedum-ui
-  namespace: aipns # Namespace where the deployment will run
+  namespace: essedum
 spec:
   replicas: 1 # Number of replicas
   selector:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: essedum-ui
-        image: 10.200.111.174:5000/essedum_app_frontend:latest
+        image: localhost:32000/essedum_app_frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8082

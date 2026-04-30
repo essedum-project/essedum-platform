@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: essedum-backend
-  namespace: aipns # Namespace where the deployment will run
+  namespace: essedum
 spec:
   replicas: 1 # Number of replicas
   selector:
@@ -15,8 +15,17 @@ spec:
     spec:
       containers:
       - name: essedum-backend
-        image: 10.200.111.174:5000/essedum_app_backend:latest
+        image: localhost:32000/essedum_app_backend:latest
         imagePullPolicy: Always
+        env:
+        - name: security.issuer-uri
+          value: "https://essedum.local/realms/ESSEDUM"
+        - name: security.jwk-set-uri
+          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
+        - name: security.clientId
+          value: "essedum-45"
+        - name: security.scope
+          value: "openid profile email"
         ports:
         - containerPort: 8082
 ---
@@ -24,7 +33,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: essedum-backend-service
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: essedum-backend # Matches the label in the Deployment

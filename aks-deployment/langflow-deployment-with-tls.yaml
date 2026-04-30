@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: langflow
-  namespace: aipns
+  namespace: essedum
   labels:
     app: langflow
 spec:
@@ -43,7 +43,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: langflow-service
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: langflow
@@ -58,17 +58,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: langflow-ingress
-  namespace: aipns
+  namespace: essedum
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
-  tls:
-  - hosts:
-    - langflow.lfn.essedum.anuket.iol.unh.edu
-    secretName: essedum-secret
   rules:
-  - host: langflow.lfn.essedum.anuket.iol.unh.edu
+  - host: langflow.essedum.local
     http:
       paths:
       - path: /

@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vibe-code-builder-service
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
       containers:
         - name: vibe-code-builder
-          image:  localhost:5000/vibe-code-builder-service:v1
+          image:  localhost:32000/vibe-code-builder-service:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
@@ -36,12 +36,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vibe-code-builder-service
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: vibe-code-builder
   ports:
     - port: 80
       targetPort: 5000
-  type: LoadBalancer
+  type: ClusterIP
   sessionAffinity: ClientIP

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -24,23 +24,19 @@ spec:
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: admin
             - name: KC_HTTP_PORT
-              value: "8180"
-            - name: KC_HTTPS_PORT
-              value: "8443"
+              value: "8080"
             - name: KC_PROXY
               value: "edge"
             - name: KC_HOSTNAME_STRICT
               value: "false"
             - name: KC_HTTPS_ENABLED
-              value: "true"
+              value: "false"
             - name: KC_HOSTNAME
-              value: "login.lfn.essedum.anuket.iol.unh.edu"
+              value: "essedum.local"
+            - name: KC_HOSTNAME_ADMIN
+              value: "keycloak.essedum.local"
             - name: KC_HOSTNAME_STRICT_HTTPS
-              value: "true"
-            - name: KC_HTTPS_CERTIFICATE_FILE
-              value: "/etc/keycloak/certs/tls.crt"
-            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
-              value: "/etc/keycloak/certs/tls.key"
+              value: "false"
             - name: KC_DB
               value: mysql
             - name: KC_DB_URL
@@ -50,30 +46,19 @@ spec:
             - name: KC_DB_PASSWORD
               value: "password"
           ports:
-            - containerPort: 8443
+            - containerPort: 8080
               protocol: TCP
-
-          volumeMounts:
-            - name: tls-cert
-              mountPath: /etc/keycloak/certs
-              readOnly: true
-      volumes:
-        - name: tls-cert
-          secret:
-            secretName: essedum-secret
-
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: keycloak
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: keycloak
   ports:
     - protocol: TCP
-      port: 8443
-      targetPort: 8443
-  type: LoadBalancer
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

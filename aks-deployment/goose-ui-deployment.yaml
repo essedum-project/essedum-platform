@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: goose-ui
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -15,13 +15,13 @@ spec:
     spec:
       containers:
       - name: goose-ui
-        image: localhost:5000/goose-ui:latest
+        image: localhost:32000/goose-ui:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
         env:
         - name: GOOSE_URL
-          value: "http://goosed-service.aipns.svc.cluster.local:3005"
+          value: "http://goosed-service.essedum.svc.cluster.local:3005"
         - name: GOOSE_SERVER__SECRET_KEY
           valueFrom:
             secretKeyRef:
@@ -34,7 +34,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: goose-ui-service
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: goose-ui

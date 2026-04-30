@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: qdrant
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -30,7 +30,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qdrant
-  namespace: aipns
+  namespace: essedum
 spec:
   selector:
     app: qdrant
@@ -45,7 +45,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: qdrant-pvc
-  namespace: aipns
+  namespace: essedum
 spec:
   accessModes:
   - ReadWriteMany
