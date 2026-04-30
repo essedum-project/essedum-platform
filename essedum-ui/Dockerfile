@@ -1,62 +1,23 @@
-# Use official Node image - LTS version for better compatibility
-FROM node:20.12.2-alpine AS build
-
-# Install build tools
-RUN apk add --no-cache python3 make g++ git
+# Use official Node image
+FROM node:24.1.0-alpine AS build
 
 WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-# Set npm registry and increase memory
-ENV NODE_OPTIONS="--max-old-space-size=16384"
+RUN npm install --legacy-peer-deps --verbose
 
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm cache clean --force
-
-# Install dependencies for aip-app-ui
-RUN echo ">>> Installing aip-app-ui dependencies..." && \
-    npm install --legacy-peer-deps --verbose --no-audit --no-fund 2>&1 || { \
-    echo ""; \
-    echo "=== NPM INSTALL FAILED ==="; \
-    echo "Showing npm debug logs:"; \
-    find /root/.npm/_logs -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -200; \
-    exit 1; \
-  }
-
-# Build aip-app-ui
-RUN echo ">>> Building aip-app..." && \
-    npm run build-prod 2>&1 | tail -150 || { \
-    echo ""; \
-    echo "=== BUILD FAILED ==="; \
-    exit 1; \
-  }
+RUN npm run build-prod
 
 WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-# Install dependencies for shell-app-ui
-RUN echo ">>> Installing shell-app-ui dependencies..." && \
-    npm install --legacy-peer-deps --verbose --no-audit --no-fund 2>&1 || { \
-    echo ""; \
-    echo "=== NPM INSTALL FAILED ==="; \
-    echo "Showing npm debug logs:"; \
-    find /root/.npm/_logs -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -200; \
-    exit 1; \
-  }
+RUN npm install --legacy-peer-deps --verbose
 
-# Build shell-app-ui
-RUN echo ">>> Building common-app..." && \
-    npm run build-prod 2>&1 | tail -150 || { \
-    echo ""; \
-    echo "=== BUILD FAILED ==="; \
-    exit 1; \
-  }
+RUN npm run build-prod
 
-# Copy nginx config for use in runtime stage
-COPY essedum-ui/nginx_ui.conf /nginx_ui.conf
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY essedum-ui/nginx_ui.conf /
 
 FROM nginx:alpine
 
@@ -68,19 +29,18 @@ RUN apk add --no-cache openssl && \
       -out /etc/nginx/ssl/server.crt \
       -subj "/CN=localhost"
 
-# Copy nginx config
-COPY --from=build /nginx_ui.conf /etc/nginx/nginx.conf
+COPY essedum-ui/nginx_ui.conf /etc/nginx/nginx.conf
 
 WORKDIR /app
 RUN mkdir -p /app/ui/aip /app/ui/common
 
-# Copy built artifacts
+COPY --from=build /shell-app-ui/dist/common-app /app/ui/common/
 COPY --from=build /aip-app-ui/dist/aip-app /app/ui/aip
-COPY --from=build /shell-app-ui/dist/common-app /app/ui/common
 
-# Copy and configure entrypoint
-COPY --from=build /entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && chmod -R 755 /app/ui
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN chmod -R 755 /app/ui
 
 # Set working directory to root
 WORKDIR /
@@ -88,6 +48,6 @@ WORKDIR /
 # Expose ports
 EXPOSE 8082 8083 8084 8085 8086 8087 4000 8089
 
-# Start with entrypoint
+# Start with entrypoint that replaces env-var placeholders, then launches Nginx
 ENTRYPOINT ["/entrypoint.sh"]
  
