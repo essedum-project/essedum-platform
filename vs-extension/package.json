@@ -2,7 +2,7 @@
   "name": "essedum",
   "displayName": "Essedum",
   "description": "VS Code extension for Essedum AI Platform",
-  "version": "1.0.40",
+  "version": "1.1.0",
   "publisher": "essedum",
   "license": "MIT",
   "engines": {
@@ -177,7 +177,7 @@
       "essedum-explorer": [
         {
           "id": "essedum-login",
-          "name": "Network Selection",
+          "name": "Environment Selection",
           "type": "webview",
           "when": "!essedum.isAuthenticated",
           "icon": "$(key)"

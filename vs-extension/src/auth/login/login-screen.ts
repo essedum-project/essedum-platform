@@ -69,7 +69,25 @@ export class LoginScreenProvider implements vscode.WebviewViewProvider {
             (message: LoginMessage) => {
                 switch (message.command) {
                     case LOGIN_COMMANDS.LOGIN:
-                        if (message.network) {
+                        if (message.network === 'custom' && message.config) {
+                            // Handle custom network configuration
+                            const customNetworkConfig: NetworkConfig = {
+                                id: 'infosys' as any, // Using infosys as fallback type
+                                name: 'custom',
+                                displayName: 'Custom Network',
+                                issuerUri: message.config.issuerUri,
+                                jwkSetUri: message.config.jwkSetUri,
+                                clientId: message.config.clientId,
+                                scope: 'openid profile email',
+                                claim: 'preferred_username',
+                                createUserIfNotExist: true,
+                                silentRefreshTimeoutFactor: 0.75,
+                                baseURL: message.config.baseURL
+                            };
+                            setBaseUrl(customNetworkConfig.baseURL);
+                            this._onNetworkSelected.fire(customNetworkConfig);
+                        } else if (message.network) {
+                            // Handle predefined network
                             const networkConfig = AUTH_CONFIG.NETWORKS[message.network.toUpperCase() as keyof typeof AUTH_CONFIG.NETWORKS];
                             if (networkConfig) {
                                 setBaseUrl(networkConfig.baseURL);

@@ -12,18 +12,18 @@
  * Network display information
  */
 export const NETWORK_INFO = {
-    INFOSYS: {
-        name: 'Infosys Internal Network',
-        description: 'For Infosys employees and internal users'
-    },
+    // INFOSYS: {
+    //     name: 'Infosys Internal Network',
+    //     description: 'For Infosys employees and internal users'
+    // },
     LFN: {
         name: 'LFN Network',
         description: 'For Linux Foundation Networking users'
-    },
-    SERVER5G: {
-        name: '5G Server Network',
-        description: 'For 5G Server users'
     }
+    // SERVER5G: {
+    //     name: '5G Server Network',
+    //     description: 'For 5G Server users'
+    // }
 } as const;
 
 /**
@@ -31,9 +31,9 @@ export const NETWORK_INFO = {
  */
 export const UI_TEXT = {
     TITLE: '🔐 Essedum AI Platform',
-    SUBTITLE: 'Please select your authentication network',
-    LABEL: 'Authentication Network:',
-    SELECT_PLACEHOLDER: '-- Select Network --',
+    SUBTITLE: 'Please select your Essedum Environment',
+    LABEL: 'Essedum Environment:',
+    SELECT_PLACEHOLDER: '-- Select Environment --',
     LOGIN_BUTTON: 'Login',
     CANCEL_BUTTON: 'Cancel',
     LOADING_MESSAGE: 'Authenticating...'

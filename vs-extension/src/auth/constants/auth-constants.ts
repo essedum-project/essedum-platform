@@ -3,7 +3,7 @@ import { environment } from '../../config/environment';
 /**
  * Network Configuration Types
  */
-export type NetworkType = 'infosys' | 'lfn' | 'server5g';
+export type NetworkType = 'lfn';
 
 /**
  * Network Configuration Interface
@@ -33,21 +33,21 @@ export const AUTH_CONFIG = {
     /** Token refresh threshold in minutes (refresh when token expires within this time) */
     TOKEN_REFRESH_THRESHOLD_MINUTES: 5,
 
-    /** Available authentication networks */
+    /** Available Essedum Environment */
     NETWORKS: {
-        INFOSYS: {
-            id: 'infosys' as NetworkType,
-            name: 'infosys',
-            displayName: 'Infosys Internal Network',
-            issuerUri: environment.networks.infosys.issuerUri,
-            jwkSetUri: environment.networks.infosys.jwkSetUri,
-            clientId: environment.networks.infosys.clientId,
-            scope: 'openid profile email',
-            claim: 'email||admin',
-            createUserIfNotExist: true,
-            silentRefreshTimeoutFactor: 0.85,
-            baseURL: environment.networks.infosys.baseURL
-        } as NetworkConfig,
+        // INFOSYS: {
+        //     id: 'infosys' as NetworkType,
+        //     name: 'infosys',
+        //     displayName: 'Infosys Internal Network',
+        //     issuerUri: environment.networks.infosys.issuerUri,
+        //     jwkSetUri: environment.networks.infosys.jwkSetUri,
+        //     clientId: environment.networks.infosys.clientId,
+        //     scope: 'openid profile email',
+        //     claim: 'email||admin',
+        //     createUserIfNotExist: true,
+        //     silentRefreshTimeoutFactor: 0.85,
+        //     baseURL: environment.networks.infosys.baseURL
+        // } as NetworkConfig,
         LFN: {
             id: 'lfn' as NetworkType,
             name: 'lfn',
@@ -61,27 +61,27 @@ export const AUTH_CONFIG = {
             silentRefreshTimeoutFactor: 0.85,
             baseURL: environment.networks.lfn.baseURL
         } as NetworkConfig,
-        SERVER5G: {
-            id: 'server5g' as NetworkType,
-            name: 'server5g',
-            displayName: '5G Server Network',
-            issuerUri: environment.networks.server5g.issuerUri,
-            jwkSetUri: environment.networks.server5g.jwkSetUri,
-            clientId: environment.networks.server5g.clientId,
-            scope: 'openid profile email',
-            claim: 'email||admin',
-            createUserIfNotExist: true,
-            silentRefreshTimeoutFactor: 0.85,
-            baseURL: environment.networks.server5g.baseURL
-        } as NetworkConfig
+        // SERVER5G: {
+        //     id: 'server5g' as NetworkType,
+        //     name: 'server5g',
+        //     displayName: '5G Server Network',
+        //     issuerUri: environment.networks.server5g.issuerUri,
+        //     jwkSetUri: environment.networks.server5g.jwkSetUri,
+        //     clientId: environment.networks.server5g.clientId,
+        //     scope: 'openid profile email',
+        //     claim: 'email||admin',
+        //     createUserIfNotExist: true,
+        //     silentRefreshTimeoutFactor: 0.85,
+        //     baseURL: environment.networks.server5g.baseURL
+        // } as NetworkConfig
     },
 
     /** Default network (for backwards compatibility) */
-    DEFAULT_NETWORK: 'infosys' as NetworkType,
+    DEFAULT_NETWORK: 'lfn' as NetworkType,
 
     /** Legacy constants for backwards compatibility */
-    ISSUER_URI: environment.networks.infosys.issuerUri,
-    CLIENT_ID: environment.networks.infosys.clientId,
+    ISSUER_URI: environment.networks.lfn.issuerUri,
+    CLIENT_ID: environment.networks.lfn.clientId,
     SCOPE: 'openid profile email',
     REALM: 'ESSEDUM'
 } as const;

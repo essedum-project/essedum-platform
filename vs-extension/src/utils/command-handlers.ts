@@ -44,7 +44,7 @@ export async function showLoginScreen(): Promise<void> {
         logger.error(MSG.LOGIN_SCREEN.SHOW_FAILED, error);
 
         const selection = await vscode.window.showInformationMessage(
-            'Welcome to Essedum AI Platform! Please select your authentication network.',
+            'Welcome to Essedum AI Platform! Please select your Essedum Environment.',
             'Login with Network Selection',
             'Cancel'
         );

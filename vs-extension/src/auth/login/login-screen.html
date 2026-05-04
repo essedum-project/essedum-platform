@@ -14,7 +14,7 @@
     <div class="container">
         <div class="logo">
             <h1>🔐 Essedum AI Platform</h1>
-            <p>Please select your authentication network</p>
+            <p>Please select your Essedum Environment</p>
         </div>
 
         <div id="errorMessage" class="error"></div>
@@ -22,27 +22,50 @@
         <div class="login-form">
             <div id="formSection" class="form-section">
                 <div class="form-group">
-                    <label for="networkSelect">Authentication Network:</label>
+                    <label for="networkSelect">Essedum Environment:</label>
                     <select id="networkSelect">
-                        <option value="">-- Select Network --</option>
-                        <option value="infosys">Infosys Internal Network</option>
+                        <option value="">-- Select Environment --</option>
+                        <!-- <option value="infosys">Infosys Internal Network</option> -->
                         <option value="lfn">LFN Network</option>
-                        <option value="server5g">5G Server Network</option>
+                        <!-- <option value="server5g">5G Server Network</option> -->
+                        <option value="other">Other (Custom Configuration)</option>
                     </select>
 
                     <div id="networkInfo" class="network-info" style="display: none;">
-                        <div id="infosysInfo" style="display: none;">
+                        <!-- <div id="infosysInfo" style="display: none;">
                             <strong>Infosys Internal Network</strong>
                             For Infosys employees and internal users
-                        </div>
+                        </div> -->
                         <div id="lfnInfo" style="display: none;">
                             <strong>LFN Network</strong>
                             For Linux Foundation Networking users
                         </div>
-                        <div id="server5gInfo" style="display: none;">
+                        <!-- <div id="server5gInfo" style="display: none;">
                             <strong>5G Server Network</strong>
                             For 5G Server users
-                        </div>
+                        </div> -->
+                    </div>
+                </div>
+
+                <div id="configFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="issuerUri">Issuer URI:</label>
+                        <input type="text" id="issuerUri" class="config-input" placeholder="https://your-server.com:8443/realms/ESSEDUM" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jwkSetUri">JWK Set URI:</label>
+                        <input type="text" id="jwkSetUri" class="config-input" placeholder="https://your-server.com:8443/realms/ESSEDUM/protocol/openid-connect/certs" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="clientId">Client ID:</label>
+                        <input type="text" id="clientId" class="config-input" placeholder="essedum-45" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="baseURL">Base URL:</label>
+                        <input type="text" id="baseURL" class="config-input" placeholder="https://your-server.com" readonly />
                     </div>
                 </div>
 

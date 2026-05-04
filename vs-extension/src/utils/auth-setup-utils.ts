@@ -22,11 +22,11 @@ export function createAuthenticationService(context: vscode.ExtensionContext): K
     const storedOAuthConfig = context.globalState.get<any>(STORAGE_KEYS.OAUTH_CONFIG);
 
     const keycloakConfig: KeycloakConfig = {
-        issuerUri: storedOAuthConfig?.issuerUri || AUTH_CONFIG.NETWORKS.INFOSYS.issuerUri,
-        clientId: storedOAuthConfig?.clientId || AUTH_CONFIG.NETWORKS.INFOSYS.clientId,
-        scope: storedOAuthConfig?.scope || AUTH_CONFIG.NETWORKS.INFOSYS.scope,
+        issuerUri: storedOAuthConfig?.issuerUri || AUTH_CONFIG.NETWORKS.LFN.issuerUri,
+        clientId: storedOAuthConfig?.clientId || AUTH_CONFIG.NETWORKS.LFN.clientId,
+        scope: storedOAuthConfig?.scope || AUTH_CONFIG.NETWORKS.LFN.scope,
         networkType: AUTH_CONFIG.DEFAULT_NETWORK,
-        networkName: AUTH_CONFIG.NETWORKS.INFOSYS.displayName
+        networkName: AUTH_CONFIG.NETWORKS.LFN.displayName
     };
 
     logger.debug(`Using ${storedOAuthConfig ? 'server' : 'default'} configuration`);
@@ -104,12 +104,12 @@ export async function selectNetwork(networkType?: NetworkType): Promise<NetworkC
 
     // Interactive selection
     const networkOptions = [
-        {
-            label: AUTH_CONFIG.NETWORKS.INFOSYS.displayName,
-            description: 'For Infosys employees and internal users',
-            detail: AUTH_CONFIG.NETWORKS.INFOSYS.issuerUri,
-            network: AUTH_CONFIG.NETWORKS.INFOSYS
-        },
+        // {
+        //     label: AUTH_CONFIG.NETWORKS.INFOSYS.displayName,
+        //     description: 'For Infosys employees and internal users',
+        //     detail: AUTH_CONFIG.NETWORKS.INFOSYS.issuerUri,
+        //     network: AUTH_CONFIG.NETWORKS.INFOSYS
+        // },
         {
             label: AUTH_CONFIG.NETWORKS.LFN.displayName,
             description: 'For Linux Foundation Networking users',
@@ -119,12 +119,12 @@ export async function selectNetwork(networkType?: NetworkType): Promise<NetworkC
     ];
 
     const selection = await vscode.window.showQuickPick(networkOptions, {
-        placeHolder: 'Select authentication network',
-        title: 'Essedum AI Platform - Network Selection'
+        placeHolder: 'Select Essedum Environment',
+        title: 'Essedum AI Platform - Environment Selection'
     });
 
     if (!selection) {
-        throw new Error('Network selection cancelled');
+        throw new Error('Essedum Environment selection cancelled');
     }
 
     return selection.network;

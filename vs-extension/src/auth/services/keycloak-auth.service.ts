@@ -210,6 +210,19 @@ export class KeycloakAuthService {
             logger.info('Client ID:', this.config.clientId);
             logger.info('Scope:', this.config.scope);
 
+            // Check if the Keycloak server is reachable before opening browser
+            const isReachable = await this.checkServerReachability();
+            if (!isReachable) {
+                throw new Error(
+                    `Cannot reach authentication server at ${this.config.issuerUri}. ` +
+                    `Please check:\n` +
+                    `1. The server URL is correct\n` +
+                    `2. You are connected to the correct network\n` +
+                    `3. The server is running and accessible\n` +
+                    `4. No firewall is blocking the connection`
+                );
+            }
+
             // Show progress and start the auth flow
             const authResult = await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
@@ -281,12 +294,30 @@ export class KeycloakAuthService {
             console.error('Authorization code flow error:', error);
 
             // Provide user-friendly error messages
-            if (error.message.includes('timeout')) {
+            if (error.message.includes('Cannot reach authentication server')) {
+                // Direct passthrough of our custom server unreachable message
+                throw error;
+            } else if (error.message.includes('timeout')) {
                 throw new Error('Authentication timed out. Please try again and complete the login process within 5 minutes.');
             } else if (error.message.includes('cancelled')) {
                 throw new Error('Authentication was cancelled by user.');
             } else if (error.message.includes('Port') && error.message.includes('in use')) {
                 throw new Error('Unable to start OAuth server. Please ensure port 8085 is available and try again.');
+            } else if (error.code === 'ECONNREFUSED') {
+                throw new Error(
+                    `Authentication server refused connection at ${this.config.issuerUri}. ` +
+                    `The server may be down or not accessible from your network.`
+                );
+            } else if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
+                throw new Error(
+                    `Cannot resolve hostname for ${this.config.issuerUri}. ` +
+                    `Please check the server address and your network connection.`
+                );
+            } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
+                throw new Error(
+                    `Connection to ${this.config.issuerUri} timed out. ` +
+                    `Please check your network connection and try again.`
+                );
             } else if (error.message.includes('certificate') ||
                 error.message.includes('SSL') ||
                 error.message.includes('TLS') ||
@@ -304,6 +335,49 @@ export class KeycloakAuthService {
             }
 
             throw new Error(`Authentication failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Check if the Keycloak server is reachable
+     * @returns true if server is reachable, false otherwise
+     */
+    private async checkServerReachability(): Promise<boolean> {
+        try {
+            // Try to reach the OpenID configuration endpoint
+            const configUrl = `${this.config.issuerUri}/.well-known/openid-configuration`;
+            
+            logger.info(`Checking server reachability at: ${configUrl}`);
+
+            const httpsAgent = createHTTPSAgent(this.context);
+
+            const response = await axios.get(configUrl, {
+                httpsAgent,
+                timeout: 10000, // 10 second timeout for connectivity check
+                validateStatus: (status) => status >= 200 && status < 500 // Accept any non-5xx status
+            });
+
+            if (response.status >= 200 && response.status < 400) {
+                logger.info('Server is reachable');
+                return true;
+            }
+
+            logger.warn(`Server returned status ${response.status}`);
+            return false;
+        } catch (error: any) {
+            logger.error('Server reachability check failed:', error.message);
+            logger.error('Error code:', error.code);
+            
+            // Log detailed error information for debugging
+            if (error.code === 'ECONNREFUSED') {
+                logger.error('Connection refused - server may be down or not listening');
+            } else if (error.code === 'ENOTFOUND') {
+                logger.error('Hostname not found - DNS resolution failed');
+            } else if (error.code === 'ETIMEDOUT') {
+                logger.error('Connection timed out - network issue or server unreachable');
+            }
+            
+            return false;
         }
     }
 

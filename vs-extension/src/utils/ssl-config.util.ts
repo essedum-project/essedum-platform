@@ -29,7 +29,8 @@ export function shouldBypassSSL(context?: vscode.ExtensionContext): boolean {
     const networkType = selectedNetwork?.id;
 
     // Only bypass SSL for Infosys network
-    const bypass = networkType === 'infosys';
+    // const bypass = networkType === 'infosys';
+    const bypass = false;
 
     logger.info(`SSL Config: Network=${networkType}, Bypass=${bypass}`);
     return bypass;

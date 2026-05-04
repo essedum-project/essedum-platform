@@ -114,5 +114,11 @@ export interface PKCEChallenge {
  */
 export interface LoginMessage {
     command: 'login' | 'cancel' | 'ready';
-    network?: NetworkType;
+    network?: NetworkType | 'custom';
+    config?: {
+        issuerUri: string;
+        jwkSetUri: string;
+        clientId: string;
+        baseURL: string;
+    };
 }

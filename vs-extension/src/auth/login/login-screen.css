@@ -74,6 +74,43 @@ select:focus {
     box-shadow: 0 0 0 1px var(--vscode-focusBorder);
 }
 
+input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-size: 14px;
+    font-family: var(--vscode-font-family);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+}
+
+input[type="text"]::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+input[type="text"].readonly {
+    background-color: var(--vscode-input-background);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+#configFields {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--vscode-widget-border);
+}
+
+#configFields .form-group {
+    margin-bottom: 16px;
+}
+
 .network-info {
     margin-top: 12px;
     padding: 12px;
@@ -99,6 +136,10 @@ select:focus {
 
 .network-info.lfn {
     border-left: 3px solid var(--vscode-charts-green);
+}
+
+.network-info.server5g {
+    border-left: 3px solid var(--vscode-charts-orange);
 }
 
 .button-group {
