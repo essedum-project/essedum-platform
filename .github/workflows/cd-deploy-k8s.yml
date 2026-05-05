@@ -205,22 +205,34 @@ jobs:
           # Ensure app namespace exists
           kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
-          # ── Step 1: Apply infra files that define their own namespaces ──
-          # These must NOT have -n override applied
-          INFRA_FILES=(
-            "aks-deployment/ingress-nginx-deploy.yaml"
-            "aks-deployment/metallib-config.yaml"
-          )
-          for manifest in "${INFRA_FILES[@]}"; do
-            if [ -f "$manifest" ]; then
-              echo "Applying infra manifest (own namespace): $manifest"
-              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
-                kubectl apply -f - || {
-                echo "::warning::Failed to apply $manifest, continuing..."
-              }
-            fi
-          done
+          # Create required system namespaces
+          kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
+
+          # ── Step 1: Apply infra files with special handling ──
+          # For ingress-nginx: delete and recreate due to immutable selector
+          if [ -f "aks-deployment/ingress-nginx-deploy.yaml" ]; then
+            echo "Applying ingress-nginx deployment..."
+            # Delete existing deployment to avoid immutable selector error
+            kubectl delete deployment ingress-nginx-controller -n ingress-nginx --ignore-not-found || true
+            sleep 2
+            # Now apply the new one
+            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/ingress-nginx-deploy.yaml" | \
+              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              kubectl apply -f - || {
+              echo "::warning::Failed to apply ingress-nginx-deploy.yaml, continuing..."
+            }
+          fi
+
+          # For metallb: apply config to the metallb-system namespace
+          if [ -f "aks-deployment/metallib-config.yaml" ]; then
+            echo "Applying metallb config..."
+            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/metallib-config.yaml" | \
+              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              kubectl apply -f - || {
+              echo "::warning::Failed to apply metallib-config.yaml, continuing..."
+            }
+          fi
 
           # ── Step 2: Remove stale ingress admission webhook if present ──
           # Prevents: "failed calling webhook validate.nginx.ingress.kubernetes.io"
