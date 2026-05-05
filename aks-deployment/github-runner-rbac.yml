@@ -1,0 +1,125 @@
+# GitHub Actions Runner RBAC Configuration for AKS
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: essedum
+  labels:
+    name: essedum
+    app: github-runner
+
+---
+# Service Account for runners
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-runner
+  namespace: essedum
+  labels:
+    app: github-runner
+
+---
+# ClusterRole for runner deployments
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: github-runner
+  labels:
+    app: github-runner
+rules:
+  # Deployments management
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  
+  # Pods management
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  
+  # Services management
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch"]
+  
+  # ConfigMaps and Secrets (read-only for safety)
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+  
+  # PVCs management
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims", "persistentvolumes"]
+    verbs: ["get", "list"]
+  
+  # Events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+  
+  # Namespaces
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+
+---
+# ClusterRoleBinding for runners
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: github-runner
+  labels:
+    app: github-runner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: github-runner
+subjects:
+  - kind: ServiceAccount
+    name: github-runner
+    namespace: essedum
+
+---
+# Role for namespace-specific operations
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: github-runner-namespace
+  namespace: essedum
+  labels:
+    app: github-runner
+rules:
+  # Full access to resources in essedum namespace
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets", "replicasets"]
+    verbs: ["*"]
+  
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps", "secrets", "serviceaccounts"]
+    verbs: ["*"]
+  
+  - apiGroups: [""]
+    resources: ["pods/log", "pods/exec"]
+    verbs: ["get", "create"]
+  
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["*"]
+
+---
+# RoleBinding for namespace operations
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: github-runner-namespace
+  namespace: essedum
+  labels:
+    app: github-runner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: github-runner-namespace
+subjects:
+  - kind: ServiceAccount
+    name: github-runner
+    namespace: essedum
