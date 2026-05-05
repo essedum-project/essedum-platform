@@ -287,11 +287,26 @@ jobs:
             if [ -f "$manifest" ]; then
               echo ""
               echo "Applying: $manifest (preserving PVC data)"
-              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
+              MANIFEST_OUT=$(sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
                 sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
-                kubectl apply -n "$NAMESPACE" -f - 2>&1 | \
-                grep -vE "Error from server \((Forbidden|Invalid)\)|field is immutable|nodeAffinity" \
-                || true
+                kubectl apply -n "$NAMESPACE" -f - 2>&1) && APPLY_RC=0 || APPLY_RC=$?
+
+              # Always print success lines (configured/created/unchanged)
+              echo "$MANIFEST_OUT" | grep -E "configured|created|unchanged" || true
+
+              # If kubectl exited non-zero, check whether ALL errors are PV/PVC
+              # immutability errors (safe to ignore – data is preserved in existing volumes)
+              if [ "$APPLY_RC" -ne 0 ]; then
+                REAL_ERRORS=$(echo "$MANIFEST_OUT" | grep -E "^Error|^error" | \
+                  grep -vE "(Forbidden|Invalid).*immutable|immutable after creation|is immutable|field is immutable")
+                if [ -n "$REAL_ERRORS" ]; then
+                  echo "::error::Unexpected errors in $manifest:"
+                  echo "$REAL_ERRORS"
+                  exit 1
+                else
+                  echo "  (PV/PVC resources skipped – already exist, data preserved)"
+                fi
+              fi
             fi
           done
           
