@@ -35,49 +35,6 @@ EXPOSE 7860
 
 # Default command (override in kubernetes deployment)
 # CMD ["langflow", "run", "--host", "0.0.0.0", "--port", "7860"]
-
-# Alternative: Custom Build with Modifications
-# Uncomment and modify as needed
-
-# FROM python:3.11-slim
-
-# # Install system dependencies
-# RUN apt-get update && apt-get install -y \
-#     build-essential \
-#     curl \
-#     git \
-#     && rm -rf /var/lib/apt/lists/*
-
-# # Install Langflow
-# RUN pip install --no-cache-dir langflow
-
-# # Install PostgreSQL client
-# RUN pip install --no-cache-dir psycopg2-binary
-
-# # Set working directory
-# WORKDIR /app
-
-# # Copy custom configuration files
-# COPY config/ /app/config/
-
-# # Set environment variables
-# ENV LANGFLOW_CONFIG_DIR=/app/config
-# ENV PYTHONUNBUFFERED=1
-
-# # Expose port
-# EXPOSE 7860
-
-# # Run Langflow
-# CMD ["langflow", "run", "--host", "0.0.0.0", "--port", "7860"]
-
----
-
-# Docker Compose Example for Local Development
-# Save as docker-compose.yml in the same directory
-
-version: '3.8'
-
-services:
   postgres:
     image: postgres:16-alpine
     container_name: langflow-postgres-local

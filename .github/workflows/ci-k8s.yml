@@ -145,8 +145,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-          cache: "yarn"
-          cache-dependency-path: ${{ matrix.dir }}/yarn.lock
+          # Note: cache: "yarn" is intentionally omitted here.
+          # setup-node resolves the yarn binary to set up the cache BEFORE
+          # yarn is installed, causing "Unable to locate executable: yarn".
+          # yarn is installed in the next step via npm.
 
       - name: Install yarn
         run: npm install -g yarn
@@ -397,17 +399,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Checkout goose-vibe-studio-agent
-        # Only needed for goose-ui and goosed which live in the essedum-agents repo.
-        # Requires AGENTS_REPO_TOKEN secret (PAT with repo read) for private repos;
-        # falls back to GITHUB_TOKEN for public repos in the same org.
+      - name: Copy goose-vibe-studio-agent from runner local path
+        # The essedum-agents repo is checked out on the self-hosted runner at a
+        # well-known local path. Copy it into the workspace so Docker build
+        # contexts work with relative paths (no remote checkout required).
         if: ${{ matrix.agents_repo == 'true' }}
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          repository: essedum-project/essedum-agents
-          path: essedum-agents
-          token: ${{ secrets.AGENTS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
-          fetch-depth: 1
+        run: |
+          AGENTS_SRC="/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"
+          if [ ! -d "$AGENTS_SRC" ]; then
+            echo "::error::goose-vibe-studio-agent not found at $AGENTS_SRC on runner"
+            exit 1
+          fi
+          mkdir -p essedum-agents
+          cp -r "$AGENTS_SRC" essedum-agents/goose-vibe-studio-agent
+          echo "✓ Copied goose-vibe-studio-agent into workspace"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
@@ -419,9 +424,22 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: false
           tags: essedum/${{ matrix.service }}:ci-${{ github.sha }}
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
-          outputs: type=docker
+          # SECURITY: Do NOT use type=gha cache on a public repo.
+          # GHA cache is accessible to any workflow run including fork PRs,
+          # which would allow reading image layers containing compiled code,
+          # internal paths, and baked-in configuration.
+          # Use a local registry cache scoped to this runner only.
+          cache-from: type=local,src=/tmp/buildkit-cache/${{ matrix.service }}
+          cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max
+          # Do NOT load into Docker daemon (outputs: type=docker) —
+          # loading builds up /var/lib/docker indefinitely with stale images.
+          # CI only needs to verify the build succeeds; no daemon load needed.
+
+      - name: Clean up build cache and dangling images
+        if: always()
+        run: |
+          # Remove dangling images left by this build to prevent disk exhaustion.
+          docker image prune -f --filter "until=1h" || true
 
       - name: Docker build summary
         if: success()
