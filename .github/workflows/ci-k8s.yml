@@ -51,10 +51,11 @@ jobs:
 
       - name: Run unit tests
         working-directory: sv
-        run: mvn test --batch-mode --no-transfer-progress || {
-          echo "::error::Maven tests failed"
-          exit 1
-        }
+        run: |
+          mvn test --batch-mode --no-transfer-progress || {
+            echo "::error::Maven tests failed"
+            exit 1
+          }
 
       - name: Upload test reports
         if: always()
@@ -110,17 +111,19 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.dir }}
-        run: yarn install --frozen-lockfile --network-timeout 600000 || {
-          echo "::error::yarn install failed for ${{ matrix.app }}"
-          exit 1
-        }
+        run: |
+          yarn install --frozen-lockfile --network-timeout 600000 || {
+            echo "::error::yarn install failed for ${{ matrix.app }}"
+            exit 1
+          }
 
       - name: Production build
         working-directory: ${{ matrix.dir }}
-        run: yarn run build-prod || {
-          echo "::error::Production build failed for ${{ matrix.app }}"
-          exit 1
-        }
+        run: |
+          yarn run build-prod || {
+            echo "::error::Production build failed for ${{ matrix.app }}"
+            exit 1
+          }
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
