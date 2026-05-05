@@ -13,9 +13,11 @@ spec:
       labels:
         app: essedum-backend
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: essedum-backend
-        image: localhost:32000/essedum_app_backend:latest
+        image: ${REGISTRY}/essedum/leap-app-backend:${IMAGE_TAG}
         imagePullPolicy: Always
         env:
         - name: security.issuer-uri

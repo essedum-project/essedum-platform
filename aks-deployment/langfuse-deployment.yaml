@@ -32,7 +32,7 @@ spec:
               echo 'langfuse-postgres ready'
       containers:
         - name: langfuse-web
-          image: langfuse/langfuse:3
+          image: ${REGISTRY}/essedum/langfuse-web:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -184,7 +184,7 @@ spec:
               echo 'langfuse-postgres ready'
       containers:
         - name: langfuse-worker
-          image: langfuse/langfuse-worker:3
+          image: ${REGISTRY}/essedum/langfuse-worker:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3030

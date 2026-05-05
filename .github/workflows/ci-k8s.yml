@@ -318,9 +318,55 @@ jobs:
             context: adk-code-builder-deployer
             dockerfile: adk-code-builder-deployer/Dockerfile
 
+          - service: vibe-code-builder-deployer
+            context: vibe-code-builder-deployer
+            dockerfile: vibe-code-builder-deployer/Dockerfile
+
+          # ── Langflow (custom image wrapping langflowai/langflow:latest) ──
+          - service: langflow
+            context: langflow
+            dockerfile: langflow/Dockerfile
+
+          # ── LiteLLM (custom image, context=repo root for COPY lite-llm/...) ──
+          - service: litellm
+            context: .
+            dockerfile: lite-llm/Dockerfile
+
+          # ── Langfuse web + worker (custom wrappers pinning version) ──
+          - service: langfuse-web
+            context: langfuse
+            dockerfile: langfuse/Dockerfile.web
+
+          - service: langfuse-worker
+            context: langfuse
+            dockerfile: langfuse/Dockerfile.worker
+
+          # ── Goose Vibe Studio Agent (separate repo) ──
+          - service: goose-ui
+            context: essedum-agents/goose-vibe-studio-agent
+            dockerfile: essedum-agents/goose-vibe-studio-agent/Dockerfile.streamlit
+            agents_repo: "true"
+
+          - service: goosed
+            context: essedum-agents/goose-vibe-studio-agent
+            dockerfile: essedum-agents/goose-vibe-studio-agent/Dockerfile.goosed-build
+            agents_repo: "true"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Checkout goose-vibe-studio-agent
+        # Only needed for goose-ui and goosed which live in the essedum-agents repo.
+        # Requires AGENTS_REPO_TOKEN secret (PAT with repo read) for private repos;
+        # falls back to GITHUB_TOKEN for public repos in the same org.
+        if: ${{ matrix.agents_repo == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: essedum-project/essedum-agents
+          path: essedum-agents
+          token: ${{ secrets.AGENTS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -355,7 +401,7 @@ jobs:
   ci-summary:
     name: "CI – Summary & Status"
     runs-on: [self-hosted, essedum-runner]
-    needs: [backend, frontend, python, docker-build]
+    needs: [backend, frontend, python, k8s-validate, docker-build]
     if: always()
 
     steps:
@@ -364,6 +410,7 @@ jobs:
           if [ "${{ needs.backend.result }}" = "failure" ] || \
              [ "${{ needs.frontend.result }}" = "failure" ] || \
              [ "${{ needs.python.result }}" = "failure" ] || \
+             [ "${{ needs.k8s-validate.result }}" = "failure" ] || \
              [ "${{ needs.docker-build.result }}" = "failure" ]; then
             echo "::error::One or more CI jobs failed"
             echo "## :red_circle: CI Pipeline Failed" >> $GITHUB_STEP_SUMMARY
@@ -372,6 +419,7 @@ jobs:
             echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| K8s Validate | ${{ needs.k8s-validate.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
@@ -381,6 +429,7 @@ jobs:
             echo "| Backend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
             echo "| Frontend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
             echo "| Python | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| K8s Validate | ✓ passed |" >> $GITHUB_STEP_SUMMARY
             echo "| Docker Build | ✓ passed |" >> $GITHUB_STEP_SUMMARY
           fi
 

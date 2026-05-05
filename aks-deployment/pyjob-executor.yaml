@@ -13,9 +13,11 @@ spec:
       labels:
         app: pyjob-executor
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: pyjob-executor-container
-        image: localhost:32000/pyjob-excecutor:latest
+        image: ${REGISTRY}/essedum/py-job-executer:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 5000 # Flask app listens on port 5000

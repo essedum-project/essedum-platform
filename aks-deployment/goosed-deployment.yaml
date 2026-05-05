@@ -13,10 +13,12 @@ spec:
       labels:
         app: goosed
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: goosed
-        image: localhost:32000/goosed:latest
-        imagePullPolicy: IfNotPresent
+        image: ${REGISTRY}/essedum/goosed:${IMAGE_TAG}
+        imagePullPolicy: Always
         ports:
         - containerPort: 3005
         env:

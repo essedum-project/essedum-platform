@@ -13,9 +13,11 @@ spec:
       labels:
         app: essedum-ui
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: essedum-ui
-        image: localhost:32000/essedum_app_frontend:latest
+        image: ${REGISTRY}/essedum/frontend:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8082

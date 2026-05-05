@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: langflow
-        image: langflowai/langflow:latest
+        image: ${REGISTRY}/essedum/langflow:${IMAGE_TAG}
         ports:
         - containerPort: 7860
         env:

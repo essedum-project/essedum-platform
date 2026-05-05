@@ -13,9 +13,11 @@ spec:
       labels:
         app: goose-ui
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: goose-ui
-        image: localhost:32000/goose-ui:latest
+        image: ${REGISTRY}/essedum/goose-ui:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8501

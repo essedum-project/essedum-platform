@@ -1,12 +1,14 @@
 name: CD – Deploy (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers: auto-deploys when CI passes on gh_actions branch
-# Push to gh_actions branch triggers this workflow
+# Triggers: only runs after CI passes on gh_actions branch.
+# This ensures broken builds are never deployed.
 # ──────────────────────────────────────────────────────────────
 on:
-  push:
+  workflow_run:
+    workflows: ["CI \u2013 Build & Test (Kubernetes)"]
     branches: ["gh_actions"]
+    types: [completed]
 
 # Only one deployment at a time
 concurrency:
@@ -19,17 +21,26 @@ permissions:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # Check if we should proceed (all checks passed)
+  # Guard – only deploy when CI succeeded
   # ────────────────────────────────────────────────────────────
   check-readiness:
-    name: "Guard – Readiness Check"
+    name: "Guard – CI Must Pass"
     runs-on: [self-hosted, essedum-runner]
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
-      - run: echo "Pre-deployment readiness check"
-      - id: check
-        run: echo "ready=true" >> $GITHUB_OUTPUT
+      - name: Check CI conclusion
+        id: check
+        run: |
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          echo "CI conclusion: $CONCLUSION"
+          if [ "$CONCLUSION" = "success" ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+            echo "✓ CI passed – proceeding with deployment"
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "::notice::CI did not pass (conclusion: $CONCLUSION) – deployment skipped"
+          fi
 
   # ────────────────────────────────────────────────────────────
   # Deploy – Kubernetes-based deployment
@@ -47,6 +58,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: gh_actions
+          fetch-depth: 1
+
+      - name: Checkout goose-vibe-studio-agent
+        uses: actions/checkout@v4
+        with:
+          repository: essedum-project/essedum-agents
+          path: essedum-agents
+          token: ${{ secrets.AGENTS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
       - name: Verify kubeconfig
@@ -71,6 +90,23 @@ jobs:
           if [ -f "k8s/config/app-config.yaml" ]; then
             kubectl apply -f k8s/config/app-config.yaml -n "$NAMESPACE" || true
           fi
+
+      - name: Create registry pull secret in cluster
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${K8S_NAMESPACE:-essedum}"
+          # Create/update the registry-credentials secret used by all app manifests
+          kubectl create secret docker-registry registry-credentials \
+            --docker-server="$REGISTRY" \
+            --docker-username="$REGISTRY_USERNAME" \
+            --docker-password="$REGISTRY_PASSWORD" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
 
       - name: Build and push container images
         env:
@@ -107,6 +143,13 @@ jobs:
             "py-job-azure-executer:py-job-azure-executer/Dockerfile:py-job-azure-executer"
             "proxy-service:proxy-service/Dockerfile:proxy-service"
             "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile:adk-code-builder-deployer"
+            "vibe-code-builder-deployer:vibe-code-builder-deployer/Dockerfile:vibe-code-builder-deployer"
+            "langflow:langflow/Dockerfile:langflow"
+            "litellm:lite-llm/Dockerfile:."
+            "langfuse-web:langfuse/Dockerfile.web:langfuse"
+            "langfuse-worker:langfuse/Dockerfile.worker:langfuse"
+            "goose-ui:essedum-agents/goose-vibe-studio-agent/Dockerfile.streamlit:essedum-agents/goose-vibe-studio-agent"
+            "goosed:essedum-agents/goose-vibe-studio-agent/Dockerfile.goosed-build:essedum-agents/goose-vibe-studio-agent"
           )
           
           for svc_info in "${services[@]}"; do
@@ -173,7 +216,7 @@ jobs:
           echo ""
           
           echo ">>> Starting image push to registry..."
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
           
           for svc in "${services[@]}"; do
             echo "Pushing ${REGISTRY}/essedum/${svc}:${{ github.sha }}..."
@@ -213,7 +256,7 @@ jobs:
           echo ""
           echo "=== Verifying container images in registry ==="
           REGISTRY="${{ secrets.CONTAINER_REGISTRY }}"
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
           
           missing_images=0
           for svc in "${services[@]}"; do
@@ -318,6 +361,9 @@ jobs:
           kubectl get pvc -n "$NAMESPACE" --no-headers 2>/dev/null | awk '{print "  " $1 " (" $3 ") - Size: " $4}' || echo "  No PVCs found"
 
           # ── Step 4: Apply all remaining app manifests ──
+          # Excluded from this loop:
+          #   - Already handled above (ingress-nginx, metallb, PVC files)
+          #   - Runner/RBAC infra that must not be disrupted mid-deploy
           SKIP_FILES=(
             "aks-deployment/ingress-nginx-deploy.yaml"
             "aks-deployment/metallib-config.yaml"
@@ -329,6 +375,9 @@ jobs:
             "aks-deployment/langflow_file_pv.yaml"
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
+            "aks-deployment/builder-deployment.yml"
+            "aks-deployment/builder-rbac.yml"
+            "aks-deployment/github-runner-rbac.yml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ ! -f "$manifest" ]; then continue; fi
@@ -394,6 +443,11 @@ jobs:
           echo "- py-job-azure-executer" >> $GITHUB_STEP_SUMMARY
           echo "- proxy-service" >> $GITHUB_STEP_SUMMARY
           echo "- adk-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
+          echo "- vibe-code-builder-deployer" >> $GITHUB_STEP_SUMMARY          echo "- langflow" >> $GITHUB_STEP_SUMMARY
+          echo "- litellm" >> $GITHUB_STEP_SUMMARY
+          echo "- langfuse-web" >> $GITHUB_STEP_SUMMARY
+          echo "- langfuse-worker" >> $GITHUB_STEP_SUMMARY          echo "- goose-ui (Vibe Studio)" >> $GITHUB_STEP_SUMMARY
+          echo "- goosed (Vibe Studio agent server)" >> $GITHUB_STEP_SUMMARY
 
       - name: Deployment failure report
         if: failure()

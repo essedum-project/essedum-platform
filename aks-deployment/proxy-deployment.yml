@@ -15,9 +15,11 @@ spec:
       labels:
         app: proxy-service
     spec:
+      imagePullSecrets:
+      - name: registry-credentials
       containers:
       - name: proxy
-        image: localhost:32000/proxy-service:v2
+        image: ${REGISTRY}/essedum/proxy-service:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

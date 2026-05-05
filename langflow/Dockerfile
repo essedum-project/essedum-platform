@@ -36,8 +36,6 @@ EXPOSE 7860
 # Default command (override in kubernetes deployment)
 # CMD ["langflow", "run", "--host", "0.0.0.0", "--port", "7860"]
 
----
-
 # Alternative: Custom Build with Modifications
 # Uncomment and modify as needed
 

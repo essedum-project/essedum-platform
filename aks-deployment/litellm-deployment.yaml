@@ -109,7 +109,7 @@ spec:
         kubernetes.io/hostname: essedum-1
       containers:
         - name: litellm
-          image: ghcr.io/berriai/litellm:main-latest
+          image: ${REGISTRY}/essedum/litellm:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           args:
             - "--config"
