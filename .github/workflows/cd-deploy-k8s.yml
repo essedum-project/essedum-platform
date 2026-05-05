@@ -295,10 +295,13 @@ jobs:
               echo "$MANIFEST_OUT" | grep -E "configured|created|unchanged" || true
 
               # If kubectl exited non-zero, check whether ALL errors are PV/PVC
-              # immutability errors (safe to ignore – data is preserved in existing volumes)
+              # immutability errors (safe to ignore – data is preserved in existing volumes).
+              # Forbidden = PVC spec immutable after binding; Invalid = PV field immutable.
+              # These error lines never contain "immutable" on the same line, so filter
+              # by the server error class rather than the word "immutable".
               if [ "$APPLY_RC" -ne 0 ]; then
                 REAL_ERRORS=$(echo "$MANIFEST_OUT" | grep -E "^Error|^error" | \
-                  grep -vE "(Forbidden|Invalid).*immutable|immutable after creation|is immutable|field is immutable")
+                  grep -vE "Error from server \((Forbidden|Invalid)\)|is immutable|field is immutable|immutable after creation")
                 if [ -n "$REAL_ERRORS" ]; then
                   echo "::error::Unexpected errors in $manifest:"
                   echo "$REAL_ERRORS"
