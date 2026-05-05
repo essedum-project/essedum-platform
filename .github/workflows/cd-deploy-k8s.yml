@@ -26,6 +26,7 @@ jobs:
   check-readiness:
     name: "Guard – CI Must Pass"
     runs-on: [self-hosted, essedum-runner]
+    timeout-minutes: 5
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
@@ -51,17 +52,18 @@ jobs:
     needs: check-readiness
     if: ${{ needs.check-readiness.outputs.ready == 'true' }}
     runs-on: [self-hosted, essedum-runner]
+    timeout-minutes: 60
     environment: CONTAINER_REGISTRY
 
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: gh_actions
           fetch-depth: 1
 
       - name: Checkout goose-vibe-studio-agent
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: essedum-project/essedum-agents
           path: essedum-agents
@@ -114,11 +116,14 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          set -ex  # Exit on error and print commands
-          
+          # SECURITY: set -e only (no -x). set -x would expand and print every variable
+          # including secrets to the public Actions log even though GHA masks known secrets.
+          set -e
+          export DOCKER_BUILDKIT=1
+
           echo "=== Environment Debug ==="
-          echo "REGISTRY=${REGISTRY:-EMPTY}"
-          echo "REGISTRY_USERNAME=${REGISTRY_USERNAME:-EMPTY}"
+          echo "REGISTRY=${REGISTRY:+SET}"
+          echo "REGISTRY_USERNAME=${REGISTRY_USERNAME:+SET}"
           echo "Docker version: $(docker --version)"
           echo "PWD: $PWD"
           echo ""
@@ -129,7 +134,7 @@ jobs:
           fi
           
           echo "=== Build Configuration ==="
-          echo "Registry: $REGISTRY"
+          echo "Registry: ${REGISTRY:+SET}"
           echo "Building images for deployment..."
           echo ""
           
@@ -191,11 +196,12 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          set -ex  # Exit on error and print commands
-          
+          # SECURITY: set -e only. Secrets are passed via env vars, never echoed.
+          set -e
+
           echo "=== Registry Push Configuration ==="
-          echo "Registry: ${REGISTRY:-EMPTY}"
-          echo "Username: ${REGISTRY_USERNAME:-EMPTY}"
+          echo "Registry: ${REGISTRY:+SET}"
+          echo "Username: ${REGISTRY_USERNAME:+SET}"
           echo ""
           
           if [ -z "$REGISTRY" ]; then
@@ -204,7 +210,9 @@ jobs:
           fi
           
           echo ">>> Authenticating to registry..."
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" 2>&1 || {
+          # SECURITY: secrets passed via env vars, never inline-expanded in shell.
+          # Removed 2>&1 so docker auth output does not merge into stdout log.
+          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY" || {
             echo "::error::Failed to authenticate with container registry"
             exit 1
           }
@@ -240,6 +248,9 @@ jobs:
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
           IMAGE_TAG: ${{ github.sha }}
+          # SECURITY: REGISTRY passed via env so it is never inline-expanded
+          # inside run: shell script text (prevents script injection).
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
@@ -255,7 +266,7 @@ jobs:
           # Verify images are available in registry before deploying
           echo ""
           echo "=== Verifying container images in registry ==="
-          REGISTRY="${{ secrets.CONTAINER_REGISTRY }}"
+          # REGISTRY is already set via the step env: block above.
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
           
           missing_images=0
@@ -289,7 +300,7 @@ jobs:
             sleep 2
             # Now apply the new one
             sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/ingress-nginx-deploy.yaml" | \
-              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
               kubectl apply -f - || {
               echo "::warning::Failed to apply ingress-nginx-deploy.yaml, continuing..."
             }
@@ -299,7 +310,7 @@ jobs:
           if [ -f "aks-deployment/metallib-config.yaml" ]; then
             echo "Applying metallb config..."
             sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/metallib-config.yaml" | \
-              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
               kubectl apply -f - || {
               echo "::warning::Failed to apply metallib-config.yaml, continuing..."
             }
@@ -335,7 +346,7 @@ jobs:
               # This avoids merging the two streams, which made multi-line API error blocks
               # impossible to filter reliably.
               sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+                sed "s|\${REGISTRY}|${REGISTRY}|g" | \
                 kubectl apply -n "$NAMESPACE" -f - 2>"$KUBECTL_ERR" && APPLY_RC=0 || APPLY_RC=$?
 
               if [ "$APPLY_RC" -ne 0 ]; then
@@ -389,7 +400,7 @@ jobs:
             if $skip; then continue; fi
             echo "Applying: $manifest"
             sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-              sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
               kubectl apply -n "$NAMESPACE" -f - || {
               echo "::warning::Failed to apply $manifest, continuing..."
             }
@@ -443,10 +454,12 @@ jobs:
           echo "- py-job-azure-executer" >> $GITHUB_STEP_SUMMARY
           echo "- proxy-service" >> $GITHUB_STEP_SUMMARY
           echo "- adk-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
-          echo "- vibe-code-builder-deployer" >> $GITHUB_STEP_SUMMARY          echo "- langflow" >> $GITHUB_STEP_SUMMARY
+          echo "- vibe-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
+          echo "- langflow" >> $GITHUB_STEP_SUMMARY
           echo "- litellm" >> $GITHUB_STEP_SUMMARY
           echo "- langfuse-web" >> $GITHUB_STEP_SUMMARY
-          echo "- langfuse-worker" >> $GITHUB_STEP_SUMMARY          echo "- goose-ui (Vibe Studio)" >> $GITHUB_STEP_SUMMARY
+          echo "- langfuse-worker" >> $GITHUB_STEP_SUMMARY
+          echo "- goose-ui (Vibe Studio)" >> $GITHUB_STEP_SUMMARY
           echo "- goosed (Vibe Studio agent server)" >> $GITHUB_STEP_SUMMARY
 
       - name: Deployment failure report

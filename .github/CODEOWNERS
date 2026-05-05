@@ -1,0 +1,29 @@
+# CODEOWNERS – enforces mandatory review for sensitive paths.
+# Rules are matched bottom-up; last match wins.
+# Requires branch protection "Require review from Code Owners" to be enabled.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ── Default: all files require at least one org member review ──────────────
+*                                   @essedum-project/essedum-maintainers
+
+# ── CI/CD workflows: any change triggers mandatory maintainer review ────────
+.github/workflows/                  @essedum-project/essedum-maintainers
+.github/CODEOWNERS                  @essedum-project/essedum-maintainers
+
+# ── Kubernetes manifests: infra team must approve ──────────────────────────
+aks-deployment/                     @essedum-project/essedum-maintainers
+k8s/                                @essedum-project/essedum-maintainers
+
+# ── Dockerfiles: any image change requires review ──────────────────────────
+**/Dockerfile                       @essedum-project/essedum-maintainers
+**/Dockerfile.*                     @essedum-project/essedum-maintainers
+
+# ── Backend (Java/Spring) ──────────────────────────────────────────────────
+sv/                                 @essedum-project/essedum-maintainers
+
+# ── Frontend (Angular) ────────────────────────────────────────────────────
+essedum-ui/                         @essedum-project/essedum-maintainers
+
+# ── Security-sensitive config files ───────────────────────────────────────
+**/application*.yml                 @essedum-project/essedum-maintainers
+**/application*.yaml                @essedum-project/essedum-maintainers

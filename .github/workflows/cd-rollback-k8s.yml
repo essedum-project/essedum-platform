@@ -31,13 +31,18 @@ jobs:
   confirm-rollback:
     name: "Safety – Confirmation Check"
     runs-on: [self-hosted, essedum-runner]
+    timeout-minutes: 5
     steps:
       - name: Verify rollback confirmation
+        # SECURITY: user-supplied workflow_dispatch input is passed via env var,
+        # never inline-expanded in the run: shell to prevent script injection.
+        env:
+          CONFIRMATION: ${{ github.event.inputs.confirmation }}
         run: |
-          if [ "${{ github.event.inputs.confirmation }}" != "ROLLBACK" ]; then
+          if [ "$CONFIRMATION" != "ROLLBACK" ]; then
             echo "::error::Rollback confirmation text mismatch"
             echo "Expected: ROLLBACK"
-            echo "Got: ${{ github.event.inputs.confirmation }}"
+            echo "Got: [redacted for security]"
             exit 1
           fi
           echo "✓ Rollback confirmed"
@@ -46,15 +51,18 @@ jobs:
   # Rollback – rebuild and deploy from specified ref
   # ────────────────────────────────────────────────────────────
   rollback:
-    name: "Rollback – Deploy from ${{ github.event.inputs.ref }}"
+    name: "Rollback – Deploy from ref"
     needs: confirm-rollback
     runs-on: [self-hosted, essedum-runner]
+    timeout-minutes: 60
     environment: production
 
     steps:
       - name: Checkout specified ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          # SECURITY: ref is a workflow_dispatch input; actions/checkout validates
+          # it as a git ref — safe to pass here (not a run: shell expansion).
           ref: ${{ github.event.inputs.ref }}
           fetch-depth: 1
 
@@ -78,9 +86,12 @@ jobs:
           REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          # SECURITY: user input passed via env var, not inline in shell script.
+          ROLLBACK_REF: ${{ github.event.inputs.ref }}
         run: |
+          set -e
           NAMESPACE=${K8S_NAMESPACE:-essedum}
-          echo "Rolling back to: ${{ github.event.inputs.ref }}"
+          echo "Rolling back to ref: ${ROLLBACK_REF}"
           echo "Building images for rollback..."
           
           # Build custom images in sequence
@@ -99,7 +110,7 @@ jobs:
             IFS=':' read -r service dockerfile <<< "$svc_info"
             context=$(dirname "$dockerfile")
             echo "Building $service..."
-            docker build -t "${REGISTRY}/essedum/${service}:rollback-${{ github.event.inputs.ref }}" \
+            docker build -t "${REGISTRY}/essedum/${service}:rollback-${ROLLBACK_REF}" \
               -t "${REGISTRY}/essedum/${service}:latest" \
               -f "$dockerfile" "$context" 2>&1 | tail -20 || {
               echo "::warning::Build for $service had warnings"
@@ -111,8 +122,12 @@ jobs:
           REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          ROLLBACK_REF: ${{ github.event.inputs.ref }}
         run: |
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin "${{ secrets.CONTAINER_REGISTRY }}" || {
+          set -e
+          # SECURITY: secrets passed via env vars; removed 2>&1 so auth output
+          # never merges into stdout log.
+          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY" || {
             echo "::error::Failed to authenticate with container registry"
             exit 1
           }
@@ -120,7 +135,7 @@ jobs:
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
           
           for svc in "${services[@]}"; do
-            docker push "${REGISTRY}/essedum/${svc}:rollback-${{ github.event.inputs.ref }}" || {
+            docker push "${REGISTRY}/essedum/${svc}:rollback-${ROLLBACK_REF}" || {
               echo "::error::Failed to push image ${svc}"
               exit 1
             }
@@ -131,6 +146,8 @@ jobs:
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
           IMAGE_TAG: ${{ github.event.inputs.ref }}
+          # SECURITY: REGISTRY via env, never inline in shell.
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
@@ -144,15 +161,12 @@ jobs:
             if [ -f "$manifest" ]; then
               echo "Applying: $manifest (rollback)"
               sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-                sed "s|\${REGISTRY}|${{ secrets.CONTAINER_REGISTRY }}|g" | \
+                sed "s|\${REGISTRY}|${REGISTRY}|g" | \
                 kubectl apply -n "$NAMESPACE" -f - || {
                 echo "::warning::Failed to apply $manifest, continuing..."
               }
             fi
-          done || {
-            echo "::error::Failed to apply Kubernetes manifests"
-            exit 1
-          }
+          done
 
       - name: Wait for rollout
         env:
@@ -172,12 +186,15 @@ jobs:
 
       - name: Rollback summary
         if: success()
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.ref }}
+          ACTOR: ${{ github.actor }}
         run: |
-          NAMESPACE="${{ secrets.K8S_NAMESPACE || 'essedum' }}"
+          NAMESPACE="${K8S_NAMESPACE:-essedum}"
           echo "## ✓ Rollback Successful" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Rolled back to**: \`${{ github.event.inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Initiated by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Rolled back to**: \`${ROLLBACK_REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Initiated by**: @${ACTOR}" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp**: \`$(date -u +'%Y-%m-%dT%H:%M:%SZ')\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Verification commands**:" >> $GITHUB_STEP_SUMMARY
@@ -189,10 +206,13 @@ jobs:
 
       - name: Rollback failure report
         if: failure()
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.ref }}
+          ACTOR: ${{ github.actor }}
         run: |
           echo "## :red_circle: Rollback Failed" >> $GITHUB_STEP_SUMMARY
-          echo "- **Target ref**: \`${{ github.event.inputs.ref }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Initiated by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target ref**: \`${ROLLBACK_REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Initiated by**: @${ACTOR}" >> $GITHUB_STEP_SUMMARY
           echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Emergency steps**:" >> $GITHUB_STEP_SUMMARY
