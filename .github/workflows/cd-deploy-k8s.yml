@@ -69,6 +69,7 @@ jobs:
           echo "Runner context: USER=$(whoami) HOME=$HOME GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
 
           CANDIDATES=(
+            "/opt/github-runner/_work/essedum-agents/goose-vibe-studio-agent"
             "$(dirname "$(dirname "$GITHUB_WORKSPACE")")/essedum-agents/goose-vibe-studio-agent"
             "$HOME/devops/actions/essedum-agents/goose-vibe-studio-agent"
             "/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"
