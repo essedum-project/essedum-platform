@@ -1,47 +1,83 @@
 name: CD – Deploy (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers: only runs after CI passes on gh_actions branch.
-# This ensures broken builds are never deployed.
+# Triggers: push to gh_actions branch.
+# The check-readiness job polls the GitHub API to confirm the
+# CI workflow completed successfully for this exact commit SHA
+# before allowing deployment to proceed.
+# (workflow_run trigger requires the workflow file to be on the
+#  default branch – using push + API check is more reliable here)
 # ──────────────────────────────────────────────────────────────
 on:
-  workflow_run:
-    workflows: ["CI \u2013 Build & Test (Kubernetes)"]
+  push:
     branches: ["gh_actions"]
-    types: [completed]
 
 # Only one deployment at a time
 concurrency:
   group: cd-deploy-k8s
   cancel-in-progress: false
 
-# Least-privilege: CD only needs to read repo contents
+# Least-privilege: CD needs to read repo contents and query Actions API
 permissions:
   contents: read
+  actions: read
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # Guard – only deploy when CI succeeded
+  # Guard – wait for CI to complete on this SHA, then check result
+  # CI and CD both fire on push; CD polls until CI finishes.
   # ────────────────────────────────────────────────────────────
   check-readiness:
     name: "Guard – CI Must Pass"
     runs-on: [self-hosted, essedum-runner]
-    timeout-minutes: 5
+    timeout-minutes: 60
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
-      - name: Check CI conclusion
+      - name: Wait for CI workflow to complete on this SHA
         id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CI_WORKFLOW_NAME: "CI \u2013 Build & Test (Kubernetes)"
         run: |
-          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
-          echo "CI conclusion: $CONCLUSION"
-          if [ "$CONCLUSION" = "success" ]; then
-            echo "ready=true" >> $GITHUB_OUTPUT
-            echo "✓ CI passed – proceeding with deployment"
-          else
-            echo "ready=false" >> $GITHUB_OUTPUT
-            echo "::notice::CI did not pass (conclusion: $CONCLUSION) – deployment skipped"
-          fi
+          SHA="${{ github.sha }}"
+          REPO="${{ github.repository }}"
+          echo "Waiting for CI to complete on SHA: $SHA"
+
+          # Poll every 30s for up to 55 minutes (110 attempts)
+          for i in $(seq 1 110); do
+            RESPONSE=$(curl -sf \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPO}/actions/runs?head_sha=${SHA}&per_page=50" \
+              2>/dev/null || echo '{"workflow_runs":[]}')
+
+            # Parse conclusion using python3 one-liner (no heredoc – YAML safe)
+            CONCLUSION=$(echo "$RESPONSE" | \
+              CI_WORKFLOW_NAME="$CI_WORKFLOW_NAME" python3 -c \
+              "import json,sys,os; d=json.load(sys.stdin); n=os.environ['CI_WORKFLOW_NAME']; \
+               runs=d.get('workflow_runs',[]); ci=[r for r in runs if r.get('name')==n]; \
+               print('not_found') if not ci else print('pending') if ci[0].get('status')!='completed' else print(ci[0].get('conclusion','unknown'))" \
+              2>/dev/null || echo "error")
+
+            echo "  Attempt $i/110: CI status = $CONCLUSION"
+
+            if [ "$CONCLUSION" = "success" ]; then
+              echo "ready=true" >> $GITHUB_OUTPUT
+              echo "CI passed – proceeding with deployment"
+              exit 0
+            elif [ "$CONCLUSION" = "not_found" ] || [ "$CONCLUSION" = "pending" ]; then
+              sleep 30
+            else
+              echo "ready=false" >> $GITHUB_OUTPUT
+              echo "::error::CI did not pass (conclusion: $CONCLUSION) – deployment blocked"
+              exit 1
+            fi
+          done
+
+          echo "ready=false" >> $GITHUB_OUTPUT
+          echo "::error::Timed out waiting for CI to complete after 55 minutes"
+          exit 1
 
   # ────────────────────────────────────────────────────────────
   # Deploy – Kubernetes-based deployment
