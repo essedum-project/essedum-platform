@@ -33,72 +33,8 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
 # Expose port
 EXPOSE 7860
 
-# Default command (override in kubernetes deployment)
-# CMD ["langflow", "run", "--host", "0.0.0.0", "--port", "7860"]
-  postgres:
-    image: postgres:16-alpine
-    container_name: langflow-postgres-local
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: langflowdb
-      POSTGRES_USER: langfuse
-      POSTGRES_PASSWORD: langfuse
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U langfuse -d langflowdb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  langflow:
-    build: .
-    # OR use official image:
-    # image: langflowai/langflow:latest
-    container_name: langflow-app-local
-    restart: unless-stopped
-    environment:
-      LANGFLOW_DATABASE_URL: "postgresql://langfuse:langfuse@postgres:5432/langflowdb"
-      LANGFLOW_AUTO_LOGIN: "true"
-      LANGFLOW_HOST: "0.0.0.0"
-      LANGFLOW_PORT: "7860"
-      LANGFLOW_ENV: "development"
-    ports:
-      - "7860:7860"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - langflow_data:/app/data
-
-volumes:
-  postgres_data:
-    driver: local
-  langflow_data:
-    driver: local
-
----
-
-# .env File Example
-# Create this file for environment-specific configurations
-
-LANGFLOW_DATABASE_URL=postgresql://langfuse:langfuse@postgres:5432/langflowdb
-LANGFLOW_AUTO_LOGIN=true
-LANGFLOW_HOST=0.0.0.0
-LANGFLOW_PORT=7860
-LANGFLOW_ENV=production
-
-# Optional: Custom configurations
-# LANGFLOW_CORS_ORIGINS=https://yourdomain.com
-# LANGFLOW_MAX_FILE_SIZE=100
-# LANGFLOW_WORKERS=4
-
----
-
-# Build and Push to Registry (Example)
+# Default command inherited from base image (langflowai/langflow:latest)
+# Override in Kubernetes deployment spec if needed.
 
 # Build the image
 # docker build -t your-registry.com/langflow-persistent:1.0 .

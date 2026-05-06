@@ -62,46 +62,21 @@ jobs:
           mvn test --batch-mode --no-transfer-progress --fail-at-end || \
             echo "::warning::Some Maven tests failed (infrastructure-dependent tests skipped in CI)"
 
-      - name: Encrypt and upload test reports
-        # SECURITY: Public repos expose all artifacts to any GitHub user.
-        # Surefire XML contains internal class names, package structure, stack traces.
-        # We GPG-encrypt the archive with a symmetric passphrase (ARTIFACT_ENCRYPTION_KEY
-        # secret) before upload. The blob is downloadable but unreadable without the key.
-        # To decrypt locally:
-        #   gpg --decrypt --passphrase "$KEY" --batch --output reports.tar.gz reports.tar.gz.gpg
-        #   tar xzf reports.tar.gz
-        # Only runs on push (not PRs), 1-day retention.
+      - name: Archive test reports on runner
+        # SECURITY: Public repos expose all GitHub artifacts to any user.
+        # Reports stay on the self-hosted runner VM — nothing is uploaded to GitHub.
+        # Access reports directly at: sv/**/target/surefire-reports/ on the runner.
         if: always() && github.event_name == 'push'
-        env:
-          ARTIFACT_ENCRYPTION_KEY: ${{ secrets.ARTIFACT_ENCRYPTION_KEY }}
         run: |
           REPORT_DIRS=$(find sv -path "*/target/surefire-reports" -type d 2>/dev/null)
           if [ -z "$REPORT_DIRS" ]; then
-            echo "No surefire report directories found – skipping artifact upload"
-            exit 0
+            echo "No surefire report directories found"
+          else
+            ARCHIVE="/tmp/backend-test-reports-${{ github.sha }}.tar.gz"
+            tar czf "$ARCHIVE" $REPORT_DIRS
+            echo "✓ Test reports archived on runner at: $ARCHIVE"
+            echo "  Access via: ssh <runner-vm> 'cat $ARCHIVE' | tar xz"
           fi
-          if [ -z "$ARTIFACT_ENCRYPTION_KEY" ]; then
-            echo "::warning::ARTIFACT_ENCRYPTION_KEY secret not set – skipping encrypted upload"
-            exit 0
-          fi
-          tar czf /tmp/backend-test-reports.tar.gz $REPORT_DIRS
-          gpg --symmetric \
-              --cipher-algo AES256 \
-              --batch \
-              --passphrase "$ARTIFACT_ENCRYPTION_KEY" \
-              --output /tmp/backend-test-reports.tar.gz.gpg \
-              /tmp/backend-test-reports.tar.gz
-          rm -f /tmp/backend-test-reports.tar.gz
-          echo "✓ Test reports encrypted with AES-256"
-
-      - name: Upload encrypted test reports
-        if: always() && github.event_name == 'push'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: backend-test-reports-encrypted
-          path: /tmp/backend-test-reports.tar.gz.gpg
-          retention-days: 1
-          if-no-files-found: ignore
 
       - name: Backend build summary
         if: success()
@@ -109,7 +84,7 @@ jobs:
           echo "## ✓ Backend Build Passed" >> $GITHUB_STEP_SUMMARY
           echo "- Java 21 / Maven compilation successful" >> $GITHUB_STEP_SUMMARY
           echo "- Unit tests passed" >> $GITHUB_STEP_SUMMARY
-          echo "- Artifacts: [View](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Test reports archived on runner VM (not uploaded to GitHub)" >> $GITHUB_STEP_SUMMARY
 
       - name: Backend failure report
         if: failure()
