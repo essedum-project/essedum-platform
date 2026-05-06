@@ -21,27 +21,6 @@ permissions:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # JOB -1 – PR approval gate (same-repo PRs only)
-  # SECURITY: blocks ALL downstream jobs until a maintainer manually
-  # approves via the GitHub UI (Settings → Environments → pr-gate).
-  # This prevents a PR author from running arbitrary code on the
-  # self-hosted runner before their changes are reviewed.
-  # – Fork PRs: never reach this job (fork-guard on detect-changes
-  #   blocks the entire pipeline before pr-gate could even matter).
-  # – Push events: pr-gate is skipped (if: is PR-only); GitHub allows
-  #   needs: with skipped jobs to proceed, so push CI/CD is unaffected.
-  # ────────────────────────────────────────────────────────────
-  pr-gate:
-    name: "Await PR Approval"
-    runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    environment: pr-gate
-    timeout-minutes: 1440
-    steps:
-      - name: PR approved
-        run: echo "PR manually approved – proceeding with CI"
-
-  # ────────────────────────────────────────────────────────────
   # JOB 0 – Detect which service paths changed
   # Every downstream job checks these outputs and skips itself
   # if nothing it owns was modified. Workflow file changes
@@ -50,7 +29,6 @@ jobs:
   detect-changes:
     name: "Detect Changed Services"
     runs-on: [self-hosted, essedum-runner]
-    needs: [pr-gate]
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 5
     outputs:
