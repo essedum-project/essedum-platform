@@ -21,15 +21,102 @@ permissions:
 
 jobs:
   # ────────────────────────────────────────────────────────────
+  # JOB 0 – Detect which service paths changed
+  # Every downstream job checks these outputs and skips itself
+  # if nothing it owns was modified. Workflow file changes
+  # (.github/workflows/**) always trigger a full rebuild.
+  # ────────────────────────────────────────────────────────────
+  detect-changes:
+    name: "Detect Changed Services"
+    runs-on: [self-hosted, essedum-runner]
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 5
+    outputs:
+      backend:    ${{ steps.filter.outputs.backend }}
+      frontend:   ${{ steps.filter.outputs.frontend }}
+      py_executer:  ${{ steps.filter.outputs.py_executer }}
+      py_sagemaker: ${{ steps.filter.outputs.py_sagemaker }}
+      py_vertex:    ${{ steps.filter.outputs.py_vertex }}
+      py_azure:     ${{ steps.filter.outputs.py_azure }}
+      proxy:      ${{ steps.filter.outputs.proxy }}
+      adk:        ${{ steps.filter.outputs.adk }}
+      vibe:       ${{ steps.filter.outputs.vibe }}
+      langflow:   ${{ steps.filter.outputs.langflow }}
+      litellm:    ${{ steps.filter.outputs.litellm }}
+      langfuse:   ${{ steps.filter.outputs.langfuse }}
+      k8s:        ${{ steps.filter.outputs.k8s }}
+      workflows:  ${{ steps.filter.outputs.workflows }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 2   # need parent commit for diff
+
+      - name: Detect path changes
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        with:
+          filters: |
+            backend:
+              - 'sv/**'
+            frontend:
+              - 'essedum-ui/**'
+            py_executer:
+              - 'py-job-executer/**'
+            py_sagemaker:
+              - 'py-job-sagemaker-executer/**'
+            py_vertex:
+              - 'py-job-vertex-executer/**'
+            py_azure:
+              - 'py-job-azure-executer/**'
+            proxy:
+              - 'proxy-service/**'
+            adk:
+              - 'adk-code-builder-deployer/**'
+            vibe:
+              - 'vibe-code-builder-deployer/**'
+            langflow:
+              - 'langflow/**'
+            litellm:
+              - 'lite-llm/**'
+            langfuse:
+              - 'langfuse/**'
+            k8s:
+              - 'aks-deployment/**'
+            workflows:
+              - '.github/workflows/**'
+
+      - name: Change detection summary
+        run: |
+          echo "### Changed services detected:" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Changed |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| backend | ${{ steps.filter.outputs.backend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| frontend | ${{ steps.filter.outputs.frontend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| py-job-executer | ${{ steps.filter.outputs.py_executer }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| py-job-sagemaker | ${{ steps.filter.outputs.py_sagemaker }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| py-job-vertex | ${{ steps.filter.outputs.py_vertex }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| py-job-azure | ${{ steps.filter.outputs.py_azure }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| proxy-service | ${{ steps.filter.outputs.proxy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| adk-code-builder | ${{ steps.filter.outputs.adk }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| vibe-code-builder | ${{ steps.filter.outputs.vibe }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| langflow | ${{ steps.filter.outputs.langflow }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| litellm | ${{ steps.filter.outputs.litellm }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| langfuse | ${{ steps.filter.outputs.langfuse }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| k8s manifests | ${{ steps.filter.outputs.k8s }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| workflows | ${{ steps.filter.outputs.workflows }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
   # JOB 1 – Backend: Java 21 / Maven
   # ────────────────────────────────────────────────────────────
   backend:
     name: "Backend – Build & Test (Java 21)"
     runs-on: [self-hosted, essedum-runner]
-    # SECURITY: Block fork PRs from running on self-hosted runner.
-    # Only org members pushing to the repo trigger builds.
-    # Also enforce this in GitHub Settings → Actions → Fork PR approval.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: [detect-changes]
+    # Run if: backend source changed OR workflow files changed (validates pipeline itself)
+    if: |
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.workflows == 'true')
     timeout-minutes: 30
 
     steps:
@@ -101,7 +188,11 @@ jobs:
   frontend:
     name: "Frontend – Build (${{ matrix.app }})"
     runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: [detect-changes]
+    # Run if: essedum-ui/ changed OR workflow files changed
+    if: |
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.workflows == 'true')
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -168,22 +259,48 @@ jobs:
   python:
     name: "Python – Lint (${{ matrix.executor }})"
     runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: [detect-changes]
+    # Run if: ANY python executor changed OR workflow files changed.
+    # Individual per-executor filtering is handled in the "Check if rebuild needed" step.
+    if: |
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.detect-changes.outputs.py_executer == 'true' ||
+       needs.detect-changes.outputs.py_sagemaker == 'true' ||
+       needs.detect-changes.outputs.py_vertex == 'true' ||
+       needs.detect-changes.outputs.py_azure == 'true' ||
+       needs.detect-changes.outputs.workflows == 'true')
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        executor:
-          - py-job-executer
-          - py-job-sagemaker-executer
-          - py-job-vertex-executer
-          - py-job-azure-executer
+        include:
+          - executor: py-job-executer
+            changes_flag: py_executer
+          - executor: py-job-sagemaker-executer
+            changes_flag: py_sagemaker
+          - executor: py-job-vertex-executer
+            changes_flag: py_vertex
+          - executor: py-job-azure-executer
+            changes_flag: py_azure
 
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Check if rebuild needed
+        id: needs_build
+        run: |
+          FLAG="${{ needs.detect-changes.outputs[matrix.changes_flag] }}"
+          WORKFLOWS="${{ needs.detect-changes.outputs.workflows }}"
+          if [ "$FLAG" != 'true' ] && [ "$WORKFLOWS" != 'true' ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping ${{ matrix.executor }} – no relevant changes detected"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Python 3.11
+        if: steps.needs_build.outputs.skip != 'true'
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.11"
@@ -191,6 +308,7 @@ jobs:
           cache-dependency-path: ${{ matrix.executor }}/requirements.txt
 
       - name: Install dependencies
+        if: steps.needs_build.outputs.skip != 'true'
         working-directory: ${{ matrix.executor }}
         run: |
           python -m venv venv
@@ -200,6 +318,7 @@ jobs:
           pip install flake8
 
       - name: Lint – hard fail on syntax/import errors
+        if: steps.needs_build.outputs.skip != 'true'
         working-directory: ${{ matrix.executor }}
         run: |
           source venv/bin/activate
@@ -210,6 +329,7 @@ jobs:
           }
 
       - name: Lint – style warnings (non-blocking)
+        if: steps.needs_build.outputs.skip != 'true'
         working-directory: ${{ matrix.executor }}
         run: |
           source venv/bin/activate
@@ -235,7 +355,11 @@ jobs:
   k8s-validate:
     name: "Kubernetes – Manifest Validate"
     runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: [detect-changes]
+    # Run if: k8s manifests changed OR workflow files changed
+    if: |
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.detect-changes.outputs.k8s == 'true' || needs.detect-changes.outputs.workflows == 'true')
     timeout-minutes: 10
 
     steps:
@@ -297,9 +421,11 @@ jobs:
   docker-build:
     name: "Docker Build – ${{ matrix.service }}"
     runs-on: [self-hosted, essedum-runner]
+    needs: [detect-changes, k8s-validate]
+    # Job runs if security fork guard passes. Actual per-service skip is handled
+    # in the "Check if rebuild needed" step below, keeping the matrix static.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 45
-    needs: k8s-validate
     strategy:
       fail-fast: false
       matrix:
@@ -307,78 +433,118 @@ jobs:
           - service: leap-app-backend
             context: .
             dockerfile: sv/Dockerfile_dbjwt
+            changes_output: backend
 
           - service: frontend
             context: .
             dockerfile: essedum-ui/Dockerfile
+            changes_output: frontend
 
           - service: py-job-executer
             context: py-job-executer
             dockerfile: py-job-executer/Dockerfile
+            changes_output: py_executer
 
           - service: py-job-sagemaker-executer
             context: py-job-sagemaker-executer
             dockerfile: py-job-sagemaker-executer/Dockerfile
+            changes_output: py_sagemaker
 
           - service: py-job-vertex-executer
             context: py-job-vertex-executer
             dockerfile: py-job-vertex-executer/Dockerfile
+            changes_output: py_vertex
 
           - service: py-job-azure-executer
             context: py-job-azure-executer
             dockerfile: py-job-azure-executer/Dockerfile
+            changes_output: py_azure
 
           - service: proxy-service
             context: proxy-service
             dockerfile: proxy-service/Dockerfile
+            changes_output: proxy
 
           - service: adk-code-builder-deployer
             context: adk-code-builder-deployer
             dockerfile: adk-code-builder-deployer/Dockerfile
+            changes_output: adk
 
           - service: vibe-code-builder-deployer
             context: vibe-code-builder-deployer
             dockerfile: vibe-code-builder-deployer/Dockerfile
+            changes_output: vibe
 
           # ── Langflow (custom image wrapping langflowai/langflow:latest) ──
           - service: langflow
             context: langflow
             dockerfile: langflow/Dockerfile
+            changes_output: langflow
 
           # ── LiteLLM (custom image, context=repo root for COPY lite-llm/...) ──
           - service: litellm
             context: .
             dockerfile: lite-llm/Dockerfile
+            changes_output: litellm
 
           # ── Langfuse web + worker (custom wrappers pinning version) ──
           - service: langfuse-web
             context: langfuse
             dockerfile: langfuse/Dockerfile.web
+            changes_output: langfuse
 
           - service: langfuse-worker
             context: langfuse
             dockerfile: langfuse/Dockerfile.worker
+            changes_output: langfuse
 
-          # ── Goose Vibe Studio Agent (separate repo) ──
+          # ── Goose Vibe Studio Agent (code lives outside repo — always rebuild) ──
           - service: goose-ui
             context: essedum-agents/goose-vibe-studio-agent
             dockerfile: essedum-agents/goose-vibe-studio-agent/Dockerfile.streamlit
             agents_repo: "true"
+            changes_output: always
 
           - service: goosed
             context: essedum-agents/goose-vibe-studio-agent
             dockerfile: essedum-agents/goose-vibe-studio-agent/Dockerfile.goosed-build
             agents_repo: "true"
+            changes_output: always
 
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Check if rebuild needed
+        id: needs_build
+        run: |
+          CHANGED="${{ matrix.changes_output }}"
+          WORKFLOWS="${{ needs.detect-changes.outputs.workflows }}"
+
+          # "always" = goose services whose code lives outside the repo
+          if [ "$CHANGED" = "always" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✓ ${{ matrix.service }}: always rebuilds (external code)"
+            exit 0
+          fi
+
+          # Evaluate the named output flag from detect-changes
+          FLAG=$(echo '${{ toJSON(needs.detect-changes.outputs) }}' \
+                 | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('$CHANGED','false'))")
+
+          if [ "$FLAG" = 'true' ] || [ "$WORKFLOWS" = 'true' ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✓ ${{ matrix.service }}: changes detected – will build"
+          else
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping ${{ matrix.service }} – no changes in $CHANGED/**"
+          fi
+
       - name: Copy goose-vibe-studio-agent from runner local path
         # Resolve the agents source directory dynamically — the runner may run as
         # a different user or have a different $HOME than devopsuser.
         # Candidate paths are tried in order; first match wins.
-        if: ${{ matrix.agents_repo == 'true' }}
+        if: matrix.agents_repo == 'true' && steps.needs_build.outputs.skip != 'true'
         run: |
           echo "Runner context: USER=$(whoami) HOME=$HOME GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
 
@@ -419,9 +585,11 @@ jobs:
           echo "✓ Copied goose-vibe-studio-agent into workspace"
 
       - name: Set up Docker Buildx
+        if: steps.needs_build.outputs.skip != 'true'
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
       - name: Build Docker image (no push in CI)
+        if: steps.needs_build.outputs.skip != 'true'
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
         with:
           context: ${{ matrix.context }}
@@ -440,7 +608,7 @@ jobs:
           # CI only needs to verify the build succeeds; no daemon load needed.
 
       - name: Clean up build cache and dangling images
-        if: always()
+        if: steps.needs_build.outputs.skip != 'true' && always()
         run: |
           # Remove dangling images left by this build to prevent disk exhaustion.
           docker image prune -f --filter "until=1h" || true
@@ -464,15 +632,18 @@ jobs:
   ci-summary:
     name: "CI – Summary & Status"
     runs-on: [self-hosted, essedum-runner]
-    needs: [backend, frontend, python, k8s-validate, docker-build]
+    needs: [detect-changes, backend, frontend, python, k8s-validate, docker-build]
     # SECURITY: same fork guard as all other jobs — prevents fork PRs from
     # touching the self-hosted runner even in the summary/gate step.
+    # Jobs that were skipped (no changes) report result 'skipped', not 'failure'.
     if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     timeout-minutes: 5
 
     steps:
       - name: Determine CI status
         run: |
+          # 'skipped' = no relevant changes for that service — treated as pass.
+          # Only 'failure' or 'cancelled' is an actual problem.
           if [ "${{ needs.backend.result }}" = "failure" ] || \
              [ "${{ needs.frontend.result }}" = "failure" ] || \
              [ "${{ needs.python.result }}" = "failure" ] || \
@@ -489,14 +660,14 @@ jobs:
             echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "## ✓ All CI Checks Passed" >> $GITHUB_STEP_SUMMARY
+            echo "## ✓ CI Checks Passed (unchanged services skipped)" >> $GITHUB_STEP_SUMMARY
             echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
             echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Backend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
-            echo "| Frontend | ✓ passed |" >> $GITHUB_STEP_SUMMARY
-            echo "| Python | ✓ passed |" >> $GITHUB_STEP_SUMMARY
-            echo "| K8s Validate | ✓ passed |" >> $GITHUB_STEP_SUMMARY
-            echo "| Docker Build | ✓ passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| K8s Validate | ${{ needs.k8s-validate.result }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Create CI badge
