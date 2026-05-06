@@ -375,16 +375,44 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Copy goose-vibe-studio-agent from runner local path
-        # The essedum-agents repo is checked out on the self-hosted runner at a
-        # well-known local path. Copy it into the workspace so Docker build
-        # contexts work with relative paths (no remote checkout required).
+        # Resolve the agents source directory dynamically — the runner may run as
+        # a different user or have a different $HOME than devopsuser.
+        # Candidate paths are tried in order; first match wins.
         if: ${{ matrix.agents_repo == 'true' }}
         run: |
-          AGENTS_SRC="/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"
-          if [ ! -d "$AGENTS_SRC" ]; then
-            echo "::error::goose-vibe-studio-agent not found at $AGENTS_SRC on runner"
+          echo "Runner context: USER=$(whoami) HOME=$HOME GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+
+          # Candidate locations in priority order:
+          #   1. Sibling of GITHUB_WORKSPACE two levels up (runner work dir = actions root)
+          #   2. $HOME-relative (runner runs as devopsuser)
+          #   3. Absolute hardcoded path (legacy fallback)
+          CANDIDATES=(
+            "$(dirname "$(dirname "$GITHUB_WORKSPACE")")/essedum-agents/goose-vibe-studio-agent"
+            "$HOME/devops/actions/essedum-agents/goose-vibe-studio-agent"
+            "/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"
+          )
+
+          AGENTS_SRC=""
+          for candidate in "${CANDIDATES[@]}"; do
+            echo "  Checking: $candidate"
+            if [ -d "$candidate" ]; then
+              AGENTS_SRC="$candidate"
+              echo "  ✓ Found at: $AGENTS_SRC"
+              break
+            fi
+          done
+
+          if [ -z "$AGENTS_SRC" ]; then
+            echo "::error::goose-vibe-studio-agent not found in any expected location."
+            echo "Searched:"
+            for c in "${CANDIDATES[@]}"; do echo "  - $c"; done
+            echo "Runner HOME contents:"
+            ls "$HOME" 2>/dev/null || echo "  (cannot list HOME)"
+            echo "GITHUB_WORKSPACE parent contents:"
+            ls "$(dirname "$(dirname "$GITHUB_WORKSPACE")")" 2>/dev/null || echo "  (cannot list)"
             exit 1
           fi
+
           mkdir -p essedum-agents
           cp -r "$AGENTS_SRC" essedum-agents/goose-vibe-studio-agent
           echo "✓ Copied goose-vibe-studio-agent into workspace"
