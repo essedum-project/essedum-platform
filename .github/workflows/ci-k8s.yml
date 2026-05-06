@@ -21,6 +21,27 @@ permissions:
 
 jobs:
   # ────────────────────────────────────────────────────────────
+  # JOB -1 – PR approval gate (same-repo PRs only)
+  # SECURITY: blocks ALL downstream jobs until a maintainer manually
+  # approves via the GitHub UI (Settings → Environments → pr-gate).
+  # This prevents a PR author from running arbitrary code on the
+  # self-hosted runner before their changes are reviewed.
+  # – Fork PRs: never reach this job (fork-guard on detect-changes
+  #   blocks the entire pipeline before pr-gate could even matter).
+  # – Push events: pr-gate is skipped (if: is PR-only); GitHub allows
+  #   needs: with skipped jobs to proceed, so push CI/CD is unaffected.
+  # ────────────────────────────────────────────────────────────
+  pr-gate:
+    name: "Await PR Approval"
+    runs-on: [self-hosted, essedum-runner]
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    environment: pr-gate
+    timeout-minutes: 1440
+    steps:
+      - name: PR approved
+        run: echo "PR manually approved – proceeding with CI"
+
+  # ────────────────────────────────────────────────────────────
   # JOB 0 – Detect which service paths changed
   # Every downstream job checks these outputs and skips itself
   # if nothing it owns was modified. Workflow file changes
@@ -29,6 +50,7 @@ jobs:
   detect-changes:
     name: "Detect Changed Services"
     runs-on: [self-hosted, essedum-runner]
+    needs: [pr-gate]
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 5
     outputs:
@@ -678,3 +700,28 @@ jobs:
           echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
           echo "- **Actor**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  # ────────────────────────────────────────────────────────────
+  # JOB FINAL – Trigger CD after CI passes on gh_actions branch
+  # SECURITY:
+  #   – if: requires event==push AND ref==gh_actions. PRs (same-repo
+  #     or fork) trigger pull_request, never push – so CD is
+  #     unreachable from any PR path, even if pr-gate is bypassed.
+  #   – Only 4 explicitly named secrets are forwarded (no
+  #     secrets: inherit – public repo, least-privilege).
+  #   – No runs-on: reusable workflow call jobs don’t hold a runner
+  #     while queued, so there is no single-runner deadlock.
+  # ────────────────────────────────────────────────────────────
+  call-cd:
+    name: "Trigger CD – Deploy"
+    needs: [ci-summary]
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/gh_actions' &&
+      needs.ci-summary.result == 'success'
+    uses: ./.github/workflows/cd-deploy-k8s.yml
+    secrets:
+      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+      REGISTRY_USERNAME:  ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD:  ${{ secrets.REGISTRY_PASSWORD }}
+      K8S_NAMESPACE:      ${{ secrets.K8S_NAMESPACE }}

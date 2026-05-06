@@ -1,18 +1,26 @@
 name: CD – Deploy (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers: fires after CI completes on gh_actions branch.
-# workflow_run is triggered by GitHub infrastructure (no runner
-# needed to wait) – avoids deadlock on a single self-hosted runner.
-#
-# REQUIRED: gh_actions must be the repository default branch for
-# workflow_run to fire. Set in GitHub → Settings → Branches.
+# Triggers:
+#   workflow_call – called directly by CI (ci-k8s.yml call-cd job)
+#     after ci-summary passes on the gh_actions branch.
+#     Only the 4 secrets this workflow actually uses are forwarded
+#     (public repo: never use secrets: inherit).
+#   workflow_dispatch – emergency manual deploy; requires repo
+#     write-access to trigger from the GitHub UI.
 # ──────────────────────────────────────────────────────────────
 on:
-  workflow_run:
-    workflows: ["CI \u2013 Build & Test (Kubernetes)"]
-    branches: ["gh_actions"]
-    types: [completed]
+  workflow_call:
+    secrets:
+      CONTAINER_REGISTRY:
+        required: true
+      REGISTRY_USERNAME:
+        required: true
+      REGISTRY_PASSWORD:
+        required: true
+      K8S_NAMESPACE:
+        required: false
+  workflow_dispatch: {}
 
 # Only one deployment at a time
 concurrency:
@@ -25,36 +33,15 @@ permissions:
 
 jobs:
   # ────────────────────────────────────────────────────────────
-  # Guard – only deploy when CI succeeded
-  # ────────────────────────────────────────────────────────────
-  check-readiness:
-    name: "Guard – CI Must Pass"
-    runs-on: [self-hosted, essedum-runner]
-    timeout-minutes: 5
-    outputs:
-      ready: ${{ steps.check.outputs.ready }}
-    steps:
-      - name: Check CI conclusion
-        id: check
-        run: |
-          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
-          echo "CI conclusion: $CONCLUSION"
-          if [ "$CONCLUSION" = "success" ]; then
-            echo "ready=true" >> $GITHUB_OUTPUT
-            echo "✓ CI passed – proceeding with deployment"
-          else
-            echo "ready=false" >> $GITHUB_OUTPUT
-            echo "::notice::CI did not pass (conclusion: $CONCLUSION) – deployment skipped"
-          fi
-
-  # ────────────────────────────────────────────────────────────
   # Deploy – Kubernetes-based deployment
-  # Runs on self-hosted runner with k8s cluster access
+  # Runs on self-hosted runner with k8s cluster access.
+  # Called from CI (workflow_call) only after ci-summary passes,
+  # so no separate readiness check is needed here.
+  # The CONTAINER_REGISTRY environment adds a mandatory human
+  # approval gate before any image is pushed or manifest applied.
   # ────────────────────────────────────────────────────────────
   deploy:
     name: "Deploy – Kubernetes Rollout"
-    needs: check-readiness
-    if: ${{ needs.check-readiness.outputs.ready == 'true' }}
     runs-on: [self-hosted, essedum-runner]
     timeout-minutes: 60
     environment: CONTAINER_REGISTRY
