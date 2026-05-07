@@ -504,6 +504,7 @@ spec:
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
+        registry: "local"
       serviceAccountName: ingress-nginx
       terminationGracePeriodSeconds: 300
       volumes:
@@ -560,6 +561,7 @@ spec:
             type: RuntimeDefault
       nodeSelector:
         kubernetes.io/os: linux
+        registry: "local"
       restartPolicy: OnFailure
       serviceAccountName: ingress-nginx-admission
   ttlSecondsAfterFinished: 0
@@ -615,6 +617,7 @@ spec:
             type: RuntimeDefault
       nodeSelector:
         kubernetes.io/os: linux
+        registry: "local"
       restartPolicy: OnFailure
       serviceAccountName: ingress-nginx-admission
   ttlSecondsAfterFinished: 0
