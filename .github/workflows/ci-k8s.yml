@@ -657,8 +657,22 @@ jobs:
           echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
 
       - name: Set up Docker Buildx
+        # IMPORTANT: the docker-container BuildKit driver runs inside an isolated
+        # container. Without --network=host that container cannot reach the local
+        # registry on localhost:5001 (its own loopback ≠ host loopback), causing
+        # "dial tcp [::1]:5001: connect: connection refused" on push.
+        # --driver-opt network=host shares the host network with the builder
+        # container so localhost resolves correctly.
+        # config-inline marks localhost:5001 as an insecure (plain-HTTP) registry
+        # so BuildKit does not attempt TLS when pushing layers.
         if: steps.needs_build.outputs.skip != 'true'
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        with:
+          driver-opts: network=host
+          config-inline: |
+            [registry."localhost:5001"]
+              http = true
+              insecure = true
 
       - name: Build and push Docker image
         # Build once in CI and push immediately to the registry.
@@ -670,6 +684,13 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
+          # SECURITY: Disable provenance attestations and SBOM generation.
+          # build-push-action v6 defaults provenance:true which uploads a
+          # *.dockerbuild attestation file as a GitHub Actions artifact, making
+          # it publicly visible in the GitHub UI on a public repo.
+          # Artifacts MUST stay on the runner only — never uploaded to GitHub.
+          provenance: false
+          sbom: false
           # SECURITY: Do NOT use type=gha cache on a public repo.
           # GHA cache is accessible to any workflow run including fork PRs,
           # which would allow reading image layers containing compiled code,
