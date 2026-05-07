@@ -57,6 +57,11 @@
 								}
 							],
 							"outputHashing": "all",
+							"optimization": {
+								"fonts": {
+									"inline": false
+								}
+							},
 							"extraWebpackConfig": "projects/aip-app/webpack.prod.config.js"
 						},
 						"development": {

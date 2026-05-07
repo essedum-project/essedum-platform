@@ -30,6 +30,12 @@ spec:
           value: "essedum-45"
         - name: security.scope
           value: "openid profile email"
+        - name: MYSQL_DATASOURCE_URL
+          value: "mysql.essedum.svc.cluster.local"
+        - name: MYSQL_DATASOURCE_USER
+          value: "root"
+        - name: MYSQL_DATASOURCE_PASSWORD
+          value: "password"
         ports:
         - containerPort: 8082
 ---

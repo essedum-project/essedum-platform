@@ -20,7 +20,7 @@ spec:
         registry: "local"
       containers:
         - name: builder
-          image: localhost:32000/builder-service:v2
+          image: ${REGISTRY}/essedum/adk-code-builder-deployer:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

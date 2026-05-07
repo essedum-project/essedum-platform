@@ -342,7 +342,6 @@ jobs:
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
             "aks-deployment/qdrant_deployment.yaml"
-            "aks-deployment/builder-deployment.yml"
             "aks-deployment/builder-rbac.yml"
             "aks-deployment/github-runner-rbac.yml"
           )

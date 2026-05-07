@@ -25,6 +25,10 @@ spec:
         env:
         - name: LANGFLOW_ENV
           value: "production"
+        - name: LANGFLOW_PORT
+          value: "7860"
+        # K8s automatically injects LANGFLOW_PORT=tcp://<clusterIP>:7860 from the langflow-service
+        # which breaks pydantic int validation. Explicitly setting it here overrides that injection.
         resources:
           requests:
             cpu: "500m"
