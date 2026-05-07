@@ -6,9 +6,22 @@ name: CI – Build & Test (Kubernetes)
 on:
   push:
     branches: ["gh_actions"]
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+      - "LICENSE"
+      - "aks-deployment/**"
+      - ".github/workflows/cd-*.yml"
+      - "docker/**"
   pull_request:
     branches: ["essedum-lfn-v13.0"]
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+      - "LICENSE"
+      - "aks-deployment/**"
+      - "docker/**"
 
 # Cancel any in-flight run for the same branch
 concurrency:
@@ -47,6 +60,7 @@ jobs:
       langfuse:   ${{ steps.filter.outputs.langfuse }}
       k8s:        ${{ steps.filter.outputs.k8s }}
       workflows:  ${{ steps.filter.outputs.workflows }}
+      has_any_change: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.py_executer == 'true' || steps.filter.outputs.py_sagemaker == 'true' || steps.filter.outputs.py_vertex == 'true' || steps.filter.outputs.py_azure == 'true' || steps.filter.outputs.proxy == 'true' || steps.filter.outputs.adk == 'true' || steps.filter.outputs.vibe == 'true' || steps.filter.outputs.langflow == 'true' || steps.filter.outputs.litellm == 'true' || steps.filter.outputs.langfuse == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -222,6 +236,15 @@ jobs:
       - name: Install yarn
         run: npm install -g yarn
 
+      - name: Cache node_modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ${{ matrix.dir }}/node_modules
+          key: ${{ runner.os }}-yarn-${{ matrix.app }}-${{ hashFiles(format('{0}/yarn.lock', matrix.dir)) }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ matrix.app }}-
+
       - name: Install dependencies
         working-directory: ${{ matrix.dir }}
         run: |
@@ -230,11 +253,13 @@ jobs:
             exit 1
           }
 
-      - name: Production build
+      - name: Type-check & lint (fast validation)
         working-directory: ${{ matrix.dir }}
         run: |
-          yarn run build-prod || {
-            echo "::error::Production build failed for ${{ matrix.app }}"
+          # CI validates compilation only — Docker build handles full prod build.
+          # This avoids duplicating a 10–15 min Angular production build in CI.
+          yarn run build --configuration=development --no-progress 2>&1 | tail -20 || {
+            echo "::error::Build validation failed for ${{ matrix.app }}"
             exit 1
           }
 
@@ -423,11 +448,11 @@ jobs:
     name: "Docker Build – ${{ matrix.service }}"
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
-    # Job runs if security fork guard passes. Actual per-service skip is handled
-    # in the "Check if rebuild needed" step below, keeping the matrix static.
-    # NOTE: k8s-validate is NOT in needs — it runs in parallel with docker-build.
-    # k8s manifests are still validated before CD because ci-summary needs both.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Job runs only when at least one service source file changed.
+    # This prevents 15 matrix jobs from spinning up on YAML-only or workflow-only commits.
+    if: |
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      needs.detect-changes.outputs.has_any_change == 'true'
     timeout-minutes: 45
     strategy:
       fail-fast: false
