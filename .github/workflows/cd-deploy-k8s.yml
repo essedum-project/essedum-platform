@@ -11,6 +11,66 @@ name: CD – Deploy (Kubernetes)
 # ──────────────────────────────────────────────────────────────
 on:
   workflow_call:
+    # image_tag and changed_* are forwarded from CI's call-cd job.
+    # CD uses image_tag to deploy the exact SHA built by CI (no second build).
+    # changed_* flags let CD skip manifest apply / rollout for unchanged services.
+    inputs:
+      image_tag:
+        description: "Commit SHA of the images built and pushed by CI"
+        required: true
+        type: string
+      changed_backend:
+        required: false
+        type: string
+        default: 'false'
+      changed_frontend:
+        required: false
+        type: string
+        default: 'false'
+      changed_py_executer:
+        required: false
+        type: string
+        default: 'false'
+      changed_py_sagemaker:
+        required: false
+        type: string
+        default: 'false'
+      changed_py_vertex:
+        required: false
+        type: string
+        default: 'false'
+      changed_py_azure:
+        required: false
+        type: string
+        default: 'false'
+      changed_proxy:
+        required: false
+        type: string
+        default: 'false'
+      changed_adk:
+        required: false
+        type: string
+        default: 'false'
+      changed_vibe:
+        required: false
+        type: string
+        default: 'false'
+      changed_langflow:
+        required: false
+        type: string
+        default: 'false'
+      changed_litellm:
+        required: false
+        type: string
+        default: 'false'
+      changed_langfuse:
+        required: false
+        type: string
+        default: 'false'
+      changed_workflows:
+        required: false
+        type: string
+        default: 'false'
     secrets:
       CONTAINER_REGISTRY:
         required: true
@@ -53,44 +113,6 @@ jobs:
           ref: gh_actions
           fetch-depth: 1
 
-      - name: Copy goose-vibe-studio-agent from runner local path  # dynamic path resolution
-        # essedum-agents is checked out locally on the self-hosted runner.
-        # Copy into workspace so Docker build contexts resolve correctly.
-        run: |
-          echo "Runner context: USER=$(whoami) HOME=$HOME GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-
-          CANDIDATES=(
-            "/opt/github-runner/_work/essedum-agents/goose-vibe-studio-agent"
-            "$(dirname "$(dirname "$GITHUB_WORKSPACE")")/essedum-agents/goose-vibe-studio-agent"
-            "$HOME/devops/actions/essedum-agents/goose-vibe-studio-agent"
-            "/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"
-          )
-
-          AGENTS_SRC=""
-          for candidate in "${CANDIDATES[@]}"; do
-            echo "  Checking: $candidate"
-            if [ -d "$candidate" ]; then
-              AGENTS_SRC="$candidate"
-              echo "  ✓ Found at: $AGENTS_SRC"
-              break
-            fi
-          done
-
-          if [ -z "$AGENTS_SRC" ]; then
-            echo "::error::goose-vibe-studio-agent not found in any expected location."
-            echo "Searched:"
-            for c in "${CANDIDATES[@]}"; do echo "  - $c"; done
-            echo "Runner HOME contents:"
-            ls "$HOME" 2>/dev/null || echo "  (cannot list HOME)"
-            echo "GITHUB_WORKSPACE parent contents:"
-            ls "$(dirname "$(dirname "$GITHUB_WORKSPACE")")" 2>/dev/null || echo "  (cannot list)"
-            exit 1
-          fi
-
-          mkdir -p essedum-agents
-          cp -r "$AGENTS_SRC" essedum-agents/goose-vibe-studio-agent
-          echo "✓ Copied goose-vibe-studio-agent into workspace"
-
       - name: Verify kubeconfig
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
@@ -131,199 +153,6 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
 
-      - name: Build and push container images
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        run: |
-          # SECURITY: set -e only (no -x). set -x would expand and print every variable
-          # including secrets to the public Actions log even though GHA masks known secrets.
-          set -e
-          export DOCKER_BUILDKIT=1
-
-          echo "=== Environment Debug ==="
-          echo "REGISTRY=${REGISTRY:+SET}"
-          echo "REGISTRY_USERNAME=${REGISTRY_USERNAME:+SET}"
-          echo "Docker version: $(docker --version)"
-          echo "PWD: $PWD"
-          echo ""
-          
-          if [ -z "$REGISTRY" ]; then
-            echo "::error::REGISTRY secret is empty!"
-            exit 1
-          fi
-          
-          echo "=== Build Configuration ==="
-          echo "Registry: ${REGISTRY:+SET}"
-          echo "Building images for deployment..."
-          echo ""
-          
-          # Build custom images - format: "name:dockerfile:context"
-          services=(
-            "leap-app-backend:sv/Dockerfile_dbjwt:."
-            "frontend:essedum-ui/Dockerfile:."
-            "py-job-executer:py-job-executer/Dockerfile:py-job-executer"
-            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile:py-job-sagemaker-executer"
-            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile:py-job-vertex-executer"
-            "py-job-azure-executer:py-job-azure-executer/Dockerfile:py-job-azure-executer"
-            "proxy-service:proxy-service/Dockerfile:proxy-service"
-            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile:adk-code-builder-deployer"
-            "vibe-code-builder-deployer:vibe-code-builder-deployer/Dockerfile:vibe-code-builder-deployer"
-            "langflow:langflow/Dockerfile:langflow"
-            "litellm:lite-llm/Dockerfile:."
-            "langfuse-web:langfuse/Dockerfile.web:langfuse"
-            "langfuse-worker:langfuse/Dockerfile.worker:langfuse"
-            "goose-ui:essedum-agents/goose-vibe-studio-agent/Dockerfile.streamlit:essedum-agents/goose-vibe-studio-agent"
-            "goosed:essedum-agents/goose-vibe-studio-agent/Dockerfile.goosed-build:essedum-agents/goose-vibe-studio-agent"
-          )
-          
-          for svc_info in "${services[@]}"; do
-            IFS=':' read -r service dockerfile context <<< "$svc_info"
-            echo ">>> Building $service"
-            echo "    Dockerfile: $dockerfile"
-            echo "    Context: $context"
-            
-            # Verify files exist
-            if [ ! -f "$dockerfile" ]; then
-              echo "::error::Dockerfile not found: $dockerfile"
-              exit 1
-            fi
-            
-            if [ ! -d "$context" ]; then
-              echo "::error::Context directory not found: $context"
-              exit 1
-            fi
-            
-            # SECURITY: Use BuildKit for reproducible, provenance-tracked builds.
-            # Tag only with the immutable commit SHA — no :latest mutable tag.
-            # :latest is dangerous because any push overwrites it; pods using
-            # imagePullPolicy:Always would auto-pull a bad image on restart.
-            DOCKER_BUILDKIT=1 docker build \
-              -t "${REGISTRY}/essedum/${service}:${{ github.sha }}" \
-              -f "$dockerfile" "$context" || {
-              echo ""
-              echo "::error::Failed to build $service - see output above for details"
-              exit 1
-            }
-            echo "✓ Successfully built: ${REGISTRY}/essedum/${service}:${{ github.sha }}"
-            echo ""
-          done
-          
-          echo "=== Build Summary ==="
-          docker images | grep "${REGISTRY}/essedum" || echo "No images found in registry prefix"
-
-      - name: Push images to registry
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        run: |
-          # SECURITY: set -e only. Secrets are passed via env vars, never echoed.
-          set -e
-
-          echo "=== Registry Push Configuration ==="
-          echo "Registry: ${REGISTRY:+SET}"
-          echo "Username: ${REGISTRY_USERNAME:+SET}"
-          echo ""
-          
-          if [ -z "$REGISTRY" ]; then
-            echo "::error::REGISTRY secret is empty!"
-            exit 1
-          fi
-          
-          echo ">>> Authenticating to registry..."
-          # SECURITY: secrets passed via env vars, never inline-expanded in shell.
-          # Removed 2>&1 so docker auth output does not merge into stdout log.
-          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY" || {
-            echo "::error::Failed to authenticate with container registry"
-            exit 1
-          }
-          echo "✓ Authentication successful"
-          echo ""
-          
-          echo ">>> Images before push:"
-          docker images | grep "${REGISTRY}/essedum" || true
-          echo ""
-          
-          echo ">>> Starting image push to registry..."
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
-          
-          for svc in "${services[@]}"; do
-            echo "Pushing ${REGISTRY}/essedum/${svc}:${{ github.sha }}..."
-            # SECURITY: Push only the immutable SHA tag, never :latest.
-            # :latest is a mutable pointer that makes rollback ambiguous and
-            # can cause pods to auto-pull broken images on restart.
-            docker push "${REGISTRY}/essedum/${svc}:${{ github.sha }}" || {
-              echo "::error::Failed to push image ${svc}:${{ github.sha }}"
-              exit 1
-            }
-            echo "✓ Pushed: ${REGISTRY}/essedum/${svc}:${{ github.sha }}"
-          done
-          
-          echo ""
-          echo "=== Push Summary ==="
-          echo "All images successfully pushed to $REGISTRY"
-
-      - name: Registry GC – prune old SHA tags (keep last 5 per service)
-        # Keeps the 5 most-recently-pushed SHA tags for each service in localhost:5001.
-        # Every CD run would otherwise accumulate a new set of 15 images with no bound.
-        # Uses the Docker Registry HTTP v2 API to delete manifests.
-        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the registry container.
-        run: |
-          REGISTRY_API="http://localhost:5001/v2"
-          KEEP=5
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
-
-          echo "=== Registry GC: keeping last $KEEP SHA tags per service ==="
-          for svc in "${services[@]}"; do
-            echo ""
-            echo ">>> ${svc}"
-            # List all tags for this service; API returns JSON { "tags": [...] }
-            tags_json=$(curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null) || {
-              echo "  Skipped (registry API unreachable or no tags)"
-              continue
-            }
-            # Extract tags, excluding 'latest', sorted newest-first via daemon metadata
-            all_tags=$(docker images "localhost:5001/essedum/${svc}" \
-              --format "{{.CreatedAt}}\t{{.Tag}}" 2>/dev/null \
-              | grep -v "latest" \
-              | sort -r \
-              | awk '{print $3}')
-            tag_count=$(echo "$all_tags" | grep -c . 2>/dev/null || echo 0)
-            echo "  Found $tag_count SHA tags"
-            if [ "$tag_count" -le "$KEEP" ]; then
-              echo "  Nothing to prune"
-              continue
-            fi
-            old_tags=$(echo "$all_tags" | tail -n +$((KEEP + 1)))
-            echo "  Will delete $((tag_count - KEEP)) old tag(s)"
-            for tag in $old_tags; do
-              [ -z "$tag" ] && continue
-              echo -n "    Deleting tag ${tag}... "
-              # Fetch content-addressable digest (required for DELETE)
-              digest=$(curl -sf -I \
-                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                "${REGISTRY_API}/essedum/${svc}/manifests/${tag}" 2>/dev/null \
-                | grep -i "^Docker-Content-Digest:" | awk '{print $2}' | tr -d '\r')
-              if [ -z "$digest" ]; then
-                echo "skip (could not fetch digest)"
-              else
-                http_code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
-                  "${REGISTRY_API}/essedum/${svc}/manifests/${digest}" 2>/dev/null)
-                if [ "$http_code" = "202" ]; then
-                  echo "deleted from registry"
-                else
-                  echo "registry returned HTTP ${http_code} (delete may be disabled — skipping)"
-                fi
-              fi
-              # Always remove from local daemon regardless of registry delete result
-              docker rmi "localhost:5001/essedum/${svc}:${tag}" 2>/dev/null || true
-            done
-          done
-          echo ""
-          echo "=== Registry GC complete ==="
-
       - name: Docker logout and image cleanup
         if: always()
         env:
@@ -352,7 +181,9 @@ jobs:
       - name: Apply Kubernetes manifests
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
-          IMAGE_TAG: ${{ github.sha }}
+          # Use the SHA that CI built and pushed. Falls back to github.sha when
+          # triggered manually via workflow_dispatch (inputs.image_tag is empty).
+          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
           # SECURITY: REGISTRY passed via env so it is never inline-expanded
           # inside run: shell script text (prevents script injection).
           REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}

@@ -522,24 +522,64 @@ jobs:
         run: |
           CHANGED="${{ matrix.changes_output }}"
           WORKFLOWS="${{ needs.detect-changes.outputs.workflows }}"
+          CACHE_DIR="${HOME}/.essedum-build-cache"
+          mkdir -p "$CACHE_DIR"
 
-          # "always" = goose services whose code lives outside the repo
+          # ── Goose services: hash the local agent directory ──────────────────
+          # Code lives outside the repo, so dorny/paths-filter cannot track it.
+          # Instead we compute a SHA256 hash of the full directory tree and
+          # compare against the hash from the last successful build.
           if [ "$CHANGED" = "always" ]; then
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "✓ ${{ matrix.service }}: always rebuilds (external code)"
+            AGENTS_DIR=""
+            for candidate in \
+              "/opt/github-runner/_work/essedum-agents/goose-vibe-studio-agent" \
+              "$(dirname "$(dirname "$GITHUB_WORKSPACE")")/essedum-agents/goose-vibe-studio-agent" \
+              "$HOME/devops/actions/essedum-agents/goose-vibe-studio-agent" \
+              "/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"; do
+              [ -d "$candidate" ] && { AGENTS_DIR="$candidate"; break; }
+            done
+
+            if [ -z "$AGENTS_DIR" ]; then
+              echo "skip=false" >> $GITHUB_OUTPUT
+              echo "::warning::goose-vibe-studio-agent not found — forcing full rebuild"
+              exit 0
+            fi
+
+            CURRENT_HASH=$(find "$AGENTS_DIR" -type f ! -path '*/.git/*' \
+              | sort | xargs sha256sum 2>/dev/null | sha256sum | awk '{print $1}')
+            LAST_HASH=$(cat "$CACHE_DIR/goose-hash" 2>/dev/null || echo "")
+            LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
+
+            if [ "$CURRENT_HASH" = "$LAST_HASH" ] && [ -n "$LAST_SHA" ] && [ "$WORKFLOWS" != 'true' ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+              echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
+              echo "::notice::${{ matrix.service }}: goose directory unchanged – retagging ${LAST_SHA} → ${{ github.sha }}"
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+              echo "goose_hash=${CURRENT_HASH}" >> $GITHUB_OUTPUT
+              echo "✓ ${{ matrix.service }}: goose directory changed – will rebuild"
+            fi
             exit 0
           fi
 
-          # Evaluate the named output flag from detect-changes
+          # ── Standard path-filter check ───────────────────────────────────────
           FLAG=$(echo '${{ toJSON(needs.detect-changes.outputs) }}' \
                  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('$CHANGED','false'))")
+          LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
 
           if [ "$FLAG" = 'true' ] || [ "$WORKFLOWS" = 'true' ]; then
             echo "skip=false" >> $GITHUB_OUTPUT
             echo "✓ ${{ matrix.service }}: changes detected – will build"
-          else
+          elif [ -n "$LAST_SHA" ]; then
+            # Source unchanged AND a previously-built image exists in the registry.
+            # Fast-path: retag the old SHA with the new SHA (no layer transfer).
             echo "skip=true" >> $GITHUB_OUTPUT
-            echo "::notice::Skipping ${{ matrix.service }} – no changes in $CHANGED/**"
+            echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
+            echo "::notice::${{ matrix.service }}: no source changes – will retag ${LAST_SHA} → ${{ github.sha }}"
+          else
+            # No cached image on this runner (first run ever). Must build.
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "::notice::${{ matrix.service }}: no cached image found – building for the first time"
           fi
 
       - name: Copy goose-vibe-studio-agent from runner local path
@@ -586,18 +626,50 @@ jobs:
           cp -r "$AGENTS_SRC" essedum-agents/goose-vibe-studio-agent
           echo "✓ Copied goose-vibe-studio-agent into workspace"
 
+      - name: Retag previous image (no source changes)
+        # Service source is unchanged. Instead of a full Docker build, we copy the
+        # previously-pushed manifest to the new SHA tag using imagetools create.
+        # This is a registry-side metadata operation — no layers are transferred,
+        # completes in under 5 seconds, and produces an identical image digest.
+        if: steps.needs_build.outputs.skip == 'true'
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          set -e
+          LAST_SHA="${{ steps.needs_build.outputs.last_sha }}"
+          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
+          docker buildx imagetools create \
+            -t "${REGISTRY}/essedum/${{ matrix.service }}:${{ github.sha }}" \
+            "${REGISTRY}/essedum/${{ matrix.service }}:${LAST_SHA}"
+          echo "✓ Retagged ${{ matrix.service }}: ${LAST_SHA} → ${{ github.sha }} (no build needed)"
+          docker logout "$REGISTRY" || true
+
+      - name: Login to container registry
+        if: steps.needs_build.outputs.skip != 'true'
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          # SECURITY: password via env var piped to stdin — never echoed to log.
+          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
+
       - name: Set up Docker Buildx
         if: steps.needs_build.outputs.skip != 'true'
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
-      - name: Build Docker image (no push in CI)
+      - name: Build and push Docker image
+        # Build once in CI and push immediately to the registry.
+        # CD reuses this image directly — no second build in the deploy job.
         if: steps.needs_build.outputs.skip != 'true'
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
-          push: false
-          tags: essedum/${{ matrix.service }}:ci-${{ github.sha }}
+          push: true
+          tags: ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
           # SECURITY: Do NOT use type=gha cache on a public repo.
           # GHA cache is accessible to any workflow run including fork PRs,
           # which would allow reading image layers containing compiled code,
@@ -610,26 +682,49 @@ jobs:
           cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max,max-size=2g
           # Do NOT load into Docker daemon (outputs: type=docker) —
           # loading builds up /var/lib/docker indefinitely with stale images.
-          # CI only needs to verify the build succeeds; no daemon load needed.
+          # CI pushes directly to the registry; no daemon load needed.
 
-      - name: Clean up build cache and dangling images
+      - name: Save build SHA to runner cache
+        # Persist the SHA so the next CI run can retag instead of rebuilding
+        # when this service's source hasn't changed.
+        if: steps.needs_build.outputs.skip != 'true' && success()
+        run: |
+          CACHE_DIR="${HOME}/.essedum-build-cache"
+          mkdir -p "$CACHE_DIR"
+          echo "${{ github.sha }}" > "$CACHE_DIR/${{ matrix.service }}"
+          # Goose services: also persist the directory hash so the next run
+          # knows whether the agent code actually changed.
+          GOOSE_HASH="${{ steps.needs_build.outputs.goose_hash }}"
+          if [ -n "$GOOSE_HASH" ]; then
+            echo "$GOOSE_HASH" > "$CACHE_DIR/goose-hash"
+            echo "✓ Saved goose directory hash"
+          fi
+          echo "✓ Cached build SHA for ${{ matrix.service }}: ${{ github.sha }}"
+
+      - name: Clean up dangling images and stale build cache
         if: steps.needs_build.outputs.skip != 'true' && always()
         run: |
-          # Remove the named ci-sha image if it was loaded into the daemon.
-          # build-push-action with the docker-container driver may load the image
-          # when no explicit outputs are set; remove it unconditionally to be safe.
-          docker rmi "essedum/${{ matrix.service }}:ci-${{ github.sha }}" 2>/dev/null || true
-          # Remove all untagged (dangling) layers left by this build.
-          # No time filter — images built in this step are ready to remove now.
+          # build-push-action with the docker-container driver pushes directly to
+          # the registry and does not load the image into the local daemon, so
+          # there is no named image to remove here.
+          # Logout from registry (login was done in a prior step).
+          docker logout "${{ secrets.CONTAINER_REGISTRY }}" 2>/dev/null || true
+          # Remove any untagged (dangling) layers accumulated during the build.
           docker image prune -f || true
-          # Trim BuildKit local cache entries older than 72 h to prevent unbounded growth.
+          # Trim BuildKit local cache entries older than 72 h.
           docker builder prune -f --filter "until=72h" || true
 
       - name: Docker build summary
         if: success()
         run: |
           echo "## ✓ Docker Build Passed (${{ matrix.service }})" >> $GITHUB_STEP_SUMMARY
-          echo "- Image: \`essedum/${{ matrix.service }}:ci-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.needs_build.outputs.skip }}" = "true" ]; then
+            echo "- Action: **retagged** (no source changes)" >> $GITHUB_STEP_SUMMARY
+            echo "- Previous SHA: \`${{ steps.needs_build.outputs.last_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Action: **built and pushed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Docker build failure report
         if: failure()
@@ -650,6 +745,23 @@ jobs:
     # Jobs that were skipped (no changes) report result 'skipped', not 'failure'.
     if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     timeout-minutes: 5
+    # Expose detect-changes outputs so call-cd can forward them to CD.
+    # CD uses these to skip manifests/rollouts for unchanged services.
+    outputs:
+      image_tag:            ${{ github.sha }}
+      changed_backend:      ${{ needs.detect-changes.outputs.backend }}
+      changed_frontend:     ${{ needs.detect-changes.outputs.frontend }}
+      changed_py_executer:  ${{ needs.detect-changes.outputs.py_executer }}
+      changed_py_sagemaker: ${{ needs.detect-changes.outputs.py_sagemaker }}
+      changed_py_vertex:    ${{ needs.detect-changes.outputs.py_vertex }}
+      changed_py_azure:     ${{ needs.detect-changes.outputs.py_azure }}
+      changed_proxy:        ${{ needs.detect-changes.outputs.proxy }}
+      changed_adk:          ${{ needs.detect-changes.outputs.adk }}
+      changed_vibe:         ${{ needs.detect-changes.outputs.vibe }}
+      changed_langflow:     ${{ needs.detect-changes.outputs.langflow }}
+      changed_litellm:      ${{ needs.detect-changes.outputs.litellm }}
+      changed_langfuse:     ${{ needs.detect-changes.outputs.langfuse }}
+      changed_workflows:    ${{ needs.detect-changes.outputs.workflows }}
 
     steps:
       - name: Determine CI status
@@ -709,24 +821,70 @@ jobs:
           fi
           echo "Runner artifact store: $ARTIFACT_BASE (${{ github.sha }})"
 
-      - name: Prune stale CI daemon images (all older than 24 h)
-        # Removes any leftover named CI images (essedum/<svc>:ci-<sha>) that the
-        # per-service cleanup step may have missed (e.g. if the job was cancelled).
-        # Runs once at summary time so it is not repeated per matrix shard.
+      - name: Prune stale daemon images
+        # Images are now pushed directly to the registry by CI and are never
+        # loaded into the local Docker daemon (docker-container buildx driver).
+        # This step removes any leftover dangling layers from interrupted runs.
         if: always() && github.event_name == 'push'
         run: |
-          echo "=== Removing stale CI daemon images older than 24h ==="
-          # Remove named essedum/...:ci-... images (no-push CI builds)
-          docker images --format "{{.Repository}}:{{.Tag}}\t{{.CreatedAt}}" \
-            | grep "^essedum/.*:ci-" \
-            | awk -F'\t' '{print $1}' \
-            | xargs -r docker rmi 2>/dev/null || true
-          # Remove dangling layers
           docker image prune -f || true
-          echo "=== CI image prune done ==="
-          echo "### Remaining daemon images (essedum/)" >> $GITHUB_STEP_SUMMARY
-          docker images --format "| {{.Repository}} | {{.Tag}} | {{.Size}} |" \
-            | grep "essedum/" >> $GITHUB_STEP_SUMMARY || echo "| (none) | - | - |" >> $GITHUB_STEP_SUMMARY
+          echo "=== Daemon image prune done ==="
+
+      - name: Registry GC – prune old SHA tags (keep last 5 per service)
+        # Runs once here in ci-summary after all 15 parallel matrix builds complete,
+        # rather than in CD (where it no longer belongs since CD no longer pushes images).
+        # Keeps the 5 most-recently-pushed SHA tags per service in localhost:5001.
+        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the registry container.
+        if: always() && github.event_name == 'push'
+        run: |
+          REGISTRY_API="http://localhost:5001/v2"
+          KEEP=5
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+
+          echo "=== Registry GC: keeping last $KEEP SHA tags per service ==="
+          for svc in "${services[@]}"; do
+            echo ""
+            echo ">>> ${svc}"
+            curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null || {
+              echo "  Skipped (registry API unreachable or no tags)"
+              continue
+            }
+            all_tags=$(docker images "localhost:5001/essedum/${svc}" \
+              --format "{{.CreatedAt}}\t{{.Tag}}" 2>/dev/null \
+              | grep -v "latest" \
+              | sort -r \
+              | awk '{print $3}')
+            tag_count=$(echo "$all_tags" | grep -c . 2>/dev/null || echo 0)
+            echo "  Found $tag_count SHA tags"
+            if [ "$tag_count" -le "$KEEP" ]; then
+              echo "  Nothing to prune"
+              continue
+            fi
+            old_tags=$(echo "$all_tags" | tail -n +$((KEEP + 1)))
+            echo "  Will delete $((tag_count - KEEP)) old tag(s)"
+            for tag in $old_tags; do
+              [ -z "$tag" ] && continue
+              echo -n "    Deleting tag ${tag}... "
+              digest=$(curl -sf -I \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                "${REGISTRY_API}/essedum/${svc}/manifests/${tag}" 2>/dev/null \
+                | grep -i "^Docker-Content-Digest:" | awk '{print $2}' | tr -d '\r')
+              if [ -z "$digest" ]; then
+                echo "skip (could not fetch digest)"
+              else
+                http_code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                  "${REGISTRY_API}/essedum/${svc}/manifests/${digest}" 2>/dev/null)
+                if [ "$http_code" = "202" ]; then
+                  echo "deleted from registry"
+                else
+                  echo "registry returned HTTP ${http_code} (delete may be disabled — skipping)"
+                fi
+              fi
+              docker rmi "localhost:5001/essedum/${svc}:${tag}" 2>/dev/null || true
+            done
+          done
+          echo ""
+          echo "=== Registry GC complete ==="
 
   # ────────────────────────────────────────────────────────────
   # JOB FINAL – Trigger CD after CI passes on gh_actions branch
@@ -747,6 +905,24 @@ jobs:
       github.ref == 'refs/heads/gh_actions' &&
       needs.ci-summary.result == 'success'
     uses: ./.github/workflows/cd-deploy-k8s.yml
+    with:
+      # Forward the exact SHA that CI built and pushed — CD deploys this tag directly.
+      # No second docker build in CD; images are already in the registry.
+      image_tag:            ${{ needs.ci-summary.outputs.image_tag }}
+      # Forward which services changed so CD can skip manifests/rollouts for unchanged ones.
+      changed_backend:      ${{ needs.ci-summary.outputs.changed_backend }}
+      changed_frontend:     ${{ needs.ci-summary.outputs.changed_frontend }}
+      changed_py_executer:  ${{ needs.ci-summary.outputs.changed_py_executer }}
+      changed_py_sagemaker: ${{ needs.ci-summary.outputs.changed_py_sagemaker }}
+      changed_py_vertex:    ${{ needs.ci-summary.outputs.changed_py_vertex }}
+      changed_py_azure:     ${{ needs.ci-summary.outputs.changed_py_azure }}
+      changed_proxy:        ${{ needs.ci-summary.outputs.changed_proxy }}
+      changed_adk:          ${{ needs.ci-summary.outputs.changed_adk }}
+      changed_vibe:         ${{ needs.ci-summary.outputs.changed_vibe }}
+      changed_langflow:     ${{ needs.ci-summary.outputs.changed_langflow }}
+      changed_litellm:      ${{ needs.ci-summary.outputs.changed_litellm }}
+      changed_langfuse:     ${{ needs.ci-summary.outputs.changed_langfuse }}
+      changed_workflows:    ${{ needs.ci-summary.outputs.changed_workflows }}
     secrets:
       CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
       REGISTRY_USERNAME:  ${{ secrets.REGISTRY_USERNAME }}
