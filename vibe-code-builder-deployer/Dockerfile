@@ -1,4 +1,4 @@
-FROM moby/buildkit:latest AS buildkit-binary
+FROM moby/buildkit:v0.18.2 AS buildkit-binary
 
 FROM python:3.12-slim
 

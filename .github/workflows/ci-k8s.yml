@@ -152,17 +152,17 @@ jobs:
       - name: Archive test reports on runner
         # SECURITY: Public repos expose all GitHub artifacts to any user.
         # Reports stay on the self-hosted runner VM — nothing is uploaded to GitHub.
-        # Access reports directly at: sv/**/target/surefire-reports/ on the runner.
+        # Stored at: /opt/ci-artifacts/<sha>/backend-test-reports.tar.gz
         if: always() && github.event_name == 'push'
         run: |
+          ARTIFACT_DIR="/opt/ci-artifacts/${{ github.sha }}"
+          mkdir -p "$ARTIFACT_DIR"
           REPORT_DIRS=$(find sv -path "*/target/surefire-reports" -type d 2>/dev/null)
           if [ -z "$REPORT_DIRS" ]; then
             echo "No surefire report directories found"
           else
-            ARCHIVE="/tmp/backend-test-reports-${{ github.sha }}.tar.gz"
-            tar czf "$ARCHIVE" $REPORT_DIRS
-            echo "✓ Test reports archived on runner at: $ARCHIVE"
-            echo "  Access via: ssh <runner-vm> 'cat $ARCHIVE' | tar xz"
+            tar czf "$ARTIFACT_DIR/backend-test-reports.tar.gz" $REPORT_DIRS
+            echo "✓ Test reports archived on runner at: $ARTIFACT_DIR/backend-test-reports.tar.gz"
           fi
 
       - name: Backend build summary
@@ -602,7 +602,10 @@ jobs:
           # internal paths, and baked-in configuration.
           # Use a local registry cache scoped to this runner only.
           cache-from: type=local,src=/tmp/buildkit-cache/${{ matrix.service }}
-          cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max
+          # mode=max caches all intermediate layers (best hit-rate).
+          # max-size caps the on-disk footprint per service at 2 GB so the
+          # /tmp/buildkit-cache directory cannot grow unboundedly on the runner.
+          cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max,max-size=2g
           # Do NOT load into Docker daemon (outputs: type=docker) —
           # loading builds up /var/lib/docker indefinitely with stale images.
           # CI only needs to verify the build succeeds; no daemon load needed.
@@ -610,8 +613,15 @@ jobs:
       - name: Clean up build cache and dangling images
         if: steps.needs_build.outputs.skip != 'true' && always()
         run: |
-          # Remove dangling images left by this build to prevent disk exhaustion.
-          docker image prune -f --filter "until=1h" || true
+          # Remove the named ci-sha image if it was loaded into the daemon.
+          # build-push-action with the docker-container driver may load the image
+          # when no explicit outputs are set; remove it unconditionally to be safe.
+          docker rmi "essedum/${{ matrix.service }}:ci-${{ github.sha }}" 2>/dev/null || true
+          # Remove all untagged (dangling) layers left by this build.
+          # No time filter — images built in this step are ready to remove now.
+          docker image prune -f || true
+          # Trim BuildKit local cache entries older than 72 h to prevent unbounded growth.
+          docker builder prune -f --filter "until=72h" || true
 
       - name: Docker build summary
         if: success()
@@ -678,6 +688,43 @@ jobs:
           echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
           echo "- **Actor**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Prune old runner artifacts (keep last 10 runs)
+        # SECURITY: Artifacts never leave the runner VM – nothing uploaded to GitHub.
+        # Keeps /opt/ci-artifacts/<sha>/ directories for the 10 most recent SHAs.
+        # Access: ls /opt/ci-artifacts/ on the runner VM.
+        if: always() && github.event_name == 'push'
+        run: |
+          ARTIFACT_BASE="/opt/ci-artifacts"
+          mkdir -p "$ARTIFACT_BASE"
+          # Ensure current run directory exists even if no reports were produced
+          mkdir -p "$ARTIFACT_BASE/${{ github.sha }}"
+          # Count directories; delete oldest beyond 10
+          DIRS=$(ls -t "$ARTIFACT_BASE" 2>/dev/null | wc -l)
+          if [ "$DIRS" -gt 10 ]; then
+            ls -t "$ARTIFACT_BASE" | tail -n +11 | xargs -I{} rm -rf "$ARTIFACT_BASE/{}"
+            echo "✓ Pruned old artifact directories (kept 10 most recent)"
+          fi
+          echo "Runner artifact store: $ARTIFACT_BASE (${{ github.sha }})"
+
+      - name: Prune stale CI daemon images (all older than 24 h)
+        # Removes any leftover named CI images (essedum/<svc>:ci-<sha>) that the
+        # per-service cleanup step may have missed (e.g. if the job was cancelled).
+        # Runs once at summary time so it is not repeated per matrix shard.
+        if: always() && github.event_name == 'push'
+        run: |
+          echo "=== Removing stale CI daemon images older than 24h ==="
+          # Remove named essedum/...:ci-... images (no-push CI builds)
+          docker images --format "{{.Repository}}:{{.Tag}}\t{{.CreatedAt}}" \
+            | grep "^essedum/.*:ci-" \
+            | awk -F'\t' '{print $1}' \
+            | xargs -r docker rmi 2>/dev/null || true
+          # Remove dangling layers
+          docker image prune -f || true
+          echo "=== CI image prune done ==="
+          echo "### Remaining daemon images (essedum/)" >> $GITHUB_STEP_SUMMARY
+          docker images --format "| {{.Repository}} | {{.Tag}} | {{.Size}} |" \
+            | grep "essedum/" >> $GITHUB_STEP_SUMMARY || echo "| (none) | - | - |" >> $GITHUB_STEP_SUMMARY
 
   # ────────────────────────────────────────────────────────────
   # JOB FINAL – Trigger CD after CI passes on gh_actions branch

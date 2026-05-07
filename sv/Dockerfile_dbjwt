@@ -37,8 +37,10 @@ COPY sv/nginx_backend.conf /etc/nginx/nginx.conf
 ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
-ENV GCP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----..."
-ENV GCP_PRIVATE_KEY_ID="e0d21673ec720bd0d3431153a9f7818bb418db4e"
+# SECURITY: GCP_PRIVATE_KEY and GCP_PRIVATE_KEY_ID must NOT be set here.
+# Inject at runtime via Kubernetes secret (envFrom / env.valueFrom.secretKeyRef).
+# Hardcoding secrets in ENV bakes them into every image layer and exposes
+# them in 'docker inspect' output and build logs.
 
 # Copy from first stage
 COPY --from=maven_builder /app /app/

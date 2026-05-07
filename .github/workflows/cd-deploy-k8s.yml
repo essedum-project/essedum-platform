@@ -265,6 +265,65 @@ jobs:
           echo "=== Push Summary ==="
           echo "All images successfully pushed to $REGISTRY"
 
+      - name: Registry GC – prune old SHA tags (keep last 5 per service)
+        # Keeps the 5 most-recently-pushed SHA tags for each service in localhost:5001.
+        # Every CD run would otherwise accumulate a new set of 15 images with no bound.
+        # Uses the Docker Registry HTTP v2 API to delete manifests.
+        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the registry container.
+        run: |
+          REGISTRY_API="http://localhost:5001/v2"
+          KEEP=5
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+
+          echo "=== Registry GC: keeping last $KEEP SHA tags per service ==="
+          for svc in "${services[@]}"; do
+            echo ""
+            echo ">>> ${svc}"
+            # List all tags for this service; API returns JSON { "tags": [...] }
+            tags_json=$(curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null) || {
+              echo "  Skipped (registry API unreachable or no tags)"
+              continue
+            }
+            # Extract tags, excluding 'latest', sorted newest-first via daemon metadata
+            all_tags=$(docker images "localhost:5001/essedum/${svc}" \
+              --format "{{.CreatedAt}}\t{{.Tag}}" 2>/dev/null \
+              | grep -v "latest" \
+              | sort -r \
+              | awk '{print $3}')
+            tag_count=$(echo "$all_tags" | grep -c . 2>/dev/null || echo 0)
+            echo "  Found $tag_count SHA tags"
+            if [ "$tag_count" -le "$KEEP" ]; then
+              echo "  Nothing to prune"
+              continue
+            fi
+            old_tags=$(echo "$all_tags" | tail -n +$((KEEP + 1)))
+            echo "  Will delete $((tag_count - KEEP)) old tag(s)"
+            for tag in $old_tags; do
+              [ -z "$tag" ] && continue
+              echo -n "    Deleting tag ${tag}... "
+              # Fetch content-addressable digest (required for DELETE)
+              digest=$(curl -sf -I \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                "${REGISTRY_API}/essedum/${svc}/manifests/${tag}" 2>/dev/null \
+                | grep -i "^Docker-Content-Digest:" | awk '{print $2}' | tr -d '\r')
+              if [ -z "$digest" ]; then
+                echo "skip (could not fetch digest)"
+              else
+                http_code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                  "${REGISTRY_API}/essedum/${svc}/manifests/${digest}" 2>/dev/null)
+                if [ "$http_code" = "202" ]; then
+                  echo "deleted from registry"
+                else
+                  echo "registry returned HTTP ${http_code} (delete may be disabled — skipping)"
+                fi
+              fi
+              # Always remove from local daemon regardless of registry delete result
+              docker rmi "localhost:5001/essedum/${svc}:${tag}" 2>/dev/null || true
+            done
+          done
+          echo ""
+          echo "=== Registry GC complete ==="
+
       - name: Docker logout and image cleanup
         if: always()
         env:
@@ -275,14 +334,19 @@ jobs:
           # reuse if the runner is compromised between workflow runs.
           docker logout "$REGISTRY" || true
 
-          # Remove all images built/pulled during this run to prevent disk
-          # exhaustion and stop stale images with unpatched deps accumulating.
-          docker image prune -f --filter "until=1h" || true
-          # Remove images tagged with this specific SHA (the ones we just pushed)
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+
+          # Remove images built for this specific SHA from the daemon.
+          # No time filter — the build just completed so these images are minutes old
+          # and a --filter "until=1h" would silently skip them.
           for svc in "${services[@]}"; do
             docker rmi "${REGISTRY}/essedum/${svc}:${{ github.sha }}" 2>/dev/null || true
+            # Also remove any localhost:5001 daemon copy from this SHA
+            docker rmi "localhost:5001/essedum/${svc}:${{ github.sha }}" 2>/dev/null || true
           done
+
+          # Remove all remaining untagged (dangling) layers.
+          docker image prune -f || true
           echo "✓ Docker logout complete and images cleaned up"
 
       - name: Apply Kubernetes manifests
@@ -304,28 +368,46 @@ jobs:
           kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
           kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
 
-          # Verify images are available in registry before deploying
+          # Verify images are available in the registry before deploying.
+          # Uses the Docker Registry v2 API (HTTP HEAD on the manifest) instead of
+          # docker inspect, because images are removed from the local daemon by the
+          # cleanup step before this step runs.
+          # Supports both http (localhost/127.x insecure registry) and https (remote).
+          # Also avoids the bash arithmetic trap: ((var++)) returns exit-code 1 when
+          # var=0 (post-increment of zero evaluates to zero = false), which kills the
+          # step under the default set -e that GitHub Actions applies to all run: blocks.
           echo ""
           echo "=== Verifying container images in registry ==="
           # REGISTRY is already set via the step env: block above.
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
-          
+
+          # Choose protocol: insecure for localhost / loopback, https for everything else
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+            REG_PROTO="http"
+          else
+            REG_PROTO="https"
+          fi
+
           missing_images=0
           for svc in "${services[@]}"; do
-            IMAGE="${REGISTRY}/essedum/${svc}:${IMAGE_TAG}"
             echo -n "  Checking ${svc}... "
-            if docker inspect "$IMAGE" &>/dev/null; then
-              echo "✓ Found"
+            http_status=$(curl -sI -o /dev/null -w "%{http_code}" \
+              -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              "${REG_PROTO}://${REGISTRY}/v2/essedum/${svc}/manifests/${IMAGE_TAG}" 2>/dev/null \
+              || echo "000")
+            if [ "$http_status" = "200" ]; then
+              echo "✓ Found in registry"
             else
-              echo "✗ NOT FOUND: $IMAGE"
-              ((missing_images++))
+              echo "✗ NOT FOUND (registry returned HTTP ${http_status}): ${REGISTRY}/essedum/${svc}:${IMAGE_TAG}"
+              # Use safe arithmetic — ((var++)) exits with code 1 when var=0
+              missing_images=$((missing_images + 1))
             fi
           done
-          
-          if [ $missing_images -gt 0 ]; then
+
+          if [ "$missing_images" -gt 0 ]; then
             echo ""
-            echo "WARNING: $missing_images images not found in registry"
-            echo "Deployments may fail if images are not available"
+            echo "::error::${missing_images} image(s) not found in registry — aborting deployment"
+            exit 1
           else
             echo ""
             echo "✓ All images verified in registry"

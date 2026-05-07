@@ -4,7 +4,7 @@
 # Build: docker build -t langflow-persistent:custom .
 # Run: docker run -p 7860:7860 --env-file .env langflow-persistent:custom
 
-FROM langflowai/langflow:latest
+FROM langflowai/langflow:1.8.1
 
 # Metadata
 LABEL maintainer="Essedum Platform"
@@ -33,7 +33,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
 # Expose port
 EXPOSE 7860
 
-# Default command inherited from base image (langflowai/langflow:latest)
+# Default command inherited from base image (langflowai/langflow:1.8.1)
 # Override in Kubernetes deployment spec if needed.
 
 # Build the image
