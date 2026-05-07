@@ -51,8 +51,11 @@ metadata:
 spec:
   accessModes:
   - ReadWriteOnce
+  selector:
+    matchLabels:
+      app: qdrant
   resources:
     requests:
-      storage: 5Gi
-  storageClassName: ""
+      storage: 1Gi
+  storageClassName: manual
   volumeName: qdrantfile-pv

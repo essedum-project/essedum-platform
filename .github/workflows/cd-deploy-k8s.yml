@@ -289,6 +289,7 @@ jobs:
             "aks-deployment/langflow_file_pv.yaml"
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
+            "aks-deployment/qdrant_deployment.yaml"
           )
 
           for manifest in "${PVC_FILES[@]}"; do
@@ -340,6 +341,7 @@ jobs:
             "aks-deployment/langflow_file_pv.yaml"
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
+            "aks-deployment/qdrant_deployment.yaml"
             "aks-deployment/builder-deployment.yml"
             "aks-deployment/builder-rbac.yml"
             "aks-deployment/github-runner-rbac.yml"
@@ -366,22 +368,35 @@ jobs:
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
-          echo "Waiting for deployments to stabilize (timeout: 15 minutes)..."
-          
+          echo "Waiting for deployments to stabilize (timeout: 3 minutes each)..."
+
+          # Deployments not managed by this CD pipeline — skip rollout check
+          SKIP_ROLLOUT=(
+            "github-runner"
+            "builder-service"
+            "buildkitd"
+          )
+
           deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
           for deployment in $deployments; do
+            # Skip non-CD-managed deployments
+            skip=false
+            for skip_name in "${SKIP_ROLLOUT[@]}"; do
+              if [ "$deployment" = "$skip_name" ]; then skip=true; break; fi
+            done
+            if $skip; then
+              echo ">>> Skipping $deployment (not CD-managed)"
+              continue
+            fi
+
             echo ""
             echo ">>> Monitoring $deployment..."
-            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=15m || {
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=3m || {
               echo "::warning::Rollout status check timed out for $deployment"
               echo "Pod status for $deployment:"
               kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=$deployment -o wide 2>/dev/null || \
               kubectl get pods -n "$NAMESPACE" -l app=$deployment -o wide 2>/dev/null || \
               echo "No matching pods found with standard selectors"
-              echo "Checking pod logs for errors:"
-              kubectl logs -n "$NAMESPACE" -l app.kubernetes.io/name=$deployment --tail=20 2>/dev/null || \
-              kubectl logs -n "$NAMESPACE" -l app=$deployment --tail=20 2>/dev/null || \
-              echo "No logs available"
             }
           done
           
