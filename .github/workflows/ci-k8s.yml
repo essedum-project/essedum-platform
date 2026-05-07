@@ -152,10 +152,12 @@ jobs:
       - name: Archive test reports on runner
         # SECURITY: Public repos expose all GitHub artifacts to any user.
         # Reports stay on the self-hosted runner VM — nothing is uploaded to GitHub.
-        # Stored at: /opt/ci-artifacts/<sha>/backend-test-reports.tar.gz
+        # Stored at: $HOME/ci-artifacts/<sha>/backend-test-reports.tar.gz
+        # Uses $HOME (runner-owned) instead of /opt (requires root) to avoid
+        # "Permission denied" when the runner user cannot write to /opt.
         if: always() && github.event_name == 'push'
         run: |
-          ARTIFACT_DIR="/opt/ci-artifacts/${{ github.sha }}"
+          ARTIFACT_DIR="${HOME}/ci-artifacts/${{ github.sha }}"
           mkdir -p "$ARTIFACT_DIR"
           REPORT_DIRS=$(find sv -path "*/target/surefire-reports" -type d 2>/dev/null)
           if [ -z "$REPORT_DIRS" ]; then
@@ -691,11 +693,11 @@ jobs:
 
       - name: Prune old runner artifacts (keep last 10 runs)
         # SECURITY: Artifacts never leave the runner VM – nothing uploaded to GitHub.
-        # Keeps /opt/ci-artifacts/<sha>/ directories for the 10 most recent SHAs.
-        # Access: ls /opt/ci-artifacts/ on the runner VM.
+        # Keeps $HOME/ci-artifacts/<sha>/ directories for the 10 most recent SHAs.
+        # Access: ls $HOME/ci-artifacts/ on the runner VM.
         if: always() && github.event_name == 'push'
         run: |
-          ARTIFACT_BASE="/opt/ci-artifacts"
+          ARTIFACT_BASE="${HOME}/ci-artifacts"
           mkdir -p "$ARTIFACT_BASE"
           # Ensure current run directory exists even if no reports were produced
           mkdir -p "$ARTIFACT_BASE/${{ github.sha }}"
