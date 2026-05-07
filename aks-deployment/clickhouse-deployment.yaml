@@ -134,7 +134,10 @@ spec:
             - name: TZ
               value: "UTC"
             - name: CLICKHOUSE_PASSWORD
-              value: "REDACTED_CLICKHOUSE_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-secret
+                  key: clickhouse-password
             - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
               value: "1"
           volumeMounts:

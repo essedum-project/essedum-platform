@@ -22,9 +22,15 @@ spec:
             - "start-dev"
           env:
             - name: KEYCLOAK_ADMIN
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: admin-user
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: admin-password
             - name: KC_HTTP_PORT
               value: "8080"
             - name: KC_PROXY
@@ -44,9 +50,15 @@ spec:
             - name: KC_DB_URL
               value: "jdbc:mysql://mysql:3306/keycloak"
             - name: KC_DB_USERNAME
-              value: "root"
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: db-username
             - name: KC_DB_PASSWORD
-              value: "password"
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: db-password
           ports:
             - containerPort: 8080
               protocol: TCP

@@ -77,9 +77,15 @@ spec:
             - name: POSTGRES_DB
               value: "litellm"
             - name: POSTGRES_USER
-              value: "litellm"
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-postgres-secret
+                  key: postgres-user
             - name: POSTGRES_PASSWORD
-              value: "REDACTED_LITELLM_DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-postgres-secret
+                  key: postgres-password
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data

@@ -33,9 +33,15 @@ spec:
         - name: MYSQL_DATASOURCE_URL
           value: "mysql.essedum.svc.cluster.local"
         - name: MYSQL_DATASOURCE_USER
-          value: "root"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: datasource-user
         - name: MYSQL_DATASOURCE_PASSWORD
-          value: "password"
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
         ports:
         - containerPort: 8082
 ---

@@ -82,9 +82,15 @@ spec:
               name: console
           env:
             - name: MINIO_ROOT_USER
-              value: "langfuse-minio"
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-secret
+                  key: minio-access-key
             - name: MINIO_ROOT_PASSWORD
-              value: "REDACTED_LANGFUSE_MINIO_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-secret
+                  key: minio-secret-key
             - name: TZ
               value: "UTC"
           volumeMounts:

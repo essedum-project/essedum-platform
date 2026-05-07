@@ -75,11 +75,20 @@ spec:
               name: postgres
           env:
             - name: POSTGRES_USER
-              value: "langfuse"
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-postgres-secret
+                  key: postgres-user
             - name: POSTGRES_PASSWORD
-              value: "REDACTED_LANGFUSE_PG_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-postgres-secret
+                  key: postgres-password
             - name: POSTGRES_DB
-              value: "langfuse"
+              valueFrom:
+                secretKeyRef:
+                  name: langfuse-postgres-secret
+                  key: postgres-db
             - name: TZ
               value: "UTC"
           volumeMounts:
