@@ -64,6 +64,13 @@ spec:
               value: "false"
             - name: REDIS_CONNECTION_STRING
               value: "redis://:REDACTED_REDIS_PASSWORD@redis:6379"
+            # langfuse-web v3 requires REDIS_HOST/PORT/AUTH as separate vars
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_AUTH
+              value: "REDACTED_REDIS_PASSWORD"
             # S3 Event Upload
             - name: LANGFUSE_S3_EVENT_UPLOAD_BUCKET
               value: "langfuse"
