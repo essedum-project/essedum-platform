@@ -15,10 +15,12 @@ spec:
     spec:
       imagePullSecrets:
       - name: registry-credentials
+      nodeSelector:
+        registry: "local"
       containers:
       - name: goosed
         image: ${REGISTRY}/essedum/goosed:${IMAGE_TAG}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3005
         env:

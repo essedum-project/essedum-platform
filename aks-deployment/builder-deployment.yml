@@ -16,10 +16,12 @@ spec:
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
       imagePullSecrets: []
+      nodeSelector:
+        registry: "local"
       containers:
         - name: builder
           image: localhost:32000/builder-service:v2
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
           env:

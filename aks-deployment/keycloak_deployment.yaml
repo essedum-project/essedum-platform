@@ -13,6 +13,8 @@ spec:
       labels:
         app: keycloak
     spec:
+      nodeSelector:
+        registry: "local"
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.2.3

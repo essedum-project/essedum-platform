@@ -23,8 +23,9 @@ jobs:
   # ────────────────────────────────────────────────────────────
   # JOB 0 – Detect which service paths changed
   # Every downstream job checks these outputs and skips itself
-  # if nothing it owns was modified. Workflow file changes
-  # (.github/workflows/**) always trigger a full rebuild.
+  # if nothing it owns was modified. Only source changes for a
+  # service trigger its build — workflow file changes alone do not
+  # force a full rebuild.
   # ────────────────────────────────────────────────────────────
   detect-changes:
     name: "Detect Changed Services"
@@ -113,10 +114,10 @@ jobs:
     name: "Backend – Build & Test (Java 21)"
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
-    # Run if: backend source changed OR workflow files changed (validates pipeline itself)
+    # Run if: backend source changed
     if: |
       (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.workflows == 'true')
+      needs.detect-changes.outputs.backend == 'true'
     timeout-minutes: 30
 
     steps:
@@ -191,10 +192,10 @@ jobs:
     name: "Frontend – Build (${{ matrix.app }})"
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
-    # Run if: essedum-ui/ changed OR workflow files changed
+    # Run if: essedum-ui/ changed
     if: |
       (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.workflows == 'true')
+      needs.detect-changes.outputs.frontend == 'true'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -262,15 +263,14 @@ jobs:
     name: "Python – Lint (${{ matrix.executor }})"
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
-    # Run if: ANY python executor changed OR workflow files changed.
+    # Run if: ANY python executor changed.
     # Individual per-executor filtering is handled in the "Check if rebuild needed" step.
     if: |
       (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
       (needs.detect-changes.outputs.py_executer == 'true' ||
        needs.detect-changes.outputs.py_sagemaker == 'true' ||
        needs.detect-changes.outputs.py_vertex == 'true' ||
-       needs.detect-changes.outputs.py_azure == 'true' ||
-       needs.detect-changes.outputs.workflows == 'true')
+       needs.detect-changes.outputs.py_azure == 'true')
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -293,8 +293,7 @@ jobs:
         id: needs_build
         run: |
           FLAG="${{ needs.detect-changes.outputs[matrix.changes_flag] }}"
-          WORKFLOWS="${{ needs.detect-changes.outputs.workflows }}"
-          if [ "$FLAG" != 'true' ] && [ "$WORKFLOWS" != 'true' ]; then
+          if [ "$FLAG" != 'true' ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
             echo "::notice::Skipping ${{ matrix.executor }} – no relevant changes detected"
           else
@@ -358,10 +357,10 @@ jobs:
     name: "Kubernetes – Manifest Validate"
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
-    # Run if: k8s manifests changed OR workflow files changed
+    # Run if: k8s manifests changed
     if: |
       (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
-      (needs.detect-changes.outputs.k8s == 'true' || needs.detect-changes.outputs.workflows == 'true')
+      needs.detect-changes.outputs.k8s == 'true'
     timeout-minutes: 10
 
     steps:
@@ -423,9 +422,11 @@ jobs:
   docker-build:
     name: "Docker Build – ${{ matrix.service }}"
     runs-on: [self-hosted, essedum-runner]
-    needs: [detect-changes, k8s-validate]
+    needs: [detect-changes]
     # Job runs if security fork guard passes. Actual per-service skip is handled
     # in the "Check if rebuild needed" step below, keeping the matrix static.
+    # NOTE: k8s-validate is NOT in needs — it runs in parallel with docker-build.
+    # k8s manifests are still validated before CD because ci-summary needs both.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 45
     strategy:
@@ -521,7 +522,6 @@ jobs:
         id: needs_build
         run: |
           CHANGED="${{ matrix.changes_output }}"
-          WORKFLOWS="${{ needs.detect-changes.outputs.workflows }}"
           CACHE_DIR="${HOME}/.essedum-build-cache"
           mkdir -p "$CACHE_DIR"
 
@@ -550,7 +550,7 @@ jobs:
             LAST_HASH=$(cat "$CACHE_DIR/goose-hash" 2>/dev/null || echo "")
             LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
 
-            if [ "$CURRENT_HASH" = "$LAST_HASH" ] && [ -n "$LAST_SHA" ] && [ "$WORKFLOWS" != 'true' ]; then
+            if [ "$CURRENT_HASH" = "$LAST_HASH" ] && [ -n "$LAST_SHA" ]; then
               echo "skip=true" >> $GITHUB_OUTPUT
               echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
               echo "::notice::${{ matrix.service }}: goose directory unchanged – retagging ${LAST_SHA} → ${{ github.sha }}"
@@ -567,7 +567,7 @@ jobs:
                  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('$CHANGED','false'))")
           LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
 
-          if [ "$FLAG" = 'true' ] || [ "$WORKFLOWS" = 'true' ]; then
+          if [ "$FLAG" = 'true' ]; then
             echo "skip=false" >> $GITHUB_OUTPUT
             echo "✓ ${{ matrix.service }}: changes detected – will build"
           elif [ -n "$LAST_SHA" ]; then

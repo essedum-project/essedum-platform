@@ -30,6 +30,8 @@ spec:
                 echo 'waiting for langfuse-postgres...'; sleep 3
               done
               echo 'langfuse-postgres ready'
+      nodeSelector:
+        registry: "local"
       containers:
         - name: langfuse-web
           image: ${REGISTRY}/essedum/langfuse-web:${IMAGE_TAG}

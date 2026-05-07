@@ -15,10 +15,12 @@ spec:
     spec:
       imagePullSecrets:
       - name: registry-credentials
+      nodeSelector:
+        registry: "local"
       containers:
       - name: essedum-backend
         image: ${REGISTRY}/essedum/leap-app-backend:${IMAGE_TAG}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: security.issuer-uri
           value: "https://essedum.local/realms/ESSEDUM"

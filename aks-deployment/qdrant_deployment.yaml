@@ -13,6 +13,8 @@ spec:
       labels:
         app: qdrant
     spec:
+      nodeSelector:
+        registry: "local"
       containers:
       - name: qdrant
         image: qdrant/qdrant:latest
@@ -48,7 +50,7 @@ metadata:
   namespace: essedum
 spec:
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi

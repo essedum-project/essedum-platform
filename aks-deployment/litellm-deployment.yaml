@@ -107,6 +107,8 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: essedum-1
+      nodeSelector:
+        registry: "local"
       containers:
         - name: litellm
           image: ${REGISTRY}/essedum/litellm:${IMAGE_TAG}

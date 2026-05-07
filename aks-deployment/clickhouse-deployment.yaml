@@ -119,6 +119,8 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: essedum-1
+      nodeSelector:
+        registry: "local"
       containers:
         - name: clickhouse
           image: clickhouse/clickhouse-server:24.9

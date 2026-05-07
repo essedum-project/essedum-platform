@@ -15,10 +15,12 @@ spec:
     spec:
       imagePullSecrets:
       - name: registry-credentials
+      nodeSelector:
+        registry: "local"
       containers:
       - name: essedum-ui
         image: ${REGISTRY}/essedum/frontend:${IMAGE_TAG}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082
         - containerPort: 8084

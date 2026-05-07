@@ -17,10 +17,12 @@ spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
       imagePullSecrets:
       - name: registry-credentials
+      nodeSelector:
+        registry: "local"
       containers:
         - name: vibe-code-builder
           image: ${REGISTRY}/essedum/vibe-code-builder-deployer:${IMAGE_TAG}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
           envFrom:

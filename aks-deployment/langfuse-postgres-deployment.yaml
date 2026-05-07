@@ -64,6 +64,8 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: essedum-1
+      nodeSelector:
+        registry: "local"
       containers:
         - name: langfuse-postgres
           image: postgres:15-alpine

@@ -13,6 +13,8 @@ spec:
       labels:
         app: mysql
     spec:
+      nodeSelector:
+        registry: "local"
       containers:
       - image: mysql:8.0
         name: mysql
