@@ -10,8 +10,6 @@ on:
       - "**.md"
       - ".gitignore"
       - "LICENSE"
-      - "aks-deployment/**"
-      - ".github/workflows/cd-*.yml"
       - "docker/**"
   pull_request:
     branches: ["essedum-lfn-v13.0"]
@@ -20,7 +18,6 @@ on:
       - "**.md"
       - ".gitignore"
       - "LICENSE"
-      - "aks-deployment/**"
       - "docker/**"
 
 # Cancel any in-flight run for the same branch
