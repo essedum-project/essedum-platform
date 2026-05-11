@@ -97,6 +97,7 @@ metadata:
     app: litellm
 spec:
   replicas: 1
+  progressDeadlineSeconds: 900
   selector:
     matchLabels:
       app: litellm

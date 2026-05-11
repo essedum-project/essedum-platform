@@ -253,8 +253,8 @@ jobs:
             kubectl delete deployment ingress-nginx-controller -n ingress-nginx --ignore-not-found || true
             sleep 2
             # Now apply the new one
-            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/ingress-nginx-deploy.yaml" | \
-              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
+            sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "aks-deployment/ingress-nginx-deploy.yaml" | \
+              sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
               kubectl apply -f - || {
               echo "::warning::Failed to apply ingress-nginx-deploy.yaml, continuing..."
             }
@@ -263,8 +263,8 @@ jobs:
           # For metallb: apply config to the metallb-system namespace
           if [ -f "aks-deployment/metallib-config.yaml" ]; then
             echo "Applying metallb config..."
-            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "aks-deployment/metallib-config.yaml" | \
-              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
+            sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "aks-deployment/metallib-config.yaml" | \
+              sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
               kubectl apply -f - || {
               echo "::warning::Failed to apply metallib-config.yaml, continuing..."
             }
@@ -274,6 +274,15 @@ jobs:
           # Prevents: "failed calling webhook validate.nginx.ingress.kubernetes.io"
           kubectl delete validatingwebhookconfiguration ingress-nginx-admission \
             --ignore-not-found || true
+
+          # ── Step 2b: Patch ProgressDeadlineSeconds for all deployments ──
+          # Increase from default 600s (10m) to 900s (15m) to allow slower app startups
+          echo "Patching ProgressDeadlineSeconds for all deployments..."
+          for deployment in $(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            kubectl patch deployment "$deployment" -n "$NAMESPACE" --type merge \
+              -p '{"spec":{"progressDeadlineSeconds":900}}' 2>/dev/null || true
+          done
+          echo "✓ ProgressDeadlineSeconds patched"
 
           # ── Step 3: Apply PVC-containing files with data preservation ──
           # PVCs are immutable once bound; PV immutable fields (hostPath, nodeAffinity)
@@ -300,8 +309,8 @@ jobs:
               # stdout (resource status lines) printed directly; stderr captured separately.
               # This avoids merging the two streams, which made multi-line API error blocks
               # impossible to filter reliably.
-              sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-                sed "s|\${REGISTRY}|${REGISTRY}|g" | \
+              sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "$manifest" | \
+                sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
                 kubectl apply -n "$NAMESPACE" -f - 2>"$KUBECTL_ERR" && APPLY_RC=0 || APPLY_RC=$?
 
               if [ "$APPLY_RC" -ne 0 ]; then
@@ -334,7 +343,6 @@ jobs:
             "aks-deployment/ingress-nginx-deploy.yaml"
             "aks-deployment/metallib-config.yaml"
             "aks-deployment/clickhouse-deployment.yaml"
-            "aks-deployment/litellm-deployment.yaml"
             "aks-deployment/litellm-postgres-deployment.yaml"
             "aks-deployment/langfuse-postgres-deployment.yaml"
             "aks-deployment/langfuse-minio-deployment.yaml"
@@ -354,8 +362,8 @@ jobs:
             done
             if $skip; then continue; fi
             echo "Applying: $manifest"
-            sed "s|\${IMAGE_TAG}|${IMAGE_TAG}|g" "$manifest" | \
-              sed "s|\${REGISTRY}|${REGISTRY}|g" | \
+            sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "$manifest" | \
+              sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
               kubectl apply -n "$NAMESPACE" -f - || {
               echo "::warning::Failed to apply $manifest, continuing..."
             }

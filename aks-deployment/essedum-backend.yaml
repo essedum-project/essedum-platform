@@ -5,6 +5,7 @@ metadata:
   namespace: essedum
 spec:
   replicas: 1 # Number of replicas
+  progressDeadlineSeconds: 900
   selector:
     matchLabels:
       app: essedum-backend
