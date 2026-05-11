@@ -19,11 +19,11 @@ spec:
         registry: "local"
       containers:
       - name: essedum-backend
-        image: ${REGISTRY}/essedum/leap-app-backend:${IMAGE_TAG}
+        image: ${REGISTRY}/essedum/backend:${IMAGE_TAG}
         imagePullPolicy: IfNotPresent
         env:
         - name: security.issuer-uri
-          value: "https://essedum.local/realms/ESSEDUM"
+          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM"
         - name: security.jwk-set-uri
           value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: security.clientId

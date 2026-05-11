@@ -466,7 +466,7 @@ jobs:
         include:
           - service: leap-app-backend
             context: .
-            dockerfile: sv/Dockerfile_dbjwt
+            dockerfile: sv/Dockerfile_oauth2
             changes_output: backend
 
           - service: frontend
