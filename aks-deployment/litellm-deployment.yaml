@@ -182,6 +182,17 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "echo > /dev/tcp/127.0.0.1/4000"
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+      terminationGracePeriodSeconds: 30
       volumes:
         - name: litellm-config
           configMap:

@@ -367,7 +367,7 @@ jobs:
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
-          echo "Waiting for deployments to stabilize (timeout: 3 minutes each)..."
+          echo "Waiting for deployments to stabilize (timeout: 10 minutes each)..."
 
           # Deployments not managed by this CD pipeline — skip rollout check
           SKIP_ROLLOUT=(
@@ -390,7 +390,7 @@ jobs:
 
             echo ""
             echo ">>> Monitoring $deployment..."
-            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=3m || {
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=10m || {
               echo "::warning::Rollout status check timed out for $deployment"
               echo "Pod status for $deployment:"
               kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=$deployment -o wide 2>/dev/null || \
