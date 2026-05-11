@@ -553,61 +553,25 @@ jobs:
           CACHE_DIR="${HOME}/.essedum-build-cache"
           mkdir -p "$CACHE_DIR"
 
-          # ── Goose services: hash the local agent directory ──────────────────
-          # Code lives outside the repo, so dorny/paths-filter cannot track it.
-          # Instead we compute a SHA256 hash of the full directory tree and
-          # compare against the hash from the last successful build.
+          # ── Goose services: always rebuild (code outside repo) ───────────────
           if [ "$CHANGED" = "always" ]; then
-            AGENTS_DIR=""
-            for candidate in \
-              "/opt/github-runner/_work/essedum-agents/goose-vibe-studio-agent" \
-              "$(dirname "$(dirname "$GITHUB_WORKSPACE")")/essedum-agents/goose-vibe-studio-agent" \
-              "$HOME/devops/actions/essedum-agents/goose-vibe-studio-agent" \
-              "/home/devopsuser/devops/actions/essedum-agents/goose-vibe-studio-agent"; do
-              [ -d "$candidate" ] && { AGENTS_DIR="$candidate"; break; }
-            done
-
-            if [ -z "$AGENTS_DIR" ]; then
-              echo "skip=false" >> $GITHUB_OUTPUT
-              echo "::warning::goose-vibe-studio-agent not found — forcing full rebuild"
-              exit 0
-            fi
-
-            CURRENT_HASH=$(find "$AGENTS_DIR" -type f ! -path '*/.git/*' \
-              | sort | xargs sha256sum 2>/dev/null | sha256sum | awk '{print $1}')
-            LAST_HASH=$(cat "$CACHE_DIR/goose-hash" 2>/dev/null || echo "")
-            LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
-
-            if [ "$CURRENT_HASH" = "$LAST_HASH" ] && [ -n "$LAST_SHA" ]; then
-              echo "skip=true" >> $GITHUB_OUTPUT
-              echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
-              echo "::notice::${{ matrix.service }}: goose directory unchanged – retagging ${LAST_SHA} → ${{ github.sha }}"
-            else
-              echo "skip=false" >> $GITHUB_OUTPUT
-              echo "goose_hash=${CURRENT_HASH}" >> $GITHUB_OUTPUT
-              echo "✓ ${{ matrix.service }}: goose directory changed – will rebuild"
-            fi
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✓ ${{ matrix.service }}: external repo – will rebuild"
             exit 0
           fi
 
           # ── Standard path-filter check ───────────────────────────────────────
+          # ALWAYS BUILD if source code changed — no caching/retagging optimization.
+          # This ensures every code change triggers a fresh Docker build.
           FLAG=$(echo '${{ toJSON(needs.detect-changes.outputs) }}' \
                  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('$CHANGED','false'))")
-          LAST_SHA=$(cat "$CACHE_DIR/${{ matrix.service }}" 2>/dev/null || echo "")
 
           if [ "$FLAG" = 'true' ]; then
             echo "skip=false" >> $GITHUB_OUTPUT
-            echo "✓ ${{ matrix.service }}: changes detected – will build"
-          elif [ -n "$LAST_SHA" ]; then
-            # Source unchanged AND a previously-built image exists in the registry.
-            # Fast-path: retag the old SHA with the new SHA (no layer transfer).
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
-            echo "::notice::${{ matrix.service }}: no source changes – will retag ${LAST_SHA} → ${{ github.sha }}"
+            echo "✓ ${{ matrix.service }}: code changed – will rebuild"
           else
-            # No cached image on this runner (first run ever). Must build.
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "::notice::${{ matrix.service }}: no cached image found – building for the first time"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::${{ matrix.service }}: no source code changes – skipping build"
           fi
 
       - name: Copy goose-vibe-studio-agent from runner local path
@@ -768,10 +732,9 @@ jobs:
         run: |
           echo "## ✓ Docker Build Passed (${{ matrix.service }})" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.needs_build.outputs.skip }}" = "true" ]; then
-            echo "- Action: **retagged** (no source changes)" >> $GITHUB_STEP_SUMMARY
-            echo "- Previous SHA: \`${{ steps.needs_build.outputs.last_sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Status: **skipped** (no source code changes)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- Action: **built and pushed**" >> $GITHUB_STEP_SUMMARY
+            echo "- Status: **built and pushed**" >> $GITHUB_STEP_SUMMARY
           fi
           echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -788,10 +751,11 @@ jobs:
   ci-summary:
     name: "CI – Summary & Status"
     runs-on: [self-hosted, essedum-runner]
-    needs: [detect-changes, backend, frontend, python, k8s-validate, docker-build]
+    needs: [detect-changes, python, k8s-validate, docker-build]
     # SECURITY: same fork guard as all other jobs — prevents fork PRs from
     # touching the self-hosted runner even in the summary/gate step.
     # Jobs that were skipped (no changes) report result 'skipped', not 'failure'.
+    # NOTE: backend and frontend CI validation removed — Docker builds handle all compilation.
     if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     timeout-minutes: 5
     # Expose detect-changes outputs so call-cd can forward them to CD.
@@ -818,27 +782,21 @@ jobs:
         run: |
           # 'skipped' = no relevant changes for that service — treated as pass.
           # Only 'failure' or 'cancelled' is an actual problem.
-          if [ "${{ needs.backend.result }}" = "failure" ] || \
-             [ "${{ needs.frontend.result }}" = "failure" ] || \
-             [ "${{ needs.python.result }}" = "failure" ] || \
+          if [ "${{ needs.python.result }}" = "failure" ] || \
              [ "${{ needs.k8s-validate.result }}" = "failure" ] || \
              [ "${{ needs.docker-build.result }}" = "failure" ]; then
             echo "::error::One or more CI jobs failed"
             echo "## :red_circle: CI Pipeline Failed" >> $GITHUB_STEP_SUMMARY
             echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
             echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| K8s Validate | ${{ needs.k8s-validate.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "## ✓ CI Checks Passed (unchanged services skipped)" >> $GITHUB_STEP_SUMMARY
+            echo "## ✓ CI Checks Passed (Docker builds successful, unchanged services skipped)" >> $GITHUB_STEP_SUMMARY
             echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
             echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| K8s Validate | ${{ needs.k8s-validate.result }} |" >> $GITHUB_STEP_SUMMARY
             echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
