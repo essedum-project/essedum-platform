@@ -26,7 +26,7 @@ spec:
       paths:
       - backend:
           service:
-            name: frontend
+            name: essedum-ui-service
             port:
               number: 8084
         path: /
@@ -54,9 +54,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: backend
+            name: essedum-backend-service
             port:
-              number: 8082
+              number: 8080
   # ── Keycloak ────────────────────────────────────────────────────────────
   - host: keycloak.essedum.local
     http:

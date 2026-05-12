@@ -284,6 +284,31 @@ jobs:
           done
           echo "✓ ProgressDeadlineSeconds patched"
 
+          # ── Step 2c: Deploy MySQL first, wait until ready, then Keycloak ──
+          # Keycloak requires MySQL to be accepting connections before it starts.
+          # Applying them in order here complements the initContainer in the
+          # keycloak pod spec, which also waits for MySQL TCP to open.
+          echo "=== Applying MySQL first (Keycloak dependency) ==="
+          if [ -f "aks-deployment/mysql_deployment_v3.yaml" ]; then
+            sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "aks-deployment/mysql_deployment_v3.yaml" | \
+              sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
+              kubectl apply -n "$NAMESPACE" -f - || {
+              echo "::warning::Failed to apply mysql_deployment_v3.yaml, continuing..."
+            }
+            echo "Waiting for MySQL to be ready (timeout: 3 minutes)..."
+            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=3m || \
+              echo "::warning::MySQL rollout wait timed out – Keycloak initContainer will retry"
+          fi
+
+          echo "=== Applying Keycloak ==="
+          if [ -f "aks-deployment/keycloak_deployment.yaml" ]; then
+            sed 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' "aks-deployment/keycloak_deployment.yaml" | \
+              sed 's|\${REGISTRY}|'"${REGISTRY}"'|g' | \
+              kubectl apply -n "$NAMESPACE" -f - || {
+              echo "::warning::Failed to apply keycloak_deployment.yaml, continuing..."
+            }
+          fi
+
           # ── Step 3: Apply PVC-containing files with data preservation ──
           # PVCs are immutable once bound; PV immutable fields (hostPath, nodeAffinity)
           # cannot be changed on existing volumes. Suppress these known-safe server errors
@@ -352,6 +377,8 @@ jobs:
             "aks-deployment/qdrant_deployment.yaml"
             "aks-deployment/builder-rbac.yml"
             "aks-deployment/github-runner-rbac.yml"
+            "aks-deployment/mysql_deployment_v3.yaml"
+            "aks-deployment/keycloak_deployment.yaml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ ! -f "$manifest" ]; then continue; fi

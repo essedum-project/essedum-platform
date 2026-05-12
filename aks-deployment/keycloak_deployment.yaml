@@ -15,6 +15,10 @@ spec:
     spec:
       nodeSelector:
         registry: "local"
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo "waiting for mysql..."; sleep 3; done; echo "MySQL is ready"']
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.2.3
