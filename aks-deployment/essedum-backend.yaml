@@ -19,11 +19,17 @@ spec:
       nodeSelector:
         registry: "local"
       terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo "waiting for mysql..."; sleep 3; done; echo "MySQL is ready"']
       containers:
       - name: essedum-backend
         image: ${REGISTRY}/essedum/leap-app-backend:${IMAGE_TAG}
         imagePullPolicy: IfNotPresent
         env:
+        - name: SPRING_CLOUD_VAULT_ENABLED
+          value: "false"
         - name: security.issuer-uri
           value: "https://essedum.local:30443/realms/ESSEDUM"
         - name: security.jwk-set-uri
@@ -48,14 +54,14 @@ spec:
         - containerPort: 8082
         livenessProbe:
           tcpSocket:
-            port: 8082
+            port: 8081
           initialDelaySeconds: 120
           periodSeconds: 30
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           tcpSocket:
-            port: 8082
+            port: 8081
           initialDelaySeconds: 90
           periodSeconds: 10
           timeoutSeconds: 5
