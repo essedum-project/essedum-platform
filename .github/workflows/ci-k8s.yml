@@ -399,9 +399,8 @@ jobs:
           echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
           docker buildx imagetools create \
             -t "${REGISTRY}/essedum/${{ matrix.service }}:${{ github.sha }}" \
-            -t "${REGISTRY}/essedum/${{ matrix.service }}:latest" \
             "${REGISTRY}/essedum/${{ matrix.service }}:${LAST_SHA}"
-          echo "✓ Retagged ${{ matrix.service }}: ${LAST_SHA} → ${{ github.sha }} + latest (no build needed)"
+          echo "✓ Retagged ${{ matrix.service }}: ${LAST_SHA} → ${{ github.sha }} (no build needed)"
           docker logout "$REGISTRY" || true
 
       - name: Login to container registry
@@ -441,9 +440,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: |
-            ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
-            ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:latest
+          tags: ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
           # SECURITY: Disable provenance attestations and SBOM generation.
           # build-push-action v6 defaults provenance:true which uploads a
           # *.dockerbuild attestation file as a GitHub Actions artifact, making
@@ -603,63 +600,57 @@ jobs:
           docker image prune -f || true
           echo "=== Daemon image prune done ==="
 
-      - name: Registry GC – prune old SHA tags (keep last 3 per service)
-        # Runs once here in ci-summary after all 15 parallel matrix builds complete.
-        # Queries the registry API directly — images pushed via docker-container
-        # Buildx driver are never loaded into the daemon, so `docker images` always
-        # returns 0 results. curl against registry v2 API is the only reliable source.
-        # Keeps the 3 most-recently-pushed SHA tags + latest + manual-* per service.
-        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the local-reg container.
+      - name: Registry GC – prune old SHA tags (keep last 5 per service)
+        # Runs once here in ci-summary after all 15 parallel matrix builds complete,
+        # rather than in CD (where it no longer belongs since CD no longer pushes images).
+        # Keeps the 5 most-recently-pushed SHA tags per service in localhost:5001.
+        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the registry container.
         if: always() && github.event_name == 'push'
         run: |
           REGISTRY_API="http://localhost:5001/v2"
-          KEEP=3
+          KEEP=5
           services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
 
           echo "=== Registry GC: keeping last $KEEP SHA tags per service ==="
           for svc in "${services[@]}"; do
             echo ""
             echo ">>> ${svc}"
-            tags_resp=$(curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null)
-            if [ -z "$tags_resp" ]; then
-              echo "  Skipped (no tags or registry unreachable)"
+            curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null || {
+              echo "  Skipped (registry API unreachable or no tags)"
               continue
-            fi
-            # Extract only 40-char hex SHA tags (skip latest, manual-*, version tags)
-            readarray -t sha_tags < <(echo "$tags_resp" | \
-              python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-for t in (d.get('tags') or []):
-    if len(t) == 40 and all(c in '0123456789abcdef' for c in t):
-        print(t)
-" 2>/dev/null)
-            tag_count=${#sha_tags[@]}
+            }
+            all_tags=$(docker images "localhost:5001/essedum/${svc}" \
+              --format "{{.CreatedAt}}\t{{.Tag}}" 2>/dev/null \
+              | grep -v "latest" \
+              | sort -r \
+              | awk '{print $3}')
+            tag_count=$(echo "$all_tags" | grep -c . 2>/dev/null || echo 0)
             echo "  Found $tag_count SHA tags"
             if [ "$tag_count" -le "$KEEP" ]; then
-              echo "  Nothing to prune (at or below keep limit)"
+              echo "  Nothing to prune"
               continue
             fi
-            delete_count=$((tag_count - KEEP))
-            echo "  Will delete $delete_count old SHA tag(s)..."
-            for ((i=0; i<delete_count; i++)); do
-              tag="${sha_tags[$i]}"
+            old_tags=$(echo "$all_tags" | tail -n +$((KEEP + 1)))
+            echo "  Will delete $((tag_count - KEEP)) old tag(s)"
+            for tag in $old_tags; do
               [ -z "$tag" ] && continue
+              echo -n "    Deleting tag ${tag}... "
               digest=$(curl -sf -I \
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 "${REGISTRY_API}/essedum/${svc}/manifests/${tag}" 2>/dev/null \
                 | grep -i "^Docker-Content-Digest:" | awk '{print $2}' | tr -d '\r')
               if [ -z "$digest" ]; then
-                echo "    ${tag}: skip (manifest already gone)"
+                echo "skip (could not fetch digest)"
               else
                 http_code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
                   "${REGISTRY_API}/essedum/${svc}/manifests/${digest}" 2>/dev/null)
                 if [ "$http_code" = "202" ]; then
-                  echo "    ${tag}: deleted"
+                  echo "deleted from registry"
                 else
-                  echo "    ${tag}: HTTP ${http_code} (skipped)"
+                  echo "registry returned HTTP ${http_code} (delete may be disabled — skipping)"
                 fi
               fi
+              docker rmi "localhost:5001/essedum/${svc}:${tag}" 2>/dev/null || true
             done
           done
           echo ""
