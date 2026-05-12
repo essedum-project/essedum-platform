@@ -102,6 +102,11 @@ public class ApplicationConfigResource {
 	@Value("${security.issuer-uri:#{null}}")
 	private String issuerUri;
 
+	// External issuer URI returned to the browser for the OIDC login redirect.
+	// Falls back to security.issuer-uri when not configured.
+	@Value("${security.external-issuer-uri:${security.issuer-uri:#{null}}}")
+	private String externalIssuerUri;
+
 	@Value("${security.clientId:#{null}}")
 	private String clientId;
 
@@ -226,7 +231,7 @@ public class ApplicationConfigResource {
 		configDTO.setCalendar(Boolean.valueOf(calendar));
 		configDTO.setDstFlag(dstFlag);		
 		configDTO.setEpochChatUrl(epochChatUrl);
-		configDTO.setIssuerUri(issuerUri);
+		configDTO.setIssuerUri(externalIssuerUri != null ? externalIssuerUri : issuerUri);
 		configDTO.setClientId(clientId);
 		configDTO.setShowProfileIcon(showProfileIcon);
 		configDTO.setScope(scope);

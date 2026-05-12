@@ -9,17 +9,28 @@ WORKDIR /aip-app-ui
 
 COPY essedum-ui/aip-app-ui/ ./
 
-RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
-
-RUN yarn run build-prod
+# Install dependencies and build aip-app with error checking
+RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/ && \
+    echo "Building aip-app..." && \
+    yarn run build-prod && \
+    echo "Verifying aip-app build..." && \
+    test -f dist/aip-app/index.html || (echo "ERROR: aip-app/index.html not found after build" && exit 1) && \
+    test -f dist/aip-app/styles.*.css || (echo "ERROR: No styles CSS file found in aip-app build" && exit 1) && \
+    ls -lh dist/aip-app/styles.*.css && \
+    echo "aip-app build verified successfully"
 
 WORKDIR /shell-app-ui
 
 COPY essedum-ui/shell-app-ui/ ./
 
-RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/
-
-RUN yarn run build-prod
+# Install dependencies and build shell-app-ui with error checking
+RUN yarn install --frozen-lockfile --network-timeout 600000 --registry https://registry.npmjs.org/ && \
+    echo "Building shell-app-ui..." && \
+    yarn run build-prod && \
+    echo "Verifying shell-app-ui build..." && \
+    test -f dist/common-app/index.html || (echo "ERROR: common-app/index.html not found after build" && exit 1) && \
+    ls -lh dist/common-app/ && \
+    echo "shell-app-ui build verified successfully"
 
 COPY essedum-ui/nginx_ui.conf /
 

@@ -3,7 +3,7 @@
     "authRequired": true,
     "authInIframe": false,
     "iframeHtmlPath": "assets/login-iframe.html",
-    "issuer": "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM",
+    "issuer": "https://essedum.local:30443/realms/ESSEDUM",
     "clientId": "essedum-45",
     "responseType": "code",
     "scope": "openid profile email",

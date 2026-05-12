@@ -22,6 +22,6 @@ spec:
           service:
             name: vibe-code-builder-service
             port:
-              number: 5000
+              number: 80
         path: /apps/vibe-code-builder-service(/|$)(.*)
         pathType: ImplementationSpecific

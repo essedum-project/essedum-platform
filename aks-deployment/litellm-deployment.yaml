@@ -114,8 +114,13 @@ spec:
         - name: litellm
           image: ${REGISTRY}/essedum/litellm:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
-          # No args: Dockerfile CMD already runs: litellm --config /app/config/config.yaml --host 0.0.0.0 --port 4000
-          # Setting args here would make K8s pass them as argv[0], treating "--config" as the executable.
+          args:
+            - "--config"
+            - "/app/config/config.yaml"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "4000"
           ports:
             - containerPort: 4000
               name: http

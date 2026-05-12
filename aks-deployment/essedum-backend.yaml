@@ -25,7 +25,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: security.issuer-uri
-          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM"
+          value: "https://essedum.local:30443/realms/ESSEDUM"
         - name: security.jwk-set-uri
           value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: security.clientId
