@@ -646,61 +646,13 @@ jobs:
           docker image prune -f || true
           echo "=== Daemon image prune done ==="
 
-      - name: Registry GC – prune old SHA tags (keep last 5 per service)
-        # Runs once here in ci-summary after all 15 parallel matrix builds complete,
-        # rather than in CD (where it no longer belongs since CD no longer pushes images).
-        # Keeps the 5 most-recently-pushed SHA tags per service in localhost:5001.
-        # Requires REGISTRY_STORAGE_DELETE_ENABLED=true on the registry container.
-        if: always() && github.event_name == 'push'
-        run: |
-          REGISTRY_API="http://localhost:5001/v2"
-          KEEP=5
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
-
-          echo "=== Registry GC: keeping last $KEEP SHA tags per service ==="
-          for svc in "${services[@]}"; do
-            echo ""
-            echo ">>> ${svc}"
-            curl -sf "${REGISTRY_API}/essedum/${svc}/tags/list" 2>/dev/null || {
-              echo "  Skipped (registry API unreachable or no tags)"
-              continue
-            }
-            all_tags=$(docker images "localhost:5001/essedum/${svc}" \
-              --format "{{.CreatedAt}}\t{{.Tag}}" 2>/dev/null \
-              | grep -v "latest" \
-              | sort -r \
-              | awk '{print $3}')
-            tag_count=$(echo "$all_tags" | grep -c . 2>/dev/null || echo 0)
-            echo "  Found $tag_count SHA tags"
-            if [ "$tag_count" -le "$KEEP" ]; then
-              echo "  Nothing to prune"
-              continue
-            fi
-            old_tags=$(echo "$all_tags" | tail -n +$((KEEP + 1)))
-            echo "  Will delete $((tag_count - KEEP)) old tag(s)"
-            for tag in $old_tags; do
-              [ -z "$tag" ] && continue
-              echo -n "    Deleting tag ${tag}... "
-              digest=$(curl -sf -I \
-                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                "${REGISTRY_API}/essedum/${svc}/manifests/${tag}" 2>/dev/null \
-                | grep -i "^Docker-Content-Digest:" | awk '{print $2}' | tr -d '\r')
-              if [ -z "$digest" ]; then
-                echo "skip (could not fetch digest)"
-              else
-                http_code=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
-                  "${REGISTRY_API}/essedum/${svc}/manifests/${digest}" 2>/dev/null)
-                if [ "$http_code" = "202" ]; then
-                  echo "deleted from registry"
-                else
-                  echo "registry returned HTTP ${http_code} (delete may be disabled — skipping)"
-                fi
-              fi
-              docker rmi "localhost:5001/essedum/${svc}:${tag}" 2>/dev/null || true
-            done
-          done
-          echo ""
-          echo "=== Registry GC complete ==="
+      - name: Registry GC – disabled
+        # GC is disabled: deleting by manifest digest also removes ALL other tags
+        # that share the same digest (same image built from unchanged source).
+        # This caused newly-pushed CI images to become dangling immediately after
+        # being built. GC will be re-enabled once the pipeline is stable.
+        if: false
+        run: echo "GC disabled"
 
   # ────────────────────────────────────────────────────────────
   # JOB FINAL – Trigger CD after CI passes on gh_actions branch
