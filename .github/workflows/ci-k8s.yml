@@ -325,14 +325,28 @@ jobs:
             echo "skip=false" >> $GITHUB_OUTPUT
             echo "✓ ${{ matrix.service }}: code changed – will rebuild"
           else
-            # Source unchanged — retag only if a previously-built SHA is cached.
-            # If no cache exists (first run ever), we must build to populate it.
+            # Source unchanged — retag only if a previously-built SHA is cached
+            # AND that image still exists in the registry (it may have been deleted
+            # by a cleanup run, making the cache stale). Fall back to full build
+            # if the cached SHA is missing from the registry.
             CACHE_FILE="$CACHE_DIR/${{ matrix.service }}"
             if [ -f "$CACHE_FILE" ]; then
               LAST_SHA=$(cat "$CACHE_FILE")
-              echo "skip=true" >> $GITHUB_OUTPUT
-              echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
-              echo "::notice::${{ matrix.service }}: no source changes – will retag ${LAST_SHA} → ${{ github.sha }}"
+              REGISTRY="${{ secrets.CONTAINER_REGISTRY }}"
+              # Verify the cached image actually exists before trusting the cache
+              HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                "http://localhost:5001/v2/essedum/${{ matrix.service }}/manifests/${LAST_SHA}" 2>/dev/null || echo "000")
+              if [ "$HTTP_STATUS" = "200" ]; then
+                echo "skip=true" >> $GITHUB_OUTPUT
+                echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
+                echo "::notice::${{ matrix.service }}: no source changes – will retag ${LAST_SHA} → ${{ github.sha }}"
+              else
+                # Cached SHA no longer in registry (deleted by cleanup) – rebuild
+                rm -f "$CACHE_FILE"
+                echo "skip=false" >> $GITHUB_OUTPUT
+                echo "::warning::${{ matrix.service }}: cached SHA ${LAST_SHA} not found in registry (HTTP ${HTTP_STATUS}) – rebuilding"
+              fi
             else
               echo "skip=false" >> $GITHUB_OUTPUT
               echo "::notice::${{ matrix.service }}: no cached SHA found – building for first time"
