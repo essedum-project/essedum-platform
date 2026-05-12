@@ -200,17 +200,29 @@ jobs:
           kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
 
           # Verify images are available in the registry before deploying.
-          # Uses the Docker Registry v2 API (HTTP HEAD on the manifest) instead of
-          # docker inspect, because images are removed from the local daemon by the
-          # cleanup step before this step runs.
-          # Supports both http (localhost/127.x insecure registry) and https (remote).
-          # Also avoids the bash arithmetic trap: ((var++)) returns exit-code 1 when
-          # var=0 (post-increment of zero evaluates to zero = false), which kills the
-          # step under the default set -e that GitHub Actions applies to all run: blocks.
+          # Only services whose changed_* flag is 'true' need an image at IMAGE_TAG
+          # (they were just built/retagged by CI). Unchanged services already have
+          # a running pod with their previous image — we skip their manifest update.
           echo ""
           echo "=== Verifying container images in registry ==="
-          # REGISTRY is already set via the step env: block above.
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+
+          # Map service name → changed flag from CI
+          declare -A svc_changed
+          svc_changed["leap-app-backend"]="${{ inputs.changed_backend }}"
+          svc_changed["frontend"]="${{ inputs.changed_frontend }}"
+          svc_changed["py-job-executer"]="${{ inputs.changed_py_executer }}"
+          svc_changed["py-job-sagemaker-executer"]="${{ inputs.changed_py_sagemaker }}"
+          svc_changed["py-job-vertex-executer"]="${{ inputs.changed_py_vertex }}"
+          svc_changed["py-job-azure-executer"]="${{ inputs.changed_py_azure }}"
+          svc_changed["proxy-service"]="${{ inputs.changed_proxy }}"
+          svc_changed["adk-code-builder-deployer"]="${{ inputs.changed_adk }}"
+          svc_changed["vibe-code-builder-deployer"]="${{ inputs.changed_vibe }}"
+          svc_changed["langflow"]="${{ inputs.changed_langflow }}"
+          svc_changed["litellm"]="${{ inputs.changed_litellm }}"
+          svc_changed["langfuse-web"]="${{ inputs.changed_langfuse }}"
+          svc_changed["langfuse-worker"]="${{ inputs.changed_langfuse }}"
+          svc_changed["goose-ui"]="true"
+          svc_changed["goosed"]="true"
 
           # Choose protocol: insecure for localhost / loopback, https for everything else
           if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
@@ -220,7 +232,13 @@ jobs:
           fi
 
           missing_images=0
+          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
           for svc in "${services[@]}"; do
+            changed="${svc_changed[$svc]}"
+            if [ "$changed" != "true" ]; then
+              echo "  Skipping ${svc} (unchanged – existing deployment untouched)"
+              continue
+            fi
             echo -n "  Checking ${svc}... "
             http_status=$(curl -sI -o /dev/null -w "%{http_code}" \
               -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
@@ -230,7 +248,6 @@ jobs:
               echo "✓ Found in registry"
             else
               echo "✗ NOT FOUND (registry returned HTTP ${http_status}): ${REGISTRY}/essedum/${svc}:${IMAGE_TAG}"
-              # Use safe arithmetic — ((var++)) exits with code 1 when var=0
               missing_images=$((missing_images + 1))
             fi
           done
@@ -241,7 +258,7 @@ jobs:
             exit 1
           else
             echo ""
-            echo "✓ All images verified in registry"
+            echo "✓ All changed-service images verified in registry"
           fi
           echo ""
 

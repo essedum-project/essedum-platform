@@ -398,24 +398,56 @@ jobs:
           echo "✓ Copied goose-vibe-studio-agent into workspace"
 
       - name: Retag previous image (no source changes)
-        # Service source is unchanged. Instead of a full Docker build, we copy the
-        # previously-pushed manifest to the new SHA tag using imagetools create.
-        # This is a registry-side metadata operation — no layers are transferred,
-        # completes in under 5 seconds, and produces an identical image digest.
+        # Service source is unchanged: copy the manifest to the new SHA tag using
+        # the registry v2 API directly (PUT /manifests/<new-tag>).
+        # This avoids docker buildx imagetools which requires the buildx insecure-
+        # registry config to be initialised — a step that only runs on the build
+        # path. Pure curl works for both localhost (plain HTTP) and remote registries.
         if: steps.needs_build.outputs.skip == 'true'
         env:
           REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
           set -e
           LAST_SHA="${{ steps.needs_build.outputs.last_sha }}"
-          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
-          docker buildx imagetools create \
-            -t "${REGISTRY}/essedum/${{ matrix.service }}:${{ github.sha }}" \
-            "${REGISTRY}/essedum/${{ matrix.service }}:${LAST_SHA}"
-          echo "✓ Retagged ${{ matrix.service }}: ${LAST_SHA} → ${{ github.sha }} (no build needed)"
-          docker logout "$REGISTRY" || true
+          SVC="${{ matrix.service }}"
+          NEW_SHA="${{ github.sha }}"
+
+          # Detect protocol: http for localhost/loopback, https for remote
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+            REG_PROTO="http"
+          else
+            REG_PROTO="https"
+          fi
+
+          BASE_URL="${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}"
+
+          # Fetch the manifest bytes and content-type from the source tag
+          MANIFEST=$(curl -sf \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "${BASE_URL}/manifests/${LAST_SHA}")
+          CONTENT_TYPE=$(curl -sI \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "${BASE_URL}/manifests/${LAST_SHA}" \
+            | grep -i "^content-type:" | awk '{print $2}' | tr -d '\r\n')
+
+          if [ -z "$MANIFEST" ] || [ -z "$CONTENT_TYPE" ]; then
+            echo "::error::Could not fetch manifest for ${SVC}:${LAST_SHA} — aborting retag"
+            exit 1
+          fi
+
+          # Write the same manifest under the new tag (registry de-dupes the layers)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X PUT \
+            -H "Content-Type: ${CONTENT_TYPE}" \
+            --data-raw "${MANIFEST}" \
+            "${BASE_URL}/manifests/${NEW_SHA}")
+
+          if [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "200" ]; then
+            echo "✓ Retagged ${SVC}: ${LAST_SHA} → ${NEW_SHA} (no build needed)"
+          else
+            echo "::error::Retag PUT returned HTTP ${HTTP_CODE} for ${SVC} — aborting"
+            exit 1
+          fi
 
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
