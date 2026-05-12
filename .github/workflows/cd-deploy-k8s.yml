@@ -379,6 +379,7 @@ jobs:
             "aks-deployment/github-runner-rbac.yml"
             "aks-deployment/mysql_deployment_v3.yaml"
             "aks-deployment/keycloak_deployment.yaml"
+            "aks-deployment/litellm-deployment.yaml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ ! -f "$manifest" ]; then continue; fi

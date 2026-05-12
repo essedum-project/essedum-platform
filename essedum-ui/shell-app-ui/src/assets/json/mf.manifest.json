@@ -1,10 +1,4 @@
 {
-	"mfe14": {
-		"remoteEntry": "http://localhost:5002/remoteEntry.js",
-		"exposedModule": "./FeatureModule",
-		"routePath": "mfe14",
-		"ngModuleName": "FeatureModule"
-	},
 	"ivm": {
 		"remoteEntry": "/ivm/remoteEntry.js",
 		"exposedModule": "./Component",
@@ -84,15 +78,6 @@
 		"routePath": "workflows",
 		"ngModuleName": "IcipWorkflowModule"
 	},
-	"codebot-mfe4": {
-		"remoteEntry": "http://localhost:8080/atgen/codegen/remoteEntry.js",
-		"exposedModule": "./Codegen",
-		"routePath": "atgen/codegen/featuregen",
-		"type": "script",
-		"remoteName": "codegen",
-		"elementName": "react-element",
-		"title": "Essedum"
-	},
 	"eda": {
 		"remoteEntry": "/eda/remoteEntry.js",
 		"exposedModule": "./Component",
@@ -120,12 +105,6 @@
 		"routePath": "iamp-tad",
 		"ngModuleName": "IampBtfModule",
 		"title": "Essedum"
-	},
-	"g20k_cyberscan": {
-		"remoteEntry": "https://localhost:8094/scan/remoteEntry.js",
-		"exposedModule": "./ScanModule",
-		"routePath": "cyberscan",
-		"ngModuleName": "CyberscanModule"
 	},
 	"cis": {
 		"remoteEntry": "/cis/remoteEntry.js",
