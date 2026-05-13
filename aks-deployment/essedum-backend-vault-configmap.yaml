@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: essedum-backend-vault-config
+  namespace: essedum
+data:
+  application-vault.yml: |
+    spring:
+      cloud:
+        vault:
+          enabled: true
+          uri: http://10.85.12.206:31854
+          token: test
+          scheme: http
+          config:
+            lifecycle:
+              min-renewal: 120s
+              expiry-threshold: 90s
+      config:
+        import: optional:vault://secret/${spring.application.name}

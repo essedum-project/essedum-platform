@@ -13,6 +13,6 @@ spring:
           min-renewal: 120s
           expiry-threshold: 90s
   config:
-    import: vault://secret/${spring.application.name}
+    import: optional:vault://secret/${spring.application.name}
     
  
