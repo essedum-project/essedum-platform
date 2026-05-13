@@ -1,3 +1,4 @@
+# build trigger: pipeline recovery
 # Use official Node image
 FROM node:22-alpine AS build
 

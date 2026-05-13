@@ -1,3 +1,4 @@
+# build trigger: pipeline recovery
 FROM python:3.12-slim
 
 WORKDIR /py-job-executer

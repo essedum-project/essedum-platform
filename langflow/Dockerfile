@@ -1,3 +1,4 @@
+# build trigger: pipeline recovery
 # Dockerfile for Langflow Persistent Deployment
 # Based on official Langflow image with custom configurations
 # 

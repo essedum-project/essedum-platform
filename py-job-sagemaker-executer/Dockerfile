@@ -1,3 +1,4 @@
+# build trigger: pipeline recovery
 FROM python:3.11-slim
 
 WORKDIR /py-job-sagemaker-executer

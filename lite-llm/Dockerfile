@@ -1,3 +1,4 @@
+# build trigger: pipeline recovery
 
 # Use the official LiteLLM stable image — Prisma query engine is pre-compiled
 # correctly for this architecture. We only add our config on top.
