@@ -449,6 +449,22 @@ jobs:
             exit 1
           fi
 
+          # Verify the retag actually made the manifest readable.
+          # The registry can return 201 for a manifest PUT but skip writing the blob
+          # when a stale revision link exists — a GET confirms the blob is on disk.
+          # On failure: clear the stale cache SHA so the next run rebuilds instead of retagging.
+          VERIFY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "${BASE_URL}/manifests/${NEW_SHA}")
+          if [ "$VERIFY_STATUS" = "200" ]; then
+            echo "✓ Verified ${SVC}:${NEW_SHA} is readable in registry"
+          else
+            echo "::error::Retag verification failed: ${SVC}:${NEW_SHA} returned HTTP ${VERIFY_STATUS}"
+            echo "::error::Stale revision link in registry — clearing runner cache so next run rebuilds"
+            rm -f "${HOME}/.essedum-build-cache/${SVC}"
+            exit 1
+          fi
+
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
         env:
@@ -507,6 +523,34 @@ jobs:
           # Do NOT load into Docker daemon (outputs: type=docker) —
           # loading builds up /var/lib/docker indefinitely with stale images.
           # CI pushes directly to the registry; no daemon load needed.
+
+      - name: Verify image is readable in registry
+        # registry:2 can return HTTP 201 for a manifest PUT but silently skip writing
+        # the blob when a stale revision link already exists for that digest. A GET
+        # immediately after the push confirms the blob was actually written on disk.
+        # Failing here prevents CD from deploying a ghost image that returns 404 at pull time.
+        if: steps.needs_build.outputs.skip != 'true'
+        env:
+          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+        run: |
+          SVC="${{ matrix.service }}"
+          SHA="${{ github.sha }}"
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+            REG_PROTO="http"
+          else
+            REG_PROTO="https"
+          fi
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}/manifests/${SHA}")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✓ ${SVC}:${SHA} verified readable in registry (HTTP 200)"
+          else
+            echo "::error::Push silently failed for ${SVC}: manifest GET returned HTTP ${HTTP_STATUS} after a 201 PUT."
+            echo "::error::Cause: stale revision link in registry storage for this digest."
+            echo "::error::Fix: docker exec local-reg sh -c 'rm -rf /var/lib/registry/docker/registry/v2/repositories/essedum/${SVC}/_manifests/revisions/sha256/<digest>/link'"
+            exit 1
+          fi
 
       - name: Save build SHA to runner cache
         # Persist the SHA so the next CI run can retag instead of rebuilding
@@ -648,13 +692,19 @@ jobs:
           docker image prune -f || true
           echo "=== Daemon image prune done ==="
 
-      - name: Registry GC – disabled
-        # GC is disabled: deleting by manifest digest also removes ALL other tags
-        # that share the same digest (same image built from unchanged source).
-        # This caused newly-pushed CI images to become dangling immediately after
-        # being built. GC will be re-enabled once the pipeline is stable.
-        if: false
-        run: echo "GC disabled"
+      - name: Registry GC – remove unreferenced blobs
+        # garbage-collect only removes blobs not referenced by any remaining manifest.
+        # It does NOT delete manifests or tags, so images with multiple SHA tags that
+        # share the same digest (unchanged-source retags) are unaffected.
+        # --delete-untagged=false preserves manifest-list entries (multi-arch indexes)
+        # that have no direct tag but are referenced by a tagged manifest list.
+        # Safe to run here: all builds for this push have already succeeded.
+        if: github.event_name == 'push'
+        run: |
+          docker exec local-reg registry garbage-collect \
+            --delete-untagged=false \
+            /etc/docker/registry/config.yml 2>&1 || true
+          echo "✓ Registry GC complete"
 
   # ────────────────────────────────────────────────────────────
   # JOB FINAL – Trigger CD after CI passes on gh_actions branch
