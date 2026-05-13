@@ -103,7 +103,7 @@ jobs:
   deploy:
     name: "Deploy – Kubernetes Rollout"
     runs-on: [self-hosted, essedum-runner]
-    timeout-minutes: 60
+    timeout-minutes: 90
     environment: CONTAINER_REGISTRY
 
     steps:
@@ -313,7 +313,7 @@ jobs:
               echo "::warning::Failed to apply mysql_deployment_v3.yaml, continuing..."
             }
             echo "Waiting for MySQL to be ready (timeout: 3 minutes)..."
-            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=3m || \
+            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=5m || \
               echo "::warning::MySQL rollout wait timed out – Keycloak initContainer will retry"
           fi
 
@@ -420,7 +420,16 @@ jobs:
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
-          echo "Waiting for deployments to stabilize (timeout: 10 minutes each)..."
+          # Per-deployment timeouts.
+          # essedum-backend: Java/Spring Boot with MySQL initContainer needs up to 15 min
+          #   (initContainer + 90s readiness delay + JVM startup). Using 18m so kubectl
+          #   always sees the real result (success or progressDeadlineExceeded at 15m)
+          #   rather than timing out itself and masking actual failures.
+          # All other services: lightweight processes, 10m is ample.
+          declare -A ROLLOUT_TIMEOUT
+          ROLLOUT_TIMEOUT["essedum-backend"]="18m"
+
+          echo "Waiting for deployments to stabilize..."
 
           # Deployments not managed by this CD pipeline — skip rollout check
           SKIP_ROLLOUT=(
@@ -441,9 +450,10 @@ jobs:
               continue
             fi
 
+            TIMEOUT="${ROLLOUT_TIMEOUT[$deployment]:-10m}"
             echo ""
-            echo ">>> Monitoring $deployment..."
-            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=10m || {
+            echo ">>> Monitoring $deployment (timeout: $TIMEOUT)..."
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=$TIMEOUT || {
               echo "::warning::Rollout status check timed out for $deployment"
               echo "Pod status for $deployment:"
               kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=$deployment -o wide 2>/dev/null || \
