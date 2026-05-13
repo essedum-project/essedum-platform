@@ -313,7 +313,7 @@ jobs:
               echo "::warning::Failed to apply mysql_deployment_v3.yaml, continuing..."
             }
             echo "Waiting for MySQL to be ready (timeout: 3 minutes)..."
-            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=5m || \
+            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=3m || \
               echo "::warning::MySQL rollout wait timed out – Keycloak initContainer will retry"
           fi
 
@@ -378,6 +378,15 @@ jobs:
           kubectl get pvc -n "$NAMESPACE" --no-headers 2>/dev/null | awk '{print "  " $1 " (" $3 ") - Size: " $4}' || echo "  No PVCs found"
 
           # ── Step 4: Apply all remaining app manifests ──
+          # Pre-scale backend to 0 before applying its manifest.
+          # This eliminates the rolling-update "old replicas pending termination"
+          # race: with no old pod running, the new pod starts clean and MySQL
+          # (already ready from Step 2c) is immediately reachable by the initContainer.
+          echo "Pre-scaling essedum-backend to 0 for clean restart..."
+          kubectl scale deployment essedum-backend -n "$NAMESPACE" --replicas=0 2>/dev/null || true
+          kubectl wait pods -n "$NAMESPACE" -l app=essedum-backend \
+            --for=delete --timeout=60s 2>/dev/null || true
+          echo "✓ Old backend pod cleared — manifest apply will bring it back up"
           # Excluded from this loop:
           #   - Already handled above (ingress-nginx, metallb, PVC files)
           #   - Runner/RBAC infra that must not be disrupted mid-deploy
@@ -420,14 +429,8 @@ jobs:
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
           NAMESPACE="${K8S_NAMESPACE}"
-          # Per-deployment timeouts.
-          # essedum-backend: Java/Spring Boot with MySQL initContainer needs up to 15 min
-          #   (initContainer + 90s readiness delay + JVM startup). Using 18m so kubectl
-          #   always sees the real result (success or progressDeadlineExceeded at 15m)
-          #   rather than timing out itself and masking actual failures.
-          # All other services: lightweight processes, 10m is ample.
+          # Per-deployment timeouts — default 10m, override per service if needed.
           declare -A ROLLOUT_TIMEOUT
-          ROLLOUT_TIMEOUT["essedum-backend"]="18m"
 
           echo "Waiting for deployments to stabilize..."
 
