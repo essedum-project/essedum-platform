@@ -41,7 +41,7 @@ spec:
         - name: security.issuer-uri
           value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
         - name: security.jwk-set-uri
-          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM/protocol/openid-connect/certs"
+          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: security.clientId
           value: "essedum-45"
         - name: security.scope
