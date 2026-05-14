@@ -12,9 +12,9 @@
 		<main.basedir>${project.basedir}</main.basedir>
 		<spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>2022.0.5</spring-cloud-dependencies.version>
-		<spring-version>6.2.0</spring-version>
-		<spring-framework.version>6.2.0</spring-framework.version>
-		<jackson.version>2.17.2</jackson.version>
+		<spring-version>6.2.18</spring-version>
+		<spring-framework.version>6.2.18</spring-framework.version>
+		<jackson.version>2.18.6</jackson.version>
 		<spring-vault-core.version>3.1.1</spring-vault-core.version>
 		<springdoc-openapi-ui>1.6.6</springdoc-openapi-ui>
 		<springfox.version>2.9.2</springfox.version>
@@ -83,10 +83,10 @@
 		<com.opencsv.opencsv.version>5.7.1</com.opencsv.opencsv.version>
 		<com.healthmarketscience.sqlbuilder.sqlbuilder.version>3.0.0</com.healthmarketscience.sqlbuilder.sqlbuilder.version>
 		<com.google.guava.guava.version>33.1.0-jre</com.google.guava.guava.version>
-		<org.eclipse.jgit.org.eclipse.jgit.version>5.13.4.202507202350-r</org.eclipse.jgit.org.eclipse.jgit.version>
+		<org.eclipse.jgit.org.eclipse.jgit.version>6.10.1.202505221210-r</org.eclipse.jgit.org.eclipse.jgit.version>
 		<org.mockito.mockito-all.version>2.0.2-beta</org.mockito.mockito-all.version>
-		<org.springframework.spring-webmvc.version>6.2.0</org.springframework.spring-webmvc.version>
-		<org.springframework.spring-web.version>6.2.0</org.springframework.spring-web.version>
+		<org.springframework.spring-webmvc.version>6.2.18</org.springframework.spring-webmvc.version>
+		<org.springframework.spring-web.version>6.2.18</org.springframework.spring-web.version>
 		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.54</org.apache.tomcat.embed.tomcat-embed-core.version>
 		<com.lfn.ai.comm-lib-util.version>${project.version}</com.lfn.ai.comm-lib-util.version>
 		<com.lfn.iamp-lib-usm.version>${project.version}</com.lfn.iamp-lib-usm.version>
