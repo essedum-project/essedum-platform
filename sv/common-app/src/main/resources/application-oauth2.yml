@@ -1,8 +1,8 @@
 # Sample setup with keycloak
 security:
   # Used by Spring Security for JWT validation (in-cluster, must be reachable by the backend pod)
-  issuer-uri: https://essedum.local:30443/realms/ESSEDUM
-  jwk-set-uri: https://essedum.local:30443/realms/ESSEDUM/protocol/openid-connect/certs
+  issuer-uri: https://keycloak.essedum.local:30443/realms/ESSEDUM
+  jwk-set-uri: https://keycloak.essedum.local:30443/realms/ESSEDUM/protocol/openid-connect/certs
   # Sent to the browser via /api/getConfigDetails for the OIDC redirect. Must be reachable by end users.
   # Falls back to security.issuer-uri when EXTERNAL_ISSUER_URI is not set.
   external-issuer-uri: ${EXTERNAL_ISSUER_URI:${security.issuer-uri}}
