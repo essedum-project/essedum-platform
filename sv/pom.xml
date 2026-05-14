@@ -77,8 +77,8 @@
 		<com.azure.azure-storage-blob.version>12.29.0</com.azure.azure-storage-blob.version>
 		<io.netty.netty-codec-http2.version>4.1.132.Final</io.netty.netty-codec-http2.version>
 		<io.netty.netty-handler.version>4.1.118.Final</io.netty.netty-handler.version>
-		<ch.qos.logback.logback-classic.version>1.5.12</ch.qos.logback.logback-classic.version>
-		<ch.qos.logback.logback-core.version>1.5.12</ch.qos.logback.logback-core.version>
+		<ch.qos.logback.logback-classic.version>1.5.25</ch.qos.logback.logback-classic.version>
+		<ch.qos.logback.logback-core.version>1.5.25</ch.qos.logback.logback-core.version>
 		<com.googlecode.json-simple.json-simple.version>${json-simple.version}</com.googlecode.json-simple.json-simple.version>
 		<com.opencsv.opencsv.version>5.7.1</com.opencsv.opencsv.version>
 		<com.healthmarketscience.sqlbuilder.sqlbuilder.version>3.0.0</com.healthmarketscience.sqlbuilder.sqlbuilder.version>
@@ -146,7 +146,7 @@
 	    <lucene.version>8.11.1</lucene.version>
 	    <protobuf-java.version>3.25.5</protobuf-java.version>
 	    <junit.jupiter.version>5.10.1</junit.jupiter.version>
-	    <nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>	    
+	    <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
 	    <pdfbox.version>3.0.3</pdfbox.version>
 	    <testng.version>7.9.0</testng.version>
 	    <mime4j.version>0.8.11</mime4j.version>
