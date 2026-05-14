@@ -39,9 +39,9 @@ spec:
         - name: SPRING_CLOUD_VAULT_ENABLED
           value: "false"
         - name: security.issuer-uri
-          value: "https://essedum.local:30443/realms/ESSEDUM"
+          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
         - name: security.jwk-set-uri
-          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
+          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: security.clientId
           value: "essedum-45"
         - name: security.scope

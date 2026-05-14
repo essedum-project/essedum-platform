@@ -44,9 +44,9 @@ spec:
             - name: KC_HTTPS_ENABLED
               value: "false"
             - name: KC_HOSTNAME
-              value: "https://essedum.local:30443"
+              value: "https://keycloak.essedum.local:30443"
             - name: KC_HOSTNAME_ADMIN
-              value: "https://essedum.local:30443"
+              value: "https://keycloak.essedum.local:30443"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "false"
             - name: KC_DB
