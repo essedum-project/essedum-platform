@@ -24,6 +24,11 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: essedum-secret
+            - configMapRef:
+                name: essedum-config
           env:
             - name: BUILDKIT_ADDR
               value: "tcp://buildkitd:1234"   # Points to your buildkitd Service
@@ -31,6 +36,18 @@ spec:
               value: "1"
             - name: DOCKER_CONFIG
               value: "/root/.docker"
+            - name: MINIO_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: MINIO_BUCKET
+                  optional: true
+            - name: FE_MINIO_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: FE_MINIO_BUCKET
+                  optional: true
           volumeMounts:
             - name: docker-config
               mountPath: /root/.docker

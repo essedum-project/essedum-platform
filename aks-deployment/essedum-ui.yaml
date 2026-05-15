@@ -21,6 +21,11 @@ spec:
       - name: essedum-ui
         image: ${REGISTRY}/essedum/frontend:${IMAGE_TAG}
         imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: essedum-secret
+          - configMapRef:
+              name: essedum-config
         ports:
         - containerPort: 8082
         - containerPort: 8084

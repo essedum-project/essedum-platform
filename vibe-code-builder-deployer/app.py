@@ -1,5 +1,6 @@
 import os
 import boto3
+from botocore.config import Config as BotoConfig
 import subprocess
 import shutil
 import random
@@ -386,19 +387,39 @@ def handle_pipeline_trigger(data):
         os.makedirs(EXTRACT_DIR, exist_ok=True)
 
         # 2) DOWNLOAD (S3/MinIO)
+        raw_bucket = (data.get("bucket_name") or "").strip()
+        raw_key = (data.get("file_path") or "").strip()
+        env_bucket = os.getenv("MINIO_BUCKET") or os.getenv("FE_MINIO_BUCKET")
+        if not raw_bucket or (raw_bucket.startswith("__") and raw_bucket.endswith("__")):
+            if env_bucket:
+                print(f"[DOWNLOAD] bucket_name from payload was '{raw_bucket}'; "
+                      f"using MINIO_BUCKET env var: {env_bucket}")
+                raw_bucket = env_bucket
+            else:
+                raise Exception(
+                    f"bucket_name is missing or unresolved ('{raw_bucket}'). "
+                    "Set MINIO_BUCKET env var on the deployer service."
+                )
+        minio_ep = os.getenv("MINIO_ENDPOINT")
         log_to_client(
-            f"Downloading {data['file_path']} from {data.get('minio_endpoint', 's3')}",
+            f"Downloading {raw_key} from {minio_ep} (bucket: {raw_bucket})",
             step="DOWNLOAD",
+        )
+        s3_cfg = BotoConfig(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+            retries={"max_attempts": 3, "mode": "standard"},
         )
         s3 = boto3.client(
             "s3",
-            endpoint_url= os.getenv("MINIO_ENDPOINT"),
+            endpoint_url=minio_ep,
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key= os.getenv("AWS_SECRET_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION", "us-east-1"),
+            config=s3_cfg,
         )
         local_zip = os.path.join(DOWNLOAD_DIR, "source.zip")
-        s3.download_file(data["bucket_name"], data["file_path"], local_zip)
+        s3.download_file(raw_bucket, raw_key, local_zip)
         log_to_client("Download complete.", step="DOWNLOAD")
         #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
         deploy_name = data["deployment_name"]

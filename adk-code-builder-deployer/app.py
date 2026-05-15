@@ -3,6 +3,7 @@ eventlet.monkey_patch()
 
 import os
 import boto3
+from botocore.config import Config as BotoConfig
 import subprocess
 import shutil
 import random
@@ -53,6 +54,46 @@ def log_to_client(message, step="info"):
     socketio.emit(
         "pipeline_update", {"step": step, "message": message, "timestamp": iso_utc_now()}
     )
+
+
+def resolve_s3_target(bucket_name, file_path):
+    """Normalize and validate bucket/key values before downloading from MinIO/S3."""
+    bucket = (bucket_name or "").strip()
+    key = (file_path or "").strip()
+
+    if not key:
+        raise Exception("file_path is required for pipeline download")
+
+    # Accept s3://bucket/key format in file_path.
+    if key.startswith("s3://"):
+        key_without_scheme = key[5:]
+        if "/" not in key_without_scheme:
+            raise Exception(f"Invalid S3 object path: {file_path}")
+        parsed_bucket, parsed_key = key_without_scheme.split("/", 1)
+        if not bucket:
+            bucket = parsed_bucket
+        key = parsed_key
+
+    # Fall back to MINIO_BUCKET env var when the frontend sends an unresolved
+    # placeholder (e.g. __FE_MINIO_BUCKET__) or an empty bucket name.
+    env_bucket = os.getenv("MINIO_BUCKET") or os.getenv("FE_MINIO_BUCKET")
+    if not bucket or (bucket.startswith("__") and bucket.endswith("__")):
+        if env_bucket:
+            print(f"[DOWNLOAD] bucket_name from payload was '{bucket}'; "
+                  f"using MINIO_BUCKET env var: {env_bucket}")
+            bucket = env_bucket
+        else:
+            raise Exception(
+                f"bucket_name is missing or unresolved ('{bucket}'). "
+                "Set MINIO_BUCKET env var on the deployer service or FE_MINIO_BUCKET on the UI."
+            )
+
+    if "/" in bucket:
+        raise Exception(
+            f"Invalid bucket_name '{bucket}'. Provide only the bucket name, not a URL or path."
+        )
+
+    return bucket, key
 
 
 # REST API endpoint for deleting deployments
@@ -524,15 +565,29 @@ def handle_pipeline_trigger(data):
             f"Downloading {data['file_path']} from {minio_endpoint}",
             step="DOWNLOAD",
         )
+        resolved_bucket, resolved_key = resolve_s3_target(
+            data.get("bucket_name"), data.get("file_path")
+        )
+        log_to_client(
+            f"Resolved MinIO target -> bucket: {resolved_bucket}, key: {resolved_key}",
+            step="DOWNLOAD",
+        )
+
+        s3_client_config = BotoConfig(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+            retries={"max_attempts": 3, "mode": "standard"},
+        )
         s3 = boto3.client(
             "s3",
             endpoint_url=minio_endpoint,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
             region_name=os.getenv("AWS_REGION", "us-east-1"),
+            config=s3_client_config,
         )
         local_zip = os.path.join(DOWNLOAD_DIR, "source.zip")
-        s3.download_file(data["bucket_name"], data["file_path"], local_zip)
+        s3.download_file(resolved_bucket, resolved_key, local_zip)
         log_to_client("Download complete.", step="DOWNLOAD")
         #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
         deploy_name = data["deployment_name"]

@@ -320,7 +320,6 @@ subjects:
   namespace: ingress-nginx
 ---
 apiVersion: v1
-data: null
 kind: ConfigMap
 metadata:
   labels:
@@ -331,6 +330,9 @@ metadata:
     app.kubernetes.io/version: 1.12.3
   name: ingress-nginx-controller
   namespace: ingress-nginx
+data:
+  allow-snippet-annotations: "true"
+  annotations-risk-level: "Critical"
 ---
 apiVersion: v1
 kind: Service

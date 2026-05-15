@@ -66,9 +66,22 @@ metadata:
   name: langflow-ingress
   namespace: essedum
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: ALLOWALL";
+      more_set_headers "Content-Security-Policy: frame-ancestors *";
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - langflow.essedum.local
+    secretName: essedum-tls
   rules:
   - host: langflow.essedum.local
     http:
