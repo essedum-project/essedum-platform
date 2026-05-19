@@ -1,0 +1,220 @@
+<header class="wizard-header">
+  <div class="title">
+    <mat-icon class="sparkle">auto_awesome</mat-icon>
+    <div>
+      <h2>New Data Pipeline</h2>
+      <p>Generate a typed, runnable Python pipeline in four guided steps.</p>
+    </div>
+  </div>
+  <button mat-icon-button class="close" (click)="cancel()" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<div class="wizard-shell" mat-dialog-content>
+  <mat-stepper #stepper linear class="wizard-stepper">
+
+    <!-- ── Step 1: Identity & Type ── -->
+    <mat-step [stepControl]="identityForm" label="Identity & Type">
+      <form [formGroup]="identityForm">
+        <h3 class="step-title"><mat-icon>category</mat-icon> Choose a pipeline type</h3>
+        <div class="type-grid">
+          <button type="button" *ngFor="let t of pipelineTypes"
+                  class="type-card"
+                  [class.active]="identityForm.value.pipelineType === t.value"
+                  [class.card-disabled]="t.value !== 'feature-engineering'"
+                  [disabled]="t.value !== 'feature-engineering'"
+                  (click)="selectType(t.value)">
+            <mat-icon>{{ t.icon }}</mat-icon>
+            <div class="type-label">{{ t.label }}</div>
+            <div class="type-desc">{{ t.description }}</div>
+            <div class="coming-soon-badge" *ngIf="t.value !== 'feature-engineering'">Coming soon</div>
+          </button>
+        </div>
+
+        <div class="row two-col">
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="churn-features-v3">
+            <mat-hint>letters, digits, dash, underscore</mat-hint>
+            <mat-error *ngIf="identityForm.get('name').hasError('pattern')">Invalid characters</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Display alias</mat-label>
+            <input matInput formControlName="alias" placeholder="Churn — Features v3">
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="fill" class="full">
+          <mat-label>Description (optional)</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+
+        <div class="step-actions">
+          <button mat-button (click)="cancel()">Cancel</button>
+          <button mat-flat-button color="primary" matStepperNext
+                  [disabled]="identityForm.invalid">Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- ── Step 2: Source / Config ── -->
+    <mat-step [stepControl]="sourceForm" label="Source / Config">
+      <form [formGroup]="sourceForm">
+        <h3 class="step-title"><mat-icon>storage</mat-icon> Where does the data come from?</h3>
+
+        <ng-container *ngIf="identityForm.value.pipelineType !== 'slm-cot'">
+
+          <!-- 1. Output container type (always first) -->
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Output container type</mat-label>
+            <mat-select formControlName="outputContainer">
+              <mat-option *ngFor="let c of outputContainers" [value]="c">{{ c }}</mat-option>
+              <mat-option *ngIf="outputContainersLoaded && outputContainers.length === 0" [value]="null" disabled>
+                No options available
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- 2. Source connection — filtered by selected container type -->
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Source connection</mat-label>
+            <mat-select formControlName="connection" [disabled]="!sourceForm.value.outputContainer">
+              <mat-option *ngFor="let c of connections" [value]="c">{{ c }}</mat-option>
+              <mat-option *ngIf="connectionsLoaded && connections.length === 0" [value]="null" disabled>
+                No connections for this type
+              </mat-option>
+              <mat-option *ngIf="!sourceForm.value.outputContainer" [value]="null" disabled>
+                Select a container type first
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- 3. Dataset — filtered by selected connection -->
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Dataset</mat-label>
+            <mat-select formControlName="dataset" [disabled]="!sourceForm.value.connection">
+              <mat-option *ngFor="let d of datasets" [value]="d">{{ d }}</mat-option>
+              <mat-option *ngIf="datasetsLoaded && datasets.length === 0" [value]="null" disabled>
+                No datasets for this connection
+              </mat-option>
+              <mat-option *ngIf="!sourceForm.value.connection" [value]="null" disabled>
+                Select a connection first
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </ng-container>
+
+        <!-- Output format conditional (RAG / SLM types) -->
+        <div class="row two-col" *ngIf="outputFormats.length">
+          <mat-form-field appearance="fill">
+            <mat-label>Output format</mat-label>
+            <mat-select formControlName="outputFormat">
+              <mat-option *ngFor="let f of outputFormats" [value]="f">{{ f }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="filler"></div>
+        </div>
+
+        <!-- SLM teacher / base model -->
+        <ng-container *ngIf="selectedTypeMeta?.isSlm">
+          <div class="row two-col">
+            <mat-form-field appearance="fill" *ngIf="identityForm.value.pipelineType === 'slm-cot'">
+              <mat-label>Teacher model</mat-label>
+              <mat-select formControlName="teacherModel">
+                <mat-option *ngFor="let m of teacherModels" [value]="m">{{ m }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Target base model</mat-label>
+              <mat-select formControlName="baseModel">
+                <mat-option *ngFor="let m of slmBaseModels" [value]="m">{{ m }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </ng-container>
+
+        <!-- Non-SLM, non-RAG: problem type + target column (dropdown from dataset schema) -->
+        <ng-container *ngIf="!selectedTypeMeta?.isSlm && identityForm.value.pipelineType !== 'rag-ingestion'">
+          <div class="row two-col">
+            <mat-form-field appearance="fill">
+              <mat-label>Problem type</mat-label>
+              <mat-select formControlName="problemType">
+                <mat-option *ngFor="let p of problemTypes" [value]="p">{{ p }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Target column</mat-label>
+              <mat-select formControlName="targetCol" [disabled]="!sourceForm.value.dataset">
+                <mat-option *ngFor="let col of targetColumns" [value]="col">{{ col }}</mat-option>
+                <mat-option *ngIf="targetColumnsLoaded && targetColumns.length === 0 && sourceForm.value.dataset" [value]="null" disabled>
+                  No columns found
+                </mat-option>
+                <mat-option *ngIf="!targetColumnsLoaded && sourceForm.value.dataset" [value]="null" disabled>
+                  Loading columns…
+                </mat-option>
+                <mat-option *ngIf="!sourceForm.value.dataset" [value]="null" disabled>
+                  Select a dataset first
+                </mat-option>
+              </mat-select>
+              <mat-spinner matSuffix diameter="16" *ngIf="!targetColumnsLoaded && sourceForm.value.dataset"></mat-spinner>
+            </mat-form-field>
+          </div>
+        </ng-container>
+
+        <div class="step-actions">
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-flat-button color="primary" matStepperNext [disabled]="sourceForm.invalid">Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- ── Step 3: Execution ── -->
+    <mat-step [stepControl]="executionForm" label="Execution">
+      <form [formGroup]="executionForm">
+        <h3 class="step-title"><mat-icon>play_circle</mat-icon> How does it run?</h3>
+        <mat-form-field appearance="fill" class="full">
+          <mat-label>Executor</mat-label>
+          <mat-select formControlName="executor">
+            <mat-option *ngFor="let e of executors" [value]="e.value">
+              <strong>{{ e.label }}</strong> — {{ e.description }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="full">
+          <mat-label>Schedule (cron)</mat-label>
+          <input matInput formControlName="schedule" placeholder="0 */2 * * *">
+        </mat-form-field>
+        <div class="chip-row">
+          <span class="chip-label">Quick presets:</span>
+          <mat-chip-listbox>
+            <mat-chip-option *ngFor="let p of schedulePresets" (click)="pickSchedule(p.value)">
+              {{ p.label }}
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+        <div class="step-actions">
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-flat-button color="primary" matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- ── Step 4: Git ── -->
+    <mat-step label="Git">
+      <app-git-link-step [initialValue]="gitLink"
+                         (valueChange)="onGitLinkChange($event)"
+                         (validityChange)="onGitValidity($event)"></app-git-link-step>
+      <div class="step-actions">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-flat-button color="primary"
+                [disabled]="!gitValid || creating"
+                (click)="createPipeline()">
+          <mat-icon>auto_awesome</mat-icon>&nbsp;Create Pipeline
+        </button>
+      </div>
+    </mat-step>
+
+  </mat-stepper>
+</div>
+

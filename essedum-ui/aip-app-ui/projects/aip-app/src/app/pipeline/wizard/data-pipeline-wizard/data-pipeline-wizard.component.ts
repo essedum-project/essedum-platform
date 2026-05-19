@@ -1,0 +1,299 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatStepper } from '@angular/material/stepper';
+import { Services } from '../../../services/service';
+import { StreamingServices } from '../../../streaming-services/streaming-service';
+import { CodeTemplateService } from '../shared/code-template.service';
+import { WizardStateService } from '../shared/wizard-state.service';
+import { GitLinkService } from '../../../services/git-link.service';
+import {
+  DATA_PIPELINE_TYPES,
+  FALLBACK_SLM_BASE_MODELS,
+  TEACHER_MODELS,
+  OUTPUT_FORMATS_BY_TYPE,
+  PROBLEM_TYPES,
+  EXECUTORS,
+  SCHEDULE_PRESETS,
+  GitLinkValue,
+  emptyGitLink,
+} from '../shared/pipeline-options.constants';
+
+
+@Component({
+  selector: 'app-data-pipeline-wizard',
+  templateUrl: './data-pipeline-wizard.component.html',
+  styleUrls: ['./data-pipeline-wizard.component.scss'],
+  providers: [WizardStateService],
+})
+export class DataPipelineWizardComponent implements OnInit {
+  @ViewChild('stepper') stepper: MatStepper;
+
+  // dropdown sources
+  pipelineTypes = DATA_PIPELINE_TYPES;
+
+  // All datasource objects (loaded once)
+  private allDatasources: any[] = [];
+  // Map: alias → datasource name (used for API calls that need the name, not alias)
+  private aliasToName = new Map<string, string>();
+  // Cascading dropdowns for ML/non-SLM/non-RAG types
+  outputContainers: string[] = [];         // unique types from all datasources
+  outputContainersLoaded = false;
+
+  connections: string[] = [];             // aliases filtered by selected container type
+  connectionsLoaded = false;
+
+  datasets: string[] = [];                // dataset names filtered by selected connection
+  datasetsLoaded = false;
+
+  targetColumns: string[] = [];           // column names fetched from dataset schema
+  targetColumnsLoaded = false;
+
+  slmBaseModels = FALLBACK_SLM_BASE_MODELS;
+  teacherModels = TEACHER_MODELS;
+  problemTypes = PROBLEM_TYPES;
+  executors = EXECUTORS;
+  schedulePresets = SCHEDULE_PRESETS;
+
+  identityForm: FormGroup;
+  sourceForm: FormGroup;
+  executionForm: FormGroup;
+  gitLink: GitLinkValue = emptyGitLink();
+  gitValid = false;
+
+  creating = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private templates: CodeTemplateService,
+    private services: Services,
+    private gitSvc: GitLinkService,
+    public dialogRef: MatDialogRef<DataPipelineWizardComponent>,
+  ) {}
+
+  ngOnInit(): void {
+    this.identityForm = this.fb.group({
+      pipelineType: ['feature-engineering', Validators.required],
+      name:         ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
+      alias:        ['', Validators.required],
+      description:  [''],
+    });
+
+    this.sourceForm = this.fb.group({
+      outputContainer: [''],
+      connection:      [''],
+      dataset:         ['', Validators.required],
+      problemType:     ['classification'],
+      targetCol:       [''],
+      baseModel:       [''],
+      teacherModel:    [''],
+      outputFormat:    [''],
+    });
+
+    this.executionForm = this.fb.group({
+      executor: ['py-job-executor', Validators.required],
+      schedule: [''],
+    });
+
+    this.gitLink = this.gitSvc.defaultLinkFor('new-pipeline', 'data-pipeline');
+
+    // keep file path in sync with name
+    this.identityForm.get('name').valueChanges.subscribe(name => {
+      if (name) {
+        this.gitLink = { ...this.gitLink, filePath: `data-pipelines/${name}/pipeline.py` };
+      }
+    });
+
+    // Cascade: when output container type changes → reload connections
+    this.sourceForm.get('outputContainer').valueChanges.subscribe(containerType => {
+      this.sourceForm.patchValue({ connection: '', dataset: '', targetCol: '' }, { emitEvent: false });
+      this.connections = [];
+      this.datasets = [];
+      this.targetColumns = [];
+      this.connectionsLoaded = false;
+      this.datasetsLoaded = false;
+      if (containerType) {
+        this.connections = this.allDatasources
+          .filter(d => d.type === containerType)
+          .map(d => d.alias || d.name)
+          .filter(Boolean)
+          .sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        this.connectionsLoaded = true;
+      }
+    });
+
+    // Cascade: when connection changes → reload datasets
+    this.sourceForm.get('connection').valueChanges.subscribe(connectionAlias => {
+      this.sourceForm.patchValue({ dataset: '', targetCol: '' }, { emitEvent: false });
+      this.datasets = [];
+      this.targetColumns = [];
+      this.datasetsLoaded = false;
+      if (connectionAlias) {
+        // The API expects the datasource name field, not the alias
+        const datasourceName = this.aliasToName.get(connectionAlias) || connectionAlias;
+        this.services.getDatasetNamesByDatasource(datasourceName).subscribe({
+          next: (res: any[]) => {
+            const items: any[] = Array.isArray(res) ? res : [];
+            this.datasets = items
+              .map((d: any) => d.alias || d.name)
+              .filter(Boolean)
+              .sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase()));
+            this.datasetsLoaded = true;
+          },
+          error: () => { this.datasetsLoaded = true; },
+        });
+      }
+    });
+
+    // When dataset changes → fetch real column names via dbdata API
+    this.sourceForm.get('dataset').valueChanges.subscribe(datasetName => {
+      this.sourceForm.patchValue({ targetCol: '' }, { emitEvent: false });
+      this.targetColumns = [];
+      this.targetColumnsLoaded = false;
+      if (!datasetName) return;
+      const containerType  = this.sourceForm.value.outputContainer;
+      const connectionAlias = this.sourceForm.value.connection;
+      const org = sessionStorage.getItem('organization') || '';
+      const datasetObj  = { alias: datasetName };
+      const dsourceObj  = { type: containerType, alias: connectionAlias };
+      const params      = { page: 0, size: 50 };
+      this.services.getProxyDbDatasetDetails(datasetObj as any, dsourceObj, params, org, true).subscribe({
+        next: (rows: any[]) => {
+          if (rows && rows.length > 0) {
+            this.targetColumns = Object.keys(rows[0]);
+          }
+          this.targetColumnsLoaded = true;
+        },
+        error: () => { this.targetColumnsLoaded = true; },
+      });
+    });
+
+    this.loadLiveOptions();
+    this.applyTypeDefaults('feature-engineering');
+  }
+
+  // ─── reactive helpers ─────────────────────────────────────────────────
+  get selectedTypeMeta() {
+    return this.pipelineTypes.find(p => p.value === this.identityForm.value.pipelineType);
+  }
+
+  get isSlmFlavour(): boolean {
+    return !!this.selectedTypeMeta?.isSlm || this.identityForm.value.pipelineType === 'rag-ingestion';
+  }
+
+  get outputFormats(): string[] {
+    return OUTPUT_FORMATS_BY_TYPE[this.identityForm.value.pipelineType] ?? [];
+  }
+
+  selectType(value: string): void {
+    this.identityForm.patchValue({ pipelineType: value });
+    this.applyTypeDefaults(value);
+  }
+
+  private applyTypeDefaults(type: string): void {
+    const conn = this.sourceForm.get('connection');
+    const cont = this.sourceForm.get('outputContainer');
+    conn.setValidators(type === 'slm-cot' ? [] : [Validators.required]);
+    cont.setValidators([Validators.required]);
+
+    if (type === 'rag-ingestion') {
+      this.sourceForm.patchValue({ outputFormat: 'qdrant-collection' });
+    } else if (OUTPUT_FORMATS_BY_TYPE[type]) {
+      this.sourceForm.patchValue({ outputFormat: OUTPUT_FORMATS_BY_TYPE[type][0] });
+    } else {
+      this.sourceForm.patchValue({ outputFormat: '' });
+    }
+
+    conn.updateValueAndValidity();
+    cont.updateValueAndValidity();
+  }
+
+  // ─── live dropdown population ─────────────────────────────────────────
+  private loadLiveOptions(): void {
+    // Load all datasources once; derive output container types and connections from them
+    this.services.getDatasources().subscribe({
+      next: (res: any[]) => {
+        this.allDatasources = Array.isArray(res) ? res : [];
+
+        // Build alias → name map for API calls
+        this.aliasToName.clear();
+        this.allDatasources.forEach(d => {
+          if (d.alias && d.name) this.aliasToName.set(d.alias, d.name);
+          if (d.name) this.aliasToName.set(d.name, d.name);
+        });
+
+        // Unique container types
+        const typeSet = new Set<string>();
+        this.allDatasources.forEach(d => { if (d.type) typeSet.add(d.type); });
+        this.outputContainers = Array.from(typeSet).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        this.outputContainersLoaded = true;
+      },
+      error: () => { this.outputContainersLoaded = true; },
+    });
+  }
+
+  pickSchedule(value: string): void { this.executionForm.patchValue({ schedule: value }); }
+  onGitLinkChange(v: GitLinkValue): void { this.gitLink = v; }
+  onGitValidity(v: boolean): void { this.gitValid = v; }
+
+  cancel(): void { this.dialogRef.close(); }
+
+  // ─── Create pipeline ──────────────────────────────────────────────────
+  createPipeline(): void {
+    if (this.creating) return;
+    if (this.identityForm.invalid || this.sourceForm.invalid || this.executionForm.invalid) return;
+
+    const cfg = {
+      ...this.identityForm.value,
+      ...this.sourceForm.value,
+      ...this.executionForm.value,
+      git: this.gitLink,
+    };
+
+    const pythonCode = this.templates.generateDataPipelineCode(cfg as any);
+
+    const newSs = new StreamingServices();
+    newSs.name = cfg.name;
+    newSs.alias = cfg.alias;
+    newSs.description = cfg.description || '';
+    newSs.type = 'DataPipeline';
+    newSs.interfacetype = 'pipeline';
+    newSs.json_content = JSON.stringify({
+      elements: [{
+        attributes: {
+          filetype: 'Python3',
+          files: [`${cfg.name}_pipeline.py`],
+          generatedCode: pythonCode,
+        },
+      }],
+      pipeline_attributes: {
+        wizard_version: 1,
+        pipelineType: cfg.pipelineType,
+        outputContainer: cfg.outputContainer,
+        connection: cfg.connection,
+        dataset: cfg.dataset,
+        problemType: cfg.problemType,
+        targetCol: cfg.targetCol,
+        baseModel: cfg.baseModel,
+        teacherModel: cfg.teacherModel,
+        outputFormat: cfg.outputFormat,
+        executor: cfg.executor,
+        schedule: cfg.schedule,
+        git: cfg.git,
+        kind: 'data-pipeline',
+      },
+    });
+
+    this.creating = true;
+    this.services.create(newSs).subscribe({
+      next: (data) => {
+        this.services.message('Pipeline created!', 'success');
+        this.dialogRef.close({ pipeline: data, kind: 'data-pipeline' });
+      },
+      error: () => {
+        this.creating = false;
+        this.services.message('Could not create pipeline', 'error');
+      },
+    });
+  }
+}

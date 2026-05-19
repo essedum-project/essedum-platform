@@ -8,3 +8,8 @@
   > * { max-width: none !important; width: 100% !important; flex: none !important; padding: 0 !important; }
 }
 .aip-card-wrapper, .card-wrapper { width: 100% !important; height: 100%; }
+
+.wizard-menu-row {
+  display: flex; justify-content: flex-end; padding: 0 16px 8px;
+  button { font-weight: 500; mat-icon { color:#7c3aed; } }
+}

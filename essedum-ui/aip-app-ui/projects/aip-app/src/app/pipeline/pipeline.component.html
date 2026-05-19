@@ -2,8 +2,24 @@
 
   <!-- Header Section -->
   <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
-    (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
+    (search)="onSearch($event)" (refresh)="onRefresh()" [addMenu]="newMenu">
   </app-aip-header>
+
+  <!-- Add-button dropdown menu -->
+  <mat-menu #newMenu="matMenu" xPosition="before" panelClass="pipeline-add-menu">
+    <button mat-menu-item (click)="onAdd()">
+      <mat-icon style="color:#64748b !important">code</mat-icon><span>Native Script / Legacy</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="openDataPipelineWizard()">
+      <mat-icon style="color:#a78bfa !important">auto_awesome</mat-icon>
+      <span>Data Pipeline (Wizard)</span>
+    </button>
+    <button mat-menu-item (click)="openTrainingPipelineWizard()">
+      <mat-icon style="color:#38bdf8 !important">model_training</mat-icon>
+      <span>Training Pipeline (Wizard)</span>
+    </button>
+  </mat-menu>
 
   <!-- Filter Section -->
   <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPipelineTypeList]="{ 

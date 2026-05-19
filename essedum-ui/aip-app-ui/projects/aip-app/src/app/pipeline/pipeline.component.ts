@@ -14,6 +14,8 @@ import { TagsService } from '../services/tags.service';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { PipelineCreateComponent } from './pipeline-create/pipeline-create.component';
+import { DataPipelineWizardComponent } from './wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardComponent } from './wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 @Component({
   selector: 'app-pipeline',
   templateUrl: './pipeline.component.html',
@@ -426,11 +428,61 @@ export class PipelineComponent implements OnInit, OnChanges {
         },
         relativeTo: this.route,
       };
-      if (this.streamItem.type === 'NativeScript') {
+      const isWizard = this.isWizardPipeline(this.streamItem);
+      const isTraining = this.streamItem.type === 'TrainingPipeline';
+      if (isWizard) {
+        // Relative navigation so module-federation shell prefix is preserved.
+        // From '/pipelines': './view-wizard/:cname' for data, '../training-pipelines/view-wizard/:cname' for training.
+        const segments = isTraining
+          ? ['../training-pipelines/view-wizard', card.name]
+          : ['./view-wizard', card.name];
+        this.router.navigate(segments, navigationExtras);
+      } else if (this.streamItem.type === 'NativeScript') {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       }
     });
   }
+
+  // Distinguish a wizard-created pipeline from legacy NativeScript records.
+  // The wizard stamps a `pipeline_attributes.wizard_version` field in json_content
+  // so we don't need a backend schema change to know which editor to route to.
+  private isWizardPipeline(item: any): boolean {
+    if (!item) return false;
+    if (item.type === 'DataPipeline' || item.type === 'TrainingPipeline') return true;
+    try {
+      const parsed = item.json_content ? JSON.parse(item.json_content) : null;
+      return !!parsed?.pipeline_attributes?.wizard_version;
+    } catch { return false; }
+  }
+
+  openDataPipelineWizard(): void {
+    const dialogRef = this.dialog.open(DataPipelineWizardComponent, {
+      width: '900px', maxWidth: '94vw', disableClose: true, panelClass: 'wizard-dialog', backdropClass: 'wizard-backdrop',
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.pipeline) {
+        this.refresh();
+        this.router.navigate(['./view-wizard', result.pipeline.name], { relativeTo: this.route });
+      }
+    });
+  }
+
+  openTrainingPipelineWizard(): void {
+    const dialogRef = this.dialog.open(TrainingPipelineWizardComponent, {
+      width: '900px', maxWidth: '94vw', disableClose: true, panelClass: 'wizard-dialog', backdropClass: 'wizard-backdrop',
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.pipeline) {
+        this.refresh();
+        this.router.navigate(['../training-pipelines/view-wizard', result.pipeline.name],
+          { relativeTo: this.route });
+      }
+    });
+  }
+
+  // Kept for compatibility with the existing pipeline.component.html template
+  // (the legacy aip-card emits a jobConsole event we don't yet handle here).
+  jobConsole(_name: string): void {}
 
   editPipeline(id: string): void {
     this.service.getStreamingServices(id).subscribe(

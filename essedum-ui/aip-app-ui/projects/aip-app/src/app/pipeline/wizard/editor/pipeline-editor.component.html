@@ -1,0 +1,68 @@
+<div class="editor-shell" *ngIf="!loading && model; else loadingTpl">
+
+  <!-- Header strip -->
+  <header class="editor-head">
+    <button mat-icon-button (click)="back()" aria-label="Back"><mat-icon>arrow_back</mat-icon></button>
+    <div class="title">
+      <mat-icon class="kind-icon">
+        {{ model.kind === 'training-job' ? 'model_training' : 'account_tree' }}
+      </mat-icon>
+      <div>
+        <h2>{{ model.alias || model.name }}</h2>
+      </div>
+    </div>
+    <span class="head-spacer"></span>
+    <button mat-flat-button class="run-btn" (click)="runPipeline()" [disabled]="running">
+      <mat-icon>{{ running ? 'hourglass_top' : 'play_arrow' }}</mat-icon>
+      {{ running ? 'Running…' : 'Run' }}
+    </button>
+  </header>
+
+  <!-- Tabs -->
+  <mat-tab-group class="editor-tabs" [(selectedIndex)]="activeTab" animationDuration="120ms" mat-align-tabs="start">
+
+    <!-- Code Editor -->
+    <mat-tab>
+      <ng-template mat-tab-label><mat-icon>code</mat-icon>&nbsp;Code</ng-template>
+      <app-code-editor-tab [model]="model" (codeChange)="saveCode($event)"></app-code-editor-tab>
+    </mat-tab>
+
+    <!-- Vibe Code (AI rewrite) -->
+    <mat-tab *ngIf="hasVibePermission">
+      <ng-template mat-tab-label><mat-icon>auto_awesome</mat-icon>&nbsp;Vibe Code</ng-template>
+      <app-vibe-code-tab [model]="model" (codeChange)="saveCode($event)"></app-vibe-code-tab>
+    </mat-tab>
+
+    <!-- Git -->
+    <mat-tab *ngIf="hasVibePermission">
+      <ng-template mat-tab-label><mat-icon>cloud_sync</mat-icon>&nbsp;Git</ng-template>
+      <app-git-tab [model]="model"></app-git-tab>
+    </mat-tab>
+
+    <!-- Config (read-only summary) -->
+    <mat-tab>
+      <ng-template mat-tab-label><mat-icon>settings</mat-icon>&nbsp;Config</ng-template>
+      <app-config-tab [model]="model"></app-config-tab>
+    </mat-tab>
+
+    <!-- Run history (data-pipeline) / Metrics+Logs (training) -->
+    <mat-tab *ngIf="model.kind === 'data-pipeline'">
+      <ng-template mat-tab-label><mat-icon>history</mat-icon>&nbsp;Run History</ng-template>
+      <app-run-history-tab [model]="model"></app-run-history-tab>
+    </mat-tab>
+
+    <mat-tab *ngIf="model.kind === 'training-job'">
+      <ng-template mat-tab-label><mat-icon>analytics</mat-icon>&nbsp;Metrics</ng-template>
+      <app-metrics-tab [model]="model"></app-metrics-tab>
+    </mat-tab>
+    <mat-tab *ngIf="model.kind === 'training-job'">
+      <ng-template mat-tab-label><mat-icon>terminal</mat-icon>&nbsp;Logs</ng-template>
+      <app-logs-tab [model]="model"></app-logs-tab>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading"><mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner></div>
+</ng-template>

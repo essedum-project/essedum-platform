@@ -40,6 +40,7 @@ import { AgentDirectoryViewComponent } from './agent-directory/agent-directory-v
 import { AgentDirectoryEditComponent } from './agent-directory/agent-directory-edit/agent-directory-edit.component';
 import { VibeStudioComponent } from './vibe-studio/vibe-studio/vibe-studio.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { PipelineEditorComponent } from './pipeline/wizard/editor/pipeline-editor.component';
 
 
 const routes: Routes = [
@@ -79,9 +80,15 @@ const routes: Routes = [
         path: 'pipelines',
         children: [
           { path: '', component: PipelineComponent },
-        
           { path: 'view/:cname', component: NativeScriptComponent },
-    
+          { path: 'view-wizard/:cname', component: PipelineEditorComponent },
+        ],
+      },
+      {
+        path: 'training-pipelines',
+        children: [
+          { path: '', component: PipelineComponent },
+          { path: 'view-wizard/:cname', component: PipelineEditorComponent },
         ],
       },
       {
