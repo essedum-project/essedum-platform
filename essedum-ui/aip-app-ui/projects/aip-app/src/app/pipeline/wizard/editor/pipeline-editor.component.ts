@@ -130,8 +130,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.running = true;
     const alias = this.model.alias || this.model.name;
     const cname = this.model.name;
-    const pipelineType = this.model.type || 'DataPipeline';
-    this.services.runPipeline(alias, cname, pipelineType, 'true', undefined)
+    this.services.runPipeline(alias, cname, 'NativeScript', 'true', undefined)
       .subscribe({
         next: () => {
           this.running = false;
