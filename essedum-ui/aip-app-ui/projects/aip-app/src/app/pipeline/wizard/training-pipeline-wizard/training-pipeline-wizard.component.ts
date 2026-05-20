@@ -29,6 +29,11 @@ export class TrainingPipelineWizardComponent implements OnInit {
   jobTypes = TRAINING_JOB_TYPES;
   datasets: string[] = [];
   datasetsLoaded = false;
+  private allDatasetObjects: any[] = [];   // full dataset objects (have datasource info)
+  private datasetObjectMap = new Map<string, any>(); // alias → full object
+  datasetColumns: string[] = [];           // columns fetched from selected dataset
+  datasetColumnsLoaded = false;
+  private datasetRows: any[] = [];         // schema sample rows
   slmBaseModels = FALLBACK_SLM_BASE_MODELS;
   teacherModels = TEACHER_MODELS;
   executors = EXECUTORS;
@@ -82,27 +87,55 @@ export class TrainingPipelineWizardComponent implements OnInit {
       if (name) this.gitLink = { ...this.gitLink, filePath: `training-jobs/${name}/train.py` };
     });
 
+    // Cascade: when dataset changes → fetch schema columns
+    this.dataExecForm.get('dataset').valueChanges.subscribe(datasetAlias => {
+      this.datasetColumns = [];
+      this.datasetRows = [];
+      this.datasetColumnsLoaded = false;
+      if (!datasetAlias) return;
+      const obj = this.datasetObjectMap.get(datasetAlias);
+      if (!obj?.datasource?.type || !obj?.datasource?.alias) {
+        this.datasetColumnsLoaded = true;
+        return;
+      }
+      const org = sessionStorage.getItem('organization') || '';
+      const datasetRef = { alias: datasetAlias };
+      const dsourceRef  = { type: obj.datasource.type, alias: obj.datasource.alias };
+      this.services.getProxyDbDatasetDetails(datasetRef as any, dsourceRef, { page: 0, size: 50 }, org, true).subscribe({
+        next: (rows: any[]) => {
+          if (rows && rows.length > 0) {
+            this.datasetColumns = Object.keys(rows[0]);
+            this.datasetRows = rows.slice(0, 3);
+          }
+          this.datasetColumnsLoaded = true;
+        },
+        error: () => { this.datasetColumnsLoaded = true; },
+      });
+    });
+
     this.applyTypeDefaults('traditional');
     this.loadLiveOptions();
   }
 
   private loadLiveOptions(): void {
     const org = sessionStorage.getItem('organization') || '';
-    // getDatasetNames returns all dataset objects for the org from /datasets/dataset
     this.services.getDatasetNames(org).subscribe({
       next: (res: any) => {
-        // response can be array of datasets or { content: [...] }
         const items: any[] = Array.isArray(res) ? res : (res?.content ?? []);
+        this.allDatasetObjects = items;
+        // Build lookup map: alias → full object
+        this.datasetObjectMap.clear();
+        items.forEach((d: any) => {
+          const key = d.alias || d.name;
+          if (key) this.datasetObjectMap.set(key, d);
+        });
         this.datasets = items
           .map((d: any) => d.alias || d.name)
           .filter(Boolean)
           .sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase()));
         this.datasetsLoaded = true;
       },
-      error: () => {
-        // fallback: try getDatasources which at least has connection names
-        this.datasetsLoaded = true;
-      },
+      error: () => { this.datasetsLoaded = true; },
     });
   }
 
@@ -184,6 +217,9 @@ export class TrainingPipelineWizardComponent implements OnInit {
         maxLen: cfg.maxLen,
         git: cfg.git,
         kind: 'training-job',
+        datasetColumns: this.datasetColumns,
+        datasetSample: this.datasetRows,
+        freshlyCreated: true,
       },
     });
 

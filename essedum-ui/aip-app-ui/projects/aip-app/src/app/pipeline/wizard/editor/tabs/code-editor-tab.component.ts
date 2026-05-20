@@ -89,7 +89,20 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
 
       <!-- ===== RIGHT: Code Editor ===== -->
       <section class="editor-panel">
-        <header class="ed-head">
+
+        <!-- AI initial-generation overlay -->
+        <div class="init-overlay" *ngIf="initializing">
+          <mat-spinner diameter="52"></mat-spinner>
+          <p class="init-msg">Generating your pipeline with AI…</p>
+          <span class="init-sub">
+            The agent is writing your
+            <strong>{{ model.pipelineAttrs?.jobType || model.pipelineAttrs?.pipelineType || 'pipeline' }}</strong>
+            for dataset
+            <strong>{{ model.pipelineAttrs?.dataset || model.name }}</strong>
+          </span>
+        </div>
+
+        <header class="ed-head" [class.ed-blur]="initializing">
           <mat-icon>insert_drive_file</mat-icon>
           <span class="filename">{{ model.filename }}</span>
           <span class="spacer"></span>
@@ -98,7 +111,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
             <mat-icon>save</mat-icon>&nbsp;Save
           </button>
         </header>
-        <div class="ed-body">
+        <div class="ed-body" [class.ed-blur]="initializing">
           <app-enl-code-editor
             [script]="scriptLines"
             [lang]="'python'"
@@ -274,6 +287,24 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     .ed-body { flex: 1; overflow: auto; background: #1e1e1e; }
     ::ng-deep .ed-body .editorscript { height: 100%; min-height: 480px; }
 
+    /* AI generation overlay on the editor panel */
+    .editor-panel { position: relative; }
+    .init-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px;
+      background: rgba(13, 17, 23, 0.80);
+      backdrop-filter: blur(6px);
+    }
+    .init-msg {
+      color: #e6edf3; font-size: 16px; font-weight: 600; margin: 0;
+    }
+    .init-sub {
+      color: #8b949e; font-size: 13px; text-align: center; max-width: 320px; line-height: 1.5;
+      strong { color: #c9d1d9; }
+    }
+    .ed-blur { filter: blur(3px); pointer-events: none; user-select: none; }
+
     /* ─────────────────────── Dark theme ─────────────────── */
     :host-context(body.header-dark-theme) {
       --cp-bg:          #0d1117;
@@ -313,6 +344,7 @@ export class CodeEditorTabComponent
   // Chat state
   prompt = "";
   busy = false;
+  initializing = false;       // true while AI is generating the initial file on creation
   messages: VibeChatMessage[] = [];
   selectedProvider: VibeModel = "claude";
   providers: VibeModel[] = [];
@@ -349,6 +381,7 @@ export class CodeEditorTabComponent
       .pipe(takeUntil(this.destroy$))
       .subscribe((files: VibeFile[]) => {
         this.busy = false;
+        this.initializing = false;          // dismiss overlay once code arrives
         const py = files?.find((f) => /\.py$/i.test(f.path));
         if (py) {
           this.scriptLines = py.content.split("\n");
@@ -370,6 +403,12 @@ export class CodeEditorTabComponent
       this.originalCode = this.model.code || "";
       this.dirty = false;
       this.seeded = false;
+
+      // Freshly created pipeline → auto-generate initial code via Goose
+      if (this.model.pipelineAttrs?.freshlyCreated) {
+        this.vibe.resetSession();
+        this.scheduleAutoGenerate();
+      }
     }
   }
 
@@ -394,15 +433,116 @@ export class CodeEditorTabComponent
     this.prompt = text;
   }
 
+  /**
+   * Called once on freshly-created pipelines.
+   * Sends a comprehensive internal prompt (not shown verbatim) to Goose to generate the initial file.
+   */
+  private scheduleAutoGenerate(): void {
+    const attrs = this.model.pipelineAttrs || {};
+    const columns: string[] = attrs.datasetColumns || [];
+    const sample: any[] = attrs.datasetSample || [];
+    const isTraining = this.model.kind === 'training-job';
+
+    const prompt = isTraining
+      ? this.buildTrainingPrompt(attrs, columns, sample)
+      : this.buildDataPipelinePrompt(attrs, columns, sample);
+
+    // Show only a clean indicator in chat — hide the verbose internal prompt
+    const typeLabel = isTraining
+      ? (attrs.jobType || 'training job')
+      : (attrs.pipelineType || 'pipeline');
+    const displayText = `⚡ Generating initial ${typeLabel} code from your configuration…`;
+
+    this.initializing = true;
+    this.busy = true;
+    this.seeded = true;
+    this.vibe.generate(prompt, displayText);
+  }
+
+  private buildDataPipelinePrompt(attrs: any, columns: string[], sample: any[]): string {
+    return `You are an Essedum ML pipeline code generator. Generate a complete, production-ready Python pipeline script.
+
+## Pipeline Specification
+- Name: ${this.model.name}
+- Alias: ${this.model.alias || this.model.name}
+- Pipeline Type: ${attrs.pipelineType || 'feature-engineering'}
+- Problem Type: ${attrs.problemType || 'classification'}
+- Executor: ${attrs.executor || 'py-job-executor'}
+- Output Format: ${attrs.outputFormat || ''}
+
+## Data Source
+- Connection Type: ${attrs.outputContainer || ''}
+- Connection Alias: ${attrs.connection || ''}
+- Dataset: ${attrs.dataset || ''}
+- Target Column: ${attrs.targetCol || ''}
+- Available Columns: ${columns.length ? columns.join(', ') : '(not specified)'}
+${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
+## Implementation Requirements
+1. Follow the Essedum DataContainer pattern — accept DataContainer input, return DataContainer output
+2. Load data from the ${attrs.outputContainer || 'datasource'} connection "${attrs.connection || ''}", dataset "${attrs.dataset || ''}"
+3. Implement ${attrs.problemType || 'classification'} ML task (pipeline type: ${attrs.pipelineType || 'feature-engineering'})
+4. Target/label column is "${attrs.targetCol || ''}" — predict or transform this column
+5. Use all available feature columns: ${columns.join(', ') || 'all columns except target'}
+6. Use scikit-learn (or most appropriate library) for the task
+7. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving
+8. Add logging using Python's logging module throughout
+9. Main entry function must be named run_pipeline()
+10. Return the COMPLETE Python file — do not omit or truncate any section
+
+Return the full Python script inside a fenced \`\`\`python block.`;
+  }
+
+  private buildTrainingPrompt(attrs: any, columns: string[], sample: any[]): string {
+    return `You are an Essedum ML training job code generator. Generate a complete, production-ready Python training script.
+
+## Training Job Specification
+- Name: ${this.model.name}
+- Alias: ${this.model.alias || this.model.name}
+- Job Type: ${attrs.jobType || 'traditional'}
+- Framework: ${attrs.framework || 'scikit-learn'}
+- Base Model / Algorithm: ${attrs.baseModel || ''}
+- Fine-tuning Method: ${attrs.method || ''}
+- Quantization: ${attrs.quantization || 'none'}
+- Teacher Model (distillation): ${attrs.teacher || 'N/A'}
+- Executor: ${attrs.executor || 'py-job-executor'}
+
+## Hyperparameters
+- Epochs: ${attrs.epochs ?? 3}
+- Batch Size: ${attrs.batchSize ?? 4}
+- Learning Rate: ${attrs.lr || '2e-4'}
+${attrs.loraRank ? `- LoRA Rank: ${attrs.loraRank}\n- LoRA Alpha: ${attrs.loraAlpha}` : ''}
+${attrs.maxLen ? `- Max Sequence Length: ${attrs.maxLen}` : ''}
+
+## Dataset
+- Dataset Alias: ${attrs.dataset || ''}
+- Available Columns: ${columns.length ? columns.join(', ') : '(all columns)'}
+${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
+## Implementation Requirements
+1. Follow the Essedum DataContainer pattern — load data via DataContainer input
+2. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'the appropriate framework'}
+3. Use the ${attrs.baseModel || 'specified algorithm/model'} as the base
+4. Use columns: ${columns.join(', ') || 'all available columns'}
+5. Include: data loading, preprocessing, train/validation split, model initialisation, training loop, evaluation metrics, model saving as artifact
+6. Add logging using Python's logging module throughout
+7. Main entry function must be named run_training()
+8. Handle the hyperparameters (epochs, batch size, lr) as configurable parameters
+9. Return the COMPLETE Python file — do not omit or truncate any section
+
+Return the full Python script inside a fenced \`\`\`python block.`;
+  }
+
   send(): void {
     const userPrompt = this.prompt.trim();
     if (!userPrompt) return;
     this.prompt = "";
     this.busy = true;
 
-    const pipelineKind =
-      this.model.kind === "training-job" ? "training" : "data";
-    const seedHeader = `You are modifying an Essedum ${pipelineKind} pipeline.
+    const attrs = this.model.pipelineAttrs || {};
+    const pipelineKind = this.model.kind === "training-job" ? "training" : "data";
+
+    if (!this.seeded) {
+      // First user message without prior auto-generate: include full file context
+      const seedHeader = `You are modifying an Essedum ${pipelineKind} pipeline.
 Return the FULL updated Python file inside a fenced \`\`\`python block.
 Preserve the auto-generated header comment and the input/output DataContainer schema.
 
@@ -411,11 +551,17 @@ Current file (${this.model.filename}):
 ${this.model.code}
 \`\`\`
 `;
-    const fullPrompt = this.seeded
-      ? userPrompt
-      : `${seedHeader}\n\nInstruction: ${userPrompt}`;
-    this.seeded = true;
-    this.vibe.generate(fullPrompt, userPrompt);
+      this.seeded = true;
+      this.vibe.generate(`${seedHeader}\n\nInstruction: ${userPrompt}`, userPrompt);
+    } else {
+      // Subsequent messages — wrap with lightweight internal context (not shown in chat)
+      const isTraining = this.model.kind === 'training-job';
+      const ctxParts = isTraining
+        ? `pipeline: "${this.model.name}", type: "${attrs.jobType || 'traditional'}", framework: "${attrs.framework || ''}", dataset: "${attrs.dataset || ''}", columns: [${(attrs.datasetColumns || []).join(', ')}]`
+        : `pipeline: "${this.model.name}", type: "${attrs.pipelineType || 'data'}", dataset: "${attrs.dataset || ''}", target column: "${attrs.targetCol || ''}", available columns: [${(attrs.datasetColumns || []).join(', ')}]`;
+      const internalCtx = `\n\n[Internal context — ${ctxParts}. Always return the FULL updated Python file inside a \`\`\`python block. Do not truncate.]`;
+      this.vibe.generate(userPrompt + internalCtx, userPrompt);
+    }
   }
 
   clearChat(): void {

@@ -48,6 +48,7 @@ export class DataPipelineWizardComponent implements OnInit {
 
   targetColumns: string[] = [];           // column names fetched from dataset schema
   targetColumnsLoaded = false;
+  private datasetRows: any[] = [];         // first rows from dataset (schema sample)
 
   slmBaseModels = FALLBACK_SLM_BASE_MODELS;
   teacherModels = TEACHER_MODELS;
@@ -161,6 +162,7 @@ export class DataPipelineWizardComponent implements OnInit {
         next: (rows: any[]) => {
           if (rows && rows.length > 0) {
             this.targetColumns = Object.keys(rows[0]);
+            this.datasetRows = rows.slice(0, 3);  // keep sample for AI prompt
           }
           this.targetColumnsLoaded = true;
         },
@@ -281,6 +283,9 @@ export class DataPipelineWizardComponent implements OnInit {
         schedule: cfg.schedule,
         git: cfg.git,
         kind: 'data-pipeline',
+        datasetColumns: this.targetColumns,
+        datasetSample: this.datasetRows,
+        freshlyCreated: true,
       },
     });
 
