@@ -102,7 +102,20 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
           </span>
         </div>
 
-        <header class="ed-head" [class.ed-blur]="initializing">
+        <!-- Save + Run banner (shown after every Vibe agent update) -->
+        <div class="save-run-banner" *ngIf="showSaveBanner && !initializing">
+          <mat-icon class="banner-icon">auto_awesome</mat-icon>
+          <span class="banner-msg">Pipeline Assistant updated the code &mdash; <strong>save</strong> to persist, then <strong>run</strong> to apply.</span>
+          <span class="banner-spacer"></span>
+          <button mat-flat-button class="banner-save-btn" (click)="save()">
+            <mat-icon>save</mat-icon>&nbsp;Save
+          </button>
+          <button mat-icon-button class="banner-dismiss-btn" (click)="showSaveBanner = false" matTooltip="Dismiss">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <header class="ed-head">
           <mat-icon>insert_drive_file</mat-icon>
           <span class="filename">{{ model.filename }}</span>
           <span class="spacer"></span>
@@ -111,11 +124,13 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
             <mat-icon>save</mat-icon>&nbsp;Save
           </button>
         </header>
-        <div class="ed-body" [class.ed-blur]="initializing">
+        <div class="ed-body">
           <app-enl-code-editor
+            id="ele"
             [script]="scriptLines"
             [lang]="'python'"
             [langEnable]="false"
+            style="height: 100%; width: 100%;"
             (scriptChange)="onScriptChange($event)">
           </app-enl-code-editor>
         </div>
@@ -288,7 +303,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     ::ng-deep .ed-body .editorscript { height: 100%; min-height: 480px; }
 
     /* AI generation overlay on the editor panel */
-    .editor-panel { position: relative; }
+    /* No overflow:hidden — ACE editor must own its scroll/input area */
+    .editor-panel { position: relative; display: flex; flex-direction: column; }
     .init-overlay {
       position: absolute; inset: 0; z-index: 20;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -304,6 +320,27 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       strong { color: #c9d1d9; }
     }
     .ed-blur { filter: blur(3px); pointer-events: none; user-select: none; }
+
+    /* Save + Run banner */
+    .save-run-banner {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      background: #1e3a5f;
+      border-bottom: 1px solid #2d5a8e;
+      flex-shrink: 0;
+    }
+    .banner-icon { color: #60a5fa; font-size: 18px; height: 18px; width: 18px; }
+    .banner-msg { font-size: 13px; color: #bfdbfe; }
+    .banner-msg strong { color: #93c5fd; }
+    .banner-spacer { flex: 1; }
+    .banner-save-btn {
+      background: #2563eb !important; color: #fff !important;
+      font-size: 12px; height: 30px; line-height: 30px;
+    }
+    ::ng-deep .banner-save-btn .mat-icon { font-size: 15px; height: 15px; width: 15px; }
+    .banner-dismiss-btn { color: #93c5fd !important; width: 30px; height: 30px; }
+
+    :host-context(body.header-dark-theme) .save-run-banner { background: #0d2137; border-bottom-color: #1e3a5f; }
 
     /* ─────────────────────── Dark theme ─────────────────── */
     :host-context(body.header-dark-theme) {
@@ -345,6 +382,8 @@ export class CodeEditorTabComponent
   prompt = "";
   busy = false;
   initializing = false;       // true while AI is generating the initial file on creation
+  showSaveBanner = false;     // show after Vibe updates code on follow-up prompts
+  private wasInitialGen = false;  // tracks whether the current generation is the first one
   messages: VibeChatMessage[] = [];
   selectedProvider: VibeModel = "claude";
   providers: VibeModel[] = [];
@@ -353,12 +392,22 @@ export class CodeEditorTabComponent
 
   private destroy$ = new Subject<void>();
 
-  suggestions = [
-    "Add data validation checks",
-    "Add error handling and retries",
-    "Convert to async execution",
-    "Add logging to each step",
-  ];
+  get suggestions(): string[] {
+    if (this.model?.kind === 'training-job') {
+      return [
+        'Add early stopping callback',
+        'Add gradient clipping',
+        'Add learning rate scheduler',
+        'Log metrics to MLflow',
+      ];
+    }
+    return [
+      'Add data validation checks',
+      'Add error handling and retries',
+      'Add feature normalization',
+      'Add logging to each step',
+    ];
+  }
 
   constructor(public vibe: VibeStudioService) {}
 
@@ -381,19 +430,49 @@ export class CodeEditorTabComponent
       .pipe(takeUntil(this.destroy$))
       .subscribe((files: VibeFile[]) => {
         this.busy = false;
-        this.initializing = false;          // dismiss overlay once code arrives
+        const wasInitial = this.wasInitialGen;
+        this.initializing = false;
+        this.wasInitialGen = false;
         const py = files?.find((f) => /\.py$/i.test(f.path));
         if (py) {
           this.scriptLines = py.content.split("\n");
-          const joined = py.content;
-          this.dirty = joined !== this.originalCode;
+          this.dirty = py.content !== this.originalCode;
+          if (wasInitial) {
+            // Auto-save the AI-generated file so it persists without user action
+            this.save();
+          } else {
+            // Subsequent Vibe update — show save+run banner
+            this.showSaveBanner = true;
+          }
         }
         this.scrollPending = true;
       });
 
-    // Reflect busy state
+    // Reflect busy state + clear initializing overlay when agent goes idle (failsafe)
     this.vibe.status$.pipe(takeUntil(this.destroy$)).subscribe((s) => {
       this.busy = s === "generating";
+      // If status leaves 'generating' but generationComplete$ never fired
+      // (i.e. Goose returned only text, no file artifacts), unblock the editor.
+      if ((s === 'idle' || s === 'error') && this.initializing) {
+        const wasInit = this.wasInitialGen;
+        this.initializing = false;
+        this.wasInitialGen = false;
+        // Fallback: extract Python from the last assistant message text
+        const msgs = this.vibe.messages$.value;
+        const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+        if (lastAssistant) {
+          const match = lastAssistant.content.match(/```python\n([\s\S]*?)```/);
+          if (match && match[1].trim()) {
+            this.scriptLines = match[1].split('\n');
+            this.dirty = this.scriptLines.join('\n') !== this.originalCode;
+            if (wasInit) {
+              this.save();
+            } else {
+              this.showSaveBanner = true;
+            }
+          }
+        }
+      }
     });
   }
 
@@ -456,6 +535,7 @@ export class CodeEditorTabComponent
     this.initializing = true;
     this.busy = true;
     this.seeded = true;
+    this.wasInitialGen = true;
     this.vibe.generate(prompt, displayText);
   }
 
@@ -583,6 +663,7 @@ ${this.model.code}
     this.codeChange.emit(code);
     this.originalCode = code;
     this.dirty = false;
+    this.showSaveBanner = false;
   }
 
   private scrollToBottom(): void {

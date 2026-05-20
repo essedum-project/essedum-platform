@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Services } from '../../../services/service';
@@ -36,6 +37,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private services: Services,
   ) {}
 
@@ -103,15 +105,17 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     };
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({
-      next: () => this.services.message('Saved', 'success'),
+      next: () => {
+        this.services.message('Saved! Click ▶ Run to execute the pipeline.', 'success');
+      },
       error: () => this.services.message('Save failed', 'error'),
     });
   }
 
   back(): void {
-    // Relative to current route ('pipelines/view-wizard/:cname' or 'training-pipelines/...'),
-    // '..' navigates back to the listing screen under the same shell mount.
-    this.router.navigate(['..', '..'], { relativeTo: this.route });
+    // Use browser history back — same as the legacy pipeline view (NativeScriptComponent).
+    // This avoids broken relative routing when the component is opened from different entry points.
+    this.location.back();
   }
 
   /** Compute Run History tab index at runtime based on visible tabs. */

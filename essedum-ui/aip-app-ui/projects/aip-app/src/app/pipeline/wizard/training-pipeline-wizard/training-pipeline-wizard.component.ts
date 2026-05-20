@@ -4,7 +4,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
 import { Services } from '../../../services/service';
 import { StreamingServices } from '../../../streaming-services/streaming-service';
-import { CodeTemplateService } from '../shared/code-template.service';
 import { GitLinkService } from '../../../services/git-link.service';
 import {
   TRAINING_JOB_TYPES,
@@ -48,7 +47,6 @@ export class TrainingPipelineWizardComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private templates: CodeTemplateService,
     private services: Services,
     private gitSvc: GitLinkService,
     public dialogRef: MatDialogRef<TrainingPipelineWizardComponent>,
@@ -183,8 +181,6 @@ export class TrainingPipelineWizardComponent implements OnInit {
       git: this.gitLink,
     };
 
-    const pythonCode = this.templates.generateTrainingCode(cfg as any);
-
     const newSs = new StreamingServices();
     newSs.name = cfg.name;
     newSs.alias = cfg.alias;
@@ -196,7 +192,7 @@ export class TrainingPipelineWizardComponent implements OnInit {
         attributes: {
           filetype: 'Python3',
           files: [`${cfg.name}_train.py`],
-          generatedCode: pythonCode,
+          generatedCode: '',
         },
       }],
       pipeline_attributes: {
