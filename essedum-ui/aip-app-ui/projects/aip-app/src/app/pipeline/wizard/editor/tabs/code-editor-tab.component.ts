@@ -151,6 +151,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     .chat-panel {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
       border-right: 1px solid var(--cp-border, #e5e7eb);
       background: var(--cp-bg, #ffffff);
     }
@@ -184,6 +186,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     .cp-messages {
       list-style: none;
       flex: 1;
+      min-height: 0;
       margin: 0;
       padding: 12px;
       overflow-y: auto;
@@ -282,6 +285,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     .editor-panel {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
       background: var(--ed-bg, #1e1e1e);
     }
     .ed-head {
@@ -299,12 +304,11 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       font-size: 11px; padding: 2px 7px; border-radius: 999px;
       background: #f59e0b22; color: #f59e0b; font-weight: 600;
     }
-    .ed-body { flex: 1; overflow: auto; background: #1e1e1e; }
+    .ed-body { flex: 1; min-height: 0; overflow: auto; background: #1e1e1e; }
     ::ng-deep .ed-body .editorscript { height: 100%; min-height: 480px; }
 
     /* AI generation overlay on the editor panel */
-    /* No overflow:hidden — ACE editor must own its scroll/input area */
-    .editor-panel { position: relative; display: flex; flex-direction: column; }
+    .editor-panel { position: relative; }
     .init-overlay {
       position: absolute; inset: 0; z-index: 20;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
