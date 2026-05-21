@@ -122,7 +122,14 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
   `,
   styles: [`
     /* ── Shell ─────────────────────────────────────────────────────────────── */
-    :host { display: block; height: 100%; overflow: hidden; }
+    /* position:absolute + inset:0 anchors to the tab-body-content positioned  */
+    /* ancestor — exactly the same pattern as vibe-studio.component.scss.      */
+    :host {
+      display: block !important;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
     .vibe-shell {
       display: grid;
       grid-template-columns: 360px 1fr;
@@ -134,11 +141,10 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .chat-panel {
       display: flex;
       flex-direction: column;
-      height: 100%;
       min-height: 0;
+      overflow: hidden;
       border-right: 1px solid #e5e7eb;
       background: #ffffff;
-      overflow: hidden;
     }
 
     /* ── Model Bar (Header) ─────────────────────────────────────────────────── */
@@ -359,7 +365,6 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .diff-panel {
       display: flex;
       flex-direction: column;
-      height: 100%;
       min-height: 0;
       background: #0b1220;
       color: #e5e7eb;

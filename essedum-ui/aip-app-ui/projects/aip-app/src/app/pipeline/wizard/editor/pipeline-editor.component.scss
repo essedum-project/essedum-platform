@@ -48,7 +48,7 @@
 .editor-tabs { flex:1; overflow:hidden; }
 ::ng-deep .editor-tabs .mat-mdc-tab-body-wrapper { flex:1; height:100%; overflow:hidden; }
 ::ng-deep .editor-tabs .mat-mdc-tab-body { height: 100%; overflow: hidden; }
-::ng-deep .editor-tabs .mat-mdc-tab-body-content { height: 100%; overflow: hidden; }
+::ng-deep .editor-tabs .mat-mdc-tab-body-content { position: relative; height: 100%; overflow: hidden; }
 ::ng-deep .editor-tabs .mat-mdc-tab .mdc-tab__text-label { color: var(--pe-tab-fg, #374151) !important; }
 ::ng-deep .editor-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: #7c3aed !important; }
 ::ng-deep .editor-tabs .mat-mdc-tab-header {
