@@ -103,6 +103,14 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       files: [this.model.filename],
       filetype: 'Python3',
     };
+    // Clear freshlyCreated so re-navigation doesn't re-trigger code generation
+    if (parsed.pipeline_attributes) {
+      parsed.pipeline_attributes.freshlyCreated = false;
+    }
+    // Update in-memory model so current session also stops triggering re-generation
+    if (this.model.pipelineAttrs) {
+      this.model.pipelineAttrs.freshlyCreated = false;
+    }
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({
       next: () => {

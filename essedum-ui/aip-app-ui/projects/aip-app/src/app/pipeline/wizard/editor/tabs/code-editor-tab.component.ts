@@ -11,6 +11,8 @@
   SimpleChanges,
   ViewChild,
 } from "@angular/core";
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { marked } from 'marked';
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { VibeStudioService } from "../../../../vibe-studio/services/vibe-studio.service";
@@ -49,18 +51,40 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
               <button class="cp-chip" *ngFor="let s of suggestions" (click)="prefill(s)">{{ s }}</button>
             </div>
           </li>
-          <li *ngFor="let m of messages"
+
+          <li *ngFor="let m of messages; let last = last"
               class="cp-msg"
               [class.cp-user]="m.role === 'user'"
               [class.cp-ai]="m.role === 'assistant'">
-            <span class="cp-avatar">
-              <mat-icon>{{ m.role === "user" ? "person" : "auto_awesome" }}</mat-icon>
-            </span>
-            <div class="cp-bubble">{{ m.content }}</div>
-          </li>
-          <li class="cp-typing" *ngIf="busy">
-            <mat-icon>auto_awesome</mat-icon>
-            <div class="cp-dots"><span></span><span></span><span></span></div>
+
+            <!-- User message -->
+            <ng-container *ngIf="m.role === 'user'">
+              <div class="cp-turn-meta cp-user-meta">
+                <span class="cp-turn-label">You</span>
+                <span class="cp-user-avatar"><mat-icon>person</mat-icon></span>
+              </div>
+              <div class="cp-bubble cp-user-bubble">{{ m.content }}</div>
+            </ng-container>
+
+            <!-- Assistant message -->
+            <ng-container *ngIf="m.role === 'assistant'">
+              <div class="cp-turn-meta cp-ai-meta">
+                <span class="cp-ai-avatar"><mat-icon>auto_awesome</mat-icon></span>
+                <span class="cp-turn-label">Pipeline Assistant</span>
+                <span class="cp-ai-badge">AI</span>
+              </div>
+              <!-- Typing dots: only while waiting for first token -->
+              <div *ngIf="busy && last && !m.content" class="cp-typing-inline">
+                <div class="cp-dots"><span></span><span></span><span></span></div>
+              </div>
+              <!-- Rendered markdown content -->
+              <div *ngIf="m.content"
+                   class="cp-bubble cp-ai-bubble"
+                   [innerHTML]="renderMarkdown(m.content)">
+              </div>
+              <span *ngIf="last && busy && m.content" class="cp-stream-cursor"></span>
+            </ng-container>
+
           </li>
         </ul>
 
@@ -192,8 +216,140 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124,58,237,0.3) transparent;
     }
+    .cp-messages::-webkit-scrollbar { width: 4px; }
+    .cp-messages::-webkit-scrollbar-thumb { border-radius: 4px; background: rgba(124,58,237,0.3); }
+
+    /* Message turn layout */
+    .cp-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      list-style: none;
+    }
+    .cp-user { align-items: flex-end; }
+    .cp-ai   { align-items: flex-start; }
+
+    .cp-turn-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--cp-muted, #64748b);
+    }
+    .cp-user-meta { flex-direction: row-reverse; }
+    .cp-turn-label { opacity: 0.8; }
+
+    .cp-user-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      flex-shrink: 0;
+    }
+    .cp-user-avatar mat-icon { font-size: 12px; height: 12px; width: 12px; color: #7c3aed; }
+
+    .cp-ai-avatar {
+      width: 24px; height: 24px; border-radius: 7px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+      flex-shrink: 0;
+    }
+    .cp-ai-avatar mat-icon { font-size: 14px; height: 14px; width: 14px; color: #fff; }
+
+    .cp-ai-badge {
+      font-size: 9px; font-weight: 800;
+      padding: 2px 5px; border-radius: 4px;
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+      color: #fff; letter-spacing: 0.5px;
+    }
+
+    /* Bubbles */
+    .cp-bubble {
+      max-width: 90%;
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+    .cp-user-bubble {
+      background: var(--cp-user-bg, #ede9fe);
+      color: var(--cp-user-fg, #4c1d95);
+      border-radius: 14px 4px 14px 14px;
+    }
+    .cp-ai-bubble {
+      background: var(--cp-ai-bg, #f1f5f9);
+      color: var(--cp-ai-fg, #0f172a);
+      border-radius: 4px 14px 14px 14px;
+    }
+
+    /* Markdown inside ai bubble */
+    .cp-ai-bubble ::ng-deep p { margin: 0 0 8px; &:last-child { margin-bottom: 0; } }
+    .cp-ai-bubble ::ng-deep h1,.cp-ai-bubble ::ng-deep h2,.cp-ai-bubble ::ng-deep h3 { margin: 8px 0 4px; font-weight: 700; }
+    .cp-ai-bubble ::ng-deep ul,.cp-ai-bubble ::ng-deep ol { margin: 4px 0; padding-left: 18px; }
+    .cp-ai-bubble ::ng-deep li { margin: 2px 0; }
+    .cp-ai-bubble ::ng-deep strong { font-weight: 700; }
+    .cp-ai-bubble ::ng-deep a { color: #4f8ef7; text-decoration: none; }
+    .cp-ai-bubble ::ng-deep pre {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    .cp-ai-bubble ::ng-deep pre::-webkit-scrollbar { height: 3px; }
+    .cp-ai-bubble ::ng-deep pre::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(124,58,237,0.4); }
+    .cp-ai-bubble ::ng-deep code {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 12px;
+    }
+    .cp-ai-bubble ::ng-deep pre code {
+      background: transparent;
+      color: #e2e8f0;
+      padding: 0;
+    }
+    .cp-ai-bubble ::ng-deep :not(pre) > code {
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* Typing / streaming */
+    .cp-typing-inline {
+      padding: 6px 0 2px;
+    }
+    .cp-dots { display: flex; gap: 4px; }
+    .cp-dots span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed); display: inline-block;
+      animation: cp-bounce 1.2s infinite ease-in-out;
+    }
+    .cp-dots span:nth-child(1) { animation-delay: 0s; }
+    .cp-dots span:nth-child(2) { animation-delay: .2s; }
+    .cp-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes cp-bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40%            { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes cp-blink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0; }
+    }
+    .cp-stream-cursor {
+      display: inline-block; width: 2px; height: 13px;
+      background: linear-gradient(180deg, #4f8ef7, #7c3aed);
+      margin-left: 2px; vertical-align: text-bottom;
+      border-radius: 2px; animation: cp-blink 0.7s steps(1) infinite;
+    }
+
+    /* Empty state */
     .cp-empty {
       display: flex;
       flex-direction: column;
@@ -216,57 +372,6 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       cursor: pointer;
     }
     .cp-chip:hover { opacity: 0.8; }
-
-    .cp-msg {
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-    }
-    .cp-user { flex-direction: row-reverse; }
-    ::ng-deep .cp-avatar mat-icon, ::ng-deep .cp-avatar .mat-icon {
-      font-size: 18px; height: 18px; width: 18px;
-      color: var(--cp-avatar-fg, #7c3aed);
-    }
-    .cp-bubble {
-      max-width: 82%;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .cp-user .cp-bubble {
-      background: var(--cp-user-bg, #ede9fe);
-      color: var(--cp-user-fg, #4c1d95);
-      border-bottom-right-radius: 2px;
-    }
-    .cp-ai .cp-bubble {
-      background: var(--cp-ai-bg, #f1f5f9);
-      color: var(--cp-ai-fg, #0f172a);
-      border-bottom-left-radius: 2px;
-    }
-
-    /* Typing indicator */
-    .cp-typing {
-      display: flex; align-items: center; gap: 10px; padding: 4px 0;
-    }
-    ::ng-deep .cp-typing mat-icon, ::ng-deep .cp-typing .mat-icon {
-      font-size: 18px; height: 18px; width: 18px; color: #a78bfa;
-    }
-    .cp-dots { display: flex; gap: 4px; }
-    .cp-dots span {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: #a78bfa; display: inline-block;
-      animation: cp-bounce 1.2s infinite ease-in-out;
-    }
-    .cp-dots span:nth-child(1) { animation-delay: 0s; }
-    .cp-dots span:nth-child(2) { animation-delay: .2s; }
-    .cp-dots span:nth-child(3) { animation-delay: .4s; }
-    @keyframes cp-bounce {
-      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-      40%            { transform: scale(1.2); opacity: 1; }
-    }
 
     /* Footer */
     .cp-foot {
@@ -365,8 +470,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       --ed-head-bg:     #0d1117;
       --ed-border:      #30363d;
       --ed-head-fg:     #8b949e;
-    }
-    `,
+    }    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre { background: #0d1117; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }    `,
   ],
 })
 export class CodeEditorTabComponent
@@ -413,7 +518,10 @@ export class CodeEditorTabComponent
     ];
   }
 
-  constructor(public vibe: VibeStudioService) {}
+  constructor(
+    public vibe: VibeStudioService,
+    private sanitizer: DomSanitizer,
+  ) {}
 
   ngOnInit(): void {
     this.providers =
@@ -441,13 +549,8 @@ export class CodeEditorTabComponent
         if (py) {
           this.scriptLines = py.content.split("\n");
           this.dirty = py.content !== this.originalCode;
-          if (wasInitial) {
-            // Auto-save the AI-generated file so it persists without user action
-            this.save();
-          } else {
-            // Subsequent Vibe update — show save+run banner
-            this.showSaveBanner = true;
-          }
+          // Auto-save on both initial and follow-up AI generations so the update API always fires
+          this.save();
         }
         this.scrollPending = true;
       });
@@ -488,7 +591,9 @@ export class CodeEditorTabComponent
       this.seeded = false;
 
       // Freshly created pipeline → auto-generate initial code via Goose
-      if (this.model.pipelineAttrs?.freshlyCreated) {
+      // Guard: only trigger if code is still the placeholder (defense-in-depth for stale flags)
+      if (this.model.pipelineAttrs?.freshlyCreated &&
+          (!this.model.code || this.model.code.trim() === '# (no code yet)')) {
         this.vibe.resetSession();
         this.scheduleAutoGenerate();
       }
@@ -506,6 +611,12 @@ export class CodeEditorTabComponent
     this.destroy$.next();
     this.destroy$.complete();
     this.vibe.cancelReply?.();
+  }
+
+  renderMarkdown(text: string): SafeHtml {
+    const result = marked.parse(text ?? '');
+    const html = typeof result === 'string' ? result : '';
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   onProviderChange(): void {
