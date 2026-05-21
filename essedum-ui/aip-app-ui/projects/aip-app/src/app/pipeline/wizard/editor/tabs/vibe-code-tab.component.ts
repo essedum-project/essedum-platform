@@ -104,16 +104,17 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       <!-- ── Right: Proposed Code Panel ── -->
       <section class="diff-panel">
         <div class="diff-head">
-          <span class="diff-head-icon"><mat-icon>preview</mat-icon></span>
-          <b>Proposed Code</b>
+          <span class="diff-head-icon"><mat-icon>{{ hasPendingProposal ? 'auto_fix_high' : 'insert_drive_file' }}</mat-icon></span>
+          <b>{{ hasPendingProposal ? 'Proposed Code' : 'Saved Code' }}</b>
+          <span class="proposal-badge" *ngIf="hasPendingProposal">AI proposal</span>
           <span class="spacer"></span>
-          <button mat-button class="discard-btn" (click)="discard()" [disabled]="!proposedCode">Discard</button>
-          <button mat-flat-button color="primary" class="apply-btn" (click)="apply()" [disabled]="!proposedCode">
+          <button mat-button class="discard-btn" (click)="discard()" [disabled]="!hasPendingProposal">Discard</button>
+          <button mat-flat-button color="primary" class="apply-btn" (click)="apply()" [disabled]="!hasPendingProposal">
             <mat-icon>check</mat-icon>&nbsp;Apply
           </button>
         </div>
         <div class="code-area">
-          <pre class="code-preview">{{ proposedCode || '(no proposal yet — send a prompt to generate)' }}</pre>
+          <pre class="code-preview">{{ proposedCode || '# (no code yet — send a prompt to generate)' }}</pre>
         </div>
       </section>
 
@@ -125,7 +126,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .vibe-shell {
       display: grid;
       grid-template-columns: 360px 1fr;
-      height: calc(100vh - 200px);
+      height: 100%;
       overflow: hidden;
     }
 
@@ -380,6 +381,10 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .spacer { flex: 1; }
     .discard-btn { color: #94a3b8; font-size: 12px; min-width: unset; }
     .apply-btn { font-size: 12px; }
+    .proposal-badge {
+      font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed); color: #fff; letter-spacing: 0.5px;
+    }
     .code-area {
       flex: 1;
       min-height: 0;
@@ -409,6 +414,7 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   busy = false;
   messages: { role: string; content: string }[] = [];
   proposedCode = '';
+  hasPendingProposal = false;
   selectedProvider: VibeModel = 'claude';
   providers: VibeModel[] = Object.keys(GOOSE_PROVIDER_MAP || {}) as VibeModel[];
 
@@ -420,6 +426,13 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.providers.length === 0) this.providers = ['claude', 'gemini', 'azure-oai'];
 
+    // Pre-populate the right panel with the currently saved code from the DB.
+    // hasPendingProposal stays false so Apply/Discard remain disabled.
+    const savedCode = this.model?.code;
+    if (savedCode && savedCode.trim() !== '# (no code yet)') {
+      this.proposedCode = savedCode;
+    }
+
     this.vibe.messages$.pipe(takeUntil(this.destroy$)).subscribe(msgs => {
       this.messages = msgs.map(m => ({ role: m.role, content: m.content }));
       this.scrollToBottom();
@@ -428,7 +441,10 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
     this.vibe.generationComplete$.pipe(takeUntil(this.destroy$)).subscribe(files => {
       this.busy = false;
       const py = files?.find(f => /\.py$/i.test(f.path));
-      if (py) this.proposedCode = py.content;
+      if (py) {
+        this.proposedCode = py.content;
+        this.hasPendingProposal = true;
+      }
     });
   }
 
@@ -460,12 +476,17 @@ ${this.model.code}
   }
 
   apply(): void {
-    if (!this.proposedCode) return;
+    if (!this.hasPendingProposal || !this.proposedCode) return;
     this.codeChange.emit(this.proposedCode);
-    this.proposedCode = '';
+    // After applying, the proposed code becomes the saved code — no more pending proposal.
+    this.hasPendingProposal = false;
   }
 
-  discard(): void { this.proposedCode = ''; }
+  discard(): void {
+    // Revert to the last saved code and clear the pending proposal flag.
+    this.proposedCode = this.model?.code || '';
+    this.hasPendingProposal = false;
+  }
 
   private scrollToBottom(): void {
     setTimeout(() => {
