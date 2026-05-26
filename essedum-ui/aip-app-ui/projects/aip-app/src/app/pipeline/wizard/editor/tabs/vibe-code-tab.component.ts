@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { VibeStudioService } from '../../../../vibe-studio/services/vibe-studio.service';
@@ -13,7 +13,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     <div class="vibe-shell">
 
       <!-- ── Left: Chat Panel ── -->
-      <aside class="chat-panel">
+      <aside class="chat-panel" [style.width.px]="chatWidth">
 
         <!-- Model bar / header -->
         <div class="model-bar">
@@ -100,6 +100,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
         </div>
 
       </aside>
+      <div class="panel-divider" (mousedown)="onDividerMouseDown($event)"></div>
 
       <!-- ── Right: Proposed Code Panel ── -->
       <section class="diff-panel">
@@ -125,10 +126,10 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     /* Same height strategy as code-editor-tab — explicit calc, no parent-chain */
     :host { display: block; overflow: hidden; }
     .vibe-shell {
-      display: grid;
-      grid-template-columns: 360px 1fr;
+      display: flex;
       height: calc(100vh - 148px);
       overflow: hidden;
+      user-select: none;
     }
 
     /* ── Chat Panel ─────────────────────────────────────────────────────────── */
@@ -137,8 +138,8 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
+      flex-shrink: 0;
       border-right: 1px solid #e5e7eb;
-      background: #ffffff;
     }
 
     /* ── Model Bar (Header) ─────────────────────────────────────────────────── */
@@ -252,7 +253,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .welcome-tip i { margin-right: 4px; color: #f59e0b; }
 
     /* ── Message Turns ──────────────────────────────────────────────────────── */
-    .message-turn { display: flex; flex-direction: column; gap: 5px; }
+    .message-turn { display: flex; flex-direction: column; gap: 5px; animation: msg-enter 0.22s ease both; }
     .user-turn      { align-items: flex-end; }
     .assistant-turn { align-items: flex-start; }
     .turn-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #64748b; }
@@ -277,16 +278,20 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     }
     .user-card {
       max-width: 85%;
-      background: #ede9fe;
-      border-radius: 14px 4px 14px 14px;
-      padding: 9px 13px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(124,58,237,0.07));
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 16px 4px 16px 16px;
+      padding: 10px 14px;
+      box-shadow: 0 2px 10px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
     }
-    .user-card .user-text { font-size: 13px; line-height: 1.55; color: #3730a3; word-break: break-word; }
+    .user-card .user-text { font-size: 13px; line-height: 1.6; color: #1e293b; word-break: break-word; }
     .assistant-card {
       max-width: 95%;
-      background: #f1f5f9;
-      border-radius: 4px 14px 14px 14px;
-      padding: 10px 13px;
+      background: #ffffff;
+      border: 1px solid rgba(99,102,241,0.12);
+      border-radius: 4px 16px 16px 16px;
+      padding: 10px 14px;
+      box-shadow: 0 2px 12px rgba(99,102,241,0.07), 0 1px 2px rgba(0,0,0,0.04);
     }
     .assistant-card .msg-text {
       font-size: 13px; line-height: 1.6; color: #1e293b;
@@ -301,6 +306,10 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50%      { opacity: 0; }
+    }
+    @keyframes msg-enter {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .typing-dots { display: flex; gap: 5px; padding: 4px 0; align-items: center; }
     .typing-dots span {
@@ -322,7 +331,6 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       padding: 10px 12px 12px;
       flex-shrink: 0;
       border-top: 1px solid #e5e7eb;
-      background: #ffffff;
     }
     .input-shell {
       display: flex;
@@ -345,14 +353,14 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     }
     .prompt-input::placeholder { color: #94a3b8; }
     .send-btn {
-      width: 30px; height: 30px; border-radius: 8px; border: none;
+      width: 34px; height: 34px; border-radius: 10px; border: none;
       background: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 100%);
       color: #fff; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; flex-shrink: 0; transition: opacity 0.15s, transform 0.15s;
+      cursor: pointer; flex-shrink: 0; transition: all 0.18s;
     }
-    .send-btn mat-icon { font-size: 16px; height: 16px; width: 16px; }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .send-btn:not(:disabled):hover { transform: translateY(-1px); opacity: 0.9; }
+    .send-btn mat-icon { font-size: 18px; height: 18px; width: 18px; line-height: 18px; }
+    .send-btn:disabled { opacity: 0.4; cursor: default; }
+    .send-btn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,142,247,0.5); }
     .input-hint { font-size: 10px; color: #94a3b8; margin-top: 6px; text-align: right; }
 
     /* ── Diff / Code Panel (Right) ──────────────────────────────────────────── */
@@ -402,6 +410,76 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       color: #e5e7eb;
       line-height: 1.6;
     }
+
+    /* ── Panel Divider ─────────────────────────────────────────────────────── */
+    .panel-divider {
+      width: 4px;
+      flex-shrink: 0;
+      cursor: col-resize;
+      background: #e2e8f0;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .panel-divider:hover { background: rgba(79,142,247,0.45); }
+    .panel-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px; height: 32px;
+      border-radius: 2px;
+      background: rgba(79,142,247,0.7);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .panel-divider:hover::after { opacity: 1; }
+
+    /* ── Light theme ───────────────────────────────────────────────────────── */
+    :host-context(body.header-light-theme) .chat-panel { background: #fafdff; }
+    :host-context(body.header-light-theme) .welcome-text-group h3 { color: #0f172a; }
+    :host-context(body.header-light-theme) .welcome-text-group p  { color: #64748b; }
+    :host-context(body.header-light-theme) .welcome-tip { background: #f8fafc; border-color: #e2e8f0; color: #94a3b8; }
+    :host-context(body.header-light-theme) .turn-meta   { color: #94a3b8; }
+    :host-context(body.header-light-theme) .user-avatar { background: rgba(99,102,241,0.12); color: #4f46e5; }
+    :host-context(body.header-light-theme) .prompt-input { color: #1e293b; }
+    :host-context(body.header-light-theme) .prompt-input::placeholder { color: #94a3b8; }
+    :host-context(body.header-light-theme) .input-shell { border-color: #e2e8f0; }
+    :host-context(body.header-light-theme) .input-area { background: #fafdff; }
+    :host-context(body.header-light-theme) .input-hint { color: #94a3b8; }
+    :host-context(body.header-light-theme) .panel-divider { background: #e2e8f0; }
+
+    /* ── Dark theme ────────────────────────────────────────────────────────── */
+    :host-context(body.header-dark-theme) .chat-panel { background: #0f172a; border-right-color: rgba(79,142,247,0.12); }
+    :host-context(body.header-dark-theme) .messages-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+    :host-context(body.header-dark-theme) .welcome-glow-ring { background: rgba(79,142,247,0.07); border-color: rgba(79,142,247,0.15); }
+    :host-context(body.header-dark-theme) .welcome-avatar { background: rgba(79,142,247,0.12); color: #4f8ef7; }
+    :host-context(body.header-dark-theme) .welcome-text-group h3 { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .welcome-text-group p  { color: #94a3b8; }
+    :host-context(body.header-dark-theme) .welcome-tip { background: rgba(79,142,247,0.07); border-color: rgba(79,142,247,0.2); color: #94a3b8; }
+    :host-context(body.header-dark-theme) .welcome-tip i { color: #f59e0b; }
+    :host-context(body.header-dark-theme) .turn-meta { color: #8faec8; }
+    :host-context(body.header-dark-theme) .user-meta { color: #94a3b8; }
+    :host-context(body.header-dark-theme) .user-avatar { background: rgba(79,142,247,0.15); color: #60a5fa; }
+    :host-context(body.header-dark-theme) .user-card {
+      background: linear-gradient(135deg, rgba(79,142,247,0.16), rgba(124,58,237,0.1));
+      border-color: rgba(79,142,247,0.28);
+      box-shadow: 0 2px 12px rgba(79,142,247,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    :host-context(body.header-dark-theme) .user-card .user-text { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .assistant-card {
+      background: rgba(255,255,255,0.055);
+      border-color: rgba(79,142,247,0.18);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    :host-context(body.header-dark-theme) .assistant-card .msg-text { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .input-area { background: #0f172a; border-top-color: rgba(79,142,247,0.1); }
+    :host-context(body.header-dark-theme) .input-shell { background: rgba(255,255,255,0.03); border-color: rgba(79,142,247,0.18); }
+    :host-context(body.header-dark-theme) .input-shell:focus-within { border-color: rgba(79,142,247,0.5); box-shadow: 0 0 0 3px rgba(79,142,247,0.08); }
+    :host-context(body.header-dark-theme) .prompt-input { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .prompt-input::placeholder { color: #64748b; }
+    :host-context(body.header-dark-theme) .input-hint { color: #64748b; }
+    :host-context(body.header-dark-theme) .panel-divider { background: rgba(79,142,247,0.12); }
+    :host-context(body.header-dark-theme) .panel-divider:hover { background: rgba(79,142,247,0.4); }
   `],
 })
 export class VibeCodeTabComponent implements OnInit, OnDestroy {
@@ -417,10 +495,34 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   selectedProvider: VibeModel = 'claude';
   providers: VibeModel[] = Object.keys(GOOSE_PROVIDER_MAP || {}) as VibeModel[];
 
+  chatWidth = 360;
+  private isDragging = false;
   private destroy$ = new Subject<void>();
   private seeded = false;
+  /** true once generationComplete$ has updated proposedCode for the current round */
+  private codeUpdatedThisRound = false;
 
   constructor(public vibe: VibeStudioService) {}
+
+  onDividerMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (!this.isDragging) return;
+    const container = document.querySelector('.vibe-shell') as HTMLElement;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const newWidth = event.clientX - rect.left;
+    this.chatWidth = Math.min(600, Math.max(240, newWidth));
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this.isDragging = false;
+  }
 
   ngOnInit(): void {
     if (this.providers.length === 0) this.providers = ['claude', 'gemini', 'azure-oai'];
@@ -443,6 +545,20 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
       if (py) {
         this.proposedCode = py.content;
         this.hasPendingProposal = true;
+        this.codeUpdatedThisRound = true;
+      } else {
+        // No file artifact found — extract from the last assistant message
+        this.extractProposalFromLastMessage();
+      }
+    });
+
+    // Reset busy and run fallback when generationComplete$ never fires at all
+    // (agent returned only chat text with no detectable file artifacts)
+    this.vibe.status$.pipe(takeUntil(this.destroy$)).subscribe(s => {
+      const wasBusy = this.busy;
+      this.busy = s === 'generating';
+      if (wasBusy && (s === 'idle' || s === 'error') && !this.codeUpdatedThisRound) {
+        this.extractProposalFromLastMessage();
       }
     });
   }
@@ -457,6 +573,7 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   send(): void {
     if (!this.prompt.trim()) return;
     this.busy = true;
+    this.codeUpdatedThisRound = false;
     const userPrompt = this.prompt.trim();
     this.prompt = '';
 
@@ -493,5 +610,20 @@ ${this.model.code}
         this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
       }
     }, 50);
+  }
+
+  /** Extracts the first fenced code block from the last assistant message and
+   *  sets it as the proposed code if one is found. */
+  private extractProposalFromLastMessage(): void {
+    const msgs = this.vibe.messages$.value;
+    const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+    if (lastAssistant?.content) {
+      const match = lastAssistant.content.match(/```(?:python)?\n([\s\S]*?)```/);
+      if (match?.[1]?.trim()) {
+        this.proposedCode = match[1];
+        this.hasPendingProposal = true;
+        this.codeUpdatedThisRound = true;
+      }
+    }
   }
 }

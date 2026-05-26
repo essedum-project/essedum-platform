@@ -498,6 +498,8 @@ export class CodeEditorTabComponent
   providers: VibeModel[] = [];
   private seeded = false;
   private scrollPending = false;
+  /** true once generationComplete$ has updated scriptLines for the current round */
+  private codeUpdatedThisRound = false;
 
   private destroy$ = new Subject<void>();
 
@@ -549,6 +551,7 @@ export class CodeEditorTabComponent
         if (py) {
           this.scriptLines = py.content.split("\n");
           this.dirty = py.content !== this.originalCode;
+          this.codeUpdatedThisRound = true;
           // Auto-save on both initial and follow-up AI generations so the update API always fires
           this.save();
         }
@@ -557,10 +560,12 @@ export class CodeEditorTabComponent
 
     // Reflect busy state + clear initializing overlay when agent goes idle (failsafe)
     this.vibe.status$.pipe(takeUntil(this.destroy$)).subscribe((s) => {
+      const wasBusy = this.busy;
       this.busy = s === "generating";
-      // If status leaves 'generating' but generationComplete$ never fired
-      // (i.e. Goose returned only text, no file artifacts), unblock the editor.
-      if ((s === 'idle' || s === 'error') && this.initializing) {
+      // If status leaves 'generating' but generationComplete$ never updated the editor
+      // (i.e. Goose returned only text with no file artifacts), extract code from chat.
+      // This handles both initial generation and follow-up modification prompts.
+      if (wasBusy && (s === 'idle' || s === 'error') && !this.codeUpdatedThisRound) {
         const wasInit = this.wasInitialGen;
         this.initializing = false;
         this.wasInitialGen = false;
@@ -579,6 +584,9 @@ export class CodeEditorTabComponent
             }
           }
         }
+      } else if (s === 'idle' || s === 'error') {
+        this.initializing = false;
+        this.wasInitialGen = false;
       }
     });
   }
@@ -651,6 +659,7 @@ export class CodeEditorTabComponent
     this.busy = true;
     this.seeded = true;
     this.wasInitialGen = true;
+    this.codeUpdatedThisRound = false;
     this.vibe.generate(prompt, displayText);
   }
 
@@ -731,6 +740,7 @@ Return the full Python script inside a fenced \`\`\`python block.`;
     if (!userPrompt) return;
     this.prompt = "";
     this.busy = true;
+    this.codeUpdatedThisRound = false;
 
     const attrs = this.model.pipelineAttrs || {};
     const pipelineKind = this.model.kind === "training-job" ? "training" : "data";
