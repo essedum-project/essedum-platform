@@ -14,9 +14,12 @@ rules:
     resources: ["deployments"]
     verbs: ["create","get","list","watch","patch","update","delete"]   # adjust verbs to your needs
 
-
   - apiGroups: [""]
     resources: ["secrets","services"]
+    verbs: ["get","list","watch","create","update","patch","delete"]
+
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
     verbs: ["get","list","watch","create","update","patch","delete"]
 
 ---
@@ -25,6 +28,33 @@ kind: RoleBinding
 metadata:
   name: deployer-binding
   namespace: essedum
+subjects:
+  - kind: ServiceAccount
+    name: builder-sa
+    namespace: essedum
+roleRef:
+  kind: Role
+  name: deployer-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer-role
+  namespace: aipns
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create","get","list","watch","patch","update","delete"]
+  - apiGroups: [""]
+    resources: ["secrets","services","namespaces"]
+    verbs: ["get","list","watch","create","update","patch","delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployer-binding
+  namespace: aipns
 subjects:
   - kind: ServiceAccount
     name: builder-sa

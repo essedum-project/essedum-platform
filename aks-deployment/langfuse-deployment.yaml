@@ -41,7 +41,10 @@ spec:
               name: http
           env:
             - name: TZ
-              value: "UTC"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: TZ
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -58,9 +61,15 @@ spec:
                   name: langfuse-secret
                   key: encryption-key
             - name: TELEMETRY_ENABLED
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: TELEMETRY_ENABLED
             - name: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
             - name: CLICKHOUSE_MIGRATION_URL
               valueFrom:
                 secretKeyRef:
@@ -72,14 +81,20 @@ spec:
                   name: langfuse-secret
                   key: clickhouse-url
             - name: CLICKHOUSE_USER
-              value: "default"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: CLICKHOUSE_USER
             - name: CLICKHOUSE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: langfuse-secret
                   key: clickhouse-password
             - name: CLICKHOUSE_CLUSTER_ENABLED
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: CLICKHOUSE_CLUSTER_ENABLED
             - name: REDIS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
@@ -87,9 +102,15 @@ spec:
                   key: redis-connection-string
             # langfuse-web v3 requires REDIS_HOST/PORT/AUTH as separate vars
             - name: REDIS_HOST
-              value: "redis"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: REDIS_HOST
             - name: REDIS_PORT
-              value: "6379"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: REDIS_PORT
             - name: REDIS_AUTH
               valueFrom:
                 secretKeyRef:
@@ -97,9 +118,15 @@ spec:
                   key: redis-auth
             # S3 Event Upload
             - name: LANGFUSE_S3_EVENT_UPLOAD_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_EVENT_UPLOAD_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -111,16 +138,31 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
             - name: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
-              value: "events/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
             # S3 Media Upload
             - name: LANGFUSE_S3_MEDIA_UPLOAD_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_MEDIA_UPLOAD_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -132,24 +174,51 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
             - name: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
-              value: "media/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
             # S3 Batch Export
             - name: LANGFUSE_S3_BATCH_EXPORT_ENABLED
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BATCH_EXPORT_ENABLED
             - name: LANGFUSE_S3_BATCH_EXPORT_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_BATCH_EXPORT_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_BATCH_EXPORT_PREFIX
-              value: "exports/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BATCH_EXPORT_PREFIX
             - name: LANGFUSE_S3_BATCH_EXPORT_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -161,9 +230,15 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
             - name: NEXTAUTH_URL
-              value: "http://langfuse.essedum.local"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_NEXTAUTH_URL
             - name: NEXTAUTH_SECRET
               valueFrom:
                 secretKeyRef:
@@ -243,7 +318,10 @@ spec:
               name: http
           env:
             - name: TZ
-              value: "UTC"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: TZ
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -260,9 +338,15 @@ spec:
                   name: langfuse-secret
                   key: encryption-key
             - name: TELEMETRY_ENABLED
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: TELEMETRY_ENABLED
             - name: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES
             - name: CLICKHOUSE_MIGRATION_URL
               valueFrom:
                 secretKeyRef:
@@ -274,14 +358,20 @@ spec:
                   name: langfuse-secret
                   key: clickhouse-url
             - name: CLICKHOUSE_USER
-              value: "default"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: CLICKHOUSE_USER
             - name: CLICKHOUSE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: langfuse-secret
                   key: clickhouse-password
             - name: CLICKHOUSE_CLUSTER_ENABLED
-              value: "false"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: CLICKHOUSE_CLUSTER_ENABLED
             - name: REDIS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
@@ -289,9 +379,15 @@ spec:
                   key: redis-connection-string
             # langfuse-worker v3 requires REDIS_HOST/PORT/AUTH as separate vars
             - name: REDIS_HOST
-              value: "redis"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: REDIS_HOST
             - name: REDIS_PORT
-              value: "6379"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: REDIS_PORT
             - name: REDIS_AUTH
               valueFrom:
                 secretKeyRef:
@@ -299,9 +395,15 @@ spec:
                   key: redis-auth
             # S3 Event Upload
             - name: LANGFUSE_S3_EVENT_UPLOAD_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_EVENT_UPLOAD_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -313,16 +415,31 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
             - name: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
-              value: "events/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_EVENT_UPLOAD_PREFIX
             # S3 Media Upload
             - name: LANGFUSE_S3_MEDIA_UPLOAD_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_MEDIA_UPLOAD_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -334,24 +451,51 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
             - name: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
-              value: "media/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_MEDIA_UPLOAD_PREFIX
             # S3 Batch Export
             - name: LANGFUSE_S3_BATCH_EXPORT_ENABLED
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BATCH_EXPORT_ENABLED
             - name: LANGFUSE_S3_BATCH_EXPORT_BUCKET
-              value: "langfuse"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BUCKET
             - name: LANGFUSE_S3_BATCH_EXPORT_REGION
-              value: "us-east-1"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_REGION
             - name: LANGFUSE_S3_BATCH_EXPORT_PREFIX
-              value: "exports/"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_BATCH_EXPORT_PREFIX
             - name: LANGFUSE_S3_BATCH_EXPORT_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT
-              value: "http://langfuse-minio:9000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_ENDPOINT
             - name: LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -363,7 +507,10 @@ spec:
                   name: langfuse-secret
                   key: minio-secret-key
             - name: LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE
-              value: "true"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_S3_FORCE_PATH_STYLE
           resources:
             requests:
               cpu: "250m"

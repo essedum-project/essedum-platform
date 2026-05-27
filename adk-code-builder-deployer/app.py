@@ -612,14 +612,32 @@ def handle_pipeline_trigger(data):
         if DEPLOY_MODE == "docker":
             # In Docker mode, no registry needed — use local image name
             image_tag = f"{deploy_name}:v1-{uniq_tag}"
+            deploy_image_tag = image_tag  # same for Docker (local image)
         else:
             base_repo = data["target_image_tag"].rsplit(":", 1)[0]  # e.g., localhost:5000/test-adk-app
-            # Replace localhost:5000 with the cluster-internal registry (using ClusterIP for kubelet compatibility)
-            base_repo = base_repo.replace("localhost:5000", "10.104.220.183:5000")
-            # Normalize any DNS or NodePort references to ClusterIP
-            base_repo = base_repo.replace("192.168.28.41:32000", "10.104.220.183:5000")
-            base_repo = base_repo.replace("registry.container-registry.svc.cluster.local:5000", "10.104.220.183:5000")
-            image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., registry.container-registry.svc.cluster.local:5000/test-adk-app:v1-20251217-1905
+            # INTERNAL_REGISTRY: used by buildkitd (runs as a pod, cluster DNS works here)
+            internal_registry = os.getenv("INTERNAL_REGISTRY", "registry.essedum.svc.cluster.local:5000")
+            # DEPLOY_REGISTRY: used in the K8s Deployment image tag (kubelet on any node, needs direct IP)
+            # Default to the registry ClusterIP so kubelet doesn't need cluster DNS resolution.
+            deploy_registry = os.getenv("DEPLOY_REGISTRY", "10.152.183.237:5000")
+            known_refs = [
+                "localhost:5000", "localhost:5001",
+                "192.168.28.41:32000",
+                "registry.container-registry.svc.cluster.local:5000",
+                "registry.essedum.svc.cluster.local:5000",
+                "10.104.220.183:5000", "10.152.183.237:5000",
+            ]
+            # Build push tag (for buildkitd) and deploy tag (for kubelet) separately
+            push_repo = base_repo
+            deploy_repo = base_repo
+            for ref in known_refs:
+                push_repo = push_repo.replace(ref, internal_registry)
+                deploy_repo = deploy_repo.replace(ref, deploy_registry)
+            # Ensure exactly one '/' between registry host:port and image name.
+            push_repo = re.sub(r'(:\d+)([^/])', r'\1/\2', push_repo, count=1)
+            deploy_repo = re.sub(r'(:\d+)([^/])', r'\1/\2', deploy_repo, count=1)
+            image_tag = f"{push_repo}:v1-{uniq_tag}"         # used by buildkitd to push
+            deploy_image_tag = f"{deploy_repo}:v1-{uniq_tag}"  # used in K8s Deployment spec
 
 
         # 3) UNZIP
@@ -822,7 +840,7 @@ def handle_pipeline_trigger(data):
             secret_to_use = secret_name if has_secrets else None
 
             log_to_client(
-                f"Deploying {image_tag} to {deploy_name} in {target_namespace}...",
+                f"Deploying {deploy_image_tag} to {deploy_name} in {target_namespace}...",
                 step="DEPLOY",
             )
 
@@ -838,7 +856,7 @@ def handle_pipeline_trigger(data):
                     "spec": {
                         "template": {
                             "spec": {
-                                "containers": [{"name": "app-container", "image": image_tag}]
+                                "containers": [{"name": "app-container", "image": deploy_image_tag}]
                             }
                         }
                     }
@@ -853,7 +871,7 @@ def handle_pipeline_trigger(data):
                         "Deployment not found. Creating new deployment...", step="DEPLOY"
                     )
                     deployment_obj = create_deployment_object(
-                        deploy_name, image_tag, target_namespace, secret_to_use
+                        deploy_name, deploy_image_tag, target_namespace, secret_to_use
                     )
                     k8s_apps.create_namespaced_deployment(
                         namespace=target_namespace, body=deployment_obj
@@ -889,21 +907,115 @@ def handle_pipeline_trigger(data):
             if not ok:
                 raise Exception("Deployment did not become Ready within timeout")
 
-            # --- STEP 8: CONSTRUCT DNS LINK ---
-            # Format: http://{service_name}.{namespace}.svc.cluster.local
+            # --- STEP 8: EXPOSE VIA INGRESS ---
+            ingress_host = os.getenv("APP_INGRESS_HOST", "essedum.local")
+            tls_secret = os.getenv("APP_INGRESS_TLS_SECRET", "essedum-tls")
+            ingress_ns = os.getenv("APP_INGRESS_NAMESPACE", "essedum")
+            public_base = os.getenv("APP_PUBLIC_BASE_URL", "").rstrip("/")
+
+            try:
+                k8s_networking = client.NetworkingV1Api()
+                ensure_app_ingress(
+                    k8s_core, k8s_networking,
+                    deploy_name, target_namespace,
+                    ingress_host, tls_secret, ingress_ns
+                )
+                log_to_client(f"Ingress configured for /apps/{deploy_name}", step="COMPLETE")
+            except Exception as ing_err:
+                log_to_client(f"Warning: Could not create ingress: {ing_err}", step="COMPLETE")
+
+            # Construct the public URL (served via nginx ingress)
+            if public_base:
+                public_url = f"{public_base}/apps/{deploy_name}"
+            else:
+                public_url = f"https://{ingress_host}/apps/{deploy_name}"
             internal_dns_url = f"http://{deploy_name}.{target_namespace}.svc.cluster.local"
 
-            log_to_client(f"App deployed internally at: {internal_dns_url}", step="COMPLETE")
+            log_to_client(f"App deployed at: {public_url}", step="COMPLETE")
 
             emit('pipeline_status', {
                 'status': 'SUCCESS',
-                'url': internal_dns_url,
+                'url': public_url,
+                'internal_url': internal_dns_url,
                 'message': 'App accessible via UI Proxy'
             })
 
     except Exception as e:
         log_to_client(f"Pipeline failed: {e}", step="ERROR")
         socketio.emit("pipeline_status", {"status": "ERROR", "message": str(e)})
+
+
+def ensure_app_ingress(k8s_core, k8s_networking, deploy_name, app_namespace,
+                       ingress_host, tls_secret, ingress_namespace):
+    """Creates an ExternalName service + Ingress in ingress_namespace to expose the app
+    at https://{ingress_host}/apps/{deploy_name}/.
+    """
+    ext_svc_name = f"app-proxy-{deploy_name}"
+    ingress_name = f"app-{deploy_name}-ingress"
+
+    # --- ExternalName service ---
+    ext_svc = client.V1Service(
+        metadata=client.V1ObjectMeta(
+            name=ext_svc_name,
+            namespace=ingress_namespace,
+            labels={"managed-by": "adk-builder", "app-proxy-for": deploy_name},
+        ),
+        spec=client.V1ServiceSpec(
+            type="ExternalName",
+            external_name=f"{deploy_name}.{app_namespace}.svc.cluster.local",
+            ports=[client.V1ServicePort(name="http", port=80)],
+        ),
+    )
+    try:
+        k8s_core.read_namespaced_service(name=ext_svc_name, namespace=ingress_namespace)
+        k8s_core.replace_namespaced_service(name=ext_svc_name, namespace=ingress_namespace, body=ext_svc)
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            k8s_core.create_namespaced_service(namespace=ingress_namespace, body=ext_svc)
+        else:
+            raise
+
+    # --- Ingress ---
+    ingress_obj = client.V1Ingress(
+        metadata=client.V1ObjectMeta(
+            name=ingress_name,
+            namespace=ingress_namespace,
+            labels={"managed-by": "adk-builder"},
+            annotations={
+                "nginx.ingress.kubernetes.io/rewrite-target": "/$2",
+                "nginx.ingress.kubernetes.io/use-regex": "true",
+                "nginx.ingress.kubernetes.io/service-upstream": "true",
+                "nginx.ingress.kubernetes.io/upstream-vhost": f"{deploy_name}.{app_namespace}.svc.cluster.local",
+            },
+        ),
+        spec=client.V1IngressSpec(
+            ingress_class_name="nginx",
+            tls=[client.V1IngressTLS(hosts=[ingress_host], secret_name=tls_secret)],
+            rules=[client.V1IngressRule(
+                host=ingress_host,
+                http=client.V1HTTPIngressRuleValue(paths=[
+                    client.V1HTTPIngressPath(
+                        path=f"/apps/{deploy_name}(/|$)(.*)",
+                        path_type="ImplementationSpecific",
+                        backend=client.V1IngressBackend(
+                            service=client.V1IngressServiceBackend(
+                                name=ext_svc_name,
+                                port=client.V1ServiceBackendPort(number=80),
+                            )
+                        ),
+                    )
+                ]),
+            )],
+        ),
+    )
+    try:
+        k8s_networking.read_namespaced_ingress(name=ingress_name, namespace=ingress_namespace)
+        k8s_networking.replace_namespaced_ingress(name=ingress_name, namespace=ingress_namespace, body=ingress_obj)
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            k8s_networking.create_namespaced_ingress(namespace=ingress_namespace, body=ingress_obj)
+        else:
+            raise
 
 
 def parse_env_file(env_file_path):

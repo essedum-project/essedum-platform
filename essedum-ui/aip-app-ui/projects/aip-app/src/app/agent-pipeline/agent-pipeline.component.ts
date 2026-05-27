@@ -2496,6 +2496,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
             this.deploymentStatus = 'success';
             this.deploymentStatusMessage = 'Deployment completed successfully! Playground is now enabled.';
             this.isPlaygroundEnabled = true; // Enable playground only on successful deployment
+
+            // For app pipeline, capture the public URL emitted by the builder
+            if (this.pipelineMode === 'app' && data.url) {
+              this.appUrl = data.url;
+            }
             
             // Call streaming services API after successful deployment
             this.updateStreamingServicesWithPlaygroundUrl();
@@ -2662,6 +2667,11 @@ export class AgentPipelineComponent implements OnInit, OnDestroy {
         const deploymentAlias = this.pipelineAlias ? this.pipelineAlias.toString() : 'DEFAULT-AGENT';
         jsonContent.playgroundurl = `${environmentUrl}/apps/${deploymentAlias}/ask`;
         jsonContent.runner_service_status = true;
+
+        // For app pipeline, also persist the app URL so fetchAppUrl() returns it later
+        if (this.pipelineMode === 'app' && this.appUrl) {
+          jsonContent.appUrl = this.appUrl;
+        }
         
         // Step 4: Prepare the PUT payload with updated json_content
         const putPayload = {

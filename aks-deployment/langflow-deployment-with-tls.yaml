@@ -24,11 +24,32 @@ spec:
         - containerPort: 7860
         env:
         - name: LANGFLOW_ENV
-          value: "production"
+          valueFrom:
+            configMapKeyRef:
+              name: essedum-config
+              key: LANGFLOW_ENV
         - name: LANGFLOW_PORT
-          value: "7860"
-        # K8s automatically injects LANGFLOW_PORT=tcp://<clusterIP>:7860 from the langflow-service
+          valueFrom:
+            configMapKeyRef:
+              name: essedum-config
+              key: LANGFLOW_PORT
+        # K8s automatically injects LANGFLOW_PORT=tcp://<clusterIP>:7860 from the langflow-stable service
         # which breaks pydantic int validation. Explicitly setting it here overrides that injection.
+        # Skip the Langflow login screen entirely — users land directly in the UI.
+        - name: LANGFLOW_AUTO_LOGIN
+          value: "true"
+        # Bind to all interfaces inside the pod.
+        - name: LANGFLOW_HOST
+          value: "0.0.0.0"
+        # PostgreSQL connection — store the URL in essedum-secret under key LANGFLOW_DATABASE_URL.
+        # Example value: postgresql://langflow:langflow123@langfuse-postgres.essedum.svc.cluster.local:5432/langflowdb
+        # If the secret key is absent, Langflow falls back to its default SQLite database.
+        - name: LANGFLOW_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: essedum-secret
+              key: LANGFLOW_DATABASE_URL
+              optional: true
         resources:
           requests:
             cpu: "500m"
@@ -48,14 +69,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: langflow-service
+  name: langflow-stable
   namespace: essedum
 spec:
   selector:
     app: langflow
   ports:
     - protocol: TCP
-      port: 80
+      port: 7860
       targetPort: 7860
   type: ClusterIP
 
@@ -74,8 +95,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Frame-Options: ALLOWALL";
-      more_set_headers "Content-Security-Policy: frame-ancestors *";
+      proxy_hide_header X-Frame-Options;
+      proxy_hide_header Content-Security-Policy;
+      add_header X-Frame-Options "ALLOWALL" always;
+      add_header Content-Security-Policy "frame-ancestors *" always;
 spec:
   ingressClassName: nginx
   tls:
@@ -90,6 +113,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: langflow-service
+            name: langflow-stable
             port:
-              number: 80
+              number: 7860

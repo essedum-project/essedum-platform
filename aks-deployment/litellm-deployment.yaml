@@ -125,15 +125,23 @@ spec:
             - containerPort: 4000
               name: http
           env:
+            - name: FORWARDED_ALLOW_IPS
+              value: "*"
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
                   name: litellm-secret
                   key: master-key
             - name: LITELLM_LOG_LEVEL
-              value: "INFO"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LITELLM_LOG_LEVEL
             - name: UI_USERNAME
-              value: "litellm"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LITELLM_UI_USERNAME
             - name: UI_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -160,11 +168,20 @@ spec:
                   name: litellm-secret
                   key: langfuse-public-key
             - name: LANGFUSE_BASE_URL
-              value: "http://langfuse-web:3000"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: LANGFUSE_BASE_URL
             - name: OLLAMA_HOST
-              value: "ollama"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: OLLAMA_HOST
             - name: OLLAMA_PORT
-              value: "11434"
+              valueFrom:
+                configMapKeyRef:
+                  name: essedum-config
+                  key: OLLAMA_PORT
           volumeMounts:
             - name: litellm-config
               mountPath: /app/config

@@ -1,0 +1,8 @@
+com/lfn/icip/vibecoding/rest/GooseConfigController.class
+com/lfn/icip/vibecoding/rest/GooseSystemController.class
+com/lfn/icip/vibecoding/rest/GooseScheduleController.class
+com/lfn/icip/vibecoding/rest/GooseSessionController.class
+com/lfn/icip/vibecoding/rest/GooseRecipeController.class
+com/lfn/icip/vibecoding/rest/VibeCodingController.class
+com/lfn/icip/vibecoding/service/VibeCodingService.class
+com/lfn/icip/vibecoding/config/VibeCodingConfig.class

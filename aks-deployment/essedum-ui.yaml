@@ -26,6 +26,16 @@ spec:
               name: essedum-secret
           - configMapRef:
               name: essedum-config
+        env:
+          # FE_* URLs override ConfigMap values — replace __FE_*_URL__ placeholders
+          # in the compiled JS at container startup (see docker/entrypoint.sh).
+          # Update these values if ingress hostnames/ports change.
+          - name: FE_LANGFLOW_URL
+            value: "https://langflow.essedum.local:30443"
+          - name: FE_LANGFUSE_URL
+            value: "https://langfuse.essedum.local:30443"
+          - name: FE_LITELLM_URL
+            value: "https://litellm.essedum.local:30443/ui/"
         ports:
         - containerPort: 8082
         - containerPort: 8084

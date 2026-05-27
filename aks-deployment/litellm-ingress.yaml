@@ -14,6 +14,8 @@ metadata:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       more_set_headers "X-Frame-Options: ALLOWALL";
       more_set_headers "Content-Security-Policy: frame-ancestors *";
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-Port 30443;
 spec:
   ingressClassName: nginx
   tls:

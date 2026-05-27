@@ -35,7 +35,7 @@ spec:
             - name: PYTHONUNBUFFERED
               value: "1"
             - name: DOCKER_CONFIG
-              value: "/root/.docker"
+              value: "/home/appuser/.docker"
             - name: MINIO_BUCKET
               valueFrom:
                 configMapKeyRef:
@@ -48,9 +48,21 @@ spec:
                   name: essedum-config
                   key: FE_MINIO_BUCKET
                   optional: true
+            - name: INTERNAL_REGISTRY
+              value: "registry.essedum.svc.cluster.local:5000"
+            - name: DEPLOY_REGISTRY
+              value: "10.152.183.237:5000"
+            - name: APP_INGRESS_HOST
+              value: "essedum.local"
+            - name: APP_INGRESS_TLS_SECRET
+              value: "essedum-tls"
+            - name: APP_INGRESS_NAMESPACE
+              value: "essedum"
+            - name: APP_PUBLIC_BASE_URL
+              value: "https://essedum.local:30443"
           volumeMounts:
             - name: docker-config
-              mountPath: /root/.docker
+              mountPath: /home/appuser/.docker
               readOnly: true
             - name: dockerfile-template
               mountPath: /opt/fallback
