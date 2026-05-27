@@ -33,7 +33,14 @@
             <!-- Search toggle icon removed - search is now always visible -->
 
             <!-- Add button (conditionally shown) -->
-            <div *ngIf="showAddButton" class="action-button">
+            <!-- With dropdown menu -->
+            <div *ngIf="showAddButton && addMenu" class="action-button" [matMenuTriggerFor]="addMenu"
+                matTooltip="Add" [matTooltipPosition]="TOOLTIP_POSITION"
+                (mouseenter)="isAddHovered = true" (mouseleave)="isAddHovered = false">
+                <mat-icon [ngClass]="{'active': isAddHovered}" aria-label="Add new item">add</mat-icon>
+            </div>
+            <!-- Without dropdown menu (original emit behaviour) -->
+            <div *ngIf="showAddButton && !addMenu" class="action-button">
                 <mat-icon [ngClass]="{'active': isAddHovered}" (click)="onAddClick()" matTooltip="Add"
                     [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isAddHovered = true"
                     (mouseleave)="isAddHovered = false" aria-label="Add new item">

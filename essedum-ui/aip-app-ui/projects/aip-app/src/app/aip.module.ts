@@ -160,6 +160,22 @@ import { VibeLeftPanelComponent } from './vibe-studio/vibe-left-panel/vibe-left-
 import { VibeRightPanelComponent } from './vibe-studio/vibe-right-panel/vibe-right-panel.component';
 import { VibeStudioService } from './vibe-studio/services/vibe-studio.service';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { MatStepperModule } from '@angular/material/stepper';
+
+// Wizard imports (data-pipelines + training-pipelines)
+import { DataPipelineWizardComponent } from './pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardComponent } from './pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
+import { GitLinkStepComponent } from './pipeline/wizard/shared/git-link-step.component';
+import { PipelineEditorComponent } from './pipeline/wizard/editor/pipeline-editor.component';
+import { CodeEditorTabComponent } from './pipeline/wizard/editor/tabs/code-editor-tab.component';
+import { VibeCodeTabComponent } from './pipeline/wizard/editor/tabs/vibe-code-tab.component';
+import { GitTabComponent } from './pipeline/wizard/editor/tabs/git-tab.component';
+import { ConfigTabComponent } from './pipeline/wizard/editor/tabs/config-tab.component';
+import { RunHistoryTabComponent } from './pipeline/wizard/editor/tabs/run-history-tab.component';
+import { MetricsTabComponent } from './pipeline/wizard/editor/tabs/metrics-tab.component';
+import { LogsTabComponent } from './pipeline/wizard/editor/tabs/logs-tab.component';
+import { FunctionLibraryComponent } from './pipeline/wizard/editor/function-library/function-library.component';
+import { GitLinkService } from './services/git-link.service';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -271,7 +287,20 @@ const dbConfig: DBConfig = {
     VibeStudioComponent,
     VibeLeftPanelComponent,
     VibeRightPanelComponent,
-    DashboardComponent
+    DashboardComponent,
+    // Wizard / editor components
+    DataPipelineWizardComponent,
+    TrainingPipelineWizardComponent,
+    GitLinkStepComponent,
+    PipelineEditorComponent,
+    CodeEditorTabComponent,
+    VibeCodeTabComponent,
+    GitTabComponent,
+    ConfigTabComponent,
+    RunHistoryTabComponent,
+    MetricsTabComponent,
+    LogsTabComponent,
+    FunctionLibraryComponent,
   ],
   imports: [
     CommonModule,
@@ -297,6 +326,7 @@ const dbConfig: DBConfig = {
     MatSliderModule,
     MatSnackBarModule,
     MatTabsModule,
+    MatStepperModule,
     MatProgressSpinnerModule,
     NgbModule,
     JsonFormsModule,
@@ -359,6 +389,7 @@ const dbConfig: DBConfig = {
     AipSnackbarCustomService,
     GitHubService,
     VibeStudioService,
+    GitLinkService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],

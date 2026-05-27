@@ -1,0 +1,28 @@
+@import '../data-pipeline-wizard/data-pipeline-wizard.component.scss';
+
+// ── Training accent: sky-blue ─────────────────────────────────────────────────
+.sparkle { color: #0ea5e9 !important; }
+
+.step-title mat-icon { color: #0284c7 !important; }
+
+.type-card.active {
+  border-color: #0284c7 !important;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+  box-shadow: 0 0 0 3px rgba(2,132,199,0.08) !important;
+  mat-icon    { color: #0284c7 !important; }
+  .type-label { color: #0284c7 !important; }
+}
+
+// ── Dark theme overrides ──────────────────────────────────────────────────────
+:host-context(body.header-dark-theme) {
+  .sparkle       { color: #38bdf8 !important; }
+  .step-title mat-icon { color: #38bdf8 !important; }
+
+  .type-card.active {
+    border-color: #0284c7 !important;
+    background: rgba(2,132,199,0.16) !important;
+    box-shadow: 0 0 0 3px rgba(2,132,199,0.14) !important;
+    mat-icon    { color: #38bdf8 !important; }
+    .type-label { color: #7dd3fc !important; }
+  }
+}

@@ -5,6 +5,7 @@ import {
   Output,
   HostListener,
 } from '@angular/core';
+import { MatMenu } from '@angular/material/menu';
 import {
   trigger,
   state,
@@ -59,6 +60,7 @@ export class AipHeaderComponent {
   @Input() action: string = '';
   @Input() lastRefreshedTime: Date | null = null;
   @Input() showAddButton: boolean = false;
+  @Input() addMenu: MatMenu | null = null;
   @Input() backAction: boolean = false;
   @Input() closeAction: boolean = false;
   @Input() showRelatedInstances: boolean = false;

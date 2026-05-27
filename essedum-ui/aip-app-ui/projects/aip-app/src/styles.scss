@@ -3842,3 +3842,223 @@ body.header-light-theme {
   .ace-jsoneditor .ace_text-layer,
   .ace_text-layer { color: #0f172a !important; }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Wizard Dialog Panel  (Data Pipeline + Training Pipeline wizards)
+// panelClass: 'wizard-dialog'  — applied to .cdk-overlay-pane
+// All overlay content lives outside the component host, so these MUST be global
+// flat selectors with !important.
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Backdrop: allow clicks to pass through to header (theme toggle etc.) ─────
+// The dialog itself (pane) still captures pointer events normally.
+.wizard-backdrop { pointer-events: none !important; }
+
+// ── Dialog surface reset (both themes) ───────────────────────────────────────
+.wizard-dialog .mat-mdc-dialog-container { padding: 0 !important; }
+.wizard-dialog .mat-mdc-dialog-surface,
+.wizard-dialog .mdc-dialog__surface {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.wizard-dialog .mdc-dialog__content {
+  padding: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+// ── LIGHT theme ───────────────────────────────────────────────────────────────
+.wizard-dialog .mat-mdc-dialog-surface,
+.wizard-dialog .mdc-dialog__surface {
+  background: #ffffff !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
+}
+
+// ── DARK theme — dialog surface ───────────────────────────────────────────────
+body.header-dark-theme .wizard-dialog .mat-mdc-dialog-surface,
+body.header-dark-theme .wizard-dialog .mdc-dialog__surface {
+  background: linear-gradient(160deg, #1c2333 0%, #141b2a 100%) !important;
+  border: 1px solid rgba(79,142,247,0.14) !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 80px rgba(79,142,247,0.04) !important;
+}
+
+// ── DARK theme — stepper ──────────────────────────────────────────────────────
+// 1) CSS-variable layer — set on the stepper element itself (where AM15 reads them)
+body.header-dark-theme .wizard-dialog .mat-stepper-horizontal,
+body.header-dark-theme .wizard-dialog .mat-stepper-vertical,
+body.header-dark-theme .wizard-dialog mat-horizontal-stepper {
+  --mat-stepper-header-label-text-color:                     #94a3b8;
+  --mat-stepper-header-selected-state-label-text-color:      #e2e8f0;
+  --mat-stepper-header-done-state-label-text-color:          #94a3b8;
+  --mat-stepper-header-edit-state-label-text-color:          #94a3b8;
+  --mat-stepper-header-error-state-label-text-color:         #f87171;
+  --mat-stepper-header-icon-background-color:                rgba(79,142,247,0.18);
+  --mat-stepper-header-icon-foreground-color:                #94a3b8;
+  --mat-stepper-header-selected-state-icon-background-color: #7c3aed;
+  --mat-stepper-header-selected-state-icon-foreground-color: #ffffff;
+  --mat-stepper-header-done-state-icon-background-color:     #7c3aed;
+  --mat-stepper-header-done-state-icon-foreground-color:     #ffffff;
+  --mat-stepper-header-edit-state-icon-background-color:     #7c3aed;
+  --mat-stepper-header-edit-state-icon-foreground-color:     #ffffff;
+  --mat-stepper-line-color:                                  rgba(79,142,247,0.15);
+}
+// 2) Flat-selector fallback — covers every possible Angular Material version/build
+body.header-dark-theme .wizard-dialog .mat-stepper-horizontal,
+body.header-dark-theme .wizard-dialog .mat-stepper-vertical {
+  background: transparent !important;
+}
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label *,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-text-label {
+  color: #94a3b8 !important;
+}
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label.mat-step-label-active,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label.mat-step-label-selected,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label-active .mat-step-text-label,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label-selected .mat-step-text-label,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label.mat-step-label-active *,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-label.mat-step-label-selected * {
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+}
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-icon {
+  background-color: rgba(79,142,247,0.18) !important;
+  color: #94a3b8 !important;
+}
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-icon-selected,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-icon-state-edit,
+body.header-dark-theme .wizard-dialog .mat-step-header .mat-step-icon-state-done {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+body.header-dark-theme .wizard-dialog .mat-stepper-horizontal-line {
+  border-top-color: rgba(79,142,247,0.15) !important;
+}
+body.header-dark-theme .wizard-dialog .mat-step-header:hover {
+  background: rgba(79,142,247,0.06) !important;
+}
+
+// ── DARK theme — fill form fields ────────────────────────────────────────────
+// Label (floating)
+body.header-dark-theme .wizard-dialog .mdc-floating-label,
+body.header-dark-theme .wizard-dialog .mat-mdc-floating-label {
+  color: #94a3b8 !important;
+}
+body.header-dark-theme .wizard-dialog .mdc-floating-label--float-above,
+body.header-dark-theme .wizard-dialog .mat-mdc-floating-label.mdc-floating-label--float-above {
+  color: #a78bfa !important;
+}
+// Input / textarea text
+body.header-dark-theme .wizard-dialog .mat-mdc-input-element,
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field input,
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field textarea {
+  color: #e2e8f0 !important;
+  caret-color: #a78bfa !important;
+}
+// Select trigger text
+body.header-dark-theme .wizard-dialog .mat-mdc-select-value,
+body.header-dark-theme .wizard-dialog .mat-mdc-select-value-text {
+  color: #e2e8f0 !important;
+}
+body.header-dark-theme .wizard-dialog .mat-mdc-select-arrow {
+  color: #94a3b8 !important;
+}
+// Fill container background — transparent like the rest of the app
+body.header-dark-theme .wizard-dialog .mdc-text-field--filled:not(.mdc-text-field--disabled),
+body.header-dark-theme .wizard-dialog .mdc-text-field--filled:not(.mdc-text-field--disabled):hover,
+body.header-dark-theme .wizard-dialog .mdc-text-field--filled.mdc-text-field--focused {
+  background-color: rgba(255,255,255,0.05) !important;
+  --mdc-filled-text-field-container-color: rgba(255,255,255,0.05);
+  --mdc-filled-text-field-hover-state-layer-opacity: 0;
+  --mdc-filled-text-field-focus-state-layer-opacity: 0;
+}
+// Bottom line (replaces box border for fill style)
+body.header-dark-theme .wizard-dialog .mdc-line-ripple::before {
+  border-bottom-color: rgba(79,142,247,0.35) !important;
+}
+body.header-dark-theme .wizard-dialog .mdc-line-ripple::after,
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field.mat-focused .mdc-line-ripple::after {
+  border-bottom-color: #a78bfa !important;
+}
+// Hint text
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field-hint,
+body.header-dark-theme .wizard-dialog .mat-hint {
+  color: #64748b !important;
+}
+// Error text
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field-error,
+body.header-dark-theme .wizard-dialog .mat-error {
+  color: #f87171 !important;
+}
+// Placeholder
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field input::placeholder,
+body.header-dark-theme .wizard-dialog .mat-mdc-form-field textarea::placeholder {
+  color: #475569 !important;
+}
+
+// ── DARK theme — mat-chip-option (schedule presets) ──────────────────────────
+// MDC chips render text in .mdc-evolution-chip__text-label; must be targeted
+// globally because the component is inside the CDK overlay.
+body.header-dark-theme .wizard-dialog .mat-mdc-chip,
+body.header-dark-theme .wizard-dialog .mat-mdc-chip-option {
+  background: rgba(79,142,247,0.14) !important;
+  border-color: rgba(79,142,247,0.28) !important;
+  --mdc-chip-label-text-color: #a5c8ff;
+  --mdc-chip-elevated-container-color: rgba(79,142,247,0.14);
+}
+body.header-dark-theme .wizard-dialog .mat-mdc-chip .mdc-evolution-chip__text-label,
+body.header-dark-theme .wizard-dialog .mat-mdc-chip-option .mdc-evolution-chip__text-label,
+body.header-dark-theme .wizard-dialog .mat-mdc-chip .mat-mdc-chip-action-label,
+body.header-dark-theme .wizard-dialog .mat-mdc-chip-option .mat-mdc-chip-action-label {
+  color: #a5c8ff !important;
+}
+
+// ── DARK theme — step action buttons divider ───────────────────────────────────
+body.header-dark-theme .wizard-dialog .mat-divider {
+  border-top-color: rgba(79,142,247,0.12) !important;
+}
+
+// ─── Pipeline Add-Button Dropdown Menu ────────────────────────────────────────
+// Icon colors are set via inline style on each <mat-icon> in the HTML (highest
+// specificity, beats all MDC resets). These rules handle panel background,
+// text color, hover, and divider only.
+
+// ── LIGHT theme ──────────────────────────────────────────────────────────────
+.pipeline-add-menu.mat-mdc-menu-panel {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  --mat-menu-item-label-text-color: #1e293b;
+}
+.pipeline-add-menu .mat-mdc-menu-item,
+.pipeline-add-menu .mat-mdc-menu-item .mdc-list-item__primary-text {
+  color: #1e293b !important;
+}
+.pipeline-add-menu .mat-mdc-menu-item:hover {
+  background: rgba(79, 142, 247, 0.08) !important;
+}
+.pipeline-add-menu .mat-divider {
+  border-top-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+// ── DARK theme ────────────────────────────────────────────────────────────────
+body.header-dark-theme .pipeline-add-menu.mat-mdc-menu-panel {
+  background: #1e2a3a !important;
+  border: 1px solid rgba(79, 142, 247, 0.2) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+  --mat-menu-item-label-text-color: #e2e8f0;
+}
+body.header-dark-theme .pipeline-add-menu .mat-mdc-menu-item,
+body.header-dark-theme .pipeline-add-menu .mat-mdc-menu-item .mdc-list-item__primary-text {
+  color: #e2e8f0 !important;
+}
+body.header-dark-theme .pipeline-add-menu .mat-mdc-menu-item:hover {
+  background: rgba(79, 142, 247, 0.14) !important;
+}
+body.header-dark-theme .pipeline-add-menu .mat-divider {
+  border-top-color: rgba(79, 142, 247, 0.2) !important;
+}

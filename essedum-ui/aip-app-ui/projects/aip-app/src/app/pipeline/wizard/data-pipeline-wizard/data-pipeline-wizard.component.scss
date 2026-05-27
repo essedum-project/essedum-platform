@@ -1,0 +1,193 @@
+:host { display: block; }
+
+// ── Shell (scrollable stepper area only) ─────────────────────────────────────
+.wizard-shell {
+  width: min(860px, 92vw);
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79,142,247,0.3) transparent;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.3); border-radius: 2px; }
+}
+
+// ── Header (outside scroll area — never clipped) ──────────────────────────────
+.wizard-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+  width: min(860px, 92vw);
+  .title { display: flex; gap: 10px; align-items: center; }
+  .sparkle { color: #7c3aed; font-size: 22px !important; height: 22px !important; width: 22px !important; flex-shrink: 0; }
+  h2 { margin: 0; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.2; }
+  p  { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
+  .close { color: #9ca3af; margin-left: 8px; }
+}
+
+// ── Stepper labels — ::ng-deep pierces mat-step-header's view encapsulation ──
+// Normal class selectors cannot cross Angular component boundaries; ::ng-deep is
+// the only reliable way to reach .mat-step-label inside mat-step-header.
+::ng-deep .wizard-stepper .mat-step-label,
+::ng-deep .wizard-stepper .mat-step-text-label { color: #374151; }
+::ng-deep .wizard-stepper .mat-step-label-active,
+::ng-deep .wizard-stepper .mat-step-label-selected { color: #111827; font-weight: 600; }
+::ng-deep .wizard-stepper .mat-step-label-active .mat-step-text-label,
+::ng-deep .wizard-stepper .mat-step-label-selected .mat-step-text-label { color: #111827; }
+
+:host-context(body.header-dark-theme) {
+  ::ng-deep .wizard-stepper .mat-step-label,
+  ::ng-deep .wizard-stepper .mat-step-text-label { color: #94a3b8 !important; }
+  ::ng-deep .wizard-stepper .mat-step-label-active,
+  ::ng-deep .wizard-stepper .mat-step-label-selected { color: #e2e8f0 !important; font-weight: 600 !important; }
+  ::ng-deep .wizard-stepper .mat-step-label-active .mat-step-text-label,
+  ::ng-deep .wizard-stepper .mat-step-label-selected .mat-step-text-label { color: #e2e8f0 !important; }
+}
+
+// ── Stepper ───────────────────────────────────────────────────────────────────
+.wizard-stepper { background: transparent !important; padding: 14px 20px 6px; }
+.step-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #374151; margin: 2px 0 12px;
+  mat-icon { color: #7c3aed; font-size: 16px !important; height: 16px !important; width: 16px !important; }
+}
+
+// ── Type grid (compact 4-up cards) ───────────────────────────────────────────
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  @media (max-width: 680px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.type-card {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  display: flex; flex-direction: column; gap: 3px;
+  mat-icon {
+    color: #6366f1;
+    font-size: 18px !important; height: 18px !important; width: 18px !important;
+    display: block; margin-bottom: 2px;
+  }
+  .type-label { font-weight: 600; font-size: 12px; color: #1e293b; line-height: 1.2; }
+  .type-desc  { font-size: 10.5px; color: #6b7280; line-height: 1.35; }
+  &.card-disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.6);
+    position: relative;
+  }
+  .coming-soon-badge {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(100,116,139,0.18);
+    color: #94a3b8;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  &:hover { border-color: #a5b4fc; background: #f5f3ff; }
+  &.active {
+    border-color: #7c3aed;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.08);
+    mat-icon    { color: #7c3aed; }
+    .type-label { color: #7c3aed; }
+  }
+}
+
+// ── Form layout ───────────────────────────────────────────────────────────────
+.row { display: flex; gap: 12px; }
+.row.two-col   > * { flex: 1; min-width: 0; }
+.row.three-col > * { flex: 1; min-width: 0; }
+.full { width: 100%; }
+.filler { flex: 1; }
+
+// ── Chip row ──────────────────────────────────────────────────────────────────
+.chip-row {
+  display: flex; align-items: center; gap: 10px; margin: 4px 0 10px; flex-wrap: wrap;
+  .chip-label { color: #6b7280; font-size: 12px; }
+}
+
+// ── Step actions ──────────────────────────────────────────────────────────────
+.step-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.07); margin-top: 10px;
+  mat-icon { font-size: 16px !important; height: 16px !important; width: 16px !important; vertical-align: middle; }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// DARK THEME  (all tokens flipped — every text/icon/border must be visible)
+// ────────────────────────────────────────────────────────────────────────────
+:host-context(body.header-dark-theme) {
+  .wizard-header {
+    background: transparent;
+    border-bottom-color: rgba(79,142,247,0.12);
+    h2    { color: #f1f5f9; }
+    p     { color: #94a3b8; }
+    .close mat-icon { color: #64748b !important; }
+  }
+
+  .step-title {
+    color: #cbd5e1;
+    mat-icon { color: #a78bfa !important; }
+  }
+
+  .type-card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(100,116,139,0.3);
+    mat-icon    { color: #818cf8 !important; }
+    .type-label { color: #e2e8f0; }
+    .type-desc  { color: #94a3b8; }
+    &.card-disabled { opacity: 0.35; filter: grayscale(0.7); }
+    &.card-disabled .coming-soon-badge { background: rgba(255,255,255,0.07); color: #475569; }
+
+    &:hover {
+      border-color: rgba(139,92,246,0.55);
+      background: rgba(139,92,246,0.1);
+    }
+    &.active {
+      border-color: #7c3aed;
+      background: rgba(124,58,237,0.18);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.14);
+      mat-icon    { color: #a78bfa !important; }
+      .type-label { color: #c4b5fd; }
+    }
+  }
+
+  .step-actions { border-top-color: rgba(79,142,247,0.1); }
+  .chip-row .chip-label { color: #94a3b8; }
+
+  // Chip preset buttons — text must always be visible
+  .mat-mdc-chip,
+  .mat-mdc-chip-option {
+    --mdc-chip-label-text-color: #a5c8ff !important;
+    background: rgba(79,142,247,0.14) !important;
+    border-color: rgba(79,142,247,0.28) !important;
+    .mdc-evolution-chip__text-label,
+    .mat-mdc-chip-action-label { color: #a5c8ff !important; }
+  }
+
+  // fill form field — remove the default blue/grey container tint
+  .mat-mdc-form-field {
+    --mdc-filled-text-field-container-color: rgba(255,255,255,0.05);
+    --mdc-filled-text-field-hover-state-layer-opacity: 0;
+    --mdc-filled-text-field-focus-state-layer-opacity: 0;
+    --mdc-filled-text-field-label-text-color: #94a3b8;
+    --mdc-filled-text-field-input-text-color: #e2e8f0;
+    --mdc-filled-text-field-active-indicator-color: rgba(79,142,247,0.35);
+    --mdc-filled-text-field-focus-active-indicator-color: #a78bfa;
+    --mdc-filled-text-field-hover-active-indicator-color: rgba(79,142,247,0.55);
+  }
+}
