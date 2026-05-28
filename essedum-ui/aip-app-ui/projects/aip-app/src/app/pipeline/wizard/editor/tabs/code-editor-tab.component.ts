@@ -682,16 +682,23 @@ export class CodeEditorTabComponent
 - Available Columns: ${columns.length ? columns.join(', ') : '(not specified)'}
 ${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
 ## Implementation Requirements
-1. Follow the Essedum DataContainer pattern — accept DataContainer input, return DataContainer output
-2. Load data from the ${attrs.outputContainer || 'datasource'} connection "${attrs.connection || ''}", dataset "${attrs.dataset || ''}"
-3. Implement ${attrs.problemType || 'classification'} ML task (pipeline type: ${attrs.pipelineType || 'feature-engineering'})
-4. Target/label column is "${attrs.targetCol || ''}" — predict or transform this column
-5. Use all available feature columns: ${columns.join(', ') || 'all columns except target'}
-6. Use scikit-learn (or most appropriate library) for the task
-7. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving
-8. Add logging using Python's logging module throughout
-9. Main entry function must be named run_pipeline()
-10. Return the COMPLETE Python file — do not omit or truncate any section
+1. CRITICAL — At the very top of the file (the first executable lines, before any other imports), include a dependency auto-installation block exactly like this:
+   \`\`\`python
+   import subprocess, sys
+   _WIZARD_PIPELINE_DEPS = ['pandas', 'numpy', 'scikit-learn', ...ALL other packages the script needs...]
+   subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', '--disable-pip-version-check'] + _WIZARD_PIPELINE_DEPS)
+   \`\`\`
+   Replace the list with EVERY package imported in the script (e.g. boto3, sqlalchemy, psycopg2-binary, pymysql, etc.). This block MUST be present — the executor environment may not have these packages pre-installed.
+2. Follow the Essedum DataContainer pattern — accept DataContainer input, return DataContainer output
+3. Load data from the ${attrs.outputContainer || 'datasource'} connection "${attrs.connection || ''}", dataset "${attrs.dataset || ''}"
+4. Implement ${attrs.problemType || 'classification'} ML task (pipeline type: ${attrs.pipelineType || 'feature-engineering'})
+5. Target/label column is "${attrs.targetCol || ''}" — predict or transform this column
+6. Use all available feature columns: ${columns.join(', ') || 'all columns except target'}
+7. Use scikit-learn (or most appropriate library) for the task
+8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving
+9. Add logging using Python's logging module throughout
+10. Main entry function must be named run_pipeline()
+11. Return the COMPLETE Python file — do not omit or truncate any section
 
 Return the full Python script inside a fenced \`\`\`python block.`;
   }
@@ -722,15 +729,22 @@ ${attrs.maxLen ? `- Max Sequence Length: ${attrs.maxLen}` : ''}
 - Available Columns: ${columns.length ? columns.join(', ') : '(all columns)'}
 ${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
 ## Implementation Requirements
-1. Follow the Essedum DataContainer pattern — load data via DataContainer input
-2. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'the appropriate framework'}
-3. Use the ${attrs.baseModel || 'specified algorithm/model'} as the base
-4. Use columns: ${columns.join(', ') || 'all available columns'}
-5. Include: data loading, preprocessing, train/validation split, model initialisation, training loop, evaluation metrics, model saving as artifact
-6. Add logging using Python's logging module throughout
-7. Main entry function must be named run_training()
-8. Handle the hyperparameters (epochs, batch size, lr) as configurable parameters
-9. Return the COMPLETE Python file — do not omit or truncate any section
+1. CRITICAL — At the very top of the file (the first executable lines, before any other imports), include a dependency auto-installation block exactly like this:
+   \`\`\`python
+   import subprocess, sys
+   _WIZARD_PIPELINE_DEPS = ['pandas', 'numpy', 'scikit-learn', ...ALL other packages the script needs...]
+   subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', '--disable-pip-version-check'] + _WIZARD_PIPELINE_DEPS)
+   \`\`\`
+   Replace the list with EVERY package imported in the script (e.g. torch, transformers, datasets, peft, trl, boto3, etc.). This block MUST be present — the executor environment may not have these packages pre-installed.
+2. Follow the Essedum DataContainer pattern — load data via DataContainer input
+3. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'the appropriate framework'}
+4. Use the ${attrs.baseModel || 'specified algorithm/model'} as the base
+5. Use columns: ${columns.join(', ') || 'all available columns'}
+6. Include: data loading, preprocessing, train/validation split, model initialisation, training loop, evaluation metrics, model saving as artifact
+7. Add logging using Python's logging module throughout
+8. Main entry function must be named run_training()
+9. Handle the hyperparameters (epochs, batch size, lr) as configurable parameters
+10. Return the COMPLETE Python file — do not omit or truncate any section
 
 Return the full Python script inside a fenced \`\`\`python block.`;
   }
