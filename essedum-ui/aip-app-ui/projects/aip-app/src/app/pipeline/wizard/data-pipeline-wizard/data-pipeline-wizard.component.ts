@@ -281,7 +281,7 @@ export class DataPipelineWizardComponent implements OnInit {
       elements: [{
         attributes: {
           filetype: 'Python3',
-          files: [`${cfg.name}_pipeline.py`],
+          files: [],           // will be set to cname_org.py after create() responds
           generatedCode: '',
 
         },
@@ -310,6 +310,18 @@ export class DataPipelineWizardComponent implements OnInit {
     this.creating = true;
     this.services.create(newSs).subscribe({
       next: (data) => {
+        // Use cname + org from the create API response — mirrors native-script's
+        // saveJson(streamItem.name) → targetFileName = `${pname}_${streamItem.organization}.py`
+        const org = data.organization || sessionStorage.getItem('organization') || '';
+        const canonicalFile = `${data.name}_${org}.py`;
+        try {
+          const pc = JSON.parse(data.json_content || '{}');
+          if (pc.elements?.[0]?.attributes) {
+            pc.elements[0].attributes.files = [canonicalFile];
+            data.json_content = JSON.stringify(pc);
+          }
+        } catch { /* non-critical — editor will re-derive on save */ }
+        this.services.update(data).subscribe();  // persist canonical filename to DB
         this.services.message('Pipeline created!', 'success');
         this.dialogRef.close({ pipeline: data, kind: 'data-pipeline' });
       },

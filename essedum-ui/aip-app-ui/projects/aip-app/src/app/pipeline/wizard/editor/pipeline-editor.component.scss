@@ -34,6 +34,53 @@
 
   .head-spacer { flex: 1; }
 
+  // Run type inline selector — borderless pill, label + value on one line
+  .run-type-combo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .run-type-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--pe-muted, #6b7280);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+  .run-type-sel-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .run-type-sel {
+    appearance: none;
+    -webkit-appearance: none;
+    color-scheme: light;                            /* force light-mode rendering regardless of OS */
+    background-color: var(--pe-sel-bg, #f1f5f9);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 28px 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--pe-sel-fg, #1e293b);
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+    min-width: 160px;
+    transition: background 0.15s, box-shadow 0.15s;
+    &:hover:not(:disabled) { background-color: var(--pe-sel-hover, #e2e8f0); }
+    &:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.3); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    option { background: var(--pe-sel-opt-bg, #ffffff); color: var(--pe-sel-fg, #1e293b); }
+  }
+  .run-type-chev {
+    position: absolute;
+    right: 8px;
+    font-size: 10px;
+    color: var(--pe-muted, #6b7280);
+    pointer-events: none;
+  }
+
   .run-btn {
     background: #16a34a !important;
     color: #fff !important;
@@ -69,4 +116,13 @@
   --pe-chip-fg:        #c084fc;
   --pe-chip-ghost-bg:  #21262d;
   --pe-chip-ghost-fg:  #8b949e;
+  // Run type select — dark
+  --pe-sel-bg:         #21262d;
+  --pe-sel-hover:      #2d333b;
+  --pe-sel-fg:         #e6edf3;
+  --pe-sel-opt-bg:     #1c2128;
+  --pe-muted:          #8b949e;
+
+  // Allow the native select to render in OS dark mode inside dark-themed app
+  .run-type-sel { color-scheme: dark; }
 }

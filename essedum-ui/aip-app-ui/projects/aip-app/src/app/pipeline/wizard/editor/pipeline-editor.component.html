@@ -12,7 +12,20 @@
       </div>
     </div>
     <span class="head-spacer"></span>
-    <button mat-flat-button class="run-btn" (click)="runPipeline()" [disabled]="running">
+    <!-- Run type selector: mirrors native-script Script tab dropdown -->
+    <div class="run-type-combo" *ngIf="runTypes?.length">
+      <span class="run-type-label">Run type</span>
+      <div class="run-type-sel-wrap">
+        <select class="run-type-sel"
+                [(ngModel)]="selectedRunType"
+                [disabled]="running"
+                (change)="runTypeChanged(selectedRunType)">
+          <option *ngFor="let t of runTypes" [ngValue]="t.value">{{ t.viewValue }}</option>
+        </select>
+        <span class="run-type-chev">▾</span>
+      </div>
+    </div>
+    <button mat-flat-button class="run-btn" (click)="runPipeline()" [disabled]="running || !selectedRunType">
       <mat-icon>{{ running ? 'hourglass_top' : 'play_arrow' }}</mat-icon>
       {{ running ? 'Running…' : 'Run' }}
     </button>

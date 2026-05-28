@@ -107,15 +107,16 @@
   max-height: 52vh !important;
   overflow-y: auto !important;
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(79,142,247,0.35) transparent !important;
+  scrollbar-color: rgba(71,66,220,0.35) transparent !important;
 
   &::-webkit-scrollbar { width: 5px; }
-  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.35); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb { background: rgba(71,66,220,0.35); border-radius: 3px; }
 
   > div { padding: 0 !important; }
 
+  // Light theme default: dark readable text
   span, pre {
-    color: #c9d1d9 !important;
+    color: #334155 !important;
     font-family: 'Roboto Mono', 'Consolas', monospace !important;
     font-size: 12px !important;
     line-height: 1.7 !important;
@@ -123,44 +124,45 @@
 }
 
 ::ng-deep mat-expansion-panel {
-  background: rgba(88,166,255,0.03) !important;
-  border: 1px solid rgba(88,166,255,0.12) !important;
+  background: rgba(71,66,220,0.03) !important;
+  border: 1px solid rgba(71,66,220,0.12) !important;
   border-radius: 8px !important;
 }
-::ng-deep .mat-expansion-panel-header { background: rgba(88,166,255,0.1) !important; border-radius: 8px !important; }
-::ng-deep .mat-panel-title { color: #e6edf3 !important; font-weight: 600 !important; }
-::ng-deep .mat-expansion-panel-body { color: #c9d1d9 !important; }
+::ng-deep .mat-expansion-panel-header { background: rgba(71,66,220,0.08) !important; border-radius: 8px !important; }
+::ng-deep .mat-panel-title { color: #0f172a !important; font-weight: 600 !important; }
+::ng-deep .mat-expansion-panel-body { color: #334155 !important; }
 
-body.header-light-theme {
+// ── Dark theme overrides ─────────────────────────────────────────────────────────────────────
+:host-context(body.header-dark-theme) {
   .space h3 { color: #64748b !important; }
-  .space .line-wrap { color: #0f172a !important; }
-  .content-group > div { background: rgba(71,66,220,0.03); border-color: rgba(71,66,220,0.1); h3 { color: #64748b !important; } }
-  .id { color: #334155 !important; }
-  .copy-icon, .close-icon { color: #64748b !important; &:hover { color: #4742dc !important; } }
-  ::ng-deep .mat-expansion-panel-header { background: rgba(71,66,220,0.08) !important; }
-  ::ng-deep .mat-panel-title { color: #0f172a !important; }
-  ::ng-deep .mat-expansion-panel-body { color: #334155 !important; }
+  .space .line-wrap { color: #e6edf3 !important; }
+  .content-group > div { background: rgba(88,166,255,0.04); border-color: rgba(88,166,255,0.1); h3 { color: #8b949e !important; } }
+  .id { color: #c9d1d9 !important; }
+  .copy-icon, .close-icon { color: #c9d1d9 !important; &:hover { color: #58a6ff !important; } }
+
+  ::ng-deep mat-expansion-panel {
+    background: rgba(88,166,255,0.03) !important;
+    border-color: rgba(88,166,255,0.12) !important;
+  }
+  ::ng-deep .mat-expansion-panel-header { background: rgba(88,166,255,0.1) !important; }
+  ::ng-deep .mat-panel-title { color: #e6edf3 !important; }
+  ::ng-deep .mat-expansion-panel-body { color: #c9d1d9 !important; }
 
   ::ng-deep .example-card {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border-color: rgba(35, 79, 153, 0.14) !important;
+    background: rgba(13, 22, 48, 0.97) !important;
+    border-color: rgba(79, 142, 247, 0.18) !important;
 
-    .mat-mdc-card-header,
-    mat-card-header {
-      background: rgba(35, 79, 153, 0.04) !important;
-      border-bottom-color: rgba(35, 79, 153, 0.1) !important;
+    .mat-mdc-card-header, mat-card-header {
+      background: rgba(79, 142, 247, 0.05) !important;
+      border-bottom-color: rgba(79, 142, 247, 0.1) !important;
     }
-
-    .mat-mdc-card-title,
-    mat-card-title { color: #0f172a !important; }
-
-    .mat-mdc-card-content,
-    mat-card-content { color: #334155 !important; }
+    .mat-mdc-card-title, mat-card-title { color: #e2e8f0 !important; }
+    .mat-mdc-card-content, mat-card-content { color: #c9d1d9 !important; }
   }
 
   .line-space {
-    span, pre { color: #334155 !important; }
-    scrollbar-color: rgba(71,66,220,0.35) transparent !important;
-    &::-webkit-scrollbar-thumb { background: rgba(71,66,220,0.35); }
+    span, pre { color: #c9d1d9 !important; }
+    scrollbar-color: rgba(79,142,247,0.35) transparent !important;
+    &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.35); }
   }
 }
