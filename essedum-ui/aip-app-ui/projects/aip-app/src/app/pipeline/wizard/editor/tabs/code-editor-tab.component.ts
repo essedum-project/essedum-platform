@@ -691,6 +691,10 @@ export class CodeEditorTabComponent
       if (this.model.pipelineAttrs?.freshlyCreated &&
           (!this.model.code || this.model.code.trim() === '# (no code yet)')) {
         this.vibe.resetSession();
+        // Re-apply the user's selections to the fresh session
+        // (resetSession() resets model to 'claude' and agentProvider to '')
+        if (this.selectedAgent) this.vibe.setAgentProvider(this.selectedAgent);
+        if (this.selectedModel) this.vibe.setModel(this.selectedModel as VibeModel);
         if (this.setupDone) {
           this.scheduleAutoGenerate();
         } else {
@@ -723,6 +727,8 @@ export class CodeEditorTabComponent
     if (this.selectedAgent) {
       this.vibe.setAgentProvider(this.selectedAgent);
     }
+    // Reset model when agent changes so a stale model is not sent
+    this.selectedModel = null;
   }
 
   onModelSelect(): void {
@@ -972,6 +978,10 @@ ${this.model.code}
     this.vibe["session"] = this.vibe["createNewSession"]?.() ?? this.vibe["session"];
     this.vibe.messages$.next([]);
     this.seeded = false;
+    // Re-apply current selections — createNewSession() resets to 'claude'/'', so we
+    // must push the user's chosen agent+model back into the fresh session immediately.
+    if (this.selectedAgent) this.vibe.setAgentProvider(this.selectedAgent);
+    if (this.selectedModel) this.vibe.setModel(this.selectedModel as VibeModel);
   }
 
   onScriptChange(lines: string[]): void {
