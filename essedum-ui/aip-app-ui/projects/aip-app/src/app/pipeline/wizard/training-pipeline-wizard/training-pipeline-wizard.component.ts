@@ -248,9 +248,10 @@ export class TrainingPipelineWizardComponent implements OnInit {
         // relatively so the shell's mount prefix is preserved.
         this.dialogRef.close({ pipeline: data, kind: 'training-job' });
       },
-      error: () => {
+      error: (err: any) => {
         this.creating = false;
-        this.services.message('Could not create training job', 'error');
+        const msg = err?.error?.details || err?.error?.message || err?.message || 'Could not create training job';
+        this.services.message(msg, 'error');
       },
     });
   }

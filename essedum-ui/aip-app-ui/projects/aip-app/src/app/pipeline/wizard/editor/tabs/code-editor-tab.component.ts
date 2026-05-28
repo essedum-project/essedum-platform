@@ -155,14 +155,14 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
           </span>
         </div>
 
-        <!-- Save + Run banner (shown after every Vibe agent update) -->
+        <!-- Save + Run banner (shown after follow-up AI code update) -->
         <div class="save-run-banner" *ngIf="showSaveBanner && !initializing">
-          <mat-icon class="banner-icon">auto_awesome</mat-icon>
-          <span class="banner-msg">Pipeline Assistant updated the code &mdash; <strong>save</strong> to persist, then <strong>run</strong> to apply.</span>
+          <mat-icon class="banner-icon">check_circle</mat-icon>
+          <div class="banner-body">
+            <span class="banner-title">Code updated &amp; saved by AI</span>
+            <span class="banner-sub">Click <strong>▶ Run</strong> in the top bar to execute the updated pipeline.</span>
+          </div>
           <span class="banner-spacer"></span>
-          <button mat-flat-button class="banner-save-btn" (click)="save()">
-            <mat-icon>save</mat-icon>&nbsp;Save
-          </button>
           <button mat-icon-button class="banner-dismiss-btn" (click)="showSaveBanner = false" matTooltip="Dismiss">
             <mat-icon>close</mat-icon>
           </button>
@@ -479,24 +479,25 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
 
     /* Save + Run banner */
     .save-run-banner {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 14px;
-      background: #1e3a5f;
-      border-bottom: 1px solid #2d5a8e;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px;
+      background: linear-gradient(90deg, #052e16, #064e3b);
+      border-bottom: 1px solid #166534;
+      border-left: 4px solid #22c55e;
       flex-shrink: 0;
+      animation: banner-slide-in 0.28s ease;
     }
-    .banner-icon { color: #60a5fa; font-size: 18px; height: 18px; width: 18px; }
-    .banner-msg { font-size: 13px; color: #bfdbfe; }
-    .banner-msg strong { color: #93c5fd; }
+    @keyframes banner-slide-in {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .banner-icon { color: #4ade80; font-size: 20px; height: 20px; width: 20px; flex-shrink: 0; }
+    .banner-body { display: flex; flex-direction: column; gap: 1px; }
+    .banner-title { font-size: 13px; font-weight: 700; color: #bbf7d0; }
+    .banner-sub { font-size: 11px; color: #86efac; }
+    .banner-sub strong { color: #4ade80; }
     .banner-spacer { flex: 1; }
-    .banner-save-btn {
-      background: #2563eb !important; color: #fff !important;
-      font-size: 12px; height: 30px; line-height: 30px;
-    }
-    ::ng-deep .banner-save-btn .mat-icon { font-size: 15px; height: 15px; width: 15px; }
-    .banner-dismiss-btn { color: #93c5fd !important; width: 30px; height: 30px; }
-
-    :host-context(body.header-dark-theme) .save-run-banner { background: #0d2137; border-bottom-color: #1e3a5f; }
+    .banner-dismiss-btn { color: #4ade80 !important; width: 30px; height: 30px; }
 
     /* ─────────────────────── Dark theme ─────────────────── */
     :host-context(body.header-dark-theme) {
@@ -623,11 +624,15 @@ export class CodeEditorTabComponent
         this.wasInitialGen = false;
         const py = files?.find((f) => /\.py$/i.test(f.path));
         if (py) {
-          this.scriptLines = py.content.split("\n");
-          this.dirty = py.content !== this.originalCode;
+          const processedCode = this.injectDepsIfMissing(py.content);
+          this.scriptLines = processedCode.split("\n");
+          this.dirty = processedCode !== this.originalCode;
           this.codeUpdatedThisRound = true;
-          // Auto-save on both initial and follow-up AI generations so the update API always fires
           this.save();
+          // Show the "updated & saved — click Run" banner for follow-up prompts
+          if (!wasInitial) {
+            this.showSaveBanner = true;
+          }
         }
         this.scrollPending = true;
       });
@@ -649,11 +654,11 @@ export class CodeEditorTabComponent
         if (lastAssistant) {
           const match = lastAssistant.content.match(/```python\n([\s\S]*?)```/);
           if (match && match[1].trim()) {
-            this.scriptLines = match[1].split('\n');
-            this.dirty = this.scriptLines.join('\n') !== this.originalCode;
-            if (wasInit) {
-              this.save();
-            } else {
+            const processedCode = this.injectDepsIfMissing(match[1]);
+            this.scriptLines = processedCode.split('\n');
+            this.dirty = processedCode !== this.originalCode;
+            this.save();
+            if (!wasInit) {
               this.showSaveBanner = true;
             }
           }
@@ -671,6 +676,15 @@ export class CodeEditorTabComponent
       this.originalCode = this.model.code || "";
       this.dirty = false;
       this.seeded = false;
+
+      // For freshly created pipelines the user already chose agent+model in the wizard
+      // dialog — read the values from the singleton service so the setup screen is skipped.
+      if (this.model.pipelineAttrs?.freshlyCreated) {
+        const svcAgent = this.vibe.currentAgentProvider;
+        const svcModel = this.vibe.currentModel;
+        if (svcAgent) this.selectedAgent = svcAgent;
+        if (svcModel) this.selectedModel = svcModel;
+      }
 
       // Freshly created pipeline → auto-generate initial code via Goose
       // Guard: only trigger if code is still the placeholder (defense-in-depth for stale flags)
@@ -837,6 +851,85 @@ ${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, n
 10. Return the COMPLETE Python file — do not omit or truncate any section
 
 Return the full Python script inside a fenced \`\`\`python block.`;
+  }
+
+  /**
+   * Scans generated Python code for third-party imports and injects a
+   * `pip install` block at the very top when one is not already present.
+   * Guarantees all packages are available in the executor environment.
+   */
+  private injectDepsIfMissing(code: string): string {
+    // Already has a pip install block — leave untouched
+    if (/_WIZARD_PIPELINE_DEPS|_DEPS\s*=\s*\[/.test(code.slice(0, 800)) ||
+        /subprocess\.check_call[\s\S]{0,200}pip.*install/i.test(code.slice(0, 1000))) {
+      return code;
+    }
+
+    const STDLIB = new Set([
+      'os', 'sys', 'io', 'json', 're', 'time', 'datetime', 'collections',
+      'functools', 'itertools', 'pathlib', 'typing', 'dataclasses', 'abc',
+      'copy', 'math', 'random', 'hashlib', 'base64', 'urllib', 'http',
+      'logging', 'warnings', 'traceback', 'inspect', 'struct', 'string',
+      'enum', 'contextlib', 'threading', 'subprocess', 'shutil', 'tempfile',
+      'uuid', 'argparse', 'configparser', 'csv', 'pickle', 'gzip', 'zipfile',
+      'concurrent', 'asyncio', 'socket', 'ssl', 'email', 'html', 'xml',
+      'unittest', 'pprint', 'textwrap', 'operator', 'heapq', 'bisect',
+      'builtins', 'platform', 'signal', 'stat', 'glob', 'fnmatch',
+      'weakref', 'gc', 'types', 'decimal', 'fractions', 'statistics',
+      'multiprocessing', 'queue', 'array', 'ctypes', 'mmap',
+    ]);
+
+    const PKG_MAP: Record<string, string> = {
+      'sklearn':    'scikit-learn',
+      'cv2':        'opencv-python',
+      'PIL':        'Pillow',
+      'bs4':        'beautifulsoup4',
+      'yaml':       'PyYAML',
+      'dotenv':     'python-dotenv',
+      'psycopg2':   'psycopg2-binary',
+      'pymysql':    'PyMySQL',
+      'dateutil':   'python-dateutil',
+      'attr':       'attrs',
+      'jwt':        'PyJWT',
+      'flask':      'Flask',
+      'fastapi':    'fastapi',
+      'pydantic':   'pydantic',
+      'sqlalchemy': 'SQLAlchemy',
+    };
+
+    const seen = new Set<string>();
+    const packages: string[] = [];
+    const importRe = /^(?:import|from)\s+(\w+)/gm;
+    let m: RegExpExecArray | null;
+    while ((m = importRe.exec(code)) !== null) {
+      const mod = m[1];
+      if (!STDLIB.has(mod) && !seen.has(mod)) {
+        seen.add(mod);
+        packages.push(PKG_MAP[mod] ?? mod);
+      }
+    }
+
+    if (!packages.length) return code;
+
+    const pkgList = packages.map(p => `'${p}'`).join(', ');
+    const installBlock =
+      `import subprocess, sys\n` +
+      `_DEPS = [${pkgList}]\n` +
+      `subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', '--disable-pip-version-check'] + _DEPS)\n`;
+
+    // Insert after shebang / encoding comment lines (first 1-3 lines)
+    const lines = code.split('\n');
+    let insertAt = 0;
+    for (let i = 0; i < Math.min(lines.length, 5); i++) {
+      const l = lines[i].trim();
+      if (l.startsWith('#!') || l.startsWith('# -*-') || l.startsWith('# coding') || l.startsWith('# -*- coding')) {
+        insertAt = i + 1;
+      } else {
+        break;
+      }
+    }
+    lines.splice(insertAt, 0, installBlock, '');
+    return lines.join('\n');
   }
 
   send(): void {

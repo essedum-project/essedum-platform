@@ -295,6 +295,12 @@ export class VibeStudioService implements OnDestroy {
     this.session.agentProvider = name;
   }
 
+  /** Read the currently stored agent provider (e.g. 'ollama', 'azure_openai'). */
+  get currentAgentProvider(): string { return this.session.agentProvider; }
+
+  /** Read the currently stored model name. */
+  get currentModel(): VibeModel { return this.session.model; }
+
   /**
    * Sends a user message to the Goose agent and opens an SSE stream for the reply.
    * Starts the agent session on first call (lazy init).

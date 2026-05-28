@@ -313,9 +313,10 @@ export class DataPipelineWizardComponent implements OnInit {
         this.services.message('Pipeline created!', 'success');
         this.dialogRef.close({ pipeline: data, kind: 'data-pipeline' });
       },
-      error: () => {
+      error: (err: any) => {
         this.creating = false;
-        this.services.message('Could not create pipeline', 'error');
+        const msg = err?.error?.details || err?.error?.message || err?.message || 'Could not create pipeline';
+        this.services.message(msg, 'error');
       },
     });
   }
