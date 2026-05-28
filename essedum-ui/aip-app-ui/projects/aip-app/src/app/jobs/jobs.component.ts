@@ -454,6 +454,7 @@ export class JobsComponent implements OnInit {
       height: '95%',
       width: '90%',
       disableClose: true,
+      panelClass: 'job-log-dialog',
       data: {
         isConsole: true,
         content: this.jobData,

@@ -12,7 +12,56 @@
 </header>
 
 <div class="wizard-shell" mat-dialog-content>
-  <mat-stepper #stepper linear class="wizard-stepper">
+
+  <!-- ═══ AGENT + MODEL SELECTION (mirrors Vibe Studio) ═══ -->
+  <div *ngIf="!selectionDone" class="agent-setup-screen">
+    <div class="setup-hero">
+      <div class="setup-icon-wrap"><i class="bi bi-stars"></i></div>
+      <h3>Choose Agent &amp; Model</h3>
+      <p>Select the AI agent and model that will help generate your training script.</p>
+    </div>
+
+    <div class="steps-row">
+      <!-- Step 1: Agent -->
+      <div class="step-col">
+        <div class="model-picker-label">
+          <span class="step-badge">1</span><span>Agent</span>
+        </div>
+        <div class="provider-select-wrap">
+          <select class="provider-select" [(ngModel)]="selectedAgent" (ngModelChange)="onAgentSelect($event)">
+            <option [ngValue]="null" disabled>Select agent…</option>
+            <option *ngFor="let p of agentOptions" [value]="p.value">{{ p.label }}</option>
+          </select>
+          <i class="bi bi-chevron-down provider-select-chevron"></i>
+        </div>
+      </div>
+
+      <div class="steps-row-sep"><i class="bi bi-chevron-right"></i></div>
+
+      <!-- Step 2: Model (locked until agent chosen) -->
+      <div class="step-col" [class.step-col--locked]="!selectedAgent">
+        <div class="model-picker-label" [class.model-picker-label--inactive]="!selectedAgent">
+          <span class="step-badge" [class.step-badge--inactive]="!selectedAgent">2</span>
+          <span>Model</span>
+          <span *ngIf="!selectedAgent" class="step-hint">← pick agent first</span>
+        </div>
+        <div class="provider-select-wrap">
+          <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)" [disabled]="!selectedAgent">
+            <option [ngValue]="null" disabled>Select model…</option>
+            <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+          </select>
+          <i class="bi bi-chevron-down provider-select-chevron"></i>
+        </div>
+      </div>
+    </div>
+
+    <button mat-flat-button color="primary" class="continue-btn"
+            (click)="proceedToWizard()" [disabled]="!selectedAgent || !selectedModel">
+      Continue to pipeline setup &nbsp;<mat-icon>arrow_forward</mat-icon>
+    </button>
+  </div>
+
+  <mat-stepper *ngIf="selectionDone" #stepper linear class="wizard-stepper">
 
     <!-- ── Step 1: Training Mode ── -->
     <mat-step [stepControl]="modeForm" label="Mode">

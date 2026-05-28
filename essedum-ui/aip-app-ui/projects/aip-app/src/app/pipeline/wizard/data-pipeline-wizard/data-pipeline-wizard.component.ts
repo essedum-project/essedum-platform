@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
 import { Services } from '../../../services/service';
+import { VibeStudioService } from '../../../vibe-studio/services/vibe-studio.service';
 import { StreamingServices } from '../../../streaming-services/streaming-service';
 import { WizardStateService } from '../shared/wizard-state.service';
 import { GitLinkService } from '../../../services/git-link.service';
@@ -63,11 +64,31 @@ export class DataPipelineWizardComponent implements OnInit {
 
   creating = false;
 
+  // ── Agent + Model pre-selection (mirrors Vibe Studio) ──────────────────────
+  selectionDone = false;
+  selectedAgent: string | null = null;
+  selectedModel: string | null = null;
+  readonly agentOptions: { label: string; value: string }[] = [
+    { label: 'Ollama',       value: 'ollama'       },
+    { label: 'Azure OpenAI', value: 'azure_openai'  },
+    { label: 'Anthropic',    value: 'anthropic'     },
+  ];
+  readonly modelOptions: { label: string; value: string }[] = [
+    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
+    { label: 'gemma4:latest',  value: 'gemma4:latest'   },
+    { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
+    { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+  ];
+  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.vibe.setAgentProvider(agent); }
+  onModelSelect(model: string): void { this.selectedModel = model; this.vibe.setModel(model); }
+  proceedToWizard(): void { if (this.selectedAgent && this.selectedModel) this.selectionDone = true; }
+
   constructor(
     private fb: FormBuilder,
     private services: Services,
     private gitSvc: GitLinkService,
     public dialogRef: MatDialogRef<DataPipelineWizardComponent>,
+    public vibe: VibeStudioService,
   ) {}
 
   ngOnInit(): void {

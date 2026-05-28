@@ -20,7 +20,6 @@ import {
   VibeChatMessage,
   VibeFile,
   VibeModel,
-  GOOSE_PROVIDER_MAP,
 } from "../../../../vibe-studio/models/vibe-studio.models";
 import { WizardPipelineModel } from "../pipeline-editor.component";
 
@@ -35,15 +34,45 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
           <mat-icon class="cp-logo">auto_awesome</mat-icon>
           <span class="cp-title">Pipeline Assistant</span>
           <span class="spacer"></span>
-          <mat-select class="cp-model-sel" [(value)]="selectedProvider" (selectionChange)="onProviderChange()">
-            <mat-option *ngFor="let p of providers" [value]="p">{{ p }}</mat-option>
-          </mat-select>
-          <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat" class="cp-clear-btn">
+          <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat" class="cp-clear-btn" *ngIf="setupDone">
             <mat-icon>delete_sweep</mat-icon>
           </button>
         </header>
 
-        <ul class="cp-messages" #msgList>
+        <!-- Setup screen: choose agent + model before chatting -->
+        <div *ngIf="!setupDone" class="cp-setup-screen">
+          <div class="cp-setup-icon-wrap"><mat-icon>auto_awesome</mat-icon></div>
+          <div class="cp-setup-hero">
+            <h3>Configure Assistant</h3>
+            <p>Select an agent provider and model to begin.</p>
+          </div>
+          <div class="cp-setup-step">
+            <label class="cp-setup-step-label">
+              <span class="cp-step-badge">1</span> Agent Provider
+            </label>
+            <div class="cp-provider-select-wrap">
+              <select class="cp-provider-select" [(ngModel)]="selectedAgent" (change)="onAgentSelect()">
+                <option value="" disabled [selected]="!selectedAgent">Select agent…</option>
+                <option *ngFor="let a of agentOptions" [value]="a.value">{{ a.label }}</option>
+              </select>
+              <span class="cp-select-chevron">▾</span>
+            </div>
+          </div>
+          <div class="cp-setup-step">
+            <label class="cp-setup-step-label" [style.opacity]="selectedAgent ? '1' : '0.45'">
+              <span class="cp-step-badge">2</span> Model
+            </label>
+            <div class="cp-provider-select-wrap">
+              <select class="cp-provider-select" [(ngModel)]="selectedModel" (change)="onModelSelect()" [disabled]="!selectedAgent">
+                <option value="" disabled [selected]="!selectedModel">Select model…</option>
+                <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+              </select>
+              <span class="cp-select-chevron">▾</span>
+            </div>
+          </div>
+        </div>
+
+        <ul class="cp-messages" #msgList *ngIf="setupDone">
           <li class="cp-empty" *ngIf="!messages.length">
             <mat-icon>tips_and_updates</mat-icon>
             <p>Describe the changes you want in this pipeline. The agent will return an updated Python file.</p>
@@ -88,7 +117,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
           </li>
         </ul>
 
-        <footer class="cp-foot">
+        <footer class="cp-foot" *ngIf="setupDone">
           <mat-form-field appearance="outline" class="cp-input">
             <textarea
               matInput
@@ -288,7 +317,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     }
 
     /* Markdown inside ai bubble */
-    .cp-ai-bubble ::ng-deep p { margin: 0 0 8px; &:last-child { margin-bottom: 0; } }
+    .cp-ai-bubble ::ng-deep p { margin: 0 0 8px; }
+    .cp-ai-bubble ::ng-deep p:last-child { margin-bottom: 0; }
     .cp-ai-bubble ::ng-deep h1,.cp-ai-bubble ::ng-deep h2,.cp-ai-bubble ::ng-deep h3 { margin: 8px 0 4px; font-weight: 700; }
     .cp-ai-bubble ::ng-deep ul,.cp-ai-bubble ::ng-deep ol { margin: 4px 0; padding-left: 18px; }
     .cp-ai-bubble ::ng-deep li { margin: 2px 0; }
@@ -386,6 +416,23 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     ::ng-deep .cp-input .mat-mdc-text-field-wrapper { background: var(--cp-input-bg, #fff); }
     .cp-send-btn { min-width: 40px !important; padding: 0 10px !important; }
 
+    /* ─────────────────────── Setup screen ─────────────────── */
+    .cp-setup-screen { display: flex; flex-direction: column; align-items: stretch; padding: 24px 16px 16px; gap: 18px; flex: 1; overflow-y: auto; }
+    .cp-setup-icon-wrap { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); color: #7c3aed; align-self: center; }
+    .cp-setup-icon-wrap mat-icon { font-size: 24px; height: 24px; width: 24px; }
+    .cp-setup-hero { text-align: center; }
+    .cp-setup-hero h3 { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #0f172a; }
+    .cp-setup-hero p { margin: 0; font-size: 12px; color: #64748b; line-height: 1.5; }
+    .cp-setup-step { display: flex; flex-direction: column; gap: 6px; }
+    .cp-setup-step-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #374151; }
+    .cp-step-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; background: rgba(99,102,241,0.12); color: #4f46e5; flex-shrink: 0; }
+    .cp-provider-select-wrap { position: relative; display: flex; align-items: center; }
+    .cp-provider-select { width: 100%; appearance: none; -webkit-appearance: none; border-radius: 8px; padding: 9px 28px 9px 10px; font-size: 12px; font-weight: 500; outline: none; cursor: pointer; font-family: inherit; transition: border-color 0.15s; background: #ffffff; border: 1.5px solid rgba(99,102,241,0.25); color: #111827; }
+    .cp-provider-select:focus { box-shadow: 0 0 0 3px rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.6); }
+    .cp-provider-select:disabled { cursor: not-allowed; opacity: 0.5; }
+    .cp-provider-select option { background: #fff; color: #111827; }
+    .cp-select-chevron { position: absolute; right: 8px; font-size: 10px; pointer-events: none; color: #6b7280; }
+
     /* ─────────────────────── Code editor (right) ─────────── */
     .editor-panel {
       display: flex;
@@ -471,7 +518,24 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       --ed-border:      #30363d;
       --ed-head-fg:     #8b949e;
     }    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre { background: #0d1117; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }    `,
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble { color: #e6edf3 !important; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep * { color: #e6edf3; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep strong { color: #f0f6ff !important; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep a { color: #60a5fa !important; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep code { color: #c084fc !important; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre code { color: #e2e8f0 !important; }
+    /* Setup screen – dark */
+    :host-context(body.header-dark-theme) .cp-setup-screen { background: var(--cp-bg, #0d1117); }
+    :host-context(body.header-dark-theme) .cp-setup-icon-wrap { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.2); color: #7c3aed; }
+    :host-context(body.header-dark-theme) .cp-setup-hero h3 { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-setup-hero p { color: #94a3b8; }
+    :host-context(body.header-dark-theme) .cp-setup-step-label { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-step-badge { background: rgba(79,142,247,0.15); color: #60a5fa; }
+    :host-context(body.header-dark-theme) .cp-provider-select { background: #1e293b; border: 1.5px solid rgba(79,142,247,0.25); color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-provider-select:focus { border-color: rgba(79,142,247,0.6); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
+    :host-context(body.header-dark-theme) .cp-provider-select option { background: #1e293b; color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-select-chevron { color: #94a3b8; }    `,
   ],
 })
 export class CodeEditorTabComponent
@@ -494,9 +558,24 @@ export class CodeEditorTabComponent
   showSaveBanner = false;     // show after Vibe updates code on follow-up prompts
   private wasInitialGen = false;  // tracks whether the current generation is the first one
   messages: VibeChatMessage[] = [];
-  selectedProvider: VibeModel = "claude";
-  providers: VibeModel[] = [];
+  selectedAgent: string | null = null;
+  selectedModel: string | null = null;
+  pendingAutoGenerate = false;
   private seeded = false;
+
+  get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
+
+  readonly agentOptions = [
+    { label: 'Ollama',       value: 'ollama' },
+    { label: 'Azure OpenAI', value: 'azure_openai' },
+    { label: 'Anthropic',    value: 'anthropic' },
+  ];
+  readonly modelOptions = [
+    { label: 'qwen3.6:27b',   value: 'qwen3.6:27b' },
+    { label: 'gemma4:latest',  value: 'gemma4:latest' },
+    { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
+    { label: 'gpt-4o-mini',   value: 'gpt-4o-mini' },
+  ];
   private scrollPending = false;
   /** true once generationComplete$ has updated scriptLines for the current round */
   private codeUpdatedThisRound = false;
@@ -526,11 +605,6 @@ export class CodeEditorTabComponent
   ) {}
 
   ngOnInit(): void {
-    this.providers =
-      (Object.keys(GOOSE_PROVIDER_MAP || {}) as VibeModel[]).length > 0
-        ? (Object.keys(GOOSE_PROVIDER_MAP) as VibeModel[])
-        : ["claude", "gemini", "azure-oai"];
-
     // Mirror messages from VibeStudioService
     this.vibe.messages$
       .pipe(takeUntil(this.destroy$))
@@ -603,7 +677,11 @@ export class CodeEditorTabComponent
       if (this.model.pipelineAttrs?.freshlyCreated &&
           (!this.model.code || this.model.code.trim() === '# (no code yet)')) {
         this.vibe.resetSession();
-        this.scheduleAutoGenerate();
+        if (this.setupDone) {
+          this.scheduleAutoGenerate();
+        } else {
+          this.pendingAutoGenerate = true;
+        }
       }
     }
   }
@@ -627,8 +705,20 @@ export class CodeEditorTabComponent
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
-  onProviderChange(): void {
-    this.vibe.setModel(this.selectedProvider);
+  onAgentSelect(): void {
+    if (this.selectedAgent) {
+      this.vibe.setAgentProvider(this.selectedAgent);
+    }
+  }
+
+  onModelSelect(): void {
+    if (this.selectedModel) {
+      this.vibe.setModel(this.selectedModel as VibeModel);
+      if (this.pendingAutoGenerate && this.setupDone) {
+        this.pendingAutoGenerate = false;
+        setTimeout(() => this.scheduleAutoGenerate(), 0);
+      }
+    }
   }
 
   prefill(text: string): void {

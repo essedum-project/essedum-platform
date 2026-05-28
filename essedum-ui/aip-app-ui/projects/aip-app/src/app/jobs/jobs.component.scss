@@ -116,6 +116,45 @@ button[mat-icon-button] {
   }
 }
 
+// ── Action column ────────────────────────────────────────────────────────────
+.cancel-div {
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+  text-align: left !important;
+  padding: 4px 6px !important;
+}
+.cancel-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+}
+
+// Compact mat-icon-button — removes MDC persistent state layer that creates the large dark box
+::ng-deep .cancel-div .mat-mdc-icon-button,
+::ng-deep .cancel-btn .mat-mdc-icon-button {
+  --mdc-icon-button-state-layer-size: 28px;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 4px !important;
+  background: transparent !important;
+  border-radius: 6px !important;
+
+  .mat-mdc-button-touch-target { width: 28px !important; height: 28px !important; }
+  .mat-mdc-button-persistent-ripple,
+  .mdc-icon-button__ripple { display: none !important; }
+  mat-icon, .mat-icon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+  }
+}
+::ng-deep .cancel-div .mat-mdc-icon-button:hover,
+::ng-deep .cancel-btn .mat-mdc-icon-button:hover {
+  background: rgba(88,166,255,0.1) !important;
+}
+
 // ── Action icons in table ─────────────────────────────────────────────────────
 mat-icon, .mat-icon {
   color: #8b949e !important;
@@ -150,4 +189,10 @@ mat-icon, .mat-icon {
   }
 
   mat-icon, .mat-icon { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
+
+  .cancel-div { vertical-align: middle !important; }
+  .cancel-btn { display: inline-flex !important; align-items: center !important; vertical-align: middle !important; }
+
+  ::ng-deep .cancel-div .mat-mdc-icon-button:hover,
+  ::ng-deep .cancel-btn .mat-mdc-icon-button:hover { background: rgba(71,66,220,0.08) !important; }
 }

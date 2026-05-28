@@ -1945,6 +1945,92 @@ html body .cdk-overlay-container .cdk-overlay-pane.standard-dialog .mdc-dialog__
 body.header-light-theme .cdk-overlay-container .cdk-overlay-pane.standard-dialog .mat-mdc-dialog-surface::-webkit-scrollbar-thumb,
 body.header-light-theme .cdk-overlay-container .cdk-overlay-pane.standard-dialog .mdc-dialog__surface::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); }
 
+// ── Job Log Dialog (panelClass: 'job-log-dialog') ────────────────────────────
+// Dark theme — dialog surface
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-dialog-container,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mdc-dialog__surface {
+  background: #0b1526 !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(79,142,247,0.2) !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.04) inset !important;
+}
+// Dark theme — mat-card inside dialog
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card:not(.lfx-c-card),
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .example-card {
+  background: rgba(13,22,48,0.98) !important;
+  border: 1px solid rgba(79,142,247,0.15) !important;
+  --mdc-elevated-card-container-color: rgba(13,22,48,0.98);
+  --mdc-outlined-card-container-color: rgba(13,22,48,0.98);
+}
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card-title,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .example-card mat-card-title { color: #e2e8f0 !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card-content,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .example-card mat-card-content { color: #c9d1d9 !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .example-card span,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .example-card pre { color: #c9d1d9 !important; }
+// Dark theme — expansion panel inside dialog
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-expansion-panel {
+  background: rgba(11,18,40,0.97) !important;
+  border: 1px solid rgba(79,142,247,0.12) !important;
+}
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel-body { color: #c9d1d9 !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel-header { background: rgba(79,142,247,0.08) !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .mat-panel-title { color: #e2e8f0 !important; }
+// Dark theme — general text in dialog
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog h3 { color: #c9d1d9 !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .id { color: #c9d1d9 !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .copy-icon,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .close-icon { color: #8b949e !important; }
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .copy-icon:hover,
+body.header-dark-theme .cdk-overlay-pane.job-log-dialog .close-icon:hover { color: #58a6ff !important; }
+
+// Light theme — dialog surface
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-dialog-container,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mdc-dialog__surface {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(35,79,153,0.14) !important;
+  box-shadow: 0 16px 48px rgba(35,79,153,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
+}
+// Light theme — mat-card inside dialog
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card:not(.lfx-c-card),
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card {
+  background: rgba(255,255,255,0.95) !important;
+  border: 1px solid rgba(35,79,153,0.12) !important;
+  --mdc-elevated-card-container-color: #ffffff;
+  --mdc-outlined-card-container-color: #ffffff;
+}
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card-title,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card mat-card-title { color: #0f172a !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card-content,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card mat-card-content { color: #334155 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card span,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card pre { color: #334155 !important; }
+// Higher-specificity rule wins when component scoping ties on span/pre
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card .line-space span,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .example-card .line-space pre,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .line-space span,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .line-space pre { color: #1e293b !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-card-title { color: #0f172a !important; font-weight: 600 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-expansion-panel { background: #f8fafc !important; border-color: rgba(71,66,220,0.1) !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel-header,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-mdc-expansion-panel-header { background: rgba(71,66,220,0.08) !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel-header-title,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-panel-title { color: #0f172a !important; font-weight: 600 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-indicator::after { border-color: #0f172a !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .hidden-details h3 { color: #334155 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .hidden-details .id { color: #64748b !important; }
+// Light theme — expansion panel inside dialog
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .mat-expansion-panel-body { color: #334155 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog h3 { color: #334155 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .id { color: #334155 !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .copy-icon,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .close-icon { color: #64748b !important; }
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .copy-icon:hover,
+body.header-light-theme .cdk-overlay-pane.job-log-dialog .close-icon:hover { color: #4742dc !important; }
+
 // ══════════════════════════════════════════════════════════════════════════════
 // LAYOUT WIDTH FIXES — prevents narrow content columns
 // ══════════════════════════════════════════════════════════════════════════════

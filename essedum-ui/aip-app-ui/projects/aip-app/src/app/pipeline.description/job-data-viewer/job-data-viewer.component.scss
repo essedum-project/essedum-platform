@@ -71,6 +71,57 @@
 .tabpadding { padding: 12px !important; }
 .flexdivcolumn { display: flex; flex-direction: column; gap: 12px; }
 
+// ── Log Card (example-card mat-card) ─────────────────────────────────────────
+::ng-deep .example-card {
+  background: rgba(13, 22, 48, 0.97) !important;
+  border: 1px solid rgba(79, 142, 247, 0.18) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-card-header,
+  mat-card-header {
+    padding: 10px 16px 8px !important;
+    border-bottom: 1px solid rgba(79, 142, 247, 0.1) !important;
+    background: rgba(79, 142, 247, 0.05) !important;
+  }
+
+  .mat-mdc-card-title,
+  mat-card-title {
+    color: #e2e8f0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    margin: 0 !important;
+  }
+
+  .mat-mdc-card-content,
+  mat-card-content {
+    color: #c9d1d9 !important;
+    padding: 12px 16px 16px !important;
+    margin: 0 !important;
+  }
+}
+
+// ── Log text area ─────────────────────────────────────────────────────────────
+.line-space {
+  max-height: 52vh !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(79,142,247,0.35) transparent !important;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.35); border-radius: 3px; }
+
+  > div { padding: 0 !important; }
+
+  span, pre {
+    color: #c9d1d9 !important;
+    font-family: 'Roboto Mono', 'Consolas', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.7 !important;
+  }
+}
+
 ::ng-deep mat-expansion-panel {
   background: rgba(88,166,255,0.03) !important;
   border: 1px solid rgba(88,166,255,0.12) !important;
@@ -78,6 +129,7 @@
 }
 ::ng-deep .mat-expansion-panel-header { background: rgba(88,166,255,0.1) !important; border-radius: 8px !important; }
 ::ng-deep .mat-panel-title { color: #e6edf3 !important; font-weight: 600 !important; }
+::ng-deep .mat-expansion-panel-body { color: #c9d1d9 !important; }
 
 body.header-light-theme {
   .space h3 { color: #64748b !important; }
@@ -87,4 +139,28 @@ body.header-light-theme {
   .copy-icon, .close-icon { color: #64748b !important; &:hover { color: #4742dc !important; } }
   ::ng-deep .mat-expansion-panel-header { background: rgba(71,66,220,0.08) !important; }
   ::ng-deep .mat-panel-title { color: #0f172a !important; }
+  ::ng-deep .mat-expansion-panel-body { color: #334155 !important; }
+
+  ::ng-deep .example-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(35, 79, 153, 0.14) !important;
+
+    .mat-mdc-card-header,
+    mat-card-header {
+      background: rgba(35, 79, 153, 0.04) !important;
+      border-bottom-color: rgba(35, 79, 153, 0.1) !important;
+    }
+
+    .mat-mdc-card-title,
+    mat-card-title { color: #0f172a !important; }
+
+    .mat-mdc-card-content,
+    mat-card-content { color: #334155 !important; }
+  }
+
+  .line-space {
+    span, pre { color: #334155 !important; }
+    scrollbar-color: rgba(71,66,220,0.35) transparent !important;
+    &::-webkit-scrollbar-thumb { background: rgba(71,66,220,0.35); }
+  }
 }
