@@ -368,13 +368,21 @@ export class ConnectionViewComponent implements OnInit {
     }
     this.Services.testConnection(this.data).subscribe(
       (response) => {
-        this.Services.message('Success Connected successfully');
+        this.Services.message('Connection test successful!', 'success');
         this.testSuccessful = true;
       },
       (error) => {
-        this.Services.message(
-          'Error! Please check connection details: ' + error,'error'
-        );
+        if (error?.details) {
+          this.Services.message(error.details, 'error');
+        } else if (error?.message) {
+          this.Services.message(error.message, 'error');
+        } else if (error?.error?.details) {
+          this.Services.message(error.error.details, 'error');
+        } else if (error?.error?.message) {
+          this.Services.message(error.error.message, 'error');
+        } else {
+          this.Services.message('Connection test failed. Please check connection details.', 'error');
+        }
       }
     );
   }
