@@ -1,7 +1,7 @@
 <div class="right-panel">
 
   <!-- ── Empty state ── -->
-  <div *ngIf="(status === 'idle' || status === 'error') && !files.length" class="empty-state">
+  <div [hidden]="!((status === 'idle' || status === 'error') && !files.length)" class="empty-state">
     <div class="empty-content">
       <div class="empty-icon-wrap">
         <i class="bi bi-layout-split"></i>
@@ -16,7 +16,7 @@
   </div>
 
   <!-- ── Panel (generating / live / files loaded) ── -->
-  <div *ngIf="status === 'generating' || status === 'live' || files.length > 0" class="panel-content">
+  <div [hidden]="!(status === 'generating' || status === 'live' || files.length > 0)" class="panel-content">
 
     <!-- Tab bar -->
     <div class="tab-bar">
@@ -32,7 +32,7 @@
     </div>
 
     <!-- ── Code / Explorer tab ── -->
-    <div *ngIf="activeTab === 'code'" class="code-pane">
+    <div [hidden]="activeTab !== 'code'" class="code-pane">
 
       <!-- Sidebar: VS Code explorer -->
       <div class="vsc-sidebar">
@@ -121,10 +121,10 @@
     </div>
 
     <!-- ── Preview tab ── -->
-    <div *ngIf="activeTab === 'preview'" class="preview-pane">
+    <div [hidden]="activeTab !== 'preview'" class="preview-pane">
 
       <!-- Deployment in progress -->
-      <div *ngIf="deploymentStatus === 'deploying'" class="preview-empty deployment-ongoing">
+      <div [hidden]="deploymentStatus !== 'deploying'" class="preview-empty deployment-ongoing">
         <div class="deploy-spinner-wrap">
           <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
           <div class="deploy-icon-overlay"><i class="bi bi-rocket-takeoff-fill"></i></div>
@@ -134,16 +134,15 @@
       </div>
 
       <!-- Deployment error -->
-      <div *ngIf="deploymentStatus === 'error'" class="preview-empty deployment-error">
+      <div [hidden]="deploymentStatus !== 'error'" class="preview-empty deployment-error">
         <div class="error-icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <p>Deployment failed</p>
         <p class="error-sublabel">Check logs or try again.</p>
       </div>
 
       <!-- Deployment success with result -->
-      <div *ngIf="deploymentStatus === 'success' && deploymentResult" class="deployment-result">
-        <ng-container *ngIf="isDeploymentUrl(deploymentResult); else resultText">
-          <div class="browser-chrome">
+      <div [hidden]="!(deploymentStatus === 'success' && deploymentResult)" class="deployment-result">
+        <div [hidden]="!isDeploymentResultUrl" class="browser-chrome">
             <div class="browser-chrome-bar">
               <div class="browser-dots">
                 <span class="dot dot-red"></span>
@@ -159,22 +158,19 @@
               </a>
             </div>
             <iframe
-              [src]="sanitizeDeploymentUrl(deploymentResult)"
+              #deploymentIframe
               class="preview-iframe"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               title="Deployment Preview"
             ></iframe>
-          </div>
-        </ng-container>
-        <ng-template #resultText>
-          <div class="deployment-result-body">
-            <pre>{{ deploymentResult | json }}</pre>
-          </div>
-        </ng-template>
+        </div>
+        <div [hidden]="isDeploymentResultUrl" class="deployment-result-body">
+          <pre>{{ deploymentResult | json }}</pre>
+        </div>
       </div>
 
       <!-- Default empty / no deployment triggered yet -->
-      <div *ngIf="deploymentStatus === 'idle' && !previewUrl" class="preview-empty">
+      <div [hidden]="!(deploymentStatus === 'idle' && !previewUrl)" class="preview-empty">
         <div *ngIf="status === 'generating'" class="generating-state">
           <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
           <p>Generating your app…</p>
@@ -189,7 +185,7 @@
       </div>
 
       <!-- Legacy iframe preview from previewUrl$ -->
-      <div *ngIf="deploymentStatus === 'idle' && previewUrl" class="browser-chrome">
+      <div [hidden]="!(deploymentStatus === 'idle' && previewUrl)" class="browser-chrome">
         <div class="browser-chrome-bar">
           <div class="browser-dots">
             <span class="dot dot-red"></span>
@@ -202,7 +198,7 @@
           </div>
         </div>
         <iframe
-          [src]="previewUrl"
+          #previewIframe
           class="preview-iframe"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           title="App Preview"

@@ -48,6 +48,20 @@ pre {
   &::-webkit-scrollbar-thumb { background: rgba(68,128,245,0.18); border-radius: 4px; }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  LIGHT THEME
+// ═══════════════════════════════════════════════════════════════════
+body.header-light-theme {
+  :host ::ng-deep mat-card { background: #ffffff !important; border-color: rgba(79,70,229,0.14) !important; box-shadow: 0 4px 20px rgba(79,70,229,0.08) !important; &::before { opacity: 0.4; } }
+  pre { background: #f8fafc !important; border-color: rgba(79,70,229,0.12) !important; color: #334155 !important; }
+  .table {
+    tr:first-child td { color: #64748b !important; background: rgba(79,70,229,0.04) !important; }
+    tr td { color: #475569 !important; }
+    tr:hover td { color: #0f172a !important; background: rgba(79,70,229,0.04) !important; }
+    tr:nth-child(even) td { background: rgba(79,70,229,0.02) !important; }
+  }
+}
+
 // ── JSON editor ───────────────────────────────────────────────────
 :host ::ng-deep json-editor { border: none !important; .jsoneditor { background: transparent !important; border: none !important; } .jsoneditor-tree { background: transparent !important; color: #aac4e0 !important; font-size: 12.5px !important; font-family: 'JetBrains Mono', monospace !important; } .jsoneditor-value.jsoneditor-string { color: #f9a873 !important; } .jsoneditor-value.jsoneditor-number { color: #c4b5fd !important; } .jsoneditor-value.jsoneditor-boolean { color: #fb923c !important; } .jsoneditor-value.jsoneditor-null { color: #6b7fa0 !important; } .jsoneditor-key { color: #6aaaf5 !important; } }
 

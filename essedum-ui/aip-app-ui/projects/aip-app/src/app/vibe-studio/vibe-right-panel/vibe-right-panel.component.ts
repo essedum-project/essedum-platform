@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { VibeStudioService } from '../services/vibe-studio.service';
 import { VibeFile, VibeSessionStatus } from '../models/vibe-studio.models';
 
@@ -18,32 +18,42 @@ export interface FileTreeNode {
   selector: 'app-vibe-right-panel',
   templateUrl: './vibe-right-panel.component.html',
   styleUrls: ['./vibe-right-panel.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VibeRightPanelComponent implements OnInit, OnDestroy {
   files: VibeFile[] = [];
   treeNodes: FileTreeNode[] = [];          // flat list for *ngFor (virtual tree)
   selectedFile: VibeFile | null = null;
-  previewUrl: SafeResourceUrl | null = null;
+  /** Plain URL string kept for [hidden] conditions; iframe src set imperatively. */
+  previewUrl: string | null = null;
   status: VibeSessionStatus = 'idle';
   activeTab: 'preview' | 'code' = 'preview';
   codeLines: string[] = [];
   tokenizedLines: SafeHtml[] = [];
   deploymentStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
   deploymentResult: any = null;
-  deploymentSafeUrl: SafeResourceUrl | null = null;
+  /** Cached flag — true when deploymentResult is a URL string (avoids method call in template). */
+  isDeploymentResultUrl = false;
   private selectedExt = '';
+
+  /** Refs to iframes — src is set imperatively, never via Angular [src] binding. */
+  @ViewChild('deploymentIframe') deploymentIframe?: ElementRef<HTMLIFrameElement>;
+  @ViewChild('previewIframe') previewIframe?: ElementRef<HTMLIFrameElement>;
 
   private expandedDirs = new Set<string>();
   private destroy$ = new Subject<void>();
+  private lastPreviewUrl: string | null = null;
+  private lastDeploymentUrl: string | null = null;
 
   constructor(
     private vibeService: VibeStudioService,
     private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.vibeService.files$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(debounceTime(200), takeUntil(this.destroy$))
       .subscribe((files) => {
         this.files = files;
         if (!files.length) {
@@ -51,11 +61,11 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
           this.codeLines = [];
           this.expandedDirs.clear();
           this.treeNodes = [];
+          this.cdr.markForCheck();
           return;
         }
         const firstLoad = !this.selectedFile;
         this.rebuildTree();
-        this.activeTab = 'code';
         if (firstLoad) {
           // Auto-expand all dirs and select first file on first load
           this.expandAll();
@@ -74,23 +84,30 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
             }
           }
         }
+        this.cdr.markForCheck();
       });
 
     this.vibeService.previewUrl$
       .pipe(takeUntil(this.destroy$))
       .subscribe((url) => {
-        if (url) {
-          this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        if (url && url !== this.lastPreviewUrl) {
+          this.lastPreviewUrl = url;
+          this.previewUrl = url; // plain string for template [hidden] conditions
+          // Set iframe src imperatively — avoids Angular [src] binding re-evaluation
+          if (this.previewIframe?.nativeElement) {
+            this.previewIframe.nativeElement.src = url;
+          }
           // Only auto-switch to preview if no files are loaded yet
           if (!this.files.length) {
             this.activeTab = 'preview';
           }
+          this.cdr.markForCheck();
         }
       });
 
     this.vibeService.status$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((s) => (this.status = s));
+      .subscribe((s) => { this.status = s; this.cdr.markForCheck(); });
 
     this.vibeService.deploymentStatus$
       .pipe(takeUntil(this.destroy$))
@@ -99,15 +116,23 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
         if (s === 'deploying' || s === 'success' || s === 'error') {
           this.activeTab = 'preview';
         }
+        this.cdr.markForCheck();
       });
 
     this.vibeService.deploymentResult$
       .pipe(takeUntil(this.destroy$))
       .subscribe((result) => {
         this.deploymentResult = result;
-        this.deploymentSafeUrl = (result && this.isDeploymentUrl(result))
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(result as string)
-          : null;
+        this.isDeploymentResultUrl = this.isDeploymentUrl(result);
+        const newUrl = (result && this.isDeploymentResultUrl) ? (result as string) : null;
+        if (newUrl !== this.lastDeploymentUrl) {
+          this.lastDeploymentUrl = newUrl;
+          // Set iframe src imperatively — avoids Angular [src] binding re-evaluation
+          if (newUrl && this.deploymentIframe?.nativeElement) {
+            this.deploymentIframe.nativeElement.src = newUrl;
+          }
+        }
+        this.cdr.markForCheck();
       });
   }
 
@@ -442,11 +467,6 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
   /** Returns true when the deployment result is a plain URL string (render in iframe). */
   isDeploymentUrl(result: any): boolean {
     return typeof result === 'string' && /^https?:\/\//i.test(result.trim());
-  }
-
-  /** Sanitizes a deployment URL for iframe use. */
-  sanitizeDeploymentUrl(result: any): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(result as string);
   }
 
   ngOnDestroy(): void {

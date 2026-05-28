@@ -14,9 +14,16 @@ import { StreamingServices } from '../../streaming-services/streaming-service';
 export class VibeStudioComponent implements OnInit, OnDestroy {
   readonly appTypeOptions = APP_TYPE_OPTIONS;
 
-  /** Agent options loaded from the /config/providers API (Step 1). */
+  /** Agent options loaded from the /config/providers API, with hardcoded fallback (Step 1). */
   providerOptions: { label: string; value: string }[] = [];
   providersLoading = true;
+
+  /** Hardcoded fallback providers used when the API is unavailable. */
+  private readonly fallbackProviders: { label: string; value: string }[] = [
+    { label: 'Ollama',        value: 'ollama'        },
+    { label: 'Azure OpenAI',  value: 'azure_openai'  },
+    { label: 'Anthropic',     value: 'anthropic'     },
+  ];
   /** Selected agent value from the Step 1 dropdown. */
   selectedAgent: VibeModel | null = null;
 
@@ -60,16 +67,9 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Load agent options from the /config/providers endpoint (Step 1 dropdown).
-    this.vibeService.getProviders()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          this.providerOptions = this.normalizeProviders(data);
-          this.providersLoading = false;
-        },
-        error: () => { this.providersLoading = false; },
-      });
+    // Always use the hardcoded agent options (Ollama, Azure OpenAI, Anthropic).
+    this.providerOptions = this.fallbackProviders;
+    this.providersLoading = false;
 
     // When generation fully completes, buffer the files and attempt upload.
     // tryFlushUpload() will also be called when registeredCname arrives, so

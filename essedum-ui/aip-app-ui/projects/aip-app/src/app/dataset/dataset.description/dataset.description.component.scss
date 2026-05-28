@@ -207,6 +207,55 @@ button[mat-stroked-button] {
   &:hover { border-color: rgba(79,142,247,0.5) !important; color: #b8cce0 !important; background: rgba(79,142,247,0.06) !important; }
 }
 
+// ── Page title ────────────────────────────────────────────────────
+.aip-desc-title {
+  font-size: 20px !important; font-weight: 800 !important;
+  color: #dde6f0 !important; letter-spacing: -0.3px !important;
+}
+.ds-dataset-prefix { color: #4d6882 !important; }
+
+// ── Data container ────────────────────────────────────────────────
+.data-container {
+  margin-top: 16px !important;
+  display: flex !important; flex-direction: column !important; gap: 12px !important;
+}
+
+// ── Primary metadata card ─────────────────────────────────────────
+:host ::ng-deep .data-container > mat-card {
+  background: rgba(8,16,42,0.94) !important;
+  border: 1px solid rgba(79,142,247,0.18) !important; border-radius: 14px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.04) inset !important;
+  padding: 20px 24px !important; overflow: hidden !important; position: relative !important;
+}
+
+// ── Metadata key-value pairs ──────────────────────────────────────
+.metadata {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: 8px 20px !important;
+}
+.meta-key {
+  font-size: 11px !important; font-weight: 700 !important;
+  color: #4d6882 !important; text-transform: capitalize !important;
+  letter-spacing: 0.3px !important; margin-right: 6px !important;
+}
+.meta-val {
+  font-size: 13px !important; color: #8aaccc !important;
+  word-break: break-word !important; line-height: 1.55 !important;
+}
+
+// ── Error state card ──────────────────────────────────────────────
+:host ::ng-deep .data-container > div > mat-card:not(.lfx-u-mar-b-16) {
+  background: rgba(220,38,38,0.08) !important;
+  border: 1px solid rgba(220,38,38,0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(220,38,38,0.1) !important;
+  padding: 20px !important;
+}
+:host ::ng-deep .data-container > div > mat-card:not(.lfx-u-mar-b-16) b {
+  color: #f87171 !important; font-size: 13.5px !important; font-weight: 600 !important;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  LIGHT THEME
 // ═══════════════════════════════════════════════════════════════════
@@ -220,6 +269,13 @@ body.header-light-theme {
   .mat-field { color: #334155 !important; background: rgba(79,70,229,0.03) !important; border-color: rgba(79,70,229,0.09) !important; &:hover { border-color: rgba(79,70,229,0.2) !important; background: rgba(79,70,229,0.05) !important; } &.mat-field--highlight { color: #4f46e5 !important; } }
   .meta-label { color: #64748b; }
   .meta-value { color: #334155; background: rgba(79,70,229,0.03); border-color: rgba(79,70,229,0.08); }
+  .aip-desc-title { color: #0f172a !important; }
+  .ds-dataset-prefix { color: #64748b !important; }
+  .meta-key { color: #64748b !important; }
+  .meta-val { color: #334155 !important; }
+  :host ::ng-deep .data-container > mat-card { background: #ffffff !important; border-color: rgba(79,70,229,0.14) !important; box-shadow: 0 4px 20px rgba(79,70,229,0.08), 0 1px 4px rgba(0,0,0,0.06) !important; }
+  :host ::ng-deep .data-container > div > mat-card:not(.lfx-u-mar-b-16) { background: rgba(239,68,68,0.05) !important; border-color: rgba(239,68,68,0.22) !important; box-shadow: 0 4px 12px rgba(239,68,68,0.07) !important; }
+  :host ::ng-deep .data-container > div > mat-card:not(.lfx-u-mar-b-16) b { color: #dc2626 !important; }
   .description-section { border-color: rgba(79,70,229,0.08); &::after { background: linear-gradient(90deg, #6366f1, transparent); } }
   .desc-tag { background: rgba(79,70,229,0.08); border-color: rgba(79,70,229,0.2); color: #4f46e5; }
   .dialog-actions, .form-actions { border-top-color: rgba(79,70,229,0.08) !important; }
