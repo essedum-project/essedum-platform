@@ -43,8 +43,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - api.essedum.local
+    secretName: essedum-tls
   rules:
   # ── Backend API ─────────────────────────────────────────────────────────
   - host: api.essedum.local
@@ -57,14 +62,4 @@ spec:
             name: essedum-backend-service
             port:
               number: 8080
-  # ── Keycloak ────────────────────────────────────────────────────────────
-  - host: keycloak.essedum.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: keycloak
-            port:
-              number: 8080
+  # NOTE: keycloak.essedum.local is handled by keycloak-admin-ingress.yaml (with TLS)

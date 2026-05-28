@@ -4,6 +4,7 @@ metadata:
   name: keycloak-admin-ingress
   namespace: essedum
   annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Forwarded-Host $host:30443;
       proxy_set_header X-Forwarded-Port 30443;
