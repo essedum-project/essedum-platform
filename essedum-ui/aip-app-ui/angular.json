@@ -57,6 +57,7 @@
 								}
 							],
 							"outputHashing": "all",
+							"extractLicenses": false,
 							"optimization": {
 								"fonts": {
 									"inline": false
