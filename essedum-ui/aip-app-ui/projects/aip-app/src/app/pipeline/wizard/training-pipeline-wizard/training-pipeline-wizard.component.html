@@ -223,7 +223,7 @@
       <div class="step-actions">
         <button mat-button matStepperPrevious>Back</button>
         <button mat-flat-button color="primary"
-                [disabled]="!gitValid || creating"
+                [disabled]="creating"
                 (click)="createJob()">
           <mat-icon>auto_awesome</mat-icon>&nbsp;Create Training Job
         </button>

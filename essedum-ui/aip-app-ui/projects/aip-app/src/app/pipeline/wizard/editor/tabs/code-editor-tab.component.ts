@@ -819,7 +819,17 @@ ${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, n
 6. Use all available feature columns: ${columns.join(', ') || 'all columns except target'}
 7. Use scikit-learn (or most appropriate library) for the task
 8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving
-9. Add logging using Python's logging module throughout
+9. LOGGING — this is mandatory and critical for observability:
+   - At the very top (after the pip install block) add these exact lines:
+     import logging
+     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+     logger = logging.getLogger(__name__)
+   - Log at the START and END of every major step (data loading, preprocessing, feature engineering, training, evaluation, saving)
+   - After loading data: log shape, column names, null counts using logger.info
+   - After each preprocessing step: log what changed (e.g. nulls remaining, rows dropped)
+   - After training: log all evaluation metrics (accuracy, F1, RMSE, etc.)
+   - On any error or skip: use logger.warning or logger.error
+   - Use logger.info liberally so a user reading the run log can follow every step without reading the code
 10. Main entry function must be named run_pipeline()
 11. Return the COMPLETE Python file — do not omit or truncate any section
 
@@ -864,7 +874,18 @@ ${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, n
 4. Use the ${attrs.baseModel || 'specified algorithm/model'} as the base
 5. Use columns: ${columns.join(', ') || 'all available columns'}
 6. Include: data loading, preprocessing, train/validation split, model initialisation, training loop, evaluation metrics, model saving as artifact
-7. Add logging using Python's logging module throughout
+7. LOGGING — this is mandatory and critical for observability:
+   - At the very top (after the pip install block) add these exact lines:
+     import logging
+     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+     logger = logging.getLogger(__name__)
+   - Log at the START and END of every major step (data loading, preprocessing, split, model init, each epoch, evaluation, saving)
+   - After loading data: log shape, dtypes, null counts using logger.info
+   - During training: log loss and metrics after every epoch
+   - After evaluation: log all metrics (accuracy, F1, loss, perplexity, etc.)
+   - Log model save path and artifact details
+   - On any error or skip: use logger.warning or logger.error
+   - Use logger.info liberally so a user reading the run log can follow every step without reading the code
 8. Main entry function must be named run_training()
 9. Handle the hyperparameters (epochs, batch size, lr) as configurable parameters
 10. Return the COMPLETE Python file — do not omit or truncate any section
@@ -980,7 +1001,7 @@ ${this.model.code}
       const ctxParts = isTraining
         ? `pipeline: "${this.model.name}", type: "${attrs.jobType || 'traditional'}", framework: "${attrs.framework || ''}", dataset: "${attrs.dataset || ''}", columns: [${(attrs.datasetColumns || []).join(', ')}]`
         : `pipeline: "${this.model.name}", type: "${attrs.pipelineType || 'data'}", dataset: "${attrs.dataset || ''}", target column: "${attrs.targetCol || ''}", available columns: [${(attrs.datasetColumns || []).join(', ')}]`;
-      const internalCtx = `\n\n[Internal context — ${ctxParts}. Always return the FULL updated Python file inside a \`\`\`python block. Do not truncate.]`;
+      const internalCtx = `\n\n[Internal context — ${ctxParts}. Always return the FULL updated Python file inside a \`\`\`python block. Do not truncate. Preserve and extend all logging.basicConfig / logger.info statements so the run log remains detailed and observable.]`;
       this.vibe.generate(userPrompt + internalCtx, userPrompt);
     }
   }
