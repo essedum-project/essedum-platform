@@ -121,7 +121,9 @@
               </mat-select>
             </ng-container>
             <ng-template #freeBaseModel>
-              <input matInput formControlName="baseModel" placeholder="xgboost.XGBClassifier">
+              <mat-select formControlName="baseModel">
+                <mat-option *ngFor="let m of traditionalBaseModels" [value]="m">{{ m }}</mat-option>
+              </mat-select>
             </ng-template>
           </mat-form-field>
         </div>

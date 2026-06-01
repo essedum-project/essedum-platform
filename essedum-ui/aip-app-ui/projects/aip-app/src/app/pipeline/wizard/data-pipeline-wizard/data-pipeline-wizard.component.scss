@@ -37,6 +37,10 @@
 ::ng-deep .wizard-stepper .mat-step-label-selected .mat-step-text-label { color: #111827; }
 
 :host-context(body.header-dark-theme) {
+  // Force dark background on the dialog surface via the component root
+  background: #0f172a;
+  ::ng-deep .mat-mdc-dialog-surface { background-color: #0f172a !important; }
+
   ::ng-deep .wizard-stepper .mat-step-label,
   ::ng-deep .wizard-stepper .mat-step-text-label { color: #94a3b8 !important; }
   ::ng-deep .wizard-stepper .mat-step-label-active,
@@ -132,12 +136,14 @@
 // ────────────────────────────────────────────────────────────────────────────
 :host-context(body.header-dark-theme) {
   .wizard-header {
-    background: transparent;
+    background: #0f172a !important;
     border-bottom-color: rgba(79,142,247,0.12);
     h2    { color: #f1f5f9; }
     p     { color: #94a3b8; }
     .close mat-icon { color: #64748b !important; }
   }
+
+  .wizard-shell, .agent-setup-screen { background: #0f172a !important; }
 
   .step-title {
     color: #cbd5e1;

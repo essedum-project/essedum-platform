@@ -35,6 +35,12 @@ export class TrainingPipelineWizardComponent implements OnInit {
   datasetColumnsLoaded = false;
   private datasetRows: any[] = [];         // schema sample rows
   slmBaseModels = FALLBACK_SLM_BASE_MODELS;
+  readonly traditionalBaseModels = [
+    'Logistic Regression',
+    'Linear Regression',
+    'Decision Tree',
+    'Random Forest',
+  ];
   teacherModels = TEACHER_MODELS;
   executors = EXECUTORS;
   quantOptions = QUANTIZATION_OPTIONS;
@@ -83,7 +89,7 @@ export class TrainingPipelineWizardComponent implements OnInit {
       alias:       ['', Validators.required],
       description: [''],
       framework:   ['XGBoost 1.7', Validators.required],
-      baseModel:   ['xgboost.XGBClassifier', Validators.required],
+      baseModel:   ['Logistic Regression', Validators.required],
       method:      [''],
       quantization:[''],
       teacher:     [''],

@@ -26,7 +26,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
 @Component({
   selector: "app-code-editor-tab",
   template: `
-    <div class="code-tab-shell">
+    <div class="code-tab-shell" [style.grid-template-columns]="chatWidth + 'px 6px 1fr'">
 
       <!-- ===== LEFT: Pipeline Chat Panel ===== -->
       <aside class="chat-panel">
@@ -140,6 +140,9 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
         </footer>
       </aside>
 
+      <!-- ===== DRAG DIVIDER ===== -->
+      <div class="drag-divider" (mousedown)="startDrag($event)"></div>
+
       <!-- ===== RIGHT: Code Editor ===== -->
       <section class="editor-panel">
 
@@ -196,8 +199,18 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
     /* ─────────────────────── Layout ─────────────────────── */
     .code-tab-shell {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 380px 6px 1fr;
       height: calc(100vh - 148px);
+    }
+
+    /* ─────────────────────── Drag divider ───────────────── */
+    .drag-divider {
+      width: 6px;
+      cursor: col-resize;
+      background: var(--cp-border, #e5e7eb);
+      transition: background 0.15s;
+      z-index: 10;
+      &:hover { background: #a78bfa; }
     }
 
     /* ─────────────────────── Chat panel (light) ─────────── */
@@ -518,7 +531,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       --ed-head-bg:     #0d1117;
       --ed-border:      #30363d;
       --ed-head-fg:     #8b949e;
-    }    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre { background: #0d1117; }
+    }    :host-context(body.header-dark-theme) .drag-divider { background: rgba(255,255,255,0.08); &:hover { background: #7c3aed; } }
+    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre { background: #0d1117; }
     :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }
     :host-context(body.header-dark-theme) .cp-ai-bubble { color: #e6edf3 !important; }
     :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep * { color: #e6edf3; }
@@ -557,6 +571,18 @@ export class CodeEditorTabComponent
   busy = false;
   initializing = false;       // true while AI is generating the initial file on creation
   showSaveBanner = false;     // show after Vibe updates code on follow-up prompts
+
+  // Panel resize
+  chatWidth = 380;
+  private isDragging = false;
+  private dragStartX = 0;
+  private dragStartW = 0;
+  private readonly onDragMove = (e: MouseEvent) => {
+    if (!this.isDragging) return;
+    const delta = e.clientX - this.dragStartX;
+    this.chatWidth = Math.max(220, Math.min(680, this.dragStartW + delta));
+  };
+  private readonly onDragEnd = () => { this.isDragging = false; };
   private wasInitialGen = false;  // tracks whether the current generation is the first one
   messages: VibeChatMessage[] = [];
   selectedAgent: string | null = null;
@@ -565,6 +591,13 @@ export class CodeEditorTabComponent
   private seeded = false;
 
   get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
+
+  startDrag(e: MouseEvent): void {
+    this.isDragging = true;
+    this.dragStartX = e.clientX;
+    this.dragStartW = this.chatWidth;
+    e.preventDefault();
+  }
 
   /** Show only the .py filename — the API may return a JSON array like
    *  ["name_org.py","name_org.ipynb"]; we extract just the .py entry. */
@@ -619,6 +652,8 @@ export class CodeEditorTabComponent
   ) {}
 
   ngOnInit(): void {
+    document.addEventListener('mousemove', this.onDragMove);
+    document.addEventListener('mouseup',   this.onDragEnd);
     // Mirror messages from VibeStudioService
     this.vibe.messages$
       .pipe(takeUntil(this.destroy$))
@@ -728,6 +763,8 @@ export class CodeEditorTabComponent
     this.destroy$.next();
     this.destroy$.complete();
     this.vibe.cancelReply?.();
+    document.removeEventListener('mousemove', this.onDragMove);
+    document.removeEventListener('mouseup',   this.onDragEnd);
   }
 
   renderMarkdown(text: string): SafeHtml {
