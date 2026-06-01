@@ -19,11 +19,20 @@
   border-bottom: 1px solid rgba(0,0,0,0.08);
   background: #fff;
   width: min(860px, 92vw);
+  position: relative;
   .title { display: flex; gap: 10px; align-items: center; }
   .sparkle { color: #7c3aed; font-size: 22px !important; height: 22px !important; width: 22px !important; flex-shrink: 0; }
   h2 { margin: 0; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.2; }
   p  { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
-  .close { color: #9ca3af; margin-left: 8px; }
+  .close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    color: #9ca3af !important;
+    transition: color 0.15s ease;
+    mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; line-height: 20px !important; }
+    &:hover { color: #374151 !important; }
+  }
 }
 
 // ── Stepper labels — ::ng-deep pierces mat-step-header's view encapsulation ──
@@ -141,6 +150,8 @@
     h2    { color: #f1f5f9; }
     p     { color: #94a3b8; }
     .close mat-icon { color: #64748b !important; }
+    .close:hover { background: rgba(255,255,255,0.08) !important; color: #e2e8f0 !important; }
+    .close:hover mat-icon { color: #e2e8f0 !important; }
   }
 
   .wizard-shell, .agent-setup-screen { background: #0f172a !important; }
