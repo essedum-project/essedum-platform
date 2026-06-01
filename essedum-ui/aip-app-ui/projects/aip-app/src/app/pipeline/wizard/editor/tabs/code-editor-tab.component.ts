@@ -170,7 +170,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
 
         <header class="ed-head">
           <mat-icon>insert_drive_file</mat-icon>
-          <span class="filename">{{ model.filename }}</span>
+          <span class="filename">{{ displayFilename }}</span>
           <span class="spacer"></span>
           <span class="dirty-badge" *ngIf="dirty">unsaved</span>
           <button mat-stroked-button color="primary" (click)="save()" [disabled]="!dirty">
@@ -565,6 +565,19 @@ export class CodeEditorTabComponent
   private seeded = false;
 
   get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
+
+  /** Show only the .py filename — the API may return a JSON array like
+   *  ["name_org.py","name_org.ipynb"]; we extract just the .py entry. */
+  get displayFilename(): string {
+    const f = this.model?.filename || '';
+    try {
+      const arr = JSON.parse(f);
+      if (Array.isArray(arr)) {
+        return arr.find((x: string) => /\.py$/i.test(x)) || arr[0] || f;
+      }
+    } catch { /* not JSON — use as-is */ }
+    return f;
+  }
 
   readonly agentOptions = [
     { label: 'Ollama',       value: 'ollama' },

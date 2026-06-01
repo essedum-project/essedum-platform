@@ -258,7 +258,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 JSONObject fileObj = null;
                 ICIPStreamingServices pipelineInfo = streamingServicesService
                         .findbyNameAndOrganization(listjobdto.get(index).getName(), jobObject.getOrg());
-                if (!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))) {
+                if (!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))
+                        && !(pipelineInfo.getType().equalsIgnoreCase("DataPipeline"))
+                        && !(pipelineInfo.getType().equalsIgnoreCase("TrainingPipeline"))) {
                     fileObj = streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),
                             jobObject.getOrg());
                     String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(), jobObject.getOrg(),
@@ -476,10 +478,15 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                             jsonObject.addProperty("org", org);
 
 
-                            environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
-                                    environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
-                                String key = envJSON.get("name").getAsString(); String value =
-                                        envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
+                            environ = jsonObject.getAsJsonArray("environment");
+                            if (environ != null) {
+                                for (int i = 0; i < environ.size(); i++) {
+                                    JsonObject envJSON = environ.get(i).getAsJsonObject();
+                                    String key = envJSON.get("name").getAsString();
+                                    String value = envJSON.get("value").getAsString();
+                                    envJSONO.addProperty(key, value);
+                                }
+                            }
 
 
                             String data = "{\"input_string\":" + jsonObject.toString() + "}";
@@ -823,6 +830,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
                         }
                         Files.deleteIfExists(outPath);
+                        if (outPath != null && outPath.getParent() != null) {
+                            Files.createDirectories(outPath.getParent());
+                        }
                         Files.createFile(outPath);
 
                         try (FileOutputStream writer = new FileOutputStream(outPath.toString())) {
@@ -1473,10 +1483,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 }
             }
             paths.append(path.getFileName());
-            paths.append(",");
+            break; // Only one script file needed for python execution
         }
-        if (paths.length() > 0)
-            paths.replace(paths.length() - 1, paths.length(), "");
 
         Map<String, String> argumentBuilder = new HashMap<>();
         JsonArray argumentArray = getLatestArgument(attrObject, params, gson);
