@@ -121,7 +121,7 @@
               </mat-select>
             </ng-container>
             <ng-template #freeBaseModel>
-              <mat-select formControlName="baseModel">
+              <mat-select formControlName="baseModel" panelClass="wizard-bm-panel">
                 <mat-option *ngFor="let m of traditionalBaseModels" [value]="m">{{ m }}</mat-option>
               </mat-select>
             </ng-template>

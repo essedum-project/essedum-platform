@@ -92,7 +92,7 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
                 <span class="cp-turn-label">You</span>
                 <span class="cp-user-avatar"><mat-icon>person</mat-icon></span>
               </div>
-              <div class="cp-bubble cp-user-bubble">{{ m.content }}</div>
+              <div class="cp-bubble cp-user-bubble"><div class="cp-user-text">{{ m.content }}</div></div>
             </ng-container>
 
             <!-- Assistant message -->
@@ -107,9 +107,8 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
                 <div class="cp-dots"><span></span><span></span><span></span></div>
               </div>
               <!-- Rendered markdown content -->
-              <div *ngIf="m.content"
-                   class="cp-bubble cp-ai-bubble"
-                   [innerHTML]="renderMarkdown(m.content)">
+              <div *ngIf="m.content" class="cp-bubble cp-ai-bubble">
+                <div class="cp-markdown" [innerHTML]="renderMarkdown(m.content)"></div>
               </div>
               <span *ngIf="last && busy && m.content" class="cp-stream-cursor"></span>
             </ng-container>
@@ -118,25 +117,29 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
         </ul>
 
         <footer class="cp-foot" *ngIf="setupDone">
-          <mat-form-field appearance="outline" class="cp-input">
+          <div class="cp-input-shell"
+               [class.cp-input-focused]="cpInputFocused"
+               [class.is-generating]="busy">
             <textarea
-              matInput
+              class="cp-prompt-input"
               #promptInput
-              rows="3"
+              rows="1"
               [(ngModel)]="prompt"
-              placeholder="What should change? (Ctrl+Enter to send)"
-              (keydown.control.enter)="send()"
+              (keydown)="onPromptKeyDown($event)"
+              (focus)="cpInputFocused = true"
+              (blur)="cpInputFocused = false"
+              placeholder="Ask Pipeline Assistant to change something…"
               [disabled]="busy">
             </textarea>
-          </mat-form-field>
-          <button
-            mat-flat-button
-            color="primary"
-            class="cp-send-btn"
-            (click)="send()"
-            [disabled]="!prompt.trim() || busy">
-            <mat-icon>send</mat-icon>
-          </button>
+            <button
+              class="cp-send-btn"
+              (click)="send()"
+              [disabled]="!prompt.trim() || busy"
+              title="Send (Enter)">
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+          </div>
+          <div class="cp-input-hint">⏎&nbsp;Send &nbsp;·&nbsp; ⇧⏎&nbsp;New line</div>
         </footer>
       </aside>
 
@@ -309,58 +312,56 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       color: #fff; letter-spacing: 0.5px;
     }
 
-    /* Bubbles */
-    .cp-bubble {
-      max-width: 90%;
-      padding: 10px 13px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.6;
-      word-break: break-word;
-    }
+    /* Bubbles → Vibe Studio card style */
+    .cp-bubble { word-break: break-word; }
     .cp-user-bubble {
-      background: var(--cp-user-bg, #ede9fe);
-      color: var(--cp-user-fg, #4c1d95);
-      border-radius: 14px 4px 14px 14px;
+      max-width: 82%;
+      border-radius: 16px 4px 16px 16px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(124,58,237,0.07));
+      border: 1px solid rgba(99,102,241,0.22);
+      box-shadow: 0 2px 10px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
     }
+    .cp-user-text { font-size: 13px; line-height: 1.6; color: #1e293b; }
     .cp-ai-bubble {
-      background: var(--cp-ai-bg, #f1f5f9);
-      color: var(--cp-ai-fg, #0f172a);
-      border-radius: 4px 14px 14px 14px;
+      max-width: 95%;
+      border-radius: 4px 16px 16px 16px;
+      padding: 12px 14px;
+      background: #ffffff;
+      border: 1px solid rgba(99,102,241,0.12);
+      box-shadow: 0 2px 12px rgba(99,102,241,0.07), 0 1px 2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1);
+      color: #1e293b;
     }
 
-    /* Markdown inside ai bubble */
-    .cp-ai-bubble ::ng-deep p { margin: 0 0 8px; }
-    .cp-ai-bubble ::ng-deep p:last-child { margin-bottom: 0; }
-    .cp-ai-bubble ::ng-deep h1,.cp-ai-bubble ::ng-deep h2,.cp-ai-bubble ::ng-deep h3 { margin: 8px 0 4px; font-weight: 700; }
-    .cp-ai-bubble ::ng-deep ul,.cp-ai-bubble ::ng-deep ol { margin: 4px 0; padding-left: 18px; }
-    .cp-ai-bubble ::ng-deep li { margin: 2px 0; }
-    .cp-ai-bubble ::ng-deep strong { font-weight: 700; }
-    .cp-ai-bubble ::ng-deep a { color: #4f8ef7; text-decoration: none; }
-    .cp-ai-bubble ::ng-deep pre {
-      background: #0f172a;
+    /* Markdown inside AI bubble */
+    .cp-markdown { font-size: 13px; line-height: 1.65; word-break: break-word; color: inherit; }
+    .cp-markdown ::ng-deep p { margin: 0 0 8px; color: inherit; }
+    .cp-markdown ::ng-deep p:last-child { margin-bottom: 0; }
+    .cp-markdown ::ng-deep h1,.cp-markdown ::ng-deep h2,.cp-markdown ::ng-deep h3 { margin: 8px 0 4px; font-weight: 700; color: inherit; }
+    .cp-markdown ::ng-deep ul,.cp-markdown ::ng-deep ol { margin: 4px 0; padding-left: 18px; color: inherit; }
+    .cp-markdown ::ng-deep li { margin: 2px 0; color: inherit; }
+    .cp-markdown ::ng-deep strong { font-weight: 700; color: inherit; }
+    .cp-markdown ::ng-deep a { color: #4f46e5; text-decoration: none; }
+    .cp-markdown ::ng-deep pre {
+      background: #f8fafc;
+      border: 1px solid rgba(99,102,241,0.12);
       border-radius: 8px;
       padding: 10px 12px;
       overflow-x: auto;
       margin: 8px 0;
       font-size: 12px;
+      color: #1e293b;
     }
-    .cp-ai-bubble ::ng-deep pre::-webkit-scrollbar { height: 3px; }
-    .cp-ai-bubble ::ng-deep pre::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(124,58,237,0.4); }
-    .cp-ai-bubble ::ng-deep code {
+    .cp-markdown ::ng-deep pre::-webkit-scrollbar { height: 3px; }
+    .cp-markdown ::ng-deep pre::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(124,58,237,0.4); }
+    .cp-markdown ::ng-deep code {
       font-family: 'Fira Code', 'Consolas', monospace;
       font-size: 12px;
     }
-    .cp-ai-bubble ::ng-deep pre code {
-      background: transparent;
-      color: #e2e8f0;
-      padding: 0;
-    }
-    .cp-ai-bubble ::ng-deep :not(pre) > code {
-      background: rgba(124,58,237,0.1);
-      color: #7c3aed;
-      padding: 1px 5px;
-      border-radius: 4px;
+    .cp-markdown ::ng-deep pre code { background: transparent; padding: 0; }
+    .cp-markdown ::ng-deep :not(pre) > code {
+      background: rgba(99,102,241,0.08); color: #4f46e5;
+      padding: 1px 5px; border-radius: 4px;
     }
 
     /* Typing / streaming */
@@ -418,16 +419,68 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
 
     /* Footer */
     .cp-foot {
-      display: flex;
-      gap: 8px;
-      padding: 8px 12px;
+      padding: 10px 12px 12px;
       border-top: 1px solid var(--cp-border, #e5e7eb);
-      align-items: flex-end;
-      background: var(--cp-head-bg, #f8fafc);
+      flex-shrink: 0;
     }
-    .cp-input { flex: 1; }
-    ::ng-deep .cp-input .mat-mdc-text-field-wrapper { background: var(--cp-input-bg, #fff); }
-    .cp-send-btn { min-width: 40px !important; padding: 0 10px !important; }
+    .cp-input-shell {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 12px;
+      padding: 10px 10px 10px 14px;
+      background: #ffffff;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      &.cp-input-focused {
+        border-color: rgba(99,102,241,0.5);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+      }
+      &.is-generating { opacity: 0.75; }
+    }
+    .cp-prompt-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 13px;
+      line-height: 1.55;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: inherit;
+      color: #0f172a;
+      &::placeholder { color: #94a3b8; }
+      &::-webkit-scrollbar { width: 3px; }
+    }
+    .cp-send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+      color: #fff;
+      transition: all 0.18s;
+      flex-shrink: 0;
+      mat-icon { font-size: 18px; width: 18px; height: 18px; line-height: 18px; }
+      &:hover:not(:disabled) {
+        box-shadow: 0 4px 16px rgba(79,142,247,0.5);
+        transform: translateY(-1px);
+      }
+      &:disabled { opacity: 0.4; cursor: default; }
+    }
+    .cp-input-hint {
+      font-size: 10px;
+      text-align: right;
+      margin-top: 6px;
+      color: #94a3b8;
+      letter-spacing: 0.1px;
+    }
 
     /* ─────────────────────── Setup screen ─────────────────── */
     .cp-setup-screen { display: flex; flex-direction: column; align-items: stretch; padding: 24px 16px 16px; gap: 18px; flex: 1; overflow-y: auto; }
@@ -532,14 +585,39 @@ import { WizardPipelineModel } from "../pipeline-editor.component";
       --ed-border:      #30363d;
       --ed-head-fg:     #8b949e;
     }    :host-context(body.header-dark-theme) .drag-divider { background: rgba(255,255,255,0.08); &:hover { background: #7c3aed; } }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre { background: #0d1117; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble { color: #e6edf3 !important; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep * { color: #e6edf3; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep strong { color: #f0f6ff !important; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep a { color: #60a5fa !important; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep code { color: #c084fc !important; }
-    :host-context(body.header-dark-theme) .cp-ai-bubble ::ng-deep pre code { color: #e2e8f0 !important; }
+    :host-context(body.header-dark-theme) .cp-user-bubble {
+      background: linear-gradient(135deg, rgba(79,142,247,0.16), rgba(124,58,237,0.1));
+      border-color: rgba(79,142,247,0.28);
+      box-shadow: 0 2px 12px rgba(79,142,247,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    :host-context(body.header-dark-theme) .cp-user-text { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-ai-bubble {
+      background: rgba(255,255,255,0.055);
+      border-color: rgba(79,142,247,0.18);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+      color: #e2e8f0;
+    }
+    :host-context(body.header-dark-theme) .cp-markdown { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep p,
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep li,
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep h1,
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep h2,
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep h3 { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep strong { color: #f1f5f9; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep a { color: #60a5fa; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep pre { background: rgba(0,0,0,0.35); border-color: rgba(79,142,247,0.1); color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep pre code { color: #e2e8f0; }
+    :host-context(body.header-dark-theme) .cp-markdown ::ng-deep :not(pre) > code { background: rgba(167,139,250,0.15); color: #c084fc; }
+    :host-context(body.header-dark-theme) .cp-input-shell {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(79,142,247,0.18);
+      &.cp-input-focused {
+        border-color: rgba(79,142,247,0.5);
+        box-shadow: 0 0 0 3px rgba(79,142,247,0.08);
+      }
+    }
+    :host-context(body.header-dark-theme) .cp-prompt-input { color: #e2e8f0; &::placeholder { color: #64748b; } }
+    :host-context(body.header-dark-theme) .cp-input-hint { color: #64748b; }
     /* Setup screen – dark */
     :host-context(body.header-dark-theme) .cp-setup-screen { background: var(--cp-bg, #0d1117); }
     :host-context(body.header-dark-theme) .cp-setup-icon-wrap { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.2); color: #7c3aed; }
@@ -569,6 +647,7 @@ export class CodeEditorTabComponent
   // Chat state
   prompt = "";
   busy = false;
+  cpInputFocused = false;
   initializing = false;       // true while AI is generating the initial file on creation
   showSaveBanner = false;     // show after Vibe updates code on follow-up prompts
 
@@ -793,6 +872,13 @@ export class CodeEditorTabComponent
 
   prefill(text: string): void {
     this.prompt = text;
+  }
+
+  onPromptKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.send();
+    }
   }
 
   /**

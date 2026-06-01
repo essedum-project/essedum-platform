@@ -1,5 +1,10 @@
 @import '../data-pipeline-wizard/data-pipeline-wizard.component.scss';
 
+// Fix: base-model dropdown panel clipped at viewport bottom inside dialog
+::ng-deep .wizard-bm-panel.mat-mdc-select-panel {
+  max-height: 200px !important;
+}
+
 // ── Training accent: sky-blue ─────────────────────────────────────────────────
 .sparkle { color: #0ea5e9 !important; }
 
