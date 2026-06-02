@@ -44,7 +44,6 @@ def iso_utc_now():
 
 
 def log_to_client(message, step="info"):
-    print(f"[{step}] {message}")
     socketio.emit(
         "pipeline_update", {"step": step, "message": message, "timestamp": iso_utc_now()}
     )

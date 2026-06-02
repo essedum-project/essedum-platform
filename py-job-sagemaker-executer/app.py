@@ -256,19 +256,10 @@ def terminate_task(task_id):
 @app.route('/execute/<task_id>/getLog', methods=['GET'])
 def get_task_log(task_id):
     try:
-        # Validate task_id is a well-formed UUID before using it in path construction
-        try:
-            uuid.UUID(task_id)
-        except ValueError:
-            return jsonify({'logs': {'content': 'Invalid task ID'}}), 400
-
-        task_folder=str(task_id)
-        log_file=r'/temp/Jobs/'+task_folder+'/log.txt'
-
-        # Validate resolved path to prevent directory traversal
-        log_file_resolved = os.path.realpath(log_file)
-        base_dir_resolved = os.path.realpath('/temp/Jobs')
-        if not log_file_resolved.startswith(base_dir_resolved):
+        base_path = '/temp/Jobs'
+        task_folder = str(task_id)
+        log_file = os.path.normpath(os.path.join(base_path, task_folder, 'log.txt'))
+        if not log_file.startswith(base_path + os.sep):
             logger.warning(f'Potential path traversal attempt detected: {task_id}')
             return jsonify({'logs': {'content': 'Invalid task ID'}}), 403
         
