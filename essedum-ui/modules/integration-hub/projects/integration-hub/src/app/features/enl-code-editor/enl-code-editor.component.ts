@@ -187,7 +187,7 @@ export class EnlCodeEditorComponent
     };
 
     Object.entries(pathConfig).forEach(([key, path]) => {
-      ace.config.set(key as keyof ace.Ace.ConfigOptions, path);
+      ace.config.set(key, path);
     });
   }
 
