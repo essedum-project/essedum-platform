@@ -1,0 +1,79 @@
+<div class="dashboard-container">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+  </div>
+
+  <!-- Platform Overview - 6 Small Cards -->
+  <div class="stat-card large-card">
+    <div class="card-header">
+      <h2 class="card-title">Platform Overview</h2>
+    </div>
+    <div class="small-cards-grid">
+      <div class="small-card" *ngFor="let mod of moduleStats" [routerLink]="mod.route">
+        <div class="small-card-icon" [style.background]="mod.accent + '18'" [style.border-color]="mod.accent + '44'">
+          <i class="fa" [ngClass]="mod.icon" [style.color]="mod.accent"></i>
+        </div>
+        <div class="small-card-body">
+          <div class="small-card-label">{{ mod.label }}</div>
+          <div class="small-card-count" [style.color]="mod.accent">{{ mod.count }}</div>
+          <div class="small-card-sub">{{ mod.sub }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Pipelines Lists -->
+  <div class="pipeline-lists-container">
+
+    <!-- Top Agent Pipelines -->
+    <div class="pipeline-section">
+      <h3 class="pipeline-section-title"><i class="fa fa-code-fork"></i> Top Agent Pipelines</h3>
+      <div class="pipeline-list">
+        <div class="pipeline-item" *ngFor="let pipeline of topAgentPipelines">
+          <div class="pipeline-item-left">
+            <span class="pipeline-item-dot" [ngClass]="'dot-' + pipeline.status"></span>
+            <div class="pipeline-item-info">
+              <span class="pipeline-item-name">{{ pipeline.alias }}</span>
+              <span class="pipeline-item-sub" *ngIf="pipeline.name">{{ pipeline.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top MCP Pipelines -->
+    <div class="pipeline-section">
+      <h3 class="pipeline-section-title"><i class="fa fa-server"></i> Top MCP Pipelines</h3>
+      <div class="pipeline-list">
+        <div class="pipeline-item" *ngFor="let pipeline of topMcpPipelines">
+          <div class="pipeline-item-left">
+            <span class="pipeline-item-dot" [ngClass]="'dot-' + pipeline.status"></span>
+            <div class="pipeline-item-info">
+              <span class="pipeline-item-name">{{ pipeline.alias }}</span>
+              <span class="pipeline-item-sub" *ngIf="pipeline.name">{{ pipeline.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top App Pipelines -->
+    <div class="pipeline-section">
+      <h3 class="pipeline-section-title"><i class="fa fa-window-restore"></i> Top App Pipelines</h3>
+      <div class="pipeline-list">
+        <div class="pipeline-item" *ngFor="let pipeline of topAppPipelines">
+          <div class="pipeline-item-left">
+            <span class="pipeline-item-dot" [ngClass]="'dot-' + pipeline.status"></span>
+            <div class="pipeline-item-info">
+              <span class="pipeline-item-name">{{ pipeline.alias }}</span>
+              <span class="pipeline-item-sub" *ngIf="pipeline.name">{{ pipeline.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

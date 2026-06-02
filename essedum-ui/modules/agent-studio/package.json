@@ -1,0 +1,97 @@
+{
+  "name": "@essedum/agent-studio",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8085",
+    "build": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build --watch --configuration development",
+    "build-prod": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build agent-studio --configuration production --aot=true",
+    "test": "ng test"
+  },
+  "dependencies": {
+    "@angular-architects/module-federation": "^18.0.2",
+    "@angular-architects/module-federation-tools": "^18.0.2",
+    "@angular/animations": "^18.2.14",
+    "@angular/cdk": "^18.2.14",
+    "@angular/common": "^18.2.14",
+    "@angular/compiler": "^18.2.14",
+    "@angular/core": "^18.2.14",
+    "@angular/forms": "^18.2.14",
+    "@angular/material": "^18.2.14",
+    "@angular/platform-browser": "^18.2.14",
+    "@angular/platform-browser-dynamic": "^18.2.14",
+    "@angular/router": "^18.2.14",
+    "@jsonforms/angular": "3.3.0",
+    "@jsonforms/angular-material": "3.3.0",
+    "@jsonforms/core": "3.3.0",
+    "@ng-bootstrap/ng-bootstrap": "^17.0.0",
+    "@popperjs/core": "^2.11.8",
+    "ace-builds": "1.36.2",
+    "ang-jsoneditor": "3.1.0",
+    "event-source-polyfill": "^1.0.31",
+    "jszip": "^3.10.1",
+    "jsoneditor": "^9.7.0",
+    "marked": "^4.0.17",
+    "ng-busy": "^17.0.0",
+    "ng2-file-upload": "^5.0.0",
+    "ngx-markdown": "^15.1.0",
+    "ngx-mat-select-search": "^7.0.6",
+    "ngx-pagination": "^6.0.3",
+    "ngx-quill": "^26.0.8",
+    "quill": "2.0.2",
+    "rxjs": "^7.8.1",
+    "socket.io-client": "^4.8.1",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.7"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.14",
+    "@angular/cli": "~18.2.14",
+    "@angular/compiler-cli": "^18.2.14",
+    "ngx-build-plus": "^18.0.0",
+    "sass": "^1.71.0",
+    "typescript": "~5.4.5"
+  },
+  "overrides": {
+    "webpack": "^5.107.1",
+    "esbuild": "^0.25.2",
+    "postcss": "^8.5.10",
+    "picomatch": "^4.0.4",
+    "tmp": "^0.2.5",
+    "tar": "^7.5.11",
+    "serialize-javascript": "^7.0.5",
+    "minimist": "^1.2.8",
+    "glob": "^11.0.0",
+    "ajv": "^8.17.1",
+    "rollup": "^4.31.0",
+    "vite": "^6.0.11",
+    "uuid": "^11.1.1",
+    "dompurify": "^3.4.1",
+    "mermaid": "^11.5.0",
+    "quill": "2.0.2",
+    "ng-busy": {
+      "@angular/animations": "$@angular/animations",
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "rxjs": "$rxjs"
+    },
+    "ng2-file-upload": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core"
+    },
+    "ngx-markdown": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "@angular/platform-browser": "$@angular/platform-browser",
+      "zone.js": "$zone.js"
+    },
+    "ngx-quill": {
+      "@angular/core": "$@angular/core",
+      "@angular/common": "$@angular/common",
+      "@angular/forms": "$@angular/forms",
+      "@angular/platform-browser": "$@angular/platform-browser",
+      "rxjs": "$rxjs",
+      "quill": "$quill"
+    }
+  }
+}

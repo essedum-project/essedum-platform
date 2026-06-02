@@ -1,0 +1,54 @@
+<div class="dialog-header">
+  <h2 class="dialog-title">
+    <span *ngIf="!edit && !data?.copy">Create Pipeline</span>
+    <span *ngIf="edit">Edit Pipeline</span>
+    <span *ngIf="data?.copy">Copy Pipeline</span>
+  </h2>
+  <button type="button" class="dialog-close-btn" aria-label="Close" (click)="closePipelineOpenDialog()">
+    <i class="icon x-16 close-icon"></i>
+  </button>
+</div>
+
+<div class="dialog-body">
+  <div class="field-row">
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Display Name</mat-label>
+      <input matInput type="text" placeholder="Enter Name..." [(ngModel)]="alias" required />
+      <mat-error *ngIf="errFlag">This field is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="field-row">
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Description</mat-label>
+      <input matInput type="text" placeholder="Enter Pipeline Description..." [(ngModel)]="description" />
+    </mat-form-field>
+  </div>
+
+  <div class="field-row">
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="type" required>
+        <mat-option *ngFor="let option of options" [value]="option.value">
+          {{ option.viewValue }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="errFlag && !type">This field is required</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="field-row checkbox-row">
+    <mat-checkbox (change)="checkAll($event.checked)" [checked]="isTemplate">
+      Is Template?
+    </mat-checkbox>
+  </div>
+
+  <mat-error *ngIf="errFlag" class="global-error">Please provide the required fields.</mat-error>
+
+  <div class="dialog-actions">
+    <button mat-raised-button class="btn-cancel" (click)="closePipelineOpenDialog()">Cancel</button>
+    <button *ngIf="!edit && !data?.copy" mat-raised-button class="btn-primary" (click)="saveDetails()">Save</button>
+    <button *ngIf="edit" mat-raised-button class="btn-primary" (click)="editDetails()">Update</button>
+    <button *ngIf="data?.copy" mat-raised-button class="btn-primary" (click)="saveDetails()">Copy</button>
+  </div>
+</div>

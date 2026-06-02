@@ -1,0 +1,11 @@
+{
+  "name": "@essedum/shared-lib",
+  "version": "0.1.0",
+  "peerDependencies": {
+    "@angular/common": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/router": "^18.2.0",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.3.0"
+  }
+}

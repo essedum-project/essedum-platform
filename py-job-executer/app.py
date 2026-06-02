@@ -283,11 +283,11 @@ def get_task_log(task_id):
         # Validate path to prevent directory traversal
         log_file_resolved = os.path.realpath(log_file)
         working_dir_resolved = os.path.realpath(WORKING_DIRECTORY)
-        if not log_file_resolved.startswith(working_dir_resolved):
+        if not log_file_resolved.startswith(working_dir_resolved + os.sep):
             logger.warning(f'Potential path traversal attempt detected: {task_id}')
             return jsonify({'logs': {'content':'Invalid task ID'}}), 403
         
-        with open(log_file,'r', encoding='utf-8', errors='ignore') as f:
+        with open(log_file_resolved,'r', encoding='utf-8', errors='ignore') as f:
             log=f.read()
         
         result={
@@ -314,7 +314,7 @@ def get_task_output_artifacts(task_id):
         # Validate path to prevent directory traversal
         output_dir_resolved = os.path.realpath(output_dir)
         working_dir_resolved = os.path.realpath(WORKING_DIRECTORY)
-        if not output_dir_resolved.startswith(working_dir_resolved):
+        if not output_dir_resolved.startswith(working_dir_resolved + os.sep):
             logger.warning(f'Potential path traversal attempt detected: {task_id}')
             return jsonify({'error': 'Invalid task ID'}), 403
         
@@ -323,16 +323,16 @@ def get_task_output_artifacts(task_id):
         if os.path.exists(output_dir_resolved):
             for file in os.listdir(output_dir_resolved):
                 if '.' in file:
-                    file_path = os.path.join(output_dir, file)
+                    file_path = os.path.join(output_dir_resolved, file)
                     
                     # Validate file_path to prevent directory traversal via filename
                     file_path_resolved = os.path.realpath(file_path)
-                    if not file_path_resolved.startswith(output_dir_resolved):
+                    if not file_path_resolved.startswith(output_dir_resolved + os.sep):
                         logger.warning(f'Potential path traversal in filename detected: {file}')
                         continue
                     
                     key = file.split('.')[0]
-                    with open(file_path,'r', encoding='utf-8', errors='ignore') as f:
+                    with open(file_path_resolved,'r', encoding='utf-8', errors='ignore') as f:
                         log=f.read()
                     result[key] = {'content':log}
        
@@ -466,21 +466,21 @@ def delete_venv():
             return jsonify({"error": "venvs directory not found"}), 404
         deleted_venvs = []
         not_found_venvs = []
+        venvs_path_resolved = os.path.realpath(venvs_path)
         for venv in venvs_to_delete:
             venv_path = os.path.join(venvs_path, venv)
             
             # Validate path to prevent directory traversal
             venv_path_resolved = os.path.realpath(venv_path)
-            venvs_path_resolved = os.path.realpath(venvs_path)
-            if not venv_path_resolved.startswith(venvs_path_resolved):
+            if not venv_path_resolved.startswith(venvs_path_resolved + os.sep):
                 logger.warning(f'Potential path traversal attempt detected: {venv}')
                 not_found_venvs.append(venv)
                 continue
             
-            if os.path.exists(venv_path) and os.path.isdir(venv_path):
+            if os.path.exists(venv_path_resolved) and os.path.isdir(venv_path_resolved):
                 try:
                     import shutil
-                    shutil.rmtree(venv_path)
+                    shutil.rmtree(venv_path_resolved)
                     deleted_venvs.append(venv)
                 except Exception as e:
                     logger.error(f"Failed to delete venv {venv}: {e}", exc_info=True)

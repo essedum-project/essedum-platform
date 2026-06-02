@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "integration-hub": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": { "style": "scss" }
+      },
+      "root": "projects/integration-hub",
+      "sourceRoot": "projects/integration-hub/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/integration-hub",
+            "index": "projects/integration-hub/src/index.html",
+            "main": "projects/integration-hub/src/main.ts",
+            "polyfills": "projects/integration-hub/src/polyfills.ts",
+            "tsConfig": "projects/integration-hub/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/integration-hub/src/favicon.ico",
+              "projects/integration-hub/src/assets"
+            ],
+            "styles": [],
+            "scripts": [],
+            "extraWebpackConfig": "projects/integration-hub/webpack.config.js",
+            "commonChunk": false
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/integration-hub/src/environments/environment.ts",
+                  "with": "projects/integration-hub/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "configurations": {
+            "production": { "browserTarget": "integration-hub:build:production" },
+            "development": { "browserTarget": "integration-hub:build:development" }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 8088,
+            "publicHost": "http://localhost:8088",
+            "extraWebpackConfig": "projects/integration-hub/webpack.config.js"
+          }
+        },
+        "extract-i18n": {
+          "builder": "ngx-build-plus:extract-i18n",
+          "options": {
+            "browserTarget": "integration-hub:build",
+            "extraWebpackConfig": "projects/integration-hub/webpack.config.js"
+          }
+        }
+      }
+    }
+  },
+  "cli": { "analytics": false }
+}

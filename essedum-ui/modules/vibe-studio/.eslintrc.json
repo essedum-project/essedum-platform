@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "comment": "Plan §A.7 — block cross-MFE imports. Activates when ESLint is installed.",
+  "rules": {
+    "no-restricted-imports": ["error", {
+      "patterns": [
+        {
+          "group": [
+            "**/modules/agent-studio/**",
+            "**/modules/data-ops/**",
+            "**/modules/integration-hub/**"
+          ],
+          "message": "Cross-MFE imports are forbidden. Use @essedum/shared-lib or the event bus."
+        }
+      ]
+    }]
+  }
+}

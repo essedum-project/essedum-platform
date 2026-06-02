@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "agent-studio": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": { "style": "scss" }
+      },
+      "root": "projects/agent-studio",
+      "sourceRoot": "projects/agent-studio/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/agent-studio",
+            "index": "projects/agent-studio/src/index.html",
+            "main": "projects/agent-studio/src/main.ts",
+            "polyfills": "projects/agent-studio/src/polyfills.ts",
+            "tsConfig": "projects/agent-studio/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/agent-studio/src/favicon.ico",
+              "projects/agent-studio/src/assets"
+            ],
+            "styles": [],
+            "scripts": [],
+            "extraWebpackConfig": "projects/agent-studio/webpack.config.js",
+            "commonChunk": false
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/agent-studio/src/environments/environment.ts",
+                  "with": "projects/agent-studio/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "configurations": {
+            "production": { "browserTarget": "agent-studio:build:production" },
+            "development": { "browserTarget": "agent-studio:build:development" }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 8085,
+            "publicHost": "http://localhost:8085",
+            "extraWebpackConfig": "projects/agent-studio/webpack.config.js"
+          }
+        },
+        "extract-i18n": {
+          "builder": "ngx-build-plus:extract-i18n",
+          "options": {
+            "browserTarget": "agent-studio:build",
+            "extraWebpackConfig": "projects/agent-studio/webpack.config.js"
+          }
+        }
+      }
+    }
+  },
+  "cli": { "analytics": false }
+}

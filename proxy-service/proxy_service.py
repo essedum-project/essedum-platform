@@ -32,6 +32,12 @@ def is_valid_service_name(name: str) -> bool:
         return False
     return True
 
+# Permitted query parameters for Socket.IO HTTP polling and WebSocket upgrades.
+# Restricting to this set ensures user input cannot alter the upstream URL
+# in unexpected ways (guards against SSRF via query-string injection).
+_ALLOWED_HTTP_PARAMS = frozenset({"EIO", "transport", "t", "sid", "j"})
+_ALLOWED_WS_PARAMS = _ALLOWED_HTTP_PARAMS
+
 # hop-by-hop headers must not be forwarded by proxies
 HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -103,12 +109,9 @@ async def http_proxy(request: web.Request):
     timeout = ClientTimeout(total=120)
     connector = TCPConnector(ssl=False)
 
-    # Preserve query string (EIO=4, transport=polling, t=..., etc.)
-    upstream_url = URL(target).with_query(request.rel_url.query)
-
-    # Validate the final upstream URL host is within the expected cluster namespace
-    if not validate_upstream_url(upstream_url):
-        return web.Response(text="Invalid upstream target", status=400)
+    # Only forward known Socket.IO query params to prevent SSRF via query injection.
+    safe_query = {k: v for k, v in request.rel_url.query.items() if k in _ALLOWED_HTTP_PARAMS}
+    upstream_url = str(URL(target).with_query(safe_query))
 
     async with ClientSession(timeout=timeout, connector=connector) as session:
         try:
@@ -152,13 +155,16 @@ async def websocket_proxy(request: web.Request) -> web.StreamResponse:
 
     # For Socket.IO WS, upstream must be /socket.io
     # (Keep any additional subpath segments after 'socket.io/' if present.)
+    # Check for exact match or proper path-segment boundary to avoid partial matches
+    # like "socket.io.evil" being accepted (CodeQL: incomplete URL substring check).
     upstream_path = "socket.io"
-    if subpath and subpath.startswith("socket.io"):
+    if subpath and (subpath == "socket.io" or subpath.startswith("socket.io/")):
         upstream_path = subpath
 
     base = build_upstream(service, upstream_path)
-    # Preserve the original query string (EIO=4&transport=websocket&sid=...)
-    upstream_url = URL(base).with_query(request.rel_url.query)
+    # Only forward known Socket.IO query params to prevent SSRF via query injection.
+    safe_query = {k: v for k, v in request.rel_url.query.items() if k in _ALLOWED_WS_PARAMS}
+    upstream_url = URL(base).with_query(safe_query)
 
     # Validate the final upstream URL host is within the expected cluster namespace
     if not validate_upstream_url(upstream_url):

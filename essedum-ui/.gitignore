@@ -1,0 +1,42 @@
+# Top-level safety net for essedum-ui workspaces.
+# Each workspace (shell, modules/*) also has its own .gitignore;
+# this catches anything that gets added at the wrong level by mistake.
+
+# Compiled output (any workspace)
+**/dist/
+**/tmp/
+**/out-tsc/
+**/.angular/cache/
+**/*.tsbuildinfo
+
+# Node (any workspace)
+**/node_modules/
+**/npm-debug.log
+**/yarn-error.log
+**/build.log
+
+# Secrets / corporate config — never commit
+**/.npmrc
+**/*.bak
+**/*.corp
+
+# IDE / editor noise
+**/.idea/
+**/.vscode/
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+**/.project
+**/.classpath
+**/.settings/
+**/.history/
+**/.sass-cache/
+
+# Test/coverage outputs
+**/coverage/
+**/testem.log
+
+# System files
+**/.DS_Store
+**/Thumbs.db

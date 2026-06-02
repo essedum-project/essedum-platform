@@ -1,0 +1,39 @@
+<div class="notebook-dialog-container">
+  <!-- Header Navbar -->
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <mat-icon class="header-icon">info</mat-icon>
+      <span>Notebook File Access</span>
+    </div>
+    <button mat-icon-button class="close-button" [mat-dialog-close]="true">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <!-- Content Body -->
+  <div class="dialog-body">
+    <div class="message-content">
+      <div class="info-section">
+        <mat-icon class="large-icon">code</mat-icon>
+        <h3>VS Code Extension Required</h3>
+        <p class="message-text">{{ data.message }}</p>
+      </div>
+      
+      <div class="instructions">
+        <h4>How to access:</h4>
+        <ol>
+          <li>Open Visual Studio Code</li>
+          <li>Install the Essedum plugin</li>
+          <li>Access your notebook files through the extension</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer Actions -->
+  <div class="dialog-footer">
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">
+      Got it
+    </button>
+  </div>
+</div>

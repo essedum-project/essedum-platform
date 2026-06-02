@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "vibe-studio": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": { "style": "scss" }
+      },
+      "root": "projects/vibe-studio",
+      "sourceRoot": "projects/vibe-studio/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/vibe-studio",
+            "index": "projects/vibe-studio/src/index.html",
+            "main": "projects/vibe-studio/src/main.ts",
+            "polyfills": "projects/vibe-studio/src/polyfills.ts",
+            "tsConfig": "projects/vibe-studio/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/vibe-studio/src/favicon.ico",
+              "projects/vibe-studio/src/assets"
+            ],
+            "styles": [],
+            "scripts": [],
+            "extraWebpackConfig": "projects/vibe-studio/webpack.config.js",
+            "commonChunk": false
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "5mb", "maximumError": "8mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/vibe-studio/src/environments/environment.ts",
+                  "with": "projects/vibe-studio/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "configurations": {
+            "production": { "browserTarget": "vibe-studio:build:production" },
+            "development": { "browserTarget": "vibe-studio:build:development" }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 8089,
+            "publicHost": "http://localhost:8089",
+            "extraWebpackConfig": "projects/vibe-studio/webpack.config.js"
+          }
+        },
+        "extract-i18n": {
+          "builder": "ngx-build-plus:extract-i18n",
+          "options": {
+            "browserTarget": "vibe-studio:build",
+            "extraWebpackConfig": "projects/vibe-studio/webpack.config.js"
+          }
+        }
+      }
+    }
+  },
+  "cli": { "analytics": false }
+}

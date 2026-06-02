@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "data-ops": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": { "style": "scss" }
+      },
+      "root": "projects/data-ops",
+      "sourceRoot": "projects/data-ops/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "ngx-build-plus:browser",
+          "options": {
+            "outputPath": "dist/data-ops",
+            "index": "projects/data-ops/src/index.html",
+            "main": "projects/data-ops/src/main.ts",
+            "polyfills": "projects/data-ops/src/polyfills.ts",
+            "tsConfig": "projects/data-ops/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/data-ops/src/favicon.ico",
+              "projects/data-ops/src/assets"
+            ],
+            "styles": [],
+            "scripts": [],
+            "extraWebpackConfig": "projects/data-ops/webpack.config.js",
+            "commonChunk": false
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/data-ops/src/environments/environment.ts",
+                  "with": "projects/data-ops/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "ngx-build-plus:dev-server",
+          "configurations": {
+            "production": { "browserTarget": "data-ops:build:production" },
+            "development": { "browserTarget": "data-ops:build:development" }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "port": 8087,
+            "publicHost": "http://localhost:8087",
+            "extraWebpackConfig": "projects/data-ops/webpack.config.js"
+          }
+        },
+        "extract-i18n": {
+          "builder": "ngx-build-plus:extract-i18n",
+          "options": {
+            "browserTarget": "data-ops:build",
+            "extraWebpackConfig": "projects/data-ops/webpack.config.js"
+          }
+        }
+      }
+    }
+  },
+  "cli": { "analytics": false }
+}
