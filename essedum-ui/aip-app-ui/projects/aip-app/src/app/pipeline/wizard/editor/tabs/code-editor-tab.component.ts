@@ -749,7 +749,20 @@ export class CodeEditorTabComponent
         const wasInitial = this.wasInitialGen;
         this.initializing = false;
         this.wasInitialGen = false;
-        const py = files?.find((f) => /\.py$/i.test(f.path));
+        let py = files?.find((f) => /\.py$/i.test(f.path));
+        // Fallback: if no .py artifact from list-apps, extract from the chat markdown.
+        // (status$ fires after this and wasBusy will be false by then, so we must
+        // do the extraction here while we still know generation just completed.)
+        if (!py) {
+          const msgs = this.vibe.messages$.value;
+          const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+          if (lastAssistant) {
+            const match = lastAssistant.content.match(/```python\n([\s\S]*?)```/);
+            if (match && match[1].trim()) {
+              py = { path: this.model?.filename || 'pipeline.py', content: match[1] };
+            }
+          }
+        }
         if (py) {
           const processedCode = this.injectDepsIfMissing(py.content);
           this.scriptLines = processedCode.split("\n");
@@ -910,49 +923,96 @@ export class CodeEditorTabComponent
   }
 
   private buildDataPipelinePrompt(attrs: any, columns: string[], sample: any[]): string {
+    const cols = columns.length ? columns
+      : (sample.length ? Object.keys(sample[0]) : []);
+
+    // Auto-detect regression vs classification from the actual target column values
+    const targetColName = attrs.targetCol || '';
+    const detectedProblemType = (() => {
+      if (attrs.problemType && attrs.problemType !== 'classification') return attrs.problemType;
+      if (sample.length > 0 && targetColName) {
+        const targetVals = sample
+          .map((r: any) => r[targetColName])
+          .filter((v: any) => v !== null && v !== undefined);
+        const numericVals = targetVals.filter((v: any) =>
+          typeof v === 'number' || (typeof v === 'string' && v !== '' && !isNaN(Number(v))));
+        const hasFloats = numericVals.some((v: any) =>
+          typeof v === 'number' ? !Number.isInteger(v) : String(v).includes('.'));
+        const uniqueCount = new Set(numericVals.map(Number)).size;
+        // Many unique numeric values or floats → continuous → regression
+        if (numericVals.length > 0 && (hasFloats || uniqueCount > Math.min(10, Math.ceil(sample.length * 0.6)))) {
+          return 'regression';
+        }
+      }
+      return attrs.problemType || 'classification';
+    })();
+
+    // Embed the dataset inline so the script needs no external connections or credentials
+    let dataSection: string;
+    if (sample.length > 0) {
+      dataSection =
+        `\n## Dataset (embedded inline — do NOT load from any external source)\n` +
+        `The complete dataset is provided below as a Python variable.\n` +
+        `Load it with: df = pd.DataFrame(DATA)\n` +
+        `DATA = ${JSON.stringify(sample, null, 2)}\n` +
+        `- Columns: ${cols.join(', ')}\n` +
+        `- Target column: ${attrs.targetCol || ''}\n` +
+        `- Total rows: ${sample.length} — use ALL of them\n`;
+    } else {
+      dataSection =
+        `\n## Dataset Schema\n` +
+        `- Columns: ${cols.join(', ') || '(not specified)'}\n` +
+        `- Target column: ${attrs.targetCol || ''}\n` +
+        `- No data provided — generate a small synthetic dataset with these columns for demonstration.\n`;
+    }
+
     return `You are an Essedum ML pipeline code generator. Generate a complete, production-ready Python pipeline script.
 
 ## Pipeline Specification
 - Name: ${this.model.name}
 - Alias: ${this.model.alias || this.model.name}
 - Pipeline Type: ${attrs.pipelineType || 'feature-engineering'}
-- Problem Type: ${attrs.problemType || 'classification'}
+- Problem Type: ${detectedProblemType}
 - Executor: ${attrs.executor || 'py-job-executor'}
 - Output Format: ${attrs.outputFormat || ''}
-
-## Data Source
-- Connection Type: ${attrs.outputContainer || ''}
-- Connection Alias: ${attrs.connection || ''}
-- Dataset: ${attrs.dataset || ''}
 - Target Column: ${attrs.targetCol || ''}
-- Available Columns: ${columns.length ? columns.join(', ') : '(not specified)'}
-${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
+- Feature Columns: ${cols.filter(c => c !== attrs.targetCol).join(', ') || 'all columns except target'}
+${dataSection}
 ## Implementation Requirements
-1. CRITICAL — At the very top of the file (the first executable lines, before any other imports), include a dependency auto-installation block exactly like this:
+1. CRITICAL — At the very top of the file (before any other code), include a dependency auto-installation block:
    \`\`\`python
    import subprocess, sys
    _WIZARD_PIPELINE_DEPS = ['pandas', 'numpy', 'scikit-learn', ...ALL other packages the script needs...]
    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', '--disable-pip-version-check'] + _WIZARD_PIPELINE_DEPS)
    \`\`\`
-   Replace the list with EVERY package imported in the script (e.g. boto3, sqlalchemy, psycopg2-binary, pymysql, etc.). This block MUST be present — the executor environment may not have these packages pre-installed.
-2. Follow the Essedum DataContainer pattern — accept DataContainer input, return DataContainer output
-3. Load data from the ${attrs.outputContainer || 'datasource'} connection "${attrs.connection || ''}", dataset "${attrs.dataset || ''}"
-4. Implement ${attrs.problemType || 'classification'} ML task (pipeline type: ${attrs.pipelineType || 'feature-engineering'})
-5. Target/label column is "${attrs.targetCol || ''}" — predict or transform this column
-6. Use all available feature columns: ${columns.join(', ') || 'all columns except target'}
-7. Use scikit-learn (or most appropriate library) for the task
-8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving
-9. LOGGING — this is mandatory and critical for observability:
-   - At the very top (after the pip install block) add these exact lines:
+   List EVERY non-stdlib package used. Do NOT include 'essedum'.
+   NEVER include standard library modules — these are already built into Python and will cause pip to fail: pickle, os, sys, io, json, re, time, datetime, collections, functools, itertools, pathlib, typing, dataclasses, abc, copy, math, random, hashlib, base64, urllib, http, logging, warnings, traceback, inspect, struct, string, enum, contextlib, threading, subprocess, shutil, tempfile, uuid, argparse, configparser, csv, gzip, zipfile, statistics, operator, heapq, bisect, array, queue, socket.
+2. SECURITY — NON-NEGOTIABLE — STRICTLY ENFORCED:
+   - The script MUST NOT contain any API keys, passwords, access tokens, secret keys, credentials, connection strings, or any sensitive value of any kind.
+   - The script MUST NOT import or use boto3, minio, sqlalchemy, psycopg2, pymysql, requests, httpx, or any networking/database/storage library.
+   - The script MUST NOT make any network requests or connect to any external service, database, file server, or cloud storage.
+   - Violating any of the above will cause the pipeline to be rejected. Keep all data self-contained.
+3. DATA LOADING — CRITICAL:
+   - The full dataset is already embedded in the DATA variable defined above.
+   - Load it with: \`df = pd.DataFrame(DATA)\`
+   - Do NOT read from any file path, URL, S3 bucket, MinIO, database, or any external source.
+   - DATA contains all available rows — use them as-is.
+4. Do NOT import or use the 'essedum' package.
+5. TASK TYPE — CRITICAL: detected as "${detectedProblemType}"
+   - INSPECT the actual "${attrs.targetCol || ''}" values in DATA before choosing any model.
+   - CONTINUOUS target (floats or many unique numeric values, e.g. salary, price, score, temperature) → REGRESSION → MUST use a Regressor (RandomForestRegressor, LinearRegression, Ridge, Lasso, GradientBoostingRegressor). NEVER use a Classifier on continuous data — it will throw a ValueError at runtime.
+   - CATEGORICAL target (strings, booleans, or very few distinct integers like 0/1/2) → CLASSIFICATION → use a Classifier.
+   - The model class MUST match the actual data distribution. Wrong choice = immediate crash.
+6. Target/label column: "${attrs.targetCol || ''}" — predict or transform this column
+7. Use scikit-learn (or the most appropriate stdlib-compatible library) for the task
+8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving (use pickle to a local path)
+9. LOGGING — mandatory:
+   - After the pip install block add:
      import logging
      logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
      logger = logging.getLogger(__name__)
-   - Log at the START and END of every major step (data loading, preprocessing, feature engineering, training, evaluation, saving)
-   - After loading data: log shape, column names, null counts using logger.info
-   - After each preprocessing step: log what changed (e.g. nulls remaining, rows dropped)
-   - After training: log all evaluation metrics (accuracy, F1, RMSE, etc.)
-   - On any error or skip: use logger.warning or logger.error
-   - Use logger.info liberally so a user reading the run log can follow every step without reading the code
+   - Log start/end of every major step, data shape, null counts, and all evaluation metrics
+   - Use logger.info, logger.warning, logger.error throughout
 10. Main entry function must be named run_pipeline()
 11. Return the COMPLETE Python file — do not omit or truncate any section
 
@@ -960,6 +1020,25 @@ Return the full Python script inside a fenced \`\`\`python block.`;
   }
 
   private buildTrainingPrompt(attrs: any, columns: string[], sample: any[]): string {
+    const cols = columns.length ? columns
+      : (sample.length ? Object.keys(sample[0]) : []);
+
+    let dataSection: string;
+    if (sample.length > 0) {
+      dataSection =
+        `\n## Dataset (embedded inline — do NOT load from any external source)\n` +
+        `The training dataset is provided below as a Python variable.\n` +
+        `Load it with: df = pd.DataFrame(DATA)\n` +
+        `DATA = ${JSON.stringify(sample, null, 2)}\n` +
+        `- Columns: ${cols.join(', ')}\n` +
+        `- Total rows: ${sample.length}\n`;
+    } else {
+      dataSection =
+        `\n## Dataset Schema\n` +
+        `- Columns: ${cols.join(', ') || '(all columns)'}\n` +
+        `- No data provided — generate a small synthetic dataset with these columns.\n`;
+    }
+
     return `You are an Essedum ML training job code generator. Generate a complete, production-ready Python training script.
 
 ## Training Job Specification
@@ -979,39 +1058,39 @@ Return the full Python script inside a fenced \`\`\`python block.`;
 - Learning Rate: ${attrs.lr || '2e-4'}
 ${attrs.loraRank ? `- LoRA Rank: ${attrs.loraRank}\n- LoRA Alpha: ${attrs.loraAlpha}` : ''}
 ${attrs.maxLen ? `- Max Sequence Length: ${attrs.maxLen}` : ''}
-
-## Dataset
-- Dataset Alias: ${attrs.dataset || ''}
-- Available Columns: ${columns.length ? columns.join(', ') : '(all columns)'}
-${sample.length ? `\n## Dataset Sample (first rows):\n${JSON.stringify(sample, null, 2)}\n` : ''}
+${dataSection}
 ## Implementation Requirements
-1. CRITICAL — At the very top of the file (the first executable lines, before any other imports), include a dependency auto-installation block exactly like this:
+1. CRITICAL — At the very top of the file (before any other code), include a dependency auto-installation block:
    \`\`\`python
    import subprocess, sys
-   _WIZARD_PIPELINE_DEPS = ['pandas', 'numpy', 'scikit-learn', ...ALL other packages the script needs...]
+   _WIZARD_PIPELINE_DEPS = ['pandas', 'numpy', 'scikit-learn', ...ALL other packages...]
    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', '--disable-pip-version-check'] + _WIZARD_PIPELINE_DEPS)
    \`\`\`
-   Replace the list with EVERY package imported in the script (e.g. torch, transformers, datasets, peft, trl, boto3, etc.). This block MUST be present — the executor environment may not have these packages pre-installed.
-2. Follow the Essedum DataContainer pattern — load data via DataContainer input
-3. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'the appropriate framework'}
-4. Use the ${attrs.baseModel || 'specified algorithm/model'} as the base
-5. Use columns: ${columns.join(', ') || 'all available columns'}
-6. Include: data loading, preprocessing, train/validation split, model initialisation, training loop, evaluation metrics, model saving as artifact
-7. LOGGING — this is mandatory and critical for observability:
-   - At the very top (after the pip install block) add these exact lines:
+   List every non-stdlib package used. Do NOT include 'essedum'.
+   NEVER include standard library modules — these are already built into Python and will cause pip to fail: pickle, os, sys, io, json, re, time, datetime, collections, functools, itertools, pathlib, typing, dataclasses, abc, copy, math, random, hashlib, base64, urllib, http, logging, warnings, traceback, inspect, struct, string, enum, contextlib, threading, subprocess, shutil, tempfile, uuid, argparse, configparser, csv, gzip, zipfile, statistics, operator, heapq, bisect, array, queue, socket.
+2. SECURITY — NON-NEGOTIABLE — STRICTLY ENFORCED:
+   - The script MUST NOT contain any API keys, passwords, access tokens, secret keys, credentials, connection strings, or any sensitive value.
+   - The script MUST NOT import or use boto3, minio, sqlalchemy, psycopg2, pymysql, requests, httpx, or any networking/database/storage library.
+   - The script MUST NOT make any network requests or connect to any external service, database, or cloud storage.
+3. DATA LOADING — CRITICAL:
+   - The training dataset is already in the DATA variable above.
+   - Load with: \`df = pd.DataFrame(DATA)\`
+   - Do NOT read from any file, URL, S3, MinIO, database, or external source.
+4. Do NOT import or use the 'essedum' package.
+5. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'scikit-learn'}
+6. Use the ${attrs.baseModel || 'specified algorithm'} as the base model/algorithm
+7. Use columns: ${cols.join(', ') || 'all available columns'}
+8. Include: preprocessing, train/validation split, model initialisation, training, evaluation metrics, model saving (pickle to local path)
+9. LOGGING — mandatory:
+   - After pip install block add:
      import logging
      logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
      logger = logging.getLogger(__name__)
-   - Log at the START and END of every major step (data loading, preprocessing, split, model init, each epoch, evaluation, saving)
-   - After loading data: log shape, dtypes, null counts using logger.info
-   - During training: log loss and metrics after every epoch
-   - After evaluation: log all metrics (accuracy, F1, loss, perplexity, etc.)
-   - Log model save path and artifact details
-   - On any error or skip: use logger.warning or logger.error
-   - Use logger.info liberally so a user reading the run log can follow every step without reading the code
-8. Main entry function must be named run_training()
-9. Handle the hyperparameters (epochs, batch size, lr) as configurable parameters
-10. Return the COMPLETE Python file — do not omit or truncate any section
+   - Log start/end of every major step, shape after load, loss/metrics per epoch, final evaluation
+   - Use logger.info, logger.warning, logger.error throughout
+10. Main entry function: run_training()
+11. Handle hyperparameters (epochs, batch size, lr) as configurable variables at the top
+12. Return the COMPLETE Python file — do not truncate
 
 Return the full Python script inside a fenced \`\`\`python block.`;
   }

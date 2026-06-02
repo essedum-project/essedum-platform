@@ -36,6 +36,10 @@ export class DataPipelineWizardComponent implements OnInit {
   private allDatasources: any[] = [];
   // Map: alias → datasource name (used for API calls that need the name, not alias)
   private aliasToName = new Map<string, string>();
+  // Full objects of the currently selected datasource and dataset
+  private selectedDatasourceObj: any = null;
+  private datasetItems: any[] = [];
+  private selectedDatasetObj: any = null;
   // Cascading dropdowns for ML/non-SLM/non-RAG types
   outputContainers: string[] = [];         // unique types from all datasources
   outputContainersLoaded = false;
@@ -148,12 +152,20 @@ export class DataPipelineWizardComponent implements OnInit {
       this.datasets = [];
       this.targetColumns = [];
       this.datasetsLoaded = false;
+      this.selectedDatasourceObj = null;
+      this.datasetItems = [];
+      this.selectedDatasetObj = null;
       if (connectionAlias) {
+        // Capture the full datasource object for connection details
+        this.selectedDatasourceObj = this.allDatasources.find(
+          d => (d.alias || d.name) === connectionAlias
+        ) || null;
         // The API expects the datasource name field, not the alias
         const datasourceName = this.aliasToName.get(connectionAlias) || connectionAlias;
         this.services.getDatasetNamesByDatasource(datasourceName).subscribe({
           next: (res: any[]) => {
             const items: any[] = Array.isArray(res) ? res : [];
+            this.datasetItems = items;  // keep full objects for dataset path
             this.datasets = items
               .map((d: any) => d.alias || d.name)
               .filter(Boolean)
@@ -165,8 +177,11 @@ export class DataPipelineWizardComponent implements OnInit {
       }
     });
 
-    // When dataset changes → fetch real column names via dbdata API
+    // When dataset changes → capture full dataset object + fetch real column names via dbdata API
     this.sourceForm.get('dataset').valueChanges.subscribe(datasetName => {
+      this.selectedDatasetObj = this.datasetItems.find(
+        d => (d.alias || d.name) === datasetName
+      ) || null;
       this.sourceForm.patchValue({ targetCol: '' }, { emitEvent: false });
       this.targetColumns = [];
       this.targetColumnsLoaded = false;
@@ -304,6 +319,16 @@ export class DataPipelineWizardComponent implements OnInit {
         datasetColumns: this.targetColumns,
         datasetSample: this.datasetRows,
         freshlyCreated: true,
+        // Full datasource connection details so AI generates concrete, non-placeholder code
+        datasourceConnectionDetails: this.selectedDatasourceObj
+          ? (() => { try { return JSON.parse(this.selectedDatasourceObj.connectionDetails || '{}'); } catch { return {}; } })()
+          : {},
+        datasourceType: this.selectedDatasourceObj?.type || cfg.outputContainer,
+        datasetLocation: this.selectedDatasetObj?.location
+          || this.selectedDatasetObj?.filePath
+          || this.selectedDatasetObj?.path
+          || this.selectedDatasetObj?.name
+          || cfg.dataset,
       },
     });
 
@@ -327,7 +352,9 @@ export class DataPipelineWizardComponent implements OnInit {
       },
       error: (err: any) => {
         this.creating = false;
-        const msg = err?.error?.details || err?.error?.message || err?.message || 'Could not create pipeline';
+        const rawMsg = err?.error?.details || err?.error?.message || err?.error?.error
+          || (typeof err?.error === 'string' && (err.error as string).length < 500 ? err.error : null);
+        const msg = rawMsg || err?.message || 'Could not create pipeline';
         this.services.message(msg, 'error');
       },
     });

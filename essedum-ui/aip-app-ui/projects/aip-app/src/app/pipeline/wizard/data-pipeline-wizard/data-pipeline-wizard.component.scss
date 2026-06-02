@@ -135,7 +135,7 @@
 
 // ── Step actions ──────────────────────────────────────────────────────────────
 .step-actions {
-  display: flex; gap: 8px; justify-content: flex-end;
+  display: flex; gap: 8px; justify-content: flex-end; align-items: center;
   padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.07); margin-top: 10px;
   mat-icon { font-size: 16px !important; height: 16px !important; width: 16px !important; vertical-align: middle; }
 }
@@ -183,7 +183,19 @@
     }
   }
 
-  .step-actions { border-top-color: rgba(79,142,247,0.1); }
+  .step-actions {
+    border-top-color: rgba(79,142,247,0.1);
+    // Cancel (uncolored mat-button) must be readable on dark bg
+    ::ng-deep .mat-mdc-button:not([color]) {
+      --mdc-text-button-label-text-color: #94a3b8 !important;
+      color: #94a3b8 !important;
+      &:hover {
+        background: rgba(255,255,255,0.07) !important;
+        --mdc-text-button-label-text-color: #e2e8f0 !important;
+        color: #e2e8f0 !important;
+      }
+    }
+  }
   .chip-row .chip-label { color: #94a3b8; }
 
   // Chip preset buttons — text must always be visible

@@ -214,11 +214,22 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.services.update(this.model.raw).subscribe({ error: () => {} });
   }
 
-  /** Compute Run History tab index at runtime based on visible tabs. */
+  /**
+   * Tab index for Run History (data-pipeline) at runtime.
+   * Tabs: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, RunHistory
+   */
   private get runHistoryTabIndex(): number {
     if (this.model?.kind !== 'data-pipeline') return -1;
-    // Tabs order: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, RunHistory
     return this.hasVibePermission ? 4 : 2;
+  }
+
+  /**
+   * Tab index for Logs (training-job) at runtime.
+   * Tabs: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, Metrics, Logs
+   */
+  private get logsTabIndex(): number {
+    if (this.model?.kind !== 'training-job') return -1;
+    return this.hasVibePermission ? 5 : 3;
   }
 
   runPipeline(): void {
@@ -226,26 +237,34 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.running = true;
     const alias = this.model.alias || this.model.name;
     const cname = this.model.name;
-    // Use the selected run type — same fields as native-script's runPipeline() call
-    const isLocal   = this.selectedRunType?.type       ?? 'true';
-    const datasource = this.selectedRunType?.dsName    ?? undefined;
-    // Persist the chosen run type so it is pre-selected on the next open
+    const isLocal    = this.selectedRunType?.type  ?? 'true';
+    const datasource = this.selectedRunType?.dsName ?? undefined;
     this.persistDefaultRuntime();
     this.services.runPipeline(alias, cname, 'NativeScript', isLocal, datasource)
       .subscribe({
         next: () => {
           this.running = false;
           this.services.message('Pipeline started!', 'success');
-          const rhIdx = this.runHistoryTabIndex;
-          if (rhIdx >= 0) {
-            this.activeTab = rhIdx;
-            // Refresh run history after a short delay so the backend registers the run
-            setTimeout(() => this.runHistoryTab?.refresh(), 3000);
+          if (this.model?.kind === 'training-job') {
+            // Navigate to Logs tab so the user can follow progress live
+            const lIdx = this.logsTabIndex;
+            if (lIdx >= 0) { this.activeTab = lIdx; }
+          } else {
+            const rhIdx = this.runHistoryTabIndex;
+            if (rhIdx >= 0) {
+              this.activeTab = rhIdx;
+              setTimeout(() => this.runHistoryTab?.refresh(), 3000);
+            }
           }
         },
-        error: () => {
+        error: (err: any) => {
           this.running = false;
-          this.services.message('Failed to start pipeline', 'error');
+          // err = error.error (the BE response body) — extract the most descriptive message
+          const msg =
+            err?.details || err?.message || err?.error ||
+            (typeof err === 'string' && err.length < 600 ? err : null) ||
+            'Failed to start pipeline';
+          this.services.message(msg, 'error');
         },
       });
   }

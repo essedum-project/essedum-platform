@@ -268,7 +268,11 @@ export class TrainingPipelineWizardComponent implements OnInit {
       },
       error: (err: any) => {
         this.creating = false;
-        const msg = err?.error?.details || err?.error?.message || err?.message || 'Could not create training job';
+        // err = error.error (BE response body) from handleError's throwError(errMsg)
+        const msg =
+          err?.details || err?.message || err?.error ||
+          (typeof err === 'string' && err.length < 600 ? err : null) ||
+          'Could not create training job';
         this.services.message(msg, 'error');
       },
     });

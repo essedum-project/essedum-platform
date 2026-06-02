@@ -719,6 +719,9 @@ mat-card-actions.card-actions-hover {
 
 // ─── Material Overrides ─────────────────────────────────────────────────────────
 .mat-mdc-select-panel {
+  // Prevent dropdown panels from extending below the visible viewport
+  max-height: min(50vh, 256px) !important;
+  overflow-y: auto !important;
   .mat-mdc-option {
     .mat-mdc-checkbox { pointer-events: none; margin-right: 6px; }
     .mdc-list-item__primary-text {
@@ -1659,6 +1662,28 @@ body.header-dark-theme {
   div h3 { color: #e2e8f0; }
 
   input[type="text"]:disabled { color: #475569 !important; }
+
+  // Generic dialog dark theme — confirm-delete and any dialog without specific panelClass
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    background-color: #1e293b !important;
+  }
+  .mat-mdc-dialog-title,
+  [mat-dialog-title] {
+    color: #f1f5f9 !important;
+  }
+  .mat-mdc-dialog-content,
+  .mat-dialog-content {
+    color: #cbd5e1 !important;
+  }
+  .mat-mdc-dialog-actions {
+    border-top: 1px solid rgba(79,142,247,0.12) !important;
+    // Un-coloured raised buttons (Yes/No in confirm-delete)
+    .mat-mdc-raised-button:not([color]) {
+      background: #334155 !important;
+      color: #e2e8f0 !important;
+      &:hover { background: #475569 !important; }
+    }
+  }
 }
 
 // ─── LIGHT THEME ───────────────────────────────────────────────────────────────

@@ -843,6 +843,11 @@ export class VibeStudioService implements OnDestroy {
    *   • Files with content:    { files: { "path": "content" } }
    */
   private listAppsAndFetchFiles(sessionId: string, done: () => void): void {
+    // Safety net: guarantee done() fires within 90 s even if call-tool requests hang.
+    let resolved = false;
+    const safeDone = () => { if (!resolved) { resolved = true; done(); } };
+    const safetyTimer = setTimeout(safeDone, 90000);
+
     const url = `${this.baseUrl}/service/v1/vibe-coding/agent/list-apps`;
     this.http
       .get<any>(url, {
@@ -851,14 +856,15 @@ export class VibeStudioService implements OnDestroy {
       })
       .subscribe({
         next: (resp) => {
+          clearTimeout(safetyTimer);
           const pathsToFetch = this.extractFilePathsFromListApps(resp);
           if (pathsToFetch.length > 0) {
-            this.fetchFilesFromServer(sessionId, pathsToFetch, done);
+            this.fetchFilesFromServer(sessionId, pathsToFetch, safeDone);
           } else {
-            done();
+            safeDone();
           }
         },
-        error: () => done(),
+        error: () => { clearTimeout(safetyTimer); safeDone(); },
       });
   }
 
