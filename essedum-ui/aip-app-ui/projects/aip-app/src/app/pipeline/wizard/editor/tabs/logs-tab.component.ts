@@ -197,10 +197,14 @@ export class LogsTabComponent implements OnInit, OnDestroy {
 
   constructor(private services: Services) {}
 
-  ngOnInit(): void { this.startPolling(); }
+  /** On init: do a single one-shot fetch to display any existing run status.
+   *  No interval is started here — polling only begins after Run is clicked. */
+  ngOnInit(): void { this.poll(); }
   ngOnDestroy(): void { this.stopPolling(); }
 
-  private startPolling(): void {
+  /** Called by the parent editor after the Run button is clicked and the pipeline starts. */
+  startPolling(): void {
+    this.stopPolling();
     this.poll();
     this.pollTimer = setInterval(() => this.poll(), 4000);
   }
@@ -211,9 +215,15 @@ export class LogsTabComponent implements OnInit, OnDestroy {
 
   private poll(): void {
     if (!this.model?.name) return;
-    this.services.fetchInternalJobByName(this.model.name, 0, 4).subscribe({
+    this.services.fetchInternalJobByName2(this.model.name, 0, 4).subscribe({
       next: (jobs: any[]) => {
-        if (!Array.isArray(jobs) || jobs.length === 0) { this.noJobs = true; return; }
+        if (!Array.isArray(jobs) || jobs.length === 0) {
+          this.noJobs = true;
+          // No runs yet — stop polling to avoid repeated API calls and snackbars.
+          // User can click Refresh to check again.
+          this.stopPolling();
+          return;
+        }
         this.noJobs = false;
         const latest = [...jobs].sort((a, b) => {
           const da = a.submittedOn ? new Date(a.submittedOn).getTime() : 0;
@@ -228,7 +238,11 @@ export class LogsTabComponent implements OnInit, OnDestroy {
           this.stopPolling();
         }
       },
-      error: () => { /* silent — noJobs stays false, status stays null */ },
+      error: () => {
+        // Stop polling on error to prevent repeated snackbar notifications.
+        // The service layer already shows an error message; further polls would just repeat it.
+        this.stopPolling();
+      },
     });
   }
 
@@ -253,7 +267,7 @@ export class LogsTabComponent implements OnInit, OnDestroy {
   refresh(): void {
     this.lines = []; this.jobStatus = null; this.jobId = null;
     this.submittedOn = null; this.noJobs = false;
-    this.stopPolling(); this.startPolling();
+    this.startPolling();
   }
 
   clear(): void { this.lines = []; }

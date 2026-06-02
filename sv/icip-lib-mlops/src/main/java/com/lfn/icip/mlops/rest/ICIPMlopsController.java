@@ -85,6 +85,8 @@ import com.lfn.icip.icipwebeditor.executor.sync.service.JobSyncExecutorService;
 import com.lfn.icip.icipwebeditor.file.service.ICIPFileService;
 import com.lfn.icip.icipwebeditor.fileserver.dto.ICIPChunkMetaData;
 import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs;
+import com.lfn.icip.icipwebeditor.job.model.ICIPPartialInternalJobs;
+import com.lfn.icip.icipwebeditor.job.model.ICIPPartialInternalJobs;
 import com.lfn.icip.icipwebeditor.job.service.IICIPInternalJobsService;
 import com.lfn.icip.icipwebeditor.model.ICIPAgentJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPAgents;
@@ -2303,6 +2305,31 @@ public class ICIPMlopsController {
 	}
 
 	/**
+	 * Gets internal jobs by job name and organization.
+	 *
+	 * @param name the job name
+	 * @param org  the organization
+	 * @param page the page number
+	 * @param size the page size
+	 * @return list of matching internal jobs (partial)
+	 */
+	@GetMapping("/internaljob/jobname/{name}/{org}")
+	public ResponseEntity<?> getInternalJobsByName(
+			@PathVariable(name = "name") String name,
+			@PathVariable(name = "org") String org,
+			@RequestParam(name = "page", defaultValue = "0") Integer page,
+			@RequestParam(name = "size", defaultValue = "10") Integer size) {
+		logger.debug("Getting internal jobs by name: {}", name);
+		try {
+			List<ICIPPartialInternalJobs> jobs = iICIPInternalJobsService.findByJobName(name, org, page, size);
+			return new ResponseEntity<>(jobs != null ? jobs : List.of(), new HttpHeaders(), HttpStatus.OK);
+		} catch (Exception ex) {
+			logger.error("Error fetching internal jobs by name '{}' for org '{}': {}", name, org, ex.getMessage());
+			return new ResponseEntity<>(List.of(), new HttpHeaders(), HttpStatus.OK);
+		}
+	}
+
+	/**
 	 * Gets the job console.
 	 *
 	 * @param jobId  the job id
@@ -2320,8 +2347,11 @@ public class ICIPMlopsController {
 			@RequestParam(name = "lineno", required = true) int lineno,
 			@RequestParam(name = "status", required = true) String status) throws IOException {
 		logger.debug("Getting Job console");
-		return new ResponseEntity<>(iICIPInternalJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status),
-				new HttpHeaders(), HttpStatus.OK);
+		ICIPInternalJobs result = iICIPInternalJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status);
+		if (result == null) {
+			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(result, new HttpHeaders(), HttpStatus.OK);
 	}
 
 	/**

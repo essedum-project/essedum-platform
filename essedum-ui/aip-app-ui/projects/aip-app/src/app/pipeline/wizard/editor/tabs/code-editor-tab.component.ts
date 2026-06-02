@@ -1000,8 +1000,14 @@ ${dataSection}
 4. Do NOT import or use the 'essedum' package.
 5. TASK TYPE — CRITICAL: detected as "${detectedProblemType}"
    - INSPECT the actual "${attrs.targetCol || ''}" values in DATA before choosing any model.
-   - CONTINUOUS target (floats or many unique numeric values, e.g. salary, price, score, temperature) → REGRESSION → MUST use a Regressor (RandomForestRegressor, LinearRegression, Ridge, Lasso, GradientBoostingRegressor). NEVER use a Classifier on continuous data — it will throw a ValueError at runtime.
-   - CATEGORICAL target (strings, booleans, or very few distinct integers like 0/1/2) → CLASSIFICATION → use a Classifier.
+   - CONTINUOUS target (floats or many unique numeric values, e.g. salary, price, score, temperature) → REGRESSION → MUST use a Regressor. Use EXACT imports:
+     * from sklearn.linear_model import LinearRegression   (NOT sklearn.ensemble)
+     * from sklearn.linear_model import Ridge              (NOT sklearn.ensemble)
+     * from sklearn.linear_model import Lasso              (NOT sklearn.ensemble)
+     * from sklearn.ensemble import RandomForestRegressor
+     * from sklearn.ensemble import GradientBoostingRegressor
+     NEVER use a Classifier on continuous data — it will throw a ValueError at runtime.
+   - CATEGORICAL target (strings, booleans, or very few distinct integers like 0/1/2) → CLASSIFICATION → use a Classifier (e.g. from sklearn.ensemble import RandomForestClassifier).
    - The model class MUST match the actual data distribution. Wrong choice = immediate crash.
 6. Target/label column: "${attrs.targetCol || ''}" — predict or transform this column
 7. Use scikit-learn (or the most appropriate stdlib-compatible library) for the task
@@ -1077,19 +1083,41 @@ ${dataSection}
    - Load with: \`df = pd.DataFrame(DATA)\`
    - Do NOT read from any file, URL, S3, MinIO, database, or external source.
 4. Do NOT import or use the 'essedum' package.
-5. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'scikit-learn'}
-6. Use the ${attrs.baseModel || 'specified algorithm'} as the base model/algorithm
-7. Use columns: ${cols.join(', ') || 'all available columns'}
-8. Include: preprocessing, train/validation split, model initialisation, training, evaluation metrics, model saving (pickle to local path)
-9. LOGGING — mandatory:
-   - After pip install block add:
-     import logging
-     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
-     logger = logging.getLogger(__name__)
-   - Log start/end of every major step, shape after load, loss/metrics per epoch, final evaluation
-   - Use logger.info, logger.warning, logger.error throughout
-10. Main entry function: run_training()
-11. Handle hyperparameters (epochs, batch size, lr) as configurable variables at the top
+5. SKLEARN IMPORTS — CRITICAL — USE EXACT MODULE PATHS (wrong path = ImportError at runtime):
+   - from sklearn.linear_model import LinearRegression     ← NEVER sklearn.ensemble
+   - from sklearn.linear_model import Ridge                ← NEVER sklearn.ensemble
+   - from sklearn.linear_model import Lasso                ← NEVER sklearn.ensemble
+   - from sklearn.linear_model import ElasticNet           ← NEVER sklearn.ensemble
+   - from sklearn.linear_model import LogisticRegression   ← NEVER sklearn.ensemble
+   - from sklearn.ensemble import RandomForestRegressor
+   - from sklearn.ensemble import RandomForestClassifier
+   - from sklearn.ensemble import GradientBoostingRegressor
+   - from sklearn.ensemble import GradientBoostingClassifier
+   - from sklearn.svm import SVR  (regression)  /  from sklearn.svm import SVC  (classification)
+   - from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
+   - from sklearn.model_selection import train_test_split
+   - from sklearn.metrics import mean_squared_error, r2_score, accuracy_score, classification_report
+   RULE: any class whose name ends in 'Regression' or 'Regressor' and lives in sklearn.linear_model
+   MUST be imported from sklearn.linear_model — NEVER from sklearn.ensemble.
+6. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'scikit-learn'}
+7. Use the ${attrs.baseModel || 'specified algorithm'} as the base model/algorithm
+8. Use columns: ${cols.join(', ') || 'all available columns'}
+9. Include: preprocessing, train/validation split, model initialisation, training, evaluation metrics, model saving (pickle to local path)
+10. LOGGING — mandatory:
+    - After pip install block add:
+      import logging
+      logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+      logger = logging.getLogger(__name__)
+    - Log start/end of every major step, shape after load, loss/metrics per epoch, final evaluation
+    - Use logger.info, logger.warning, logger.error throughout
+11. MAIN ENTRY FUNCTION — CRITICAL:
+    - Define hyperparameter constants (EPOCHS, BATCH_SIZE, LEARNING_RATE, etc.) at module level (top of file, after imports).
+    - Wrap ALL training logic (data loading, preprocessing, model init, training, evaluation, model saving) inside a single function called run_training().
+    - At the very bottom of the script, add exactly:
+      if __name__ == '__main__':
+          run_training()
+    - DO NOT write any training logic at module level outside of run_training().
+    - DO NOT call run_training() anywhere except inside the if __name__ == '__main__' block.
 12. Return the COMPLETE Python file — do not truncate
 
 Return the full Python script inside a fenced \`\`\`python block.`;
@@ -1101,12 +1129,6 @@ Return the full Python script inside a fenced \`\`\`python block.`;
    * Guarantees all packages are available in the executor environment.
    */
   private injectDepsIfMissing(code: string): string {
-    // Already has a pip install block — leave untouched
-    if (/_WIZARD_PIPELINE_DEPS|_DEPS\s*=\s*\[/.test(code.slice(0, 800)) ||
-        /subprocess\.check_call[\s\S]{0,200}pip.*install/i.test(code.slice(0, 1000))) {
-      return code;
-    }
-
     const STDLIB = new Set([
       'os', 'sys', 'io', 'json', 're', 'time', 'datetime', 'collections',
       'functools', 'itertools', 'pathlib', 'typing', 'dataclasses', 'abc',
@@ -1120,6 +1142,23 @@ Return the full Python script inside a fenced \`\`\`python block.`;
       'weakref', 'gc', 'types', 'decimal', 'fractions', 'statistics',
       'multiprocessing', 'queue', 'array', 'ctypes', 'mmap',
     ]);
+
+    // Already has a pip install block — sanitize it (strip any stdlib modules the AI
+    // mistakenly included, e.g. 'pickle') then return without injecting a second block.
+    if (/_WIZARD_PIPELINE_DEPS|_DEPS\s*=\s*\[/.test(code.slice(0, 800)) ||
+        /subprocess\.check_call[\s\S]{0,200}pip.*install/i.test(code.slice(0, 1000))) {
+      return code.replace(
+        /\b(_WIZARD_PIPELINE_DEPS|_DEPS)\s*=\s*\[([\s\S]*?)\]/,
+        (_match: string, varName: string, contents: string) => {
+          const items: string[] = (contents.match(/'[^']*'|"[^"]*"/g) || []);
+          const filtered = items.filter((item: string) => {
+            const pkg = item.replace(/['"]/g, '').trim();
+            return !STDLIB.has(pkg) && !STDLIB.has(pkg.replace(/-/g, '_'));
+          });
+          return `${varName} = [${filtered.join(', ')}]`;
+        }
+      );
+    }
 
     const PKG_MAP: Record<string, string> = {
       'sklearn':    'scikit-learn',
