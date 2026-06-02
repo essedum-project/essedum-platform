@@ -57,6 +57,8 @@ import { MethodCreateEditComponent } from '../features/adapter/method-create-edi
 // Features: pipeline
 import { PipelineComponent } from '../features/pipeline/pipeline.component';
 import { PipelineCreateComponent } from '../features/pipeline/pipeline-create/pipeline-create.component';
+import { DataPipelineWizardComponent } from '../features/pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardComponent } from '../features/pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 
 // Features: pipeline-dialog
 import { PipelineDialogComponent } from '../features/pipeline-dialog/pipeline-dialog.component';
@@ -147,6 +149,8 @@ import { environment } from '../../environments/environment';
     // pipeline
     PipelineComponent,
     PipelineCreateComponent,
+    DataPipelineWizardComponent,
+    TrainingPipelineWizardComponent,
     PipelineDialogComponent,
     JobDataViewerComponent,
     ShowOutputArtifactsComponent,

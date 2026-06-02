@@ -1,0 +1,108 @@
+.wizard-dialog-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+.wizard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid #e0e0e0;
+
+  .wizard-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+}
+
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  gap: 0;
+}
+
+.wizard-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #757575;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .step-label {
+    font-size: 0.875rem;
+    color: #757575;
+  }
+
+  &.active {
+    .step-number {
+      background: #1976d2;
+      color: #fff;
+    }
+    .step-label {
+      color: #1976d2;
+      font-weight: 600;
+    }
+  }
+
+  &.done {
+    .step-number {
+      background: #4caf50;
+      color: #fff;
+    }
+    .step-label {
+      color: #4caf50;
+    }
+  }
+}
+
+.wizard-step-connector {
+  flex: 1;
+  height: 2px;
+  background: #e0e0e0;
+  margin: 0 8px;
+}
+
+.wizard-body {
+  flex: 1;
+  padding: 20px 24px;
+}
+
+.wizard-form {
+  .field-row {
+    margin-bottom: 12px;
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+}
+
+.wizard-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.global-error {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+}

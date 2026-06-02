@@ -1,0 +1,84 @@
+<div class="wizard-dialog-container">
+  <div class="wizard-header">
+    <h2 class="wizard-title">New Training Pipeline</h2>
+    <button type="button" class="dialog-close-btn" aria-label="Close" (click)="cancel()">
+      <i class="icon x-16 close-icon"></i>
+    </button>
+  </div>
+
+  <!-- Step indicators -->
+  <div class="wizard-steps">
+    <div class="wizard-step" [class.active]="step === 0" [class.done]="step > 0">
+      <span class="step-number">1</span>
+      <span class="step-label">Basic Info</span>
+    </div>
+    <div class="wizard-step-connector"></div>
+    <div class="wizard-step" [class.active]="step === 1" [class.done]="step > 1">
+      <span class="step-number">2</span>
+      <span class="step-label">Configuration</span>
+    </div>
+  </div>
+
+  <div class="wizard-body">
+
+    <!-- Step 0: Basic Info -->
+    <ng-container *ngIf="step === 0">
+      <form [formGroup]="basicForm" class="wizard-form">
+        <div class="field-row">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="alias" placeholder="Enter pipeline name..." />
+            <mat-error *ngIf="basicForm.get('alias')?.hasError('required')">Display name is required</mat-error>
+            <mat-error *ngIf="basicForm.get('alias')?.hasError('minlength')">Minimum 2 characters required</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="field-row">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Optional description..." rows="3"></textarea>
+          </mat-form-field>
+        </div>
+      </form>
+    </ng-container>
+
+    <!-- Step 1: Configuration -->
+    <ng-container *ngIf="step === 1">
+      <form [formGroup]="configForm" class="wizard-form">
+        <div class="field-row">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>ML Framework</mat-label>
+            <mat-select formControlName="framework">
+              <mat-option *ngFor="let f of frameworks" [value]="f.value">{{ f.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="field-row">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Compute Target</mat-label>
+            <mat-select formControlName="computeTarget">
+              <mat-option *ngFor="let c of computeTargets" [value]="c.value">{{ c.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="field-row">
+          <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Default Epochs</mat-label>
+            <input matInput type="number" formControlName="epochs" min="1" />
+            <mat-error *ngIf="configForm.get('epochs')?.hasError('min')">Must be at least 1</mat-error>
+          </mat-form-field>
+        </div>
+        <mat-error *ngIf="errMsg" class="global-error">{{ errMsg }}</mat-error>
+      </form>
+    </ng-container>
+
+  </div>
+
+  <div class="wizard-actions">
+    <button mat-raised-button class="btn-cancel" (click)="cancel()">Cancel</button>
+    <button *ngIf="step > 0" mat-raised-button class="btn-back" (click)="back()">Back</button>
+    <button *ngIf="step < 1" mat-raised-button class="btn-primary" (click)="next()">Next</button>
+    <button *ngIf="step === 1" mat-raised-button class="btn-primary" [disabled]="saving" (click)="create()">
+      {{ saving ? 'Creating...' : 'Create Pipeline' }}
+    </button>
+  </div>
+</div>
