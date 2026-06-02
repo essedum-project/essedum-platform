@@ -108,5 +108,4 @@ public class Common {
 		logger.info("Rebuilding datasource with new configuration");
 		return  db;
 	}
-
 }
