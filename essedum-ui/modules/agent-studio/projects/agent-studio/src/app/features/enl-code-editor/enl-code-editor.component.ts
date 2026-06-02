@@ -302,8 +302,9 @@ export class EnlCodeEditorComponent
   private getEditorOptions(): Partial<ace.Ace.EditorOptions> {
     return {
       highlightActiveLine: true,
-      minLines: 14,
-      maxLines: Infinity,
+      // No minLines/maxLines: lets ace size to its container instead of
+      // auto-growing to fit content (which produced a 1806px-tall editor
+      // that got pushed off-screen inside agent-pipeline's flex layout).
       displayIndentGuides: true,
       showPrintMargin: false,
       animatedScroll: true,

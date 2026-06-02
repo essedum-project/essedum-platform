@@ -1,0 +1,16 @@
+# =====================================================
+# Data Service - Files & Data Adapters
+# =====================================================
+spring:
+  profiles:
+    active: mysql,dbjwt
+
+  application:
+    name: data-service
+
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8083
+

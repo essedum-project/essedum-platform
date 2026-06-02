@@ -3660,28 +3660,60 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private installTabSizeForcer(): void {
-    const root = (this.panelShellRef?.nativeElement) ?? (document.querySelector('.lfx-u-mar-t-16') as HTMLElement | null);
+    const root = (this.panelShellRef?.nativeElement)
+              ?? (document.querySelector('.lfx-u-mar-t-16') as HTMLElement | null);
     if (!root || typeof ResizeObserver === 'undefined') return;
 
+    // The whole container chain (mat-tab-body-wrapper → mat-tab-body →
+    // mat-tab-body-content → .tab-content → .file-structure-container →
+    // .file-panel) collapses to shrink-to-content inside the federated
+    // bundle because the host's Material CSS singleton doesn't fully apply
+    // to remote-rendered elements. We bypass the chain by measuring an
+    // ancestor we KNOW has real width (the body/viewport) and stamping
+    // inline width on every level from mat-tab-body downward.
     const apply = () => {
-      const w = root.clientWidth;
-      if (w <= 0) return;
-      const targets = root.querySelectorAll<HTMLElement>(
-        '.mat-mdc-tab-body-wrapper, .mat-mdc-tab-body, .mat-mdc-tab-body-content'
-      );
-      targets.forEach((el) => {
-        el.style.setProperty('width', `${w}px`, 'important');
+      // Prefer the panelShell wrapper if it has real width; else fall back
+      // to the document body. body.clientWidth is always the visible width.
+      let baseW = root.clientWidth;
+      if (baseW <= 260) baseW = document.body.clientWidth;
+      if (baseW <= 260) return;
+
+      const selectors = [
+        '.mat-mdc-tab-body-wrapper',
+        '.mat-mdc-tab-body',
+        '.mat-mdc-tab-body-content',
+        '.tab-content',
+        '.file-structure-container',
+        '.file-panel',
+      ].join(',');
+
+      root.querySelectorAll<HTMLElement>(selectors).forEach((el) => {
+        el.style.setProperty('width', `${baseW}px`, 'important');
         el.style.setProperty('max-width', 'none', 'important');
         el.style.setProperty('min-width', '0', 'important');
+      });
+
+      // Editor column = remaining space after the 260px file explorer.
+      root.querySelectorAll<HTMLElement>('.file-editor-container').forEach((el) => {
+        const w = Math.max(0, baseW - 260);
+        el.style.setProperty('width', `${w}px`, 'important');
+        el.style.setProperty('min-width', '0', 'important');
+        el.style.setProperty('max-width', 'none', 'important');
       });
     };
 
     apply();
+    // Re-apply on viewport resize.
     this.tabSizeObserver = new ResizeObserver(apply);
+    this.tabSizeObserver.observe(document.body);
     this.tabSizeObserver.observe(root);
 
-    // Re-apply on tab switch and after late DOM mutations (mat-tab swaps body content).
+    // Re-apply when Material swaps tab content or *ngIf inserts the editor.
     const mo = new MutationObserver(() => apply());
     mo.observe(root, { childList: true, subtree: true });
+
+    // Also try a few times in the first second — Material's tab body can
+    // animate in after a delay.
+    [50, 150, 400, 900].forEach((ms) => setTimeout(apply, ms));
   }
 }

@@ -1,0 +1,22 @@
+# =====================================================
+# Vibe Service - OAuth2 Profile
+# Aligned with monolith common-app/application-oauth2.yml
+# Activate with: --spring.profiles.active=mysql,oauth2
+# =====================================================
+
+security:
+  issuer-uri: ${OAUTH2_ISSUER_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM}
+  jwk-set-uri: ${OAUTH2_JWK_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM/protocol/openid-connect/certs}
+  clientId: ${OAUTH2_CLIENT_ID:essedum-45}
+  scope: ${OAUTH2_SCOPE:openid profile email}
+  claim: ${OAUTH2_USER_CLAIM:email||admin}
+  createUserIfNotExist: ${OAUTH2_CREATE_USER_IF_NOT_EXIST:true}
+  silentRefreshTimeoutFactor: ${OAUTH2_SILENT_REFRESH_FACTOR:0.85}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${security.issuer-uri}
+          jwk-set-uri: ${security.jwk-set-uri}

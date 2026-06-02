@@ -67,6 +67,14 @@ import { ShowOutputArtifactsComponent } from '../features/pipeline.description/s
 import { NotebookDialogComponent } from '../features/pipeline.description/notebook-dialog/notebook-dialog.component';
 import { UserSecretsComponent } from '../features/pipeline.description/user-secrets/user-secrets.component';
 
+// Features: native-script (ported from legacy aip-app-ui — fixes NG04002 on pipelines/view/:cname)
+import { NativeScriptComponent } from '../features/native-script/native-script.component';
+import { NativeScriptDialogComponent } from '../features/native-script/native-script-dialog/native-script-dialog.component';
+// app-enl-code-editor selector used inside native-script template; without it the
+// element fell through to CUSTOM_ELEMENTS_SCHEMA and the Script tab eventually
+// OOM-killed the renderer.
+import { EnlCodeEditorComponent } from '../features/enl-code-editor/enl-code-editor.component';
+
 // Features: apps
 import { AppListComponent } from '../features/apps/app-list/app-list.component';
 import { ViewAppComponent } from '../features/apps/view-app/view-app.component';
@@ -144,6 +152,10 @@ import { environment } from '../../environments/environment';
     ShowOutputArtifactsComponent,
     NotebookDialogComponent,
     UserSecretsComponent,
+    // native-script
+    NativeScriptComponent,
+    NativeScriptDialogComponent,
+    EnlCodeEditorComponent,
     // apps
     AppListComponent,
     ViewAppComponent,

@@ -1,0 +1,74 @@
+# -------------------------------------------------------
+# Stage 1: Build with Maven
+# -------------------------------------------------------
+FROM eclipse-temurin:21-jdk AS builder
+
+RUN apt-get update && apt-get install -y maven && apt-get clean
+WORKDIR /sv
+
+# Copy project files
+COPY . .
+
+# Copy Maven settings and project settings
+COPY .m2/settings.xml /root/.m2/settings.xml
+COPY .settings /sv/.settings
+
+# Build using BuildKit cache for dependencies
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -s /root/.m2/settings.xml clean install -pl vibe-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+
+# Prepare app structure
+RUN mkdir -p /app/conf /app/lib /app/log && \
+    cp /sv/vibe-service/src/main/resources/*.yml /app/conf && \
+    cp /sv/vibe-service/src/main/resources/*.xml /app/conf && \
+    # Mirror monolith: swap mysql config only if an oauth2-specific override
+    # is shipped. Otherwise keep the default application-mysql.yml in place.
+    if [ -f /app/conf/application-mysql-oauth2.yml ]; then \
+      rm -f /app/conf/application-mysql.yml && \
+      mv /app/conf/application-mysql-oauth2.yml /app/conf/application-mysql.yml; \
+    fi && \
+    cp -r /sv/app/lib /app 2>/dev/null || true && \
+    cp /sv/vibe-service/target/vibe-service-3.3-SNAPSHOT.jar /app/
+
+# -------------------------------------------------------
+# Stage 2: Runtime Image
+# -------------------------------------------------------
+FROM eclipse-temurin:21-jdk
+
+RUN apt-get update && apt-get install -y nginx && apt-get clean
+COPY nginx_backend.conf /etc/nginx/nginx.conf
+
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+# Import SSL cert (build context = sv/ root, cert lives inside the service folder)
+COPY vibe-service/lfn-keycloak2.crt $JAVA_HOME/bin/
+RUN keytool -importcert -trustcacerts \
+    -file $JAVA_HOME/bin/lfn-keycloak2.crt \
+    -alias "lfn-keycloak" \
+    -keystore $JAVA_HOME/lib/security/cacerts \
+    -storepass changeit --noprompt
+
+# Copy built app from builder stage
+COPY --from=builder /app /app/
+WORKDIR /app
+ENV ESSEDUM_HOME=/app
+
+EXPOSE 8084
+
+CMD ["/bin/bash", "-c", "\
+    service nginx start && \
+    java \
+    -Dspring.config.location=/app/conf/ \
+    -Dencryption.key=essedum$123## \
+    -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== \
+    -DLOG_PATH=/app/log \
+    -Dlogging.level.com.springframework.security=DEBUG \
+    -Dlogging.level.com.lfn.ai.comm.lib.util.logger=ERROR \
+    -Dspring.profiles.active=mysql,oauth2,btf,dbconstants,vault \
+    -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+    -Dlogback.configurationFile=/app/conf/logback-spring.xml \
+    -Dhttp.nonProxyHosts=http://10.200.111.174:8084 \
+    -cp conf/*:vibe-service-3.3-SNAPSHOT.jar:lib/* \
+    com.lfn.vibe.VibeServiceApplication"]
+

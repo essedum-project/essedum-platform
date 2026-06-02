@@ -180,7 +180,7 @@ export class SpecTemplateDescriptionComponent implements OnInit {
         relativeTo: this.route,
       });
     else if (component.viewValue == 'Spec')
-      this.router.navigate(['../../specs/' + component.value], {
+      this.router.navigate(['../../spec-templates/' + component.value], {
         relativeTo: this.route,
       });
     else

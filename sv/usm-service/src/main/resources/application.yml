@@ -1,0 +1,21 @@
+# =====================================================
+# USM Service - User & Security Management
+# =====================================================
+# This is the primary configuration. Activate database-specific
+# profiles (mysql or postgresql) alongside auth profiles (dbjwt or oauth2).
+#
+# Example: --spring.profiles.active=mysql,dbjwt
+
+spring:
+  profiles:
+    active: mysql,dbjwt
+
+  application:
+    name: usm-service
+
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8081
+

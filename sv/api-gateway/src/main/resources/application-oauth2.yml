@@ -1,0 +1,26 @@
+# =====================================================
+# API Gateway - OAuth2 Profile
+# Aligned with monolith common-app/application-oauth2.yml.
+# Activate with: --spring.profiles.active=oauth2
+#
+# In oauth2 mode the gateway STOPS validating tokens itself
+# (the built-in JJWT/HMAC validator is disabled by gateway.auth.mode=oauth2)
+# and simply relays the Bearer token to downstream services, which each
+# run as Spring Security OAuth2 Resource Servers against Keycloak.
+# =====================================================
+
+security:
+  issuer-uri: ${OAUTH2_ISSUER_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM}
+  jwk-set-uri: ${OAUTH2_JWK_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM/protocol/openid-connect/certs}
+  clientId: ${OAUTH2_CLIENT_ID:essedum-45}
+  scope: ${OAUTH2_SCOPE:openid profile email}
+  claim: ${OAUTH2_USER_CLAIM:email||admin}
+  createUserIfNotExist: ${OAUTH2_CREATE_USER_IF_NOT_EXIST:true}
+  silentRefreshTimeoutFactor: ${OAUTH2_SILENT_REFRESH_FACTOR:0.85}
+
+# Tell the global filter to operate in "oauth2" mode (token-relay only,
+# no HMAC validation – Keycloak tokens are RS256 signed).
+gateway:
+  auth:
+    mode: oauth2
+

@@ -502,7 +502,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   }
 
   onViewDetails(card: any): void {
-    this.router.navigate(['../specs/' + card.domainname], {
+    this.router.navigate(['./' + card.domainname], {
       relativeTo: this.route,
     });
   }

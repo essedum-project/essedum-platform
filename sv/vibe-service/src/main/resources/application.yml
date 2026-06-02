@@ -1,0 +1,16 @@
+# =====================================================
+# Vibe Service - AI-Assisted Coding
+# =====================================================
+spring:
+  profiles:
+    active: mysql,dbjwt
+
+  application:
+    name: vibe-service
+
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8084
+

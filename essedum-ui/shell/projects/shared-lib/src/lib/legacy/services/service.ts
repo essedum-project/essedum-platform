@@ -1760,35 +1760,16 @@ export class Services {
     const roleName = localStorage.getItem('roleName') || 'IT Portfolio Manager';
     const projectName = localStorage.getItem('projectName') || org;
 
-    console.log('Making API call to read native file:', {
-      cname,
-      org,
-      filename,
-      baseUrl: this.baseUrl,
-      url: apiUrl,
-      fullUrl: apiUrl + '?file=' + filename,
-      authToken: authToken ? 'Bearer ' + authToken.substring(0, 20) + '...' : 'No token',
-      roleId,
-      roleName,
-      projectName
-    });
-
-    // Prepare headers similar to successful curl
+    // Browser-forbidden headers (Connection, sec-ch-ua*) were being set here; the browser
+    // refuses them with console warnings. Send only headers we are actually allowed to set.
     const headers = new HttpHeaders({
       'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-US,en;q=0.9',
       'Authorization': `Bearer ${authToken}`,
-      'Connection': 'keep-alive',
-      'Content-Type': 'application/json',
       'Project': '2',
       'ProjectName': projectName,
       'X-Requested-With': 'Leap',
-      'charset': 'utf-8',
       'roleId': roleId,
       'roleName': roleName,
-      'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Windows"'
     });
 
     return this.https.get(apiUrl, {
@@ -1799,13 +1780,10 @@ export class Services {
       reportProgress: false
     }).pipe(
       catchError((error) => {
-        console.error('❌ API Error in readNativeFile:', {
-          status: error.status,
-          statusText: error.statusText,
-          url: error.url,
-          message: error.message,
-          error: error.error
-        });
+        // Keep a small log line; do NOT serialise the full HttpErrorResponse — its
+        // ArrayBuffer body and request payload are retained by DevTools and previously
+        // contributed to the Script-tab renderer OOM that closed the browser window.
+        console.error('readNativeFile failed:', error?.status, error?.url);
         return throwError(error);
       })
     );

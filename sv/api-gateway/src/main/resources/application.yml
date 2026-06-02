@@ -1,0 +1,265 @@
+# =====================================================
+# API Gateway - Spring Cloud Gateway
+# =====================================================
+# Routes all requests to the appropriate microservice.
+# The routes are configured to match the EXACT same API paths
+# as the monolithic application, so the frontend needs ZERO changes.
+# =====================================================
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # ---- Global CORS ----
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+      # ---- Default Filters ----
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+        # ---- Route Definitions ----
+      # IMPORTANT: Routes are ordered so that more specific paths match first.
+      # All paths mirror the monolith's API exactly (pathPrefix = api/aip).
+      routes:
+        # ============================================================
+        # Vibe Service - AI-Assisted Coding (Port 8084)
+        # Monolith path: /api/aip/service/v1/vibe-coding/**
+        # ============================================================
+        - id: vibe-coding
+          uri: ${VIBE_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/aip/service/v1/vibe-coding/**
+        # ============================================================
+        # USM Service - User & Security Management (Port 8081)
+        # ============================================================
+        - id: usm-authenticate
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/authenticate,/api/userInfo,/api/userInfoCAP,/api/validateUser,/api/validateUserCAP,/api/registerUser
+        - id: usm-users
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/users/**,/api/userss/**
+        - id: usm-roles
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/roles/**,/api/role-processs/**
+        - id: usm-organisations
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/organisations/**,/api/org-units/**,/api/projects/**
+        - id: usm-permissions
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/permissions/**,/api/role-permissionss/**,/api/usm-role-permissionss/**,/api/usm-permission-apis/**,/api/user-api-permissionss/**
+        - id: usm-misc
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/delegates/**,/api/email/**,/api/country-time-zones/**,/api/usm-modules/**,/api/usm-module-organisations/**,/api/usm-notificationss/**,/api/usm-portfolios/**,/api/usm-stages/**,/api/user-project-roles/**,/api/user-units/**,/api/user-process-mappings/**,/api/usm-role-to-roles/**,/api/usm-user-to-users/**,/api/file-extension-keys/**,/api/icms-processs/**,/api/dash-constants/**,/api/get-dash-constants
+        - id: usm-config
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/getConfigDetails,/api/essedum/logout,/api/essedum/authorize,/api/get-startup-constants,/api/get-startup-constants/**
+        # ============================================================
+        # Data Service - Files, Datasets & Data Adapters (Port 8083)
+        # ============================================================
+        - id: data-datasets
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/datasets/**
+        - id: data-adapters
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/adapters/**
+        - id: data-datasources
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/datasources/**
+        - id: data-files
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/file/**
+        - id: data-fileserver
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/fileserver/**
+        - id: data-tags
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/tags/**
+        - id: data-rating
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/rating/**
+        - id: data-schema-registry
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/schemaRegistry/**
+        - id: data-langflow
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/langflow/**
+        - id: data-entities
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/entities/**
+        - id: data-mladapters
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/mladapters/**
+        - id: data-mlinstances
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/mlinstances/**
+        - id: data-mlspectemplates
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/mlspectemplates/**
+        - id: data-mltopics
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/mltopics/**
+        - id: data-mldatasettopics
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/mldatasettopics/**
+        - id: data-service-proxy
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/service/aiops/**,/api/aip/service/codebuddy/**
+        # ============================================================
+        # ICIP Service - AI/ML Pipeline, Jobs & Services (Port 8082)
+        # ============================================================
+        - id: icip-mlops
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/exp/**
+        - id: icip-jobs
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/jobs/**
+        - id: icip-services-list
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/services/**
+        - id: icip-app
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/app/**
+        - id: icip-folder
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/folder/**
+        - id: icip-plugin
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/plugin/**
+        - id: icip-deployment-form
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/deployment-form/**
+        - id: icip-git-configs
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/git-configs/**
+        - id: icip-agent-directory
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/agent-directory/**
+        - id: icip-runtime
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/runtime/**
+        - id: icip-streaming-services
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/streamingServices/**
+        # Frontend calls /api/aip/groups/** but the controller is mapped under
+        # /api/aip/service/v1 (ICIPMlopsController). Rewrite the path so the
+        # request reaches the correct endpoint on icip-service.
+        - id: icip-groups
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/groups/**
+          filters:
+            - RewritePath=/api/aip/groups/(?<segment>.*), /api/aip/service/v1/groups/${segment}
+        - id: icip-pipeline
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/service/v1/pipeline/**
+        - id: icip-search
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/service/v1/search/**,/api/aip/service/v1/useCase/**
+        - id: icip-mlops-v1
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/service/v1/**
+        - id: icip-service-proxy
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/service/**
+        - id: icip-websocket
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/ws/**
+        # ============================================================
+        # GitHub OAuth - Common (routed to USM)
+        # ============================================================
+        - id: github
+          uri: ${USM_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/github/**
+# Eureka removed - using K8s service discovery
+eureka:
+  client:
+    enabled: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    reactor.netty: INFO
+# ---- JWT Authentication (same secret as downstream services) ----
+jwt:
+  base64-secret: ${JWT_SECRET:ZjY0MDRhOTNlZDdlNDM0ODdlOTQ3MWNjODQwYmRhNWIyYTg5YTBjMzJlYmQ2Y2M4OTc5MGFlZjQ5ZjRkNTk0YTMyN2MyOGIzMWRjM2Y5OTgxNGMyZjk1OThiMTM0NGZhMDkzYjk3ODY2NGViZjVkZWI4YWYxN2YzOWY5YzMzMjk=}
+# ---- Gateway Auth Filter Configuration ----
+gateway:
+  auth:
+    enabled: ${GATEWAY_AUTH_ENABLED:true}
+    open-paths:
+      - /api/authenticate
+      - /api/registerUser
+      - /api/getConfigDetails
+      - /api/validateUser
+      - /api/validateUserCAP
+      - /api/userInfo
+      - /api/userInfoCAP
+      - /api/get-startup-constants
+      - /api/get-startup-constants/**
+      - /api/github/oauth/**
+      - /api/aip/langflow/langflow_agent_export
+      - /api/aip/langflow/get_langflow_agent_export
+      - /api/aip/langflow/langflow_export_file_details
+      - /api/aip/langflow/get_langflow_agent_file
+      - /api/aip/file/create/**
+      - /api/aip/service/v1/streamingServices/update
+      - /actuator/**
+      - /ws/**
+# ---- Service-to-Service Access Token ----
+config:
+  service-auth:
+    access-token: ${SERVICE_ACCESS_TOKEN:aec127c2-c984-33f6-9a3a-355xd1dof097}

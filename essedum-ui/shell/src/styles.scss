@@ -18,7 +18,10 @@ $size-text-14: 14px;
 $size-text-12: 12px;
 $font-400: 400;
 $font-700: 700;
-// jsoneditor CSS was needed by ang-jsoneditor in the monolith. Now lives in MFEs only.
+// jsoneditor base CSS (toolbar sprite icons, layout). Loaded via CDN here so all MFEs
+// using <json-editor> render the toolbar correctly; the dark/light overrides live in
+// aip-app-legacy.scss.
+@import url("https://cdn.jsdelivr.net/npm/jsoneditor@9.10.5/dist/jsoneditor.min.css");
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import "./assets/css/usm-styles.scss";
 @import "./assets/css/common-app-styles.css";
@@ -353,7 +356,11 @@ html, body { height: 100%; margin: 0; padding: 0; }
 mat-drawer-container.example-container {
   position: fixed !important;
   top: 0; left: 0; right: 0; bottom: 44px;
-  width: 100vw;
+  // Size from left/right (fills the visible viewport, excluding the scrollbar
+  // gutter). `width: 100vw` would be ~15px too wide because 100vw counts the
+  // scrollbar, and with overflow:hidden that strip of content gets clipped
+  // off the right edge with no scrollbar to reach it.
+  width: auto;
   height: calc(100vh - 44px);
   overflow: hidden !important;
   background: var(--background-colour, #f0f4f8) !important;

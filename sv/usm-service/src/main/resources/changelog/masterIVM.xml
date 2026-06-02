@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	
+	<property name="uuid_type" value="uuid" dbms="postgresql" />
+	<property name="uuid_type" value="uniqueidentifier"
+		dbms="mssql" />
+	<property name="uuid_type" value="RAW(16)" dbms="oracle" />
+	<property name="uuid_type" value="BINARY(16)" dbms="mysql" />
+	<property name="uuid_type" value="uuid" dbms="h2" />
+
+	<property name="uuid-property" value="UUID_TO_BIN(UUID())"
+		dbms="mysql" />
+	<property name="uuid-property" value="uid.uuid_generate_v4()"
+		dbms="postgresql" />
+	<property name="uuid-property" value="NEWID()" dbms="mssql" />
+	<property name="uuid-property" value="sys_guid()"
+		dbms="oracle" />
+	<property name="uuid-property" value="uuid()" dbms="h2" />
+	
+	<property name="timestamp-type"
+		value="TIMESTAMP WITHOUT TIME ZONE" dbms="postgresql" />
+	<property name="timestamp-type" value="[datetime]"
+		dbms="mssql" />
+	<property name="timestamp-type" value="TIMESTAMP"
+		dbms="oracle" />
+	<property name="timestamp-type" value="timestamp" dbms="mysql" />
+	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
+	
+	<!--  <include file="changelog/bcc/bcc.xml" />-->
+	<!--  <include file="changelog/bjm/bjm.xml" />-->
+	<!-- <include file="changelog/ccl/ccl.xml" />
+	<include file="changelog/cfm/cfm.xml" /> -->
+	<!-- 	<include file="changelog/cip/cip.xml" /> -->
+	<!--  <include file="changelog/dbs/dbs.xml" />-->
+	<!-- 	<include file="changelog/icm/icm.xml" />
+	<include file="changelog/sre/sre.xml" />
+	<include file="changelog/twb/twb.xml" /> -->
+	<include file="changelog/ivm/usm-ivm.xml" />
+	<!-- <include file="changelog/sbx/deletesbx.xml" />
+	<include file="changelog/sbx/sbx.xml" />
+	<include file="changelog/cap/cap.xml" />
+	<include file="changelog/tad/tad.xml" />
+	<include file="changelog/grh/grh.xml" />
+	<include file="changelog/btm/btm.xml" />
+	<include file="changelog/svy/svy.xml" />
+	<include file="changelog/eda/eda.xml" />
+ -->
+	<include file="changelog/ivm/dataIVM.xml" />
+	<include file="changelog/ivm/acmeIVM.xml" />
+	<!--  <include file="changelog/data/3v0/usm/data.xml" />-->
+	<!-- <include file="changelog/acme/Leo-DT.xml" />
+	<include file="changelog/acme/Leo-appd.xml" /> -->
+	<!--  <include file="changelog/data/1312v0/usm/data.xml" /> 
+	<include file="changelog/data/2v0/masterdata.xml" />	-->
+	<!-- <include file="changelog/cip/constraint.xml" />
+	<include file="changelog/data/2v1/masterdata.xml" />
+	<include file="changelog/test/test.xml" context="test" />  -->
+
+	<!-- <include file="changelog/cap/constraint.xml" />
+	<include file="changelog/bcc/constraint.xml" />
+	<include file="changelog/bjm/constraint.xml" />
+	<include file="changelog/ccl/constraint.xml" />
+	<include file="changelog/cfm/constraint.xml" />
+	<include file="changelog/dbs/constraint.xml" />
+	<include file="changelog/icm/constraint.xml" />
+	<include file="changelog/sre/constraint.xml" />
+	<include file="changelog/twb/constraint.xml" /> -->
+	<!-- <include file="changelog/usm/constraint.xml" />  -->
+	<include file="changelog/ivm/usm-constraint.xml" />
+	<!-- <include file="changelog/sbx/constraint.xml" />
+	<include file="changelog/tad/constraint.xml" />
+	<include file="changelog/btm/constraint.xml" />
+	<include file="changelog/svy/constraint.xml" />
+	<include file="changelog/eda/constraint.xml" />
+	<include file="changelog/bjm/bjm1311.xml" /> 
+	<include file="changelog/data/2v2/masterdata.xml" />
+	<include file="changelog/data/3v0/masterdata.xml" /> -->
+
+</databaseChangeLog>

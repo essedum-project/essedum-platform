@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	<include file="changelog/bcc/bcc.xml" context="fresh"/>
+	<include file="changelog/ccl/ccl.xml" context="fresh"/>
+	<include file="changelog/cfm/cfm.xml" context="fresh"/>
+	<include file="changelog/dbs/dbs.xml" context="fresh"/>
+	<include file="changelog/usm/usm.xml" context="fresh"/>
+
+	<include file="changelog/bcc/constraint.xml" context="fresh"/>
+	<include file="changelog/ccl/constraint.xml" context="fresh"/>
+	<include file="changelog/cfm/constraint.xml" context="fresh"/>
+	<include file="changelog/dbs/constraint.xml" context="fresh"/>
+	<include file="changelog/usm/constraint.xml" context="fresh"/>
+	
+	<include file="changelog/2v13to300/acme/usm/usm.xml" context="acme_2v13to300"/>
+	<include file="changelog/2v13to300/usm/usm.xml" context="2v13to300"/>
+	
+	<include file="changelog/300_to_310/acme/bcc/bcc.xml" context="300to310-acme"/>
+	<include file="changelog/300_to_310/acme/cfm/cfm.xml" context="300to310-acme"/>
+	<include file="changelog/300_to_310/acme/dbs/dbs.xml" context="300to310-acme"/>
+	<include file="changelog/300_to_310/acme/usm/usm.xml" context="300to310-acme"/>
+	<include file="changelog/300_to_310/bcc/bcc.xml" context="300to310"/>
+	<include file="changelog/300_to_310/cfm/cfm.xml" context="300to310"/>
+	<include file="changelog/300_to_310/dbs/dbs.xml" context="300to310"/>
+	<include file="changelog/300_to_310/usm/usm.xml" context="300to310"/>
+	
+	<include file="changelog/310_to_311/acme/dbs/dbs.xml" context="310to311-acme"/>
+	<include file="changelog/310_to_311/acme/usm/usm.xml" context="310to311-acme"/>
+	<include file="changelog/310_to_311/dbs/dbs.xml" context="310to311"/>
+	<include file="changelog/310_to_311/usm/usm.xml" context="310to311"/>
+	
+	<include file="changelog/311_to_312/acme/dbs/dbs.xml" context="311to312-acme"/>
+	<include file="changelog/311_to_312/acme/usm/usm.xml" context="311to312-acme"/>
+	<include file="changelog/311_to_312/usm/usm.xml" context="311to312"/>
+	
+	<include file="changelog/312_to_320/acme/dbs/dbs.xml" context="312to320-acme"/>
+	<include file="changelog/312_to_320/acme/usm/usm.xml" context="312to320-acme"/>
+	<include file="changelog/312_to_320/dbs/dbs.xml" context="312to320"/>
+	<include file="changelog/312_to_320/usm/usm.xml" context="312to320"/>
+</databaseChangeLog>

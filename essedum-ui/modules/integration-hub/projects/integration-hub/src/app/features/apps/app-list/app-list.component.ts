@@ -242,7 +242,7 @@ export class AppListComponent implements OnInit {
         window.open(resp.tryoutlink, '_blank');
         return;
       }
-      this.router.navigate(['../app/' + app.name + '/' + type], {
+      this.router.navigate(['../apps/' + app.name + '/' + type], {
         queryParams: {
           page: this.pageNumber,
           search: this.filter,

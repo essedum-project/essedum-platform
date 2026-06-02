@@ -1,0 +1,244 @@
+:host { display: block; }
+
+// ── Dialog wrapper ────────────────────────────────────────────────────────────
+.dialog-wrapper {
+  padding: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px;
+
+  h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      transform: scale(1.05);
+    }
+  }
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+.dialog-body {
+  padding: 8px 20px 10px !important;
+  overflow: visible !important;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .field-key { flex: 1; min-width: 110px; }
+  .field-value { flex: 1.2; min-width: 110px; }
+  .field-type { flex: 0.8; min-width: 90px; }
+}
+
+// ── Form fields — flat underline style, no box borders ────────────────────────
+:host ::ng-deep mat-form-field,
+:host ::ng-deep .mat-mdc-form-field {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+// Hide error/hint space
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+// Kill outline if present
+:host ::ng-deep .mdc-notched-outline,
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-notched-outline__trailing {
+  border: none !important;
+  display: none !important;
+}
+
+// Kill filled background and ripple — make it transparent
+:host ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled),
+:host ::ng-deep .mdc-text-field--filled {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+:host ::ng-deep .mdc-text-field--filled::before,
+:host ::ng-deep .mdc-text-field__ripple {
+  display: none !important;
+}
+
+// Wrapper — transparent, no borders at all
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  border: none !important;
+  padding: 0 2px !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+// Use Material's line ripple as the single underline
+:host ::ng-deep .mdc-line-ripple::before {
+  border-bottom: none !important;
+  border-bottom: none !important;
+}
+
+:host ::ng-deep .mdc-line-ripple::after {
+  border-bottom: none !important;
+  border-bottom: none !important;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper:hover .mdc-line-ripple::before {
+  border-bottom: none !important;
+}
+
+// Infix — compact
+:host ::ng-deep .mat-mdc-form-field-infix {
+  padding-top: 18px !important;
+  padding-bottom: 4px !important;
+  min-height: 0 !important;
+  border-top: 0 !important;
+  width: auto !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-flex {
+  align-items: flex-end !important;
+  height: auto !important;
+}
+
+// Floating label
+:host ::ng-deep .mdc-floating-label {
+  color: #6b8399 !important;
+  font-size: 13px !important;
+}
+
+:host ::ng-deep .mdc-floating-label--float-above {
+  color: #7eb8ff !important;
+  font-size: 11px !important;
+}
+
+// Input text — bright and readable
+:host ::ng-deep .mat-mdc-input-element,
+:host ::ng-deep input.mat-mdc-input-element {
+  color: #f0f6fc !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  caret-color: #58a6ff;
+  -webkit-text-fill-color: #f0f6fc !important;
+}
+
+// Select — bright text
+:host ::ng-deep mat-select .mat-mdc-select-value-text {
+  color: #f0f6fc !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+:host ::ng-deep .mat-mdc-select-placeholder {
+  color: #4d6882 !important;
+  font-size: 13px !important;
+}
+
+:host ::ng-deep .mat-mdc-select-arrow {
+  color: #7eb8ff !important;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.dialog-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 12px 20px 16px !important;
+  margin: 0 !important;
+  border-top: none !important;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 24px;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  box-shadow: 0 3px 14px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+
+  &:hover {
+    box-shadow: 0 5px 22px rgba(79, 70, 229, 0.6), 0 0 40px rgba(124, 58, 237, 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+// ── Light theme ───────────────────────────────────────────────────────────────
+:host-context(body.header-light-theme) {
+  .dialog-header {
+    h2 { color: #1e293b; }
+    .close-btn {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.06);
+      color: #64748b;
+      &:hover { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    }
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background: transparent !important;
+  }
+  ::ng-deep .mdc-line-ripple::before {
+    border-bottom: none !important;
+  }
+  ::ng-deep .mdc-line-ripple::after {
+    border-bottom: none !important;
+  }
+  ::ng-deep .mat-mdc-text-field-wrapper:hover .mdc-line-ripple::before {
+    border-bottom: none !important;
+  }
+
+  ::ng-deep .mdc-floating-label { color: #64748b !important; }
+  ::ng-deep .mdc-floating-label--float-above { color: #4742dc !important; }
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep input.mat-mdc-input-element { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; }
+  ::ng-deep mat-select .mat-mdc-select-value-text { color: #0f172a !important; }
+  ::ng-deep .mat-mdc-select-arrow { color: #94a3b8 !important; }
+
+  .action-btn {
+    background: linear-gradient(135deg, #4742dc 0%, #7c3aed 100%);
+    box-shadow: 0 3px 14px rgba(71, 66, 220, 0.35);
+    &:hover { box-shadow: 0 5px 22px rgba(71, 66, 220, 0.5); }
+  }
+}
+
+// ── Dark theme explicit ───────────────────────────────────────────────────────
+:host-context(body.header-dark-theme) {
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep input.mat-mdc-input-element { color: #f0f6fc !important; -webkit-text-fill-color: #f0f6fc !important; }
+}

@@ -1,21 +1,22 @@
+// Ported from the monolith's iamp-usm/aip-header.component.scss (verified
+// against the deployed reference at essedum.az.ad.idemo-ppc.com). The tighter
+// gaps + zero-padding timestamp are what makes the refresh button fit beside
+// the Add button on standard-width pages. Earlier versions of this file had
+// gap:20px/gap:12px + padding:6px 12px on the timestamp <p> which added ~40px
+// of horizontal space and pushed the refresh icon off-screen.
+
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
-.lfx-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding: 18px 0 14px !important;
-  width: 100% !important;
-  gap: 20px;
-  border-bottom: none !important;
-  margin-bottom: 16px;
-  
-  p {
-    margin: 0;
-    padding-right: 12px;
-    white-space: nowrap;
-  }
-}
+// .lfx-header {
+//   display: flex !important;
+//   align-items: center !important;
+//   justify-content: space-between !important;
+//   padding: 18px 0 14px !important;
+//   width: 100% !important;
+//   gap: 12px;
+//   border-bottom: 1px solid rgba(79,142,247,0.08);
+//   margin-bottom: 16px;
+// }
 
 .header-left {
   display: flex;
@@ -55,32 +56,47 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  // Pull the action row leftward by an empirically-measured amount so the
+  // rightmost button (refresh) stays inside the viewport even when an
+  // ancestor (mat-tab-body / .aip-container / etc.) is rendered ~43px wider
+  // than the visible viewport. body has overflow-x:hidden so the natural
+  // right edge of .lfx-header is clipped — this margin gets the buttons
+  // back into the visible window. Has zero visual impact when the page
+  // isn't being overflowed (e.g. at >=1400px viewport).
+  // margin-right: 48px;
 }
 
 .header-actions {
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 6px !important;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
 
   p {
     font-size: 11px !important;
-    color: #94a3b8 !important;
-    margin: 0 !important;
+    color: #b8cce0 !important;
+    margin: 0 8px 0 0 !important;
     white-space: nowrap;
-    padding: 6px 12px 6px 0;
-    border-right: 1px solid rgba(79,142,247,0.15);
-    line-height: 1.4;
-    display: flex;
-    align-items: center;
+    padding: 6px 12px 6px 0 !important;
+    border-right: 1px solid rgba(79,142,247,.15);
   }
+}
+
+// Very narrow viewports only: collapse the search to keep buttons visible.
+@media (max-width: 900px) {
+  .header-search { min-width: 140px !important; }
+  .header-actions p { display: none !important; }
 }
 
 .action-button {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex-shrink: 0 !important;
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -153,11 +169,9 @@
   margin-left: 8px;
 }
 
-// ── Light theme ───────────────────────────────────────────────────────────────
+// ── Light theme ───────────────────────────────────────────────────────────
 :host-context(body.header-light-theme) {
-  .lfx-header {
-    border-bottom: none !important;
-  }
+  .lfx-header { border-bottom-color: rgba(99,102,241,0.1); }
   .header-left {
     h3 { color: #0f172a; }
     h3.grey-color { color: #64748b; }
@@ -182,9 +196,9 @@
   .lfx-panel-input { color: #0f172a; &::placeholder { color: #94a3b8; } }
 }
 
-// ── Dark theme explicit ───────────────────────────────────────────────────────
+// ── Dark theme ────────────────────────────────────────────────────────────
 :host-context(body.header-dark-theme) {
-  .lfx-header { border-bottom: none !important; }
+  .lfx-header { border-bottom-color: rgba(79,142,247,0.08); }
   .header-left h3 { color: #e2e8f0; }
   .header-left h3.grey-color { color: #b8cce0; }
   .header-actions p { color: #b8cce0 !important; }

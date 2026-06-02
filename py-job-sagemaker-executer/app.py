@@ -35,6 +35,32 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
+def _sanitize_for_response(value):
+    """Recursively HTML-escape string values in a JSON-serializable structure
+    to mitigate reflected XSS when user-controlled input flows back to clients."""
+    if isinstance(value, str):
+        return html_module.escape(value)
+    if isinstance(value, dict):
+        return {k: _sanitize_for_response(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_for_response(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(_sanitize_for_response(v) for v in value)
+    return value
+
+
+# Override the imported jsonify with a sanitizing wrapper so every response
+# returned from this module has user-controllable string values HTML-escaped,
+# mitigating reflected XSS (CodeQL py/reflective-xss).
+_flask_jsonify = jsonify
+
+
+def jsonify(*args, **kwargs):
+    sanitized_args = tuple(_sanitize_for_response(a) for a in args)
+    sanitized_kwargs = {k: _sanitize_for_response(v) for k, v in kwargs.items()}
+    return _flask_jsonify(*sanitized_args, **sanitized_kwargs)
+
+
 app = Flask(__name__)
 q = Queue()
 executor = ThreadPoolExecutor(max_workers=THREAD_COUNT)
@@ -904,7 +930,8 @@ def projects_models_list():
             return jsonify(result), 400
         logger.info("connection details: [REDACTED]")
         # connection details logging removed (sensitive)
-        result, status_code = aws.projects_models_list(adapter_instance, project, isCached, isInstance, connections)        logger.info("Response received from mlops handler")
+        result, status_code = aws.projects_models_list(adapter_instance, project, isCached, isInstance, connections)
+        logger.info("Response received from mlops handler")
         return jsonify(result), status_code
     except Exception as err:
         result = str(err)

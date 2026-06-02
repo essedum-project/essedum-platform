@@ -1,0 +1,114 @@
+<div class="dialog-wrapper">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>Argument</h2>
+        <button class="close-btn" (click)="close()" aria-label="Close">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <mat-dialog-content class="dialog-body">
+        <div class="form-row">
+            <mat-form-field  class="field-key">
+                <mat-label>Key</mat-label>
+                <input matInput [(ngModel)]="paramsKey">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="source=='azure'">
+                <mat-label>Step Method</mat-label>
+                <mat-select [(ngModel)]="paramsType" (selectionChange)="paramsTypechange(paramsType)">
+                    <mat-option value="OutputFileDatasetConfig">OutputFileDatasetConfig</mat-option>
+                    <mat-option value="PipelineParameter">PipelineParameter</mat-option>
+                    <mat-option value="PipelineData">PipelineData</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="source=='azure'">
+                <mat-label>Data Type</mat-label>
+                <mat-select [(ngModel)]="paramsDataType" (selectionChange)="paramsTypechange(paramsDataType)">
+                    <mat-option value="Integer">Integer</mat-option>
+                    <mat-option value="List">List</mat-option>
+                    <mat-option value="Boolean">Boolean</mat-option>
+                    <mat-option value="Float">Float</mat-option>
+                    <mat-option value="String">String</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field  class="field-value"
+                *ngIf="(paramsType == this.valueTypes[0] || source=='azure') && ((!Tags && !typeint) && !flags && !typeFloat && !typeString)">
+                <mat-label>Value</mat-label>
+                <input matInput [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="typeint">
+                <mat-label>Value</mat-label>
+                <input matInput type="number" [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="flags">
+                <mat-label>True or False</mat-label>
+                <input matInput type="text" [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="Tags">
+                <mat-label>Comma separated values</mat-label>
+                <input matInput type="text" [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="typeFloat">
+                <mat-label>Value</mat-label>
+                <input matInput type="number" [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="typeString">
+                <mat-label>Enter Text</mat-label>
+                <input matInput type="text" [(ngModel)]="paramsValue">
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="paramsType == this.valueTypes[1]">
+                <mat-label>Datasource</mat-label>
+                <input matInput type="text" [formControl]="datasourceControl" [matAutocomplete]="auto">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayDatasources.bind(this)">
+                    <mat-option *ngFor="let option of filteredDatasourceOptions | async"
+                        value="{{option.name.toString()+';'+option.alias.toString()}}">
+                        {{option.alias}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="paramsType == this.valueTypes[2]">
+                <mat-label>Dataset</mat-label>
+                <input matInput type="text" [formControl]="datasetControl" [matAutocomplete]="auto">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayDatasets.bind(this)">
+                    <mat-option *ngFor="let option of filteredDatasetOptions | async"
+                        value="{{option.name.toString()+';'+option.alias.toString()}}">
+                        {{option.alias}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field  class="field-value" *ngIf="paramsType == this.valueTypes[3]">
+                <mat-label>Schema</mat-label>
+                <input matInput type="text" [formControl]="schemaControl" [matAutocomplete]="auto">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displaySchemas.bind(this)">
+                    <mat-option *ngFor="let option of filteredSchemaOptions | async"
+                        value="{{option.name.toString()+';'+option.alias.toString()}}">
+                        {{option.alias}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field  class="field-type" *ngIf="source=='native'">
+                <mat-label>Type</mat-label>
+                <mat-select [(ngModel)]="paramsType">
+                    <mat-option *ngFor="let valuetype of valueTypes" [value]="valuetype">
+                        {{valuetype}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="dialog-actions">
+        <button class="action-btn" (click)="addOrModify()">{{(buttonName) | titlecase}}</button>
+    </mat-dialog-actions>
+</div>

@@ -1,0 +1,54 @@
+# -------------------------------------------------------
+# Stage 1: Build with Maven
+# -------------------------------------------------------
+FROM maven:3.9.6-eclipse-temurin-21 AS maven_builder
+
+WORKDIR /sv
+
+COPY . .
+
+RUN mvn clean install -pl usm-service -am -Dmaven.test.skip=true -Dlicense.skip=true
+
+RUN mkdir -p /app/conf /app/lib /app/log
+
+RUN cp /sv/usm-service/src/main/resources/*.yml /app/conf
+RUN cp /sv/usm-service/src/main/resources/*.xml /app/conf
+
+RUN rm -f /app/conf/application-oauth2.yml /app/conf/application-mysql-oauth2.yml
+
+# Copy the compiled usm-service JAR
+RUN cp /sv/usm-service/target/usm-service*.jar /app/
+
+# Use Maven dependency plugin to copy only runtime dependencies
+RUN cd /sv/usm-service && mvn -s /root/.m2/settings.xml dependency:copy-dependencies -DoutputDirectory=/app/lib -Dmdep.prependGroupId=false -DskipTests -DincludeScope=runtime
+
+
+# -------------------------------------------------------
+# Stage 2: Runtime image
+# -------------------------------------------------------
+FROM eclipse-temurin:21-jdk
+
+USER root
+
+# Install Nginx
+RUN apt-get update && apt-get install -y nginx && apt-get clean
+
+COPY nginx_backend.conf /etc/nginx/nginx.conf
+
+ENV JAVA_HOME=/usr/local/openjdk-21
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+ENV GCP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----..."
+ENV GCP_PRIVATE_KEY_ID="e0d21673ec720bd0d3431153a9f7818bb418db4e"
+
+# Copy from first stage
+COPY --from=maven_builder /app /app/
+
+WORKDIR /app
+
+ENV ESSEDUM_HOME=/app
+
+CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=essedum$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.lfn.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,dbjwt,btf,dbconstants,vault -cp usm-service-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.usm.UsmServiceApplication -Dhttp.nonProxyHosts=aiplatform.az.ad.idemo-ppc.com"]
+
+EXPOSE 8081
+

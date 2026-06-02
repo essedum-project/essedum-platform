@@ -95,8 +95,9 @@ export class DashboardComponent implements OnInit {
   }
 
   private getDatasources() {
+    const org = sessionStorage.getItem('organization') || '';
     return this.https
-      .get<any>(`${this.api}/service/v1/datasources/all`, { observe: 'response' })
+      .get<any>(`${this.api}/datasources/all`, { observe: 'response', params: { org } })
       .pipe(map(r => r.body));
   }
 

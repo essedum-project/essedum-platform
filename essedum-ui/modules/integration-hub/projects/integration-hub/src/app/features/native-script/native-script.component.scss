@@ -1,0 +1,770 @@
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+
+// ── Material deep overrides (borderless, compact) ─────────────────────────────
+:host ::ng-deep mat-form-field,
+:host ::ng-deep .mat-mdc-form-field { width: 100% !important; min-width: 0 !important; font-size: 13px !important; }
+:host ::ng-deep .mat-mdc-text-field-wrapper { width: 100% !important; padding: 0 !important; background: transparent !important; overflow: visible !important; }
+:host ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) { background: transparent !important; }
+:host ::ng-deep .mdc-text-field--filled { background: transparent !important; border: none !important; border-radius: 0 !important; padding: 0 4px !important; height: auto !important; min-height: auto !important; }
+:host ::ng-deep .mdc-text-field--filled:hover { background: transparent !important; border-bottom: none !important; }
+:host ::ng-deep .mdc-text-field--filled.mdc-text-field--focused { background: transparent !important; border: none !important; box-shadow: none !important; }
+:host ::ng-deep .mat-mdc-form-field-infix { min-height: 36px !important; padding: 14px 0 4px !important; border-top: 0 !important; width: 100% !important; }
+:host ::ng-deep .mdc-text-field--filled .mdc-floating-label { top: 5px !important; font-size: 11px !important; }
+:host ::ng-deep .mdc-floating-label, :host ::ng-deep mat-label { color: #8b949e !important; font-size: 11px !important; font-weight: 500 !important; }
+:host ::ng-deep .mdc-floating-label--float-above { color: #58a6ff !important; font-size: 10px !important; font-weight: 600 !important; }
+:host ::ng-deep .mat-mdc-input-element { color: #e6edf3 !important; font-size: 13px !important; }
+:host ::ng-deep mat-select .mat-mdc-select-value-text { color: #e6edf3 !important; font-size: 13px !important; }
+:host ::ng-deep .mat-mdc-select-value { font-size: 13px !important; }
+:host ::ng-deep .mat-mdc-select-placeholder { color: #484f58 !important; font-size: 12px !important; }
+:host ::ng-deep .mat-mdc-select-arrow { color: #58a6ff !important; }
+// .mdc-line-ripple is now styled globally in styles.scss � do not hide it
+:host ::ng-deep .mat-mdc-form-field-focus-overlay { display: none !important; opacity: 0 !important; }
+:host ::ng-deep .mdc-text-field__ripple { display: none !important; }
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper { min-height: 0 !important; padding: 0 !important; }
+:host ::ng-deep .mat-mdc-form-field-flex { align-items: flex-end !important; }
+:host ::ng-deep .mdc-text-field--filled.mdc-text-field--disabled { opacity: 0.5 !important; border-bottom: none !important; }
+:host ::ng-deep .mdc-text-field--disabled .mat-mdc-input-element,
+:host ::ng-deep .mdc-text-field--disabled input { color: rgba(100,140,180,0.5) !important; -webkit-text-fill-color: rgba(100,140,180,0.5) !important; }
+
+// ── Panel background ──────────────────────────────────────────────────────────
+.native-script-panel {
+  background: rgba(13,17,23,0.95) !important;
+  border: 1px solid rgba(88,166,255,0.08) !important;
+  border-radius: 12px !important;
+  padding: 18px 20px !important;
+}
+
+// ── Child component overrides (app-app-config inputs) ─────────────────────────
+:host ::ng-deep app-app-config {
+  .form-control, input.form-control, input[type="text"], input[type="password"],
+  .table .form-control, .table input.form-control, .table td input,
+  .table input[type="text"], .table input[type="password"],
+  .table-striped td input, .table-striped td .form-control {
+    background: rgba(13,17,23,0.9) !important;
+    background-color: rgba(13,17,23,0.9) !important;
+    border: 1px solid rgba(88,166,255,0.2) !important;
+    color: #e6edf3 !important;
+    -webkit-text-fill-color: #e6edf3 !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    height: 32px !important;
+    &::placeholder { color: #484f58 !important; -webkit-text-fill-color: #484f58 !important; }
+    &:focus { border-color: #58a6ff !important; box-shadow: 0 0 0 2px rgba(88,166,255,0.1) !important; }
+  }
+  .table-striped > tbody > tr > td,
+  .table-striped > tbody > tr:nth-of-type(odd) > *,
+  .table-striped > tbody > tr:nth-of-type(even) > * {
+    background: transparent !important;
+    background-color: transparent !important;
+    --bs-table-accent-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+  }
+  mat-card, .mat-mdc-card { background: rgba(13,17,23,0.6) !important; border-color: rgba(88,166,255,0.1) !important; }
+}
+
+// ── Child component overrides (app-user-secrets) ──────────────────────────────
+:host ::ng-deep app-user-secrets {
+  .form-control, input.form-control, input[type="text"], input[type="password"],
+  .table .form-control, .table td input, .table td .form-control,
+  .table-striped td input, .table-striped td .form-control {
+    background: rgba(13,17,23,0.9) !important;
+    background-color: rgba(13,17,23,0.9) !important;
+    border: 1px solid rgba(88,166,255,0.2) !important;
+    color: #e6edf3 !important;
+    -webkit-text-fill-color: #e6edf3 !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    height: 32px !important;
+    &::placeholder { color: #484f58 !important; -webkit-text-fill-color: #484f58 !important; }
+    &:focus { border-color: #58a6ff !important; box-shadow: 0 0 0 2px rgba(88,166,255,0.1) !important; }
+  }
+  .table-striped > tbody > tr > td,
+  .table-striped > tbody > tr:nth-of-type(odd) > *,
+  .table-striped > tbody > tr:nth-of-type(even) > * {
+    background: transparent !important;
+    background-color: transparent !important;
+    --bs-table-accent-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-bg: transparent !important;
+  }
+  mat-card, .mat-mdc-card { background: rgba(13,17,23,0.6) !important; border-color: rgba(88,166,255,0.1) !important; }
+}
+
+// ── Select run type field layout fix ──────────────────────────────────────────
+.tab-content .d-flex {
+  align-items: center !important;
+  gap: 12px !important;
+  .lfx-u-mar-t-24 { margin-top: 0 !important; }
+  .lfx-u-mar-lr-8 { margin: 0 !important; flex: 1 !important; }
+}
+
+// ── Config container (Environment section box) ────────────────────────────────
+.config-container {
+  background: rgba(13,17,23,0.5) !important;
+  border: 1px solid rgba(88,166,255,0.1) !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+  margin-bottom: 20px !important;
+}
+
+// ── Collapsible sections (Environment, Secrets) ───────────────────────────────
+.collapsible-section {
+  background: rgba(13,17,23,0.4) !important;
+  border: 1px solid rgba(88,166,255,0.1) !important;
+  border-radius: 8px !important;
+  margin-bottom: 16px !important;
+  overflow: hidden !important;
+}
+
+.collapsible-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: background 0.15s !important;
+  &:hover { background: rgba(88,166,255,0.04) !important; }
+
+  .collapse-icon {
+    color: #58a6ff !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+    &.expanded { transform: rotate(90deg) !important; }
+  }
+
+  .collapse-title {
+    color: #c9d1d9 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+  }
+
+  .collapse-badge {
+    margin-left: auto !important;
+    background: rgba(88,166,255,0.12) !important;
+    color: #58a6ff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 8px !important;
+    border-radius: 10px !important;
+    min-width: 20px !important;
+    text-align: center !important;
+  }
+}
+
+.collapsible-body {
+  max-height: 800px !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s, padding 0.3s !important;
+  opacity: 1 !important;
+  padding: 0 14px 14px !important;
+  &.collapsed {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding: 0 14px !important;
+  }
+}
+
+// ── Header (Pipeline title + action icons) ────────────────────────────────────
+.selector-model-title-head {
+  .aip-desc-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #e2e8f0 !important;
+  }
+  span[style*="color: #737373"] {
+    color: #8b949e !important;
+  }
+}
+
+// ── Action icon buttons (tag, play, save, copy, back) ─── 2026 AI Shiny ──────
+.action-icon-btn, button.action-icon-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background: linear-gradient(145deg, rgba(88,166,255,0.12) 0%, rgba(124,58,237,0.08) 100%) !important;
+  border: 1px solid rgba(88,166,255,0.25) !important;
+  color: #c9d1d9 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+
+  &:hover {
+    background: linear-gradient(145deg, rgba(88,166,255,0.22) 0%, rgba(124,58,237,0.15) 100%) !important;
+    border-color: rgba(88,166,255,0.5) !important;
+    color: #fff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(88,166,255,0.3), 0 0 24px rgba(88,166,255,0.12) !important;
+  }
+
+  &:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 1px 4px rgba(88,166,255,0.2) !important;
+  }
+
+  mat-icon, .mat-icon, .aip-led-icons {
+    color: inherit !important;
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+// ── +/- argument action icons ─────────────────────────────────────────────────
+.arg-action-icon {
+  width: 26px !important;
+  height: 26px !important;
+  font-size: 18px !important;
+  border-radius: 6px !important;
+  background: linear-gradient(145deg, rgba(88,166,255,0.15) 0%, rgba(124,58,237,0.1) 100%) !important;
+  border: 1px solid rgba(88,166,255,0.3) !important;
+  color: #8bb9f0 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1) !important;
+
+  &:hover {
+    background: linear-gradient(145deg, rgba(88,166,255,0.28) 0%, rgba(124,58,237,0.18) 100%) !important;
+    border-color: rgba(88,166,255,0.55) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 12px rgba(88,166,255,0.3) !important;
+  }
+}
+
+.selector-model-title-tail {
+  ul { list-style: none !important; margin: 0 !important; padding: 0 !important; gap: 10px !important; display: flex !important; align-items: center !important; }
+  .li-style { display: inline-flex !important; align-items: center !important; padding: 0 !important; }
+  .lfx-u-mar-r-24 { margin-right: 0 !important; }
+  .lfx-u-mar-r-16 { margin-right: 0 !important; }
+}
+
+// ── Back arrow special styling ────────────────────────────────────────────────
+.selector-model-title-head {
+  mat-icon.action-icon-btn {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    background: rgba(88,166,255,0.08) !important;
+    border: 1px solid rgba(88,166,255,0.2) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    color: #c9d1d9 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    vertical-align: middle !important;
+    overflow: visible !important;
+    &:hover {
+      color: #fff !important;
+      background: rgba(88,166,255,0.15) !important;
+      border-color: rgba(88,166,255,0.4) !important;
+      transform: translateX(-2px) !important;
+      box-shadow: 0 2px 12px rgba(88,166,255,0.2) !important;
+    }
+  }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+:host ::ng-deep .mat-mdc-tab-group {
+  .mat-mdc-tab-header { border-bottom: none !important; background: transparent !important; }
+  .mat-mdc-tab-labels { gap: 8px !important; justify-content: flex-start !important; padding: 0 4px !important; }
+  .mat-mdc-tab-label-container { flex-grow: 0 !important; }
+  .mat-mdc-tab {
+    min-width: auto !important; max-width: fit-content !important; padding: 0 18px !important; height: 38px !important; flex: none !important;
+    border-radius: 8px 8px 0 0 !important; background: transparent !important; opacity: 0.65 !important;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+    position: relative !important;
+    .mdc-tab__text-label { color: #8b949e !important; font-weight: 500 !important; font-size: 12.5px !important; text-transform: none !important; white-space: nowrap !important; transition: all 0.25s !important; }
+    &:hover {
+      opacity: 1 !important;
+      background: rgba(88,166,255,0.08) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(88,166,255,0.12) !important;
+      .mdc-tab__text-label { color: #c9d1d9 !important; }
+    }
+  }
+  .mdc-tab--active {
+    opacity: 1 !important; background: rgba(88,166,255,0.1) !important;
+    box-shadow: 0 2px 8px rgba(88,166,255,0.15), inset 0 -2px 0 #58a6ff !important;
+    .mdc-tab__text-label { color: #58a6ff !important; font-weight: 700 !important; }
+    &:hover { background: rgba(88,166,255,0.14) !important; box-shadow: 0 4px 16px rgba(88,166,255,0.2), inset 0 -2px 0 #58a6ff !important; }
+  }
+  .mdc-tab-indicator__content--underline { border-color: #58a6ff !important; border-width: 2.5px !important; border-radius: 2px 2px 0 0 !important; }
+  .mat-mdc-tab-body-wrapper { background: transparent !important; }
+}
+
+// ── Configuration tab labels ──────────────────────────────────────────────────
+.tab-content {
+  span.fs, span[style*="font-size: 14px"] {
+    color: #c9d1d9 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+
+  // Type dropdown — compact width
+  .d-flex > mat-form-field,
+  .d-flex > .lfx-u-mar-lr-8 {
+    max-width: 200px !important;
+    width: 200px !important;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── CODESPACE PANEL (VS Code Dark Terminal Style) ─────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+.file-explorer-container {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  height: calc(100vh - 320px) !important;
+  min-height: 500px !important;
+  background: #0d1117 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+// ── File Explorer Sidebar ─────────────────────────────────────────────────────
+.file-explorer-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 260px !important;
+  min-width: 220px !important;
+  max-width: 280px !important;
+  background: #161b22 !important;
+  border-right: 1px solid #30363d !important;
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+
+.file-explorer-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 10px 14px !important;
+  background: #1c2129 !important;
+  border-bottom: none !important;
+  min-height: 40px !important;
+  gap: 8px !important;
+  color: #8b949e !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  mat-icon {
+    color: #58a6ff !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    vertical-align: middle !important;
+    margin-right: 6px !important;
+  }
+}
+
+.file-explorer-content {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 6px 0 !important;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+}
+
+.file-tree {
+  background: transparent !important;
+  :host ::ng-deep mat-tree-node, mat-tree-node {
+    display: flex !important;
+    align-items: center !important;
+    padding: 5px 14px !important;
+    cursor: pointer !important;
+    border-left: 2px solid transparent !important;
+    transition: all 0.15s ease !important;
+    color: #8b949e !important;
+    font-size: 12px !important;
+    min-height: 30px !important;
+    &:hover {
+      background: rgba(88,166,255,0.06) !important;
+      color: #c9d1d9 !important;
+    }
+    mat-icon {
+      color: #484f58 !important;
+      font-size: 15px !important;
+      width: 15px !important;
+      height: 15px !important;
+    }
+  }
+}
+.selected-file {
+  background: rgba(88,166,255,0.1) !important;
+  border-left-color: #58a6ff !important;
+  color: #e6edf3 !important;
+  mat-icon { color: #58a6ff !important; }
+  .file-name { color: #e6edf3 !important; font-weight: 500 !important; }
+}
+
+.tree-item-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  .file-icon {
+    color: #484f58 !important;
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+.file-name {
+  font-size: 12px !important;
+  color: #8b949e !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.empty-state {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 40px 20px !important;
+  text-align: center !important;
+  mat-icon { font-size: 40px !important; width: 40px !important; height: 40px !important; color: #8b949e !important; margin-bottom: 12px !important; }
+  .empty-title { color: #e2e8f0 !important; font-size: 13px !important; margin-bottom: 4px !important; }
+  .empty-subtitle { color: #94a3b8 !important; font-size: 11px !important; }
+}
+
+// ── Code Editor Panel ─────────────────────────────────────────────────────────
+.code-editor-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  background: #0d1117 !important;
+  overflow: hidden !important;
+}
+
+.code-editor-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 14px !important;
+  background: #161b22 !important;
+  border-bottom: none !important;
+  min-height: 38px !important;
+  gap: 6px !important;
+  color: #c9d1d9 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  mat-icon {
+    color: #58a6ff !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    vertical-align: middle !important;
+    margin-right: 6px !important;
+  }
+  span {
+    color: #c9d1d9 !important;
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #3fb950;
+      margin-right: 8px;
+    }
+  }
+}
+
+.code-editor-content {
+  flex: 1 !important;
+  background: #0d1117 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  // Code editor child overrides
+  :host ::ng-deep app-enl-code-editor,
+  :host ::ng-deep .CodeMirror,
+  :host ::ng-deep .ace_editor,
+  :host ::ng-deep textarea {
+    background: #0d1117 !important;
+    color: #c9d1d9 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.7 !important;
+  }
+  :host ::ng-deep .ace_gutter {
+    background: #161b22 !important;
+    color: #484f58 !important;
+    border-right: 1px solid #30363d !important;
+  }
+}
+
+.notebook-placeholder {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  background: #0d1117 !important;
+  color: #c9d1d9 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  padding: 40px !important;
+  h3 { color: #e6edf3 !important; font-size: 16px !important; margin: 0 0 12px 0 !important; }
+  p { color: #8b949e !important; font-size: 13px !important; line-height: 1.6 !important; text-align: center !important; max-width: 300px !important; margin: 0 !important; }
+  > mat-icon { font-size: 48px !important; width: 48px !important; height: 48px !important; color: #30363d !important; margin-bottom: 16px !important; }
+  button { margin-top: 20px !important; }
+}
+
+// ── Arguments tree ────────────────────────────────────────────────────────────
+:host ::ng-deep .example-tree, :host ::ng-deep mat-tree {
+  background: transparent !important;
+  color: #c9d1d9 !important;
+  .mat-tree-node { color: #c9d1d9 !important; font-size: 13px !important; }
+  mat-icon { color: #58a6ff !important; cursor: pointer !important; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── BUTTONS (Shiny gradient with glow) ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+button[mat-raised-button][color="primary"],
+button[mat-flat-button][color="primary"] {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  padding: 6px 18px !important;
+  height: 32px !important;
+  line-height: 1 !important;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(79,70,229,0.4), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+  letter-spacing: 0.3px !important;
+  &:hover:not([disabled]) {
+    box-shadow: 0 4px 20px rgba(79,70,229,0.6), 0 0 30px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+    transform: translateY(-1px) !important;
+    background: linear-gradient(135deg, #5b52f0 0%, #8b5cf6 50%, #7c7cff 100%) !important;
+  }
+  &:active:not([disabled]) { transform: translateY(0) !important; box-shadow: 0 1px 8px rgba(79,70,229,0.4) !important; }
+  &[disabled] { opacity: 0.35 !important; box-shadow: none !important; filter: grayscale(0.3) !important; }
+}
+
+button[mat-icon-button] {
+  color: #8b949e !important;
+  width: 32px !important;
+  height: 32px !important;
+  transition: all 0.15s !important;
+  &:hover { color: #58a6ff !important; background: rgba(88,166,255,0.08) !important; }
+}
+
+button[mat-button], button[mat-stroked-button] {
+  background: rgba(88,166,255,0.04) !important;
+  color: #79c0ff !important;
+  border: 1px solid rgba(88,166,255,0.2) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 5px 14px !important;
+  height: 30px !important;
+  line-height: 1 !important;
+  transition: all 0.15s !important;
+  &:hover:not([disabled]) {
+    color: #fff !important;
+    background: rgba(88,166,255,0.12) !important;
+    border-color: rgba(88,166,255,0.5) !important;
+    box-shadow: 0 2px 8px rgba(88,166,255,0.15) !important;
+  }
+  &[disabled] { color: #30363d !important; border-color: rgba(88,166,255,0.06) !important; opacity: 0.5 !important; }
+}
+
+// ── Jobs tab paginator ────────────────────────────────────────────────────────
+:host ::ng-deep mat-paginator {
+  background: transparent !important;
+  color: #8b949e !important;
+  .mat-mdc-paginator-container { color: #8b949e !important; }
+  .mat-mdc-select-value-text { color: #c9d1d9 !important; }
+  button { color: #8b949e !important; &:hover { color: #58a6ff !important; } }
+}
+
+// ── Table (Jobs tab) ──────────────────────────────────────────────────────────
+:host ::ng-deep table, :host ::ng-deep .mat-mdc-table {
+  background: transparent !important;
+  th { color: #8b949e !important; font-weight: 700 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; border-bottom: none !important; }
+  td { color: #c9d1d9 !important; font-size: 12px !important; border-bottom: none !important; }
+  tr:hover td { background: rgba(88,166,255,0.04) !important; }
+}
+
+// ── Action icons override (header icons with ngStyle) ─────────────────────────
+.selector-model-title-tail {
+  button[mat-icon-button] {
+    color: #8b949e !important;
+    &:hover { color: #58a6ff !important; }
+  }
+  mat-icon.aip-led-icons {
+    color: inherit !important;
+    font-size: 20px !important;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── LIGHT THEME ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+:host-context(body.header-light-theme) {
+  .native-script-panel { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important; }
+  .selector-model-title-head .aip-desc-title { color: #0f172a !important; }
+
+  .empty-state {
+    mat-icon { color: #94a3b8 !important; }
+    .empty-title { color: #334155 !important; }
+    .empty-subtitle { color: #64748b !important; }
+  }
+  .selector-model-title-head span[style*="color: #737373"] { color: #64748b !important; }
+
+  // Action icon buttons - light theme
+  .action-icon-btn, button.action-icon-btn {
+    background: linear-gradient(145deg, rgba(71,66,220,0.06) 0%, rgba(124,58,237,0.04) 100%) !important;
+    border-color: rgba(71,66,220,0.15) !important;
+    color: #64748b !important;
+    &:hover {
+      background: linear-gradient(145deg, rgba(71,66,220,0.12) 0%, rgba(124,58,237,0.08) 100%) !important;
+      border-color: rgba(71,66,220,0.35) !important;
+      color: #4742dc !important;
+      box-shadow: 0 4px 16px rgba(71,66,220,0.15) !important;
+    }
+  }
+  .selector-model-title-head mat-icon.action-icon-btn {
+    background: rgba(71,66,220,0.05) !important;
+    border-color: rgba(71,66,220,0.12) !important;
+    color: #64748b !important;
+    &:hover { color: #4742dc !important; background: rgba(71,66,220,0.1) !important; border-color: rgba(71,66,220,0.3) !important; }
+  }
+
+  // +/- argument icons - light theme
+  .arg-action-icon {
+    background: linear-gradient(145deg, rgba(71,66,220,0.08) 0%, rgba(124,58,237,0.05) 100%) !important;
+    border-color: rgba(71,66,220,0.2) !important;
+    color: #64748b !important;
+    &:hover {
+      background: linear-gradient(145deg, rgba(71,66,220,0.15) 0%, rgba(124,58,237,0.1) 100%) !important;
+      border-color: rgba(71,66,220,0.4) !important;
+      color: #4742dc !important;
+      box-shadow: 0 3px 12px rgba(71,66,220,0.15) !important;
+    }
+  }
+
+  // Collapsible sections - light theme
+  .collapsible-section {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+  .collapsible-header {
+    &:hover { background: rgba(71,66,220,0.03) !important; }
+    .collapse-icon { color: #4742dc !important; }
+    .collapse-title { color: #334155 !important; }
+    .collapse-badge { background: rgba(71,66,220,0.08) !important; color: #4742dc !important; }
+  }
+
+  // Form fields
+  ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) { background: transparent !important; }
+  ::ng-deep .mdc-text-field--filled { border: none !important; border-bottom: none !important; border-radius: 0 !important; }
+  ::ng-deep .mdc-text-field--filled:hover { background: transparent !important; border-bottom: none !important; }
+  ::ng-deep .mdc-text-field--filled.mdc-text-field--focused { background: transparent !important; border-bottom: none !important; box-shadow: none !important; }
+  ::ng-deep .mdc-floating-label, ::ng-deep mat-label { color: #64748b !important; }
+  ::ng-deep .mdc-floating-label--float-above { color: #4742dc !important; }
+  ::ng-deep .mat-mdc-input-element { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; }
+  ::ng-deep mat-select .mat-mdc-select-value-text { color: #0f172a !important; }
+  ::ng-deep .mat-mdc-select-placeholder { color: #94a3b8 !important; }
+  ::ng-deep .mat-mdc-select-arrow { color: #64748b !important; }
+
+  // Tabs
+  ::ng-deep .mat-mdc-tab-group {
+    .mat-mdc-tab-header { border-bottom: none !important; }
+    .mat-mdc-tab .mdc-tab__text-label { color: #64748b !important; }
+    .mdc-tab--active .mdc-tab__text-label { color: #4742dc !important; }
+    .mdc-tab-indicator__content--underline { border-color: #4742dc !important; }
+  }
+
+  .tab-content span.fs, .tab-content span[style*="font-size: 14px"] { color: #334155 !important; }
+
+  // Codespace stays dark in light theme (terminal consistency)
+  .file-explorer-container { border-color: #e2e8f0 !important; }
+  .file-explorer-panel { background: #161b22 !important; border-right-color: #30363d !important; }
+  .file-explorer-header { background: #1c2129 !important; border-bottom: none !important; color: #8b949e !important; mat-icon { color: #58a6ff !important; } }
+  .code-editor-panel { background: #0d1117 !important; }
+  .code-editor-header { background: #161b22 !important; border-bottom: none !important; color: #c9d1d9 !important; mat-icon { color: #58a6ff !important; } }
+  .code-editor-content { background: #0d1117 !important; }
+  .file-tree mat-tree-node { color: #8b949e !important; }
+  .notebook-placeholder { background: #0d1117 !important; h3 { color: #e6edf3 !important; } p { color: #8b949e !important; } }
+
+  ::ng-deep .example-tree, ::ng-deep mat-tree { color: #334155 !important; .mat-tree-node { color: #334155 !important; } mat-icon { color: #4742dc !important; } }
+
+  // Tables
+  ::ng-deep table, ::ng-deep .mat-mdc-table {
+    th { color: #64748b !important; border-bottom: none !important; }
+    td { color: #334155 !important; border-bottom: none !important; }
+    tr:hover td { background: rgba(71,66,220,0.03) !important; }
+  }
+  ::ng-deep mat-paginator { color: #64748b !important; .mat-mdc-select-value-text { color: #334155 !important; } button { color: #64748b !important; &:hover { color: #4742dc !important; } } }
+
+  // Buttons
+  button[mat-raised-button][color="primary"], button[mat-flat-button][color="primary"] {
+    background: linear-gradient(135deg, #4742dc 0%, #7c3aed 50%, #6366f1 100%) !important;
+    box-shadow: 0 2px 12px rgba(71,66,220,0.35), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+    &:hover:not([disabled]) { box-shadow: 0 4px 20px rgba(71,66,220,0.5), 0 0 30px rgba(124,58,237,0.2) !important; }
+  }
+  button[mat-icon-button] { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
+  button[mat-button], button[mat-stroked-button] { color: #64748b !important; background: transparent !important; border-color: rgba(71,66,220,0.2) !important; &:hover:not([disabled]) { color: #4742dc !important; border-color: rgba(71,66,220,0.4) !important; background: rgba(71,66,220,0.04) !important; } }
+
+  // Light overrides for child components
+  ::ng-deep app-app-config, ::ng-deep app-user-secrets {
+    .form-control, input.form-control, input[type="text"], input[type="password"],
+    .table .form-control, .table td input {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      &:focus { border-color: #4742dc !important; }
+    }
+    mat-card, .mat-mdc-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important; }
+    .table, .table-striped { background: transparent !important; }
+    .table-striped > tbody > tr > td,
+    .table-striped > tbody > tr:nth-of-type(odd) > *,
+    .table-striped > tbody > tr:nth-of-type(even) > * {
+      background: transparent !important;
+      --bs-table-accent-bg: transparent !important;
+      --bs-table-striped-bg: transparent !important;
+    }
+    .table thead tr th { color: #64748b !important; }
+    .table tbody tr td { color: #334155 !important; -webkit-text-fill-color: #334155 !important; }
+    span { color: #334155 !important; -webkit-text-fill-color: #334155 !important; }
+    mat-icon { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
+  }
+  .config-container { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+}

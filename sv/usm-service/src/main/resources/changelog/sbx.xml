@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	<include file="changelog/cip/cip.xml" />
+	<include file="changelog/dbs/dbs.xml" />
+	<include file="changelog/icm/icm.xml" />
+	<include file="changelog/usm/usm.xml" />
+	<include file="changelog/sbx/sbx.xml" />
+	
+	<include file="changelog/data/sbxdata.xml" />
+		
+	<include file="changelog/cip/constraint.xml" />
+	<include file="changelog/dbs/constraint.xml" />
+	<include file="changelog/icm/constraint.xml" />
+	<include file="changelog/usm/constraint.xml" />
+	<include file="changelog/sbx/constraint.xml" />
+	
+</databaseChangeLog>

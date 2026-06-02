@@ -101,8 +101,10 @@ export class AppHomeComponent implements OnInit {
 
   fetchPortfolioPoject() {
     try {
-      this.project = JSON.parse(sessionStorage.getItem("project") || '').name;
-      this.portfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || '').portfolioName;
+      const projectRaw = sessionStorage.getItem("project");
+      const portfolioRaw = sessionStorage.getItem("portfoliodata");
+      this.project = projectRaw ? JSON.parse(projectRaw)?.name : undefined;
+      this.portfolio = portfolioRaw ? JSON.parse(portfolioRaw)?.portfolioName : undefined;
     } catch (e: any) {
       console.error("JSON.parse error - ", e.message);
     }

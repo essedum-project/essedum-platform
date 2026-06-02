@@ -1,0 +1,19 @@
+# Build output
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+*.iml
+.settings/
+.classpath
+.project
+.m2/
+
+# OS files
+.DS_Store
+Thumbs.db
+

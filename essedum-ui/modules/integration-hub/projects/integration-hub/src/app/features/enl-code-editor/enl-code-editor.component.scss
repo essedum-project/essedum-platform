@@ -1,0 +1,51 @@
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+
+.code-editor-wrapper {
+  width: 100%;
+  border: 1px solid rgba(79,142,247,0.15);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.code-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(79,142,247,0.06);
+  border-bottom: 1px solid rgba(79,142,247,0.1);
+
+  .language-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #b8cce0;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 6px;
+  }
+}
+
+.code-editor-content {
+  width: 100%;
+  min-height: 200px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #a8bcd8;
+  padding: 14px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+body.header-light-theme {
+  .code-editor-wrapper { background: #f8fafc; border-color: rgba(79,70,229,0.15); }
+  .code-editor-content { color: #1e293b; }
+}

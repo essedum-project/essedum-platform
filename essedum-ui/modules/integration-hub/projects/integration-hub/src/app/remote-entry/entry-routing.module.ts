@@ -6,6 +6,7 @@ import { AdapterCreateEditComponent } from '../features/adapter/adapter-create-e
 import { AdapterDescriptionComponent } from '../features/adapter/adapter-description/adapter-description.component';
 
 import { PipelineComponent } from '../features/pipeline/pipeline.component';
+import { NativeScriptComponent } from '../features/native-script/native-script.component';
 
 import { AppListComponent } from '../features/apps/app-list/app-list.component';
 import { ViewAppComponent } from '../features/apps/view-app/view-app.component';
@@ -42,6 +43,7 @@ const routes: Routes = [
     path: 'pipelines',
     children: [
       { path: '', component: PipelineComponent },
+      { path: 'view/:cname', component: NativeScriptComponent },
     ],
   },
 

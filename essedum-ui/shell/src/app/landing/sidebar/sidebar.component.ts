@@ -15,7 +15,7 @@ export class SidebarComponent implements OnInit {
   lazyloadevent = { first: 0, rows: 1000, sortField: null, sortOrder: 1 };
   role: any;
   sidebarMenu = [
-    { label: "Dashboard", icon: "tachometer", url: "./" },
+    { label: "Dashboard", icon: "tachometer", url: "./dashboard" },
     { label: "Mapping", icon: "map-signs", url: "./iamp-usm/dashconstant" },
     { label: "Documents", icon: "book", url: "./iamp-ccl/documents" },
     {
@@ -226,6 +226,11 @@ export class SidebarComponent implements OnInit {
         } else {
           this.ready = true;
           this.populateDefaultSidebarMenu();
+        }
+        // Ensure a Dashboard entry exists at the top of the sidebar regardless of
+        // what DashConsts returned (legacy records often omit it).
+        if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
+          this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
         }
         // Remap legacy DashConsts URLs to new MFE routes so clicking AI-Brain/AIP
         // sidebar entries loads our federated MFEs (modules/data-ops, modules/agent-studio,

@@ -1,0 +1,237 @@
+# =====================================================
+# Vibe Service - PostgreSQL Profile Configuration
+# =====================================================
+
+apipermission:
+  disable_api_security_validation: false
+
+ESSEDUM_HOME: /app
+LOG_PATH: /app/log
+ESSEDUM_URL: http://localhost:8084/
+commonAppUrl: "http://localhost:8081/"
+
+telemetry:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
+    jdbcUrl: jdbc:postgresql://${PG_DATASOURCE_URL:localhost:5432}/telemetrydb
+    url: jdbc:postgresql://${PG_DATASOURCE_URL:localhost:5432}/telemetrydb
+    username: ${PG_USER:postgres}
+    password: ${PG_PASSWORD:password}
+
+config:
+  active-profiles: postgresql,dbjwt,vault
+  static-locations: file:/app/static/
+
+  datasourceurl: jdbc:postgresql://${PG_DATASOURCE_URL:localhost:5432}
+  datasourceuser: ${PG_USER:postgres}
+  datasourcepass: ${PG_PASSWORD:password}
+  essedumcoredb: essedum_coredb
+
+  service-auth:
+    access-token: ${SERVICE_ACCESS_TOKEN:aec127c2-c984-33f6-9a3a-355xd1dof097}
+    proxy-user: ${SERVICE_PROXY_USER:admin}
+
+  driverClassName: org.postgresql.Driver
+  essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb}
+  essedum-db-username: ${config.datasourceuser}
+  essedum-db-password: ${config.datasourcepass}
+  database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+spring:
+  application:
+    name: vibe-service
+
+  liquibase:
+    enabled: false
+
+  quartz:
+    enabled: true
+    job-store-type: memory
+
+  cloud:
+    vault:
+      enabled: false
+
+  main:
+    allow-bean-definition-overriding: true
+
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
+
+  cors:
+    allowedOriginPatterns: "*"
+    allowedHeaders: "*"
+    allowedMethods: "*"
+
+  jackson:
+    serialization.write_dates_as_timestamps: false
+    serialization.fail-on-empty-beans: false
+
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    database: POSTGRESQL
+    show-sql: false
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: true
+      hibernate.jdbc.batch_size: 500
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+      hibernate.jdbc.batch_versioned_data: true
+      hibernate.jdbc.time_zone: UTC
+      hibernate:
+        ddl-auto: none
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+      hibernate.enable_lazy_load_no_trans: true
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: ${config.driverClassName}
+    url: ${config.essedum-db-url}
+    username: ${config.essedum-db-username}
+    password: ${config.essedum-db-password}
+    maximum-pool-size: 15
+    minimumIdle: 3
+    idleTimeout: 60000
+
+server:
+  port: 8084
+  error:
+    path: /error
+  whitelabel:
+    enabled: false
+  max-http-header-size: 48000
+  compression.enabled: true
+
+schedule:
+  refreshPermissionApiRate: 10000
+  refreshCofigurationPropertiesRate: 10000
+
+csrf:
+  ignore:
+    urls: /api/authenticate,/api/vibe/**,/api/goose/**,/api/github/**,/actuator/**
+
+jwt:
+  base64-secret: ${JWT_SECRET:ZjY0MDRhOTNlZDdlNDM0ODdlOTQ3MWNjODQwYmRhNWIyYTg5YTBjMzJlYmQ2Y2M4OTc5MGFlZjQ5ZjRkNTk0YTMyN2MyOGIzMWRjM2Y5OTgxNGMyZjk1OThiMTM0NGZhMDkzYjk3ODY2NGViZjVkZWI4YWYxN2YzOWY5YzMzMjk=}
+  token-validity-in-seconds: 86400
+  token-validity-in-seconds-for-remember-me: 2592000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,metrics,prometheus,health,info
+
+vibe:
+  goose:
+    service:
+      url: ${GOOSE_URL:http://localhost:30132}
+      connect-timeout-ms: 10000
+      response-timeout-seconds: 300
+      secret-key: ${GOOSE_SECRET_KEY:sk-1234}
+    working-dir: ${GOOSE_WORKING_DIR:/app/goose}
+  github:
+    enabled: ${VIBE_GITHUB_ENABLED:false}
+    repo-url: ${VIBE_GITHUB_REPO_URL:}
+    username: ${VIBE_GITHUB_USERNAME:}
+    token: ${VIBE_GITHUB_TOKEN:}
+    work-dir: ${VIBE_GITHUB_WORK_DIR:/tmp/vibe-github}
+    commit-message-template: "Vibe session {sessionId} — auto-generated code"
+    branch-prefix: "vibe-session/"
+
+github:
+  gitPathStudio: /app/gitRepo/studio/
+  gitPathStore: /app/gitRepo/store/
+  username: ${GITHUB_USERNAME:}
+  password: ${GITHUB_TOKEN:}
+  repoUrl: ${GITHUB_REPO_URL:}
+
+security:
+  silentRefreshTimeoutFactor: 0.85
+
+# Eureka removed - using K8s service discovery
+eureka:
+  client:
+    enabled: false
+
+mailserver:
+  accesstoken: bg9126c2-c913-iof6-9r5x-90ecf001h00a
+
+icip:
+  dsurl: ${config.datasourceurl}
+  dsuser: ${config.datasourceuser}
+  dspass: ${config.datasourcepass}
+  script:
+    github:
+      enabled: true
+  datasource:
+    driverClassName: ${spring.datasource.driverClassName}
+    jdbcUrl: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    maximum-pool-size: 10
+    minimumIdle: 1
+    idleTimeout: 30000
+    platform: postgresql
+    type: com.zaxxer.hikari.HikariDataSource
+  pathPrefix: api/aip
+
+jobexecutor:
+  org: leo1311
+  enabled: true
+  runtimeList: azure, ams
+
+port_automation_app_url: ${PORT_AUTOMATION_URL:http://localhost:5000}
+
+encryption:
+  key: ${ENCRYPTION_KEY:defaultEncryptionKey}
+
+endpoint:
+  dbs: "/api"
+  bcc: "/api"
+  cfm: "/api"
+  ccl: "/api"
+
+eda:
+  event:
+    retryLimit: 3
+
+proxy:
+  httpProxyConfiguration:
+    proxyScheme: http
+    proxyHost: ${PROXY_HOST:blrproxy.ad.lfn.com}
+    proxyPort: ${PROXY_PORT:8080}
+    proxyUser:
+    proxyPassword:
+
+translate-api:
+  url:
+  version:
+  key:
+
+quartz:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.postgresql.Driver
+    jdbcUrl: ${config.datasourceurl}/${config.essedumcoredb}
+    url: ${config.datasourceurl}/${config.essedumcoredb}
+    username: ${config.essedum-db-username}
+    password: ${config.essedum-db-password}
+    maximum-pool-size: 10
+    minimumIdle: 1
+    idleTimeout: 30000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: POSTGRESQL
+    show-sql: false
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        ddl-auto: none

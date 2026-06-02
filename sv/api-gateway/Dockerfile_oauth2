@@ -1,0 +1,76 @@
+# -------------------------------------------------------
+# API Gateway - OAuth2 / Keycloak profile
+# Mirrors the monolith Dockerfile_oauth2 pattern.
+#
+# In oauth2 mode the gateway relays Bearer tokens to downstream
+# microservices (which run as OAuth2 Resource Servers). The Keycloak
+# CA cert is imported into the JVM trust store so any future direct
+# JWKS / OIDC call from the gateway also trusts the IdP.
+# -------------------------------------------------------
+# Stage 1: Build with Maven
+# -------------------------------------------------------
+FROM eclipse-temurin:21-jdk AS builder
+
+RUN apt-get update && apt-get install -y maven && apt-get clean
+WORKDIR /sv
+
+# Copy project files (build context = sv/ root)
+COPY . .
+
+# Build using BuildKit cache for dependencies
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B clean install -pl api-gateway -am \
+        -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+
+# Prepare app structure
+RUN mkdir -p /app/conf /app/lib /app/log && \
+    cp /sv/api-gateway/src/main/resources/*.yml /app/conf && \
+    # Build runtime classpath
+    cd /sv/api-gateway && \
+    mvn dependency:copy-dependencies \
+        -DoutputDirectory=/app/lib -Dmdep.prependGroupId=false \
+        -DskipTests -DincludeScope=runtime && \
+    cp /sv/api-gateway/target/api-gateway-3.3-SNAPSHOT.jar /app/
+
+# -------------------------------------------------------
+# Stage 2: Runtime image
+# -------------------------------------------------------
+FROM eclipse-temurin:21-jdk
+
+LABEL maintainer="ESSEDUM Platform Team"
+LABEL service="api-gateway"
+LABEL profile="oauth2"
+
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+# Import Keycloak CA cert into the JVM trust store.
+# The api-gateway folder does not ship its own copy, so we reuse the
+# one bundled with usm-service (any service copy is identical).
+COPY usm-service/lfn-keycloak2.crt $JAVA_HOME/bin/
+RUN keytool -importcert -trustcacerts \
+    -file $JAVA_HOME/bin/lfn-keycloak2.crt \
+    -alias "lfn-keycloak" \
+    -keystore $JAVA_HOME/lib/security/cacerts \
+    -storepass changeit --noprompt
+
+# Copy built app from builder stage
+COPY --from=builder /app /app/
+
+WORKDIR /app
+ENV ESSEDUM_HOME=/app
+ENV JAVA_OPTS="-Xms128m -Xmx256m"
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} \
+    -Dspring.config.location=/app/conf/ \
+    -DLOG_PATH=/app/log \
+    -Dlogging.level.org.springframework.security=INFO \
+    -Dspring.profiles.active=oauth2 \
+    -cp conf/*:api-gateway-3.3-SNAPSHOT.jar:lib/* \
+    com.lfn.gateway.ApiGatewayApplication"]
+

@@ -1,0 +1,211 @@
+# =====================================================
+# ESSEDUM Platform - Microservices Docker Compose
+# =====================================================
+# This file orchestrates all 4 microservices plus infrastructure.
+#
+# Usage:
+#   docker-compose -f docker-compose-microservices.yml up -d
+#
+# Prerequisites:
+#   - Build all services: mvn clean package -DskipTests
+#   - MySQL/PostgreSQL database running
+# =====================================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # Infrastructure: Service Discovery (Eureka)
+  # ============================================
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    image: essedum/discovery-service:latest
+    container_name: essedum-discovery
+    ports:
+      - "8761:8761"
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx256m
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    networks:
+      - essedum-network
+
+  # ============================================
+  # Infrastructure: API Gateway
+  # ============================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    image: essedum/api-gateway:latest
+    container_name: essedum-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx256m
+      - EUREKA_ENABLED=true
+      - EUREKA_URL=http://discovery-service:8761/eureka
+      - USM_SERVICE_URL=http://usm-service:8081
+      - ICIP_SERVICE_URL=http://icip-service:8082
+      - DATA_SERVICE_URL=http://data-service:8083
+      - VIBE_SERVICE_URL=http://vibe-service:8084
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    networks:
+      - essedum-network
+
+  # ============================================
+  # Microservice #1: USM Service (Port 8081)
+  # ============================================
+  usm-service:
+    build:
+      context: .
+      dockerfile: Dockerfile_usm
+    image: essedum/usm-service:latest
+    container_name: essedum-usm
+    ports:
+      - "8081:8081"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - SPRING_PROFILES_ACTIVE=mysql,dbjwt
+      - MYSQL_DATASOURCE_URL=${MYSQL_HOST:-mysql}:${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - EUREKA_ENABLED=true
+      - EUREKA_URL=http://discovery-service:8761/eureka
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    volumes:
+      - usm-logs:/app/log
+    networks:
+      - essedum-network
+
+  # ============================================
+  # Microservice #2: ICIP Service (Port 8082)
+  # ============================================
+  icip-service:
+    build:
+      context: .
+      dockerfile: Dockerfile_icip
+    image: essedum/icip-service:latest
+    container_name: essedum-icip
+    ports:
+      - "8082:8082"
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+      - SPRING_PROFILES_ACTIVE=mysql,dbjwt
+      - MYSQL_DATASOURCE_URL=${MYSQL_HOST:-mysql}:${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - KAFKA_SERVERS=${KAFKA_SERVERS:-kafka:9092}
+      - EUREKA_ENABLED=true
+      - EUREKA_URL=http://discovery-service:8761/eureka
+      - USM_SERVICE_URL=http://usm-service:8081
+      - DATA_SERVICE_URL=http://data-service:8083
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      usm-service:
+        condition: service_started
+    volumes:
+      - icip-logs:/app/log
+      - icip-gitrepo:/app/gitRepo
+    networks:
+      - essedum-network
+
+  # ============================================
+  # Microservice #3: Data Service (Port 8083)
+  # ============================================
+  data-service:
+    build:
+      context: .
+      dockerfile: Dockerfile_data
+    image: essedum/data-service:latest
+    container_name: essedum-data
+    ports:
+      - "8083:8083"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - SPRING_PROFILES_ACTIVE=mysql,dbjwt
+      - MYSQL_DATASOURCE_URL=${MYSQL_HOST:-mysql}:${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - MINIO_URL=${MINIO_URL:-}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-}
+      - EUREKA_ENABLED=true
+      - EUREKA_URL=http://discovery-service:8761/eureka
+      - USM_SERVICE_URL=http://usm-service:8081
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      usm-service:
+        condition: service_started
+    volumes:
+      - data-logs:/app/log
+      - data-files:/app/files
+    networks:
+      - essedum-network
+
+  # ============================================
+  # Microservice #4: Vibe Service (Port 8084)
+  # ============================================
+  vibe-service:
+    build:
+      context: .
+      dockerfile: Dockerfile_vibe
+    image: essedum/vibe-service:latest
+    container_name: essedum-vibe
+    ports:
+      - "8084:8084"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - SPRING_PROFILES_ACTIVE=mysql,dbjwt
+      - MYSQL_DATASOURCE_URL=${MYSQL_HOST:-mysql}:${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - JWT_SECRET=${JWT_SECRET:-}
+      - GOOSE_URL=${GOOSE_URL:-http://goose:30132}
+      - GOOSE_SECRET_KEY=${GOOSE_SECRET_KEY:-sk-1234}
+      - VIBE_GITHUB_ENABLED=${VIBE_GITHUB_ENABLED:-false}
+      - VIBE_GITHUB_TOKEN=${VIBE_GITHUB_TOKEN:-}
+      - EUREKA_ENABLED=true
+      - EUREKA_URL=http://discovery-service:8761/eureka
+      - USM_SERVICE_URL=http://usm-service:8081
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      usm-service:
+        condition: service_started
+    volumes:
+      - vibe-logs:/app/log
+      - vibe-goose:/app/goose
+      - vibe-github:/tmp/vibe-github
+    networks:
+      - essedum-network
+
+volumes:
+  usm-logs:
+  icip-logs:
+  icip-gitrepo:
+  data-logs:
+  data-files:
+  vibe-logs:
+  vibe-goose:
+  vibe-github:
+
+networks:
+  essedum-network:
+    driver: bridge
+

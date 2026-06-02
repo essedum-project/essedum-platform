@@ -25,10 +25,13 @@
   min-width: 0;
 }
 :host .code-editor {
-  flex: 1 !important;
+  position: relative !important;
+  flex: 1 1 auto !important;
   width: 100% !important;
   height: 100% !important;
-  min-height: 300px;
+  min-height: 400px;
+  // ace mounts internal .ace_scroller / .ace_content / .ace_gutter as absolute
+  // children — they need a sized positioned ancestor to be visible.
 }
 
 .code-editor-wrapper {
