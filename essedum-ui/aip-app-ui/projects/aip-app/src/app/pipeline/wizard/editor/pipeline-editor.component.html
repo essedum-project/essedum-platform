@@ -58,7 +58,7 @@
       <app-config-tab [model]="model"></app-config-tab>
     </mat-tab>
 
-    <!-- Run history (data-pipeline) / Metrics+Logs (training) -->
+    <!-- Run history — data-pipeline and training-job both use the same component -->
     <mat-tab *ngIf="model.kind === 'data-pipeline'">
       <ng-template mat-tab-label><mat-icon>history</mat-icon>&nbsp;Run History</ng-template>
       <app-run-history-tab [model]="model"></app-run-history-tab>
@@ -69,8 +69,8 @@
       <app-metrics-tab [model]="model"></app-metrics-tab>
     </mat-tab>
     <mat-tab *ngIf="model.kind === 'training-job'">
-      <ng-template mat-tab-label><mat-icon>terminal</mat-icon>&nbsp;Logs</ng-template>
-      <app-logs-tab [model]="model"></app-logs-tab>
+      <ng-template mat-tab-label><mat-icon>history</mat-icon>&nbsp;Run History</ng-template>
+      <app-run-history-tab [model]="model"></app-run-history-tab>
     </mat-tab>
 
   </mat-tab-group>

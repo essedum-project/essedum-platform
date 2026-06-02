@@ -215,21 +215,18 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Tab index for Run History (data-pipeline) at runtime.
-   * Tabs: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, RunHistory
+   * Tab index for Run History — works for both data-pipeline and training-job.
+   * Tabs: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, [Metrics if training], RunHistory
    */
   private get runHistoryTabIndex(): number {
-    if (this.model?.kind !== 'data-pipeline') return -1;
-    return this.hasVibePermission ? 4 : 2;
-  }
-
-  /**
-   * Tab index for Logs (training-job) at runtime.
-   * Tabs: Code(0), [VibeCode(1), Git(2) if hasVibePermission], Config, Metrics, Logs
-   */
-  private get logsTabIndex(): number {
-    if (this.model?.kind !== 'training-job') return -1;
-    return this.hasVibePermission ? 5 : 3;
+    if (this.model?.kind === 'data-pipeline') {
+      return this.hasVibePermission ? 4 : 2;
+    }
+    if (this.model?.kind === 'training-job') {
+      // training-job has an extra Metrics tab before Run History
+      return this.hasVibePermission ? 5 : 3;
+    }
+    return -1;
   }
 
   runPipeline(): void {
@@ -246,9 +243,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.running = false;
           this.services.message('Pipeline started!', 'success');
           if (this.model?.kind === 'training-job') {
-            // Navigate to Logs tab so the user can follow progress live
-            const lIdx = this.logsTabIndex;
-            if (lIdx >= 0) { this.activeTab = lIdx; }
+            // Navigate to Run History tab (same component as data-pipeline)
+            const rhIdx = this.runHistoryTabIndex;
+            if (rhIdx >= 0) {
+              this.activeTab = rhIdx;
+              setTimeout(() => this.runHistoryTab?.refresh(), 3000);
+            }
           } else {
             const rhIdx = this.runHistoryTabIndex;
             if (rhIdx >= 0) {
