@@ -239,34 +239,7 @@ import { SchemaRelationshipService } from '../features/schema/schema-relationshi
 // Pipes
 import { HighlightSearchPipe } from '../features/pipes/highlight.pipe';
 
-// Third-party extras
-import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
-import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
-import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
-import { AngularDualListBoxModule } from 'angular-dual-listbox';
-import { PlotlyModule } from 'angular-plotly.js';
-import * as PlotlyJS from 'plotly.js-dist-min';
-import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
-PlotlyModule.plotlyjs = PlotlyJS;
-
-const dbConfig: DBConfig = {
-  name: 'icm_tickets',
-  version: 1,
-  objectStoresMeta: [
-    {
-      store: 'ticketData',
-      storeConfig: { keyPath: 'number', autoIncrement: false },
-      storeSchema: [
-        { name: 'incidentNumber', keypath: 'incidentNumber', options: { unique: false } },
-        { name: 'type', keypath: 'type', options: { unique: false } },
-        { name: 'priority', keypath: 'priority', options: { unique: false } },
-        { name: 'date', keypath: 'date', options: { unique: false } },
-      ],
-    },
-  ],
-};
 
 // Environment is now only a fallback if the host hasn't provided API_CONFIG.
 import { environment } from '../../environments/environment';
@@ -436,13 +409,7 @@ import { environment } from '../../environments/environment';
     GithubLoginComponent,
     MatStepperModule,
     MatGridListModule,
-    PdfViewerModule,
-    CModule,
-    NgxMaterialTimepickerModule,
-    NgxIndexedDBModule.forRoot(dbConfig),
-    AngularDualListBoxModule,
-    PlotlyModule,
-    NgxSliderModule,
+
     // Consolidated UI primitives (formerly duplicated in each MFE)
     SharedLibUiModule,
   ],
@@ -474,7 +441,7 @@ import { environment } from '../../environments/environment';
     GitHubService,
     VibeStudioService,
     GitLinkService,
-hav    DatasourceService,
+    DatasourceService,
     JobsService,
     SchemaRelationshipService,
     DynamicRemoteLoad,
