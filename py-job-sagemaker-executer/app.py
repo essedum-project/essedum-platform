@@ -55,10 +55,14 @@ def _sanitize_for_response(value):
 _flask_jsonify = jsonify
 
 
-def sanitized_jsonify(*args, **kwargs):
-    sanitized_args = tuple(_sanitize_for_response(a) for a in args)
-    sanitized_kwargs = {k: _sanitize_for_response(v) for k, v in kwargs.items()}
-    return _flask_jsonify(*sanitized_args, **sanitized_kwargs)
+def sanitized_jsonify(value=None):
+    # Apply html.escape inline so CodeQL's taint analysis recognizes the
+    # sanitizer in the data-flow path (py/reflective-xss).
+    if isinstance(value, str):
+        return _flask_jsonify(html_module.escape(value))
+    if isinstance(value, (dict, list, tuple)):
+        return _flask_jsonify(_sanitize_for_response(value))
+    return _flask_jsonify(value)
 
 
 app = Flask(__name__)
