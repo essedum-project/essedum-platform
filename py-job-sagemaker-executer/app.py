@@ -442,7 +442,7 @@ def projects_datasets_create():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -474,7 +474,7 @@ def projects_datasets_list_list():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -505,7 +505,7 @@ def projects_datasets_get(dataset_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 400
 
@@ -537,7 +537,7 @@ def projects_datasets_delete(dataset_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -579,7 +579,7 @@ def projects_datasets_export_create(dataset_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -622,7 +622,7 @@ def projects_endpoints_create():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -655,7 +655,7 @@ def projects_endpoints_list_list():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -689,7 +689,7 @@ def projects_endpoints_get(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -722,7 +722,7 @@ def projects_endpoints_delete(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -768,7 +768,7 @@ def projects_endpoints_deploy_model_create(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -813,7 +813,7 @@ def projects_endpoints_explain_create(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -857,7 +857,7 @@ def projects_endpoints_infer_create(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -901,7 +901,7 @@ def projects_endpoints_undeploy_models_create(endpoint_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -938,7 +938,7 @@ def projects_models_list():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -969,7 +969,7 @@ def projects_models_get(model_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1017,7 +1017,7 @@ def projects_models_register_create():
         
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1050,7 +1050,7 @@ def projects_models_delete(model_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1091,7 +1091,7 @@ def projects_models_export_create(model_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1133,7 +1133,7 @@ def training_automl_simplified_create():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1174,7 +1174,7 @@ def training_custom_script_create():
         return create_task_util(request_body)
 
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1206,7 +1206,7 @@ def training_istlist():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1260,7 +1260,7 @@ def training_train_create():
         
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1299,7 +1299,7 @@ def training_cancel_list(training_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1332,7 +1332,7 @@ def training_delete(training_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1366,7 +1366,7 @@ def training_get_list(training_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1412,7 +1412,7 @@ def projects_inferencePipelines_create():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1445,7 +1445,7 @@ def projects_inferencePipelines_list_list():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1478,7 +1478,7 @@ def projects_inferencePipelines_delete(inference_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1520,7 +1520,7 @@ def projects_inferencePipelines_cancel(inference_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1559,7 +1559,7 @@ def projects_inferencePipelines_get(inference_job_id):
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), status_code
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1574,7 +1574,7 @@ def adapter_function_execute():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result), 200
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
     return sanitized_jsonify(result), 500
 
@@ -1591,7 +1591,7 @@ def cloudconnect():
         logger.info("Response received from mlops handler")
         return sanitized_jsonify(result)
     except Exception as err:
-        result = str(err)
+        result = "An unexpected error occurred. Please check server logs for details."
         logger.error("An unexpected error occurred", exc_info=True)
         return sanitized_jsonify(result), 400
 
