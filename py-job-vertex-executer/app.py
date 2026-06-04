@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort, request, render_template, make_response, g
+from flask import Flask, jsonify, abort, request, render_template, g
 import uuid
 import html as html_module
 from utils import *
@@ -59,8 +59,23 @@ def jsonify(value=None):
     # sanitizer in the data-flow path (py/reflective-xss).
     if isinstance(value, str):
         return _flask_jsonify(html_module.escape(value))
-    if isinstance(value, (dict, list, tuple)):
-        return _flask_jsonify(_sanitize_for_response(value))
+    if isinstance(value, dict):
+        safe = {}
+        for _k, _v in value.items():
+            if isinstance(_v, str):
+                safe[_k] = html_module.escape(_v)
+            elif isinstance(_v, dict):
+                safe[_k] = {_ik: html_module.escape(_iv) if isinstance(_iv, str) else _iv
+                            for _ik, _iv in _v.items()}
+            elif isinstance(_v, list):
+                safe[_k] = [html_module.escape(_i) if isinstance(_i, str) else _i
+                            for _i in _v]
+            else:
+                safe[_k] = _v
+        return _flask_jsonify(safe)
+    if isinstance(value, list):
+        return _flask_jsonify([html_module.escape(_v) if isinstance(_v, str) else _v
+                               for _v in value])
     return _flask_jsonify(value)
 
 
@@ -167,18 +182,18 @@ app.logger.addHandler(handler)
 # error handler
 @app.errorhandler(400)
 def not_found(error):
-    return make_response(jsonify({'error': 'Bad Request - Missing or invalid parameters'}), 400)
+    return jsonify({'error': 'Bad Request - Missing or invalid parameters'}), 400
 
 
 # error handler
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found - The requested resource does not exists'}), 404)
+    return jsonify({'error': 'Not found - The requested resource does not exists'}), 404
 
 # error handler
 @app.errorhandler(422)
 def not_found(error):
-    return make_response(jsonify({'error': 'Unprocessable Entity - Invalid data or values in the payload'}), 422)
+    return jsonify({'error': 'Unprocessable Entity - Invalid data or values in the payload'}), 422
 
 
 @app.route('/execute/jobs', methods=['GET'])
