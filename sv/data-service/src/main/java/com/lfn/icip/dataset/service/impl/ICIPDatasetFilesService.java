@@ -63,7 +63,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import com.lfn.ai.comm.lib.util.FileValidate;
 import com.lfn.ai.comm.lib.util.FileValidateV2;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
@@ -108,9 +107,6 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	@Autowired
 	private FileServerService fileserverService;
 	
-	@Autowired
-	private FileValidate fileValidate;
-
 	@Autowired
 	private FileValidateV2 fileValidateV2;
 
