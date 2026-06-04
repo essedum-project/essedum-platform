@@ -15,7 +15,6 @@ import psutil
 import time
 import os
 import signal
-import traceback
 from mlops import aws
 from datasource import get_connection_details_with_token
 from functionadapter import function_execute
@@ -296,6 +295,10 @@ def get_task_log(task_id):
         with open(log_file,'r', encoding='utf-8', errors='ignore') as f:
             log=f.read()
         
+        # Strip stack traces from log output to prevent information exposure
+        import re
+        log = re.sub(r'Traceback \(most recent call last\):.*?(?=\d{4}-|$)', '', log, flags=re.DOTALL)
+        
         result={
             'logs':{'content':log}     
         }
@@ -313,6 +316,10 @@ def get_log():
         
         with open(log_file,'r', encoding='utf-8', errors='ignore') as f:
             log=f.read()
+        
+        # Strip stack traces from log output to prevent information exposure
+        import re
+        log = re.sub(r'Traceback \(most recent call last\):.*?(?=\d{4}-|$)', '', log, flags=re.DOTALL)
         
         result={
             'logs':{'content':log}     
