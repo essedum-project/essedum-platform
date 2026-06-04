@@ -1296,7 +1296,10 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 		Files.deleteIfExists(outPath);
 		Files.createFile(outPath);
 
-		ProcessBuilder pb = new ProcessBuilder(cmd[0], cmd[1], CommandSanitizer.sanitizeArgument(cmd[2]));
+		ProcessBuilder pb = new ProcessBuilder(
+				CommandSanitizer.validateExecutable(cmd[0]),
+				CommandSanitizer.validateShellFlag(cmd[1]),
+				CommandSanitizer.sanitizeArgument(cmd[2]));
 		pb.redirectErrorStream(true);
 		pb.redirectOutput(outPath.toFile());
 
