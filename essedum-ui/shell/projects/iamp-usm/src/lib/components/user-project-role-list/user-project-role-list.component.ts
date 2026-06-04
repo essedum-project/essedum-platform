@@ -38,10 +38,11 @@ import { DatePipe } from "@angular/common";
 // import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
 // import { ApisService } from "../../services/apis.service";
 @Component({
-  //moduleId: module.id,
-  templateUrl: "user-project-role-list.component.html",
-  selector: 'lib-user-project-role-list',
-  styleUrls: ["user-project-role-list.component.css"],
+    //moduleId: module.id,
+    templateUrl: "user-project-role-list.component.html",
+    selector: 'lib-user-project-role-list',
+    styleUrls: ["user-project-role-list.component.css"],
+    standalone: false
 })
 export class UserProjectRoleListComponent implements OnInit, OnChanges {
   lastRefreshedTime: Date = new Date();

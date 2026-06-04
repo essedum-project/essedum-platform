@@ -57,10 +57,11 @@ interface EditorEvent {
 type SupportedLanguage = 'python' | 'java' | 'javascript' | 'r';
 
 @Component({
-  selector: 'app-enl-code-editor[id=ele]',
-  templateUrl: './enl-code-editor.component.html',
-  styleUrls: ['./enl-code-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-enl-code-editor[id=ele]',
+    templateUrl: './enl-code-editor.component.html',
+    styleUrls: ['./enl-code-editor.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EnlCodeEditorComponent
   implements OnInit, OnChanges, AfterViewInit

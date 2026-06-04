@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-aip-pagination',
-  templateUrl: './aip-pagination.component.html',
-  styleUrls: ['./aip-pagination.component.scss'],
+    selector: 'app-aip-pagination',
+    templateUrl: './aip-pagination.component.html',
+    styleUrls: ['./aip-pagination.component.scss'],
+    standalone: false
 })
 export class AipPaginationComponent {
   @Input() pageNumber!: number;

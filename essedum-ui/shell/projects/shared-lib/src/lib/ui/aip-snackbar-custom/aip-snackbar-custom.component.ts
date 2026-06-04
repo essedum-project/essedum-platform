@@ -9,9 +9,10 @@ export interface SnackbarData {
 }
 
 @Component({
-  selector: 'app-aip-snackbar-custom',
-  templateUrl: './aip-snackbar-custom.component.html',
-  styleUrls: ['./aip-snackbar-custom.component.scss']
+    selector: 'app-aip-snackbar-custom',
+    templateUrl: './aip-snackbar-custom.component.html',
+    styleUrls: ['./aip-snackbar-custom.component.scss'],
+    standalone: false
 })
 export class AipSnackbarCustomComponent {
 

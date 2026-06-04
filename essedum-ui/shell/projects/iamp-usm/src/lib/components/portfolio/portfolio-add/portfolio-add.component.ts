@@ -22,11 +22,10 @@ import { SharedMaterialModule } from "../../../shared-modules/material/material.
 
 
 @Component({
-  selector: "portfolio-add",
-  templateUrl: "./portfolio-add.component.html",
-  styleUrls: ["./portfolio-add.component.scss"],
-  standalone: true,
-  imports: [SharedMaterialModule],
+    selector: "portfolio-add",
+    templateUrl: "./portfolio-add.component.html",
+    styleUrls: ["./portfolio-add.component.scss"],
+    imports: [SharedMaterialModule]
 })
 export class PortfolioAddComponent implements OnInit, OnDestroy {
   usmPortfolio: Portfolio = new Portfolio();

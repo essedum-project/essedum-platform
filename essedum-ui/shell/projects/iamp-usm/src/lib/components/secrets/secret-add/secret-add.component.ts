@@ -9,11 +9,10 @@ import { SecretService } from "../../../services/secret.service";
 import { MessageService } from "../../../services/message.service";
 
 @Component({
-  selector: "lib-secret-add",
-  standalone: true,
-  imports: [SharedMaterialModule],
-  templateUrl: "./secret-add.component.html",
-  styleUrl: "./secret-add.component.css",
+    selector: "lib-secret-add",
+    imports: [SharedMaterialModule],
+    templateUrl: "./secret-add.component.html",
+    styleUrl: "./secret-add.component.css"
 })
 export class SecretAddComponent implements OnInit {
   edit: boolean = false;

@@ -4,9 +4,10 @@ import { MatCardModule } from "@angular/material/card";
 import { AppOAuthService } from "../../core/auth.service";
 
 @Component({
-  selector: 'app-token-expiry-popup',
-  templateUrl: './token-expiry-popup.component.html',
-  styleUrls: ['./token-expiry-popup.component.scss']
+    selector: 'app-token-expiry-popup',
+    templateUrl: './token-expiry-popup.component.html',
+    styleUrls: ['./token-expiry-popup.component.scss'],
+    standalone: false
 })
 export class TokenExpiryPopupComponent implements OnInit {
   @Output() resetTimerEvent = new EventEmitter<void>();

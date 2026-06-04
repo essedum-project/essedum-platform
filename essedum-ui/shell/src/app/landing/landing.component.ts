@@ -32,9 +32,10 @@ import { AppConfigService } from "../services/app-config.service";
 import { MyProfileComponent } from "./my-profile/my-profile.component";
 
 @Component({
-  selector: "app-landing",
-  templateUrl: "./landing.component.html",
-  styleUrls: ["./landing.component.scss"],
+    selector: "app-landing",
+    templateUrl: "./landing.component.html",
+    styleUrls: ["./landing.component.scss"],
+    standalone: false
 })
 export class LandingComponent implements OnInit, AfterViewInit {
   @ViewChild("drawerLeft", { static: true }) drawerLeft: any;

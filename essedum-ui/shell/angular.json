@@ -21,7 +21,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "ngx-build-plus:browser",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/shell",
             "index": "src/index.html",
@@ -44,9 +44,6 @@
             "styles": [
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/primeng/resources/themes/nova/theme.css",
-              "node_modules/primeng/resources/primeng.min.css",
-              "node_modules/ng-busy/src/style/busy.css",
               "node_modules/font-awesome/css/font-awesome.min.css",
               "node_modules/cookieconsent/build/cookieconsent.min.css",
               "src/aip-app-legacy.scss"
@@ -57,7 +54,7 @@
               "src/assets/js/usm-script.js",
               "node_modules/cookieconsent/build/cookieconsent.min.js"
             ],
-            "extraWebpackConfig": "webpack.config.js",
+           
             "commonChunk": false,
             "allowedCommonJsDependencies": [
               "quill-delta",
@@ -107,7 +104,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "ngx-build-plus:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "browserTarget": "shell:build:production",
@@ -120,15 +117,15 @@
           "defaultConfiguration": "development",
           "options": {
             "port": 8080,
-            "publicHost": "http://localhost:8080",
-            "extraWebpackConfig": "webpack.config.js"
+            "publicHost": "http://localhost:8080"
+         
           }
         },
         "extract-i18n": {
           "builder": "ngx-build-plus:extract-i18n",
           "options": {
-            "browserTarget": "shell:build",
-            "extraWebpackConfig": "webpack.config.js"
+            "browserTarget": "shell:build"
+   
           }
         },
         "test": {

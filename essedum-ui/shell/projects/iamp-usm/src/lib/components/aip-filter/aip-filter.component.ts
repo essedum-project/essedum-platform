@@ -48,33 +48,32 @@ enum FilterType {
 }
 
 @Component({
-  selector: "app-aip-filter",
-  templateUrl: "./aip-filter.component.html",
-  styleUrls: ["./aip-filter.component.scss"],
-  animations: [
-    trigger("slideToggle", [
-      transition(":enter", [
-        style({ height: 0, opacity: 0 }),
-        animate("600ms ease-out", style({ height: "*", opacity: 1 })),
-      ]),
-      transition(":leave", [
-        animate("600ms ease-in", style({ height: 0, opacity: 0 })),
-      ]),
-    ]),
-  ],
-  standalone: true,
-  imports: [
-    MatIconModule,
-    MatTooltipModule,
-    CommonModule,
-    FormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatSelectModule,
-    NgxMatSelectSearchModule,
-  ],
+    selector: "app-aip-filter",
+    templateUrl: "./aip-filter.component.html",
+    styleUrls: ["./aip-filter.component.scss"],
+    animations: [
+        trigger("slideToggle", [
+            transition(":enter", [
+                style({ height: 0, opacity: 0 }),
+                animate("600ms ease-out", style({ height: "*", opacity: 1 })),
+            ]),
+            transition(":leave", [
+                animate("600ms ease-in", style({ height: 0, opacity: 0 })),
+            ]),
+        ]),
+    ],
+    imports: [
+        MatIconModule,
+        MatTooltipModule,
+        CommonModule,
+        FormsModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatSelectModule,
+        NgxMatSelectSearchModule,
+    ]
 })
 export class AipFilterComponent implements OnInit, OnChanges {
   // Input properties
