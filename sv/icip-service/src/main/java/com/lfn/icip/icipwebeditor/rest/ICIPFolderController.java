@@ -21,6 +21,7 @@ import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
 import com.lfn.icip.icipwebeditor.exception.*;
 import com.lfn.icip.icipwebeditor.folder.service.ICIPFolderService;
+import com.lfn.icip.icipwebeditor.folder.service.PipelineMetadataValidator;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
 import com.lfn.icip.icipwebeditor.repository.ICIPAiAgentScriptRepository;
@@ -70,13 +71,17 @@ public class ICIPFolderController {
     @EssedumProperty("icip.script.github.enabled")
     private String remoteScript;
 
+    /** Validates metadata.json inside every uploaded pipeline package. */
+    @Autowired
+    private PipelineMetadataValidator pipelineMetadataValidator;
 
     /**
      * Upload file.
      *
-     * @param cname the customer name
-     * @param org the organization
-     * @param zipFile the zip file (optional - multipart upload)
+     * @param cname      the customer name
+     * @param org        the organization
+     * @param type       the pipeline type: App, Agent, or MCP
+     * @param zipFile    the zip file (optional - multipart upload)
      * @param folderPath the folder path (optional - if not uploading a file)
      * @return the response entity
      */
@@ -84,16 +89,24 @@ public class ICIPFolderController {
     public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(
             @PathVariable(name = "cname") String cname,
             @PathVariable(name = "org") String org,
+            @RequestParam(value = "type",required=true) String type,
             @RequestParam(value = "zipFile", required = false) MultipartFile zipFile,
             @RequestParam(value = "folderPath", required = false) String folderPath) {
 
-        logger.info("request to upload ai-agent scripts for cname={}, org={}", cname, org);
+        logger.info("request to upload ai-agent scripts for cname={}, org={}, type={}", cname, org, type);
 
         try {
+            // Validate pipeline type param
+            if (type == null || type.isBlank()) {
+                throw new InvalidRequestException(
+                        "Pipeline type is required. Provide a valid type value.");
+            }
+
             // Validate that at least one option is provided
             if ((zipFile == null || zipFile.isEmpty()) && (folderPath == null || folderPath.isBlank())) {
                 logger.warn("Neither zipFile nor folderPath provided for cname={}, org={}", cname, org);
-                throw new InvalidRequestException("Either zipFile or folderPath must be provided. Please upload a ZIP file or specify a folder path.");
+                throw new InvalidRequestException(
+                        "Either zipFile or folderPath must be provided. Please upload a ZIP file or specify a folder path.");
             }
 
             // Validate cname and org
@@ -104,7 +117,16 @@ public class ICIPFolderController {
                 throw new InvalidRequestException("Organization (org) cannot be null or empty");
             }
 
-            // Check if files already exist for this cname and org
+            // ── Pipeline metadata.json validation ─────────────────────────────
+            // Runs BEFORE deleting existing records to prevent data loss on a bad upload.
+            logger.info("Validating pipeline metadata.json for cname={}, org={}, type={}", cname, org, type);
+            if (zipFile != null && !zipFile.isEmpty()) {
+                pipelineMetadataValidator.validateFromZip(zipFile, type);
+            } else if (folderPath != null && !folderPath.isBlank()) {
+                pipelineMetadataValidator.validateFromFolderPath(folderPath, type);
+            }
+            logger.info("Pipeline metadata validation passed for cname={}, org={}, type={}", cname, org, type);
+            // ── End metadata validation ────────────────────────────────────────
             List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
             if (existingFiles != null && !existingFiles.isEmpty()) {
                 logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
@@ -184,7 +206,8 @@ public class ICIPFolderController {
                     githubPushSuccess ? "" : " - Reason: " + githubPushError);
             return new ResponseEntity<>(result, HttpStatus.OK);
 
-        } catch (InvalidRequestException | FileDeletionException | FileUploadException e) {
+        } catch (InvalidRequestException | FileDeletionException | FileUploadException
+                | PipelineMetadataValidationException e) {
             // Re-throw custom exceptions to be handled by GlobalControllerException
             throw e;
         } catch (Exception e) {
