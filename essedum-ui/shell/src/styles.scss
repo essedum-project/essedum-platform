@@ -2130,6 +2130,17 @@ body.header-light-theme {
   .mdc-snackbar__surface { background: transparent !important; border-radius: 12px !important; padding: 12px 18px !important; }
   .mdc-snackbar__label { color: #e2e8f0 !important; font-size: 13px !important; font-weight: 500 !important; padding: 0 !important; height: auto !important; }
   .mat-mdc-button.mat-mdc-snack-bar-action { color: #7eb8ff !important; font-weight: 600 !important; }
+
+  // Custom component snackbars — container is fully transparent; the inner
+  // .custom-snackbar div owns all visual chrome to avoid double-background split.
+  &.snackbar-success, &.snackbar-error, &.snackbar-warning, &.snackbar-info {
+    --mdc-snackbar-container-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    .mdc-snackbar__surface { background: transparent !important; padding: 0 !important; border-radius: 12px !important; }
+  }
 }
 
 // Card action bar at bottom
