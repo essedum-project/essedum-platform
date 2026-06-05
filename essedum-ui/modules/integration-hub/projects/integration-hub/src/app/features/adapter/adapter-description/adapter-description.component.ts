@@ -9,9 +9,10 @@ import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-adapter-description',
-  templateUrl: './adapter-description.component.html',
-  styleUrls: ['./adapter-description.component.scss'],
+    selector: 'app-adapter-description',
+    templateUrl: './adapter-description.component.html',
+    styleUrls: ['./adapter-description.component.scss'],
+    standalone: false
 })
 export class AdapterDescriptionComponent {
   readonly CARD_TITLE = 'Implementation';

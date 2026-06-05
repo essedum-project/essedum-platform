@@ -9,9 +9,10 @@ import { AipSwaggerCustomComponent } from '../aip-swagger-custom.component';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-aip-method-create-edit',
-  templateUrl: './aip-method-create-edit.component.html',
-  styleUrls: ['./aip-method-create-edit.component.scss']
+    selector: 'app-aip-method-create-edit',
+    templateUrl: './aip-method-create-edit.component.html',
+    styleUrls: ['./aip-method-create-edit.component.scss'],
+    standalone: false
 })
 export class AipMethodCreateEditComponent {
   tab: any = 'connectionTab';

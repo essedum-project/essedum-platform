@@ -2,9 +2,10 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 @Component({
-  selector: 'app-salus',
-  templateUrl: './salus.component.html',
-  styleUrls: ['./salus.component.scss'],
+    selector: 'app-salus',
+    templateUrl: './salus.component.html',
+    styleUrls: ['./salus.component.scss'],
+    standalone: false
 })
 export class SalusComponent implements OnInit, AfterViewInit {
   // Embedded Salus interface URL

@@ -19,9 +19,10 @@ import { DataPipelineWizardComponent } from './wizard/data-pipeline-wizard/data-
 import { TrainingPipelineWizardComponent } from './wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 import { Subscription } from 'rxjs';
 @Component({
-  selector: 'app-pipeline',
-  templateUrl: './pipeline.component.html',
-  styleUrls: ['./pipeline.component.scss'],
+    selector: 'app-pipeline',
+    templateUrl: './pipeline.component.html',
+    styleUrls: ['./pipeline.component.scss'],
+    standalone: false
 })
 export class PipelineComponent implements OnInit, OnChanges, OnDestroy {
   // Cross-MFE event-bus subscriptions.

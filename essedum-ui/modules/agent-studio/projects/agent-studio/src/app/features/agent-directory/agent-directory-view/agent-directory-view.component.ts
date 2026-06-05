@@ -6,9 +6,10 @@ import { Location } from '@angular/common';
 import { AgentDirectoryService } from '../agent-directory.service';
 
 @Component({
-  selector: 'app-agent-directory-view',
-  templateUrl: './agent-directory-view.component.html',
-  styleUrls: ['./agent-directory-view.component.scss'],
+    selector: 'app-agent-directory-view',
+    templateUrl: './agent-directory-view.component.html',
+    styleUrls: ['./agent-directory-view.component.scss'],
+    standalone: false
 })
 export class AgentDirectoryViewComponent implements OnInit {
   isBackHovered: boolean = false;

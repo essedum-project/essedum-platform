@@ -6,9 +6,10 @@ export interface NotebookDialogData {
 }
 
 @Component({
-  selector: 'app-notebook-dialog',
-  templateUrl: './notebook-dialog.component.html',
-  styleUrls: ['./notebook-dialog.component.scss']
+    selector: 'app-notebook-dialog',
+    templateUrl: './notebook-dialog.component.html',
+    styleUrls: ['./notebook-dialog.component.scss'],
+    standalone: false
 })
 export class NotebookDialogComponent {
 

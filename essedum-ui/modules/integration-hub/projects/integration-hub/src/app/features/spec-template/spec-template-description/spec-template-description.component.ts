@@ -16,9 +16,10 @@ import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-spec-template-description',
-  templateUrl: './spec-template-description.component.html',
-  styleUrls: ['./spec-template-description.component.scss'],
+    selector: 'app-spec-template-description',
+    templateUrl: './spec-template-description.component.html',
+    styleUrls: ['./spec-template-description.component.scss'],
+    standalone: false
 })
 export class SpecTemplateDescriptionComponent implements OnInit {
   @Input() cardTitle: String = 'Spec';

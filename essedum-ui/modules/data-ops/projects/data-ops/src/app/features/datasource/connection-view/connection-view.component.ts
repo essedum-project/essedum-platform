@@ -6,9 +6,10 @@ import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-connection-view',
-  templateUrl: './connection-view.component.html',
-  styleUrls: ['./connection-view.component.scss'],
+    selector: 'app-connection-view',
+    templateUrl: './connection-view.component.html',
+    styleUrls: ['./connection-view.component.scss'],
+    standalone: false
 })
 export class ConnectionViewComponent implements OnInit {
   @Input() initiativeData: any;

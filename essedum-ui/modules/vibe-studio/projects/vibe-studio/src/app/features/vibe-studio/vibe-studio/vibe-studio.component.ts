@@ -7,9 +7,10 @@ import { Services } from '@essedum/shared-lib';
 import { StreamingServices } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-vibe-studio',
-  templateUrl: './vibe-studio.component.html',
-  styleUrls: ['./vibe-studio.component.scss'],
+    selector: 'app-vibe-studio',
+    templateUrl: './vibe-studio.component.html',
+    styleUrls: ['./vibe-studio.component.scss'],
+    standalone: false
 })
 export class VibeStudioComponent implements OnInit, OnDestroy {
   readonly appTypeOptions = APP_TYPE_OPTIONS;

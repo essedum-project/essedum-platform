@@ -19,9 +19,10 @@ import { VibeStudioService } from '../../../services/vibe-studio.service';
 import { StreamingServices } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-training-pipeline-wizard',
-  templateUrl: './training-pipeline-wizard.component.html',
-  styleUrls: ['./training-pipeline-wizard.component.scss'],
+    selector: 'app-training-pipeline-wizard',
+    templateUrl: './training-pipeline-wizard.component.html',
+    styleUrls: ['./training-pipeline-wizard.component.scss'],
+    standalone: false
 })
 export class TrainingPipelineWizardComponent implements OnInit {
   @ViewChild('stepper') stepper: MatStepper;

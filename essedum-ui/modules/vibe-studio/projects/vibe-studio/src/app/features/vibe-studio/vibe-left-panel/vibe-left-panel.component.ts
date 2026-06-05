@@ -10,9 +10,10 @@ import {
 } from '../models/vibe-studio.models';
 
 @Component({
-  selector: 'app-vibe-left-panel',
-  templateUrl: './vibe-left-panel.component.html',
-  styleUrls: ['./vibe-left-panel.component.scss'],
+    selector: 'app-vibe-left-panel',
+    templateUrl: './vibe-left-panel.component.html',
+    styleUrls: ['./vibe-left-panel.component.scss'],
+    standalone: false
 })
 export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   @ViewChild('chatContainer') chatContainer!: ElementRef;

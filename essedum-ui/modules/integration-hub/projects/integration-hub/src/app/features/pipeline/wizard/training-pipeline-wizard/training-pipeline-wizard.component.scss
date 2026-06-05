@@ -1,4 +1,4 @@
-@import '../data-pipeline-wizard/data-pipeline-wizard.component.scss';
+@use '../data-pipeline-wizard/data-pipeline-wizard.component.scss';
 
 // Fix: base-model dropdown panel clipped at viewport bottom inside dialog
 ::ng-deep .wizard-bm-panel.mat-mdc-select-panel {

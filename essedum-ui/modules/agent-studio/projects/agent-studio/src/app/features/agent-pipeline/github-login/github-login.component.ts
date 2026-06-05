@@ -9,21 +9,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-github-login',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
-  templateUrl: './github-login.component.html',
-  styleUrl: './github-login.component.scss'
+    selector: 'app-github-login',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatProgressSpinnerModule
+    ],
+    templateUrl: './github-login.component.html',
+    styleUrl: './github-login.component.scss'
 })
 export class GithubLoginComponent {
   @Output() loginSuccess = new EventEmitter<any>();

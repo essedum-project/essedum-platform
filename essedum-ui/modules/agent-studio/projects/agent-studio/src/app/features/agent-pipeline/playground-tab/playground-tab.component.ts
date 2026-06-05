@@ -2,9 +2,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-playground-tab',
-  templateUrl: './playground-tab.component.html',
-  styleUrls: ['./playground-tab.component.scss']
+    selector: 'app-playground-tab',
+    templateUrl: './playground-tab.component.html',
+    styleUrls: ['./playground-tab.component.scss'],
+    standalone: false
 })
 export class PlaygroundTabComponent {
   @Input() pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';

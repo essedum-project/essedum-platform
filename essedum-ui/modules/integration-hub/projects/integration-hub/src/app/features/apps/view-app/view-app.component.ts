@@ -31,9 +31,10 @@ import { ComponentType } from '@angular/cdk/overlay';
 import { DynamicRemoteLoad } from './remoteLoad';
 
 @Component({
-  selector: 'app-view-app',
-  templateUrl: './view-app.component.html',
-  styleUrls: ['./view-app.component.scss'],
+    selector: 'app-view-app',
+    templateUrl: './view-app.component.html',
+    styleUrls: ['./view-app.component.scss'],
+    standalone: false
 })
 export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() initiativeData: any;

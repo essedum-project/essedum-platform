@@ -13,9 +13,10 @@ import { Services } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 @Component({
-  selector: 'app-model-description',
-  templateUrl: './model.description.component.html',
-  styleUrls: ['./model.description.component.scss'],
+    selector: 'app-model-description',
+    templateUrl: './model.description.component.html',
+    styleUrls: ['./model.description.component.scss'],
+    standalone: false
 })
 export class ModelDescriptionComponent implements OnInit {
   @Input() initiativeData: any;

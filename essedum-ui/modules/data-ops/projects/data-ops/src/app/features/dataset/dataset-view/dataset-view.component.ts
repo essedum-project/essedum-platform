@@ -10,9 +10,10 @@ export class PaginationAttributes {
   sortOrder: any
 }
 @Component({
-  selector: 'app-dataset-view',
-  templateUrl: './dataset-view.component.html',
-  styleUrls: ['./dataset-view.component.scss']
+    selector: 'app-dataset-view',
+    templateUrl: './dataset-view.component.html',
+    styleUrls: ['./dataset-view.component.scss'],
+    standalone: false
 })
 export class DatasetViewComponent {
   @Input('data') data;

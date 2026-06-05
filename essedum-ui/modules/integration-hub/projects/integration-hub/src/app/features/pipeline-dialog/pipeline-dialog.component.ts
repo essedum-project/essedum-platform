@@ -10,9 +10,10 @@ import { DatasetServices } from '../services/dataset-service';
 import { JobsService } from '../services/jobs.service';
 
 @Component({
-  selector: 'app-pipeline-dialog',
-  templateUrl: './pipeline-dialog.component.html',
-  styleUrls: ['./pipeline-dialog.component.scss']
+    selector: 'app-pipeline-dialog',
+    templateUrl: './pipeline-dialog.component.html',
+    styleUrls: ['./pipeline-dialog.component.scss'],
+    standalone: false
 })
 export class PipelineDialogComponent {
   @Input() data: string;

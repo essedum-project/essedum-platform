@@ -6,8 +6,8 @@ import {
 } from './snippet-library.constants';
 
 @Component({
-  selector: 'app-function-library',
-  template: `
+    selector: 'app-function-library',
+    template: `
     <div class="fn-lib">
       <header class="fn-head">
         <mat-icon>auto_stories</mat-icon>
@@ -32,7 +32,7 @@ import {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display:block; height:100%; }
     .fn-lib { display:flex; flex-direction:column; height:100%; background:#0f172a; color:#e5e7eb; padding:10px; }
     .fn-head { display:flex; align-items:center; gap:8px; font-weight:600; margin-bottom:8px; color:#a5b4fc; }
@@ -48,6 +48,7 @@ import {
     .fn-name { display:block; font-family:'Fira Code',monospace; font-size:12px; color:#a5b4fc; }
     .fn-desc { display:block; font-size:11px; color:#94a3b8; }
   `],
+    standalone: false
 })
 export class FunctionLibraryComponent implements OnInit {
   @Input() kind: 'data-pipeline' | 'training-job' = 'data-pipeline';

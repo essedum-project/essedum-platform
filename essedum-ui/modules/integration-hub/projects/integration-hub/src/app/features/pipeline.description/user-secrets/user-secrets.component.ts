@@ -1,9 +1,10 @@
 import { Component, Input, OnInit,  Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-user-secrets',
-  templateUrl: './user-secrets.component.html',
-  styleUrls: ['./user-secrets.component.scss']
+    selector: 'app-user-secrets',
+    templateUrl: './user-secrets.component.html',
+    styleUrls: ['./user-secrets.component.scss'],
+    standalone: false
 })
 export class UserSecretsComponent implements OnInit {
   ngOnInit(): void {

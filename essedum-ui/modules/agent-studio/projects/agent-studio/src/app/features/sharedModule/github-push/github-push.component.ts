@@ -5,9 +5,10 @@ import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.servic
 import JSZip from 'jszip';
 import { Services } from '@essedum/shared-lib';
 @Component({
-  selector: 'app-github-push',
-  templateUrl: './github-push.component.html',
-  styleUrls: ['./github-push.component.scss']
+    selector: 'app-github-push',
+    templateUrl: './github-push.component.html',
+    styleUrls: ['./github-push.component.scss'],
+    standalone: false
 })
 export class GitHubPushComponent implements OnInit {
   @Input() mode: 'push' | 'pull' = 'push';

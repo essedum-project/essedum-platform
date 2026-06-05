@@ -15,9 +15,10 @@ export interface FileTreeNode {
 }
 
 @Component({
-  selector: 'app-vibe-right-panel',
-  templateUrl: './vibe-right-panel.component.html',
-  styleUrls: ['./vibe-right-panel.component.scss'],
+    selector: 'app-vibe-right-panel',
+    templateUrl: './vibe-right-panel.component.html',
+    styleUrls: ['./vibe-right-panel.component.scss'],
+    standalone: false
 })
 export class VibeRightPanelComponent implements OnInit, OnDestroy {
   files: VibeFile[] = [];

@@ -6,9 +6,10 @@ import { Services } from '@essedum/shared-lib';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-pipeline-create',
-  templateUrl: './pipeline-create.component.html',
-  styleUrls: ['./pipeline-create.component.scss']
+    selector: 'app-pipeline-create',
+    templateUrl: './pipeline-create.component.html',
+    styleUrls: ['./pipeline-create.component.scss'],
+    standalone: false
 })
 export class PipelineCreateComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();

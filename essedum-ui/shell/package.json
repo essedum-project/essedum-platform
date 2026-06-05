@@ -10,18 +10,16 @@
     "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
   },
   "dependencies": {
-    "@angular-architects/module-federation": "^16.0.0",
-    "@angular-architects/module-federation-tools": "^16.0.0",
-    "@angular-material-components/datetime-picker": "^16.0.1",
+    "@angular-architects/module-federation": "^19.0.0",
+    "@angular-architects/module-federation-tools": "^19.0.0",
     "@angular/animations": "^19.2.25",
-    "@angular/cdk": "^18.2.14",
+    "@angular/cdk": "^19.2.0",
     "@angular/common": "^19.2.25",
     "@angular/compiler": "^19.2.25",
     "@angular/core": "^19.2.25",
-    "@angular/elements": "^19.2.25",
     "@angular/forms": "^19.2.25",
     "@angular/localize": "^19.2.25",
-    "@angular/material": "^18.2.14",
+    "@angular/material": "^19.2.0",
     "@angular/platform-browser": "^19.2.25",
     "@angular/platform-browser-dynamic": "^19.2.25",
     "@angular/router": "^19.2.25",
@@ -45,12 +43,10 @@
     "ngx-mat-select-search": "^4.2.1",
     "ngx-pagination": "^6.0.2",
     "ngx-quill": "^26.0.8",
-    "ngx-spinner": "^21.1.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.8",
     "quill": "2.0.2",
     "rxjs": "7.8.1",
-    "rxjs-compat": "^6.6.7",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.1"
   },
@@ -62,7 +58,6 @@
     "acorn": "^8.12.1",
     "lodash": "^4.17.21",
     "ng-packagr": "^19.2.2",
-    "rxjs-tslint": "0.1.5",
     "typescript": "~5.8.3"
   },
   "overrides": {

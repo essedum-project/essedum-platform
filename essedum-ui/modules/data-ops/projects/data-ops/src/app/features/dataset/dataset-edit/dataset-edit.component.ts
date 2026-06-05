@@ -9,9 +9,10 @@ import { Location } from "@angular/common";
 import { DashConstant } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-dataset-edit',
-  templateUrl: './dataset-edit.component.html',
-  styleUrls: ['./dataset-edit.component.scss']
+    selector: 'app-dataset-edit',
+    templateUrl: './dataset-edit.component.html',
+    styleUrls: ['./dataset-edit.component.scss'],
+    standalone: false
 })
 export class DatasetEditComponent implements OnInit {
 

@@ -25,9 +25,10 @@ import * as SockJS from 'sockjs-client';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-create-app',
-  templateUrl: './create-app.component.html',
-  styleUrls: ['./create-app.component.scss'],
+    selector: 'app-create-app',
+    templateUrl: './create-app.component.html',
+    styleUrls: ['./create-app.component.scss'],
+    standalone: false
 })
 export class CreateAppComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();

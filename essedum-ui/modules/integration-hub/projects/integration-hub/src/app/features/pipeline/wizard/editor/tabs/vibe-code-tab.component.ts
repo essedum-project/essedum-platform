@@ -10,8 +10,8 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
 // In-place AI rewrite tab — agent+model selection mirrors Vibe Studio exactly,
 // then hands off to VibeStudioService (Goose) for all AI work.
 @Component({
-  selector: 'app-vibe-code-tab',
-  template: `
+    selector: 'app-vibe-code-tab',
+    template: `
     <div class="vibe-shell">
 
       <!-- ── Left: Chat Panel ── -->
@@ -182,7 +182,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
 
     </div>
   `,
-  styles: [`
+    styles: [`
     /* ── Shell ─────────────────────────────────────────────────────────────── */
     :host { display: block; overflow: hidden; }
     .vibe-shell { display: flex; height: calc(100vh - 148px); overflow: hidden; user-select: none; }
@@ -424,6 +424,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     :host-context(body.header-light-theme) .prompt-input::placeholder { color: #94a3b8; }
     :host-context(body.header-light-theme) .input-hint { color: #94a3b8; }
   `],
+    standalone: false
 })
 export class VibeCodeTabComponent implements OnInit, OnDestroy {
   @Input() model: WizardPipelineModel;

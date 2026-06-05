@@ -3,9 +3,10 @@ import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { DatasetServices } from '../dataset-service';
 
 @Component({
-  selector: 'app-rest-dataset-config',
-  templateUrl: './rest-dataset-config.component.html',
-  styleUrls: ['./rest-dataset-config.component.scss']
+    selector: 'app-rest-dataset-config',
+    templateUrl: './rest-dataset-config.component.html',
+    styleUrls: ['./rest-dataset-config.component.scss'],
+    standalone: false
 })
 export class RestDatasetConfigComponent implements OnInit {
   @ViewChild('columnJsonEditor', { static: false }) columnJsonEditor: JsonEditorComponent;

@@ -21,10 +21,11 @@ import { StreamingServices } from '@essedum/shared-lib';
 
 
 @Component({
-  selector: 'app-data-pipeline-wizard',
-  templateUrl: './data-pipeline-wizard.component.html',
-  styleUrls: ['./data-pipeline-wizard.component.scss'],
-  providers: [WizardStateService],
+    selector: 'app-data-pipeline-wizard',
+    templateUrl: './data-pipeline-wizard.component.html',
+    styleUrls: ['./data-pipeline-wizard.component.scss'],
+    providers: [WizardStateService],
+    standalone: false
 })
 export class DataPipelineWizardComponent implements OnInit {
   @ViewChild('stepper') stepper: MatStepper;

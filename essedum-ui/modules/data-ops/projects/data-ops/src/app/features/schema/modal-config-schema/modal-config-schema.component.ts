@@ -76,9 +76,10 @@ enum TabValues {
 }
 
 @Component({
-  selector: 'modal-config-schema',
-  templateUrl: './modal-config-schema.component.html',
-  styleUrls: ['./modal-config-schema.component.scss'],
+    selector: 'modal-config-schema',
+    templateUrl: './modal-config-schema.component.html',
+    styleUrls: ['./modal-config-schema.component.scss'],
+    standalone: false
 })
 export class ModalConfigSchemaComponent
   implements OnInit, OnChanges, AfterViewInit

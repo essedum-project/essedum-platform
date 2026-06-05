@@ -26,8 +26,8 @@ import { VibeChatMessage, VibeFile, VibeModel } from "../../../../models/vibe-st
 import { VibeStudioService } from "../../../../services/vibe-studio.service";
 
 @Component({
-  selector: "app-code-editor-tab",
-  template: `
+    selector: "app-code-editor-tab",
+    template: `
     <div class="code-tab-shell" [style.grid-template-columns]="chatWidth + 'px 6px 1fr'">
 
       <!-- ===== LEFT: Pipeline Chat Panel ===== -->
@@ -199,8 +199,8 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
 
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
     /* ─────────────────────── Layout ─────────────────────── */
     .code-tab-shell {
       display: grid;
@@ -631,7 +631,8 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
     :host-context(body.header-dark-theme) .cp-provider-select:focus { border-color: rgba(79,142,247,0.6); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
     :host-context(body.header-dark-theme) .cp-provider-select option { background: #1e293b; color: #e2e8f0; }
     :host-context(body.header-dark-theme) .cp-select-chevron { color: #94a3b8; }    `,
-  ],
+    ],
+    standalone: false
 })
 export class CodeEditorTabComponent
   implements OnInit, OnChanges, OnDestroy, AfterViewChecked

@@ -3,9 +3,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-agent',
-  templateUrl: './agent.component.html',
-  styleUrls: ['./agent.component.scss'],
+    selector: 'app-agent',
+    templateUrl: './agent.component.html',
+    styleUrls: ['./agent.component.scss'],
+    standalone: false
 })
 export class AgentComponent implements OnInit, AfterViewInit {
   // Embedded Langflow interface URL - loaded from environment
