@@ -58,6 +58,7 @@
     "acorn": "^8.12.1",
     "lodash": "^4.17.21",
     "ng-packagr": "^19.2.2",
+    "ngx-build-plus": "^19.0.0",
     "typescript": "~5.8.3"
   },
   "overrides": {

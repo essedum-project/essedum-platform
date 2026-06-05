@@ -21,8 +21,9 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "ngx-build-plus:browser",
           "options": {
+            "extraWebpackConfig": "webpack.config.js",
             "outputPath": "dist/shell",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -104,14 +105,15 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "ngx-build-plus:dev-server",
           "configurations": {
             "production": {
               "browserTarget": "shell:build:production",
               "extraWebpackConfig": "webpack.prod.config.js"
             },
             "development": {
-              "browserTarget": "shell:build:development"
+              "browserTarget": "shell:build:development",
+              "extraWebpackConfig": "webpack.config.js"
             }
           },
           "defaultConfiguration": "development",
