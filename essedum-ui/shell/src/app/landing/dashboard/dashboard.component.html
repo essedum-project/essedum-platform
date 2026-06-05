@@ -11,7 +11,7 @@
       <h2 class="card-title">Platform Overview</h2>
     </div>
     <div class="small-cards-grid">
-      <div class="small-card" *ngFor="let mod of moduleStats" [routerLink]="mod.route">
+      <div class="small-card" *ngFor="let mod of moduleStats" (click)="navigateTo(mod)" style="cursor: pointer;">
         <div class="small-card-icon" [style.background]="mod.accent + '18'" [style.border-color]="mod.accent + '44'">
           <i class="fa" [ngClass]="mod.icon" [style.color]="mod.accent"></i>
         </div>

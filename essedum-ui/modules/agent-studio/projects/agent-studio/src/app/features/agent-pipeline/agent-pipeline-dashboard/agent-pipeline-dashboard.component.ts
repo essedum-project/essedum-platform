@@ -122,8 +122,13 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   }
 
   private handleRouteState(): void {
+    const state = this.location.getState() as any;
+
+    if (state?.pipelineMode && ['agent', 'mcp', 'app'].includes(state.pipelineMode)) {
+      this.pipelineMode = state.pipelineMode;
+    }
+
     if (this.router.url.includes('preview')) {
-      const state = this.location.getState() as any;
       if (state?.relatedData?.data) {
         this.streamItem = state.relatedData.data;
         this.desc(this.streamItem);
@@ -534,7 +539,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       dialogRef.afterClosed().subscribe((result) => {
         if (result === 'delete') {
           this.service.deletePipeline(cid).subscribe((res) => {
-            this.service.message('Pipeline agent deleted!', 'success');
+            this.service.message('Pipeline deleted successfully!', 'success');
             this.onRefresh();
           });
         }
