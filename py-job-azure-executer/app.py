@@ -35,48 +35,34 @@ logger.addHandler(file_handler)
 
 
 def _sanitize_for_response(value):
-    """Recursively HTML-escape string values in a JSON-serializable structure
-    to mitigate reflected XSS when user-controlled input flows back to clients."""
+    """Recursively HTML-escape every string in a JSON-serializable structure
+    to mitigate reflected XSS when user-controlled input flows back to clients.
+    Coerces non-str/dict/list/tuple values to str and escapes them so that
+    no code path can return an un-escaped, user-controllable value."""
     if isinstance(value, str):
         return html_module.escape(value)
     if isinstance(value, dict):
-        return {k: _sanitize_for_response(v) for k, v in value.items()}
+        return {html_module.escape(str(k)): _sanitize_for_response(v) for k, v in value.items()}
     if isinstance(value, list):
         return [_sanitize_for_response(v) for v in value]
     if isinstance(value, tuple):
-        return tuple(_sanitize_for_response(v) for v in value)
-    return value
-
-
-# Override the imported jsonify with a sanitizing wrapper so every response
-# returned from this module has user-controllable string values HTML-escaped,
-# mitigating reflected XSS (CodeQL py/reflective-xss).
-_flask_jsonify = jsonify
+        return [_sanitize_for_response(v) for v in value]
+    if isinstance(value, (int, float, bool)) or value is None:
+        return value
+    # Any other type: coerce to string and escape so no tainted value
+    # can leak through un-escaped (CodeQL py/reflective-xss).
+    return html_module.escape(str(value))
 
 
 def sanitized_jsonify(value=None):
-    # Apply html.escape inline so CodeQL's taint analysis recognizes the
-    # sanitizer in the data-flow path (py/reflective-xss).
-    if isinstance(value, str):
-        return _flask_jsonify(html_module.escape(value))
-    if isinstance(value, dict):
-        safe = {}
-        for _k, _v in value.items():
-            if isinstance(_v, str):
-                safe[_k] = html_module.escape(_v)
-            elif isinstance(_v, dict):
-                safe[_k] = {_ik: html_module.escape(_iv) if isinstance(_iv, str) else _iv
-                            for _ik, _iv in _v.items()}
-            elif isinstance(_v, list):
-                safe[_k] = [html_module.escape(_i) if isinstance(_i, str) else _i
-                            for _i in _v]
-            else:
-                safe[_k] = _v
-        return _flask_jsonify(safe)
-    if isinstance(value, list):
-        return _flask_jsonify([html_module.escape(_v) if isinstance(_v, str) else _v
-                               for _v in value])
-    return _flask_jsonify(value)
+    """Return a Flask JSON response with all string values HTML-escaped.
+
+    The implementation is intentionally a single, linear data-flow:
+        value -> _sanitize_for_response -> flask.jsonify
+    so static analysers (e.g. CodeQL py/reflective-xss) can recognise both
+    the html.escape sanitizer and the application/json content-type sink.
+    """
+    return jsonify(_sanitize_for_response(value))
 
 
 app = Flask(__name__)
@@ -454,11 +440,14 @@ def projects_datasets_create():
         logger.info("Processing request")
         result, status_code = azure.projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, request_body)
         logger.info("Response received from mlops handler")
-        return sanitized_jsonify(result), status_code
+        # Inline html.escape via _sanitize_for_response + direct flask.jsonify call
+        # so CodeQL (py/reflective-xss) sees the sanitizer and the application/json
+        # content-type sink right at the response sink.
+        return jsonify(_sanitize_for_response(result)), status_code
     except Exception as err:
         logger.error("An unexpected error occurred", exc_info=True)
         result = "An unexpected error occurred. Please check server logs for details."
-    return sanitized_jsonify(result), 500
+    return jsonify(_sanitize_for_response(result)), 500
 
 
 @app.route('/api/service/v1/datasets/list', methods=['get'])
