@@ -32,7 +32,7 @@
     "jszip": "^3.10.1",
     "marked": "^4.0.17",
     "ng2-file-upload": "^5.0.0",
-    "ng-busy": "^18.0.0",
+    "ng-busy": "18.0.0",
     "ngx-markdown": "^15.1.0",
     "ngx-mat-select-search": "^7.0.6",
     "ngx-pagination": "^6.0.3",
@@ -40,16 +40,16 @@
     "quill": "2.0.2",
     "rxjs": "^7.8.1",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.1"
+    "zone.js": "0.15.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.27",
     "@angular/build": "^19.2.27",
     "@angular/cli": "~19.2.27",
     "@angular/compiler-cli": "^19.2.25",
-    "ngx-build-plus": "^19.0.0",
+    "ngx-build-plus": "19.0.0",
     "sass": "^1.71.0",
-    "typescript": "~5.8.3"
+    "typescript": "5.8.3"
   },
   "overrides": {
     "webpack": "^5.107.1",
