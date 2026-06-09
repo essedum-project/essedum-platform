@@ -1,0 +1,45 @@
+<div class="pod-log-dialog">
+
+  <!-- Top action bar (copy + close) -->
+  <div class="pod-log-toolbar">
+    <span class="pod-log-title">
+      <mat-icon class="pod-log-title-icon">description</mat-icon>
+      {{ dialogTitle }}
+    </span>
+    <div class="pod-log-actions">
+      <button mat-icon-button class="pod-log-action-btn" (click)="copyText()"
+              [matTooltip]="copied ? COPIEDTOOLTIP : COPYTOOLTIP" matTooltipPosition="above">
+        <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+      </button>
+      <button mat-icon-button class="pod-log-action-btn" (click)="close()"
+              [matTooltip]="CLOSETOOLTIP" matTooltipPosition="above">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Log Details expansion panel -->
+  <div class="pod-log-body">
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="true" class="pod-log-expansion">
+        <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px">
+          <mat-panel-title class="pod-log-panel-title">{{ PANELTITLE }}</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="pod-log-meta">
+          <div class="pod-log-meta-row">
+            <span class="meta-label">{{ PIPELINEKEY }}</span>
+            <span class="meta-value">{{ data.pipelineName }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <!-- Log content card -->
+    <div class="pod-log-card">
+      <div class="pod-log-card-header">{{ LOGLABEL }}</div>
+      <pre class="pod-log-content">{{ data.logText || EMPTYLOG }}</pre>
+    </div>
+  </div>
+
+</div>
