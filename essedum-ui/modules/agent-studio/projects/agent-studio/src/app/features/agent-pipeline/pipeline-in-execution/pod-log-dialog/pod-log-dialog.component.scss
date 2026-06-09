@@ -3,11 +3,23 @@
   flex-direction: column;
   background: #0f1c2e;
   color: #e2e8f0;
-  min-width: 560px;
-  max-width: 800px;
   width: 100%;
+  height: 100%;
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* Ensure mat-dialog-container clips content so bottom border-radius is visible */
+::ng-deep .pod-log-dialog-panel {
+  .mat-dialog-container,
+  .mat-mdc-dialog-surface {
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 80vh !important;
+  }
 }
 
 /* ── Toolbar ── */
@@ -55,11 +67,13 @@
 /* ── Body ── */
 .pod-log-body {
   padding: 16px;
+  padding-bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-height: 70vh;
-  overflow-y: auto;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: rgba(68, 128, 245, 0.3); border-radius: 2px; }
@@ -123,6 +137,10 @@
   overflow: hidden;
   border-top: 2px solid;
   border-image: linear-gradient(90deg, #7c3aed, #06b6d4) 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .pod-log-card-header {
@@ -141,9 +159,12 @@
   word-break: break-word;
   font-family: 'Consolas', 'Courier New', monospace;
   line-height: 1.6;
-  max-height: 340px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(68, 128, 245, 0.3); border-radius: 2px; }
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb { background: rgba(68, 128, 245, 0.55); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(68, 128, 245, 0.85); }
 }

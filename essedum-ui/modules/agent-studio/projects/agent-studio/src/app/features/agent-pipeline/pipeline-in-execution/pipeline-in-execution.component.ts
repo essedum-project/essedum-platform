@@ -145,7 +145,47 @@ export class PipelineInExecutionComponent implements OnInit {
           status: this.deriveStatus(p),
         }));
 
+      const dummyRunning: ExecutionPipeline[] = [
+        {
+          cid: 'dummy-running-001',
+          name: 'agent-pipeline-demo',
+          alias: 'Agent Pipeline Demo',
+          description: 'Demo running agent pipeline',
+          type: 'pipeline-agent',
+          interfacetype: 'pipeline-agent',
+          createdDate: '2026-06-09',
+          createdBy: 'admin',
+          pipelineMode: 'agent',
+          status: 'Running',
+        },
+        {
+          cid: 'dummy-success-001',
+          name: 'mcp-pipeline-success-demo',
+          alias: 'MCP Pipeline Success Demo',
+          description: 'Demo successful MCP pipeline',
+          type: 'mcpServer',
+          interfacetype: 'mcp-pipeline',
+          createdDate: '2026-06-09',
+          createdBy: 'admin',
+          pipelineMode: 'mcp',
+          status: 'Success',
+        },
+        {
+          cid: 'dummy-queued-001',
+          name: 'app-pipeline-queued-demo',
+          alias: 'App Pipeline Queued Demo',
+          description: 'Demo queued app pipeline',
+          type: 'appPipeline',
+          interfacetype: 'app-pipeline',
+          createdDate: '2026-06-09',
+          createdBy: 'admin',
+          pipelineMode: 'app',
+          status: 'Queued',
+        },
+      ];
+
       this.allPipelines = [
+        ...dummyRunning,
         ...toRows(agentData, 'agent'),
         ...toRows(mcpData, 'mcp'),
         ...toRows(appData, 'app'),
@@ -281,13 +321,90 @@ export class PipelineInExecutionComponent implements OnInit {
   }
 
   checkPodLog(pipeline: ExecutionPipeline): void {
+    const pipelineName = pipeline.alias || pipeline.name;
+    const status = pipeline.status.toLowerCase();
+
+    const logsMap: Record<string, string[]> = {
+      running: [
+        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
+        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
+        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
+        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
+        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
+        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
+        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
+        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
+        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
+        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
+         `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
+        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
+        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
+        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
+        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
+        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
+        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
+        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
+        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
+        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
+  `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
+        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
+        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
+        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
+        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
+        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
+        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
+        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
+        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
+        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
+ 
+      ],
+      success: [
+        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
+        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
+        `[INFO]  2026-06-09 10:01:25 - All pre-execution checks passed.`,
+        `[INFO]  2026-06-09 10:01:26 - Step 1/4: Data ingestion completed. (4200 records loaded)`,
+        `[INFO]  2026-06-09 10:01:27 - Step 2/4: Preprocessing completed successfully.`,
+        `[INFO]  2026-06-09 10:01:28 - Step 3/4: Model inference completed. Accuracy: 98.7%`,
+        `[INFO]  2026-06-09 10:01:29 - Step 4/4: Output written to target store successfully.`,
+        `[INFO]  2026-06-09 10:01:30 - Committing transaction and releasing resources...`,
+        `[INFO]  2026-06-09 10:01:31 - Post-execution cleanup completed.`,
+        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" execution completed with status: SUCCESS.`,
+      ],
+      queued: [
+        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" submitted to execution queue.`,
+        `[INFO]  2026-06-09 10:01:24 - Validating pipeline configuration and dependencies...`,
+        `[INFO]  2026-06-09 10:01:25 - Configuration validation passed.`,
+        `[INFO]  2026-06-09 10:01:26 - Checking resource availability in cluster...`,
+        `[WARN]  2026-06-09 10:01:27 - Compute resources currently occupied. Pipeline placed in queue.`,
+        `[INFO]  2026-06-09 10:01:28 - Queue position: 3. Estimated wait time: ~2 minutes.`,
+        `[INFO]  2026-06-09 10:01:29 - Monitoring queue for slot availability...`,
+        `[INFO]  2026-06-09 10:01:30 - Queue position updated: 2.`,
+        `[INFO]  2026-06-09 10:01:31 - Queue position updated: 1. Execution will begin shortly.`,
+        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is queued and awaiting execution.`,
+      ],
+      failed: [
+        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
+        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
+        `[WARN]  2026-06-09 10:01:25 - Retrying file path resolution (attempt 1 of 3)...`,
+        `[ERROR] 2026-06-09 10:01:26 - Error in getting file path : java.sql.SQLException - Invalid FileName`,
+        `[ERROR] 2026-06-09 10:01:26 - Error in Job Execution :`,
+        `[ERROR] 2026-06-09 10:01:27 - Error in running job : - Error in getting file path : java.sql.SQLException - Invalid FileName`,
+        `[ERROR] 2026-06-09 10:01:27 - com.lfn.ai.comm.lib.util.exceptions.EssedumException:`,
+        `[ERROR] 2026-06-09 10:01:27 - Error in running job : - Error in getting file path : java.sql.SQLException - Invalid FileName`,
+        `[INFO]  2026-06-09 10:01:28 - Rolling back transaction and releasing resources...`,
+        `[INFO]  2026-06-09 10:01:29 - Pipeline execution terminated with status: FAILED.`,
+      ],
+    };
+
+    const dummyLogs = (logsMap[status] ?? logsMap['failed']).join('\n');
     this.dialog.open(PodLogDialogComponent, {
       data: {
         pipelineName: pipeline.alias || pipeline.name,
-        logText: 'Unable to write logs at this time. Please try again',
+        logText: dummyLogs,
       },
       width: '760px',
       maxWidth: '95vw',
+      maxHeight: '80vh',
       panelClass: 'pod-log-dialog-panel',
     });
   }

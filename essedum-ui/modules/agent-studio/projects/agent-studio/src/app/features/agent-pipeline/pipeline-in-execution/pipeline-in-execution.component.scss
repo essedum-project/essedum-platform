@@ -430,10 +430,20 @@
 /* Actions */
 .exec-action-btn {
   color: #4a6a8a;
-  width: 32px;
-  height: 32px;
-  mat-icon { font-size: 18px; }
-  &:hover { color: #c8d8ee; }
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover {
+    color: #c8d8ee;
+    background: rgba(100, 160, 255, 0.18) !important;
+  }
+  ::ng-deep .mat-button-focus-overlay { border-radius: 50%; }
 }
 
 /* Menu icon colours */
@@ -473,5 +483,11 @@
   .exec-row { border-bottom-color: #f1f5f9; &:hover { background: rgba(71, 66, 220, 0.03); } }
   .exec-alias { color: #1e293b; }
   .exec-name-sub { color: #94a3b8; }
-  .exec-action-btn { color: #94a3b8; &:hover { color: #1e293b; } }
+  .exec-action-btn {
+    color: #94a3b8;
+    &:hover {
+      color: #1e293b;
+      background: rgba(71, 66, 220, 0.12) !important;
+    }
+  }
 }

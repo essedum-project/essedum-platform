@@ -116,7 +116,8 @@
 
       <!-- Actions (3-dot) -->
       <div class="col-actions">
-        <button mat-icon-button [matMenuTriggerFor]="rowMenu" class="exec-action-btn">
+        <button mat-icon-button [matMenuTriggerFor]="rowMenu" class="exec-action-btn"
+                *ngIf="pipeline.status.toLowerCase() !== 'inactive'">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #rowMenu="matMenu" xPosition="before">
@@ -124,7 +125,8 @@
             <mat-icon class="menu-icon-view">visibility</mat-icon>
             <span>{{ VIEWPIPELINE }}</span>
           </button>
-          <button mat-menu-item (click)="checkPodLog(pipeline)">
+          <button mat-menu-item (click)="checkPodLog(pipeline)"
+                  *ngIf="['running','queued','success','failed'].includes(pipeline.status.toLowerCase())">
             <mat-icon class="menu-icon-log">description</mat-icon>
             <span>{{ VIEWPODLOGS }}</span>
           </button>
