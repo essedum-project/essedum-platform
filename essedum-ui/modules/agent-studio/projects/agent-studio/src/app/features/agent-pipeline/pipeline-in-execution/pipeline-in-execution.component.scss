@@ -341,8 +341,8 @@
 }
 
 .exec-alias {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: #c8d8ee;
   white-space: nowrap;
   overflow: hidden;
@@ -362,8 +362,8 @@
   display: inline-block;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   letter-spacing: 0.02em;
 
   &.type-agent { background: rgba(68, 128, 245, 0.15); color: #6ba3f7; }
@@ -378,8 +378,8 @@
   gap: 5px;
   padding: 3px 9px;
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
 
   .status-icon {
     font-size: 14px;
