@@ -107,11 +107,21 @@ This setup is ideal for developers who want to work on the source code and contr
    - Run the main application from your IDE or using the generated JAR file.
 
 3. **Frontend Setup**:
-   - Navigate to the `essedum-ui/shell-app-ui` and `essedum-ui/aip-app-ui` directories and install the dependencies:
+   - The frontend is a micro-frontend (MFE) application: a host app (`shell`) plus four child MFEs under `essedum-ui/modules/` (`agent-studio`, `data-ops`, `integration-hub`, `vibe-studio`). Build the `shell` first, since the MFEs reference its shared library.
+   - From the `essedum-ui/` directory, install dependencies and build each application:
      ```bash
-     npm install
-     npm run build
+     # Host app (build first)
+     cd shell
+     npm install --legacy-peer-deps --force
+     npm run build-prod
+     cd ..
+
+     # Child MFEs
+     for mfe in agent-studio data-ops integration-hub vibe-studio; do
+       (cd "modules/$mfe" && npm install --legacy-peer-deps --force && npm run build-prod)
+     done
      ```
+   - Each build outputs a `dist/` folder that Nginx serves (see `essedum-ui/nginx_ui_multi.conf`).
 
 4. **Nginx Setup**:
    - Configure the `nginx/nginx.conf` file to point to the `dist` folders of the frontend applications.

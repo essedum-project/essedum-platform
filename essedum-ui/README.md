@@ -1,6 +1,6 @@
 # Essedum Frontend (essedum-ui)
 
-This directory contains the source code for the Essedum platform's frontend. The frontend is built using Angular and is divided into two main applications: `aip-app-ui` and `shell`.
+This directory contains the source code for the Essedum platform's frontend. The frontend is built with Angular as a micro-frontend (MFE) application: a host app (`shell`) plus four child MFEs under `modules/` (`agent-studio`, `data-ops`, `integration-hub`, and `vibe-studio`).
 
 ## Overview
 
@@ -8,27 +8,38 @@ The frontend provides the user interface for the Essedum platform, allowing user
 
 ### Components
 
--   **`aip-app-ui`**: This is the main application UI, which contains the core features of the platform, such as pipeline creation, dataset management, and model deployment.
--   **`shell`**: This application acts as a shell or a container for the `aip-app-ui`. It provides the main layout, navigation, and authentication handling for the platform.
+-   **`shell`**: The host application. It provides the main layout, navigation, and authentication handling, and hosts the child MFEs. It also exposes the shared library the MFEs depend on, so it must be built first.
+-   **`modules/`**: The child micro-frontends — `agent-studio`, `data-ops`, `integration-hub`, and `vibe-studio` — each a standalone Angular app contributing a feature area.
 -   **Langflow Integration**: The frontend includes integration with Langflow, allowing users to access the Agent Designer and playground directly from the Essedum interface.
--   **`nginx_ui.conf`**: This is a sample Nginx configuration file for serving the frontend application. It defines how Nginx should handle requests and route them to the appropriate application.
+-   **`nginx_ui_multi.conf`**: A sample Nginx configuration for serving the shell and all MFEs together (`nginx_shell.conf` serves the shell on its own).
 
 ## Building the Frontend
 
 To build the frontend applications, you need to have Node.js and npm installed.
 
-1.  **Install Dependencies**:
-    -   Navigate to both the `aip-app-ui` and `shell` directories and run `npm install` to install the required dependencies.
+Build the `shell` first (the MFEs reference its shared library), then each module:
 
-2.  **Build the Applications**:
-    -   After installing the dependencies, run `npm run build` in each directory to build the applications. This will generate a `dist` folder in each directory containing the compiled static files.
+```bash
+# Host app (build first)
+cd shell
+npm install --legacy-peer-deps --force
+npm run build-prod
+cd ..
+
+# Child MFEs
+for mfe in agent-studio data-ops integration-hub vibe-studio; do
+  (cd "modules/$mfe" && npm install --legacy-peer-deps --force && npm run build-prod)
+done
+```
+
+Each build generates a `dist/` folder containing the compiled static files.
 
 ## Running the Frontend
 
 The frontend is served by an Nginx reverse proxy. To run the frontend, you need to:
 
-1.  Configure your Nginx server to use the `nginx_ui.conf` file.
-2.  Update the configuration to point to the `dist` folders of the `aip-app-ui` and `shell` applications.
+1.  Configure your Nginx server to use the `nginx_ui_multi.conf` file.
+2.  Update the configuration to point to the `dist` folders of the `shell` and module applications.
 3.  Start the Nginx server.
 
 For more detailed instructions on the overall platform setup, please refer to the main `README.md` file in the root of the repository.
