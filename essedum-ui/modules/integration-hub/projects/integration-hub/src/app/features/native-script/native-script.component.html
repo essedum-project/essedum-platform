@@ -249,11 +249,57 @@
                               <span class="collapse-badge">{{ dynamicEnvArray?.length || 0 }}</span>
                             </div>
                             <div class="collapsible-body" [class.collapsed]="envCollapsed">
-                              <app-app-config
-                                [configData]="dynamicEnvArray"
-                                [isauth]="isAuth"
-                                (configDataChange)="onEnvDataChange($event)"
-                              ></app-app-config>
+                              <div class="env-card">
+                                <table class="table table-striped env-table" *ngIf="dynamicEnvArray?.length > 0">
+                                  <thead>
+                                    <tr>
+                                      <th class="col-md-5" scope="col">Key</th>
+                                      <th class="col-md-5" scope="col">Value</th>
+                                      <th class="col-md-2" scope="col">Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr *ngFor="let env of dynamicEnvArray; let i = index">
+                                      <td>
+                                        <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.name">{{ env.name || '—' }}</span>
+                                        <input *ngIf="envEditIndex === i && envEditMode"
+                                          [(ngModel)]="dynamicEnvArray[i].name"
+                                          class="form-control" type="text" placeholder="KEY" />
+                                      </td>
+                                      <td>
+                                        <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.value">{{ env.value || '—' }}</span>
+                                        <input *ngIf="envEditIndex === i && envEditMode"
+                                          [(ngModel)]="dynamicEnvArray[i].value"
+                                          class="form-control" type="text" placeholder="value" />
+                                      </td>
+                                      <td>
+                                        <mat-icon matTooltip="Edit"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="editEnvVar(i)">edit</mat-icon>
+                                        <mat-icon *ngIf="envEditMode && envEditIndex === i"
+                                          matTooltip="Save"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="saveEnvVar(i)">save</mat-icon>
+                                        <mat-icon matTooltip="Delete"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="deleteEnvVar(i)">delete</mat-icon>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <div *ngIf="!dynamicEnvArray?.length" class="env-empty-state">
+                                  <mat-icon>tune</mat-icon>
+                                  <span>No environment variables defined</span>
+                                </div>
+                                <button mat-raised-button class="env-add-btn"
+                                  [disabled]="isAuth"
+                                  (click)="addEnvVar()">
+                                  <mat-icon>add</mat-icon> Add
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>

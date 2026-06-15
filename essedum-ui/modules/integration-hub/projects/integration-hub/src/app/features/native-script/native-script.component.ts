@@ -117,6 +117,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     isBackHovered=false;
     envCollapsed = true;
     secretsCollapsed = true;
+    envEditIndex: number = -1;
+    envEditMode: boolean = false;
+    private _saveDebounceTimer: any = null;
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -187,6 +190,12 @@ export class NativeScriptComponent implements OnInit, OnChanges {
             this.streamItem.jsonContent
           ).elements[0].attributes;
           this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
+    if (this.dynamicEnvArray?.length) {
+      this.envCollapsed = false;
+      // Auto-enter edit mode for any empty row (leftover unsaved add)
+      const emptyIdx = this.dynamicEnvArray.findIndex((e: any) => !e.name && !e.value);
+      if (emptyIdx !== -1) { this.envEditIndex = emptyIdx; this.envEditMode = true; }
+    }
 
         } else {
           if (this.streamItem.json_content) {
@@ -198,7 +207,12 @@ export class NativeScriptComponent implements OnInit, OnChanges {
             this.streamItem.json_content
           ).elements[0].attributes;
           this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
-          
+    if (this.dynamicEnvArray?.length) {
+      this.envCollapsed = false;
+      // Auto-enter edit mode for any empty row (leftover unsaved add)
+      const emptyIdx = this.dynamicEnvArray.findIndex((e: any) => !e.name && !e.value);
+      if (emptyIdx !== -1) { this.envEditIndex = emptyIdx; this.envEditMode = true; }
+    }
 
         }
         if (this.data.dataset) {
@@ -233,6 +247,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         }
         if(this.data.usedSecrets){
           this.dynamicSecretsArray=this.data.usedSecrets;
+          if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
         }
         if(this.data.files==null || this.data.files==undefined){
           this.data['files'] = [];
@@ -810,16 +825,78 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.getRelatedComponent();
   }
 
+  addEnvVar() {
+    if (this.isAuth) { return; }
+    // If already editing a row, don't add another blank one
+    if (this.envEditMode) { return; }
+    if (!this.dynamicEnvArray) { this.dynamicEnvArray = []; }
+    this.dynamicEnvArray.push({ name: '', value: '' });
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+    this.envCollapsed = false;
+  }
+
+  editEnvVar(i: number) {
+    if (this.isAuth) { return; }
+    this.envEditIndex = i;
+    this.envEditMode = true;
+  }
+
+  saveEnvVar(i: number) {
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteEnvVar(i: number) {
+    if (this.isAuth) { return; }
+    this.dynamicEnvArray.splice(i, 1);
+    this.saveEnvAndSecrets();
+  }
+
   onEnvDataChange($event) {
     this.environment = $event;
     this.dynamicEnvArray = $event;
     this.envModified = true;
+    if (this.dynamicEnvArray?.length) { this.envCollapsed = false; }
   }
 
   onSecretsDataChange($event) {
     this.secrets = $event;
     this.dynamicSecretsArray = $event;
     this.secretsModified = true;
+    if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
+  }
+
+  saveEnvAndSecrets() {
+    // Debounce: collapse multiple rapid calls into a single API request
+    if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
+    this._saveDebounceTimer = setTimeout(() => {
+      this._saveDebounceTimer = null;
+      try {
+        if (!this.streamItem) { return; }
+        const current = this.streamItem.json_content
+          ? JSON.parse(this.streamItem.json_content)
+          : { elements: [{ attributes: this.data || {} }] };
+        current.environment = this.dynamicEnvArray || [];
+        if (current.elements?.[0]?.attributes) {
+          current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+        }
+        current.default_runtime = this.selectedRunType;
+        this.streamItem.json_content = JSON.stringify(current);
+        this.service.update(this.streamItem).subscribe({
+          next: () => {
+            this.service.message('Configuration saved', 'success');
+          },
+          error: (err) => {
+            console.error('Failed to save env/secrets:', err);
+            this.service.message('Failed to save configuration', 'error');
+          }
+        });
+      } catch (e) {
+        console.error('saveEnvAndSecrets error:', e);
+      }
+    }, 300);
   }
 
   // File structure methods

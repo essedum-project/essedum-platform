@@ -529,13 +529,13 @@ mat-drawer.example-sidenav {
 
   .tgl-pill { background: #0a142f; }
 
-  // Light active (default): light opt on navy pill = white text; dark opt off pill = dim dark
-  .tgl-light { color: #ffffff; }
-  .tgl-dark  { color: rgba(10, 20, 48, 0.38); }
+  // Light active (default): light opt on navy pill = white text; dark opt off pill = readable dark
+  .tgl-light { color: #ffffff !important; }
+  .tgl-dark  { color: #374151 !important; }
 
-  // Dark active: dark opt on navy pill = white text; light opt off pill = dim dark
-  &.is-dark .tgl-light { color: rgba(10, 20, 48, 0.38); }
-  &.is-dark .tgl-dark  { color: #ffffff; }
+  // Dark active: dark opt on navy pill = white text; light opt off pill = readable dark
+  &.is-dark .tgl-light { color: #374151 !important; }
+  &.is-dark .tgl-dark  { color: #ffffff !important; }
 }
 
 // Light header — grey track, indigo pill, white text on active pill
@@ -548,13 +548,13 @@ mat-drawer.example-sidenav {
 
   .tgl-pill { background: #4f46e5; box-shadow: 0 2px 8px rgba(79,70,229,0.35); }
 
-  // Light active (default): light opt on indigo pill = white; dark opt off pill = readable grey
-  .tgl-light { color: #ffffff; }
-  .tgl-dark  { color: #6b7280; }
+  // Light active (default): light opt on indigo pill = white; dark opt off pill = dark readable text
+  .tgl-light { color: #ffffff !important; }
+  .tgl-dark  { color: #1f2937 !important; }
 
-  // Dark active: dark opt on indigo pill = white; light opt off = readable grey
-  &.is-dark .tgl-light { color: #6b7280; }
-  &.is-dark .tgl-dark  { color: #ffffff; }
+  // Dark active: dark opt on indigo pill = white; light opt off = dark readable text
+  &.is-dark .tgl-light { color: #1f2937 !important; }
+  &.is-dark .tgl-dark  { color: #ffffff !important; }
 }
 
 
@@ -4191,6 +4191,49 @@ body.header-dark-theme {
   }
   .mat-mdc-menu-item { color: #c8d8ea !important; font-size: 13px !important; }
   .mat-mdc-menu-item:hover { background: rgba(79,142,247,0.1) !important; color: #e2e8f0 !important; }
+
+  // Dialog text & buttons
+  .mat-mdc-dialog-container .mdc-dialog__title,
+  .mat-mdc-dialog-container h2[mat-dialog-title],
+  .mat-mdc-dialog-container h1[mat-dialog-title],
+  .mat-mdc-dialog-container h3[mat-dialog-title] {
+    color: #e2e8f0 !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+  }
+  .mat-mdc-dialog-container .mdc-dialog__title::before { display: none; }
+  .mat-mdc-dialog-container .mdc-dialog__content,
+  .mat-mdc-dialog-container mat-dialog-content,
+  .mat-mdc-dialog-container [mat-dialog-content] {
+    color: #b8cce0 !important;
+    font-size: 14px !important;
+  }
+  .mat-mdc-dialog-container mat-divider { border-top-color: rgba(79,142,247,0.18) !important; }
+  .mat-mdc-dialog-container mat-dialog-actions button,
+  .mat-mdc-dialog-container [mat-dialog-actions] button,
+  .mat-mdc-dialog-container .dialog-actions button {
+    color: #e2e8f0 !important;
+    background: rgba(79,142,247,0.12) !important;
+    border: 1px solid rgba(79,142,247,0.25) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button[color="primary"],
+  .mat-mdc-dialog-container [mat-dialog-actions] button[color="primary"],
+  .mat-mdc-dialog-container .dialog-actions button.delete-button {
+    background: rgba(239,68,68,0.2) !important;
+    border-color: rgba(239,68,68,0.4) !important;
+    color: #fca5a5 !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button:hover,
+  .mat-mdc-dialog-container [mat-dialog-actions] button:hover {
+    background: rgba(79,142,247,0.22) !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button[color="primary"]:hover,
+  .mat-mdc-dialog-container .dialog-actions button.delete-button:hover {
+    background: rgba(239,68,68,0.32) !important;
+  }
+  .mat-mdc-dialog-container .mdc-button__label { color: inherit !important; }
 }
 
 // Light theme dialog container
@@ -4241,6 +4284,49 @@ body.header-light-theme {
   }
   .mat-mdc-menu-item { color: #334155 !important; font-size: 13px !important; }
   .mat-mdc-menu-item:hover { background: rgba(99,102,241,0.07) !important; color: #4f46e5 !important; }
+
+  // Dialog text & buttons
+  .mat-mdc-dialog-container .mdc-dialog__title,
+  .mat-mdc-dialog-container h2[mat-dialog-title],
+  .mat-mdc-dialog-container h1[mat-dialog-title],
+  .mat-mdc-dialog-container h3[mat-dialog-title] {
+    color: #1e293b !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+  }
+  .mat-mdc-dialog-container .mdc-dialog__title::before { display: none; }
+  .mat-mdc-dialog-container .mdc-dialog__content,
+  .mat-mdc-dialog-container mat-dialog-content,
+  .mat-mdc-dialog-container [mat-dialog-content] {
+    color: #475569 !important;
+    font-size: 14px !important;
+  }
+  .mat-mdc-dialog-container mat-divider { border-top-color: rgba(99,102,241,0.15) !important; }
+  .mat-mdc-dialog-container mat-dialog-actions button,
+  .mat-mdc-dialog-container [mat-dialog-actions] button,
+  .mat-mdc-dialog-container .dialog-actions button {
+    color: #334155 !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button[color="primary"],
+  .mat-mdc-dialog-container [mat-dialog-actions] button[color="primary"],
+  .mat-mdc-dialog-container .dialog-actions button.delete-button {
+    background: rgba(239,68,68,0.08) !important;
+    border-color: rgba(239,68,68,0.3) !important;
+    color: #dc2626 !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button:hover,
+  .mat-mdc-dialog-container [mat-dialog-actions] button:hover {
+    background: #e2e8f0 !important;
+  }
+  .mat-mdc-dialog-container mat-dialog-actions button[color="primary"]:hover,
+  .mat-mdc-dialog-container .dialog-actions button.delete-button:hover {
+    background: rgba(239,68,68,0.15) !important;
+  }
+  .mat-mdc-dialog-container .mdc-button__label { color: inherit !important; }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
