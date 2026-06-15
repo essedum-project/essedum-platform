@@ -88,7 +88,7 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy, OnChanges {
               this.selectedFile = updated;
               const updLines = updated.content.split('\n');
               this.codeLines = updLines;
-              this.tokenizedLines = updLines.map(l => tokenizeForExt(l, this.selectedExt, this.sanitizer));
+              this.tokenizedLines = updLines.map(l => this.sanitizer.bypassSecurityTrustHtml(tokenizeForExt(l, this.selectedExt)));
             }
           }
         }
@@ -224,7 +224,7 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy, OnChanges {
     const lines = file.content.split('\n');
     this.codeLines = lines;
     this.selectedExt = file.path.split('.').pop()?.toLowerCase() ?? '';
-    this.tokenizedLines = lines.map(l => tokenizeForExt(l, this.selectedExt, this.sanitizer));
+    this.tokenizedLines = lines.map(l => this.sanitizer.bypassSecurityTrustHtml(tokenizeForExt(l, this.selectedExt)));
     this.activeTab = 'code';
   }
 
