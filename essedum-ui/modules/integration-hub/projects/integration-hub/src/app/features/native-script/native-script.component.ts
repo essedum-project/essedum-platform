@@ -906,30 +906,34 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
     this._saveDebounceTimer = setTimeout(() => {
       this._saveDebounceTimer = null;
-      try {
-        if (!this.streamItem) { return; }
-        const current = this.streamItem.json_content
-          ? JSON.parse(this.streamItem.json_content)
-          : { elements: [{ attributes: this.data || {} }] };
-        current.environment = this.dynamicEnvArray || [];
-        if (current.elements?.[0]?.attributes) {
-          current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
-        }
-        current.default_runtime = this.selectedRunType;
-        this.streamItem.json_content = JSON.stringify(current);
-        this.service.update(this.streamItem).subscribe({
-          next: () => {
-            this.service.message('Configuration saved', 'success');
-          },
-          error: (err) => {
-            console.error('Failed to save env/secrets:', err);
-            this.service.message('Failed to save configuration', 'error');
-          }
-        });
-      } catch (e) {
-        console.error('saveEnvAndSecrets error:', e);
-      }
+      this.persistEnvAndSecrets();
     }, 300);
+  }
+
+  private persistEnvAndSecrets(): void {
+    try {
+      if (!this.streamItem) { return; }
+      const current = this.streamItem.json_content
+        ? JSON.parse(this.streamItem.json_content)
+        : { elements: [{ attributes: this.data || {} }] };
+      current.environment = this.dynamicEnvArray || [];
+      if (current.elements?.[0]?.attributes) {
+        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+      }
+      current.default_runtime = this.selectedRunType;
+      this.streamItem.json_content = JSON.stringify(current);
+      this.service.update(this.streamItem).subscribe({
+        next: () => {
+          this.service.message('Configuration saved', 'success');
+        },
+        error: (err) => {
+          console.error('Failed to save env/secrets:', err);
+          this.service.message('Failed to save configuration', 'error');
+        }
+      });
+    } catch (e) {
+      console.error('saveEnvAndSecrets error:', e);
+    }
   }
 
   // File structure methods

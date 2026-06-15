@@ -3544,31 +3544,38 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this._saveEnvDebounceTimer) { clearTimeout(this._saveEnvDebounceTimer); }
     this._saveEnvDebounceTimer = setTimeout(() => {
       this._saveEnvDebounceTimer = null;
-      try {
-        if (!this.streamItem) { return; }
-        const current = this.streamItem.json_content
-          ? JSON.parse(this.streamItem.json_content)
-          : { elements: [{ attributes: {} }] };
-        current.environment = this.dynamicEnvArray || [];
-        // Ensure attributes object exists before writing secrets
-        if (!current.elements) { current.elements = [{ attributes: {} }]; }
-        if (!current.elements[0]) { current.elements[0] = { attributes: {} }; }
-        if (!current.elements[0].attributes) { current.elements[0].attributes = {}; }
-        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
-        this.streamItem.json_content = JSON.stringify(current);
-        this.service.update(this.streamItem).subscribe({
-          next: () => {
-            this.service.message('Configuration saved', 'success');
-          },
-          error: (err: any) => {
-            console.error('Failed to save configuration:', err);
-            this.service.message('Failed to save configuration', 'error');
-          }
-        });
-      } catch (e) {
-        console.error('saveEnvAndSecrets error:', e);
-      }
+      this.persistEnvAndSecrets();
     }, 300);
+  }
+
+  private persistEnvAndSecrets(): void {
+    try {
+      if (!this.streamItem) { return; }
+      const current = this.streamItem.json_content
+        ? JSON.parse(this.streamItem.json_content)
+        : { elements: [{ attributes: {} }] };
+      current.environment = this.dynamicEnvArray || [];
+      this.ensureElementsStructure(current);
+      current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+      this.streamItem.json_content = JSON.stringify(current);
+      this.service.update(this.streamItem).subscribe({
+        next: () => {
+          this.service.message('Configuration saved', 'success');
+        },
+        error: (err: any) => {
+          console.error('Failed to save configuration:', err);
+          this.service.message('Failed to save configuration', 'error');
+        }
+      });
+    } catch (e) {
+      console.error('saveEnvAndSecrets error:', e);
+    }
+  }
+
+  private ensureElementsStructure(current: any): void {
+    if (!current.elements) { current.elements = [{ attributes: {} }]; }
+    if (!current.elements[0]) { current.elements[0] = { attributes: {} }; }
+    if (!current.elements[0].attributes) { current.elements[0].attributes = {}; }
   }
 
   // ── User Secrets ─────────────────────────────────────────────────────────────
