@@ -7,29 +7,85 @@
 @keyframes borderShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes rowIn     { from { opacity:0; transform:translateX(-5px); } to { opacity:1; transform:translateX(0); } }
 
-// ── Page container ────────────────────────────────────────────────
+// ── Page container / unified toolbar row ────────────────────────
 .container {
-  padding: 0 !important;
+  padding: 10px 18px !important;
   width: 100% !important;
   box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  background: rgba(79,142,247,0.04) !important;
+  border-radius: 16px 16px 0 0 !important;
 }
 
-// ── Toolbar: count, actions ───────────────────────────────────────
+// ── Toolbar: row/selected count (left side) ──────────────────────
 .card-header-left {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
   flex-wrap: wrap !important;
-  padding: 12px 18px !important;
-  background: rgba(79,142,247,0.04) !important;
-  border-bottom: none !important;
-  border-radius: 16px 16px 0 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+// ── Toolbar: action buttons (right side) ─────────────────────────
+.card-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+
+  // Style every direct child (div wrappers + Material buttons) as icon-button
+  > div, > button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: background 0.18s, border-color 0.18s, box-shadow 0.18s !important;
+    background: rgba(79,142,247,0.1) !important;
+    border: 1px solid rgba(79,142,247,0.25) !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    // Suppress Material button ripple/overlay
+    --mdc-icon-button-state-layer-size: 34px !important;
+
+    mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] {
+      color: #b8d4f0 !important;
+      font-size: 18px !important;
+      line-height: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    &:hover {
+      background: rgba(79,142,247,0.22) !important;
+      border-color: rgba(79,142,247,0.5) !important;
+      box-shadow: 0 0 12px rgba(79,142,247,0.25) !important;
+
+      mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] {
+        color: #7eb8ff !important;
+      }
+    }
+
+    &[disabled], &:disabled {
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
+      pointer-events: none !important;
+    }
+  }
 }
 
 .data-count {
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: #3e5570 !important;
+  color: #8aaccc !important;
   letter-spacing: 0.3px !important;
   strong, b { color: #7eb8ff !important; }
 }
@@ -129,16 +185,20 @@
   tbody tr:nth-child(8) { animation-delay: 0.16s; }
 }
 
-// ── Toolbar action icon buttons (upload, refresh, download, etc.) ──
+// ── mat-icon base (glyph only — no border/background) ────────────
 mat-icon, .mat-icon {
   cursor: pointer !important;
-  font-size: 20px !important;
-  width: 32px !important; height: 32px !important;
-  display: inline-flex !important; align-items: center !important; justify-content: center !important;
-  border-radius: 9px !important; border: 1px solid rgba(79,142,247,0.16) !important;
-  background: rgba(79,142,247,0.05) !important; color: #6b7fa0 !important;
-  transition: all 0.18s ease !important; vertical-align: middle !important;
-  &:hover { background: rgba(79,142,247,0.13) !important; border-color: rgba(79,142,247,0.35) !important; color: #7eb8ff !important; box-shadow: 0 0 12px rgba(79,142,247,0.2) !important; transform: translateY(-1px) !important; }
+  font-size: 18px !important;
+  color: #b8d4f0 !important;
+  transition: color 0.18s !important;
+  vertical-align: middle !important;
+}
+
+// Suppress Material icon-button state layers / ripples in toolbar
+:host ::ng-deep .card-header button.mat-mdc-icon-button {
+  .mat-mdc-button-ripple,
+  .mat-mdc-button-persistent-ripple,
+  .mat-ripple { display: none !important; }
 }
 
 // ── mat-menu (download/column toggle) ────────────────────────────
@@ -203,12 +263,24 @@ button.page-btn, .page-btn {
 // ══════════════════════════════════════════════════════════════════
 body.header-light-theme {
   .table-card { background: #ffffff !important; border-color: rgba(79,70,229,0.14) !important; box-shadow: 0 8px 36px rgba(79,70,229,0.1) !important; &::before { background: linear-gradient(90deg, #6366f1, #06b6d4, #8b5cf6, #4f46e5, #6366f1); } }
-  .card-header-left { background: rgba(79,70,229,0.03) !important; border-color: rgba(79,70,229,0.1) !important; }
+  .container { background: rgba(79,70,229,0.03) !important; }
+  .card-header-left { background: transparent !important; }
+  .data-count { color: #334155 !important; strong, b { color: #4f46e5 !important; } }
   .data-count strong, .data-count b { color: #4f46e5 !important; }
   .table thead tr th, table thead tr th { background: rgba(79,70,229,0.05) !important; color: #64748b !important; border-color: rgba(79,70,229,0.1) !important; &:hover { color: #4f46e5 !important; background: rgba(79,70,229,0.1) !important; } }
   .table tbody tr, table tbody tr { border-color: rgba(79,70,229,0.05) !important; &:nth-child(even) { background: rgba(79,70,229,0.018) !important; } &:hover { background: rgba(79,70,229,0.06) !important; td { color: #0f172a !important; } } td { color: #334155 !important; &:first-child { color: #4f46e5 !important; } } }
   .pagination-row, .pagination-container { border-top-color: rgba(79,70,229,0.08) !important; background: rgba(79,70,229,0.02) !important; }
   button.page-btn, .page-btn { border-color: rgba(79,70,229,0.16) !important; background: rgba(79,70,229,0.04) !important; color: #64748b !important; &:hover { background: rgba(79,70,229,0.1) !important; border-color: rgba(79,70,229,0.3) !important; color: #4f46e5 !important; } &.active { background: rgba(79,70,229,0.14) !important; border-color: rgba(79,70,229,0.38) !important; color: #4f46e5 !important; } }
-  mat-icon, .mat-icon { background: rgba(79,70,229,0.04) !important; border-color: rgba(79,70,229,0.14) !important; color: #64748b !important; &:hover { background: rgba(79,70,229,0.1) !important; border-color: rgba(79,70,229,0.3) !important; color: #4f46e5 !important; } }
+  mat-icon, .mat-icon { color: #475569 !important; }
+  .card-header > div, .card-header > button {
+    background: rgba(79,70,229,0.06) !important;
+    border-color: rgba(79,70,229,0.2) !important;
+    mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] { color: #475569 !important; }
+    &:hover {
+      background: rgba(79,70,229,0.14) !important;
+      border-color: rgba(79,70,229,0.4) !important;
+      mat-icon, .mat-icon, i[class*="icon"], span[class*="icon"] { color: #4f46e5 !important; }
+    }
+  }
   .cell-badge { background: rgba(79,70,229,0.08) !important; border-color: rgba(79,70,229,0.2) !important; color: #4f46e5 !important; }
 }
