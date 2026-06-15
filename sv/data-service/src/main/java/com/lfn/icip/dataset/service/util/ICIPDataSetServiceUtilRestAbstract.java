@@ -1321,8 +1321,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 		binding.setProperty("Body", Body);
 		binding.setProperty("ConnectionDetails", datasource_attributes.toString());
 		if (ScriptType.equals("Groovy")) {
+			String safeScript = GroovySandboxUtil.validateScript(transformScript);
 			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(transformScript));
+			Object transformedResult = shell.evaluate(new StringReader(safeScript));
 			logger.info("transformedResult--->{}", transformedResult);
 			response = transformedResult.toString();
 		}

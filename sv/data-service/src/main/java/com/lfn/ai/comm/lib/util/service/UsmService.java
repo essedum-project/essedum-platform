@@ -18,13 +18,11 @@ package com.lfn.ai.comm.lib.util.service;
 import java.io.IOException;
 
 
-import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.domain.Users;
 
 /**
  * Service Interface for managing DashConstant.
- */
-/**
+ *
  * @author essedum
  */
 public interface UsmService {

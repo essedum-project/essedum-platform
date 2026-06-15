@@ -424,7 +424,10 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Write all new files to the directory
                 for (FileContent file : files) {
-                    Path filePath = tempDir.resolve(file.getPath());
+                    // Safely resolve user-supplied relative path against tempDir
+                    // to prevent path-traversal (CodeQL: uncontrolled data in path).
+                    Path filePath = com.lfn.icip.vibecoding.util.PathSafety
+                            .resolveSafely(tempDir, file.getPath());
 
                     // Create parent directories if they don't exist
                     Files.createDirectories(filePath.getParent());

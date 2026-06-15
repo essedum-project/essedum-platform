@@ -17,6 +17,7 @@ public class RouteLoggingFilter implements GlobalFilter, Ordered {
     private static final Logger log = LoggerFactory.getLogger(RouteLoggingFilter.class);
 
     @Override
+    @SuppressWarnings("null")
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
         String path = exchange.getRequest().getURI().getPath();

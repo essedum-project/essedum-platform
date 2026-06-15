@@ -7,13 +7,13 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.stereotype.Component;
 
 import com.lfn.ai.comm.lib.util.HeadersUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
@@ -22,142 +22,170 @@ import com.lfn.ai.comm.lib.util.exceptions.InvalidProjectRequestHeader;
 import com.lfn.iamp.usm.service.UserProjectRoleService;
 import com.lfn.iamp.usm.service.configApis.support.ConfigurationApisService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+@Component
 public final class CustomAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 	/** The logger. */
 	private final Logger log = LoggerFactory.getLogger(CustomAuthorizationManager.class);
 
+	/** Shared builder for path-pattern based request matchers. */
+	private static final PathPatternRequestMatcher.Builder PATH_MATCHERS = PathPatternRequestMatcher.withDefaults();
+
 	@Value("${apipermission.disable_api_security_validation:#{false}}")
 	private String permissionCheck;
-	
+
 	@Value("${security.claim:email}")
 	private String claim;
-	
+
 	@Value("${icip.pathPrefix}")
 	private String icipPathPrefix;
-	
-	@Autowired
-	ConfigurationApisService configurationApisService;
-	
-	@Autowired
-	private UserProjectRoleService userProjectRoleService;
-	
+
+	private final ConfigurationApisService configurationApisService;
+
+	private final UserProjectRoleService userProjectRoleService;
+
+	public CustomAuthorizationManager(ConfigurationApisService configurationApisService,
+			UserProjectRoleService userProjectRoleService) {
+		this.configurationApisService = configurationApisService;
+		this.userProjectRoleService = userProjectRoleService;
+	}
+
 	@Override
 	public AuthorizationDecision check(Supplier<Authentication> authentication,
 			RequestAuthorizationContext authorizationContext) {
-		//The below URLS - does not require authentication nor authorization  - permitAll
-		if(AntPathRequestMatcher.antMatcher("/api/getConfigDetails").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/authenticate").matcher(authorizationContext.getRequest()).isMatch() ||
-                AntPathRequestMatcher.antMatcher("/api/github/**").matcher(authorizationContext.getRequest()).isMatch() ||
-                AntPathRequestMatcher.antMatcher("/actuator/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/get-startup-constants**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/pipelinemodels/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/projects/page").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/incidents/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/tad/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/automation/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/file/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/batch/client/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/batch/generic/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/datasets/upload").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/"+icipPathPrefix.trim()+"/datasets/upload").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/copyblueprint/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/datasets/saveChunks/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/datasets/attachmentupload/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/"+icipPathPrefix.trim()+"/datasets/saveChunks/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/"+icipPathPrefix.trim()+"/datasets/attachmentupload/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/email/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/event/trigger/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/sre-availability-cal/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/usm-notificationss").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/registerUser").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/userss/resetPassword").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/userss/checkemail").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/demo-usecase").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/demo-usecase/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/adapter_workflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/interactiveWorkflow/**").matcher(authorizationContext.getRequest()).isMatch() ||
-				AntPathRequestMatcher.antMatcher("/api/RPAExternalTask/**").matcher(authorizationContext.getRequest()).isMatch())
-			return new AuthorizationDecision(true);
-		
-		String urlForValidation=authorizationContext.getRequest().getRequestURI();
+		HttpServletRequest request = authorizationContext.getRequest();
+		String urlForValidation = request.getRequestURI();
 
-		//Fetch the whitelistedURL - does not require authentication nor authorization - permitAll
-		List<String> whitelistedURL = configurationApisService.getWhiteListedUrl(); 
-		if(!whitelistedURL.isEmpty())
-			for (String apiRegex : whitelistedURL) {
-				if (RegularExpressionUtil.matchInputForRegex(urlForValidation, apiRegex)) {
-					return new AuthorizationDecision(true);
-				}
-			}	
-		
-		if (authorizationContext.getRequest().getUserPrincipal() == null) {
-			log.debug("Request unauthenticated: ", authorizationContext.getRequest().toString());
-			return new AuthorizationDecision(false);
-		}
-		
-		if (permissionCheck.equalsIgnoreCase("true")) {
-			log.debug("permissionCheck - ", permissionCheck);
+		// The below URLs and the whitelisted URLs do not require authentication nor authorization - permitAll
+		if (isPublicEndpoint(request) || isWhitelisted(urlForValidation)) {
 			return new AuthorizationDecision(true);
 		}
-		// Start of role permission and other access checks, that are bypassed by permissionCheck
-		if (authorizationContext.getRequest().getUserPrincipal().getName().equals("anonymousUser")) {
-			log.debug("Request assigned Anonymous User: ", authorizationContext.getRequest().toString());
+
+		if (request.getUserPrincipal() == null) {
+			log.debug("Request unauthenticated: {}", urlForValidation);
 			return new AuthorizationDecision(false);
 		}
-		
-		if (HeadersUtil.getAuthorizationToken(authorizationContext.getRequest())!= null) {
-			userProjectRoleService.deleteExpiredToken();
-			if (userProjectRoleService
-					.isInvalidToken(HeadersUtil.getAuthorizationToken(authorizationContext.getRequest()))) {
-				log.debug("Request token expired: ", authorizationContext.getRequest().toString());
-				return new AuthorizationDecision(false);
+
+		if (permissionCheck.equalsIgnoreCase("true")) {
+			log.debug("permissionCheck - {}", permissionCheck);
+			return new AuthorizationDecision(true);
+		}
+
+		// Start of role permission and other access checks, that are bypassed by permissionCheck
+		if ("anonymousUser".equals(request.getUserPrincipal().getName())) {
+			log.debug("Request assigned Anonymous User: {}", urlForValidation);
+			return new AuthorizationDecision(false);
+		}
+
+		if (isExpiredToken(request)) {
+			log.debug("Request token expired: {}", urlForValidation);
+			return new AuthorizationDecision(false);
+		}
+
+		Integer projectId = resolveProjectId(request);
+		if (projectId == null) {
+			log.debug("Request does not have project ID: {}", urlForValidation);
+			return new AuthorizationDecision(false);
+		}
+
+		List<Integer> roleIdList = resolveRoleIdList(request, projectId);
+		if (roleIdList.isEmpty()) {
+			log.debug("Request does not have role on project: {}", urlForValidation);
+			return new AuthorizationDecision(false);
+		}
+
+		return new AuthorizationDecision(hasApiAccess(roleIdList, urlForValidation, request.getMethod()));
+	}
+
+	/**
+	 * The endpoints that are open to all (no authentication/authorization required).
+	 */
+	private List<String> publicPatterns() {
+		String prefix = icipPathPrefix.trim();
+		return List.of("/api/getConfigDetails", "/api/authenticate", "/api/github/**", "/actuator/**",
+				"/api/get-startup-constants/**", "/api/pipelinemodels/**", "/api/projects/page", "/api/incidents/**",
+				"/api/tad/**", "/api/automation/**", "/api/file/**", "/api/batch/client/**", "/api/batch/generic/**",
+				"/api/datasets/upload", "/" + prefix + "/datasets/upload", "/api/copyblueprint/**",
+				"/api/datasets/saveChunks/**", "/api/datasets/attachmentupload/**",
+				"/" + prefix + "/datasets/saveChunks/**", "/" + prefix + "/datasets/attachmentupload/**",
+				"/api/email/**", "/api/event/trigger/**", "/api/sre-availability-cal/**", "/api/usm-notificationss",
+				"/api/registerUser", "/api/userss/resetPassword", "/api/userss/checkemail", "/api/demo-usecase",
+				"/api/demo-usecase/**", "/api/adapter_workflow/**", "/api/interactiveWorkflow/**",
+				"/api/RPAExternalTask/**");
+	}
+
+	private boolean isPublicEndpoint(HttpServletRequest request) {
+		for (String pattern : publicPatterns()) {
+			if (PATH_MATCHERS.matcher(pattern).matcher(request).isMatch()) {
+				return true;
 			}
 		}
-		
-		Integer projectId = null;
+		return false;
+	}
+
+	private boolean isWhitelisted(String urlForValidation) {
+		for (String apiRegex : configurationApisService.getWhiteListedUrl()) {
+			if (RegularExpressionUtil.matchInputForRegex(urlForValidation, apiRegex)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isExpiredToken(HttpServletRequest request) {
+		String token = HeadersUtil.getAuthorizationToken(request);
+		if (token == null) {
+			return false;
+		}
+		userProjectRoleService.deleteExpiredToken();
+		return userProjectRoleService.isInvalidToken(token);
+	}
+
+	private Integer resolveProjectId(HttpServletRequest request) {
+		try {
+			return HeadersUtil.getProjectId(request);
+		} catch (InvalidProjectRequestHeader e) {
+			log.error("Invalid project request header", e);
+			return null;
+		}
+	}
+
+	private List<Integer> resolveRoleIdList(HttpServletRequest request, Integer projectId) {
 		Integer roleId = null;
 		try {
-			projectId = HeadersUtil.getProjectId(authorizationContext.getRequest());
-			roleId= HeadersUtil.getRoleId(authorizationContext.getRequest());
+			roleId = HeadersUtil.getRoleId(request);
 		} catch (InvalidProjectRequestHeader e) {
 			log.error("Invalid project request header", e);
 		}
-		
-		if (projectId == null) {
-			log.debug("Request does not have project ID: ", authorizationContext.getRequest().toString());
-			return new AuthorizationDecision(false);
-		}
-		
-		List<Integer> roleIdList = new ArrayList<Integer>();
-		if (roleId == null && HeadersUtil.getRoleName(authorizationContext.getRequest()) == null) {
-			roleIdList = userProjectRoleService.getMappedRolesForUserLoginAndProject(ICIPUtils.getUser(claim), projectId);
-			log.debug("Role details not available, default mapping the roles for user and project : {} ",roleIdList);
-		}
-		else if (roleId != null) {
-			if (userProjectRoleService.isRoleExistsByUserAndProjectIdAndRoleId(ICIPUtils.getUser(claim), projectId,
-					roleId)) {
+		String user = ICIPUtils.getUser(claim);
+		String roleName = HeadersUtil.getRoleName(request);
+		List<Integer> roleIdList = new ArrayList<>();
+		if (roleId == null && roleName == null) {
+			roleIdList = userProjectRoleService.getMappedRolesForUserLoginAndProject(user, projectId);
+			log.debug("Role details not available, default mapping the roles for user and project : {} ", roleIdList);
+		} else if (roleId != null) {
+			if (Boolean.TRUE.equals(userProjectRoleService.isRoleExistsByUserAndProjectIdAndRoleId(user, projectId, roleId))) {
 				roleIdList.add(roleId);
 			}
 		} else {
-			Integer role = userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(ICIPUtils.getUser(claim), projectId,
-					HeadersUtil.getRoleName(authorizationContext.getRequest()));
-			roleIdList.add(role);
+			roleIdList.add(userProjectRoleService.getRoleIdByUserAndProjectIdAndRoleName(user, projectId, roleName));
 		}
-		if (roleIdList.isEmpty()) {
-			log.debug("Request does not have role on project: ", authorizationContext.getRequest().toString());
-			return new AuthorizationDecision(false);
-		}
+		return roleIdList;
+	}
 
-		for (Integer loop_roleid : roleIdList) {
-				for (Map.Entry<String, List<String>> apiMap : this.configurationApisService.getRoleMappedApis(loop_roleid).entrySet()) {
-					if (RegularExpressionUtil.matchInputForRegex(urlForValidation,apiMap.getKey())
-							&& ((apiMap.getValue().contains(authorizationContext.getRequest().getMethod().toUpperCase())) || apiMap.getValue().contains("ALL"))) {
-						return new AuthorizationDecision(true);
-					}
+	private boolean hasApiAccess(List<Integer> roleIdList, String urlForValidation, String httpMethod) {
+		String upperMethod = httpMethod.toUpperCase();
+		for (Integer roleId : roleIdList) {
+			for (Map.Entry<String, List<String>> apiMap : configurationApisService.getRoleMappedApis(roleId)
+					.entrySet()) {
+				if (RegularExpressionUtil.matchInputForRegex(urlForValidation, apiMap.getKey())
+						&& (apiMap.getValue().contains(upperMethod) || apiMap.getValue().contains("ALL"))) {
+					return true;
 				}
+			}
 		}
-
-		return new AuthorizationDecision(false);
+		return false;
 	}
 
 }

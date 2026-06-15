@@ -13,40 +13,25 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.lfn.ai.comm.lib.util.XSSUtils;
 
 public class XSSRequestWrapper extends HttpServletRequestWrapper {
 
-	private byte[] rawData;
-	private HttpServletRequest request;
 	private ResettableServletInputStream servletStream;
-
-	private static final Logger logger = LoggerFactory.getLogger(XSSRequestWrapper.class);
 
 	public XSSRequestWrapper(HttpServletRequest request) {
 		super(request);
-		this.request = request;
-		try {
-			this.servletStream = new ResettableServletInputStream();
-		} finally {
-			if (this.servletStream != null) {
-				try {
-					this.servletStream.close();
-				} catch (IOException e) {
-					logger.error("Unable to close stream");
-				}
-			}
-		}
+		this.servletStream = new ResettableServletInputStream();
 	}
 
+	// Returning null is intentional: the servlet getParameterValues contract uses null to signal an
+	// absent parameter, which Spring relies on for @RequestParam(required=true) resolution.
+	@SuppressWarnings("java:S1168")
 	@Override
 	public String[] getParameterValues(String parameter) {
 
 		/* allowParamValue is added to accept xml's for btf workflows */
-		String allowParamValue = "<\\?xml version=\"[1-9]\\.[0-9]\" encoding=\"UTF-8\"[^?]*\\?>\n<(?:bpmn[0-9]*:)?definitions[^>]*>[\\s\\S]*?</(?:bpmn[0-9]*:)?definitions>";
+		String allowParamValue = "<\\?xml version=\"[1-9]\\.\\d\" encoding=\"UTF-8\"[^?]*\\?>\n<(?:bpmn\\d*:)?definitions[^>]*>[\\s\\S]*?</(?:bpmn\\d*:)?definitions>";
 		String[] values = super.getParameterValues(parameter);
 		if (values == null) {
 			return null;
@@ -70,19 +55,17 @@ public class XSSRequestWrapper extends HttpServletRequestWrapper {
 	}
 
 	public void resetInputStream(byte[] newRawData) {
-		rawData = newRawData;
 		servletStream.stream = new ByteArrayInputStream(newRawData);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Enumeration getHeaders(String name) {
+	public Enumeration<String> getHeaders(String name) {
 
-		List result = new ArrayList<>();
-		Enumeration headers = super.getHeaders(name);
+		List<String> result = new ArrayList<>();
+		Enumeration<String> headers = super.getHeaders(name);
 
 		while (headers.hasMoreElements()) {
-			String header = (String) headers.nextElement();
+			String header = headers.nextElement();
 			String[] tokens = header.split(",");
 			for (String token : tokens) {
 				result.add(XSSUtils.stripXSS(token));
@@ -112,7 +95,7 @@ public class XSSRequestWrapper extends HttpServletRequestWrapper {
 
 		@Override
 		public void setReadListener(ReadListener readListener) {
-
+			// Non-blocking reads are not supported for this in-memory, resettable stream.
 		}
 	}
 

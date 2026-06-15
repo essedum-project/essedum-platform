@@ -45,18 +45,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Base64;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.spi.MappingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -66,7 +63,6 @@ import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
-import com.lfn.ai.comm.lib.util.logger.JobLogger;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -80,7 +76,7 @@ public class ICIPUtils {
 	private static final String LINE_SEPARATOR = "line.separator";
 	public static final int LETTER_IN_A_SENTENCE = 250;
 
-	private static final Logger logger = LoggerFactory.getLogger(JobLogger.class);
+	private static final Logger logger = LoggerFactory.getLogger(ICIPUtils.class);
 
 	private ICIPUtils() {
 	}
@@ -141,8 +137,8 @@ public class ICIPUtils {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public static StringBuilder readFileAsStringBuilder(Path path) throws IOException {
-		int buffer_capacity = 5200;
-		StringBuilder script = new StringBuilder(buffer_capacity);
+		int bufferCapacity = 5200;
+		StringBuilder script = new StringBuilder(bufferCapacity);
 		try (InputStream is = new FileInputStream(path.toAbsolutePath().toString())) {
 			log.info("Reading file...");
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(is), 2048)) {
@@ -218,6 +214,7 @@ public class ICIPUtils {
 	 * @return the list
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
+	@SuppressWarnings("deprecation")
 	public static List<String> readFileFromLastLines(Path path, int size) throws IOException {
 		List<String> script = new ArrayList<>();
 		try (ReversedLinesFileReader reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
@@ -236,7 +233,7 @@ public class ICIPUtils {
 	 * @return the string
 	 */
 	public static String removeSpecialCharacter(String name) {
-		return name.replaceAll("[^a-zA-Z0-9_]", "");
+		return name.replaceAll("\\W", "");
 	}
 
 	/*
@@ -267,20 +264,14 @@ public class ICIPUtils {
 				if (current == '%') {
 					resetEveryBoolean(flags, IS_KEYWORD_ACTIVE);
 					hardcodedString = addToMap(map, hardcodedString);
-					continue;
+				} else if (flags[IS_KEYWORD_ACTIVE] && current == '#') {
+					resetEveryBoolean(flags, IS_COUNT_ACTIVE);
+				} else if (flags[IS_COUNT_ACTIVE] && current == '!') {
+					resetEveryBoolean(flags, -1);
+					resetElements(map, currentElements);
 				} else {
-					if (flags[IS_KEYWORD_ACTIVE] && current == '#') {
-						resetEveryBoolean(flags, IS_COUNT_ACTIVE);
-						continue;
-					} else {
-						if (flags[IS_COUNT_ACTIVE] && current == '!') {
-							resetEveryBoolean(flags, -1);
-							resetElements(map, currentElements);
-							continue;
-						}
-					}
+					appendCharacters(flags, hardcodedString, currentElements, current);
 				}
-				appendCharacters(flags, hardcodedString, currentElements, current);
 			}
 			generateResult(result, map, parameters);
 			return result.toString();
@@ -317,35 +308,30 @@ public class ICIPUtils {
 		}
 	}
 
+	private static final String PARAMETER_PREFIX = "parameter_";
+	private static final String RANDOM_STRING = "randomstring";
+	private static final String RANDOM_DIGIT = "randomdigit";
+
 	private static void generateResult(StringBuilder result, Map<String, Integer> map, String... parameters) {
-		final String parameter = "parameter_";
-		final String randomdigit = "randomdigit";
-		final String randomstring = "randomstring";
-		map.forEach((key, value) -> {
-			if (key.startsWith(parameter)) {
-				int index = Integer.parseInt(key.substring(parameter.length())) - 1;
-				int len = parameters[index].length();
-				String subresult;
-				if (value <= len) {
-					subresult = parameters[index].substring(0, value);
-				} else {
-					subresult = parameters[index] + RandomStringUtils.random(value - len, true, false);
-				}
-				result.append(subresult);
-			} else {
-				if (key.startsWith(randomstring)) {
-					String subresult = RandomStringUtils.random(value, true, false);
-					result.append(subresult);
-				} else {
-					if (key.startsWith(randomdigit)) {
-						String subresult = RandomStringUtils.random(value, false, true);
-						result.append(subresult);
-					} else {
-						result.append(key);
-					}
-				}
+		map.forEach((key, value) -> result.append(resolveToken(key, value, parameters)));
+	}
+
+	private static String resolveToken(String key, int count, String... parameters) {
+		if (key.startsWith(PARAMETER_PREFIX)) {
+			int index = Integer.parseInt(key.substring(PARAMETER_PREFIX.length())) - 1;
+			int len = parameters[index].length();
+			if (count <= len) {
+				return parameters[index].substring(0, count);
 			}
-		});
+			return parameters[index] + RandomStringUtils.random(count - len, true, false);
+		}
+		if (key.startsWith(RANDOM_STRING)) {
+			return RandomStringUtils.random(count, true, false);
+		}
+		if (key.startsWith(RANDOM_DIGIT)) {
+			return RandomStringUtils.random(count, false, true);
+		}
+		return key;
 	}
 
 	private static void resetEveryBoolean(boolean[] flags, int index) {
@@ -355,16 +341,12 @@ public class ICIPUtils {
 		}
 	}
 
-	/**
-	 * Convert string to date.
-	 *
-	 * @param openDateStr the open date str
-	 * @param dateFormat
-	 * @return the timestamp
-	 * @throws IllegalArgumentException the illegal argument exception
-	 */
-	public static DateTime convertStringToDate(String openDateStr, String dateFormat) {
-		Map<String, String> dateMap = new HashMap<String, String>();
+	private static final String ISO_OFFSET_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+	private static final Map<String, String> DATE_FORMAT_MAP = buildDateFormatMap();
+
+	private static Map<String, String> buildDateFormatMap() {
+		Map<String, String> dateMap = new HashMap<>();
 		dateMap.put("^\\d{8}$", "yyyyMMdd");
 		dateMap.put("^\\d{1,2}-\\d{1,2}-\\d{4}$", "dd-MM-yyyy");
 		dateMap.put("^\\d{4}-\\d{1,2}-\\d{1,2}$", "yyyy-MM-dd");
@@ -388,51 +370,62 @@ public class ICIPUtils {
 		dateMap.put("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$", "yyyy/MM/dd HH:mm:ss");
 		dateMap.put("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd MMM yyyy HH:mm:ss");
 		dateMap.put("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$", "dd MMMM yyyy HH:mm:ss");
+		return dateMap;
+	}
 
-		if (!dateFormat.isEmpty()) {
-			try {
-				DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat);
-				DateTime dt = formatter.parseDateTime(openDateStr);
-				return dt;
-			} catch (NullPointerException | IllegalArgumentException de) {
-				for (String regexp : dateMap.keySet()) {
-					if (openDateStr.toLowerCase().matches(regexp)) {
-						dateFormat = dateMap.get(regexp);
-					}
-				}
-				if (!dateFormat.isEmpty() && !dateFormat.equals("yyyy-MM-dd'T'HH:mm:ssZ")) {
-					DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat);
-					DateTime dt = formatter.parseDateTime(openDateStr);
-					return dt;
-				} else if (!dateFormat.isEmpty() && dateFormat.equals("yyyy-MM-dd'T'HH:mm:ssZ")) {
-					SimpleDateFormat formatter;
-					Date date = new Date();
-					formatter = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
-					try {
-						date = (Date) formatter.parse(openDateStr);
-					} catch (ParseException e) {
-					    log.error("Exception " + e);
-					}
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(date);
-					String formatedDate;
-					if (cal.get(Calendar.HOUR) != 0) {
-						formatedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/"
-								+ cal.get(Calendar.YEAR) + " " + cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE)
-								+ ":" + cal.get(Calendar.SECOND);
-					} else {
-						formatedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/"
-								+ cal.get(Calendar.YEAR);
-					}
-					DateTimeFormatter format = DateTimeFormat.forPattern("dd/MM/yyyy hh:mm:ss");
-					DateTime dt = format.parseDateTime(formatedDate);
-					return dt;
-
-				}
-			}
-
+	/**
+	 * Convert string to date.
+	 *
+	 * @param openDateStr the open date str
+	 * @param dateFormat  the date format
+	 * @return the timestamp
+	 * @throws IllegalArgumentException the illegal argument exception
+	 */
+	public static DateTime convertStringToDate(String openDateStr, String dateFormat) {
+		if (dateFormat.isEmpty()) {
+			return null;
 		}
-		return null;
+		try {
+			return DateTimeFormat.forPattern(dateFormat).parseDateTime(openDateStr);
+		} catch (NullPointerException | IllegalArgumentException de) {
+			return parseWithDetectedFormat(openDateStr, dateFormat);
+		}
+	}
+
+	private static DateTime parseWithDetectedFormat(String openDateStr, String dateFormat) {
+		String detectedFormat = dateFormat;
+		for (Map.Entry<String, String> entry : DATE_FORMAT_MAP.entrySet()) {
+			if (openDateStr.toLowerCase().matches(entry.getKey())) {
+				detectedFormat = entry.getValue();
+			}
+		}
+		if (detectedFormat.isEmpty()) {
+			return null;
+		}
+		if (!detectedFormat.equals(ISO_OFFSET_PATTERN)) {
+			return DateTimeFormat.forPattern(detectedFormat).parseDateTime(openDateStr);
+		}
+		return parseUsingCalendar(openDateStr);
+	}
+
+	private static DateTime parseUsingCalendar(String openDateStr) {
+		Date date = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
+		try {
+			date = formatter.parse(openDateStr);
+		} catch (ParseException e) {
+			log.error("Exception ", e);
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		String formatedDate;
+		if (cal.get(Calendar.HOUR) != 0) {
+			formatedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR)
+					+ " " + cal.get(Calendar.HOUR) + ":" + cal.get(Calendar.MINUTE) + ":" + cal.get(Calendar.SECOND);
+		} else {
+			formatedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR);
+		}
+		return DateTimeFormat.forPattern("dd/MM/yyyy hh:mm:ss").parseDateTime(formatedDate);
 	}
 
 	public static void deleteAllOlderFilesInDirectory(Marker marker, String filepath, int days, boolean recursive)
@@ -511,15 +504,10 @@ public class ICIPUtils {
 
 	public static ModelMapper getModelMapper() {
 		ModelMapper modelmapper = new ModelMapper();
-		Converter<Map<String, String>, String> converter = new Converter<>() {
-			@Override
-			public String convert(MappingContext<Map<String, String>, String> attr) {
-				JSONObject jObj = new JSONObject();
-				attr.getSource().entrySet().stream().forEach(entry -> {
-					jObj.put(entry.getKey(), entry.getValue());
-				});
-				return jObj.toString();
-			}
+		Converter<Map<String, String>, String> converter = attr -> {
+			JSONObject jObj = new JSONObject();
+			attr.getSource().entrySet().forEach(entry -> jObj.put(entry.getKey(), entry.getValue()));
+			return jObj.toString();
 		};
 		modelmapper.addConverter(converter);
 		return modelmapper;
