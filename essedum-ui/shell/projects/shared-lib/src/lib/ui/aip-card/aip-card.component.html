@@ -59,7 +59,13 @@
                 <mat-icon class="badge-icon">account_tree</mat-icon>Pipeline
             </span>
 
-            <span *ngIf="servicev1 === 'pipelineagent'" class="card-type-badge badge-pipeline">
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type === 'mcpServer'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">dns</mat-icon>MCP Server
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type === 'appPipeline'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">apps</mat-icon>App Pipeline
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type !== 'mcpServer' && card?.type !== 'appPipeline'" class="card-type-badge badge-pipeline">
                 <mat-icon class="badge-icon">smart_toy</mat-icon>Agent Pipeline
             </span>
 
