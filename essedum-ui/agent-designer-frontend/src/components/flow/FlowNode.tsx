@@ -80,9 +80,9 @@ export const FlowNode = memo(({ id, data: rawData, selected }: NodeProps<AgentFl
 
       {/* Ports */}
       <div className="px-3 pb-3 space-y-1">
-        {data.definition.inputs.length > 0 && (
+        {(data.definition.inputs?.length ?? 0) > 0 && (
           <div className="space-y-1">
-            {data.definition.inputs.map((port) => (
+            {(data.definition.inputs ?? []).map((port) => (
               <div key={port.id} className="relative flex items-center gap-1.5">
                 <Handle
                   type="target"
@@ -97,13 +97,13 @@ export const FlowNode = memo(({ id, data: rawData, selected }: NodeProps<AgentFl
           </div>
         )}
 
-        {data.definition.inputs.length > 0 && data.definition.outputs.length > 0 && (
+        {(data.definition.inputs?.length ?? 0) > 0 && (data.definition.outputs?.length ?? 0) > 0 && (
           <div className="h-px bg-border my-1" />
         )}
 
-        {data.definition.outputs.length > 0 && (
+        {(data.definition.outputs?.length ?? 0) > 0 && (
           <div className="space-y-1">
-            {data.definition.outputs.map((port) => (
+            {(data.definition.outputs ?? []).map((port) => (
               <div key={port.id} className="relative flex items-center justify-end gap-1.5">
                 <span className="text-[10px] text-muted-foreground truncate">{port.label}</span>
                 <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground flex-shrink-0" />

@@ -83,7 +83,7 @@ export function NodeInspector() {
   const meta = CATEGORY_META[definition.category];
 
   // Group fields
-  const groups = definition.fields.reduce((acc, field) => {
+  const groups = (definition.fields ?? []).reduce((acc, field) => {
     const g = field.group || 'General';
     if (!acc[g]) acc[g] = [];
     acc[g].push(field);

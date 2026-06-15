@@ -395,10 +395,8 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'tools', label: 'Available Tools', type: 'data' },
     ],
     fields: [
-      { id: 'transport', label: 'Transport', type: 'select', default: 'stdio', options: [
-        { label: 'stdio', value: 'stdio' },
-        { label: 'SSE (HTTP)', value: 'sse' },
-        { label: 'WebSocket', value: 'ws' },
+      { id: 'transport', label: 'Transport', type: 'select', default: 'http', options: [
+        { label: 'HTTP (Streamable)', value: 'http' },
       ], group: 'Connection', required: true },
       { id: 'server_url', label: 'Server URL / Command', type: 'text', placeholder: 'ws://localhost:3000 or node server.js', group: 'Connection', required: true },
       { id: 'auth_token', label: 'Auth Token', type: 'password', group: 'Authentication' },
