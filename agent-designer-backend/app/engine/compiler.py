@@ -29,7 +29,7 @@ from typing import Any, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.engine.executors import EXECUTOR_REGISTRY, get_executor
-from app.engine.graph import build_adjacency, get_node_by_id, resolve_inputs
+from app.engine.graph import build_adjacency, get_node_by_id, get_node_type, resolve_inputs
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def compile_flow(
     # --- Add one LangGraph node per flow node ---
     for node in nodes:
         node_id: str = node["id"]
-        node_type: str = node.get("type", "")
+        node_type: str = get_node_type(node)
 
         # Capture by value in closure
         def make_node_fn(n: dict, nt: str, nid: str):

@@ -88,5 +88,74 @@ def resolve_inputs(
     return inputs
 
 
+def get_node_type(node: dict) -> str:
+    """Extract the logical executor type from a flow node dict.
+
+    React Flow stores every canvas node with ``type == "agentNode"``.  The
+    actual frontend node-library type (e.g. ``"text-input"``,
+    ``"openai-llm"``) lives at ``node["data"]["definition"]["type"]`` and the
+    high-level category (``"input"``, ``"llm"``, …) at
+    ``node["data"]["definition"]["category"]``.
+
+    This helper normalises all of these representations into one of the
+    backend executor keys: ``chat_input``, ``chat_output``,
+    ``prompt_template``, ``model``, ``mcp_tool``, ``memory``, ``rag_agent``.
+    """
+    raw = node.get("type", "")
+    data = node.get("data") or {}
+    definition = data.get("definition") or {}
+
+    if raw == "agentNode":
+        raw = definition.get("type", raw)
+
+    # Already a backend executor key — use as-is.
+    if raw in _BACKEND_EXECUTOR_KEYS:
+        return raw
+
+    # Explicit per-type overrides from the frontend node library.
+    if raw in _FRONTEND_TYPE_TO_EXECUTOR:
+        return _FRONTEND_TYPE_TO_EXECUTOR[raw]
+
+    # Fall back to the node's category (set by the frontend node library).
+    category = definition.get("category") or data.get("category")
+    if category in _CATEGORY_TO_EXECUTOR:
+        return _CATEGORY_TO_EXECUTOR[category]
+
+    return raw
+
+
+_BACKEND_EXECUTOR_KEYS = {
+    "chat_input",
+    "chat_output",
+    "prompt_template",
+    "model",
+    "mcp_tool",
+    "memory",
+    "rag_agent",
+}
+
+# Specific frontend node-library type strings → backend executor keys.
+_FRONTEND_TYPE_TO_EXECUTOR = {
+    "text-input": "chat_input",
+    "text-output": "chat_output",
+    "prompt-template": "prompt_template",
+    "few-shot-prompt": "prompt_template",
+    "chat-prompt": "prompt_template",
+    "vector-search": "rag_agent",
+}
+
+# Category → backend executor key (covers all *-llm, *-memory, mcp-*,
+# *-agent definitions without listing each one explicitly).
+_CATEGORY_TO_EXECUTOR = {
+    "input": "chat_input",
+    "output": "chat_output",
+    "llm": "model",
+    "prompt": "prompt_template",
+    "mcp": "mcp_tool",
+    "memory": "memory",
+    "agent": "rag_agent",
+}
+
+
 def find_nodes_by_type(nodes: list[dict], node_type: str) -> list[dict]:
-    return [n for n in nodes if n.get("type") == node_type]
+    return [n for n in nodes if get_node_type(n) == node_type]
