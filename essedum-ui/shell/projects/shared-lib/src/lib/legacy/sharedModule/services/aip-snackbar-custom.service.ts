@@ -10,12 +10,20 @@ export class AipSnackbarCustomService {
   constructor(private snackBar: MatSnackBar) {}
 
   private show(data: SnackbarData, config?: MatSnackBarConfig) {
+    const msgLen = (data.message || '').length;
+    const dynamicMaxWidth =
+      msgLen > 120 ? '90vw' :
+      msgLen > 80  ? '680px' :
+      msgLen > 50  ? '560px' :
+                     '480px';
+
     const defaultConfig: MatSnackBarConfig = {
       duration: 5000,
       horizontalPosition: 'center',
       verticalPosition: 'top',
       panelClass: [`snackbar-${data.type}`],
-      data: data
+      data: data,
+      ...(!config?.['maxWidth'] && { maxWidth: dynamicMaxWidth })
     };
 
     const snackBarConfig = { ...defaultConfig, ...config };
