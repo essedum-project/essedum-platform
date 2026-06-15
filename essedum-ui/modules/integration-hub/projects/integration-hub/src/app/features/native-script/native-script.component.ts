@@ -119,6 +119,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     secretsCollapsed = true;
     envEditIndex: number = -1;
     envEditMode: boolean = false;
+    secretsEditIndex: number = -1;
+    secretsEditMode: boolean = false;
+    secretsShowValue: boolean[] = [];
     private _saveDebounceTimer: any = null;
   constructor(
     @Inject('envi') private baseUrl: string,
@@ -192,9 +195,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
     if (this.dynamicEnvArray?.length) {
       this.envCollapsed = false;
-      // Auto-enter edit mode for any empty row (leftover unsaved add)
-      const emptyIdx = this.dynamicEnvArray.findIndex((e: any) => !e.name && !e.value);
-      if (emptyIdx !== -1) { this.envEditIndex = emptyIdx; this.envEditMode = true; }
     }
 
         } else {
@@ -209,9 +209,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
     if (this.dynamicEnvArray?.length) {
       this.envCollapsed = false;
-      // Auto-enter edit mode for any empty row (leftover unsaved add)
-      const emptyIdx = this.dynamicEnvArray.findIndex((e: any) => !e.name && !e.value);
-      if (emptyIdx !== -1) { this.envEditIndex = emptyIdx; this.envEditMode = true; }
     }
 
         }
@@ -248,6 +245,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         if(this.data.usedSecrets){
           this.dynamicSecretsArray=this.data.usedSecrets;
           if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
+          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
         }
         if(this.data.files==null || this.data.files==undefined){
           this.data['files'] = [];
@@ -866,6 +864,41 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.dynamicSecretsArray = $event;
     this.secretsModified = true;
     if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
+    this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
+    this.saveEnvAndSecrets();
+  }
+
+  addSecret(): void {
+    if (this.secretsEditMode) { return; }
+    if (!this.dynamicSecretsArray) { this.dynamicSecretsArray = []; }
+    this.dynamicSecretsArray.push({ name: '', value: '' });
+    this.secretsShowValue.push(false);
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsCollapsed = false;
+  }
+
+  editSecret(i: number): void {
+    this.secretsEditIndex = i;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(i: number): void {
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteSecret(i: number): void {
+    this.dynamicSecretsArray.splice(i, 1);
+    this.secretsShowValue.splice(i, 1);
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  toggleSecretVisibility(i: number): void {
+    this.secretsShowValue[i] = !this.secretsShowValue[i];
   }
 
   saveEnvAndSecrets() {

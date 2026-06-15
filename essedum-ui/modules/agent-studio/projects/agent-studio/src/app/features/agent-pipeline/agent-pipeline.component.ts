@@ -107,6 +107,15 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   loadScript: boolean = false;
   scriptFileName = '';
   dynamicEnvArray: Array<DynamicParamsGrid> = [];
+  envCollapsed = true;
+  envEditIndex: number = -1;
+  envEditMode: boolean = false;
+  dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
+  secretsCollapsed = true;
+  secretsEditIndex: number = -1;
+  secretsEditMode: boolean = false;
+  secretsShowValue: boolean[] = [];
+  private _saveEnvDebounceTimer: any = null;
   isExpand: boolean = true;
   uploader: FileUploader;
   cardName: any;
@@ -532,9 +541,34 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
+    const nameToFetch = this.cardName || this.currentCname;
+    if (!nameToFetch) { return; }
+    this.service.getStreamingServicesByName(nameToFetch).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+
+      // Load environment variables and user secrets from json_content
+      const rawContent = res.json_content || (res as any).jsonContent;
+      if (rawContent) {
+        try {
+          const parsed = JSON.parse(rawContent);
+          this.dynamicEnvArray = parsed.environment || [];
+          if (this.dynamicEnvArray.length) { this.envCollapsed = false; }
+          // Secrets live inside elements[0].attributes.usedSecrets
+          const attrs = parsed.elements?.[0]?.attributes;
+          this.dynamicSecretsArray = attrs?.usedSecrets || [];
+          if (this.dynamicSecretsArray.length) { this.secretsCollapsed = false; }
+          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
+          // Reset edit state — loaded data should display as read-only
+          this.envEditIndex = -1;
+          this.envEditMode = false;
+          this.secretsEditIndex = -1;
+          this.secretsEditMode = false;
+        } catch (e) {
+          this.dynamicEnvArray = [];
+          this.dynamicSecretsArray = [];
+        }
+      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
@@ -3420,6 +3454,17 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.fileSystemData = [];
     this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
+
+    // Reset env/secrets edit state so loaded data always renders read-only
+    this.envEditIndex = -1;
+    this.envEditMode = false;
+    this.secretsEditIndex = -1;
+    this.secretsEditMode = false;
+    this.dynamicEnvArray = [];
+    this.dynamicSecretsArray = [];
+    this.secretsShowValue = [];
+    this.envCollapsed = true;
+    this.secretsCollapsed = true;
     
     // Ensure script content is empty for new agents
     if (!this.loadScript || !this.script || this.script.length === 0) {
@@ -3464,6 +3509,101 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       'Deployment configuration saved successfully. You can now deploy using the Deploy button.',
       'success'
     );
+  }
+
+  // ── Environment Variables ────────────────────────────────────────────────────
+
+  addEnvVar(): void {
+    if (this.envEditMode) { return; }
+    if (!this.dynamicEnvArray) { this.dynamicEnvArray = []; }
+    this.dynamicEnvArray.push({ name: '', value: '' });
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+    this.envCollapsed = false;
+  }
+
+  editEnvVar(i: number): void {
+    this.envEditIndex = i;
+    this.envEditMode = true;
+  }
+
+  saveEnvVar(i: number): void {
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteEnvVar(i: number): void {
+    this.dynamicEnvArray.splice(i, 1);
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  saveEnvAndSecrets(): void {
+    if (this._saveEnvDebounceTimer) { clearTimeout(this._saveEnvDebounceTimer); }
+    this._saveEnvDebounceTimer = setTimeout(() => {
+      this._saveEnvDebounceTimer = null;
+      try {
+        if (!this.streamItem) { return; }
+        const current = this.streamItem.json_content
+          ? JSON.parse(this.streamItem.json_content)
+          : { elements: [{ attributes: {} }] };
+        current.environment = this.dynamicEnvArray || [];
+        // Ensure attributes object exists before writing secrets
+        if (!current.elements) { current.elements = [{ attributes: {} }]; }
+        if (!current.elements[0]) { current.elements[0] = { attributes: {} }; }
+        if (!current.elements[0].attributes) { current.elements[0].attributes = {}; }
+        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+        this.streamItem.json_content = JSON.stringify(current);
+        this.service.update(this.streamItem).subscribe({
+          next: () => {
+            this.service.message('Configuration saved', 'success');
+          },
+          error: (err: any) => {
+            console.error('Failed to save configuration:', err);
+            this.service.message('Failed to save configuration', 'error');
+          }
+        });
+      } catch (e) {
+        console.error('saveEnvAndSecrets error:', e);
+      }
+    }, 300);
+  }
+
+  // ── User Secrets ─────────────────────────────────────────────────────────────
+
+  addSecret(): void {
+    if (this.secretsEditMode) { return; }
+    if (!this.dynamicSecretsArray) { this.dynamicSecretsArray = []; }
+    this.dynamicSecretsArray.push({ name: '', value: '' });
+    this.secretsShowValue.push(false);
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsCollapsed = false;
+  }
+
+  editSecret(i: number): void {
+    this.secretsEditIndex = i;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(i: number): void {
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteSecret(i: number): void {
+    this.dynamicSecretsArray.splice(i, 1);
+    this.secretsShowValue.splice(i, 1);
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  toggleSecretVisibility(i: number): void {
+    this.secretsShowValue[i] = !this.secretsShowValue[i];
   }
 
   /**
@@ -3551,8 +3691,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           // No data from list API, show only script tab
           this.showScriptTabOnly();
         }
+
+        // Always load streamItem and env vars regardless of file presence
+        this.getStreamService();
+
         this.isLoadingFiles = false;
-         // Trigger change detection
+        // Trigger change detection
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -3566,7 +3710,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
-            // Trigger change detection
+        // Still try to load env vars
+        this.getStreamService();
+        // Trigger change detection
         this.cdr.detectChanges();
       }
     });
@@ -3598,22 +3744,17 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         if (listResponse && listResponse.length > 0) {
           // List API succeeded - enable codespace tab and populate with response data
           this.enableCodespaceTabOnly(listResponse);
-          
-          this.isLoadingFiles = false;
-
-               
-          // Trigger change detection
-          this.cdr.detectChanges();
         } else {
           // No data from list API, show only script tab and continue with old flow
           this.showScriptTabOnly();
-          this.isLoadingFiles = false;
-          // Fall back to the original getStreamService flow
-          this.getStreamService();
-
-                  // Trigger change detection
-          this.cdr.detectChanges();
         }
+
+        // Always load streamItem and env vars regardless of file presence
+        this.getStreamService();
+
+        this.isLoadingFiles = false;
+        // Trigger change detection
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error calling pipeline folder list API:', error);

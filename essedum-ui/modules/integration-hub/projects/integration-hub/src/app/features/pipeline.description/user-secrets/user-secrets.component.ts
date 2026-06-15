@@ -21,7 +21,7 @@ export class UserSecretsComponent implements OnInit {
     if(!this.isauth){
     if(this.configData == undefined)
       this.configData=[]
-    this.configData.push({name:"usedSecrets",value:""})
+    this.configData.push({name:"",value:""})
     this.editMode=true
     this.editIndex=this.configData.length-1
     this.configDataChange.emit(this.configData);}
