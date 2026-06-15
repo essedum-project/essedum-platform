@@ -158,9 +158,7 @@ sv/
 ├── ── Documentation ─────────────────
 ├── README.md                            # This file
 ├── MICROSERVICES_README.md              # Architecture deep-dive
-├── MICROSERVICES_DECOMPOSITION.md       # Decomposition strategy & rationale
-├── API_TESTING_GUIDE.md                 # cURL & Postman reference
-└── ESSEDUM-Microservices-API-Collection.postman_collection.json
+└── MICROSERVICES_DECOMPOSITION.md       # Decomposition strategy & rationale
 ```
 
 ---
@@ -328,8 +326,6 @@ Docker Compose starts services in the correct order using health-check dependenc
 | `GET` | `/api/aip/service/v1/vibe-coding/config/providers` | List AI providers |
 | `GET` | `/api/aip/service/v1/vibe-coding/recipes/list` | List recipes |
 
-> **Full API reference with cURL examples →** [`API_TESTING_GUIDE.md`](./API_TESTING_GUIDE.md)
-
 ---
 
 ## Health Checks
@@ -392,7 +388,7 @@ Profiles are combined: `--spring.profiles.active=mysql,dbjwt`
 
 ### Using Postman
 
-1. Import [`ESSEDUM-Microservices-API-Collection.postman_collection.json`](./ESSEDUM-Microservices-API-Collection.postman_collection.json) into Postman.
+1. Create a new Postman collection for the Essedum services (a prebuilt collection file is not currently included in this repo).
 2. Set collection variables:
 
    | Variable | Value |
@@ -420,8 +416,6 @@ TOKEN="<paste id_token here>"
 # 3. Use the token for any API call
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/userss
 ```
-
-> **Full cURL reference →** [`API_TESTING_GUIDE.md`](./API_TESTING_GUIDE.md)
 
 ---
 
@@ -460,4 +454,3 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/userss
 
 - [Microservices Architecture Details](./MICROSERVICES_README.md)
 - [Decomposition Strategy & Rationale](./MICROSERVICES_DECOMPOSITION.md)
-- [Full API Testing Guide](./API_TESTING_GUIDE.md)
