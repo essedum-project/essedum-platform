@@ -1,7 +1,7 @@
 <div class="right-panel">
 
-  <!-- ── Empty state ── -->
-  <div *ngIf="(status === 'idle' || status === 'error') && !files.length" class="empty-state">
+  <!-- ── Empty state (only when no card registered AND no files/generation) ── -->
+  <div *ngIf="(status === 'idle' || status === 'error') && !files.length && !pipelineCname" class="empty-state">
     <div class="empty-content">
       <div class="empty-icon-wrap">
         <i class="bi bi-layout-split"></i>
@@ -15,8 +15,8 @@
     </div>
   </div>
 
-  <!-- ── Panel (generating / live / files loaded) ── -->
-  <div *ngIf="status === 'generating' || status === 'live' || files.length > 0" class="panel-content">
+  <!-- ── Panel (show when generating / live / files loaded / card registered) ── -->
+  <div *ngIf="status === 'generating' || status === 'live' || files.length > 0 || pipelineCname" class="panel-content">
 
     <!-- Tab bar -->
     <div class="tab-bar">
@@ -28,6 +28,10 @@
       <button class="tab-btn" [class.active]="activeTab === 'preview'" (click)="activeTab = 'preview'">
         <i class="bi bi-display"></i>
         Preview
+      </button>
+      <button *ngIf="pipelineCname" class="tab-btn" [class.active]="activeTab === 'environment'" (click)="activeTab = 'environment'">
+        <i class="bi bi-gear"></i>
+        Environment
       </button>
     </div>
 
@@ -209,6 +213,118 @@
         ></iframe>
       </div>
 
+    </div>
+
+    <!-- ── Environment tab ── -->
+    <div *ngIf="activeTab === 'environment'" class="environment-pane">
+      <div class="env-tab-wrapper">
+        <!-- Environment Variables -->
+        <div class="collapsible-section">
+          <div class="collapsible-header" (click)="envCollapsed = !envCollapsed">
+            <i class="bi collapse-icon" [class.bi-chevron-right]="envCollapsed" [class.bi-chevron-down]="!envCollapsed"></i>
+            <span class="collapse-title">Environment Variables</span>
+            <span class="collapse-badge">{{ dynamicEnvArray?.length || 0 }}</span>
+          </div>
+          <div class="collapsible-body" [class.collapsed]="envCollapsed">
+            <div class="env-card">
+              <table class="env-table" *ngIf="dynamicEnvArray?.length > 0">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let env of dynamicEnvArray; let i = index; trackBy: trackByIndex">
+                    <td>
+                      <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.name">{{ env.name || '—' }}</span>
+                      <input *ngIf="envEditIndex === i && envEditMode"
+                        [(ngModel)]="dynamicEnvArray[i].name"
+                        class="env-input" type="text" placeholder="KEY" />
+                    </td>
+                    <td>
+                      <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.value">{{ env.value || '—' }}</span>
+                      <input *ngIf="envEditIndex === i && envEditMode"
+                        [(ngModel)]="dynamicEnvArray[i].value"
+                        class="env-input" type="text" placeholder="value" />
+                    </td>
+                    <td class="action-cell">
+                      <i class="bi bi-pencil env-action-icon" (click)="editEnvVar(i)" title="Edit"></i>
+                      <i *ngIf="envEditMode && envEditIndex === i" class="bi bi-floppy env-action-icon" (click)="saveEnvVar(i)" title="Save"></i>
+                      <i class="bi bi-trash env-action-icon" (click)="deleteEnvVar(i)" title="Delete"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="!dynamicEnvArray?.length" class="env-empty-state">
+                <i class="bi bi-sliders"></i>
+                <span>No environment variables defined</span>
+              </div>
+              <button class="env-add-btn" (click)="addEnvVar()">
+                <i class="bi bi-plus-lg"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Secrets -->
+        <div class="collapsible-section">
+          <div class="collapsible-header" (click)="secretsCollapsed = !secretsCollapsed">
+            <i class="bi collapse-icon" [class.bi-chevron-right]="secretsCollapsed" [class.bi-chevron-down]="!secretsCollapsed"></i>
+            <span class="collapse-title">User Secrets</span>
+            <span class="collapse-badge">{{ dynamicSecretsArray?.length || 0 }}</span>
+          </div>
+          <div class="collapsible-body" [class.collapsed]="secretsCollapsed">
+            <div class="env-card">
+              <table class="env-table" *ngIf="dynamicSecretsArray?.length > 0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let secret of dynamicSecretsArray; let i = index; trackBy: trackByIndex">
+                    <td>
+                      <span *ngIf="secretsEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!secret.name">{{ secret.name || '—' }}</span>
+                      <input *ngIf="secretsEditIndex === i && secretsEditMode"
+                        [(ngModel)]="dynamicSecretsArray[i].name"
+                        class="env-input" type="text" placeholder="secret name" />
+                    </td>
+                    <td>
+                      <span *ngIf="secretsEditIndex !== i" class="env-cell-text secret-value-mask">
+                        <span *ngIf="!secretsShowValue[i]">••••••••</span>
+                        <span *ngIf="secretsShowValue[i]">{{ secret.value || '—' }}</span>
+                        <i class="bi env-action-icon secret-eye-icon"
+                           [class.bi-eye]="!secretsShowValue[i]"
+                           [class.bi-eye-slash]="secretsShowValue[i]"
+                           (click)="toggleSecretVisibility(i)" title="Toggle visibility"></i>
+                      </span>
+                      <input *ngIf="secretsEditIndex === i && secretsEditMode"
+                        [(ngModel)]="dynamicSecretsArray[i].value"
+                        class="env-input" type="password" placeholder="secret value" />
+                    </td>
+                    <td class="action-cell">
+                      <i class="bi bi-pencil env-action-icon" (click)="editSecret(i)" title="Edit"></i>
+                      <i *ngIf="secretsEditMode && secretsEditIndex === i" class="bi bi-floppy env-action-icon" (click)="saveSecret(i)" title="Save"></i>
+                      <i class="bi bi-trash env-action-icon" (click)="deleteSecret(i)" title="Delete"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="!dynamicSecretsArray?.length" class="env-empty-state">
+                <i class="bi bi-lock"></i>
+                <span>No user secrets defined</span>
+              </div>
+              <button class="env-add-btn" (click)="addSecret()">
+                <i class="bi bi-plus-lg"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { VibeStudioService } from '../services/vibe-studio.service';
 import { VibeFile, VibeSessionStatus } from '../models/vibe-studio.models';
+import { Services } from '@essedum/shared-lib';
 
 export interface FileTreeNode {
   name: string;
@@ -19,13 +20,15 @@ export interface FileTreeNode {
   templateUrl: './vibe-right-panel.component.html',
   styleUrls: ['./vibe-right-panel.component.scss'],
 })
-export class VibeRightPanelComponent implements OnInit, OnDestroy {
+export class VibeRightPanelComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() pipelineCname: string | null = null;
+
   files: VibeFile[] = [];
   treeNodes: FileTreeNode[] = [];          // flat list for *ngFor (virtual tree)
   selectedFile: VibeFile | null = null;
   previewUrl: SafeResourceUrl | null = null;
   status: VibeSessionStatus = 'idle';
-  activeTab: 'preview' | 'code' = 'preview';
+  activeTab: 'preview' | 'code' | 'environment' = 'preview';
   codeLines: string[] = [];
   tokenizedLines: SafeHtml[] = [];
   deploymentStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
@@ -33,12 +36,26 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
   deploymentSafeUrl: SafeResourceUrl | null = null;
   private selectedExt = '';
 
+  // ── Environment tab state ──────────────────────────────────────────────────
+  dynamicEnvArray: Array<{ name: string; value: string }> = [];
+  envCollapsed = true;
+  envEditIndex = -1;
+  envEditMode = false;
+  dynamicSecretsArray: Array<{ name: string; value: string }> = [];
+  secretsCollapsed = true;
+  secretsEditIndex = -1;
+  secretsEditMode = false;
+  secretsShowValue: boolean[] = [];
+  private streamItem: any = null;
+  private _saveEnvDebounceTimer: any = null;
+
   private expandedDirs = new Set<string>();
   private destroy$ = new Subject<void>();
 
   constructor(
     private vibeService: VibeStudioService,
     private sanitizer: DomSanitizer,
+    private services: Services,
   ) {}
 
   ngOnInit(): void {
@@ -447,6 +464,134 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy {
   /** Sanitizes a deployment URL for iframe use. */
   sanitizeDeploymentUrl(result: any): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(result as string);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['pipelineCname'] && this.pipelineCname) {
+      // Only reload if not currently editing (prevents overwriting user input)
+      if (!this.envEditMode && !this.secretsEditMode) {
+        this.loadEnvAndSecrets();
+      }
+    }
+  }
+
+  // ── Environment / Secrets CRUD ──────────────────────────────────────────────
+
+  private loadEnvAndSecrets(): void {
+    if (!this.pipelineCname) return;
+    this.services.getStreamingServicesByName(this.pipelineCname).subscribe((res: any) => {
+      // If user started editing while API was in-flight, don't overwrite their work
+      if (this.envEditMode || this.secretsEditMode) {
+        this.streamItem = res;
+        return;
+      }
+      this.streamItem = res;
+      const rawContent = res.json_content || res.jsonContent;
+      if (rawContent) {
+        try {
+          const parsed = JSON.parse(rawContent);
+          this.dynamicEnvArray = parsed.environment || [];
+          if (this.dynamicEnvArray.length) { this.envCollapsed = false; }
+          const attrs = parsed.elements?.[0]?.attributes;
+          this.dynamicSecretsArray = attrs?.usedSecrets || [];
+          if (this.dynamicSecretsArray.length) { this.secretsCollapsed = false; }
+          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
+        } catch (e) {
+          this.dynamicEnvArray = [];
+          this.dynamicSecretsArray = [];
+        }
+      }
+      this.envEditIndex = -1;
+      this.envEditMode = false;
+      this.secretsEditIndex = -1;
+      this.secretsEditMode = false;
+    });
+  }
+
+  addEnvVar(): void {
+    if (this.envEditMode) return;
+    if (!this.dynamicEnvArray) this.dynamicEnvArray = [];
+    this.dynamicEnvArray.push({ name: '', value: '' });
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+    this.envCollapsed = false;
+  }
+
+  editEnvVar(i: number): void {
+    this.envEditIndex = i;
+    this.envEditMode = true;
+  }
+
+  saveEnvVar(i: number): void {
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteEnvVar(i: number): void {
+    this.dynamicEnvArray.splice(i, 1);
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  addSecret(): void {
+    if (this.secretsEditMode) return;
+    if (!this.dynamicSecretsArray) this.dynamicSecretsArray = [];
+    this.dynamicSecretsArray.push({ name: '', value: '' });
+    this.secretsShowValue.push(false);
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsCollapsed = false;
+  }
+
+  editSecret(i: number): void {
+    this.secretsEditIndex = i;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(i: number): void {
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteSecret(i: number): void {
+    this.dynamicSecretsArray.splice(i, 1);
+    this.secretsShowValue.splice(i, 1);
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  toggleSecretVisibility(i: number): void {
+    this.secretsShowValue[i] = !this.secretsShowValue[i];
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  private saveEnvAndSecrets(): void {
+    if (this._saveEnvDebounceTimer) { clearTimeout(this._saveEnvDebounceTimer); }
+    this._saveEnvDebounceTimer = setTimeout(() => {
+      this._saveEnvDebounceTimer = null;
+      try {
+        if (!this.streamItem) return;
+        const current = this.streamItem.json_content
+          ? JSON.parse(this.streamItem.json_content)
+          : { elements: [{ attributes: {} }] };
+        current.environment = this.dynamicEnvArray || [];
+        if (!current.elements) current.elements = [{ attributes: {} }];
+        if (!current.elements[0]) current.elements[0] = { attributes: {} };
+        if (!current.elements[0].attributes) current.elements[0].attributes = {};
+        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+        this.streamItem.json_content = JSON.stringify(current);
+        this.services.update(this.streamItem).subscribe();
+      } catch (e) {
+        console.error('saveEnvAndSecrets error:', e);
+      }
+    }, 300);
   }
 
   ngOnDestroy(): void {
