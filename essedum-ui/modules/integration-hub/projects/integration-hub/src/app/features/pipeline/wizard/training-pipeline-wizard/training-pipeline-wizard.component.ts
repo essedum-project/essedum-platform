@@ -66,6 +66,10 @@ export class TrainingPipelineWizardComponent implements OnInit {
     { label: 'gemma4:latest',  value: 'gemma4:latest'   },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
     { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+    { label: 'phi3:mini',      value: 'phi3:mini'       },
+    { label: 'gemma3:latest',  value: 'gemma3:latest'   },
+    { label: 'llama3:latest',  value: 'llama3:latest'   },
+    { label: 'qwen3:4b',      value: 'qwen3:4b'        },
   ];
   onAgentSelect(agent: string): void { this.selectedAgent = agent; this.vibe.setAgentProvider(agent); }
   onModelSelect(model: string): void { this.selectedModel = model; this.vibe.setModel(model); }

@@ -82,6 +82,10 @@ export class DataPipelineWizardComponent implements OnInit {
     { label: 'gemma4:latest',  value: 'gemma4:latest'   },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
     { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+    { label: 'phi3:mini',      value: 'phi3:mini'       },
+    { label: 'gemma3:latest',  value: 'gemma3:latest'   },
+    { label: 'llama3:latest',  value: 'llama3:latest'   },
+    { label: 'qwen3:4b',       value: 'qwen3:4b'        },
   ];
   onAgentSelect(agent: string): void { this.selectedAgent = agent; this.vibe.setAgentProvider(agent); }
   onModelSelect(model: string): void { this.selectedModel = model; this.vibe.setModel(model); }
@@ -227,10 +231,26 @@ export class DataPipelineWizardComponent implements OnInit {
   }
 
   private applyTypeDefaults(type: string): void {
-    const conn = this.sourceForm.get('connection');
-    const cont = this.sourceForm.get('outputContainer');
-    conn.setValidators(type === 'slm-cot' ? [] : [Validators.required]);
-    cont.setValidators([Validators.required]);
+    const conn         = this.sourceForm.get('connection');
+    const cont         = this.sourceForm.get('outputContainer');
+    const dataset      = this.sourceForm.get('dataset');
+    const baseModel    = this.sourceForm.get('baseModel');
+    const teacherModel = this.sourceForm.get('teacherModel');
+    const outputFormat = this.sourceForm.get('outputFormat');
+
+    const isSlmCot = type === 'slm-cot';
+
+    // For slm-cot, the dataset/connection/container fields are hidden in the
+    // template so they must not block form validity. The slm-cot step instead
+    // requires a teacher model, a target base model and an output format.
+    conn.setValidators(isSlmCot ? [] : [Validators.required]);
+    cont.setValidators(isSlmCot ? [] : [Validators.required]);
+    dataset.setValidators(isSlmCot ? [] : [Validators.required]);
+    baseModel.setValidators(isSlmCot ? [Validators.required] : []);
+    teacherModel.setValidators(isSlmCot ? [Validators.required] : []);
+    outputFormat.setValidators(
+      isSlmCot || OUTPUT_FORMATS_BY_TYPE[type] ? [Validators.required] : []
+    );
 
     if (type === 'rag-ingestion') {
       this.sourceForm.patchValue({ outputFormat: 'qdrant-collection' });
@@ -242,6 +262,10 @@ export class DataPipelineWizardComponent implements OnInit {
 
     conn.updateValueAndValidity();
     cont.updateValueAndValidity();
+    dataset.updateValueAndValidity();
+    baseModel.updateValueAndValidity();
+    teacherModel.updateValueAndValidity();
+    outputFormat.updateValueAndValidity();
   }
 
   // ─── live dropdown population ─────────────────────────────────────────

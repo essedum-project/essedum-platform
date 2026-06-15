@@ -153,6 +153,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     @EssedumProperty("icip.certificateCheck")
     private String certificateCheck;
 
+    @EssedumProperty("icip.ssrf.allowedHosts")
+    private String ssrfAllowedHosts;
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilS3.class);
 
@@ -864,13 +867,18 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
             logger.info("endpointUrl: {}", endpointUrl);
         } catch (MalformedURLException e1) {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         } catch (IllegalArgumentException e1) {
             logger.error("SSRF validation failed: {}", e1.getMessage());
+        }
+        if (endpointUrl == null) {
+            throw new EssedumException("Endpoint URL is invalid or blocked by SSRF validation: " + rawUrl);
         }
         TrustManager[] trustAllCerts = getTrustAllCerts();
         SSLContext sslContext = getSslContext(trustAllCerts);
@@ -1000,9 +1008,11 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             String secretKey = connectionDetails.optString(SECRET_KEY);
             String region = connectionDetails.optString(REGION_KEY);
             URL endpointUrl = null;
+            String rawUrl = connectionDetails.optString("url");
             String filePath2;
             try {
-                endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+                endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                        SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
                 logger.info("endpointUrl " + endpointUrl);
             } catch (MalformedURLException e1) {
                 logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
@@ -1064,8 +1074,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
         } catch (MalformedURLException e1) {
             logger.error("Error occured while fetching FileInfo" + e1.getMessage());
         } catch (IllegalArgumentException e1) {
@@ -1150,15 +1162,20 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
         } catch (MalformedURLException e1) {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         } catch (IllegalArgumentException e1) {
             logger.error("SSRF validation failed: " + e1.getMessage());
         }
 
-        if (!(connectionDetails.optString("url").contains("blob") || (connectionDetails.optString("url").contains("aws")) || (connectionDetails.optString("url").contains("google")))) {
+        if (!(rawUrl.contains("blob") || rawUrl.contains("aws") || rawUrl.contains("google"))) {
+            if (endpointUrl == null) {
+                throw new EssedumException("Endpoint URL is invalid or blocked by SSRF validation: " + rawUrl);
+            }
             BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             TrustManager[] trustAllCerts = getTrustAllCerts();
             SSLContext sslContext = getSslContext(trustAllCerts);
@@ -2270,18 +2287,18 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * Download file bytes from MinIO or S3-compatible endpoint
      */
     private byte[] downloadFromMinIO(String endpointUrl, String accessKey, String secretKey,
-                                      String bucketName, String objectKey) throws Exception {
+                                     String bucketName, String objectKey) throws Exception {
 
         MinioClient minioClient = MinioClient.builder()
-            .endpoint(endpointUrl)
-            .credentials(accessKey, secretKey)
-            .build();
+                .endpoint(endpointUrl)
+                .credentials(accessKey, secretKey)
+                .build();
 
         try (InputStream inputStream = minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(objectKey)
-                    .build())) {
+                        .bucket(bucketName)
+                        .object(objectKey)
+                        .build())) {
 
             byte[] fileBytes = inputStream.readAllBytes();
             logger.info("Downloaded {} bytes from MinIO: {}", fileBytes.length, objectKey);
@@ -2293,7 +2310,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * Download file bytes from AWS S3
      */
     private byte[] downloadFromS3(String accessKey, String secretKey, String region,
-                                   String bucketName, String objectKey) throws Exception {
+                                  String bucketName, String objectKey) throws Exception {
 
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
 
@@ -2301,15 +2318,15 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
                 .serviceConfiguration(S3Configuration.builder()
-                    .pathStyleAccessEnabled(true)
-                    .build())
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build()) {
 
             software.amazon.awssdk.services.s3.model.GetObjectRequest getObjectRequest =
-                software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(objectKey)
-                    .build();
+                    software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(objectKey)
+                            .build();
 
             byte[] fileBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
             logger.info("Downloaded {} bytes from S3: {}", fileBytes.length, objectKey);

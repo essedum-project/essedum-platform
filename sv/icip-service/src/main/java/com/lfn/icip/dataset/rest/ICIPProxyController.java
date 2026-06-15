@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -120,7 +120,7 @@ public class ICIPProxyController {
 	/** The i ICIP datasource service. */
 	@Autowired
 	private IICIPDatasourceService datasourceService;
-	
+
 	@Autowired
 	private ICIPMlIntstanceService iCIPMlIntstanceService;
 
@@ -139,7 +139,7 @@ public class ICIPProxyController {
 	/** The cm. */
 	@Resource(name = "cacheManagerBean")
 	private CacheManager cm;
-	
+
 
 	/**
 	 * Gets the data 1.
@@ -168,9 +168,9 @@ public class ICIPProxyController {
 	 */
 	@GetMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
+	                                      @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                      @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                      @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -192,7 +192,7 @@ public class ICIPProxyController {
 			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
 			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
@@ -261,10 +261,10 @@ public class ICIPProxyController {
 					parameters.put(paramObj);
 				}
 			}
-			}catch(Exception e) {
-				logger.error("Cannot add attributes Of Dataset");
-				return parameters;
-			}
+		}catch(Exception e) {
+			logger.error("Cannot add attributes Of Dataset");
+			return parameters;
+		}
 		return parameters;
 	}
 	private Map<String,String> getMapFromJsonArray(JSONArray jsonArray){
@@ -277,15 +277,15 @@ public class ICIPProxyController {
 					String value = jsonLineItem.getString(ICIPPluginConstants.VALUE);
 					getMapFromJsonArray.put(key, value);
 				}
-			}catch(Exception e) {
-				logger.error("Cannot get Map from JsonArray");
-				return getMapFromJsonArray;
-			}
-		return getMapFromJsonArray;	
+		}catch(Exception e) {
+			logger.error("Cannot get Map from JsonArray");
+			return getMapFromJsonArray;
+		}
+		return getMapFromJsonArray;
 	}
 
 	private JSONArray addHeadersFromDatasource(ICIPDatasource dsrc, JSONArray headerArray,
-			Map<String, String> headers) {
+	                                           Map<String, String> headers) {
 		List<HeaderAttributes> dsrcHeaderAttributes = new ArrayList<>();
 		Gson gson = new Gson();
 		/*
@@ -363,10 +363,10 @@ public class ICIPProxyController {
 
 	@PostMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getPostData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestBody String body)
+	                                          @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                          @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                          @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
+	                                          @RequestBody String body)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -388,7 +388,7 @@ public class ICIPProxyController {
 			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
 			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
@@ -421,8 +421,8 @@ public class ICIPProxyController {
 			try {
 				headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
 			} catch (JSONException jex) {
-				logger.info("No header");		
-				}
+				logger.info("No header");
+			}
 			for (int i = 0; i < headersArr.length(); ++i) {
 				if (headersArr.getJSONObject(i).get(ICIPPluginConstants.KEY).toString().equalsIgnoreCase(entry.getKey())) {
 					headerArray.put(headerObj);
@@ -446,9 +446,9 @@ public class ICIPProxyController {
 
 	@DeleteMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> deleteData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
+	                                         @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                         @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                         @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -470,7 +470,7 @@ public class ICIPProxyController {
 			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
 			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
@@ -528,9 +528,9 @@ public class ICIPProxyController {
 
 	@GetMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getDbData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
+	                                        @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                        @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                        @RequestParam Map<String, String> params)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -541,16 +541,16 @@ public class ICIPProxyController {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = new ICIPDataset2();
 		try {
-		 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-				.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-		 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-				.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+			dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			 dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
-						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);			
+			dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}
 //		String attributes = new JSONObject(dset.getAttributes()).put("params", params).toString();
 //		dset.setAttributes(attributes);
@@ -561,9 +561,9 @@ public class ICIPProxyController {
 
 	@DeleteMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> deleteDbData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
+	                                           @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                           @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                           @RequestParam Map<String, String> params)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -644,7 +644,7 @@ public class ICIPProxyController {
 	 * @throws URISyntaxException                 the URI syntax exception
 	 */
 	ResponseEntity<String> getCompleteData(ICIPDatasource datasource, ICIPDataset2 dataset2, String org, String limit,
-			boolean justData, boolean asJSON, int page, String sortEvent, int sortOrder, Boolean removeCache)
+	                                       boolean justData, boolean asJSON, int page, String sortEvent, int sortOrder, Boolean removeCache)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -675,7 +675,9 @@ public class ICIPProxyController {
 		}
 		String results = getResult(page, limit, sortEvent, sortOrder, dataset, justData, asJSON);
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
-		cache.put(id, results);
+		if (cache != null) {
+			cache.put(id, results);
+		}
 		return ResponseEntity.status(200).body(results);
 	}
 
@@ -693,7 +695,7 @@ public class ICIPProxyController {
 	 * @throws SQLException the SQL exception
 	 */
 	private String getResult(int page, String limit, String sortEvent, int sortOrder, ICIPDataset dataset,
-			boolean justData, boolean asJSON) throws SQLException {
+	                         boolean justData, boolean asJSON) throws SQLException {
 		ICIPDataset2 dataset2 = datasetService.getDataset2(dataset.getName(), dataset.getOrganization());
 		String instance=null;
 		JSONArray headersArr = new JSONArray();
@@ -712,7 +714,7 @@ public class ICIPProxyController {
 		ICIPDatasource datasource=new ICIPDatasource();
 		if(instance!=null){
 			datasource = datasourceService.getDatasource(instance,
-					dataset2.getOrganization());	
+					dataset2.getOrganization());
 		}else {
 			datasource = datasourceService.getDatasource(dataset2.getDatasource(),
 					dataset2.getOrganization());
