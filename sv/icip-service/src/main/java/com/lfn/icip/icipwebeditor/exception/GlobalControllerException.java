@@ -3,6 +3,8 @@ package com.lfn.icip.icipwebeditor.exception;
 import com.lfn.icip.icipwebeditor.model.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,24 +18,38 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.io.IOException;
 import java.util.Map;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 public class GlobalControllerException {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalControllerException.class);
 
+
 	@ExceptionHandler(AddRuntimeException.class)
 	public ResponseEntity<?> handleAddRuntimeException(AddRuntimeException ex) {
-
 		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * Handle pipeline metadata.json validation failures — HTTP 422 Unprocessable Entity.
+	 * The full validation message is surfaced directly in the 'message' field.
+	 */
+	@ExceptionHandler(PipelineMetadataValidationException.class)
+	public ResponseEntity<ErrorResponse> handlePipelineMetadataValidationException(
+			PipelineMetadataValidationException ex, WebRequest request) {
+		logger.error("Pipeline metadata validation failed: {}", ex.getMessage());
+		ErrorResponse errorResponse = new ErrorResponse(
+				HttpStatus.UNPROCESSABLE_ENTITY.value(),
+				"Pipeline Metadata Validation Failed",
+				ex.getMessage(),
+				getCauseMessage(ex),
+				request.getDescription(false).replace("uri=", "")
+		);
+		errorResponse.setException(ex.getClass().getSimpleName());
+		return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
 	@ExceptionHandler(RuntimePortsNotSavedException.class)
-	public ResponseEntity<?> handleRuntimePortsNotSavedException(RuntimePortsNotSavedException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
 
 		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);

@@ -477,9 +477,8 @@ export class AgentPipelineService {
   /**
    * Upload agent files ZIP to backend
    */
-  uploadAgentFilesZip(cname: string, organization: string, zipFile: File): Observable<any> {
-    const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null`;
-    
+  uploadAgentFilesZip(cname: string, organization: string, zipFile: File, type: string = 'Agent'): Observable<any> {
+    const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null&type=${type}`;  
 
     // Create FormData for file upload
     const formData = new FormData();
