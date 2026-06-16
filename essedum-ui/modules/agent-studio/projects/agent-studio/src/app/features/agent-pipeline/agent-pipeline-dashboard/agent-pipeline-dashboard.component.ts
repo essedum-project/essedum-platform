@@ -16,6 +16,8 @@ import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
+import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 
 @Component({
   selector: 'app-agent-pipeline-dashboard',
@@ -29,6 +31,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return 'MCP Pipelines';
     } else if (this.pipelineMode === 'app') {
       return 'App Pipelines';
+    } else if (this.pipelineMode === 'pipeline') {
+      return 'Native Pipeline';
+    } else if (this.pipelineMode === 'data') {
+      return 'Data Pipeline';
+    } else if (this.pipelineMode === 'training') {
+      return 'Training Pipeline';
     } else {
       return 'Agent Pipelines';
     }
@@ -36,7 +44,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   readonly SERVICE_V1 = 'pipelineagent';
 
   // Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' = 'agent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -405,80 +413,87 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   }
 
   onAdd(): void {
-    if (this.pipelineMode === 'mcp') {
-      
-      // Open the pipeline creation dialog with MCP-specific parameters
-      const dialogRef = this.dialog.open(PipelineCreateComponent, {
-        width: '460px',
-        maxWidth: '92vw',
+    if (this.pipelineMode === 'data') {
+      // Open local Data Pipeline Wizard dialog
+      const dialogRef = this.dialog.open(DataPipelineWizardLocalComponent, {
+        width: '900px',
+        maxWidth: '94vw',
         disableClose: true,
-        data: {
-          interfacetype: 'mcp-pipeline', // MCP-specific interface type
-          type: 'mcpServer', // MCP-specific type
-          mode: 'create'
-        }
+        panelClass: 'wizard-dialog',
       });
-      
-      // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.service.message('MCP Pipelines created successfully!', 'success');
-          // Refresh the cards to show the new MCP pipeline
+        if (result?.pipeline) {
+          this.service.message('Data Pipeline created successfully!', 'success');
           this.refresh();
         }
       });
-    } else if (this.pipelineMode === 'app') {
-      
-      // Open the pipeline creation dialog with App-specific parameters
-      const dialogRef = this.dialog.open(PipelineCreateComponent, {
-        width: '460px',
-        maxWidth: '92vw',
+      return;
+    }
+    
+    if (this.pipelineMode === 'training') {
+      // Open local Training Pipeline Wizard dialog
+      const dialogRef = this.dialog.open(TrainingPipelineWizardLocalComponent, {
+        width: '900px',
+        maxWidth: '94vw',
         disableClose: true,
-        data: {
-          interfacetype: 'app-pipeline', // App-specific interface type
-          type: 'appPipeline', // App-specific type
-          mode: 'create'
-        }
+        panelClass: 'wizard-dialog',
       });
-      
-      // Handle dialog result
       dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.service.message('App Pipelines created successfully!', 'success');
-          // Refresh the cards to show the new app pipeline
+        if (result?.pipeline) {
+          this.service.message('Training Pipeline created successfully!', 'success');
           this.refresh();
         }
       });
-    } else {
-      
-      // Open the pipeline creation dialog with Agent-specific parameters
-      const dialogRef = this.dialog.open(PipelineCreateComponent, {
-        width: '460px',
-        maxWidth: '92vw',
-        disableClose: true,
-        data: {
-          interfacetype: 'pipeline-agent', // Agent-specific interface type
-          type: 'AIAgent', // Agent-specific type
-          mode: 'create'
-        }
-      });
-      
-      // Handle dialog result
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.service.message('Agent Pipelines created successfully!', 'success');
-          // Refresh the cards to show the new agent pipeline
-          this.refresh();
-        }
-      });
+      return;
+    }
+
+    const modeConfig = this.getCreateDialogConfig();
+    
+    const dialogRef = this.dialog.open(PipelineCreateComponent, {
+      width: '460px',
+      maxWidth: '92vw',
+      disableClose: true,
+      data: modeConfig.data
+    });
+    
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.service.message(modeConfig.successMessage, 'success');
+        this.refresh();
+      }
+    });
+  }
+
+  private getCreateDialogConfig(): { data: any; successMessage: string } {
+    switch (this.pipelineMode) {
+      case 'mcp':
+        return {
+          data: { interfacetype: 'mcp-pipeline', type: 'mcpServer', mode: 'create' },
+          successMessage: 'MCP Pipeline created successfully!'
+        };
+      case 'app':
+        return {
+          data: { interfacetype: 'app-pipeline', type: 'appPipeline', mode: 'create' },
+          successMessage: 'App Pipeline created successfully!'
+        };
+      case 'pipeline':
+        return {
+          data: { interfacetype: 'pipeline', type: 'NativeScript', mode: 'create' },
+          successMessage: 'Pipeline created successfully!'
+        };
+      default:
+        return {
+          data: { interfacetype: 'pipeline-agent', type: 'AIAgent', mode: 'create' },
+          successMessage: 'Agent Pipeline created successfully!'
+        };
     }
   }
 
   onTagSelected(event: any): void {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
     
-    // Only update pipeline agent type for agent mode, not for MCP or App mode
-    if (this.pipelineMode !== 'mcp' && this.pipelineMode !== 'app') {
+    // Only update pipeline agent type for agent mode, not for other modes
+    if (this.pipelineMode === 'agent') {
       this.selectedPipelineAgentType = event.getSelectedAdapterType();
     }
     
@@ -505,17 +520,39 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: this.pipelineMode === 'mcp' ? 'MCP Pipelines' : (this.pipelineMode === 'app' ? 'App Pipelines' : 'Pipeline Agent'),
+          cardTitle: this.CARD_TITLE,
           pipelineAlias: this.streamItem.alias,
           streamItem: this.streamItem,
           card: card,
-          pipelineMode: this.pipelineMode // Pass the current mode to detail view
+          pipelineMode: this.pipelineMode
         },
         relativeTo: this.route,
       };
       
-      // Navigate for Agent, MCP, and App pipeline types
-      if (this.streamItem.type === 'AIAgent' || 
+      // For pipeline/data/training modes, navigate to integration hub views
+      if (this.pipelineMode === 'pipeline' || this.pipelineMode === 'data' || this.pipelineMode === 'training') {
+        const isWizard = this.streamItem.type === 'DataPipeline' || this.streamItem.type === 'TrainingPipeline';
+        if (isWizard) {
+          // Navigate to integration hub wizard editor
+          const basePath = this.streamItem.type === 'TrainingPipeline' 
+            ? '/landing/integration/training-pipelines/view-wizard/' 
+            : '/landing/integration/pipelines/view-wizard/';
+          this.router.navigate([basePath + card.name], {
+            queryParams: navigationExtras.queryParams,
+            queryParamsHandling: 'merge',
+            state: navigationExtras.state
+          });
+        } else {
+          // Navigate to integration hub native script view
+          this.router.navigate(['/landing/integration/pipelines/view/' + card.name], {
+            queryParams: navigationExtras.queryParams,
+            queryParamsHandling: 'merge',
+            state: navigationExtras.state
+          });
+        }
+      }
+      // For agent, MCP, and app pipeline types - use existing logic
+      else if (this.streamItem.type === 'AIAgent' || 
           this.streamItem.type === 'mcpServer' || 
           this.streamItem.type === 'appPipeline' ||
           this.streamItem.type === 'NativeScript' ||
@@ -591,7 +628,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   /**
    * Switch to specific pipeline mode - simplified method
    */
-  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app'): void {
+  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training'): void {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
@@ -626,6 +663,21 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return {
         type: 'appPipeline',
         interfacetype: 'app-pipeline'
+      };
+    } else if (this.pipelineMode === 'pipeline') {
+      return {
+        type: 'NativeScript',
+        interfacetype: 'pipeline'
+      };
+    } else if (this.pipelineMode === 'data') {
+      return {
+        type: 'DataPipeline',
+        interfacetype: 'pipeline'
+      };
+    } else if (this.pipelineMode === 'training') {
+      return {
+        type: 'TrainingPipeline',
+        interfacetype: 'pipeline'
       };
     } else {
       return {

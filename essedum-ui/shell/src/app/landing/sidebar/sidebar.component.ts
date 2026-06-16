@@ -52,7 +52,6 @@ export class SidebarComponent implements OnInit {
       icon: "plug",
       children: [
         { label: "Adapters", icon: "exchange", url: "./integration/implementations", children: [] },
-        { label: "Pipelines", icon: "sitemap", url: "./integration/pipelines", children: [] },
         { label: "Apps", icon: "th-large", url: "./integration/apps", children: [] },
         { label: "Instances", icon: "server", url: "./integration/instances", children: [] },
         { label: "Jobs", icon: "tasks", url: "./integration/jobs", children: [] },

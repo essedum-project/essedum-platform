@@ -13,7 +13,7 @@
 
 <div class="wizard-shell" mat-dialog-content>
 
-  <!-- ═══ AGENT + MODEL SELECTION (mirrors Vibe Studio) ═══ -->
+  <!-- AGENT + MODEL SELECTION -->
   <div *ngIf="!selectionDone" class="agent-setup-screen">
     <div class="setup-hero">
       <div class="setup-icon-wrap"><i class="bi bi-stars"></i></div>
@@ -22,7 +22,6 @@
     </div>
 
     <div class="steps-row">
-      <!-- Step 1: Agent -->
       <div class="step-col">
         <div class="model-picker-label">
           <span class="step-badge">1</span><span>Agent</span>
@@ -38,7 +37,6 @@
 
       <div class="steps-row-sep"><i class="bi bi-chevron-right"></i></div>
 
-      <!-- Step 2: Model (locked until agent chosen) -->
       <div class="step-col" [class.step-col--locked]="!selectedAgent">
         <div class="model-picker-label" [class.model-picker-label--inactive]="!selectedAgent">
           <span class="step-badge" [class.step-badge--inactive]="!selectedAgent">2</span>
@@ -63,7 +61,7 @@
 
   <mat-stepper *ngIf="selectionDone" #stepper linear class="wizard-stepper">
 
-    <!-- ── Step 1: Identity & Type ── -->
+    <!-- Step 1: Identity & Type -->
     <mat-step [stepControl]="identityForm" label="Identity & Type">
       <form [formGroup]="identityForm">
         <h3 class="step-title"><mat-icon>category</mat-icon> Choose a pipeline type</h3>
@@ -97,61 +95,40 @@
 
         <div class="step-actions">
           <button mat-button (click)="cancel()">Cancel</button>
-          <button mat-flat-button color="primary" matStepperNext
-                  [disabled]="identityForm.invalid">Next</button>
+          <button mat-flat-button color="primary" matStepperNext [disabled]="identityForm.invalid">Next</button>
         </div>
       </form>
     </mat-step>
 
-    <!-- ── Step 2: Source / Config ── -->
+    <!-- Step 2: Source / Config -->
     <mat-step [stepControl]="sourceForm" label="Source / Config">
       <form [formGroup]="sourceForm">
         <h3 class="step-title"><mat-icon>storage</mat-icon> Where does the data come from?</h3>
 
         <ng-container *ngIf="identityForm.value.pipelineType !== 'slm-cot'">
-
-          <!-- 1. Output container type (always first) -->
           <mat-form-field appearance="fill" class="full">
             <mat-label>Output container type</mat-label>
             <mat-select formControlName="outputContainer">
               <mat-option *ngFor="let c of outputContainers" [value]="c">{{ c }}</mat-option>
-              <mat-option *ngIf="outputContainersLoaded && outputContainers.length === 0" [value]="null" disabled>
-                No options available
-              </mat-option>
             </mat-select>
           </mat-form-field>
 
-          <!-- 2. Source connection — filtered by selected container type -->
           <mat-form-field appearance="fill" class="full">
             <mat-label>Source connection</mat-label>
             <mat-select formControlName="connection" [disabled]="!sourceForm.value.outputContainer">
               <mat-option *ngFor="let c of connections" [value]="c">{{ c }}</mat-option>
-              <mat-option *ngIf="connectionsLoaded && connections.length === 0" [value]="null" disabled>
-                No connections for this type
-              </mat-option>
-              <mat-option *ngIf="!sourceForm.value.outputContainer" [value]="null" disabled>
-                Select a container type first
-              </mat-option>
             </mat-select>
           </mat-form-field>
 
-          <!-- 3. Dataset — filtered by selected connection -->
           <mat-form-field appearance="fill" class="full">
             <mat-label>Dataset</mat-label>
             <mat-select formControlName="dataset" [disabled]="!sourceForm.value.connection">
               <mat-option *ngFor="let d of datasets" [value]="d">{{ d }}</mat-option>
-              <mat-option *ngIf="datasetsLoaded && datasets.length === 0" [value]="null" disabled>
-                No datasets for this connection
-              </mat-option>
-              <mat-option *ngIf="!sourceForm.value.connection" [value]="null" disabled>
-                Select a connection first
-              </mat-option>
             </mat-select>
           </mat-form-field>
-
         </ng-container>
 
-        <!-- Output format conditional (RAG / SLM types) -->
+        <!-- Output format (RAG / SLM types) -->
         <div class="row two-col" *ngIf="outputFormats.length">
           <mat-form-field appearance="fill">
             <mat-label>Output format</mat-label>
@@ -180,7 +157,7 @@
           </div>
         </ng-container>
 
-        <!-- Non-SLM, non-RAG: problem type + target column (dropdown from dataset schema) -->
+        <!-- Non-SLM: problem type + target column -->
         <ng-container *ngIf="!selectedTypeMeta?.isSlm && identityForm.value.pipelineType !== 'rag-ingestion'">
           <div class="row two-col">
             <mat-form-field appearance="fill">
@@ -193,17 +170,7 @@
               <mat-label>Target column</mat-label>
               <mat-select formControlName="targetCol" [disabled]="!sourceForm.value.dataset">
                 <mat-option *ngFor="let col of targetColumns" [value]="col">{{ col }}</mat-option>
-                <mat-option *ngIf="targetColumnsLoaded && targetColumns.length === 0 && sourceForm.value.dataset" [value]="null" disabled>
-                  No columns found
-                </mat-option>
-                <mat-option *ngIf="!targetColumnsLoaded && sourceForm.value.dataset" [value]="null" disabled>
-                  Loading columns…
-                </mat-option>
-                <mat-option *ngIf="!sourceForm.value.dataset" [value]="null" disabled>
-                  Select a dataset first
-                </mat-option>
               </mat-select>
-              <mat-spinner matSuffix diameter="16" *ngIf="!targetColumnsLoaded && sourceForm.value.dataset"></mat-spinner>
             </mat-form-field>
           </div>
         </ng-container>
@@ -215,7 +182,7 @@
       </form>
     </mat-step>
 
-    <!-- ── Step 3: Execution ── -->
+    <!-- Step 3: Execution -->
     <mat-step [stepControl]="executionForm" label="Execution">
       <form [formGroup]="executionForm">
         <h3 class="step-title"><mat-icon>play_circle</mat-icon> How does it run?</h3>
@@ -241,12 +208,12 @@
         </div>
         <div class="step-actions">
           <button mat-button matStepperPrevious>Back</button>
-          <button mat-flat-button color="primary" matStepperNext>Next</button>
+          <button mat-flat-button color="primary" matStepperNext [disabled]="executionForm.invalid">Next</button>
         </div>
       </form>
     </mat-step>
 
-    <!-- ── Step 4: Git ── -->
+    <!-- Step 4: Git -->
     <mat-step label="Git">
       <app-git-link-step [initialValue]="gitLink"
                          (valueChange)="onGitLinkChange($event)"
@@ -254,7 +221,7 @@
       <div class="step-actions">
         <button mat-button matStepperPrevious>Back</button>
         <button mat-flat-button color="primary"
-                [disabled]="creating"
+                [disabled]="creating || identityForm.invalid || sourceForm.invalid || executionForm.invalid"
                 (click)="createPipeline()">
           <mat-icon>auto_awesome</mat-icon>&nbsp;Create Pipeline
         </button>
@@ -263,4 +230,3 @@
 
   </mat-stepper>
 </div>
-
