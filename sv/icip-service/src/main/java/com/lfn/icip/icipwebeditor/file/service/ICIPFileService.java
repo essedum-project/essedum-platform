@@ -1625,22 +1625,32 @@ public class ICIPFileService {
         if (bytes == null || bytes.length == 0) {
             return bytes;
         }
-        String source;
-        try {
-            source = new String(bytes, StandardCharsets.UTF_8);
-        } catch (Exception ex) {
+        String source = bytesToUtf8(bytes);
+        if (source == null) {
             return bytes;
         }
         java.util.regex.Matcher matcher = DEPS_BLOCK_PATTERN.matcher(source);
         if (!matcher.find()) {
             return bytes;
         }
-        String prefix = matcher.group(1);
-        String body = matcher.group(2);
-        String suffix = matcher.group(3);
+        List<String> kept = filterNonStdlibDeps(matcher.group(2));
+        if (kept == null) {
+            return bytes;
+        }
+        return rebuildDepsSource(source, matcher, matcher.group(1), matcher.group(3), kept);
+    }
 
-        List<String> kept = new ArrayList<>();
+    private static String bytesToUtf8(byte[] bytes) {
+        try {
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private static List<String> filterNonStdlibDeps(String body) {
         java.util.regex.Matcher itemMatcher = DEPS_ITEM_PATTERN.matcher(body);
+        List<String> kept = new ArrayList<>();
         boolean removedAny = false;
         while (itemMatcher.find()) {
             String literal = itemMatcher.group(0);
@@ -1654,9 +1664,15 @@ public class ICIPFileService {
             }
             kept.add(literal);
         }
-        if (!removedAny) {
-            return bytes;
-        }
+        return removedAny ? kept : null;
+    }
+
+    private static byte[] rebuildDepsSource(
+            String source,
+            java.util.regex.Matcher matcher,
+            String prefix,
+            String suffix,
+            List<String> kept) {
         StringBuilder rebuilt = new StringBuilder(source.length());
         rebuilt.append(source, 0, matcher.start());
         rebuilt.append(prefix);

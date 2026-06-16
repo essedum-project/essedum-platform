@@ -24,8 +24,17 @@ const C_DEF = '#d4d4d4';
 
 // ── Escape utility ──────────────────────────────────────────────────────────
 
+const ESC_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+};
+
+const ESC_RE = /[&<>"]/g;
+
 function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s.replace(ESC_RE, (ch) => ESC_MAP[ch]);
 }
 
 function span(color: string, text: string): string {
@@ -34,7 +43,11 @@ function span(color: string, text: string): string {
 
 // ── Tokenize with static regex ──────────────────────────────────────────────
 
-function applyStatic(line: string, re: RegExp, colors: ReadonlyArray<string>): string {
+function applyStatic(
+  line: string,
+  re: RegExp,
+  colors: ReadonlyArray<string>,
+): string {
   if (!line) { return ''; }
   re.lastIndex = 0;
   let out = '';
@@ -54,31 +67,56 @@ function applyStatic(line: string, re: RegExp, colors: ReadonlyArray<string>): s
 }
 
 // ── Static pre-compiled regex per language ──────────────────────────────────
-// Each regex is a single literal with capture groups separated by |
 
-const RE_JS = /(\/\/.*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(`(?:[^`\\]|\\.)*`)|(@\w+)|(\b(?:0x[\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?)\b)|(\b(?:import|export|from|as|return|if|else|switch|case|default|break|continue|for|while|do|try|catch|finally|throw|yield|of|in)\b)|(\b(?:var|let|const|function|class|extends|implements|interface|type|enum|namespace|new|delete|typeof|instanceof|void|null|undefined|true|false|this|super|static|abstract|public|private|protected|readonly|async|await|declare|get|set)\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_$][a-zA-Z0-9_$]*(?=\s*\())/g;
-const COLORS_JS: ReadonlyArray<string> = [C_COMMENT, C_STRING, C_STRING, C_STRING, C_FUNC, C_NUMBER, C_KW_PINK, C_KW_BLUE, C_TYPE, C_FUNC];
+/* eslint-disable max-len */
+const RE_JS =
+  /(\/\/.*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(`(?:[^`\\]|\\.)*`)|(@\w+)|(\b(?:0x[\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?)\b)|(\b(?:import|export|from|as|return|if|else|switch|case|default|break|continue|for|while|do|try|catch|finally|throw|yield|of|in)\b)|(\b(?:var|let|const|function|class|extends|implements|interface|type|enum|namespace|new|delete|typeof|instanceof|void|null|undefined|true|false|this|super|static|abstract|public|private|protected|readonly|async|await|declare|get|set)\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_$][a-zA-Z0-9_$]*(?=\s*\())/g;
 
-const RE_HTML = /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][a-zA-Z0-9-]*)|(\/?>)|([a-zA-Z-]+=)|("[^"]*")|('[^']*')/g;
-const COLORS_HTML: ReadonlyArray<string> = [C_COMMENT, C_TAG, C_TAG, C_ATTR, C_STRING, C_STRING];
+const RE_HTML =
+  /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][a-zA-Z0-9-]*)|(\/?>)|([a-zA-Z-]+=)|("[^"]*")|('[^']*')/g;
 
-const RE_CSS = /(\/\*[\s\S]*?\*\/)|(\/\/.*)|(@\w[\w-]*)|(#[0-9a-fA-F]{3,8}\b)|("[^"]*")|('[^']*')|(\b\d+\.?\d*(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\b)|(\$[\w-]+)|([\w-]+(?=\s*:(?!:)))|([.#]?[a-zA-Z][a-zA-Z0-9_-]*)/g;
-const COLORS_CSS: ReadonlyArray<string> = [C_COMMENT, C_COMMENT, C_ATRULE, C_STRING, C_STRING, C_STRING, C_NUMBER, C_PROP, C_PROP, C_SELECTOR];
+const RE_CSS =
+  /(\/\*[\s\S]*?\*\/)|(\/\/.*)|(@\w[\w-]*)|(#[0-9a-fA-F]{3,8}\b)|("[^"]*")|('[^']*')|(\b\d+\.?\d*(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\b)|(\$[\w-]+)|([\w-]+(?=\s*:(?!:)))|([.#]?[a-zA-Z][a-zA-Z0-9_-]*)/g;
 
-const RE_JSON = /("(?:[^"\\]|\\.)*"(?=\s*:))|("(?:[^"\\]|\\.)*")|(\b(?:true|false|null)\b)|(\b-?\d+\.?\d*(?:[eE][+-]?\d+)?\b)/g;
-const COLORS_JSON: ReadonlyArray<string> = [C_PROP, C_STRING, C_KW_BLUE, C_NUMBER];
+const RE_JSON =
+  /("(?:[^"\\]|\\.)*"(?=\s*:))|("(?:[^"\\]|\\.)*")|(\b(?:true|false|null)\b)|(\b-?\d+\.?\d*(?:[eE][+-]?\d+)?\b)/g;
 
-const RE_PY = /(#.*)|("""[\s\S]*?""")|('''[\s\S]*?''')|(@\w+)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b(?:def|class|lambda|return|if|elif|else|for|while|try|except|finally|with|as|import|from|raise|pass|break|continue|yield|and|or|not|in|is)\b)|(\b(?:True|False|None|self|super|print)\b)|(\b\d+\.?\d*(?:[eE][+-]?\d+)?\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_][a-zA-Z0-9_]*(?=\s*\())/g;
-const COLORS_PY: ReadonlyArray<string> = [C_COMMENT, C_COMMENT, C_COMMENT, C_FUNC, C_STRING, C_STRING, C_KW_PINK, C_KW_BLUE, C_NUMBER, C_TYPE, C_FUNC];
+const RE_PY =
+  /(#.*)|("""[\s\S]*?""")|('''[\s\S]*?''')|(@\w+)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b(?:def|class|lambda|return|if|elif|else|for|while|try|except|finally|with|as|import|from|raise|pass|break|continue|yield|and|or|not|in|is)\b)|(\b(?:True|False|None|self|super|print)\b)|(\b\d+\.?\d*(?:[eE][+-]?\d+)?\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_][a-zA-Z0-9_]*(?=\s*\())/g;
 
-const RE_YAML = /(#.*)|(^---)|("[^"]*")|('[^']*')|(\b(?:true|false|null|yes|no)\b)|(\b\d+\.?\d*\b)|(^\s*[\w-]+(?=\s*:))/g;
-const COLORS_YAML: ReadonlyArray<string> = [C_COMMENT, C_KW_BLUE, C_STRING, C_STRING, C_KW_BLUE, C_NUMBER, C_PROP];
+const RE_YAML =
+  /(#.*)|(^---)|("[^"]*")|('[^']*')|(\b(?:true|false|null|yes|no)\b)|(\b\d+\.?\d*\b)|(^\s*[\w-]+(?=\s*:))/g;
 
-const RE_SHELL = /(#.*)|(\$\{?[\w]+\}?)|("(?:[^"\\]|\\.)*")|('[^']*')|(\b(?:if|then|else|elif|fi|for|in|do|done|while|case|esac|function|return|echo|export|source|cd|ls|mkdir|rm|cp|mv|grep|sed|awk|cat|chmod|chown)\b)|(\b\d+\b)/g;
-const COLORS_SHELL: ReadonlyArray<string> = [C_COMMENT, C_PROP, C_STRING, C_STRING, C_KW_PINK, C_NUMBER];
+const RE_SHELL =
+  /(#.*)|(\$\{?[\w]+\}?)|("(?:[^"\\]|\\.)*")|('[^']*')|(\b(?:if|then|else|elif|fi|for|in|do|done|while|case|esac|function|return|echo|export|source|cd|ls|mkdir|rm|cp|mv|grep|sed|awk|cat|chmod|chown)\b)|(\b\d+\b)/g;
 
-const RE_MD_INLINE = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[[^\]]+\]\([^)]+\))/g;
-const COLORS_MD_INLINE: ReadonlyArray<string> = [C_STRING, C_KW_BLUE, C_PROP];
+const RE_MD_INLINE =
+  /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[[^\]]+\]\([^)]+\))/g;
+/* eslint-enable max-len */
+
+const COLORS_JS: ReadonlyArray<string> =
+  [C_COMMENT, C_STRING, C_STRING, C_STRING, C_FUNC, C_NUMBER, C_KW_PINK, C_KW_BLUE, C_TYPE, C_FUNC];
+
+const COLORS_HTML: ReadonlyArray<string> =
+  [C_COMMENT, C_TAG, C_TAG, C_ATTR, C_STRING, C_STRING];
+
+const COLORS_CSS: ReadonlyArray<string> =
+  [C_COMMENT, C_COMMENT, C_ATRULE, C_STRING, C_STRING, C_STRING, C_NUMBER, C_PROP, C_PROP, C_SELECTOR];
+
+const COLORS_JSON: ReadonlyArray<string> =
+  [C_PROP, C_STRING, C_KW_BLUE, C_NUMBER];
+
+const COLORS_PY: ReadonlyArray<string> =
+  [C_COMMENT, C_COMMENT, C_COMMENT, C_FUNC, C_STRING, C_STRING, C_KW_PINK, C_KW_BLUE, C_NUMBER, C_TYPE, C_FUNC];
+
+const COLORS_YAML: ReadonlyArray<string> =
+  [C_COMMENT, C_KW_BLUE, C_STRING, C_STRING, C_KW_BLUE, C_NUMBER, C_PROP];
+
+const COLORS_SHELL: ReadonlyArray<string> =
+  [C_COMMENT, C_PROP, C_STRING, C_STRING, C_KW_PINK, C_NUMBER];
+
+const COLORS_MD_INLINE: ReadonlyArray<string> =
+  [C_STRING, C_KW_BLUE, C_PROP];
 
 // ── Per-language tokenizer functions ────────────────────────────────────────
 
@@ -116,7 +154,7 @@ function tokMd(line: string): string {
   return applyStatic(line, RE_MD_INLINE, COLORS_MD_INLINE);
 }
 
-// ── Exported function (validated switch, no dynamic property access) ────────
+// ── Exported function ───────────────────────────────────────────────────────
 
 /**
  * Tokenizes a single line for syntax highlighting.
