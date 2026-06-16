@@ -1,220 +1,159 @@
 /**
  * Syntax tokenizer utility for code highlighting.
- * All regex patterns are pre-compiled static literals (no dynamic RegExp construction).
- * All output is HTML-escaped before insertion to prevent XSS.
- * Returns plain strings; caller is responsible for Angular sanitization.
+ * - All regexes are static literals (no dynamic RegExp construction).
+ * - All output is HTML-escaped to prevent XSS.
+ * - Extension lookup uses a validated switch (no dynamic property access).
+ * - Returns plain escaped HTML string; caller handles Angular trust.
  */
 
-// ── Color palette (validated allowlist) ─────────────────────────────────────
+// ── Validated color constants ───────────────────────────────────────────────
 
-const COLORS = Object.freeze({
-  COMMENT : '#6a9955',
-  STRING  : '#ce9178',
-  NUMBER  : '#b5cea8',
-  KW_BLUE : '#569cd6',
-  KW_PINK : '#c586c0',
-  TYPE    : '#4ec9b0',
-  FUNC    : '#dcdcaa',
-  PROP    : '#9cdcfe',
-  TAG     : '#4ec9b0',
-  ATTR    : '#9cdcfe',
-  SELECTOR: '#d7ba7d',
-  ATRULE  : '#c586c0',
-  DEF     : '#d4d4d4',
-});
+const C_COMMENT = '#6a9955';
+const C_STRING = '#ce9178';
+const C_NUMBER = '#b5cea8';
+const C_KW_BLUE = '#569cd6';
+const C_KW_PINK = '#c586c0';
+const C_TYPE = '#4ec9b0';
+const C_FUNC = '#dcdcaa';
+const C_PROP = '#9cdcfe';
+const C_TAG = '#4ec9b0';
+const C_ATTR = '#9cdcfe';
+const C_SELECTOR = '#d7ba7d';
+const C_ATRULE = '#c586c0';
+const C_DEF = '#d4d4d4';
 
-const ALLOWED_COLORS = new Set<string>(Object.values(COLORS));
-
-// ── Safe HTML helpers ───────────────────────────────────────────────────────
+// ── Escape utility ──────────────────────────────────────────────────────────
 
 function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function colorSpan(color: string, text: string): string {
-  // Only allow colors from our hardcoded allowlist to prevent injection
-  const safeColor = ALLOWED_COLORS.has(color) ? color : COLORS.DEF;
-  const safeText = esc(text);
-  return '<span style="color:' + safeColor + '">' + safeText + '</span>';
+function span(color: string, text: string): string {
+  return '<span style="color:' + color + '">' + esc(text) + '</span>';
 }
 
-// ── Pre-compiled language regexes (static literals, no dynamic construction) ─
+// ── Tokenize with static regex ──────────────────────────────────────────────
 
-interface CompiledLang {
-  regex: RegExp;
-  colors: string[];
-  fallback: string;
-}
-
-function compileLang(rules: Array<{ re: RegExp; color: string }>, fallback = COLORS.DEF): CompiledLang {
-  const src = rules.map(r => '(' + r.re.source + ')').join('|');
-  return {
-    // eslint-disable-next-line security/detect-non-literal-regexp
-    regex: new RegExp(src, 'g'),
-    colors: rules.map(r => r.color),
-    fallback,
-  };
-}
-
-// All patterns are static regex literals - pre-compiled once at module load
-const LANG_JS = compileLang([
-  { re: /\/\/.*/, color: COLORS.COMMENT },
-  { re: /"(?:[^"\\]|\\.)*"/, color: COLORS.STRING },
-  { re: /'(?:[^'\\]|\\.)*'/, color: COLORS.STRING },
-  { re: /`(?:[^`\\]|\\.)*`/, color: COLORS.STRING },
-  { re: /@\w+/, color: COLORS.FUNC },
-  { re: /\b(?:0x[\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?)\b/, color: COLORS.NUMBER },
-  { re: /\b(?:import|export|from|as|return|if|else|switch|case|default|break|continue|for|while|do|try|catch|finally|throw|yield|of|in)\b/, color: COLORS.KW_PINK },
-  { re: /\b(?:var|let|const|function|class|extends|implements|interface|type|enum|namespace|new|delete|typeof|instanceof|void|null|undefined|true|false|this|super|static|abstract|public|private|protected|readonly|async|await|declare|get|set)\b/, color: COLORS.KW_BLUE },
-  { re: /\b[A-Z][A-Za-z0-9_]*\b/, color: COLORS.TYPE },
-  { re: /\b[a-z_$][a-zA-Z0-9_$]*(?=\s*\()/, color: COLORS.FUNC },
-]);
-
-const LANG_HTML = compileLang([
-  { re: /<!--[\s\S]*?-->/, color: COLORS.COMMENT },
-  { re: /<\/?[a-zA-Z][a-zA-Z0-9-]*/, color: COLORS.TAG },
-  { re: /\/?>/, color: COLORS.TAG },
-  { re: /[a-zA-Z-]+=/, color: COLORS.ATTR },
-  { re: /"[^"]*"/, color: COLORS.STRING },
-  { re: /'[^']*'/, color: COLORS.STRING },
-]);
-
-const LANG_CSS = compileLang([
-  { re: /\/\*[\s\S]*?\*\//, color: COLORS.COMMENT },
-  { re: /\/\/.*/, color: COLORS.COMMENT },
-  { re: /@\w[\w-]*/, color: COLORS.ATRULE },
-  { re: /#[0-9a-fA-F]{3,8}\b/, color: COLORS.STRING },
-  { re: /"[^"]*"/, color: COLORS.STRING },
-  { re: /'[^']*'/, color: COLORS.STRING },
-  { re: /\b\d+\.?\d*(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\b/, color: COLORS.NUMBER },
-  { re: /\$[\w-]+/, color: COLORS.PROP },
-  { re: /[\w-]+(?=\s*:(?!:))/, color: COLORS.PROP },
-  { re: /[.#]?[a-zA-Z][a-zA-Z0-9_-]*/, color: COLORS.SELECTOR },
-]);
-
-const LANG_JSON = compileLang([
-  { re: /"(?:[^"\\]|\\.)*"(?=\s*:)/, color: COLORS.PROP },
-  { re: /"(?:[^"\\]|\\.)*"/, color: COLORS.STRING },
-  { re: /\b(?:true|false|null)\b/, color: COLORS.KW_BLUE },
-  { re: /\b-?\d+\.?\d*(?:[eE][+-]?\d+)?\b/, color: COLORS.NUMBER },
-]);
-
-const LANG_PY = compileLang([
-  { re: /#.*/, color: COLORS.COMMENT },
-  { re: /"""[\s\S]*?"""/, color: COLORS.COMMENT },
-  { re: /'''[\s\S]*?'''/, color: COLORS.COMMENT },
-  { re: /@\w+/, color: COLORS.FUNC },
-  { re: /"(?:[^"\\]|\\.)*"/, color: COLORS.STRING },
-  { re: /'(?:[^'\\]|\\.)*'/, color: COLORS.STRING },
-  { re: /\b(?:def|class|lambda|return|if|elif|else|for|while|try|except|finally|with|as|import|from|raise|pass|break|continue|yield|and|or|not|in|is)\b/, color: COLORS.KW_PINK },
-  { re: /\b(?:True|False|None|self|super|print)\b/, color: COLORS.KW_BLUE },
-  { re: /\b\d+\.?\d*(?:[eE][+-]?\d+)?\b/, color: COLORS.NUMBER },
-  { re: /\b[A-Z][A-Za-z0-9_]*\b/, color: COLORS.TYPE },
-  { re: /\b[a-z_][a-zA-Z0-9_]*(?=\s*\()/, color: COLORS.FUNC },
-]);
-
-const LANG_YAML = compileLang([
-  { re: /#.*/, color: COLORS.COMMENT },
-  { re: /^---/, color: COLORS.KW_BLUE },
-  { re: /"[^"]*"/, color: COLORS.STRING },
-  { re: /'[^']*'/, color: COLORS.STRING },
-  { re: /\b(?:true|false|null|yes|no)\b/, color: COLORS.KW_BLUE },
-  { re: /\b\d+\.?\d*\b/, color: COLORS.NUMBER },
-  { re: /^\s*[\w-]+(?=\s*:)/, color: COLORS.PROP },
-]);
-
-const LANG_SHELL = compileLang([
-  { re: /#.*/, color: COLORS.COMMENT },
-  { re: /\$\{?[\w]+\}?/, color: COLORS.PROP },
-  { re: /"(?:[^"\\]|\\.)*"/, color: COLORS.STRING },
-  { re: /'[^']*'/, color: COLORS.STRING },
-  { re: /\b(?:if|then|else|elif|fi|for|in|do|done|while|case|esac|function|return|echo|export|source|cd|ls|mkdir|rm|cp|mv|grep|sed|awk|cat|chmod|chown)\b/, color: COLORS.KW_PINK },
-  { re: /\b\d+\b/, color: COLORS.NUMBER },
-]);
-
-const LANG_MD = compileLang([
-  { re: /`[^`]+`/, color: COLORS.STRING },
-  { re: /\*\*[^*]+\*\*/, color: COLORS.KW_BLUE },
-  { re: /\[[^\]]+\]\([^)]+\)/, color: COLORS.PROP },
-]);
-
-const MD_HEADING_RE = /^#{1,6}\s/;
-const MD_FENCE_RE = /^(?:```|~~~)/;
-
-// ── Tokenize engine (uses pre-compiled regex, no dynamic construction) ──────
-
-function applyLang(line: string, lang: CompiledLang): string {
+function applyStatic(line: string, re: RegExp, colors: ReadonlyArray<string>): string {
   if (!line) { return ''; }
-  const re = lang.regex;
   re.lastIndex = 0;
   let out = '';
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(line)) !== null) {
     if (m.index > last) { out += esc(line.slice(last, m.index)); }
-    let ruleIdx = -1;
-    for (let i = 0; i < lang.colors.length; i++) {
-      if (m[i + 1] !== undefined) { ruleIdx = i; break; }
+    let color = C_DEF;
+    for (let i = 0; i < colors.length; i++) {
+      if (m[i + 1] !== undefined) { color = colors[i]; break; }
     }
-    const color = ruleIdx >= 0 ? lang.colors[ruleIdx] : lang.fallback;
-    out += colorSpan(color, m[0]);
+    out += span(color, m[0]);
     last = m.index + m[0].length;
   }
   if (last < line.length) { out += esc(line.slice(last)); }
   return out;
 }
 
-function tokenizeMd(line: string): string {
-  if (MD_HEADING_RE.test(line)) {
-    return colorSpan(COLORS.KW_BLUE, line);
-  }
-  if (MD_FENCE_RE.test(line)) {
-    return colorSpan(COLORS.COMMENT, line);
-  }
-  return applyLang(line, LANG_MD);
+// ── Static pre-compiled regex per language ──────────────────────────────────
+// Each regex is a single literal with capture groups separated by |
+
+const RE_JS = /(\/\/.*)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(`(?:[^`\\]|\\.)*`)|(@\w+)|(\b(?:0x[\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?)\b)|(\b(?:import|export|from|as|return|if|else|switch|case|default|break|continue|for|while|do|try|catch|finally|throw|yield|of|in)\b)|(\b(?:var|let|const|function|class|extends|implements|interface|type|enum|namespace|new|delete|typeof|instanceof|void|null|undefined|true|false|this|super|static|abstract|public|private|protected|readonly|async|await|declare|get|set)\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_$][a-zA-Z0-9_$]*(?=\s*\())/g;
+const COLORS_JS: ReadonlyArray<string> = [C_COMMENT, C_STRING, C_STRING, C_STRING, C_FUNC, C_NUMBER, C_KW_PINK, C_KW_BLUE, C_TYPE, C_FUNC];
+
+const RE_HTML = /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][a-zA-Z0-9-]*)|(\/?>)|([a-zA-Z-]+=)|("[^"]*")|('[^']*')/g;
+const COLORS_HTML: ReadonlyArray<string> = [C_COMMENT, C_TAG, C_TAG, C_ATTR, C_STRING, C_STRING];
+
+const RE_CSS = /(\/\*[\s\S]*?\*\/)|(\/\/.*)|(@\w[\w-]*)|(#[0-9a-fA-F]{3,8}\b)|("[^"]*")|('[^']*')|(\b\d+\.?\d*(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\b)|(\$[\w-]+)|([\w-]+(?=\s*:(?!:)))|([.#]?[a-zA-Z][a-zA-Z0-9_-]*)/g;
+const COLORS_CSS: ReadonlyArray<string> = [C_COMMENT, C_COMMENT, C_ATRULE, C_STRING, C_STRING, C_STRING, C_NUMBER, C_PROP, C_PROP, C_SELECTOR];
+
+const RE_JSON = /("(?:[^"\\]|\\.)*"(?=\s*:))|("(?:[^"\\]|\\.)*")|(\b(?:true|false|null)\b)|(\b-?\d+\.?\d*(?:[eE][+-]?\d+)?\b)/g;
+const COLORS_JSON: ReadonlyArray<string> = [C_PROP, C_STRING, C_KW_BLUE, C_NUMBER];
+
+const RE_PY = /(#.*)|("""[\s\S]*?""")|('''[\s\S]*?''')|(@\w+)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)*')|(\b(?:def|class|lambda|return|if|elif|else|for|while|try|except|finally|with|as|import|from|raise|pass|break|continue|yield|and|or|not|in|is)\b)|(\b(?:True|False|None|self|super|print)\b)|(\b\d+\.?\d*(?:[eE][+-]?\d+)?\b)|(\b[A-Z][A-Za-z0-9_]*\b)|(\b[a-z_][a-zA-Z0-9_]*(?=\s*\())/g;
+const COLORS_PY: ReadonlyArray<string> = [C_COMMENT, C_COMMENT, C_COMMENT, C_FUNC, C_STRING, C_STRING, C_KW_PINK, C_KW_BLUE, C_NUMBER, C_TYPE, C_FUNC];
+
+const RE_YAML = /(#.*)|(^---)|("[^"]*")|('[^']*')|(\b(?:true|false|null|yes|no)\b)|(\b\d+\.?\d*\b)|(^\s*[\w-]+(?=\s*:))/g;
+const COLORS_YAML: ReadonlyArray<string> = [C_COMMENT, C_KW_BLUE, C_STRING, C_STRING, C_KW_BLUE, C_NUMBER, C_PROP];
+
+const RE_SHELL = /(#.*)|(\$\{?[\w]+\}?)|("(?:[^"\\]|\\.)*")|('[^']*')|(\b(?:if|then|else|elif|fi|for|in|do|done|while|case|esac|function|return|echo|export|source|cd|ls|mkdir|rm|cp|mv|grep|sed|awk|cat|chmod|chown)\b)|(\b\d+\b)/g;
+const COLORS_SHELL: ReadonlyArray<string> = [C_COMMENT, C_PROP, C_STRING, C_STRING, C_KW_PINK, C_NUMBER];
+
+const RE_MD_INLINE = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[[^\]]+\]\([^)]+\))/g;
+const COLORS_MD_INLINE: ReadonlyArray<string> = [C_STRING, C_KW_BLUE, C_PROP];
+
+// ── Per-language tokenizer functions ────────────────────────────────────────
+
+function tokJs(line: string): string {
+  return applyStatic(line, RE_JS, COLORS_JS);
 }
 
-// ── Extension-to-tokenizer map (eliminates switch/cyclomatic complexity) ────
+function tokHtml(line: string): string {
+  return applyStatic(line, RE_HTML, COLORS_HTML);
+}
 
-type Tokenizer = (line: string) => string;
+function tokCss(line: string): string {
+  return applyStatic(line, RE_CSS, COLORS_CSS);
+}
 
-const TOKENIZER_MAP: Record<string, Tokenizer> = {
-  js:   (l) => applyLang(l, LANG_JS),
-  ts:   (l) => applyLang(l, LANG_JS),
-  jsx:  (l) => applyLang(l, LANG_JS),
-  tsx:  (l) => applyLang(l, LANG_JS),
-  java: (l) => applyLang(l, LANG_JS),
-  cjs:  (l) => applyLang(l, LANG_JS),
-  mjs:  (l) => applyLang(l, LANG_JS),
-  html: (l) => applyLang(l, LANG_HTML),
-  htm:  (l) => applyLang(l, LANG_HTML),
-  xml:  (l) => applyLang(l, LANG_HTML),
-  svg:  (l) => applyLang(l, LANG_HTML),
-  css:  (l) => applyLang(l, LANG_CSS),
-  scss: (l) => applyLang(l, LANG_CSS),
-  less: (l) => applyLang(l, LANG_CSS),
-  json: (l) => applyLang(l, LANG_JSON),
-  py:   (l) => applyLang(l, LANG_PY),
-  yml:  (l) => applyLang(l, LANG_YAML),
-  yaml: (l) => applyLang(l, LANG_YAML),
-  sh:   (l) => applyLang(l, LANG_SHELL),
-  bash: (l) => applyLang(l, LANG_SHELL),
-  md:   tokenizeMd,
-};
+function tokJson(line: string): string {
+  return applyStatic(line, RE_JSON, COLORS_JSON);
+}
+
+function tokPy(line: string): string {
+  return applyStatic(line, RE_PY, COLORS_PY);
+}
+
+function tokYaml(line: string): string {
+  return applyStatic(line, RE_YAML, COLORS_YAML);
+}
+
+function tokShell(line: string): string {
+  return applyStatic(line, RE_SHELL, COLORS_SHELL);
+}
+
+function tokMd(line: string): string {
+  if (/^#{1,6}\s/.test(line)) { return span(C_KW_BLUE, line); }
+  if (/^(?:```|~~~)/.test(line)) { return span(C_COMMENT, line); }
+  return applyStatic(line, RE_MD_INLINE, COLORS_MD_INLINE);
+}
+
+// ── Exported function (validated switch, no dynamic property access) ────────
 
 /**
- * Tokenizes a single line of code for the given file extension.
- * Returns a sanitized HTML string (all user content is escaped).
- * Caller must use Angular's bypassSecurityTrustHtml or [innerHTML] binding.
+ * Tokenizes a single line for syntax highlighting.
+ * Returns escaped HTML string. Caller must handle Angular trust.
  */
 export function tokenizeForExt(line: string, ext: string): string {
-  const tokenizer = TOKENIZER_MAP[ext];
-  if (tokenizer) {
-    return tokenizer(line);
+  switch (ext) {
+    case 'js':
+    case 'ts':
+    case 'jsx':
+    case 'tsx':
+    case 'java':
+    case 'cjs':
+    case 'mjs':
+      return tokJs(line);
+    case 'html':
+    case 'htm':
+    case 'xml':
+    case 'svg':
+      return tokHtml(line);
+    case 'css':
+    case 'scss':
+    case 'less':
+      return tokCss(line);
+    case 'json':
+      return tokJson(line);
+    case 'py':
+      return tokPy(line);
+    case 'yml':
+    case 'yaml':
+      return tokYaml(line);
+    case 'sh':
+    case 'bash':
+      return tokShell(line);
+    case 'md':
+      return tokMd(line);
+    default:
+      return esc(line);
   }
-  return esc(line);
 }
