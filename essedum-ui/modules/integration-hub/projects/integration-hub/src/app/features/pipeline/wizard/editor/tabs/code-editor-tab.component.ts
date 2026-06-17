@@ -630,7 +630,27 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
     :host-context(body.header-dark-theme) .cp-provider-select { background: #1e293b; border: 1.5px solid rgba(79,142,247,0.25); color: #e2e8f0; }
     :host-context(body.header-dark-theme) .cp-provider-select:focus { border-color: rgba(79,142,247,0.6); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
     :host-context(body.header-dark-theme) .cp-provider-select option { background: #1e293b; color: #e2e8f0; }
-    :host-context(body.header-dark-theme) .cp-select-chevron { color: #94a3b8; }    `,
+    :host-context(body.header-dark-theme) .cp-select-chevron { color: #94a3b8; }
+
+    /* ─── Light theme: editor header frame ─── */
+    :host-context(body.header-light-theme) {
+      --ed-head-bg: #ffffff;
+      --ed-border:  #e2e8f0;
+      --ed-head-fg: #1e293b;
+    }
+    :host-context(body.header-light-theme) .editor-panel {
+      border: 1px solid #e2e8f0;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    :host-context(body.header-light-theme) .ed-head {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    :host-context(body.header-light-theme) .ed-head .filename { color: #1e293b; }
+    :host-context(body.header-light-theme) .drag-divider { background: #e2e8f0; &:hover { background: #7c3aed; } }
+    `,
   ],
 })
 export class CodeEditorTabComponent
@@ -699,10 +719,14 @@ export class CodeEditorTabComponent
     { label: 'Anthropic',    value: 'anthropic' },
   ];
   readonly modelOptions = [
-    { label: 'qwen3.6:27b',   value: 'qwen3.6:27b' },
-    { label: 'gemma4:latest',  value: 'gemma4:latest' },
+    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
+    { label: 'gemma4:latest',  value: 'gemma4:latest'  },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
-    { label: 'gpt-4o-mini',   value: 'gpt-4o-mini' },
+    { label: 'gpt-4o-mini',   value: 'gpt-4o-mini'    },
+    { label: 'phi3:mini',      value: 'phi3:mini'      },
+    { label: 'gemma3:latest',  value: 'gemma3:latest'  },
+    { label: 'llama3:latest',  value: 'llama3:latest'  },
+    { label: 'qwen3:4b',       value: 'qwen3:4b'       },
   ];
   private scrollPending = false;
   /** true once generationComplete$ has updated scriptLines for the current round */

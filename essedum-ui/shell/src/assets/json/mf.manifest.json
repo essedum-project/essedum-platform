@@ -4,28 +4,28 @@
 		"exposedModule": "./Module",
 		"routePath": "agent",
 		"ngModuleName": "EntryModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"data-ops": {
 		"remoteEntry": "/mfe/data-ops/remoteEntry.js",
 		"exposedModule": "./Module",
 		"routePath": "data",
 		"ngModuleName": "EntryModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"integration": {
 		"remoteEntry": "/mfe/integration/remoteEntry.js",
 		"exposedModule": "./Module",
 		"routePath": "integration",
 		"ngModuleName": "EntryModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"vibe-studio": {
 		"remoteEntry": "/mfe/vibe-studio/remoteEntry.js",
 		"exposedModule": "./Module",
 		"routePath": "vibe",
 		"ngModuleName": "EntryModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"mfe14": {
 		"remoteEntry": "http://localhost:5002/remoteEntry.js",
@@ -38,28 +38,28 @@
 		"exposedModule": "./Component",
 		"routePath": "ivm",
 		"ngModuleName": "SvyLibModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"bjm": {
 		"remoteEntry": "/bjm/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-bjm",
 		"ngModuleName": "IampBjmModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"grh": {
 		"remoteEntry": "/grh/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-graph",
 		"ngModuleName": "IampGrhModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"cap": {
 		"remoteEntry": "/cap/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-cap",
 		"ngModuleName": "IcapLibModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"dbs": {
 		"remoteEntry": "/dbs/remoteEntry.js",
@@ -72,21 +72,21 @@
 		"exposedModule": "./Component",
 		"routePath": "cc",
 		"ngModuleName": "IampBccModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"ccl": {
 		"remoteEntry": "/ccl/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-ccl",
 		"ngModuleName": "IampCclModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"cas": {
 		"remoteEntry": "/cas/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-btf",
 		"ngModuleName": "IampBtfModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"sandbox": {
 		"remoteEntry": "/sbxui/remoteEntry.js",
@@ -113,35 +113,35 @@
 		"type": "script",
 		"remoteName": "codegen",
 		"elementName": "react-element",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"eda": {
 		"remoteEntry": "/eda/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-eda",
 		"ngModuleName": "IampEdaModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"sre_app": {
 		"remoteEntry": "/sreui/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-sre",
 		"ngModuleName": "IampSreModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"iegp-app": {
 		"remoteEntry": "/iegpui/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-iegp",
 		"ngModuleName": "IampIegpModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"tad": {
 		"remoteEntry": "/cas/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-tad",
 		"ngModuleName": "IampBtfModule",
-		"title": "Essedum"
+		"title": "ESSEDUM"
 	},
 	"g20k_cyberscan": {
 		"remoteEntry": "https://localhost:8094/scan/remoteEntry.js",

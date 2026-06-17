@@ -178,16 +178,16 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 
 		String[] separator = new String[] { "" };
 		switch (tmpfileType) {
-		case IAIJobConstants.PYTHON2:
-		case IAIJobConstants.PYTHON3:
-		case IAIJobConstants.JYTHON_LANG:
-			separator[0] = ":";
-			break;
-		case "javascript":
-			separator[0] = "=";
-			break;
-		default:
-			log.error(INVALID_TYPE);
+			case IAIJobConstants.PYTHON2:
+			case IAIJobConstants.PYTHON3:
+			case IAIJobConstants.JYTHON_LANG:
+				separator[0] = ":";
+				break;
+			case "javascript":
+				separator[0] = "=";
+				break;
+			default:
+				log.error(INVALID_TYPE);
 		}
 		StringBuilder paths = new StringBuilder();
 
@@ -205,22 +205,22 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			Path path;
 			InputStream is = null;
 
-            // ✅ Remove brackets and trim spaces
-            filePathString = filePathString.replace("[", "").replace("]", "").trim();
+			// ✅ Remove brackets and trim spaces
+			filePathString = filePathString.replace("[", "").replace("]", "").trim();
 
-            // ✅ Split by comma
-            String[] filesArray = filePathString.split(",");
+			// ✅ Split by comma
+			String[] filesArray = filePathString.split(",");
 
-            // ✅ Find .py file
-            String pyFileName = Arrays.stream(filesArray)
-                    .map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
-                    .filter(f -> f.toLowerCase().endsWith(".py"))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No .py file found"));
+			// ✅ Find .py file
+			String pyFileName = Arrays.stream(filesArray)
+					.map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
+					.filter(f -> f.toLowerCase().endsWith(".py"))
+					.findFirst()
+					.orElseThrow(() -> new RuntimeException("No .py file found"));
 
-            System.out.println("Extracted .py file: " + pyFileName);
+			System.out.println("Extracted .py file: " + pyFileName);
 
-            try {
+			try {
 
 				is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
 				path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
@@ -254,71 +254,71 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			if (element.has("type") && !element.get("type").getAsString().equals("Text")) {
 				value = tmpValue.getAsString();
 				switch (element.get("type").getAsString()) {
-				case "Datasource":
-					ICIPDatasource datasource = datasourceService.getDatasource(value, org);
-					JsonObject connDetails;
-					try {
-						connDetails = gson.fromJson(datasource.getConnectionDetails(), JsonElement.class)
-								.getAsJsonObject();
-					} catch (Exception ex) {
-						String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
-								+ ex.getMessage();
-						log.error(msg, ex);
-						throw new EssedumException(msg, ex);
-					}
-					connDetails.addProperty("salt", datasource.getSalt());
-					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-							StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
-					break;
-				case "Dataset":
-					JsonParser parser = new JsonParser();
-					ICIPDataset dataset = datasetService.getDataset(value, org);
-					JsonElement e;
-					try {
-						e = parser.parse(gson.toJson(dataset));
-					} catch (Exception ex) {
-						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
-								+ ex.getMessage();
-						log.error(msg, ex);
-						throw new EssedumException(msg, ex);
-					}
-					for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
-						if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
-							JsonObject obj = schemaentry.getValue().getAsJsonObject();
-							ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
-							try {
-								String schemaValue = obj.get("schemavalue").getAsString();
-								JsonElement schemaElem = parser.parse(schemaValue);
-								schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
-								schemaDetails.setSchemaId(obj.get("name").getAsString());
-								e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
-								e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
-										parser.parse(gson.toJson(schemaDetails)));
-							} catch (Exception ex) {
-								String msg = "Error in getting schema from dataset : "
-										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-								log.error(msg, ex);
-								throw new EssedumException(msg, ex);
-							}
-							break;
+					case "Datasource":
+						ICIPDatasource datasource = datasourceService.getDatasource(value, org);
+						JsonObject connDetails;
+						try {
+							connDetails = gson.fromJson(datasource.getConnectionDetails(), JsonElement.class)
+									.getAsJsonObject();
+						} catch (Exception ex) {
+							String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
+									+ ex.getMessage();
+							log.error(msg, ex);
+							throw new EssedumException(msg, ex);
 						}
-					}
-					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-							StringEscapeUtils.escapeJson(gson.toJson(e)), "\"");
-					break;
-				case "Schema":
-					try {
+						connDetails.addProperty("salt", datasource.getSalt());
 						value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-								StringEscapeUtils.escapeJson(schemaRegistryService.fetchSchemaValue(value, org)), "\"");
-					} catch (Exception ex) {
-						String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
-								+ ex.getMessage();
-						log.error(msg, ex);
-						throw new EssedumException(msg, ex);
-					}
-					break;
-				default:
-					log.error(INVALID_TYPE);
+								StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
+						break;
+					case "Dataset":
+						JsonParser parser = new JsonParser();
+						ICIPDataset dataset = datasetService.getDataset(value, org);
+						JsonElement e;
+						try {
+							e = parser.parse(gson.toJson(dataset));
+						} catch (Exception ex) {
+							String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
+									+ ex.getMessage();
+							log.error(msg, ex);
+							throw new EssedumException(msg, ex);
+						}
+						for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
+							if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
+								JsonObject obj = schemaentry.getValue().getAsJsonObject();
+								ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
+								try {
+									String schemaValue = obj.get("schemavalue").getAsString();
+									JsonElement schemaElem = parser.parse(schemaValue);
+									schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
+									schemaDetails.setSchemaId(obj.get("name").getAsString());
+									e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
+									e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
+											parser.parse(gson.toJson(schemaDetails)));
+								} catch (Exception ex) {
+									String msg = "Error in getting schema from dataset : "
+											+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+									log.error(msg, ex);
+									throw new EssedumException(msg, ex);
+								}
+								break;
+							}
+						}
+						value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
+								StringEscapeUtils.escapeJson(gson.toJson(e)), "\"");
+						break;
+					case "Schema":
+						try {
+							value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
+									StringEscapeUtils.escapeJson(schemaRegistryService.fetchSchemaValue(value, org)), "\"");
+						} catch (Exception ex) {
+							String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
+									+ ex.getMessage();
+							log.error(msg, ex);
+							throw new EssedumException(msg, ex);
+						}
+						break;
+					default:
+						log.error(INVALID_TYPE);
 				}
 			}
 			argumentBuilder.put(key, resolver.resolveDatasetData(value, org));
@@ -345,26 +345,50 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			arguments = args.toString();
 		}
 		switch (tmpfileType) {
-		case IAIJobConstants.PYTHON2:
-			cmdStr = resolveCommand(
-					version.equalsIgnoreCase("v2") ? nativescriptPython2V2Command : nativescriptPython2Command,
-					new String[] { paths.toString(), arguments });
-			break;
-		case IAIJobConstants.PYTHON3:
-		case IAIJobConstants.JYTHON_LANG:
-			cmdStr = resolveCommand(
-					version.equalsIgnoreCase("v2") ? nativescriptPythonV2Command : nativescriptPythonCommand,
-					new String[] { paths.toString(), arguments });
-			break;
-		case "javascript":
-			cmdStr = resolveCommand(
-					version.equalsIgnoreCase("v2") ? nativescriptJavascriptV2Command : nativescriptJavascriptCommand,
-					new String[] { paths.toString(), arguments });
-			break;
-		default:
-			log.error(INVALID_TYPE);
+			case IAIJobConstants.PYTHON2:
+				cmdStr = resolveCommand(
+						stripPythonPathPlaceholder(
+								version.equalsIgnoreCase("v2") ? nativescriptPython2V2Command : nativescriptPython2Command),
+						new String[] { paths.toString(), arguments });
+				break;
+			case IAIJobConstants.PYTHON3:
+			case IAIJobConstants.JYTHON_LANG:
+				cmdStr = resolveCommand(
+						stripPythonPathPlaceholder(
+								version.equalsIgnoreCase("v2") ? nativescriptPythonV2Command : nativescriptPythonCommand),
+						new String[] { paths.toString(), arguments });
+				break;
+			case "javascript":
+				cmdStr = resolveCommand(
+						stripPythonPathPlaceholder(version.equalsIgnoreCase("v2") ? nativescriptJavascriptV2Command
+								: nativescriptJavascriptCommand),
+						new String[] { paths.toString(), arguments });
+				break;
+			default:
+				log.error(INVALID_TYPE);
 		}
 		return cmdStr;
+	}
+
+	/**
+	 * The USM constant {@code icip.pythonpath} is referenced by the various
+	 * {@code icip.pipeline.nativescript.*.command} templates but is not seeded in
+	 * the USM database. As a result {@code @EssedumProperty} leaves the literal
+	 * {@code @!icip.pythonpath!@} placeholder in the command string. The downstream
+	 * {@link com.lfn.icip.icipwebeditor.job.service.util.ICIPCommonJobServiceUtil#resolveCommand}
+	 * treats {@code @} as a "not required" marker and consumes those characters
+	 * before substituting the {@code #} placeholders, producing a broken command
+	 * like {@code !icip.pythonpath! # #}. Replace the unresolved placeholder with
+	 * the literal {@code python} interpreter so the {@code #} substitution can
+	 * proceed normally.
+	 */
+	private String stripPythonPathPlaceholder(String cmd) {
+		if (cmd == null) {
+			return null;
+		}
+		return cmd
+				.replace("@!icip.pythonpath!@", "python")
+				.replace("!icip.pythonpath!", "python");
 	}
 
 	/**
@@ -378,7 +402,14 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 */
 	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
-			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
+			// Wizard-created pipelines (TrainingPipeline / DataPipeline) do not include
+			// an "arguments" array in their element attributes. Treat a missing or
+			// non-array "arguments" entry as an empty argument list rather than NPE.
+			JsonElement argumentsElement = binary.get("arguments");
+			if (argumentsElement == null || argumentsElement.isJsonNull() || !argumentsElement.isJsonArray()) {
+				return new JsonArray();
+			}
+			JsonArray binaryArray = argumentsElement.getAsJsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
 				JsonObject paramsObject = gson.fromJson(params, JsonElement.class).getAsJsonObject();
 				for (JsonElement binaryElement : binaryArray) {
@@ -444,7 +475,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
- 
+
 		}
 		StringBuilder paths = new StringBuilder();
 
@@ -461,33 +492,33 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String filePathString = file.getAsString();
 			Path path = null;
 			InputStream is = null;
-            // ✅ Remove brackets and trim spaces
-            filePathString = filePathString.replace("[", "").replace("]", "").trim();
+			// ✅ Remove brackets and trim spaces
+			filePathString = filePathString.replace("[", "").replace("]", "").trim();
 
-            // ✅ Split by comma
-            String[] filesArray = filePathString.split(",");
+			// ✅ Split by comma
+			String[] filesArray = filePathString.split(",");
 
-            // ✅ Find .py file
-            String pyFileName = Arrays.stream(filesArray)
-                    .map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
-                    .filter(f -> f.toLowerCase().endsWith(".py"))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No .py file found"));
+			// ✅ Find .py file
+			String pyFileName = Arrays.stream(filesArray)
+					.map(f -> f.replace("\"", "").trim()) // remove quotes and spaces
+					.filter(f -> f.toLowerCase().endsWith(".py"))
+					.findFirst()
+					.orElseThrow(() -> new RuntimeException("No .py file found"));
 
-            log.debug("Extracted .py file: {}", pyFileName);
+			log.debug("Extracted .py file: {}", pyFileName);
 			try {
-                // ✅ Fetch input stream for the .py file
-                is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
+				// ✅ Fetch input stream for the .py file
+				is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
 
-                // ✅ Get file path on server
-                path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
+				// ✅ Get file path on server
+				path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
 
-            } catch (IOException | SQLException ex) {
-                String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-                log.error(msg, ex);
-            }
+			} catch (IOException | SQLException ex) {
+				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+				log.error(msg, ex);
+			}
 
-            return path;
+			return path;
 		}
 		return null;
 	}

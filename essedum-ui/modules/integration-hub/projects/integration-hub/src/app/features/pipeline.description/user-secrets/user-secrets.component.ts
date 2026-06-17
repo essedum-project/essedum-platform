@@ -21,7 +21,7 @@ export class UserSecretsComponent implements OnInit {
     if(!this.isauth){
     if(this.configData == undefined)
       this.configData=[]
-    this.configData.push({name:"usedSecrets",value:""})
+    this.configData.push({name:"",value:""})
     this.editMode=true
     this.editIndex=this.configData.length-1
     this.configDataChange.emit(this.configData);}
@@ -29,9 +29,15 @@ export class UserSecretsComponent implements OnInit {
 
   deleteConfig(i){
     if(!this.isauth){
-    this.configData.splice(i,1)
-    return true
+      this.configData.splice(i,1);
+      this.configDataChange.emit(this.configData);
     }
+  }
+
+  saveConfig(i){
+    this.editMode = false;
+    this.editIndex = -1;
+    this.configDataChange.emit(this.configData);
   }
 
   editConfig(i){
@@ -42,4 +48,3 @@ export class UserSecretsComponent implements OnInit {
   }
 
 }
-

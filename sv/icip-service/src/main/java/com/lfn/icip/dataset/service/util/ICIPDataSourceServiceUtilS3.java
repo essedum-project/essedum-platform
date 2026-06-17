@@ -508,7 +508,8 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
         String region = connectionDetails.optString("Region");
         URL endpointUrl = null;
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"),
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
         } catch (MalformedURLException e1) {
             logger.error("Upload DATASOURCE URL not correct" + e1.getMessage());
             return "Error";

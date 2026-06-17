@@ -100,10 +100,18 @@
 ::ng-deep .editor-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label { color: #7c3aed !important; }
 ::ng-deep .editor-tabs .mat-mdc-tab-header {
   background: var(--pe-head-bg, #ffffff);
-  border-bottom: 1px solid var(--pe-border, #e5e7eb);
+  border-bottom: none;
 }
 
 .loading { display:flex; justify-content:center; align-items:center; padding: 64px; }
+
+// -- Light theme explicit overrides
+:host-context(body.header-light-theme) {
+  --pe-bg: #ffffff;
+  ::ng-deep .mat-mdc-tab-body-content { background: #ffffff !important; }
+  ::ng-deep .mat-mdc-tab-body         { background: #ffffff !important; }
+  ::ng-deep .mat-mdc-tab-body-wrapper { background: #ffffff !important; }
+}
 
 // -- Dark theme overrides
 :host-context(body.header-dark-theme) {

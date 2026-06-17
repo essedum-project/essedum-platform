@@ -37,13 +37,13 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   get selectedAgentLabel(): string {
     return this.providerOptions.find(p => p.value === this.selectedAgent)?.label ?? this.selectedAgent ?? '';
   }
-  leftPanelWidth = 35;
+  leftPanelWidth = 28;
   private isDragging = false;
   private destroy$ = new Subject<void>();
   /** cancels the per-session messages$ subscription on new-session / re-select */
   private sessionReset$ = new Subject<void>();
   /** cname returned by the streaming-services create API */
-  private registeredCname: string | null = null;
+  registeredCname: string | null = null;
   /** app name extracted from the user's requirements message */
   private appName: string | null = null;
   /** files buffered from generationComplete$ while waiting for registeredCname */
@@ -280,24 +280,27 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     this.vibeService.resetSession();
   }
 
+  private dragContainerRect: DOMRect | null = null;
+
   onDividerMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.isDragging = true;
+    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
+    this.dragContainerRect = container ? container.getBoundingClientRect() : null;
   }
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging) return;
-    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
+    if (!this.isDragging || !this.dragContainerRect) return;
+    const rect = this.dragContainerRect;
     const pct = ((event.clientX - rect.left) / rect.width) * 100;
-    this.leftPanelWidth = Math.min(75, Math.max(25, pct));
+    this.leftPanelWidth = Math.min(75, Math.max(20, pct));
   }
 
   @HostListener('document:mouseup')
   onMouseUp(): void {
     this.isDragging = false;
+    this.dragContainerRect = null;
   }
 
   ngOnDestroy(): void {

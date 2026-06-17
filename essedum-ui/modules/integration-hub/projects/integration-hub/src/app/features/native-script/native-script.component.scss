@@ -171,6 +171,131 @@
   }
 }
 
+// ── Inline env-var card ───────────────────────────────────────────────────────
+.env-card {
+  background: rgba(13,22,48,0.88) !important;
+  border: 1px solid rgba(88,166,255,0.14) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(12px) !important;
+  padding: 16px 20px !important;
+  margin-top: 4px !important;
+}
+
+.env-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  background: transparent !important;
+  margin-bottom: 10px !important;
+
+  thead tr th {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #8b949e !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    border-bottom: none !important;
+    padding: 8px 10px !important;
+    background: rgba(88,166,255,0.04) !important;
+  }
+
+  tbody tr {
+    background: transparent !important;
+    border-bottom: none !important;
+    &:hover { background: rgba(88,166,255,0.04) !important; }
+
+    td {
+      padding: 8px 10px !important;
+      font-size: 13px !important;
+      color: #c9d1d9 !important;
+      -webkit-text-fill-color: #c9d1d9 !important;
+      vertical-align: middle !important;
+      background: transparent !important;
+    }
+  }
+
+  .table-striped > tbody > tr:nth-of-type(odd) > *,
+  .table-striped > tbody > tr:nth-of-type(even) > * {
+    background: transparent !important;
+    --bs-table-accent-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    --bs-table-bg: transparent !important;
+  }
+
+  .form-control, input.form-control, input[type="text"], input[type="password"],
+  .table .form-control, .table td input, .table td .form-control,
+  .table-striped td input, .table-striped td .form-control {
+    background: rgba(13,17,23,0.9) !important;
+    border: 1px solid rgba(88,166,255,0.25) !important;
+    border-radius: 5px !important;
+    color: #e6edf3 !important;
+    -webkit-text-fill-color: #e6edf3 !important;
+    font-size: 12px !important;
+    padding: 5px 8px !important;
+    width: 100% !important;
+    &:focus { border-color: #58a6ff !important; outline: none !important; box-shadow: 0 0 0 2px rgba(88,166,255,0.1) !important; }
+    &::placeholder { color: #484f58 !important; -webkit-text-fill-color: #484f58 !important; }
+  }
+}
+
+.env-action-icon {
+  font-size: 17px !important;
+  width: 17px !important;
+  height: 17px !important;
+  vertical-align: middle !important;
+  cursor: pointer !important;
+  color: #8b949e !important;
+  margin-right: 6px !important;
+  transition: color 0.15s !important;
+  &:hover { color: #58a6ff !important; }
+}
+
+// Explicit text colors for env cell spans (override any inheritance issues)
+.env-cell-text {
+  color: #c9d1d9 !important;
+  -webkit-text-fill-color: #c9d1d9 !important;
+  font-size: 13px !important;
+}
+.env-cell-empty {
+  color: #484f58 !important;
+  -webkit-text-fill-color: #484f58 !important;
+  font-style: italic !important;
+}
+
+.env-empty-state {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #484f58 !important;
+  font-size: 13px !important;
+  padding: 10px 4px !important;
+  margin-bottom: 8px !important;
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; color: #484f58 !important; }
+}
+
+.env-add-btn {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 4px 16px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 10px rgba(79,70,229,0.35) !important;
+  transition: box-shadow 0.2s, transform 0.2s !important;
+  mat-icon { font-size: 16px !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
+  &:hover:not([disabled]) {
+    box-shadow: 0 4px 20px rgba(79,70,229,0.55) !important;
+    transform: translateY(-1px) !important;
+  }
+  &[disabled] { opacity: 0.45 !important; cursor: not-allowed !important; }
+}
+
 // ── Header (Pipeline title + action icons) ────────────────────────────────────
 .selector-model-title-head {
   .aip-desc-title {
@@ -503,9 +628,13 @@
 
 .code-editor-content {
   flex: 1 !important;
+  min-height: 0 !important;
   background: #0d1117 !important;
   position: relative !important;
-  overflow: hidden !important;
+  // ACE editor is created with maxLines: Infinity, so it grows to fit the whole
+  // file instead of scrolling internally. Allow this panel to scroll so long
+  // scripts aren't clipped by the fixed-height container.
+  overflow: auto !important;
   // Code editor child overrides
   :host ::ng-deep app-enl-code-editor,
   :host ::ng-deep .CodeMirror,
@@ -680,14 +809,59 @@ button[mat-button], button[mat-stroked-button] {
 
   // Collapsible sections - light theme
   .collapsible-section {
-    background: #f8fafc !important;
+    background: #ffffff !important;
     border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
   }
   .collapsible-header {
+    background: transparent !important;
     &:hover { background: rgba(71,66,220,0.03) !important; }
     .collapse-icon { color: #4742dc !important; }
     .collapse-title { color: #334155 !important; }
     .collapse-badge { background: rgba(71,66,220,0.08) !important; color: #4742dc !important; }
+  }
+
+  .collapsible-body {
+    background: transparent !important;
+  }
+
+  // Env-var card – light theme (identical to user-secrets mat-card: #ffffff)
+  .env-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+  }
+  .env-table {
+    thead tr th { color: #64748b !important; background: rgba(71,66,220,0.04) !important; }
+    tbody tr {
+      &:hover { background: rgba(71,66,220,0.03) !important; }
+      td { color: #334155 !important; -webkit-text-fill-color: #334155 !important; background: transparent !important; }
+    }
+    .table-striped > tbody > tr:nth-of-type(odd) > *,
+    .table-striped > tbody > tr:nth-of-type(even) > * {
+      background: transparent !important; background-color: transparent !important;
+      --bs-table-accent-bg: transparent !important; --bs-table-bg: transparent !important;
+    }
+    .form-control, input.form-control, input[type="text"], input[type="password"],
+    .table .form-control, .table td input, .table td .form-control {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      &:focus { border-color: #4742dc !important; box-shadow: 0 0 0 2px rgba(71,66,220,0.12) !important; }
+      &::placeholder { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
+    }
+  }
+  .env-action-icon { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
+  .env-cell-text { color: #334155 !important; -webkit-text-fill-color: #334155 !important; }
+  .env-cell-empty { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
+  .env-empty-state { color: #94a3b8 !important; mat-icon { color: #cbd5e1 !important; } }
+  .env-add-btn {
+    background: linear-gradient(135deg, #4742dc 0%, #7c3aed 50%, #6366f1 100%) !important;
+    box-shadow: 0 2px 10px rgba(71,66,220,0.3) !important;
+    &:hover:not([disabled]) { box-shadow: 0 4px 20px rgba(71,66,220,0.45) !important; }
   }
 
   // Form fields

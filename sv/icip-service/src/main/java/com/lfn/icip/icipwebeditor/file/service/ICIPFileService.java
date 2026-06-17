@@ -357,6 +357,14 @@ public class ICIPFileService {
         logger.info("Starting persistInNativeJsonScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}, fileType: {}",
                 name, org, fileName, newFileName, fileType);
 
+        // Sanitize python scripts: strip any stdlib modules (e.g. 'pickle', 'os', 'json')
+        // that the wizard's LLM may have mistakenly included in _WIZARD_PIPELINE_DEPS /
+        // _DEPS. pip cannot install stdlib modules and the job would fail at startup.
+        if ("Python3".equalsIgnoreCase(fileType) || "Python".equalsIgnoreCase(fileType)
+                || (newFileName != null && newFileName.toLowerCase().endsWith(".py"))) {
+            bytes = sanitizeWizardPipelineDeps(bytes);
+        }
+
         List<String> savedFileNames = new ArrayList<>();
         Blob blob = new SerialBlob(bytes);
 
@@ -1580,6 +1588,103 @@ public class ICIPFileService {
                 logger.error(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Python standard-library module names that must NEVER appear in a pip
+     * install list — pip will fail with "No matching distribution" and abort
+     * the whole job. The training-pipeline wizard's LLM occasionally hallucinates
+     * these (most often 'pickle') into {@code _WIZARD_PIPELINE_DEPS}.
+     */
+    private static final Set<String> PYTHON_STDLIB_MODULES = new HashSet<>(Arrays.asList(
+            "os", "sys", "io", "json", "re", "time", "datetime", "collections",
+            "functools", "itertools", "pathlib", "typing", "dataclasses", "abc",
+            "copy", "math", "random", "hashlib", "base64", "urllib", "http",
+            "logging", "warnings", "traceback", "inspect", "struct", "string",
+            "enum", "contextlib", "threading", "subprocess", "shutil", "tempfile",
+            "uuid", "argparse", "configparser", "csv", "pickle", "gzip", "zipfile",
+            "concurrent", "asyncio", "socket", "ssl", "email", "html", "xml",
+            "unittest", "pprint", "textwrap", "operator", "heapq", "bisect",
+            "builtins", "platform", "signal", "stat", "glob", "fnmatch",
+            "weakref", "gc", "types", "decimal", "fractions", "statistics",
+            "multiprocessing", "queue", "array", "ctypes", "mmap"
+    ));
+
+    private static final java.util.regex.Pattern DEPS_BLOCK_PATTERN = java.util.regex.Pattern.compile(
+            "(\\b(?:_WIZARD_PIPELINE_DEPS|_DEPS)\\s*=\\s*\\[)([^\\]]*)(\\])");
+    private static final java.util.regex.Pattern DEPS_ITEM_PATTERN = java.util.regex.Pattern.compile(
+            "'([^']*)'|\"([^\"]*)\"");
+
+    /**
+     * Strips Python stdlib module names from any {@code _WIZARD_PIPELINE_DEPS}
+     * / {@code _DEPS} list literal at the top of the supplied Python script.
+     * Returns the original bytes unchanged when no such block is found or the
+     * content is not valid UTF-8.
+     */
+    static byte[] sanitizeWizardPipelineDeps(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return bytes;
+        }
+        String source = bytesToUtf8(bytes);
+        if (source == null) {
+            return bytes;
+        }
+        java.util.regex.Matcher matcher = DEPS_BLOCK_PATTERN.matcher(source);
+        if (!matcher.find()) {
+            return bytes;
+        }
+        List<String> kept = filterNonStdlibDeps(matcher.group(2));
+        if (kept == null) {
+            return bytes;
+        }
+        return rebuildDepsSource(source, matcher, matcher.group(1), matcher.group(3), kept);
+    }
+
+    private static String bytesToUtf8(byte[] bytes) {
+        try {
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private static List<String> filterNonStdlibDeps(String body) {
+        java.util.regex.Matcher itemMatcher = DEPS_ITEM_PATTERN.matcher(body);
+        List<String> kept = new ArrayList<>();
+        boolean removedAny = false;
+        while (itemMatcher.find()) {
+            String literal = itemMatcher.group(0);
+            String value = itemMatcher.group(1) != null ? itemMatcher.group(1) : itemMatcher.group(2);
+            String normalized = value == null ? "" : value.trim().toLowerCase();
+            String moduleName = normalized.replace('-', '_');
+            if (PYTHON_STDLIB_MODULES.contains(moduleName)) {
+                removedAny = true;
+                logger.info("sanitizeWizardPipelineDeps: removing stdlib module '{}' from deps list", value);
+                continue;
+            }
+            kept.add(literal);
+        }
+        return removedAny ? kept : null;
+    }
+
+    private static byte[] rebuildDepsSource(
+            String source,
+            java.util.regex.Matcher matcher,
+            String prefix,
+            String suffix,
+            List<String> kept) {
+        StringBuilder rebuilt = new StringBuilder(source.length());
+        rebuilt.append(source, 0, matcher.start());
+        rebuilt.append(prefix);
+        for (int i = 0; i < kept.size(); i++) {
+            if (i > 0) {
+                rebuilt.append(", ");
+            }
+            rebuilt.append(kept.get(i));
+        }
+        rebuilt.append(suffix);
+        rebuilt.append(source, matcher.end(), source.length());
+        return rebuilt.toString().getBytes(StandardCharsets.UTF_8);
     }
 
 }
