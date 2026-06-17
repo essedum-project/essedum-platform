@@ -71,6 +71,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -763,21 +764,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	}
 
 	private TrustManager[] getTrustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new java.security.cert.X509Certificate[] {};
-			}
-		} };
-		return trustAllCerts;
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {

@@ -8,6 +8,7 @@ package com.lfn.common.app.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.common.app.config.GitHubOAuthConfig;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +47,7 @@ public class GitHubOAuthService {
     private RestTemplate createRestTemplate() {
         try {
             // Create trust manager that trusts all certificates
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-            };
+            TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
             // Install the all-trusting trust manager
             SSLContext sslContext = SSLContext.getInstance("TLS");

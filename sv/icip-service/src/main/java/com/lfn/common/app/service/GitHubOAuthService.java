@@ -17,6 +17,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.*;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -46,17 +47,7 @@ public class GitHubOAuthService {
     private RestTemplate createRestTemplate() {
         try {
             // Create trust manager that trusts all certificates
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-            };
+            TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
             // Install the all-trusting trust manager
             SSLContext sslContext = SSLContext.getInstance("TLS");

@@ -182,7 +182,7 @@ public class BedRockChatModelImpl implements ICIPPromptChatModel {
 			binding.setProperty("response", resp);
 	
 			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(transformScript));
+			Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(transformScript)));
 	
 			resp = transformedResult.toString();
 		}

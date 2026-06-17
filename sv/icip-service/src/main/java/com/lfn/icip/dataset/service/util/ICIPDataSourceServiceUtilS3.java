@@ -74,6 +74,7 @@ import com.azure.core.http.HttpClient;
 import com.azure.core.http.okhttp.OkHttpAsyncHttpClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -645,27 +646,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 //	}
 
     private TrustManager[] getTrustAllCerts() {
-        logger.info("certificateCheck value: {}", certificateCheck);
-        try {
-            // Always load the default trust store for proper certificate validation
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init((KeyStore) null);
-            // Get the trust managers from the factory
-            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-            // Ensure we have at least one X509TrustManager
-            for (TrustManager trustManager : trustManagers) {
-                if (trustManager instanceof X509TrustManager) {
-                    return new TrustManager[] { (X509TrustManager) trustManager };
-                }
-            }
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load trust store: {}", e.getMessage(), e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Failed to load trust manager algorithm: {}", e.getMessage(), e);
-        }
-        throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     private SSLContext getSslContext(TrustManager[] trustAllCerts) {

@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -388,21 +389,7 @@ public class HitachiServer implements FileServerUtil {
 				
 	}
 	private TrustManager[] getTrustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new java.security.cert.X509Certificate[] {};
-			}
-		} };
-		return trustAllCerts;
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {

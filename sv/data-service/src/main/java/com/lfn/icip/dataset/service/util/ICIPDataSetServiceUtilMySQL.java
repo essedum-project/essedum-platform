@@ -62,6 +62,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SqlStatementValidator;
 //import com.ibm.icu.math.BigDecimal;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 //import com.lfn.iamp.usm.annotation.EssedumProperty;
@@ -1045,7 +1046,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1054,7 +1055,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 					stmt.executeBatch();
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU))) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)))) {
 					stmt.execute();
 				}
 			}
@@ -1088,7 +1089,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1098,7 +1099,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 					return ICIPUtils.getGeneratedKey(stmt);
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU),
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)),
 						Statement.RETURN_GENERATED_KEYS)) {
 					stmt.executeUpdate();
 					return ICIPUtils.getGeneratedKey(stmt);
