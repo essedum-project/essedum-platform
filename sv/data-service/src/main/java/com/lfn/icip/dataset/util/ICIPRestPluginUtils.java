@@ -40,6 +40,7 @@ import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.properties.HttpClientUtil;
 import com.lfn.icip.dataset.properties.ProxyProperties;
 import com.lfn.icip.dataset.properties.ProxyProperties.HttpProxyConfiguration;
+// SsrfProtectionUtil is in the same package (com.lfn.icip.dataset.util)
 
 
 /**
@@ -57,6 +58,25 @@ public final class ICIPRestPluginUtils {
 	/** The Constant AUTHURL. */
 	private static final String AUTHURL = "authUrl";
     
+	/**
+	 * Validates a URI against SSRF (scheme, host, internal/loopback IP ranges)
+	 * before it is used to build outbound HTTP requests. Throws
+	 * {@link IllegalArgumentException} if the URI is unsafe.
+	 *
+	 * @param uri the URI to validate (must not be null)
+	 */
+	private static void validateUriForSsrf(URI uri) {
+		if (uri == null) {
+			throw new IllegalArgumentException("URI must not be null");
+		}
+		try {
+			SsrfProtectionUtil.validateAndCreateUrl(uri.toString());
+		} catch (java.net.MalformedURLException e) {
+			throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+		}
+	}
+
+
     /**
      * Instantiates a new ICIP rest plugin utils.
      */
@@ -213,6 +233,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpGet httpget = new HttpGet(uri.toString());
 		
 		if(!Strings.isNullOrEmpty(authToken))
@@ -262,6 +283,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost, String bodyType) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpPost post = new HttpPost(uri.toString());
 		String uploadDirecoryPath = null;
 		if(!Strings.isNullOrEmpty(authToken))
@@ -362,6 +384,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpPut httpput = new HttpPut(uri.toString());
 		
 		if(!Strings.isNullOrEmpty(authToken))
@@ -414,6 +437,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpDelete httpdelete = new HttpDelete(uri.toString());
 
 		if (!Strings.isNullOrEmpty(authToken))
@@ -451,6 +475,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpPatch post = new HttpPatch(uri.toString());
 		
 		if(!Strings.isNullOrEmpty(authToken))

@@ -1217,8 +1217,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			binding.setProperty("Url", inputUrl);
 			binding.setProperty("ConfigVariables", ConfigVariables);
 
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(prescript)));
+			// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+			// createSandboxedShell() applies SecureASTCustomizer restrictions.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(prescript, binding);
 
 			JSONObject transformedattr = new JSONObject(transformedResult.toString());
 			logger.info("Transformedattr--->{}", transformedattr);
@@ -1265,8 +1266,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 					Binding binding = new Binding();
 					binding.setProperty("inputJson", resp);
 
-					GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-					Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(script)));
+					// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+					// createSandboxedShell() applies SecureASTCustomizer restrictions.
+					Object transformedResult = GroovySandboxUtil.evaluateSandboxed(script, binding);
 
 					resp = transformedResult.toString();
 					logger.info("REST getDatasetData after groovy {}", resp);
@@ -1321,9 +1323,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 		binding.setProperty("Body", Body);
 		binding.setProperty("ConnectionDetails", datasource_attributes.toString());
 		if (ScriptType.equals("Groovy")) {
-			String safeScript = GroovySandboxUtil.validateScript(transformScript);
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(safeScript));
+			// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+			// createSandboxedShell() applies SecureASTCustomizer restrictions.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
 			logger.info("transformedResult--->{}", transformedResult);
 			response = transformedResult.toString();
 		}
