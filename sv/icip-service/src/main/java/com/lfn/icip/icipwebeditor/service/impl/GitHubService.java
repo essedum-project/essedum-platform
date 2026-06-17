@@ -72,6 +72,68 @@ import com.lfn.icip.dataset.service.impl.ICIPDatasetService;
 @RefreshScope
 public class GitHubService {
 
+	/**
+	 * Pattern of characters that are NOT allowed in a single path segment supplied
+	 * by an external caller (pipeline name, file name, organisation name, branch
+	 * name, etc.). Allows only ASCII letters, digits, and a small set of safe
+	 * punctuation. Path separators ({@code / \}), parent traversal ({@code ..}),
+	 * null bytes, control characters, and shell meta-characters are all rejected.
+	 */
+	private static final java.util.regex.Pattern UNSAFE_SEGMENT =
+			java.util.regex.Pattern.compile("[^A-Za-z0-9._\\-]");
+
+	/**
+	 * Validates a single user-supplied path segment (e.g. pipelineName, filename,
+	 * org, branchName) so that it cannot escape its intended directory or inject
+	 * dangerous characters into a path expression.
+	 *
+	 * @param value the untrusted segment
+	 * @param name  human-readable name of the parameter, used in error messages
+	 * @return the same value once validated
+	 * @throws IllegalArgumentException if the segment is null, empty, contains
+	 *         path separators, traversal sequences, or any other disallowed character
+	 */
+	private static String safeSegment(String value, String name) {
+		if (value == null || value.isEmpty()) {
+			throw new IllegalArgumentException(name + " must not be null or empty");
+		}
+		if (value.contains("..") || value.contains("/") || value.contains("\\")
+				|| value.contains("\0") || value.startsWith(".")) {
+			throw new IllegalArgumentException(
+					name + " contains disallowed path characters: " + value);
+		}
+		if (UNSAFE_SEGMENT.matcher(value).find()) {
+			throw new IllegalArgumentException(
+					name + " contains disallowed characters: " + value);
+		}
+		return value;
+	}
+
+	/**
+	 * Variant of {@link #safeSegment(String, String)} that accepts {@code /} as
+	 * a separator between safe segments. Used for relative file paths read from
+	 * a zip / map of files where sub-directories are legitimate, but parent
+	 * traversal is not.
+	 */
+	private static String safeRelativePath(String value, String name) {
+		if (value == null || value.isEmpty()) {
+			throw new IllegalArgumentException(name + " must not be null or empty");
+		}
+		if (value.contains("\0") || value.contains("..") || value.contains("\\")
+				|| value.startsWith("/")) {
+			throw new IllegalArgumentException(
+					name + " contains disallowed path characters: " + value);
+		}
+		for (String part : value.split("/")) {
+			if (!part.isEmpty()) {
+				safeSegment(part, name + " segment");
+			}
+		}
+		return value;
+	}
+
+
+
 	@Value("${github.gitPathStudio}")
 	private String gitPath;
 
@@ -321,6 +383,10 @@ public class GitHubService {
 	public void updateFileInLocalRepo(Blob blob, String pipelineName, String org, String filename)
 			throws IOException, SQLException {
 
+		safeSegment(pipelineName, "pipelineName");
+		safeSegment(org, "org");
+		safeSegment(filename, "filename");
+
 		String url = constantsService.getByKeys("icip.git.repo.studio.url", org).getValue();
 
 		String repoName = url.split("/")[url.split("/").length - 1].split("[.]")[0];
@@ -367,6 +433,8 @@ public class GitHubService {
 
 	public String fetchFileFromLocalRepo(String pipelineName, String org)
 			throws IOException, SQLException, InvalidRemoteException, TransportException, GitAPIException {
+		safeSegment(pipelineName, "pipelineName");
+		safeSegment(org, "org");
 		getGitHubRepository(org);
 
 		String url = constantsService.getByKeys("icip.git.repo.studio.url", org).getValue();
@@ -447,6 +515,8 @@ public class GitHubService {
 
 	public String publishPipeline(String pipelineName, String org, String type)
 			throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+		safeSegment(pipelineName, "pipelineName");
+		safeSegment(org, "org");
 		Git git = getGitStoreRepo(org);
 		Boolean result = pull(git);
 		String scriptPath = constantsService.getByKeys("icip.pipelineScript.directory", "Core").getValue();
@@ -679,6 +749,15 @@ public class GitHubService {
 	public void saveFilesToGitHubBranch(java.util.Map<String, byte[]> files, String pipelineName, String org,
 			String branchName) throws IOException, GitAPIException {
 
+		safeSegment(pipelineName, "pipelineName");
+		safeSegment(org, "org");
+		// Validate every map key (zip-derived relative path) before any path is built from it
+		if (files != null) {
+			for (String key : files.keySet()) {
+				safeRelativePath(key, "fileName");
+			}
+		}
+
 		String url = resolveRepoUrl(org);
 		if (url == null || url.isEmpty()) {
 			throw new IOException("GitHub repo URL is not configured for org: " + org);
@@ -834,10 +913,30 @@ public class GitHubService {
 
 	/**
 	 * Recursively delete a directory.
+	 *
+	 * <p>The {@code dir} argument is required to live underneath one of the
+	 * trusted git working roots ({@link #gitPath} or {@link #gitPathStore}); any
+	 * attempt to delete a path outside those roots is rejected, mitigating
+	 * "Uncontrolled data used in path expression" issues at the {@code Files.walk}
+	 * / {@code Files.delete} sinks below.
 	 */
 	private void deleteDirectoryRecursive(Path dir) throws IOException {
-		if (!Files.exists(dir)) return;
-		try (java.util.stream.Stream<Path> walk = Files.walk(dir)) {
+		if (dir == null) return;
+		Path normalized = dir.toAbsolutePath().normalize();
+		boolean underTrustedRoot = false;
+		for (String root : new String[] { gitPath, gitPathStore }) {
+			if (root == null || root.isEmpty()) continue;
+			Path rootPath = Paths.get(root).toAbsolutePath().normalize();
+			if (normalized.startsWith(rootPath)) {
+				underTrustedRoot = true;
+				break;
+			}
+		}
+		if (!underTrustedRoot) {
+			throw new IOException("Refusing to delete path outside trusted git roots: " + normalized);
+		}
+		if (!Files.exists(normalized)) return;
+		try (java.util.stream.Stream<Path> walk = Files.walk(normalized)) {
 			walk.sorted(java.util.Comparator.reverseOrder())
 					.forEach(p -> {
 						try { Files.delete(p); } catch (IOException ignored) {}
@@ -851,6 +950,9 @@ public class GitHubService {
 	public byte[] fetchFileFromGitHubBranch(String pipelineName, String org,
 			String filename, String branchName)
 			throws IOException, GitAPIException {
+		safeSegment(pipelineName, "pipelineName");
+		safeSegment(org, "org");
+		safeRelativePath(filename, "filename");
 		Git git = getGitHubRepositoryForBranch(org, branchName);
 
 		String url = resolveRepoUrl(org);
@@ -869,9 +971,13 @@ public class GitHubService {
 			if (repoBranch == null || repoBranch.isEmpty()) {
 				repoBranch = "master";
 			}
-			File gitRepoPath = new File(cloneDirectoryPath);
+			// Validate the user-supplied clone directory path to prevent traversal
+			// and reject any path containing '..' or null bytes.
+			java.nio.file.Path safeClonePath =
+					com.lfn.icip.dataset.util.PathValidationUtil.validateAndGetPath(cloneDirectoryPath);
+			File gitRepoPath = safeClonePath.toFile();
 			if (!gitRepoPath.exists()) {
-				Files.createDirectories(Paths.get(cloneDirectoryPath));
+				Files.createDirectories(safeClonePath);
 			}
 			Git git;
 			git = Git.init().setDirectory(gitRepoPath).call();

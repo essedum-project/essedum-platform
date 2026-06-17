@@ -60,6 +60,65 @@ public class ICIPAIOpsAdapterService {
 	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPAIOpsAdapterService.class);
 
+	/** Allowed JDBC sub-protocols (matches the supported drivers in this service). */
+	private static final java.util.Set<String> ALLOWED_JDBC_SUBPROTOCOLS =
+			java.util.Set.of("mysql", "postgresql", "sqlserver");
+
+	/**
+	 * Validates a JDBC URL to mitigate SSRF / connection-redirection attacks via
+	 * user-controlled connection details. Ensures the URL:
+	 * <ul>
+	 *   <li>starts with {@code jdbc:} and uses an allowed sub-protocol</li>
+	 *   <li>resolves to a non-loopback / non-private / non-link-local host</li>
+	 * </ul>
+	 *
+	 * @param jdbcUrl the JDBC URL from connection details
+	 * @return the same URL once validated
+	 * @throws IllegalArgumentException if the URL is malformed or targets an internal host
+	 */
+	static String validateJdbcUrl(String jdbcUrl) {
+		if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
+			throw new IllegalArgumentException("JDBC URL must not be null or empty");
+		}
+		String trimmed = jdbcUrl.trim();
+		if (!trimmed.toLowerCase(java.util.Locale.ROOT).startsWith("jdbc:")) {
+			throw new IllegalArgumentException("JDBC URL must start with 'jdbc:'");
+		}
+		// jdbc:<subprotocol>://<host>[:port]/<db>...
+		String afterJdbc = trimmed.substring("jdbc:".length());
+		int colonIdx = afterJdbc.indexOf(':');
+		if (colonIdx <= 0) {
+			throw new IllegalArgumentException("Malformed JDBC URL (missing sub-protocol)");
+		}
+		String subProto = afterJdbc.substring(0, colonIdx).toLowerCase(java.util.Locale.ROOT);
+		if (!ALLOWED_JDBC_SUBPROTOCOLS.contains(subProto)) {
+			throw new IllegalArgumentException("JDBC sub-protocol '" + subProto + "' is not allowed");
+		}
+		// Translate jdbc:<subproto>:// → http:// just for host parsing & SSRF checks.
+		int schemeEnd = afterJdbc.indexOf("://");
+		if (schemeEnd < 0) {
+			// Some drivers (e.g. sqlserver) use 'jdbc:sqlserver://...' which is covered above.
+			// If '://' is missing we cannot reliably extract the host — reject for safety.
+			throw new IllegalArgumentException("Malformed JDBC URL (missing '://' authority)");
+		}
+		String authorityAndRest = afterJdbc.substring(schemeEnd + 3);
+		// Strip query/path so URL parser only sees host[:port]
+		int slash = authorityAndRest.indexOf('/');
+		int question = authorityAndRest.indexOf('?');
+		int semi = authorityAndRest.indexOf(';');
+		int end = authorityAndRest.length();
+		if (slash    >= 0) end = Math.min(end, slash);
+		if (question >= 0) end = Math.min(end, question);
+		if (semi     >= 0) end = Math.min(end, semi);
+		String authority = authorityAndRest.substring(0, end);
+		try {
+			com.lfn.icip.dataset.util.SsrfProtectionUtil.validateAndCreateUrl("http://" + authority);
+		} catch (java.net.MalformedURLException e) {
+			throw new IllegalArgumentException("Invalid JDBC host: " + e.getMessage(), e);
+		}
+		return trimmed;
+	}
+
 	public void saveRecommendation(String requestBody, String results, String project, String columnName) {
 		ObjectMapper objMapper = new ObjectMapper();
 		JsonNode jsonNode;
@@ -114,7 +173,7 @@ public class ICIPAIOpsAdapterService {
 		}
 
 		try (HikariDataSource hkDatasource = new HikariDataSource()) {
-			hkDatasource.setJdbcUrl(url);
+			hkDatasource.setJdbcUrl(validateJdbcUrl(url));
 			hkDatasource.setUsername(user);
 			hkDatasource.setPassword(pstr);
 			String dbType = dataset.getDatasource().getType();
