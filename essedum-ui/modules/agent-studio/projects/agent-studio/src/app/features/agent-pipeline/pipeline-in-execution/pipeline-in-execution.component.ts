@@ -410,7 +410,9 @@ export class PipelineInExecutionComponent implements OnInit {
   }
 
   deletePipelineAsContainer(pipeline: ExecutionPipeline): void {
-    const ref = this.dialog.open(ConfirmDeleteDialogComponent);
+    const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: { entityName: pipeline.alias || pipeline.name }
+    });
     ref.afterClosed().subscribe(result => {
       if (result === 'delete') {
         this.service.deletePipeline(pipeline.cid).subscribe(() => {
