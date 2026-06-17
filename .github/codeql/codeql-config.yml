@@ -1,0 +1,26 @@
+# CodeQL configuration for Essedum
+#
+# Tells CodeQL to load the project-local Models-as-Data (MaD) pack that registers
+# our internal validation utilities (SsrfProtectionUtil, GroovySandboxUtil,
+# SqlStatementValidator, CommandSanitizer, PathValidationUtil) as sanitizers /
+# barrier guards. Without this, CodeQL's stock queries cannot follow the
+# inter-procedural flow into those utilities and will report false positives at
+# every sink that is already protected by them.
+#
+# To activate this file you must enable the "Use a configuration file" option in
+# the repository's GitHub default-setup code scanning configuration and point it
+# at this path.
+
+name: "Essedum CodeQL config"
+
+paths-ignore:
+  - "**/target/**"
+  - "**/build/**"
+  - "**/node_modules/**"
+  - "**/*.min.js"
+
+# Include the project-local model pack containing our sanitizer declarations.
+packs:
+  java:
+    - ./extensions/essedum-sanitizers
+
