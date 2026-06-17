@@ -150,6 +150,12 @@
     }
     &::placeholder { color: #484f58 !important; -webkit-text-fill-color: #484f58 !important; }
   }
+
+  .secret-value-input {
+    -webkit-text-security: disc !important;
+    -moz-text-security: disc !important;
+    text-security: disc !important;
+  }
 }
 
 // ── Action icons (edit / save / delete / eye) ──────────────────────────────────

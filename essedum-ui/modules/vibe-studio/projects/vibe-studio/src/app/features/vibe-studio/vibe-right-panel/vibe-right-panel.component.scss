@@ -741,6 +741,12 @@
   &::placeholder { color: #484f58; }
 }
 
+.secret-value-input {
+  -webkit-text-security: disc;
+  -moz-text-security: disc;
+  text-security: disc;
+}
+
 .env-action-icon {
   font-size: 15px;
   cursor: pointer;

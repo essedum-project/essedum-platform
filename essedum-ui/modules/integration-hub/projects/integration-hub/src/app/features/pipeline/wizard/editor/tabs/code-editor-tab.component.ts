@@ -205,7 +205,8 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
     .code-tab-shell {
       display: grid;
       grid-template-columns: 380px 6px 1fr;
-      height: calc(100vh - 148px);
+      height: 100%;
+      min-height: 0;
     }
 
     /* ─────────────────────── Drag divider ───────────────── */
@@ -642,6 +643,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       border: 1px solid #e2e8f0;
       border-radius: 0 0 8px 8px;
       overflow: hidden;
+      background: #ffffff;
     }
     :host-context(body.header-light-theme) .ed-head {
       background: #ffffff;
@@ -649,6 +651,14 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
     :host-context(body.header-light-theme) .ed-head .filename { color: #1e293b; }
+    :host-context(body.header-light-theme) .ed-body { background: #ffffff; }
+    :host-context(body.header-light-theme) .init-overlay {
+      background: rgba(248, 250, 252, 0.88);
+      backdrop-filter: blur(6px);
+    }
+    :host-context(body.header-light-theme) .init-msg { color: #1e293b; }
+    :host-context(body.header-light-theme) .init-sub { color: #64748b; }
+    :host-context(body.header-light-theme) .init-sub strong { color: #334155; }
     :host-context(body.header-light-theme) .drag-divider { background: #e2e8f0; &:hover { background: #7c3aed; } }
     `,
   ],

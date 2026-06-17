@@ -329,7 +329,8 @@
                                   <span *ngIf="secretsEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!secret.name">{{ secret.name || '—' }}</span>
                                   <input *ngIf="secretsEditIndex === i && secretsEditMode"
                                     [(ngModel)]="dynamicSecretsArray[i].name"
-                                    class="form-control" type="text" placeholder="secret name" />
+                                    class="form-control" type="text" placeholder="secret name"
+                                    autocomplete="nope" />
                                 </td>
                                 <td>
                                   <span *ngIf="secretsEditIndex !== i" class="env-cell-text secret-value-mask">
@@ -342,7 +343,8 @@
                                   </span>
                                   <input *ngIf="secretsEditIndex === i && secretsEditMode"
                                     [(ngModel)]="dynamicSecretsArray[i].value"
-                                    class="form-control" type="password" placeholder="secret value" />
+                                    class="form-control secret-value-input" type="text" placeholder="secret value"
+                                    autocomplete="nope" />
                                 </td>
                                 <td>
                                   <mat-icon matTooltip="Edit"

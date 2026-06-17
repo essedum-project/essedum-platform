@@ -27,6 +27,12 @@
 :host ::ng-deep .mdc-text-field--disabled input { color: rgba(100,140,180,0.5) !important; -webkit-text-fill-color: rgba(100,140,180,0.5) !important; }
 
 // ── Panel background ──────────────────────────────────────────────────────────
+.secret-value-input {
+  -webkit-text-security: disc !important;
+  -moz-text-security: disc !important;
+  text-security: disc !important;
+}
+
 .native-script-panel {
   background: rgba(13,17,23,0.95) !important;
   border: 1px solid rgba(88,166,255,0.08) !important;

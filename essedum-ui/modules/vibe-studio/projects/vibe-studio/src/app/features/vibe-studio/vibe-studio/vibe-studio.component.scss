@@ -571,6 +571,11 @@
   border: 1px solid;
   transition: border-color 0.2s;
   align-items: stretch;
+
+  &.is-dragging {
+    user-select: none;
+    cursor: col-resize;
+  }
 }
 
 .panel {
@@ -583,18 +588,19 @@
 }
 
 .panel.left {
+  flex: none;
   min-width: 0;
-  border-right: 1px solid;
+  overflow: hidden;
 }
 
-.panel.right { flex: 1; }
+.panel.right { flex: 1; min-width: 0; overflow: hidden; }
 
 .panel-divider {
   width: 4px;
   flex-shrink: 0;
   cursor: col-resize;
-  transition: background 0.15s;
   position: relative;
+  z-index: 2;
 
   &::after {
     content: '';
@@ -602,8 +608,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 2px;
-    height: 28px;
+    width: 3px;
+    height: 32px;
     border-radius: 2px;
     opacity: 0;
     transition: opacity 0.15s;
@@ -690,7 +696,7 @@
     box-shadow: 0 4px 32px rgba(0,0,0,0.22);
   }
 
-  .panel.left { border-right-color: rgba(79,142,247,0.08); }
+  .panel.left { border-right: none; }
 
   // card created — indigo/blue
   .pipeline-banner.banner-created {
@@ -799,7 +805,7 @@
     box-shadow: 0 4px 24px rgba(99,102,241,0.06), 0 1px 4px rgba(0,0,0,0.04);
   }
 
-  .panel.left { border-right-color: rgba(99,102,241,0.1); }
+  .panel.left { border-right: none; }
 
   // card created — indigo/blue
   .pipeline-banner.banner-created {
