@@ -423,8 +423,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result?.pipeline) {
-          this.service.message('Data Pipeline created successfully!', 'success');
-          this.refresh();
+          const pipelineName = result.pipeline.name;
+          this.router.navigate(['/landing/integration/pipelines/view-wizard/' + pipelineName], {
+            queryParamsHandling: 'merge',
+            state: { card: result.pipeline, pipelineMode: 'data' }
+          });
         }
       });
       return;
@@ -440,8 +443,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result?.pipeline) {
-          this.service.message('Training Pipeline created successfully!', 'success');
-          this.refresh();
+          const pipelineName = result.pipeline.name;
+          this.router.navigate(['/landing/integration/training-pipelines/view-wizard/' + pipelineName], {
+            queryParamsHandling: 'merge',
+            state: { card: result.pipeline, pipelineMode: 'training' }
+          });
         }
       });
       return;

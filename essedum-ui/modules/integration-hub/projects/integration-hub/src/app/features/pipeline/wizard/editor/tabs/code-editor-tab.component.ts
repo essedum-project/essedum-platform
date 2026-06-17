@@ -36,45 +36,35 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
           <mat-icon class="cp-logo">auto_awesome</mat-icon>
           <span class="cp-title">Pipeline Assistant</span>
           <span class="spacer"></span>
-          <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat" class="cp-clear-btn" *ngIf="setupDone">
+          <!-- Settings gear -->
+          <div class="cp-settings-wrap">
+            <button mat-icon-button class="cp-settings-btn" (click)="showSettingsPanel = !showSettingsPanel"
+                    [class.active]="showSettingsPanel" matTooltip="Agent & Model">
+              <mat-icon>settings</mat-icon>
+            </button>
+            <div class="cp-settings-dropdown" *ngIf="showSettingsPanel">
+              <div class="cp-settings-row">
+                <label class="cp-settings-label">Agent</label>
+                <select class="cp-provider-select" [(ngModel)]="selectedAgent" (change)="onAgentSelect()">
+                  <option value="" disabled>Select agent…</option>
+                  <option *ngFor="let a of agentOptions" [value]="a.value">{{ a.label }}</option>
+                </select>
+              </div>
+              <div class="cp-settings-row">
+                <label class="cp-settings-label">Model</label>
+                <select class="cp-provider-select" [(ngModel)]="selectedModel" (change)="onModelSelect()">
+                  <option value="" disabled>Select model…</option>
+                  <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button mat-icon-button (click)="clearChat()" matTooltip="Clear chat" class="cp-clear-btn">
             <mat-icon>delete_sweep</mat-icon>
           </button>
         </header>
 
-        <!-- Setup screen: choose agent + model before chatting -->
-        <div *ngIf="!setupDone" class="cp-setup-screen">
-          <div class="cp-setup-icon-wrap"><mat-icon>auto_awesome</mat-icon></div>
-          <div class="cp-setup-hero">
-            <h3>Configure Assistant</h3>
-            <p>Select an agent provider and model to begin.</p>
-          </div>
-          <div class="cp-setup-step">
-            <label class="cp-setup-step-label">
-              <span class="cp-step-badge">1</span> Agent Provider
-            </label>
-            <div class="cp-provider-select-wrap">
-              <select class="cp-provider-select" [(ngModel)]="selectedAgent" (change)="onAgentSelect()">
-                <option value="" disabled [selected]="!selectedAgent">Select agent…</option>
-                <option *ngFor="let a of agentOptions" [value]="a.value">{{ a.label }}</option>
-              </select>
-              <span class="cp-select-chevron">▾</span>
-            </div>
-          </div>
-          <div class="cp-setup-step">
-            <label class="cp-setup-step-label" [style.opacity]="selectedAgent ? '1' : '0.45'">
-              <span class="cp-step-badge">2</span> Model
-            </label>
-            <div class="cp-provider-select-wrap">
-              <select class="cp-provider-select" [(ngModel)]="selectedModel" (change)="onModelSelect()" [disabled]="!selectedAgent">
-                <option value="" disabled [selected]="!selectedModel">Select model…</option>
-                <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
-              </select>
-              <span class="cp-select-chevron">▾</span>
-            </div>
-          </div>
-        </div>
-
-        <ul class="cp-messages" #msgList *ngIf="setupDone">
+        <ul class="cp-messages" #msgList>
           <li class="cp-empty" *ngIf="!messages.length">
             <mat-icon>tips_and_updates</mat-icon>
             <p>Describe the changes you want in this pipeline. The agent will return an updated Python file.</p>
@@ -118,7 +108,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
           </li>
         </ul>
 
-        <footer class="cp-foot" *ngIf="setupDone">
+        <footer class="cp-foot">
           <div class="cp-input-shell"
                [class.cp-input-focused]="cpInputFocused"
                [class.is-generating]="busy">
@@ -202,11 +192,14 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
   styles: [
     `
     /* ─────────────────────── Layout ─────────────────────── */
+    :host { display: block; height: 100%; overflow: hidden; }
     .code-tab-shell {
       display: grid;
       grid-template-columns: 380px 6px 1fr;
+      grid-template-rows: 1fr;
       height: 100%;
       min-height: 0;
+      overflow: hidden;
     }
 
     /* ─────────────────────── Drag divider ───────────────── */
@@ -225,6 +218,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
+      max-height: 100%;
       border-right: 1px solid var(--cp-border, #e5e7eb);
       background: var(--cp-bg, #ffffff);
     }
@@ -253,6 +247,46 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
     ::ng-deep .cp-model-sel.mat-mdc-select .mat-mdc-select-value { font-size: 12px; color: var(--cp-title-fg, #1e293b); }
     ::ng-deep .cp-model-sel.mat-mdc-select .mat-mdc-select-arrow { color: var(--cp-muted, #94a3b8); }
     .cp-clear-btn { color: var(--cp-muted, #94a3b8) !important; }
+
+    /* Settings dropdown */
+    .cp-settings-wrap { position: relative; display: inline-flex; }
+    .cp-settings-btn {
+      color: var(--cp-muted, #94a3b8) !important;
+      &.active { color: #7c3aed !important; }
+    }
+    .cp-settings-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 4px;
+      min-width: 220px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--cp-bg, #ffffff);
+      border: 1px solid var(--cp-border, #e5e7eb);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 50;
+      animation: cp-drop 0.12s ease;
+    }
+    @keyframes cp-drop {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .cp-settings-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .cp-settings-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--cp-muted, #64748b);
+    }
 
     /* Messages */
     .cp-messages {
@@ -508,6 +542,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
+      max-height: 100%;
       background: var(--ed-bg, #1e1e1e);
     }
     .ed-head {
@@ -525,7 +560,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       font-size: 11px; padding: 2px 7px; border-radius: 999px;
       background: #f59e0b22; color: #f59e0b; font-weight: 600;
     }
-    .ed-body { flex: 1; min-height: 0; overflow: auto; background: #1e1e1e; }
+    .ed-body { flex: 1; min-height: 0; overflow: auto; background: #1e1e1e; max-height: 100%; }
     ::ng-deep .ed-body .editorscript { height: 100%; min-height: 480px; }
 
     /* AI generation overlay on the editor panel */
@@ -700,6 +735,7 @@ export class CodeEditorTabComponent
   selectedModel: string | null = null;
   pendingAutoGenerate = false;
   private seeded = false;
+  showSettingsPanel = false;
 
   get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
 
@@ -767,6 +803,24 @@ export class CodeEditorTabComponent
   ) {}
 
   ngOnInit(): void {
+    // Auto-select default agent + model based on origin
+    if (!this.selectedAgent || !this.selectedModel) {
+      const origin = window.location.origin || '';
+      if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+        this.selectedAgent = this.selectedAgent || 'azure_openai';
+        this.selectedModel = this.selectedModel || 'gpt-4o-mini';
+      } else if (origin.includes('localhost') || origin.includes('essedum-lfn.infosys.com')) {
+        this.selectedAgent = this.selectedAgent || 'ollama';
+        this.selectedModel = this.selectedModel || 'qwen3:4b';
+      } else {
+        // Fallback default for any unrecognised origin
+        this.selectedAgent = this.selectedAgent || 'ollama';
+        this.selectedModel = this.selectedModel || 'qwen3:4b';
+      }
+      this.vibe.setAgentProvider(this.selectedAgent);
+      this.vibe.setModel(this.selectedModel as VibeModel);
+    }
+
     document.addEventListener('mousemove', this.onDragMove);
     document.addEventListener('mouseup',   this.onDragEnd);
     // Mirror messages from VibeStudioService
@@ -853,13 +907,15 @@ export class CodeEditorTabComponent
       this.dirty = false;
       this.seeded = false;
 
-      // For freshly created pipelines the user already chose agent+model in the wizard
-      // dialog — read the values from the singleton service so the setup screen is skipped.
+      // For freshly created pipelines, read agent+model from pipeline_attributes
+      // (stored by the wizard dialog at creation time).
       if (this.model.pipelineAttrs?.freshlyCreated) {
-        const svcAgent = this.vibe.currentAgentProvider;
-        const svcModel = this.vibe.currentModel;
-        if (svcAgent) this.selectedAgent = svcAgent;
-        if (svcModel) this.selectedModel = svcModel;
+        const wizAgent = this.model.pipelineAttrs.selectedAgent;
+        const wizModel = this.model.pipelineAttrs.selectedModel;
+        if (wizAgent) this.selectedAgent = wizAgent;
+        if (wizModel) this.selectedModel = wizModel;
+        this.vibe.setAgentProvider(this.selectedAgent);
+        this.vibe.setModel(this.selectedModel as VibeModel);
       }
 
       // Freshly created pipeline → auto-generate initial code via Goose
@@ -868,14 +924,9 @@ export class CodeEditorTabComponent
           (!this.model.code || this.model.code.trim() === '# (no code yet)')) {
         this.vibe.resetSession();
         // Re-apply the user's selections to the fresh session
-        // (resetSession() resets model to 'claude' and agentProvider to '')
         if (this.selectedAgent) this.vibe.setAgentProvider(this.selectedAgent);
         if (this.selectedModel) this.vibe.setModel(this.selectedModel as VibeModel);
-        if (this.setupDone) {
-          this.scheduleAutoGenerate();
-        } else {
-          this.pendingAutoGenerate = true;
-        }
+        this.scheduleAutoGenerate();
       }
     }
   }
@@ -907,6 +958,7 @@ export class CodeEditorTabComponent
     }
     // Reset model when agent changes so a stale model is not sent
     this.selectedModel = null;
+    this.showSettingsPanel = false;
   }
 
   onModelSelect(): void {
@@ -917,6 +969,7 @@ export class CodeEditorTabComponent
         setTimeout(() => this.scheduleAutoGenerate(), 0);
       }
     }
+    this.showSettingsPanel = false;
   }
 
   prefill(text: string): void {

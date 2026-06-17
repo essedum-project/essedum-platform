@@ -22,12 +22,70 @@
   .sparkle { color: #7c3aed; font-size: 22px !important; height: 22px !important; width: 22px !important; flex-shrink: 0; }
   h2 { margin: 0; font-size: 16px; font-weight: 700; color: #111827; line-height: 1.2; }
   p  { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
+  .header-actions {
+    display: flex; align-items: center; gap: 4px;
+  }
   .close {
-    position: absolute; top: 6px; right: 6px;
     color: #9ca3af !important;
     mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; }
     &:hover { color: #374151 !important; }
   }
+}
+
+/* Settings gear dropdown */
+.settings-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.settings-btn {
+  color: #9ca3af !important;
+  &:hover { color: #6366f1 !important; }
+  &.active { color: #7c3aed !important; }
+  mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; }
+}
+.settings-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 220px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+  animation: settings-drop 0.12s ease;
+}
+@keyframes settings-drop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.settings-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+}
+.settings-dropdown .provider-select {
+  width: 100%;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  outline: none;
+  &:focus { border-color: #7c3aed; }
 }
 
 ::ng-deep .wizard-stepper .mat-step-label,
@@ -42,6 +100,26 @@
   ::ng-deep .wizard-stepper .mat-step-text-label { color: #94a3b8 !important; }
   ::ng-deep .wizard-stepper .mat-step-label-active,
   ::ng-deep .wizard-stepper .mat-step-label-selected { color: #e2e8f0 !important; font-weight: 600 !important; }
+
+  .wizard-header {
+    background: #1e293b;
+    border-bottom-color: rgba(255,255,255,0.06);
+    h2 { color: #e2e8f0; }
+    p { color: #94a3b8; }
+  }
+  .settings-btn { color: #94a3b8 !important; &.active { color: #a78bfa !important; } }
+  .settings-dropdown {
+    background: #1e293b;
+    border-color: rgba(79,142,247,0.2);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .settings-field-label { color: #94a3b8; }
+  .settings-dropdown .provider-select {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+    &:focus { border-color: #7c3aed; }
+  }
 }
 
 .wizard-stepper { background: transparent !important; padding: 14px 20px 6px; }

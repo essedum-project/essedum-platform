@@ -54,8 +54,9 @@ export class DataPipelineWizardLocalComponent implements OnInit {
 
   creating = false;
 
-  // Agent + Model pre-selection
-  selectionDone = false;
+  // Agent + Model pre-selection (auto-defaulted, user can change via settings gear)
+  selectionDone = true;
+  showSettings = false;
   selectedAgent: string | null = null;
   selectedModel: string | null = null;
   readonly agentOptions = [
@@ -74,9 +75,23 @@ export class DataPipelineWizardLocalComponent implements OnInit {
     { label: 'qwen3:4b', value: 'qwen3:4b' },
   ];
 
-  onAgentSelect(agent: string): void { this.selectedAgent = agent; }
-  onModelSelect(model: string): void { this.selectedModel = model; }
-  proceedToWizard(): void { if (this.selectedAgent && this.selectedModel) this.selectionDone = true; }
+  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.showSettings = false; }
+  onModelSelect(model: string): void { this.selectedModel = model; this.showSettings = false; }
+  toggleSettings(): void { this.showSettings = !this.showSettings; }
+
+  private applyDefaultAgentModel(): void {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      this.selectedAgent = 'azure_openai';
+      this.selectedModel = 'gpt-4o-mini';
+    } else if (origin.includes('localhost') || origin.includes('essedum-lfn.infosys.com')) {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    } else {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    }
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -85,9 +100,11 @@ export class DataPipelineWizardLocalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.applyDefaultAgentModel();
+
     this.identityForm = this.fb.group({
       pipelineType: ['feature-engineering', Validators.required],
-      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
+      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 _-]+$/)]],
       alias: ['', Validators.required],
       description: [''],
     });
@@ -309,6 +326,8 @@ export class DataPipelineWizardLocalComponent implements OnInit {
         datasetColumns: this.targetColumns,
         datasetSample: this.datasetRows,
         freshlyCreated: true,
+        selectedAgent: this.selectedAgent,
+        selectedModel: this.selectedModel,
         git: cfg.git,
         datasourceConnectionDetails: this.selectedDatasourceObj
           ? (() => { try { return JSON.parse(this.selectedDatasourceObj.connectionDetails || '{}'); } catch { return {}; } })()

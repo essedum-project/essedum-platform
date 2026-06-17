@@ -6,60 +6,38 @@
       <p>Generate a typed, runnable training script for traditional ML or LLM fine-tuning.</p>
     </div>
   </div>
-  <button mat-icon-button class="close" (click)="cancel()" aria-label="Close">
-    <mat-icon>close</mat-icon>
-  </button>
-</header>
-
-<div class="wizard-shell" mat-dialog-content>
-
-  <!-- AGENT + MODEL SELECTION -->
-  <div *ngIf="!selectionDone" class="agent-setup-screen">
-    <div class="setup-hero">
-      <div class="setup-icon-wrap"><i class="bi bi-stars"></i></div>
-      <h3>Choose Agent &amp; Model</h3>
-      <p>Select the AI agent and model that will help generate your training script.</p>
-    </div>
-
-    <div class="steps-row">
-      <div class="step-col">
-        <div class="model-picker-label">
-          <span class="step-badge">1</span><span>Agent</span>
-        </div>
-        <div class="provider-select-wrap">
+  <div class="header-actions">
+    <div class="settings-dropdown-wrap" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="settings-btn" [class.active]="showSettings"
+              (click)="toggleSettings()" matTooltip="Agent & Model">
+        <mat-icon>settings</mat-icon>
+      </button>
+      <div class="settings-dropdown" *ngIf="showSettings">
+        <div class="settings-row">
+          <label class="settings-field-label">Agent</label>
           <select class="provider-select" [(ngModel)]="selectedAgent" (ngModelChange)="onAgentSelect($event)">
             <option [ngValue]="null" disabled>Select agent…</option>
             <option *ngFor="let p of agentOptions" [value]="p.value">{{ p.label }}</option>
           </select>
-          <i class="bi bi-chevron-down provider-select-chevron"></i>
         </div>
-      </div>
-
-      <div class="steps-row-sep"><i class="bi bi-chevron-right"></i></div>
-
-      <div class="step-col" [class.step-col--locked]="!selectedAgent">
-        <div class="model-picker-label" [class.model-picker-label--inactive]="!selectedAgent">
-          <span class="step-badge" [class.step-badge--inactive]="!selectedAgent">2</span>
-          <span>Model</span>
-          <span *ngIf="!selectedAgent" class="step-hint">← pick agent first</span>
-        </div>
-        <div class="provider-select-wrap">
-          <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)" [disabled]="!selectedAgent">
+        <div class="settings-row">
+          <label class="settings-field-label">Model</label>
+          <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)">
             <option [ngValue]="null" disabled>Select model…</option>
             <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
           </select>
-          <i class="bi bi-chevron-down provider-select-chevron"></i>
         </div>
       </div>
     </div>
-
-    <button mat-flat-button color="primary" class="continue-btn"
-            (click)="proceedToWizard()" [disabled]="!selectedAgent || !selectedModel">
-      Continue to pipeline setup &nbsp;<mat-icon>arrow_forward</mat-icon>
+    <button mat-icon-button class="close" (click)="cancel()" aria-label="Close">
+      <mat-icon>close</mat-icon>
     </button>
   </div>
+</header>
 
-  <mat-stepper *ngIf="selectionDone" #stepper linear class="wizard-stepper">
+<div class="wizard-shell" mat-dialog-content (click)="showSettings = false">
+
+  <mat-stepper #stepper linear class="wizard-stepper">
 
     <!-- Step 1: Training Mode -->
     <mat-step [stepControl]="modeForm" label="Mode">

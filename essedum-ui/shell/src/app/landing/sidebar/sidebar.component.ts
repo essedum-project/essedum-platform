@@ -236,17 +236,18 @@ export class SidebarComponent implements OnInit {
         // cross-remote chain that fails with "Cannot access 'AipModule' before init".
         this.remapLegacyUrls(this.sidebarMenu);
 
-        // Remove standalone "Pipelines" menu item — pipelines are now accessed
-        // via the Agent MCP Pipelines dashboard tabs.
-        this.sidebarMenu = this.sidebarMenu.filter(
-          (item: any) => item && item.label !== 'Pipelines'
-        );
-        // Also remove "Pipelines" from any parent's children
+        // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
+        // (kept for backward-compat with older DB entries)
         this.sidebarMenu.forEach((item: any) => {
+          if (item && item.label === 'Agent MCP Pipelines') {
+            item.label = 'Pipelines';
+          }
           if (item && Array.isArray(item.children)) {
-            item.children = item.children.filter(
-              (child: any) => child && child.label !== 'Pipelines'
-            );
+            item.children.forEach((child: any) => {
+              if (child && child.label === 'Agent MCP Pipelines') {
+                child.label = 'Pipelines';
+              }
+            });
           }
         });
       });
