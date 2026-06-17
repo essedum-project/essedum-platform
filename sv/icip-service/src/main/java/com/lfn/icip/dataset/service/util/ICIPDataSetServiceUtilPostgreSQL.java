@@ -64,6 +64,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SqlStatementValidator;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -1342,7 +1343,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1352,7 +1353,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 					
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU))) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)))) {
 					stmt.execute();
 				}
 			}
@@ -1508,7 +1509,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1518,7 +1519,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 					return ICIPUtils.getGeneratedKey(stmt);
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU),
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)),
 						Statement.RETURN_GENERATED_KEYS)) {
 					stmt.executeUpdate();
 					return ICIPUtils.getGeneratedKey(stmt);

@@ -93,6 +93,24 @@ public final class SsrfProtectionUtil {
     }
 
     /**
+     * Convenience wrapper around {@link #validateAndCreateUrl(String)} that converts the
+     * checked {@link MalformedURLException} into an unchecked {@link IllegalArgumentException}.
+     * This lets callers validate a URL inline at an HTTP/OkHttp sink (passing the returned
+     * {@link URL} object) without having to alter their method signatures.
+     *
+     * @param urlString the raw, potentially user-controlled URL string
+     * @return a validated {@link URL}
+     * @throws IllegalArgumentException if the URL is malformed or fails SSRF validation
+     */
+    public static URL safeUrl(String urlString) {
+        try {
+            return validateAndCreateUrl(urlString);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Validates that the URL scheme is allowed (http or https only).
      */
     private static void validateScheme(URL url) {

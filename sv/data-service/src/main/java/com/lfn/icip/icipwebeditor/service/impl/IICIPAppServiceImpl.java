@@ -148,8 +148,13 @@ public class IICIPAppServiceImpl implements IICIPAppService, IICIPSearchable {
 	@Override
 	public void uploadFile(MultipartFile multipartfile, String fileid, ICIPChunkMetaData chunkMetaData, String org)
 			throws Exception {
-		Path filePath = Paths.get(folderPath, FileConstants.APPFILESDIRECTORY, fileid,
-				Integer.toString(chunkMetaData.getIndex()));
+		Path baseDir = Paths.get(folderPath, FileConstants.APPFILESDIRECTORY).normalize().toAbsolutePath();
+		Path filePath = baseDir.resolve(fileid).resolve(Integer.toString(chunkMetaData.getIndex()))
+				.normalize().toAbsolutePath();
+		// Prevent path traversal: the user-supplied fileid must not escape the intended base directory
+		if (!filePath.startsWith(baseDir)) {
+			throw new IllegalArgumentException("Invalid file path: path traversal detected");
+		}
 
 		Files.createDirectories(filePath.getParent());
 		File file = filePath.toFile();

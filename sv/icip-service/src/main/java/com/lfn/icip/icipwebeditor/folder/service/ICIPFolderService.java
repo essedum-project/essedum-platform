@@ -15,6 +15,7 @@
 
 package com.lfn.icip.icipwebeditor.folder.service;
 
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
@@ -894,24 +895,7 @@ public class ICIPFolderService {
      * @return array of TrustManager
      */
     private TrustManager[] getTrustAllCerts() {
-        return new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all client certificates
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all server certificates
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                }
-        };
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     /**

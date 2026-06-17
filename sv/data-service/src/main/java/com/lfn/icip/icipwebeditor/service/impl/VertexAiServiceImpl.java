@@ -28,6 +28,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
@@ -176,7 +177,7 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 			binding.setProperty("response", Answer);
 
 			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(transformScript));
+			Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(transformScript)));
 
 			Answer = transformedResult != null ? transformedResult.toString() : "";
 		}
@@ -186,40 +187,7 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 	}
 	
 	private TrustManager[] getTrustAllCerts() throws Exception {
-		//logger.info("certificateCheck value: {}", certificateCheck);
-		if("true".equalsIgnoreCase(certificateCheck)) {
-			// Load the default trust store
-		    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		    trustManagerFactory.init((KeyStore) null);
-	
-		    // Get the trust managers from the factory
-		    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-	
-		    // Ensure we have at least one X509TrustManager
-		    for (TrustManager trustManager : trustManagers) {
-		        if (trustManager instanceof X509TrustManager) {
-		            return new TrustManager[] { (X509TrustManager) trustManager };
-		        }
-		    }
-	
-		    throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-		}else {
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-	
-				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-	
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return new java.security.cert.X509Certificate[] {};
-				}
-			} };
-			return trustAllCerts;
-		}   
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	@Override

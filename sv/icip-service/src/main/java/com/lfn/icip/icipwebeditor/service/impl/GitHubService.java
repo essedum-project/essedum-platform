@@ -60,6 +60,7 @@ import com.amazonaws.http.conn.ssl.SdkTLSSocketFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -581,21 +582,7 @@ public class GitHubService {
 	}
 
 	private TrustManager[] getTrustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new java.security.cert.X509Certificate[] {};
-			}
-		} };
-		return trustAllCerts;
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	public static String extractRepoName(String repoUrl) {

@@ -1218,7 +1218,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			binding.setProperty("ConfigVariables", ConfigVariables);
 
 			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(prescript));
+			Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(prescript)));
 
 			JSONObject transformedattr = new JSONObject(transformedResult.toString());
 			logger.info("Transformedattr--->{}", transformedattr);
@@ -1266,7 +1266,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 					binding.setProperty("inputJson", resp);
 
 					GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-					Object transformedResult = shell.evaluate(new StringReader(script));
+					Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(script)));
 
 					resp = transformedResult.toString();
 					logger.info("REST getDatasetData after groovy {}", resp);

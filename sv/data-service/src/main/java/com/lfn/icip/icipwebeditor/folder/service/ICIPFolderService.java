@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.X509TrustManager;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
@@ -894,24 +895,7 @@ public class ICIPFolderService {
      * @return array of TrustManager
      */
     private TrustManager[] getTrustAllCerts() {
-        return new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all client certificates
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all server certificates
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                }
-        };
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     /**

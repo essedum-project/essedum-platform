@@ -113,7 +113,7 @@ public class AzureOpenAiServiceImpl implements ICIPPromptChatModel {
 		binding.setProperty("response", response);
 
 		GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-		Object transformedResult = shell.evaluate(new StringReader(transformScript));
+		Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(transformScript)));
 
 		response = transformedResult.toString();
 	}
