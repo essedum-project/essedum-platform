@@ -3816,8 +3816,9 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   get visibleSidebarMenu(): any[] {
     return this.sidebarMenu.filter(
       (item) =>
-        !this.ADVANCED_MENU_LABELS.includes(item.label) ||
-        this.customMenuState[item.label] === true
+        item.label !== 'Pipelines' &&
+        (!this.ADVANCED_MENU_LABELS.includes(item.label) ||
+        this.customMenuState[item.label] === true)
     );
   }
 

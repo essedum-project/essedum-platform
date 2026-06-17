@@ -235,6 +235,20 @@ export class SidebarComponent implements OnInit {
         // modules/integration-hub, modules/vibe-studio) instead of the buggy icip_app/aip_app
         // cross-remote chain that fails with "Cannot access 'AipModule' before init".
         this.remapLegacyUrls(this.sidebarMenu);
+
+        // Remove standalone "Pipelines" menu item — pipelines are now accessed
+        // via the Agent MCP Pipelines dashboard tabs.
+        this.sidebarMenu = this.sidebarMenu.filter(
+          (item: any) => item && item.label !== 'Pipelines'
+        );
+        // Also remove "Pipelines" from any parent's children
+        this.sidebarMenu.forEach((item: any) => {
+          if (item && Array.isArray(item.children)) {
+            item.children = item.children.filter(
+              (child: any) => child && child.label !== 'Pipelines'
+            );
+          }
+        });
       });
     }
   }
@@ -1148,8 +1162,8 @@ export class SidebarComponent implements OnInit {
     './aip/agent-directory':    './agent/directory',
 
     // Integrations (was aip_app pipelines/apps/instances/jobs)
-    './aibrain/pipelines':      './integration/pipelines',
-    './aip/pipelines':          './integration/pipelines',
+    './aibrain/pipelines':      './agent/pipeline',
+    './aip/pipelines':          './agent/pipeline',
     './aip/implementations':    './integration/implementations',
     './aip/app-list':           './integration/apps',
     './aip/instances':          './integration/instances',

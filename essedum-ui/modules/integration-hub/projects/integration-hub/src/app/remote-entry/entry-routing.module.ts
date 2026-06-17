@@ -32,7 +32,7 @@ import { PipelineEditorComponent } from '../features/pipeline/wizard/editor/pipe
 
 // Routes mount under `/integration/**` per the host manifest (integration.routePath = 'integration').
 const routes: Routes = [
-  { path: '', redirectTo: 'pipelines', pathMatch: 'full' },
+  { path: '', redirectTo: 'implementations', pathMatch: 'full' },
 
   { path: 'salus', component: SalusComponent },
 
@@ -48,7 +48,7 @@ const routes: Routes = [
   {
     path: 'pipelines',
     children: [
-      { path: '', component: PipelineComponent },
+      { path: '', redirectTo: '/landing/agent/pipeline', pathMatch: 'full' },
       { path: 'view/:cname', component: NativeScriptComponent },
       { path: 'view-wizard/:cname', component: PipelineEditorComponent },
     ],
@@ -56,7 +56,7 @@ const routes: Routes = [
   {
     path: 'training-pipelines',
     children: [
-      { path: '', component: PipelineComponent },
+      { path: '', redirectTo: '/landing/agent/pipeline', pathMatch: 'full' },
       { path: 'view-wizard/:cname', component: PipelineEditorComponent },
     ],
   },
