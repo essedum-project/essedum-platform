@@ -5,7 +5,6 @@ import { AdapterComponent } from '../features/adapter/adapter.component';
 import { AdapterCreateEditComponent } from '../features/adapter/adapter-create-edit/adapter-create-edit.component';
 import { AdapterDescriptionComponent } from '../features/adapter/adapter-description/adapter-description.component';
 
-import { PipelineComponent } from '../features/pipeline/pipeline.component';
 import { NativeScriptComponent } from '../features/native-script/native-script.component';
 
 import { AppListComponent } from '../features/apps/app-list/app-list.component';
