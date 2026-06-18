@@ -4,7 +4,7 @@ import type { NodeProps } from '@xyflow/react';
 import type { AgentFlowNode, FlowNodeData } from '../../types/flow';
 import { useFlowStore } from '../../store/flowStore';
 import { CATEGORY_META } from '../../data/nodeDefinitions';
-import { cn } from '../../lib/utils';
+import { cn, formatOutputPreview } from '../../lib/utils';
 
 const statusColors = {
   idle: '',
@@ -123,7 +123,7 @@ export const FlowNode = memo(({ id, data: rawData, selected }: NodeProps<AgentFl
       {data.output != null && status === 'success' && (
         <div className="mx-3 mb-2.5 p-2 rounded-lg bg-green-400/5 border border-green-400/20">
           <p className="text-[9px] text-green-400 leading-relaxed line-clamp-2 font-mono">
-            {String(data.output).slice(0, 80)}…
+            {formatOutputPreview(data.output).slice(0, 80)}…
           </p>
         </div>
       )}

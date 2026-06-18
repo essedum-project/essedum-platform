@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { Trash2, Copy, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
-import { CATEGORY_META } from '../../data/nodeDefinitions';
-import { cn } from '../../lib/utils';
+import { CATEGORY_META, NODE_DEFINITIONS } from '../../data/nodeDefinitions';
+import { cn, formatOutputPreview } from '../../lib/utils';
 import { toast } from 'sonner';
 import { LABELS } from '../../lib/labels';
 import { llmService, SUPPORTED_PROVIDERS } from '../../services/llmService';
@@ -80,10 +80,15 @@ export function NodeInspector() {
 
   const { data } = node;
   const { definition, config, status, output } = data;
+  // Prefer the live library definition (so additions to ``fields`` propagate to
+  // nodes that were created before the library was extended). Fall back to the
+  // snapshot stored on the node if the type is unknown.
+  const liveDefinition =
+    NODE_DEFINITIONS.find((d) => d.type === definition.type) ?? definition;
   const meta = CATEGORY_META[definition.category];
 
   // Group fields
-  const groups = (definition.fields ?? []).reduce((acc, field) => {
+  const groups = (liveDefinition.fields ?? []).reduce((acc, field) => {
     const g = field.group || 'General';
     if (!acc[g]) acc[g] = [];
     acc[g].push(field);
@@ -342,8 +347,8 @@ export function NodeInspector() {
           {output != null && (
             <div className="mt-2">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">{LABELS.INSPECTOR_OUTPUT_PREVIEW}</p>
-              <div className="code-block text-[10px] leading-relaxed max-h-32 overflow-auto">
-                {String(output)}
+              <div className="code-block text-[10px] leading-relaxed max-h-32 overflow-auto whitespace-pre-wrap">
+                {formatOutputPreview(output)}
               </div>
             </div>
           )}

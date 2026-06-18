@@ -402,6 +402,8 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'auth_token', label: 'Auth Token', type: 'password', group: 'Authentication' },
       { id: 'timeout', label: 'Timeout (ms)', type: 'number', default: 30000, group: 'Configuration' },
       { id: 'tool_filter', label: 'Tool Filter (comma-sep)', type: 'text', placeholder: 'read_file, write_file', group: 'Configuration' },
+      { id: 'arg_name', label: 'Tool Arg Name', type: 'text', default: 'input', placeholder: 'input', group: 'Configuration' },
+      { id: 'arguments_json', label: 'Static Arguments (JSON)', type: 'textarea', placeholder: '{ "path": "/tmp/x" }', group: 'Configuration' },
     ],
     tags: ['mcp', 'protocol', 'tools'],
   },
