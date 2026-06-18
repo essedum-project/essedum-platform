@@ -270,6 +270,21 @@ def _extract_fenced_body(text: str) -> str | None:
     return fence.group(1) if fence else None
 
 
+def _advance_in_string(ch: str, escape: bool) -> tuple[bool, bool]:
+    """Advance one character while inside a JSON string literal.
+
+    Returns ``(in_str, escape)`` — the new state after consuming ``ch``.
+    ``in_str`` becomes ``False`` when the closing quote is reached.
+    """
+    if escape:
+        return True, False
+    if ch == "\\":
+        return True, True
+    if ch == '"':
+        return False, False
+    return True, False
+
+
 def _find_balanced_object_end(text: str, start: int) -> int:
     """Return the index of the ``}`` that closes the object at ``start``, or ``-1``."""
     depth = 0
@@ -278,12 +293,7 @@ def _find_balanced_object_end(text: str, start: int) -> int:
     for i in range(start, len(text)):
         ch = text[i]
         if in_str:
-            if escape:
-                escape = False
-            elif ch == "\\":
-                escape = True
-            elif ch == '"':
-                in_str = False
+            in_str, escape = _advance_in_string(ch, escape)
             continue
         if ch == '"':
             in_str = True
@@ -384,6 +394,21 @@ def _evaluate(expr: str, value: Any) -> bool:
         ) from exc
 
 
+def _resolve_input_value(inputs: dict[str, Any]) -> Any:
+    """Pick the upstream value to evaluate against.
+
+    The frontend port id is ``value``, but we also accept ``input``/``text``/
+    ``message`` aliases. Falls back to the first available input.
+    """
+    for key in ("value", "input", "text", "message"):
+        candidate = inputs.get(key)
+        if candidate is not None:
+            return candidate
+    if inputs:
+        return next(iter(inputs.values()))
+    return None
+
+
 class ConditionExecutor(BaseExecutor):
     async def execute(
         self,
@@ -398,16 +423,7 @@ class ConditionExecutor(BaseExecutor):
                 "Condition node is missing 'condition'. Set the expression in the node inspector."
             )
 
-        # Resolve upstream value. The frontend port id is "value", but we also
-        # accept "input"/"text"/"message" for flexibility.
-        value = inputs.get("value")
-        if value is None:
-            for key in ("input", "text", "message"):
-                if inputs.get(key) is not None:
-                    value = inputs[key]
-                    break
-        if value is None and inputs:
-            value = next(iter(inputs.values()))
+        value = _resolve_input_value(inputs)
 
         result = _evaluate(expression, value)
         route = "true" if result else "false"
