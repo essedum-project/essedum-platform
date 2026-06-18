@@ -24,7 +24,7 @@ import ast
 import json
 import operator
 import re
-from typing import Any
+from typing import Any, Callable
 
 from app.engine.executors.base import BaseExecutor
 
@@ -95,14 +95,35 @@ class _SafeEvaluator(ast.NodeVisitor):
 
     def __init__(self, scope: dict[str, Any]) -> None:
         self._scope = scope
+        # Explicit dispatch table: maps AST node type → bound handler. Using
+        # a table (rather than ``getattr``) makes it obvious to static
+        # analyzers that every dispatched value is a real callable.
+        self._handlers: dict[type[ast.AST], Callable[[Any], Any]] = {
+            ast.Expression: self.visit_Expression,
+            ast.Constant: self.visit_Constant,
+            ast.Name: self.visit_Name,
+            ast.BoolOp: self.visit_BoolOp,
+            ast.UnaryOp: self.visit_UnaryOp,
+            ast.BinOp: self.visit_BinOp,
+            ast.Compare: self.visit_Compare,
+            ast.Call: self.visit_Call,
+            ast.Subscript: self.visit_Subscript,
+            ast.Slice: self.visit_Slice,
+            ast.Attribute: self.visit_Attribute,
+            ast.List: self.visit_List,
+            ast.Tuple: self.visit_Tuple,
+            ast.Set: self.visit_Set,
+            ast.Dict: self.visit_Dict,
+            ast.IfExp: self.visit_IfExp,
+        }
 
     def visit(self, node: ast.AST) -> Any:  # type: ignore[override]
-        method = getattr(self, f"visit_{type(node).__name__}", None)
-        if not callable(method):
+        handler = self._handlers.get(type(node))
+        if handler is None:
             raise ValueError(
                 f"Unsupported expression element: {type(node).__name__}"
             )
-        return method(node)
+        return handler(node)
 
     def visit_Expression(self, node: ast.Expression) -> Any:
         return self.visit(node.body)
