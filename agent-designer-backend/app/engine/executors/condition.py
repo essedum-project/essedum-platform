@@ -20,7 +20,9 @@ Light JS-compatibility: ``.length`` is rewritten to ``len(...)`` so the
 default UI placeholder (``value.length > 0``) evaluates as expected.
 """
 
+import ast
 import json
+import operator
 import re
 from typing import Any
 
@@ -44,6 +46,176 @@ _SAFE_BUILTINS = {
     "False": False,
     "None": None,
 }
+
+# Whitelisted callables (by identity) that may appear as the ``func`` of a
+# Call node. Anything else — including attribute calls like ``foo.bar()`` —
+# is rejected by ``_SafeEvaluator``.
+_SAFE_CALLABLES = frozenset(
+    id(v) for v in _SAFE_BUILTINS.values() if callable(v)
+)
+
+_BIN_OPS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+}
+
+_UNARY_OPS = {
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+    ast.Not: operator.not_,
+}
+
+_CMP_OPS = {
+    ast.Eq: operator.eq,
+    ast.NotEq: operator.ne,
+    ast.Lt: operator.lt,
+    ast.LtE: operator.le,
+    ast.Gt: operator.gt,
+    ast.GtE: operator.ge,
+    ast.In: lambda a, b: a in b,
+    ast.NotIn: lambda a, b: a not in b,
+    ast.Is: operator.is_,
+    ast.IsNot: operator.is_not,
+}
+
+
+class _SafeEvaluator(ast.NodeVisitor):
+    """Evaluate a single Python expression against a fixed scope.
+
+    Only a small whitelist of node types is permitted. Anything else —
+    including imports, attribute access to dunder methods, lambda/function
+    definitions, comprehensions that bind iterables we don't control, and
+    arbitrary method calls — raises ``ValueError`` before evaluation.
+    """
+
+    def __init__(self, scope: dict[str, Any]) -> None:
+        self._scope = scope
+
+    def visit(self, node: ast.AST) -> Any:  # type: ignore[override]
+        method = getattr(self, f"visit_{type(node).__name__}", None)
+        if method is None:
+            raise ValueError(
+                f"Unsupported expression element: {type(node).__name__}"
+            )
+        return method(node)
+
+    def visit_Expression(self, node: ast.Expression) -> Any:
+        return self.visit(node.body)
+
+    def visit_Constant(self, node: ast.Constant) -> Any:
+        return node.value
+
+    def visit_Name(self, node: ast.Name) -> Any:
+        if node.id in self._scope:
+            return self._scope[node.id]
+        if node.id in _SAFE_BUILTINS:
+            return _SAFE_BUILTINS[node.id]
+        raise ValueError(f"Unknown name in condition: {node.id!r}")
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> Any:
+        if isinstance(node.op, ast.And):
+            result: Any = True
+            for value in node.values:
+                result = self.visit(value)
+                if not result:
+                    return result
+            return result
+        if isinstance(node.op, ast.Or):
+            result = False
+            for value in node.values:
+                result = self.visit(value)
+                if result:
+                    return result
+            return result
+        raise ValueError(f"Unsupported boolean operator: {type(node.op).__name__}")
+
+    def visit_UnaryOp(self, node: ast.UnaryOp) -> Any:
+        op = _UNARY_OPS.get(type(node.op))
+        if op is None:
+            raise ValueError(
+                f"Unsupported unary operator: {type(node.op).__name__}"
+            )
+        return op(self.visit(node.operand))
+
+    def visit_BinOp(self, node: ast.BinOp) -> Any:
+        op = _BIN_OPS.get(type(node.op))
+        if op is None:
+            raise ValueError(
+                f"Unsupported binary operator: {type(node.op).__name__}"
+            )
+        return op(self.visit(node.left), self.visit(node.right))
+
+    def visit_Compare(self, node: ast.Compare) -> Any:
+        left = self.visit(node.left)
+        for op_node, comparator in zip(node.ops, node.comparators):
+            op = _CMP_OPS.get(type(op_node))
+            if op is None:
+                raise ValueError(
+                    f"Unsupported comparison operator: {type(op_node).__name__}"
+                )
+            right = self.visit(comparator)
+            if not op(left, right):
+                return False
+            left = right
+        return True
+
+    def visit_Call(self, node: ast.Call) -> Any:
+        # Reject any keyword arguments and starred expansions — keeps the
+        # surface area small and matches what the old eval scope offered.
+        if node.keywords:
+            raise ValueError("Keyword arguments are not allowed in conditions.")
+        func = self.visit(node.func)
+        if not callable(func) or id(func) not in _SAFE_CALLABLES:
+            raise ValueError("Only whitelisted builtin calls are allowed.")
+        args = [self.visit(a) for a in node.args]
+        return func(*args)
+
+    def visit_Subscript(self, node: ast.Subscript) -> Any:
+        target = self.visit(node.value)
+        key = self.visit(node.slice)
+        return target[key]
+
+    def visit_Slice(self, node: ast.Slice) -> Any:
+        lower = self.visit(node.lower) if node.lower is not None else None
+        upper = self.visit(node.upper) if node.upper is not None else None
+        step = self.visit(node.step) if node.step is not None else None
+        return slice(lower, upper, step)
+
+    def visit_Attribute(self, node: ast.Attribute) -> Any:
+        # Block dunder access to prevent escapes like ``"".__class__``.
+        if node.attr.startswith("_"):
+            raise ValueError(f"Attribute access to {node.attr!r} is not allowed.")
+        target = self.visit(node.value)
+        return getattr(target, node.attr)
+
+    def visit_List(self, node: ast.List) -> Any:
+        return [self.visit(elt) for elt in node.elts]
+
+    def visit_Tuple(self, node: ast.Tuple) -> Any:
+        return tuple(self.visit(elt) for elt in node.elts)
+
+    def visit_Set(self, node: ast.Set) -> Any:
+        return {self.visit(elt) for elt in node.elts}
+
+    def visit_Dict(self, node: ast.Dict) -> Any:
+        return {
+            (self.visit(k) if k is not None else None): self.visit(v)
+            for k, v in zip(node.keys, node.values)
+        }
+
+    def visit_IfExp(self, node: ast.IfExp) -> Any:
+        return self.visit(node.body) if self.visit(node.test) else self.visit(node.orelse)
+
+
+def _safe_eval(expr: str, scope: dict[str, Any]) -> Any:
+    """Parse ``expr`` and evaluate it via :class:`_SafeEvaluator`."""
+    tree = ast.parse(expr, mode="eval")
+    return _SafeEvaluator(scope).visit(tree)
 
 
 def _to_python_expression(expr: str) -> str:
@@ -141,12 +313,9 @@ def _evaluate(expr: str, value: Any) -> bool:
         # ``data`` are the decoded object; otherwise they equal ``value``.
         "parsed": parsed,
         "data": parsed,
-        # Useful helpers exposed to the expression sandbox.
-        "json": json,
-        "re": re,
     }
     try:
-        return bool(eval(expr, {"__builtins__": _SAFE_BUILTINS}, scope))  # noqa: S307
+        return bool(_safe_eval(expr, scope))
     except (KeyError, IndexError, TypeError, AttributeError):
         # Data-access failures (missing dict key, indexing into a string, etc.)
         # are treated as a "false" outcome rather than a hard error. Branching
