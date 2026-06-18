@@ -98,7 +98,7 @@ class _SafeEvaluator(ast.NodeVisitor):
 
     def visit(self, node: ast.AST) -> Any:  # type: ignore[override]
         method = getattr(self, f"visit_{type(node).__name__}", None)
-        if method is None:
+        if not callable(method):
             raise ValueError(
                 f"Unsupported expression element: {type(node).__name__}"
             )
@@ -223,6 +223,72 @@ def _to_python_expression(expr: str) -> str:
     return _LENGTH_RE.sub(r"len(\1)", expr)
 
 
+_SENTINEL = object()
+
+
+def _loads_or_sentinel(text: str) -> Any:
+    """Return the parsed JSON value or ``_SENTINEL`` if ``text`` is invalid."""
+    try:
+        return json.loads(text)
+    except (json.JSONDecodeError, ValueError):
+        return _SENTINEL
+
+
+def _strip_fences(text: str) -> str | None:
+    """Return ``text`` with leading/trailing markdown fences removed, or ``None``."""
+    if not text.startswith("```"):
+        return None
+    unfenced = re.sub(r"^```(?:json)?\s*", "", text)
+    unfenced = re.sub(r"\s*```\s*$", "", unfenced)
+    return unfenced
+
+
+def _extract_fenced_body(text: str) -> str | None:
+    """Return the body of the first ```` ```json ... ``` ```` block, or ``None``."""
+    fence = re.search(r"```(?:json)?\s*(.+?)\s*```", text, re.DOTALL)
+    return fence.group(1) if fence else None
+
+
+def _find_balanced_object_end(text: str, start: int) -> int:
+    """Return the index of the ``}`` that closes the object at ``start``, or ``-1``."""
+    depth = 0
+    in_str = False
+    escape = False
+    for i in range(start, len(text)):
+        ch = text[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def _scan_balanced_object(text: str) -> Any:
+    """Find and parse the first balanced ``{...}`` object in ``text``."""
+    start = text.find("{")
+    while start != -1:
+        end = _find_balanced_object_end(text, start)
+        if end == -1:
+            break
+        parsed = _loads_or_sentinel(text[start : end + 1])
+        if parsed is not _SENTINEL:
+            return parsed
+        start = text.find("{", start + 1)
+    return _SENTINEL
+
+
 def _try_parse_json(value: Any) -> Any:
     """Extract and parse the first JSON object from ``value``.
 
@@ -240,57 +306,24 @@ def _try_parse_json(value: Any) -> Any:
     if not text:
         return value
 
-    # 1. Direct parse (fast path for clean JSON).
-    try:
-        return json.loads(text)
-    except (json.JSONDecodeError, ValueError):
-        pass
+    # Try each strategy in order. The first one that successfully parses wins.
+    candidates = (
+        text,
+        _strip_fences(text),
+        _extract_fenced_body(text),
+    )
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        parsed = _loads_or_sentinel(candidate)
+        if parsed is not _SENTINEL:
+            return parsed
 
-    # 2. Markdown fences — strip and retry.
-    if text.startswith("```"):
-        unfenced = re.sub(r"^```(?:json)?\s*", "", text)
-        unfenced = re.sub(r"\s*```\s*$", "", unfenced)
-        try:
-            return json.loads(unfenced)
-        except (json.JSONDecodeError, ValueError):
-            pass
-    # Fence block anywhere in the body.
-    fence = re.search(r"```(?:json)?\s*(.+?)\s*```", text, re.DOTALL)
-    if fence:
-        try:
-            return json.loads(fence.group(1))
-        except (json.JSONDecodeError, ValueError):
-            pass
-
-    # 3. Brace-walking scan — find the first balanced ``{...}`` object
-    #    even when surrounded by prose (typical LLM output).
-    start = text.find("{")
-    while start != -1:
-        depth = 0
-        in_str = False
-        escape = False
-        for i in range(start, len(text)):
-            ch = text[i]
-            if in_str:
-                if escape:
-                    escape = False
-                elif ch == "\\":
-                    escape = True
-                elif ch == '"':
-                    in_str = False
-                continue
-            if ch == '"':
-                in_str = True
-            elif ch == "{":
-                depth += 1
-            elif ch == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        return json.loads(text[start : i + 1])
-                    except (json.JSONDecodeError, ValueError):
-                        break
-        start = text.find("{", start + 1)
+    # Brace-walking scan — find the first balanced ``{...}`` object
+    # even when surrounded by prose (typical LLM output).
+    parsed = _scan_balanced_object(text)
+    if parsed is not _SENTINEL:
+        return parsed
 
     # Nothing parsed — return the original string so substring expressions
     # like ``"relatedParty" in value`` still work.
