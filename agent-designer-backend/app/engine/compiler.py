@@ -28,7 +28,7 @@ from typing import Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from app.engine.executors import EXECUTOR_REGISTRY, get_executor
+from app.engine.executors import EXECUTOR_REGISTRY, get_executor, BRANCHING_EXECUTOR_KEYS
 from app.engine.graph import build_adjacency, get_node_by_id, get_node_type, resolve_inputs
 
 logger = logging.getLogger(__name__)
@@ -150,15 +150,66 @@ def compile_flow(
     for nid in source_nodes:
         graph.add_edge(START, nid)
 
-    # Add normal edges between flow nodes
+    # Identify branching nodes (those whose executor emits ``output['_route']``).
+    # Their outgoing edges are wired as a single conditional edge instead of
+    # plain edges, so only the chosen branch executes.
+    node_type_by_id: dict[str, str] = {n["id"]: get_node_type(n) for n in nodes}
+    node_id_set = {n["id"] for n in nodes}
+    branching_node_ids = {
+        nid for nid, nt in node_type_by_id.items() if nt in BRANCHING_EXECUTOR_KEYS
+    }
+
+    # Group outgoing edges per source so we can decide branching vs plain.
+    outgoing: dict[str, list[dict]] = {nid: [] for nid in node_id_set}
+    for edge in edges:
+        if edge["source"] in outgoing:
+            outgoing[edge["source"]].append(edge)
+
+    # Plain edges (non-branching sources only).
     for edge in edges:
         src = edge["source"]
         tgt = edge["target"]
-        # Both nodes must exist in the graph
-        src_exists = any(n["id"] == src for n in nodes)
-        tgt_exists = any(n["id"] == tgt for n in nodes)
-        if src_exists and tgt_exists:
-            graph.add_edge(src, tgt)
+        if src not in node_id_set or tgt not in node_id_set:
+            continue
+        if src in branching_node_ids:
+            continue  # handled by add_conditional_edges below
+        graph.add_edge(src, tgt)
+
+    # Conditional edges for branching nodes.
+    for nid in branching_node_ids:
+        outs = outgoing.get(nid, [])
+        # handle (sourceHandle) -> target node id
+        handle_to_target: dict[str, str] = {}
+        for e in outs:
+            if e["target"] not in node_id_set:
+                continue
+            handle = e.get("sourceHandle") or "output"
+            handle_to_target.setdefault(handle, e["target"])
+
+        if not handle_to_target:
+            # Branching node with no outgoing edges → END
+            graph.add_edge(nid, END)
+            continue
+
+        def make_router(branch_id: str, mapping: dict[str, str]):
+            def router(state: AgentFlowState) -> str:
+                if state.get("error"):
+                    return END
+                outputs = state["node_outputs"].get(branch_id) or {}
+                route = outputs.get("_route")
+                if route in mapping:
+                    return mapping[route]
+                # Sensible defaults if executor didn't set _route.
+                if "true" in mapping or "false" in mapping:
+                    return mapping.get("true") or mapping.get("false") or END
+                return next(iter(mapping.values()))
+            return router
+
+        graph.add_conditional_edges(
+            nid,
+            make_router(nid, handle_to_target),
+            list(handle_to_target.values()) + [END],
+        )
 
     # Find sink nodes (no outgoing edges) → connect to END
     all_sources = {e["source"] for e in edges}

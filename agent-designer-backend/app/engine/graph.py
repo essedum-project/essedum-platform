@@ -132,6 +132,9 @@ _BACKEND_EXECUTOR_KEYS = {
     "mcp_tool",
     "memory",
     "rag_agent",
+    "http_request",
+    "condition",
+    "router_agent",
 }
 
 # Specific frontend node-library type strings → backend executor keys.
@@ -142,6 +145,9 @@ _FRONTEND_TYPE_TO_EXECUTOR = {
     "few-shot-prompt": "prompt_template",
     "chat-prompt": "prompt_template",
     "vector-search": "rag_agent",
+    "http-request": "http_request",
+    "condition": "condition",
+    "router-agent": "router_agent",
 }
 
 # Category → backend executor key (covers all *-llm, *-memory, mcp-*,
@@ -154,6 +160,7 @@ _CATEGORY_TO_EXECUTOR = {
     "mcp": "mcp_tool",
     "memory": "memory",
     "agent": "rag_agent",
+    "condition": "condition",
 }
 
 
