@@ -206,14 +206,16 @@ public class FileValidateV2 {
 
 	private FileValidateSummary validateFile(File file, List<String> allowed,List<String> allowedFileType) throws FileNotFoundException {
 		FileInputStream inputstream = null;
+		FileValidateSummary summary;
 		try {
 			inputstream = new FileInputStream(file);
+			summary = this.validateFile(inputstream, allowed, allowedFileType, 0, file.getName(), null);
 		} finally {
 			if (inputstream != null) {
 				safeClose(inputstream);
 			}
 		}
-		return this.validateFile(inputstream, allowed, allowedFileType, 0, file.getName(),null);
+		return summary;
 	}
 
 	private FileValidateSummary validateFile(MultipartFile mulipartFile, List<String> allowed,List<String> allowedFileType,List<String>allowedMandatoryFileExtension) {
