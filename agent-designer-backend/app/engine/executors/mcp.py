@@ -18,6 +18,81 @@ def _flatten_exception(exc: BaseException) -> str:
     return f"{type(exc).__name__}: {exc}"
 
 
+def _try_loads(text: str) -> Any:
+    """Return the parsed JSON value or ``_MISSING`` if ``text`` is invalid JSON."""
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return _MISSING
+
+
+_MISSING = object()
+
+
+def _strip_fences(text: str) -> str | None:
+    """Return ``text`` with leading/trailing markdown fences removed, or ``None``."""
+    if not text.startswith("```"):
+        return None
+    unfenced = re.sub(r"^```(?:json)?\s*", "", text)
+    unfenced = re.sub(r"\s*```\s*$", "", unfenced)
+    return unfenced
+
+
+def _extract_fenced_body(text: str) -> str | None:
+    """Return the body of the first ```` ```json ... ``` ```` block, or ``None``."""
+    fence = re.search(r"```(?:json)?\s*(.+?)\s*```", text, re.DOTALL)
+    return fence.group(1) if fence else None
+
+
+def _find_balanced_object_end(text: str, start: int) -> int:
+    """Return the index of the ``}`` that closes the object at ``start``, or ``-1``."""
+    depth = 0
+    in_str = False
+    escape = False
+    for i in range(start, len(text)):
+        ch = text[i]
+        if in_str:
+            in_str, escape = _advance_in_string(ch, escape)
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def _advance_in_string(ch: str, escape: bool) -> tuple[bool, bool]:
+    """Advance one character while inside a JSON string literal.
+
+    Returns ``(in_str, escape)`` — the new state after consuming ``ch``.
+    """
+    if escape:
+        return True, False
+    if ch == "\\":
+        return True, True
+    if ch == '"':
+        return False, False
+    return True, False
+
+
+def _scan_balanced_object(text: str) -> Any:
+    """Find and parse the first balanced ``{...}`` object in ``text``, or ``_MISSING``."""
+    start = text.find("{")
+    while start != -1:
+        end = _find_balanced_object_end(text, start)
+        if end == -1:
+            return _MISSING
+        parsed = _try_loads(text[start : end + 1])
+        if parsed is not _MISSING:
+            return parsed
+        start = text.find("{", start + 1)
+    return _MISSING
+
+
 def _extract_json_object(text: str) -> Any:
     """Best-effort JSON extraction from an LLM response.
 
@@ -37,57 +112,22 @@ def _extract_json_object(text: str) -> Any:
     if not stripped:
         raise json.JSONDecodeError("empty input", text, 0)
 
-    # 1. Direct parse.
-    try:
-        return json.loads(stripped)
-    except json.JSONDecodeError:
-        pass
+    # Try each strategy in order. The first one that successfully parses wins.
+    candidates = (
+        stripped,
+        _strip_fences(stripped),
+        _extract_fenced_body(stripped),
+    )
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        parsed = _try_loads(candidate)
+        if parsed is not _MISSING:
+            return parsed
 
-    # 2. Markdown fences.
-    if stripped.startswith("```"):
-        unfenced = re.sub(r"^```(?:json)?\s*", "", stripped)
-        unfenced = re.sub(r"\s*```\s*$", "", unfenced)
-        try:
-            return json.loads(unfenced)
-        except json.JSONDecodeError:
-            pass
-    # Also try fenced block anywhere in the body.
-    fence_match = re.search(r"```(?:json)?\s*(.+?)\s*```", stripped, re.DOTALL)
-    if fence_match:
-        try:
-            return json.loads(fence_match.group(1))
-        except json.JSONDecodeError:
-            pass
-
-    # 3. Brace-walking scan for the first balanced ``{...}`` object.
-    start = stripped.find("{")
-    while start != -1:
-        depth = 0
-        in_str = False
-        escape = False
-        for i in range(start, len(stripped)):
-            ch = stripped[i]
-            if in_str:
-                if escape:
-                    escape = False
-                elif ch == "\\":
-                    escape = True
-                elif ch == '"':
-                    in_str = False
-                continue
-            if ch == '"':
-                in_str = True
-            elif ch == "{":
-                depth += 1
-            elif ch == "}":
-                depth -= 1
-                if depth == 0:
-                    candidate = stripped[start : i + 1]
-                    try:
-                        return json.loads(candidate)
-                    except json.JSONDecodeError:
-                        break  # try next ``{`` after this one
-        start = stripped.find("{", start + 1)
+    parsed = _scan_balanced_object(stripped)
+    if parsed is not _MISSING:
+        return parsed
 
     # Nothing worked — let json.loads emit the canonical error.
     return json.loads(stripped)
