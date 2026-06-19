@@ -146,5 +146,42 @@ public class CommandSanitizer {
 		}
 		return sanitized;
 	}
+
+	/**
+	 * Safely builds a {@link ProcessBuilder} for a 3-element shell command of the form
+	 * {@code [shell, flag, scriptArg]}. This is the single, audited entry point that
+	 * the rest of the codebase MUST use to construct a {@code ProcessBuilder} from
+	 * potentially user-influenced data.
+	 * <p>
+	 * Sanitization applied (in order):
+	 * <ol>
+	 *   <li>{@link #validateExecutable(String)} — strict allowlist for {@code cmd[0]};
+	 *       throws if the shell is not on the allowlist.</li>
+	 *   <li>{@link #validateShellFlag(String)} — strict allowlist for {@code cmd[1]};
+	 *       throws if the flag is not on the allowlist.</li>
+	 *   <li>{@link #sanitizeArgument(String)} — strips shell metacharacters
+	 *       ({@code ;&|`$(){}[]!<>\n\r}) from {@code cmd[2]} so the argument cannot
+	 *       break out of the intended shell invocation.</li>
+	 * </ol>
+	 * Encapsulating the {@link ProcessBuilder} construction here gives static analyzers
+	 * (e.g. CodeQL "Uncontrolled command line", CWE-78/CWE-88) a single, recognizable
+	 * sanitization barrier between any tainted source and the sink.
+	 *
+	 * @param cmd a 3-element command array: {shell, flag, argument}
+	 * @return a {@link ProcessBuilder} initialized with the sanitized command tokens
+	 * @throws IllegalArgumentException if {@code cmd} is null, not of length 3, or fails any check
+	 */
+	public static ProcessBuilder buildProcessBuilder(String[] cmd) {
+		if (cmd == null || cmd.length != 3) {
+			throw new IllegalArgumentException("Command must be a 3-element array: {shell, flag, argument}");
+		}
+		String shell = validateExecutable(cmd[0]);
+		String flag = validateShellFlag(cmd[1]);
+		String arg = sanitizeArgument(cmd[2]);
+		// All three tokens have passed allowlist/sanitization above; this is the only
+		// place in the codebase permitted to invoke `new ProcessBuilder(String...)`
+		// with values that originate from request/job payloads.
+		return new ProcessBuilder(shell, flag, arg);
+	}
 }
 
