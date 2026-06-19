@@ -192,11 +192,12 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
   styles: [
     `
     /* ─────────────────────── Layout ─────────────────────── */
-    :host { display: block; height: 100%; overflow: hidden; }
+    :host { display: block !important; position: absolute; inset: 0; overflow: hidden; }
     .code-tab-shell {
       display: grid;
       grid-template-columns: 380px 6px 1fr;
       grid-template-rows: 1fr;
+      width: 100%;
       height: 100%;
       min-height: 0;
       overflow: hidden;
@@ -205,6 +206,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
     /* ─────────────────────── Drag divider ───────────────── */
     .drag-divider {
       width: 6px;
+      height: 100%;
       cursor: col-resize;
       background: var(--cp-border, #e5e7eb);
       transition: background 0.15s;
@@ -218,7 +220,7 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
-      max-height: 100%;
+      height: 100%;
       border-right: 1px solid var(--cp-border, #e5e7eb);
       background: var(--cp-bg, #ffffff);
     }
@@ -296,6 +298,8 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       margin: 0;
       padding: 12px;
       overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -542,8 +546,8 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
-      max-height: 100%;
-      background: var(--ed-bg, #1e1e1e);
+      height: 100%;
+      background: var(--ed-bg, #0d1117);
     }
     .ed-head {
       display: flex; align-items: center; gap: 8px; padding: 8px 14px;
@@ -560,8 +564,20 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       font-size: 11px; padding: 2px 7px; border-radius: 999px;
       background: #f59e0b22; color: #f59e0b; font-weight: 600;
     }
-    .ed-body { flex: 1; min-height: 0; overflow: auto; background: #1e1e1e; max-height: 100%; }
-    ::ng-deep .ed-body .editorscript { height: 100%; min-height: 480px; }
+    .ed-body {
+      flex: 1; min-height: 0;
+      overflow-y: auto; overflow-x: hidden;
+      overscroll-behavior: contain;
+      background: var(--ed-bg, #0d1117);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124,58,237,0.3) transparent;
+    }
+    .ed-body::-webkit-scrollbar { width: 4px; }
+    .ed-body::-webkit-scrollbar-thumb { border-radius: 4px; background: rgba(124,58,237,0.3); }
+    /* ACE grows to fit content (maxLines: Infinity); .ed-body owns the scroll.
+       Ensure the editor fills the panel width and at least its height. */
+    ::ng-deep .ed-body app-enl-code-editor { display: block; width: 100%; min-height: 100%; }
+    ::ng-deep .ed-body .code-editor { width: 100%; }
 
     /* AI generation overlay on the editor panel */
     .editor-panel { position: relative; }
@@ -619,10 +635,14 @@ import { VibeStudioService } from "../../../../services/vibe-studio.service";
       --cp-ai-bg:       #21262d;
       --cp-ai-fg:       #e6edf3;
       --cp-input-bg:    #0d1117;
+      --ed-bg:          #0d1117;
       --ed-head-bg:     #0d1117;
       --ed-border:      #30363d;
       --ed-head-fg:     #8b949e;
     }    :host-context(body.header-dark-theme) .drag-divider { background: rgba(255,255,255,0.08); &:hover { background: #7c3aed; } }
+    :host-context(body.header-dark-theme) .editor-panel { background: #0d1117; }
+    :host-context(body.header-dark-theme) .ed-body { background: #0d1117; }
+    :host-context(body.header-dark-theme) ::ng-deep .ed-body .editorscript { background: #0d1117; }
     :host-context(body.header-dark-theme) .cp-user-bubble {
       background: linear-gradient(135deg, rgba(79,142,247,0.16), rgba(124,58,237,0.1));
       border-color: rgba(79,142,247,0.28);
