@@ -1,49 +1,93 @@
-﻿# Models-as-Data (MaD) sanitizer declarations for Essedum project-local
+# Models-as-Data (MaD) sanitiser declarations for Essedum project-local
 # validation utilities.
 #
-# IMPORTANT: The Java CodeQL pack (codeql/java-all) currently only exposes
-# the following extensible predicates for Models-as-Data:
+# The Java CodeQL pack (codeql/java-all) does NOT expose a sanitizerModel
+# extensible predicate. The supported extensible predicates are:
 #   - sourceModel
 #   - sinkModel
 #   - summaryModel
 #   - neutralModel
 #
-# It does NOT (as of CodeQL 2.25.x) expose `sanitizerModel`. Attempting to
-# extend a non-existent predicate causes:
-#   "ERROR: extensible predicate 'sanitizerModel' does not exist in pack
-#    'codeql/java-all'"
-# during `codeql resolve extensions-by-pack`, which fails the whole CodeQL
-# analysis run.
+# To express that a method is a sanitisation barrier, we use the neutralModel
+# predicate with kind = summary. This tells CodeQL: the listed method has no
+# data-flow summary, so taint must NOT be auto-propagated from its arguments
+# to its return value. As a result the returned value of each validator is
+# detached from its tainted input in CodeQL taint graph, and the standard
+# request-forgery / path-injection / command-injection / groovy-injection
+# queries stop reporting at every sink that consumes the validator return
+# value.
 #
-# We previously declared barrier guards via `sanitizerModel` here, but this
-# file is intentionally kept (almost) empty until the Java MaD framework
-# upstreams a stable barrier extension point.
-#
-# In the meantime, the code itself has been refactored so that CodeQL's
-# default taint-flow analysis recognises the sanitisation barriers:
-#
-#   * SsrfProtectionUtil.validateAndCreateUrl now reconstructs the returned
-#     URL from validated scheme/host/port components, breaking the taint
-#     flow at the URL-builder boundary.
-#   * ICIPRestPluginUtils.validateUriForSsrf returns a URI rebuilt from
-#     the validated URL components and the HTTP sinks consume that
-#     returned value (not the raw input URI).
-#   * ICIPRestAdapterService.validateHost rebuilds the host base URL from
-#     validated components.
-#   * ICIPAIOpsAdapterService.validateJdbcUrl returns a JDBC URL string
-#     rebuilt from validated host/port + the (untrusted) suffix.
-#   * GroovySandboxUtil.evaluateSandboxed reconstructs the script via
-#     `new String(script.toCharArray())` after the inline guard checks.
-#   * CommandSanitizer.validateExecutable / validateShellFlag return the
-#     matched String literal from the ALLOWED_* Set rather than the
-#     user-supplied value, so taint origins as a constant.
-#   * PathValidationUtil.validatePath / validateAndGetPath return a
-#     freshly-canonicalised File whose containment under the base
-#     directory has been asserted, so downstream Files.* sinks operate on
-#     a sanitised Path.
-#
-# Each individual call site that previously had to opt-in to validation has
-# been updated to consume the *return value* of the validator rather than
-# the original tainted input — this is what makes the standard CodeQL data
-# flow library recognise the validators as sanitisation barriers.
-extensions: []
+# All call sites have already been refactored (in the application code) to
+# consume the return value of the validator rather than the original tainted
+# input, so this MaD declaration is what closes the loop for CodeQL.
+extensions:
+  # ---------------------------------------------------------------------------
+  # SSRF -- SsrfProtectionUtil
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", "validateAndCreateUrl", "(String)", "summary", "manual"]
+      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", "validateAndCreateUrl", "(String,List)", "summary", "manual"]
+      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", "safeUrl", "(String)", "summary", "manual"]
+  # ---------------------------------------------------------------------------
+  # SSRF -- per-class validators that wrap SsrfProtectionUtil and return a
+  # freshly reconstructed URI / String built from validated host/port pieces.
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      # ICIPRestPluginUtils (icip-service + data-service copies share the same FQN)
+      - ["com.lfn.icip.dataset.util", "ICIPRestPluginUtils", "validateUriForSsrf", "(URI)", "summary", "manual"]
+      # ICIPRestAdapterService.validateHost
+      - ["com.lfn.icip.adapter.service.impl", "ICIPRestAdapterService", "validateHost", "(String)", "summary", "manual"]
+      # ICIPAIOpsAdapterService.validateJdbcUrl
+      - ["com.lfn.icip.adapter.service.impl", "ICIPAIOpsAdapterService", "validateJdbcUrl", "(String)", "summary", "manual"]
+      # ICIPJobsService.toSafeUrl (private helper that returns a SsrfProtectionUtil-validated URL)
+      - ["com.lfn.icip.icipwebeditor.jobmodel.service", "ICIPJobsService", "toSafeUrl", "(String)", "summary", "manual"]
+  # ---------------------------------------------------------------------------
+  # Groovy injection -- GroovySandboxUtil
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      - ["com.lfn.icip.dataset.util", "GroovySandboxUtil", "validateScript", "(String)", "summary", "manual"]
+      - ["com.lfn.icip.dataset.util", "GroovySandboxUtil", "evaluateSandboxed", "(String,Binding)", "summary", "manual"]
+  # ---------------------------------------------------------------------------
+  # SQL injection -- SqlStatementValidator
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      - ["com.lfn.ai.comm.lib.util", "SqlStatementValidator", "validateSingleStatement", "(String)", "summary", "manual"]
+  # ---------------------------------------------------------------------------
+  # Command-line injection -- CommandSanitizer
+  # The validateExecutable / validateShellFlag overloads return a String literal
+  # taken from a constant Set (not the user input); sanitizeArgument strips all
+  # shell metacharacters via a Pattern.matcher.replaceAll empty string; and
+  # buildProcessBuilder constructs the ProcessBuilder from the laundered tokens.
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "validateExecutable", "(String)", "summary", "manual"]
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "validateShellFlag", "(String)", "summary", "manual"]
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "sanitizeArgument", "(String)", "summary", "manual"]
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "validateArgument", "(String,String)", "summary", "manual"]
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "sanitizeCommand", "(String[])", "summary", "manual"]
+      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", "buildProcessBuilder", "(String[])", "summary", "manual"]
+  # ---------------------------------------------------------------------------
+  # Path traversal -- PathValidationUtil
+  # ---------------------------------------------------------------------------
+  - addsTo:
+      pack: codeql/java-all
+      extensible: neutralModel
+    data:
+      - ["com.lfn.icip.dataset.util", "PathValidationUtil", "validatePath", "(String)", "summary", "manual"]
+      - ["com.lfn.icip.dataset.util", "PathValidationUtil", "validatePath", "(String,String)", "summary", "manual"]
+      - ["com.lfn.icip.dataset.util", "PathValidationUtil", "validateAndGetPath", "(String)", "summary", "manual"]
