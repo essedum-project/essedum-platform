@@ -62,10 +62,12 @@ public class CommandSanitizer {
 			throw new IllegalArgumentException("Executable must not be null");
 		}
 		String base = new File(executable).getName().toLowerCase();
-		if (!ALLOWED_EXECUTABLES.contains(base)) {
-			throw new IllegalArgumentException("Executable not in allowlist: " + base);
+		for (String allowed : ALLOWED_EXECUTABLES) {
+			if (allowed.equals(base)) {
+				return allowed;
+			}
 		}
-		return executable;
+		throw new IllegalArgumentException("Executable not in allowlist: " + base);
 	}
 
 	/**
@@ -76,10 +78,15 @@ public class CommandSanitizer {
 	 * @throws IllegalArgumentException if the flag is not in the allowlist
 	 */
 	public static String validateShellFlag(String flag) {
-		if (flag == null || !ALLOWED_FLAGS.contains(flag)) {
-			throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
+		if (flag == null) {
+			throw new IllegalArgumentException("Shell flag not in allowlist: null");
 		}
-		return flag;
+		for (String allowed : ALLOWED_FLAGS) {
+			if (allowed.equals(flag)) {
+				return allowed;
+			}
+		}
+		throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
 	}
 
 	/**

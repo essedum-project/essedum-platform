@@ -284,7 +284,15 @@ public class AzureServer implements FileServerUtil {
 	@Override
 	public String getLastIndex(String fileid, String bucket) throws Exception {
 		Path dirpath = commonService.createTempPath();
-		Path path = Paths.get(dirpath.toAbsolutePath().toString(), fileid, constants.getCountFile());
+		// Sanitise the user-controlled fileid: the resolved path must remain
+		// inside `dirpath`. PathValidationUtil canonicalises the result and
+		// asserts containment, providing the sanitisation barrier that taint
+		// trackers (e.g. CodeQL java/path-injection) recognise on the
+		// Files.createDirectories sink below.
+		Path path = com.lfn.icip.dataset.util.PathValidationUtil
+				.validatePath(dirpath.toAbsolutePath().toString(),
+						fileid + java.io.File.separator + constants.getCountFile())
+				.toPath();
 		Files.createDirectories(path.getParent());
 		BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(bucket);
 		String filename = URLEncoder.encode(String.format(LoggerConstants.STRING_SLASH_STRING_SLASH_STRING, fileid,

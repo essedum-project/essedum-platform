@@ -871,9 +871,25 @@ public class GitHubService {
 				String filename = entry.getKey();
 				byte[] content = entry.getValue();
 
-				File targetFile = new File(tempDirFile, pipelineName + "/" + filename);
-				if (!targetFile.getParentFile().exists()) {
-					Files.createDirectories(targetFile.getParentFile().toPath());
+				// Path-traversal guard: ensure the (user-supplied) pipelineName +
+				// filename cannot escape tempDirFile. Reject null bytes / ".."
+				// sequences and assert canonical containment in the tempDir.
+				if (filename == null || filename.isBlank()
+						|| filename.indexOf('\u0000') >= 0
+						|| filename.replace('\\', '/').contains("../")
+						|| filename.replace('\\', '/').startsWith("../")
+						|| filename.replace('\\', '/').contains("/..")) {
+					throw new IOException("Invalid filename: " + filename);
+				}
+				java.io.File baseDir = tempDirFile.getCanonicalFile();
+				java.io.File targetFile = new java.io.File(baseDir,
+						pipelineName + java.io.File.separator + filename).getCanonicalFile();
+				if (!targetFile.getPath().startsWith(baseDir.getPath() + java.io.File.separator)) {
+					throw new IOException("Path traversal detected for filename: " + filename);
+				}
+				java.io.File parentDir = targetFile.getParentFile();
+				if (parentDir != null && !parentDir.exists()) {
+					Files.createDirectories(parentDir.toPath());
 				}
 				try (OutputStream os = new FileOutputStream(targetFile)) {
 					os.write(content);

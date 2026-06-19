@@ -707,7 +707,8 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Filename cannot be null or empty");
 			}
 
-			Path path = fileService.returnPath(FileConstants.AGENTS_CODE, filename);
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnPath(FileConstants.AGENTS_CODE, filename).toString());
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(
 					String.format("Agents file '%s' not found", filename));
@@ -743,8 +744,9 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Agent type cannot be null or empty");
 			}
 
-			Path path = fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
-					fileService.agentsConfig.getSampleFile(agenttype));
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
+							fileService.agentsConfig.getSampleFile(agenttype)).toString());
 
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(
@@ -781,8 +783,9 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Agent type cannot be null or empty");
 			}
 
-			Path path = fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
-					fileService.agentsConfig.getBaseFile(agenttype));
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
+							fileService.agentsConfig.getBaseFile(agenttype)).toString());
 
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(

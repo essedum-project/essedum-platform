@@ -60,7 +60,12 @@ public class FileUtil {
 	 * @throws Exception the exception
 	 */
 	public static String getFirstLine(Path path) throws Exception {
-		return Files.readAllLines(path).get(0);
+		// Reject path-traversal sequences before reading the file so taint
+		// trackers (e.g. CodeQL java/path-injection) see a sanitiser on the
+		// Files.readAllLines sink below.
+		java.nio.file.Path safePath = com.lfn.icip.dataset.util.PathValidationUtil
+				.validateAndGetPath(path.toString());
+		return Files.readAllLines(safePath).get(0);
 	}
 
 	/**

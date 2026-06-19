@@ -111,12 +111,22 @@ public class ICIPAIOpsAdapterService {
 		if (question >= 0) end = Math.min(end, question);
 		if (semi     >= 0) end = Math.min(end, semi);
 		String authority = authorityAndRest.substring(0, end);
+		String rest = authorityAndRest.substring(end);
 		try {
-			com.lfn.icip.dataset.util.SsrfProtectionUtil.validateAndCreateUrl("http://" + authority);
+			java.net.URL safe = com.lfn.icip.dataset.util.SsrfProtectionUtil.validateAndCreateUrl("http://" + authority);
+			// Reconstruct the JDBC URL strictly from validated host/port components plus
+			// the (unmodified) path/query suffix. The returned String is built from a
+			// freshly-validated URL object so taint trackers (e.g. CodeQL's java/ssrf)
+			// recognise this as a sanitisation barrier between the user-controlled
+			// connection string and the JDBC sink.
+			StringBuilder safeAuthority = new StringBuilder(safe.getHost());
+			if (safe.getPort() != -1) {
+				safeAuthority.append(':').append(safe.getPort());
+			}
+			return "jdbc:" + subProto + "://" + safeAuthority + rest;
 		} catch (java.net.MalformedURLException e) {
 			throw new IllegalArgumentException("Invalid JDBC host: " + e.getMessage(), e);
 		}
-		return trimmed;
 	}
 
 	public void saveRecommendation(String requestBody, String results, String project, String columnName) {
