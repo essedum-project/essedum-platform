@@ -267,7 +267,15 @@ public class HitachiServer implements FileServerUtil {
 	public String getLastIndex(String fileid, String bucket) throws Exception {
 		bucket = getBucket(bucket);
 		Path dirpath = commonService.createTempPath();
-		Path path = Paths.get(dirpath.toAbsolutePath().toString(), fileid, constants.getCountFile());
+		// Sanitise the user-controlled fileid component: the resolved path must
+		// remain inside `dirpath`. PathValidationUtil.validatePath canonicalises
+		// the result and asserts containment, which is the sanitiser barrier
+		// taint trackers (e.g. CodeQL java/path-injection) recognise for the
+		// Files.createDirectories sink below.
+		Path path = com.lfn.icip.dataset.util.PathValidationUtil
+				.validatePath(dirpath.toAbsolutePath().toString(),
+						fileid + java.io.File.separator + constants.getCountFile())
+				.toPath();
 		Files.createDirectories(path.getParent());
 //		minioClient.downloadObject(DownloadObjectArgs
 //				.builder().bucket(bucket).object(String.format(LoggerConstants.STRING_SLASH_STRING_SLASH_STRING, fileid,

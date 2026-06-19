@@ -60,18 +60,25 @@ public final class ICIPRestPluginUtils {
     
 	/**
 	 * Validates a URI against SSRF (scheme, host, internal/loopback IP ranges)
-	 * before it is used to build outbound HTTP requests. Throws
-	 * {@link IllegalArgumentException} if the URI is unsafe.
+	 * and returns a URI that is freshly reconstructed from the validated
+	 * scheme/host/port. Callers must use the returned value when building outbound
+	 * HTTP requests so that static-analysis taint flow visibly passes through this
+	 * sanitisation barrier.
 	 *
 	 * @param uri the URI to validate (must not be null)
+	 * @return a sanitised URI built from validated components
 	 */
-	private static void validateUriForSsrf(URI uri) {
+	private static URI validateUriForSsrf(URI uri) {
 		if (uri == null) {
 			throw new IllegalArgumentException("URI must not be null");
 		}
 		try {
-			SsrfProtectionUtil.validateAndCreateUrl(uri.toString());
-		} catch (java.net.MalformedURLException e) {
+			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(uri.toString());
+			// Rebuild the URI strictly from the validated URL's components so that
+			// the value flowing into HTTP sinks is no longer the raw input.
+			return new URI(safe.getProtocol(), null, safe.getHost(), safe.getPort(),
+					safe.getPath(), safe.getQuery(), null);
+		} catch (java.net.MalformedURLException | URISyntaxException e) {
 			throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
 		}
 	}
@@ -233,9 +240,9 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		validateUriForSsrf(uri);
-		HttpGet httpget = new HttpGet(uri.toString());
-		
+		URI safeUri = validateUriForSsrf(uri);
+		HttpGet httpget = new HttpGet(safeUri.toString());
+
 		if(!Strings.isNullOrEmpty(authToken))
 			httpget.addHeader("Authorization", headerPrefix + " " + authToken);
 		
@@ -283,8 +290,8 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost, String bodyType) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		validateUriForSsrf(uri);
-		HttpPost post = new HttpPost(uri.toString());
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPost post = new HttpPost(safeUri.toString());
 		String uploadDirecoryPath = null;
 		if(!Strings.isNullOrEmpty(authToken))
 			post.addHeader("Authorization", headerPrefix + " " + authToken);
@@ -384,9 +391,9 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		validateUriForSsrf(uri);
-		HttpPut httpput = new HttpPut(uri.toString());
-		
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPut httpput = new HttpPut(safeUri.toString());
+
 		if(!Strings.isNullOrEmpty(authToken))
 			httpput.addHeader("Authorization", headerPrefix + " " + authToken);
 		
@@ -437,8 +444,8 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		validateUriForSsrf(uri);
-		HttpDelete httpdelete = new HttpDelete(uri.toString());
+		URI safeUri = validateUriForSsrf(uri);
+		HttpDelete httpdelete = new HttpDelete(safeUri.toString());
 
 		if (!Strings.isNullOrEmpty(authToken))
 			httpdelete.addHeader("Authorization", headerPrefix + " " + authToken);
@@ -475,9 +482,9 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		validateUriForSsrf(uri);
-		HttpPatch post = new HttpPatch(uri.toString());
-		
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPatch post = new HttpPatch(safeUri.toString());
+
 		if(!Strings.isNullOrEmpty(authToken))
 			post.addHeader("Authorization", headerPrefix + " " + authToken);
 		

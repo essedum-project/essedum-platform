@@ -80,11 +80,20 @@ public class ICIPRestAdapterService {
 	 */
 	private static String validateHost(String host) {
 		try {
-			SsrfProtectionUtil.validateAndCreateUrl(host);
+			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(host);
+			// Rebuild the host base URL from the validated URL's components so
+			// the value flowing into the HTTP sink is no longer the raw input
+			// (this is what makes static-analysis taint trackers — e.g. CodeQL's
+			// java/ssrf query — recognise the sanitisation barrier here).
+			StringBuilder rebuilt = new StringBuilder()
+					.append(safe.getProtocol()).append("://").append(safe.getHost());
+			if (safe.getPort() != -1) {
+				rebuilt.append(':').append(safe.getPort());
+			}
+			return rebuilt.toString();
 		} catch (java.net.MalformedURLException e) {
 			throw new IllegalArgumentException("Invalid or disallowed host URL: " + e.getMessage(), e);
 		}
-		return host;
 	}
 
 	public String callGetMethod(String host, String adaptername, String methodname, String org,

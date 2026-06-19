@@ -62,10 +62,18 @@ public class CommandSanitizer {
 			throw new IllegalArgumentException("Executable must not be null");
 		}
 		String base = new File(executable).getName().toLowerCase();
-		if (!ALLOWED_EXECUTABLES.contains(base)) {
-			throw new IllegalArgumentException("Executable not in allowlist: " + base);
+		// Return the matched allowlist entry (a String literal stored in
+		// ALLOWED_EXECUTABLES) instead of the user-supplied path. This both
+		// guarantees an allowlisted basename is launched (the OS resolves it
+		// via PATH) and gives static-analysis taint trackers (e.g. CodeQL
+		// java/command-line-injection) a recognisable sanitisation barrier:
+		// the returned value flows from a constant Set, not from user input.
+		for (String allowed : ALLOWED_EXECUTABLES) {
+			if (allowed.equals(base)) {
+				return allowed;
+			}
 		}
-		return executable;
+		throw new IllegalArgumentException("Executable not in allowlist: " + base);
 	}
 
 	/**
@@ -76,10 +84,17 @@ public class CommandSanitizer {
 	 * @throws IllegalArgumentException if the flag is not in the allowlist
 	 */
 	public static String validateShellFlag(String flag) {
-		if (flag == null || !ALLOWED_FLAGS.contains(flag)) {
-			throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
+		if (flag == null) {
+			throw new IllegalArgumentException("Shell flag not in allowlist: null");
 		}
-		return flag;
+		// Return the matched allowlist constant (not the input) so taint
+		// trackers see a value originating from a constant Set.
+		for (String allowed : ALLOWED_FLAGS) {
+			if (allowed.equals(flag)) {
+				return allowed;
+			}
+		}
+		throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
 	}
 
 	/**
