@@ -135,15 +135,32 @@ def _resolve_input_value(inputs: dict[str, Any]) -> Any:
     return ""
 
 
-def _resolve_available_routes(node: dict, config: dict) -> list[str]:
-    """Return the list of routes actually wired/declared on the node."""
+def _defined_route_ids(node: dict) -> list[str]:
+    """Return the route ids declared as output ports on the node."""
     definition = (node.get("data") or {}).get("definition") or {}
     outputs_def = definition.get("outputs") or []
-    defined_routes = [str(o.get("id")) for o in outputs_def if o.get("id")]
-    available = (
-        config.get("available_routes") or defined_routes or list(DEFAULT_ROUTES)
+    return [str(o.get("id")) for o in outputs_def if o.get("id")]
+
+
+def _resolve_available_routes(node: dict, config: dict) -> list[str]:
+    """Return the list of routes actually wired/declared on the node."""
+    candidates = (
+        config.get("available_routes")
+        or _defined_route_ids(node)
+        or list(DEFAULT_ROUTES)
     )
-    return [r for r in available if r]
+    return [r for r in candidates if r]
+
+
+def _router_config(node: dict) -> dict[str, str]:
+    """Extract and normalise the router-agent's config block."""
+    config: dict = (node.get("data") or {}).get("config") or {}
+    return {
+        "raw": config,
+        "routing_prompt": (config.get("routing_prompt") or "").strip(),
+        "classifier_model": (config.get("classifier_model") or "").strip(),
+        "provider": (config.get("provider") or "ollama").strip(),
+    }
 
 
 class RouterAgentExecutor(BaseExecutor):
@@ -153,12 +170,8 @@ class RouterAgentExecutor(BaseExecutor):
         inputs: dict[str, Any],
         context: dict[str, Any],
     ) -> dict[str, Any]:
-        config: dict = (node.get("data") or {}).get("config") or {}
-        routing_prompt: str = (config.get("routing_prompt") or "").strip()
-        classifier_model: str = (config.get("classifier_model") or "").strip()
-        provider: str = (config.get("provider") or "ollama").strip()
-
-        available = _resolve_available_routes(node, config)
+        cfg = _router_config(node)
+        available = _resolve_available_routes(node, cfg["raw"])
         if not available:
             raise ValueError(
                 "Router Agent has no available routes. "
@@ -166,19 +179,23 @@ class RouterAgentExecutor(BaseExecutor):
             )
 
         value: Any = _resolve_input_value(inputs)
-
-        # 1) Keyword rules
-        rules = _parse_keyword_rules(routing_prompt)
-        chosen = _match_keywords(rules, str(value), available)
-
-        # 2) LLM classifier (only if model is configured and no keyword match)
-        if not chosen and classifier_model:
-            chosen = await _classify_with_llm(
-                provider, classifier_model, routing_prompt, str(value), available
-            )
-
-        # 3) Final fallback — first available route
-        if not chosen:
-            chosen = available[0]
-
+        chosen = await self._choose_route(cfg, str(value), available)
         return {chosen: value, "_route": chosen}
+
+    @staticmethod
+    async def _choose_route(
+        cfg: dict[str, str], text: str, available: list[str]
+    ) -> str:
+        """Pick a route via keyword rules → LLM classifier → first available."""
+        rules = _parse_keyword_rules(cfg["routing_prompt"])
+        chosen = _match_keywords(rules, text, available)
+        if chosen:
+            return chosen
+        if cfg["classifier_model"]:
+            chosen = await _classify_with_llm(
+                cfg["provider"], cfg["classifier_model"],
+                cfg["routing_prompt"], text, available,
+            )
+            if chosen:
+                return chosen
+        return available[0]
