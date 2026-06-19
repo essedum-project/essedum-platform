@@ -827,7 +827,7 @@ public class ICIPPipelineService implements IICIPSearchable{
 					joblogger.error(marker, "Error in importing duplicate nativeScript {}",nativeS.getCname());
 				}
 			});
-			if(interfacetype == "App") {
+			if("App".equals(interfacetype)) {
 				appService.importData(marker, target, jsonObject.getJSONObject("appdetails"));
 			}
 			joblogger.info(marker, "Imported {} successfully", interfacetype);
