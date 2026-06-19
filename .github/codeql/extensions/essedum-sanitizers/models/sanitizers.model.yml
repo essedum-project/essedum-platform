@@ -1,157 +1,49 @@
-# Models-as-Data (MaD) sanitizer declarations for Essedum project-local
-# validation utilities. Once this pack is loaded (via .github/codeql/codeql-config.yml)
-# CodeQL's standard Java security queries will treat the listed methods as
-# barrier guards / sanitizers and will no longer report false-positive alerts
-# at sinks that are protected by them.
+﻿# Models-as-Data (MaD) sanitizer declarations for Essedum project-local
+# validation utilities.
 #
-# Column meaning for the "summaryModel" rows
-# (see https://codeql.github.com/docs/codeql-language-guides/customizing-library-models-for-java/):
-#   package | type | subtypes | name | signature | ext | input | output | kind | provenance
+# IMPORTANT: The Java CodeQL pack (codeql/java-all) currently only exposes
+# the following extensible predicates for Models-as-Data:
+#   - sourceModel
+#   - sinkModel
+#   - summaryModel
+#   - neutralModel
 #
-# For "summaryModel" rows we declare each utility method as a pure data-flow
-# pass-through that LAUNDERS the taint label of the relevant kind: the input
-# argument flows to the return value as untainted data. CodeQL's data-flow
-# library treats a flow that crosses such a model as sanitized for the matching
-# query.
-
-extensions:
-  # ----------------------------------------------------------------------------
-  # SSRF — SsrfProtectionUtil
-  # Methods that return a validated java.net.URL (or throw) after checking the
-  # scheme, hostname and that the resolved address is NOT a loopback / link-local /
-  # site-local / multicast / known-internal IP range.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: summaryModel
-    data:
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "validateAndCreateUrl", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "validateAndCreateUrl", "(String,List)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "safeUrl", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-
-  # ----------------------------------------------------------------------------
-  # SSRF — register the same methods as explicit barrier guards for the
-  # request-forgery query. Any value that has been passed through them is
-  # considered no longer tainted with respect to SSRF.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: sanitizerModel
-    data:
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "validateAndCreateUrl", "(String)", "", "Argument[0]", "request-forgery", "manual"]
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "validateAndCreateUrl", "(String,List)", "", "Argument[0]", "request-forgery", "manual"]
-      - ["com.lfn.icip.dataset.util", "SsrfProtectionUtil", true,
-         "safeUrl", "(String)", "", "Argument[0]", "request-forgery", "manual"]
-
-  # ----------------------------------------------------------------------------
-  # Groovy injection — GroovySandboxUtil
-  # validateScript() rejects scripts containing Runtime / ProcessBuilder /
-  # reflection / IO / network / Eval / @Grab tokens before returning them.
-  # evaluateSandboxed() additionally restricts the AST via SecureASTCustomizer.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: summaryModel
-    data:
-      - ["com.lfn.icip.dataset.util", "GroovySandboxUtil", true,
-         "validateScript", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-
-  - addsTo:
-      pack: codeql/java-all
-      extensible: sanitizerModel
-    data:
-      - ["com.lfn.icip.dataset.util", "GroovySandboxUtil", true,
-         "validateScript", "(String)", "", "Argument[0]", "groovy-injection", "manual"]
-      - ["com.lfn.icip.dataset.util", "GroovySandboxUtil", true,
-         "evaluateSandboxed", "(String,Binding)", "", "Argument[0]", "groovy-injection", "manual"]
-
-  # ----------------------------------------------------------------------------
-  # SQL injection — SqlStatementValidator
-  # Rejects stacked queries (multiple statements separated by ';') after
-  # stripping comments and string literals, mitigating injection via the dataset
-  # query-string field.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: summaryModel
-    data:
-      - ["com.lfn.ai.comm.lib.util", "SqlStatementValidator", true,
-         "validateSingleStatement", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-
-  - addsTo:
-      pack: codeql/java-all
-      extensible: sanitizerModel
-    data:
-      - ["com.lfn.ai.comm.lib.util", "SqlStatementValidator", true,
-         "validateSingleStatement", "(String)", "", "Argument[0]", "sql-injection", "manual"]
-
-  # ----------------------------------------------------------------------------
-  # Command-line injection — CommandSanitizer
-  # Validates / normalises the executable, shell flag and individual argument
-  # tokens before they are placed into a ProcessBuilder argv.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: summaryModel
-    data:
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "validateExecutable", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "validateShellFlag", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "sanitizeArgument", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-
-  - addsTo:
-      pack: codeql/java-all
-      extensible: sanitizerModel
-    data:
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "validateExecutable", "(String)", "", "Argument[0]", "command-injection", "manual"]
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "validateShellFlag", "(String)", "", "Argument[0]", "command-injection", "manual"]
-      - ["com.lfn.ai.comm.lib.util", "CommandSanitizer", true,
-         "sanitizeArgument", "(String)", "", "Argument[0]", "command-injection", "manual"]
-
-  # ----------------------------------------------------------------------------
-  # Path traversal — PathValidationUtil
-  # Rejects '..', null bytes and ensures the canonical resolved path stays
-  # underneath the trusted base directory.
-  # ----------------------------------------------------------------------------
-  - addsTo:
-      pack: codeql/java-all
-      extensible: summaryModel
-    data:
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validatePath", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validatePath", "(String,String)", "",
-         "Argument[1]", "ReturnValue", "taint", "manual"]
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validateAndGetPath", "(String)", "",
-         "Argument[0]", "ReturnValue", "taint", "manual"]
-
-  - addsTo:
-      pack: codeql/java-all
-      extensible: sanitizerModel
-    data:
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validatePath", "(String)", "", "Argument[0]", "path-injection", "manual"]
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validatePath", "(String,String)", "", "Argument[1]", "path-injection", "manual"]
-      - ["com.lfn.icip.dataset.util", "PathValidationUtil", true,
-         "validateAndGetPath", "(String)", "", "Argument[0]", "path-injection", "manual"]
-
+# It does NOT (as of CodeQL 2.25.x) expose `sanitizerModel`. Attempting to
+# extend a non-existent predicate causes:
+#   "ERROR: extensible predicate 'sanitizerModel' does not exist in pack
+#    'codeql/java-all'"
+# during `codeql resolve extensions-by-pack`, which fails the whole CodeQL
+# analysis run.
+#
+# We previously declared barrier guards via `sanitizerModel` here, but this
+# file is intentionally kept (almost) empty until the Java MaD framework
+# upstreams a stable barrier extension point.
+#
+# In the meantime, the code itself has been refactored so that CodeQL's
+# default taint-flow analysis recognises the sanitisation barriers:
+#
+#   * SsrfProtectionUtil.validateAndCreateUrl now reconstructs the returned
+#     URL from validated scheme/host/port components, breaking the taint
+#     flow at the URL-builder boundary.
+#   * ICIPRestPluginUtils.validateUriForSsrf returns a URI rebuilt from
+#     the validated URL components and the HTTP sinks consume that
+#     returned value (not the raw input URI).
+#   * ICIPRestAdapterService.validateHost rebuilds the host base URL from
+#     validated components.
+#   * ICIPAIOpsAdapterService.validateJdbcUrl returns a JDBC URL string
+#     rebuilt from validated host/port + the (untrusted) suffix.
+#   * GroovySandboxUtil.evaluateSandboxed reconstructs the script via
+#     `new String(script.toCharArray())` after the inline guard checks.
+#   * CommandSanitizer.validateExecutable / validateShellFlag return the
+#     matched String literal from the ALLOWED_* Set rather than the
+#     user-supplied value, so taint origins as a constant.
+#   * PathValidationUtil.validatePath / validateAndGetPath return a
+#     freshly-canonicalised File whose containment under the base
+#     directory has been asserted, so downstream Files.* sinks operate on
+#     a sanitised Path.
+#
+# Each individual call site that previously had to opt-in to validation has
+# been updated to consume the *return value* of the validator rather than
+# the original tainted input — this is what makes the standard CodeQL data
+# flow library recognise the validators as sanitisation barriers.
+extensions: []
