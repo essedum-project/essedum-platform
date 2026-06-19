@@ -38,7 +38,11 @@
     <!-- Log content card -->
     <div class="pod-log-card">
       <div class="pod-log-card-header">{{ LOGLABEL }}</div>
-      <pre class="pod-log-content">{{ data.logText || EMPTYLOG }}</pre>
+      <div *ngIf="loading" class="pod-log-loading">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span class="pod-log-loading-label">{{ LOADINGLABEL }}</span>
+      </div>
+      <pre *ngIf="!loading" class="pod-log-content">{{ logText || EMPTYLOG }}</pre>
     </div>
   </div>
 

@@ -66,6 +66,7 @@
           "options": {
             "port": 8087,
             "publicHost": "http://localhost:8087",
+            "proxyConfig": "proxy.config.json",
             "extraWebpackConfig": "projects/data-ops/webpack.config.js"
           }
         },

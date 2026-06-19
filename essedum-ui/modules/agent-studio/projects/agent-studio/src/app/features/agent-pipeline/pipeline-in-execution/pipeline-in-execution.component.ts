@@ -1,24 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpParams } from '@angular/common/http';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { interval, Subject } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 import { Services } from '@essedum/shared-lib';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PodLogDialogComponent } from './pod-log-dialog/pod-log-dialog.component';
+import { PodWatcherService } from '../../services/pod-watcher.service';
 
 export interface ExecutionPipeline {
-  cid: string;
-  name: string;
-  alias: string;
-  description: string;
-  type: string;
-  interfacetype: string;
-  createdDate: string;
-  createdBy: string;
-  pipelineMode: 'agent' | 'mcp' | 'app';
-  status: string;
+  pod_name:         string;
+  container_name:   string;
+  deployment_name:  string;
+  namespace:        string;
+  type:             string;
+  description:      string;
+  execution_status: string;
+  container_status: string;
+  pod_phase:        string;
+  ready:            boolean;
+  restarts:         number;
+  created_at:       string;
+  updated_at:       string;
+  age:              string;
+  pipelineMode:     'agent' | 'mcp' | 'app';
 }
 
 @Component({
@@ -26,9 +31,10 @@ export interface ExecutionPipeline {
   templateUrl: './pipeline-in-execution.component.html',
   styleUrls: ['./pipeline-in-execution.component.scss'],
 })
-export class PipelineInExecutionComponent implements OnInit {
+export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   loading = true;
   allPipelines: ExecutionPipeline[] = [];
+  private destroy$ = new Subject<void>();
   filteredPipelines: ExecutionPipeline[] = [];
   paginatedPipelines: ExecutionPipeline[] = [];
 
@@ -41,6 +47,7 @@ export class PipelineInExecutionComponent implements OnInit {
   readonly FILTERTYPELABEL    = 'Agent Type';
   readonly FILTERSTATUSLABEL  = 'Pipeline Status';
   readonly COLPIPELINE        = 'Pipeline';
+  readonly COLPODNAME         = 'Pod Name';
   readonly COLTYPE            = 'Type';
   readonly COLSTATUS          = 'Execution Status';
   readonly COLACTIONS         = 'Actions';
@@ -91,7 +98,8 @@ export class PipelineInExecutionComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private podWatcher: PodWatcherService
   ) {}
 
   ngOnInit(): void {
@@ -100,108 +108,36 @@ export class PipelineInExecutionComponent implements OnInit {
       this.selectedStatus = params['status'] || 'all';
       this.loadAllPipelines();
     });
+
+    // Auto-refresh pod list every 15 s
+    interval(15000)
+      .pipe(takeUntil(this.destroy$), switchMap(() => this.podWatcher.getPods('all')))
+      .subscribe(pods => {
+        this.allPipelines = pods.map(p => ({ ...p, pipelineMode: this.modeFromType(p.type) }));
+        this.applyFilters();
+      });
   }
 
-  private buildParams(mode: 'agent' | 'mcp' | 'app'): HttpParams {
-    const cfgMap = {
-      agent: { interfacetype: 'pipeline-agent', type: null },
-      mcp:   { interfacetype: 'mcp-pipeline',   type: 'mcpServer' },
-      app:   { interfacetype: 'app-pipeline',    type: 'appPipeline' },
-    };
-    const cfg = cfgMap[mode];
-    let params = new HttpParams()
-      .set('page', '1')
-      .set('size', '100')
-      .set('project', this.organization)
-      .set('isCached', 'true')
-      .set('adapter_instance', 'internal')
-      .set('interfacetype', cfg.interfacetype);
-    if (cfg.type) {
-      params = params.set('type', cfg.type);
-    }
-    return params;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadAllPipelines(): void {
     this.loading = true;
-    const modes: Array<'agent' | 'mcp' | 'app'> = ['agent', 'mcp', 'app'];
-
-    forkJoin(
-      modes.map(mode =>
-        this.service.getPipelinesCards(this.buildParams(mode)).pipe(catchError(() => of([])))
-      )
-    ).subscribe(([agentData, mcpData, appData]) => {
-      const toRows = (arr: any[], mode: 'agent' | 'mcp' | 'app'): ExecutionPipeline[] =>
-        (arr || []).map(p => ({
-          cid: p.cid,
-          name: p.name,
-          alias: p.alias || p.name,
-          description: p.description,
-          type: p.type,
-          interfacetype: mode === 'agent' ? 'pipeline-agent' : mode === 'mcp' ? 'mcp-pipeline' : 'app-pipeline',
-          createdDate: p.createdDate || p.created_date || '',
-          createdBy: p.target?.created_by || p.createdBy || '',
-          pipelineMode: mode,
-          status: this.deriveStatus(p),
-        }));
-
-      const dummyRunning: ExecutionPipeline[] = [
-        {
-          cid: 'dummy-running-001',
-          name: 'agent-pipeline-demo',
-          alias: 'Agent Pipeline Demo',
-          description: 'Demo running agent pipeline',
-          type: 'pipeline-agent',
-          interfacetype: 'pipeline-agent',
-          createdDate: '2026-06-09',
-          createdBy: 'admin',
-          pipelineMode: 'agent',
-          status: 'Running',
-        },
-        {
-          cid: 'dummy-success-001',
-          name: 'mcp-pipeline-success-demo',
-          alias: 'MCP Pipeline Success Demo',
-          description: 'Demo successful MCP pipeline',
-          type: 'mcpServer',
-          interfacetype: 'mcp-pipeline',
-          createdDate: '2026-06-09',
-          createdBy: 'admin',
-          pipelineMode: 'mcp',
-          status: 'Success',
-        },
-        {
-          cid: 'dummy-queued-001',
-          name: 'app-pipeline-queued-demo',
-          alias: 'App Pipeline Queued Demo',
-          description: 'Demo queued app pipeline',
-          type: 'appPipeline',
-          interfacetype: 'app-pipeline',
-          createdDate: '2026-06-09',
-          createdBy: 'admin',
-          pipelineMode: 'app',
-          status: 'Queued',
-        },
-      ];
-
-      this.allPipelines = [
-        ...dummyRunning,
-        ...toRows(agentData, 'agent'),
-        ...toRows(mcpData, 'mcp'),
-        ...toRows(appData, 'app'),
-      ];
+    this.podWatcher.getPods('all').subscribe(pods => {
+      this.allPipelines = pods.map(p => ({ ...p, pipelineMode: this.modeFromType(p.type) }));
       this.applyFilters();
       this.loading = false;
     });
   }
 
-  private deriveStatus(p: any): string {
-    if (p.running > 0)  return 'Running';
-    if (p.queued > 0)   return 'Queued';
-    if (p.finished > 0) return 'Success';
-    if (p.error > 0)    return 'Failed';
-    if (p.killed > 0)   return 'Inactive';
-    return 'Inactive';
+  /** Maps API type string to internal pipelineMode. */
+  private modeFromType(type: string): 'agent' | 'mcp' | 'app' {
+    const t = (type || '').toLowerCase();
+    if (t === 'agent') { return 'agent'; }
+    if (t === 'mcp')   { return 'mcp'; }
+    return 'app';
   }
 
   applyFilters(): void {
@@ -210,7 +146,7 @@ export class PipelineInExecutionComponent implements OnInit {
       result = result.filter(p => p.pipelineMode === this.selectedType);
     }
     if (this.selectedStatus !== 'all') {
-      result = result.filter(p => p.status.toLowerCase() === this.selectedStatus.toLowerCase());
+      result = result.filter(p => p.execution_status.toLowerCase() === this.selectedStatus.toLowerCase());
     }
     this.filteredPipelines = result;
     this.pageNumber = 1;
@@ -300,9 +236,10 @@ export class PipelineInExecutionComponent implements OnInit {
   }
 
   viewPipeline(pipeline: ExecutionPipeline): void {
-    this.service.getStreamingServicesByName(pipeline.name).subscribe((res: any) => {
+    const name = pipeline.container_name;
+    this.service.getStreamingServicesByName(name).subscribe((res: any) => {
       this.router.navigate(
-        [`../view/${pipeline.name}`],
+        [`../view/${name}`],
         {
           state: {
             cardTitle: pipeline.pipelineMode === 'mcp'
@@ -310,7 +247,7 @@ export class PipelineInExecutionComponent implements OnInit {
               : pipeline.pipelineMode === 'app'
               ? 'App Pipelines'
               : 'Pipeline Agent',
-            pipelineAlias: res?.alias || pipeline.alias,
+            pipelineAlias: res?.alias || pipeline.container_name,
             streamItem: res,
             card: pipeline,
             pipelineMode: pipeline.pipelineMode,
@@ -320,105 +257,34 @@ export class PipelineInExecutionComponent implements OnInit {
     });
   }
 
+  /** Opens PodLogDialogComponent — the dialog fetches live logs using the pod_name. */
   checkPodLog(pipeline: ExecutionPipeline): void {
-    const pipelineName = pipeline.alias || pipeline.name;
-    const status = pipeline.status.toLowerCase();
-
-    const logsMap: Record<string, string[]> = {
-      running: [
-        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
-        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
-        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
-        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
-        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
-        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
-        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
-        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
-        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
-        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
-         `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
-        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
-        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
-        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
-        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
-        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
-        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
-        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
-        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
-        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
-  `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
-        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
-        `[INFO]  2026-06-09 10:01:25 - Connecting to data source and validating credentials...`,
-        `[INFO]  2026-06-09 10:01:26 - Job scheduler picked up task for pipeline "${pipelineName}".`,
-        `[INFO]  2026-06-09 10:01:27 - Allocating compute resources for execution...`,
-        `[INFO]  2026-06-09 10:01:28 - Step 1/4: Data ingestion in progress...`,
-        `[INFO]  2026-06-09 10:01:29 - Step 2/4: Preprocessing records (1000 of 4200)...`,
-        `[INFO]  2026-06-09 10:01:30 - Step 3/4: Running model inference...`,
-        `[INFO]  2026-06-09 10:01:31 - Step 4/4: Writing output to target store...`,
-        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is actively running. Awaiting completion...`,
- 
-      ],
-      success: [
-        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
-        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
-        `[INFO]  2026-06-09 10:01:25 - All pre-execution checks passed.`,
-        `[INFO]  2026-06-09 10:01:26 - Step 1/4: Data ingestion completed. (4200 records loaded)`,
-        `[INFO]  2026-06-09 10:01:27 - Step 2/4: Preprocessing completed successfully.`,
-        `[INFO]  2026-06-09 10:01:28 - Step 3/4: Model inference completed. Accuracy: 98.7%`,
-        `[INFO]  2026-06-09 10:01:29 - Step 4/4: Output written to target store successfully.`,
-        `[INFO]  2026-06-09 10:01:30 - Committing transaction and releasing resources...`,
-        `[INFO]  2026-06-09 10:01:31 - Post-execution cleanup completed.`,
-        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" execution completed with status: SUCCESS.`,
-      ],
-      queued: [
-        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" submitted to execution queue.`,
-        `[INFO]  2026-06-09 10:01:24 - Validating pipeline configuration and dependencies...`,
-        `[INFO]  2026-06-09 10:01:25 - Configuration validation passed.`,
-        `[INFO]  2026-06-09 10:01:26 - Checking resource availability in cluster...`,
-        `[WARN]  2026-06-09 10:01:27 - Compute resources currently occupied. Pipeline placed in queue.`,
-        `[INFO]  2026-06-09 10:01:28 - Queue position: 3. Estimated wait time: ~2 minutes.`,
-        `[INFO]  2026-06-09 10:01:29 - Monitoring queue for slot availability...`,
-        `[INFO]  2026-06-09 10:01:30 - Queue position updated: 2.`,
-        `[INFO]  2026-06-09 10:01:31 - Queue position updated: 1. Execution will begin shortly.`,
-        `[INFO]  2026-06-09 10:01:32 - Pipeline "${pipelineName}" is queued and awaiting execution.`,
-      ],
-      failed: [
-        `[INFO]  2026-06-09 10:01:23 - Pipeline "${pipelineName}" execution started.`,
-        `[INFO]  2026-06-09 10:01:24 - Initializing job context and loading configuration...`,
-        `[WARN]  2026-06-09 10:01:25 - Retrying file path resolution (attempt 1 of 3)...`,
-        `[ERROR] 2026-06-09 10:01:26 - Error in getting file path : java.sql.SQLException - Invalid FileName`,
-        `[ERROR] 2026-06-09 10:01:26 - Error in Job Execution :`,
-        `[ERROR] 2026-06-09 10:01:27 - Error in running job : - Error in getting file path : java.sql.SQLException - Invalid FileName`,
-        `[ERROR] 2026-06-09 10:01:27 - com.lfn.ai.comm.lib.util.exceptions.EssedumException:`,
-        `[ERROR] 2026-06-09 10:01:27 - Error in running job : - Error in getting file path : java.sql.SQLException - Invalid FileName`,
-        `[INFO]  2026-06-09 10:01:28 - Rolling back transaction and releasing resources...`,
-        `[INFO]  2026-06-09 10:01:29 - Pipeline execution terminated with status: FAILED.`,
-      ],
-    };
-
-    const dummyLogs = (logsMap[status] ?? logsMap['failed']).join('\n');
     this.dialog.open(PodLogDialogComponent, {
       data: {
-        pipelineName: pipeline.alias || pipeline.name,
-        logText: dummyLogs,
+        pipelineName: pipeline.container_name,
+        pod_name:     pipeline.pod_name,
+        namespace:    pipeline.namespace,
       },
-      width: '760px',
-      maxWidth: '95vw',
-      maxHeight: '80vh',
+      width:      '760px',
+      maxWidth:   '95vw',
+      maxHeight:  '80vh',
       panelClass: 'pod-log-dialog-panel',
     });
   }
 
+  /** Stops the K8s deployment (container_name used as the deployment name). */
   deletePipelineAsContainer(pipeline: ExecutionPipeline): void {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { entityName: pipeline.alias || pipeline.name }
+      data: { entityName: pipeline.container_name }
     });
     ref.afterClosed().subscribe(result => {
       if (result === 'delete') {
-        this.service.deletePipeline(pipeline.cid).subscribe(() => {
-          this.service.message('Pipeline container deleted!', 'success');
-          this.loadAllPipelines();
-        });
+        this.podWatcher
+          .deleteContainer(pipeline.container_name, pipeline.namespace)
+          .subscribe(() => {
+            this.service.message('Pipeline container deleted!', 'success');
+            this.loadAllPipelines();
+          });
       }
     });
   }

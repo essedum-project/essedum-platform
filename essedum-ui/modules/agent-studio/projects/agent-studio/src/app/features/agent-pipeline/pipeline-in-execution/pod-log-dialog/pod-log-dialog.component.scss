@@ -150,6 +150,18 @@
   color: #c8d8ee;
 }
 
+.pod-log-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  color: #8fa8c8;
+
+  .pod-log-loading-label {
+    font-size: 13px;
+  }
+}
+
 .pod-log-content {
   margin: 0;
   padding: 4px 16px 14px;

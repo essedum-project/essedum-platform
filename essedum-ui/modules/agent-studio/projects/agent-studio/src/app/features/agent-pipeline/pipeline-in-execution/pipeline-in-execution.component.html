@@ -62,6 +62,7 @@
   <!-- Column Headers -->
   <div class="exec-table-header">
     <span class="col-name">{{ COLPIPELINE }}</span>
+    <span class="col-pod-name">{{ COLPODNAME }}</span>
     <span class="col-type">{{ COLTYPE }}</span>
     <span class="col-status">{{ COLSTATUS }}</span>
     <span class="col-actions">{{ COLACTIONS }}</span>
@@ -94,9 +95,14 @@
           <mat-icon>{{ getTypeIcon(pipeline.pipelineMode) }}</mat-icon>
         </div>
         <div class="exec-name-block">
-          <span class="exec-alias" [matTooltip]="pipeline.alias">{{ pipeline.alias }}</span>
-          <span class="exec-name-sub">{{ pipeline.name }}</span>
+          <span class="exec-alias" [matTooltip]="pipeline.container_name">{{ pipeline.container_name }}</span>
+          <span class="exec-name-sub">{{ pipeline.deployment_name }}</span>
         </div>
+      </div>
+
+      <!-- Pod Name -->
+      <div class="col-pod-name">
+        <span class="exec-pod-name" [matTooltip]="pipeline.pod_name">{{ pipeline.pod_name }}</span>
       </div>
 
       <!-- Type Badge -->
@@ -108,16 +114,16 @@
 
       <!-- Status -->
       <div class="col-status">
-        <span class="exec-status-badge status-{{ pipeline.status.toLowerCase() }}">
-          <mat-icon class="status-icon">{{ getStatusIcon(pipeline.status) }}</mat-icon>
-          {{ getStatusLabel(pipeline.status) }}
+        <span class="exec-status-badge status-{{ pipeline.execution_status.toLowerCase() }}">
+          <mat-icon class="status-icon">{{ getStatusIcon(pipeline.execution_status) }}</mat-icon>
+          {{ getStatusLabel(pipeline.execution_status) }}
         </span>
       </div>
 
       <!-- Actions (3-dot) -->
       <div class="col-actions">
         <button mat-icon-button [matMenuTriggerFor]="rowMenu" class="exec-action-btn"
-                *ngIf="pipeline.status.toLowerCase() !== 'inactive'">
+                *ngIf="pipeline.execution_status.toLowerCase() !== 'inactive'">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #rowMenu="matMenu" xPosition="before">
@@ -126,7 +132,7 @@
             <span>{{ VIEWPIPELINE }}</span>
           </button>
           <button mat-menu-item (click)="checkPodLog(pipeline)"
-                  *ngIf="['running','queued','success','failed'].includes(pipeline.status.toLowerCase())">
+                  *ngIf="['running','queued','success','failed'].includes(pipeline.execution_status.toLowerCase())">
             <mat-icon class="menu-icon-log">description</mat-icon>
             <span>{{ VIEWPODLOGS }}</span>
           </button>

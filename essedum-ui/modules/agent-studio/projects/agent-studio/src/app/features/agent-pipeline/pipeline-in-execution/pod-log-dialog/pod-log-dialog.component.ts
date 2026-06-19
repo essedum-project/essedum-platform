@@ -1,9 +1,11 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { PodWatcherService } from '../../../services/pod-watcher.service';
 
 export interface PodLogDialogData {
   pipelineName: string;
-  logText: string;
+  pod_name:     string;
+  namespace:    string;
 }
 
 @Component({
@@ -11,8 +13,10 @@ export interface PodLogDialogData {
   templateUrl: './pod-log-dialog.component.html',
   styleUrls: ['./pod-log-dialog.component.scss'],
 })
-export class PodLogDialogComponent {
-  copied = false;
+export class PodLogDialogComponent implements OnInit {
+  copied  = false;
+  loading = true;
+  logText = '';
 
   // Dynamic labels
   readonly TITLESUFFIX   = 'Pod Logs';
@@ -23,6 +27,7 @@ export class PodLogDialogComponent {
   readonly COPYTOOLTIP   = 'Copy to clipboard';
   readonly COPIEDTOOLTIP = 'Copied!';
   readonly CLOSETOOLTIP  = 'Close';
+  readonly LOADINGLABEL  = 'Fetching pod logs…';
 
   get dialogTitle(): string {
     return `${this.data.pipelineName} — ${this.TITLESUFFIX}`;
@@ -30,11 +35,25 @@ export class PodLogDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<PodLogDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: PodLogDialogData
+    @Inject(MAT_DIALOG_DATA) public data: PodLogDialogData,
+    private podWatcher: PodWatcherService
   ) {}
 
+  ngOnInit(): void {
+    this.podWatcher.getPodLogs(this.data.pod_name, this.data.namespace).subscribe({
+      next: text => {
+        this.logText = text;
+        this.loading = false;
+      },
+      error: () => {
+        this.logText = 'Failed to fetch logs. Check that the pod is Running.';
+        this.loading = false;
+      },
+    });
+  }
+
   copyText(): void {
-    navigator.clipboard.writeText(this.data.logText || '').then(() => {
+    navigator.clipboard.writeText(this.logText || '').then(() => {
       this.copied = true;
       setTimeout(() => (this.copied = false), 2000);
     });

@@ -66,6 +66,7 @@
           "options": {
             "port": 8085,
             "publicHost": "http://localhost:8085",
+            "proxyConfig": "proxy.config.json",
             "extraWebpackConfig": "projects/agent-studio/webpack.config.js"
           }
         },

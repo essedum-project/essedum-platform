@@ -3,7 +3,7 @@
   "version": "3.2.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 8080",
+    "start": "ng serve --port 8080 --proxy-config proxy.config.json",
     "build": "ng build --watch=true --build-optimizer=false --optimization=false --common-chunk=false --configuration development",
     "build-prod": "node --max_old_space_size=16000 ./node_modules/@angular/cli/bin/ng build shell --configuration production --aot=true",
     "test": "ng test",

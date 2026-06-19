@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
-    "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8085",
+    "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8085 --proxy-config proxy.config.json",
     "build": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build --watch --configuration development",
     "build-prod": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng build agent-studio --configuration production --aot=true",
     "test": "ng test"

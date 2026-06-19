@@ -237,7 +237,7 @@
 /* ── Column Headers ── */
 .exec-table-header {
   display: grid;
-  grid-template-columns: 35% 15% 30% 20%;
+  grid-template-columns: 26% 22% 12% 24% 16%;
   align-items: center;
   padding: 6px 24px;
   background: rgba(255, 255, 255, 0.02);
@@ -300,7 +300,7 @@
 /* ── Row ── */
 .exec-row {
   display: grid;
-  grid-template-columns: 35% 15% 30% 20%;
+  grid-template-columns: 26% 22% 12% 24% 16%;
   align-items: center;
   padding: 10px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -316,6 +316,21 @@
   align-items: center;
   gap: 10px;
   overflow: hidden;
+}
+
+.col-pod-name {
+  overflow: hidden;
+}
+
+.exec-pod-name {
+  display: block;
+  font-size: 11px;
+  color: #6e9abb;
+  font-family: 'Consolas', 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
 }
 
 .exec-type-icon {
