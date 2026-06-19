@@ -51,6 +51,19 @@ def _parse_keyword_rules(prompt: str) -> list[tuple[str, list[str]]]:
     return rules
 
 
+def _keyword_matches(keyword: str, needle: str, tokens: set[str]) -> bool:
+    """Return ``True`` if ``keyword`` matches the input.
+
+    Multi-word keywords use substring match; single-word keywords match on
+    whole-token boundaries to avoid spurious hits inside other words.
+    """
+    if not keyword:
+        return False
+    if " " in keyword:
+        return keyword in needle
+    return keyword in tokens
+
+
 def _match_keywords(
     rules: list[tuple[str, list[str]]],
     text: str,
@@ -68,13 +81,7 @@ def _match_keywords(
             if kw == "*":
                 fallback = route
                 continue
-            if not kw:
-                continue
-            # Multi-word keyword → fall back to substring match.
-            if " " in kw:
-                if kw in needle:
-                    return route
-            elif kw in tokens:
+            if _keyword_matches(kw, needle, tokens):
                 return route
     return fallback
 
@@ -113,6 +120,32 @@ async def _classify_with_llm(
     return None
 
 
+def _resolve_input_value(inputs: dict[str, Any]) -> Any:
+    """Pick the routable value from upstream inputs.
+
+    Tries ``input`` first, then a few common aliases, then any non-``None``
+    input, finally an empty string.
+    """
+    for key in ("input", "text", "message", "prompt", "value"):
+        candidate = inputs.get(key)
+        if candidate is not None:
+            return candidate
+    if inputs:
+        return next(iter(inputs.values()))
+    return ""
+
+
+def _resolve_available_routes(node: dict, config: dict) -> list[str]:
+    """Return the list of routes actually wired/declared on the node."""
+    definition = (node.get("data") or {}).get("definition") or {}
+    outputs_def = definition.get("outputs") or []
+    defined_routes = [str(o.get("id")) for o in outputs_def if o.get("id")]
+    available = (
+        config.get("available_routes") or defined_routes or list(DEFAULT_ROUTES)
+    )
+    return [r for r in available if r]
+
+
 class RouterAgentExecutor(BaseExecutor):
     async def execute(
         self,
@@ -125,31 +158,14 @@ class RouterAgentExecutor(BaseExecutor):
         classifier_model: str = (config.get("classifier_model") or "").strip()
         provider: str = (config.get("provider") or "ollama").strip()
 
-        # Determine which routes are actually wired downstream of this node so
-        # we never pick a dead-end route.
-        definition = (node.get("data") or {}).get("definition") or {}
-        outputs_def = definition.get("outputs") or []
-        defined_routes = [str(o.get("id")) for o in outputs_def if o.get("id")]
-        available = config.get("available_routes") or defined_routes or list(DEFAULT_ROUTES)
-        available = [r for r in available if r]  # drop empties
-
+        available = _resolve_available_routes(node, config)
         if not available:
             raise ValueError(
                 "Router Agent has no available routes. "
                 "Define output ports (route_a/route_b/...) on the node."
             )
 
-        # Resolve the routable value from inputs.
-        value: Any = inputs.get("input")
-        if value is None:
-            for key in ("text", "message", "prompt", "value"):
-                if inputs.get(key) is not None:
-                    value = inputs[key]
-                    break
-        if value is None and inputs:
-            value = next(iter(inputs.values()))
-        if value is None:
-            value = ""
+        value: Any = _resolve_input_value(inputs)
 
         # 1) Keyword rules
         rules = _parse_keyword_rules(routing_prompt)
