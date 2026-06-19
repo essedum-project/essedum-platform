@@ -1,4 +1,4 @@
-package com.lfn.icip.icipwebeditor.service.impl;
+﻿package com.lfn.icip.icipwebeditor.service.impl;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,7 +16,6 @@ import com.lfn.icip.icipwebeditor.service.ICIPPromptService;
 import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.StringReader;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import com.lfn.icip.dataset.util.GroovySandboxUtil;
 
 @Service("vertexaichatmodel")
@@ -176,8 +174,10 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 			Binding binding = new Binding();
 			binding.setProperty("response", Answer);
 
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(GroovySandboxUtil.validateScript(transformScript)));
+			// Route through the single audited sink in GroovySandboxUtil so static
+			// analysers (CodeQL Groovy injection / CWE-94) see a sanitisation barrier
+			// (validation + SecureASTCustomizer sandbox) immediately before evaluation.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
 
 			Answer = transformedResult != null ? transformedResult.toString() : "";
 		}

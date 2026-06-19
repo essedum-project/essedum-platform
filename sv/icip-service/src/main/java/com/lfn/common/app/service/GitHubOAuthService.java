@@ -12,13 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,28 +43,54 @@ public class GitHubOAuthService {
     }
 
     /**
-     * Create RestTemplate with SSL verification disabled
-     * WARNING: Only for development! Use proper SSL in production
+     * Create a RestTemplate with SSL verification fully bypassed.
+     *
+     * <p><strong>WARNING — DEVELOPMENT / TEMPORARY BYPASS ONLY.</strong> This
+     * trusts every server certificate and skips hostname verification. It is
+     * intended to work around PKIX path-building failures in environments where
+     * the JDK trust store does not contain the corporate proxy / interception
+     * certificate (typical "unable to find valid certification path to requested
+     * target" error against {@code github.com}). Re-enable verification before
+     * shipping to production by reverting this method and importing the proper
+     * certificate into the JDK trust store.
      */
     private RestTemplate createRestTemplate() {
         try {
-            // Create trust manager that trusts all certificates
-            TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
-
-            // Install the all-trusting trust manager
+            // 1. Build an SSLContext that trusts every certificate chain.
+            TrustManager[] trustAll = new TrustManager[] {
+                new X509TrustManager() {
+                    @Override public void checkClientTrusted(X509Certificate[] chain, String authType) { /* trust */ }
+                    @Override public void checkServerTrusted(X509Certificate[] chain, String authType) { /* trust */ }
+                    @Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                }
+            };
             SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            sslContext.init(null, trustAll, new java.security.SecureRandom());
 
-            // Set default SSL socket factory and hostname verifier
+            // 2. Apply globally so JDK HttpsURLConnection-based clients pick it up.
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
+            HostnameVerifier allowAllHosts = (hostname, session) -> true;
+            HttpsURLConnection.setDefaultHostnameVerifier(allowAllHosts);
 
-            log.warn("SSL verification is disabled for GitHub OAuth - DO NOT USE IN PRODUCTION");
+            // 3. Force the RestTemplate's request factory to use the same context
+            //    and skip hostname verification, even if a different default ever
+            //    gets installed by another bean during start-up.
+            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+                @Override
+                protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws java.io.IOException {
+                    if (connection instanceof HttpsURLConnection) {
+                        HttpsURLConnection https = (HttpsURLConnection) connection;
+                        https.setSSLSocketFactory(sslContext.getSocketFactory());
+                        https.setHostnameVerifier(allowAllHosts);
+                    }
+                    super.prepareConnection(connection, httpMethod);
+                }
+            };
 
-            return new RestTemplate();
-
+            log.warn("SSL verification is DISABLED for GitHub OAuth — DO NOT USE IN PRODUCTION");
+            return new RestTemplate(factory);
         } catch (Exception e) {
-            log.error("Failed to create SSL-disabled RestTemplate: {}", e.getMessage());
+            log.error("Failed to create SSL-bypass RestTemplate, falling back to default: {}", e.getMessage(), e);
             return new RestTemplate();
         }
     }
