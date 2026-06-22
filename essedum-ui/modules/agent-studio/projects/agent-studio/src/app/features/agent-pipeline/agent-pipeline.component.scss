@@ -995,3 +995,315 @@
   }
   .upload-dialog-footer { border-top-color: #e1e4e8; .cancel-btn { border-color: #e1e4e8 !important; color: #656d76 !important; &:hover { border-color: rgba(79, 70, 229, 0.3) !important; color: #4f46e5 !important; } } }
 }
+
+// =============================================================================
+// ENVIRONMENT TAB  (dark theme — default)
+// =============================================================================
+.env-tab-wrapper {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Collapsible section ───────────────────────────────────────────────────────
+.collapsible-section {
+  border: 1px solid rgba(68, 128, 245, 0.14);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(68, 128, 245, 0.05);
+  border-bottom: 1px solid rgba(68, 128, 245, 0.1);
+  transition: background 0.15s;
+
+  &:hover { background: rgba(68, 128, 245, 0.1); }
+}
+
+.collapse-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #6e9abb;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+
+  &.expanded { transform: rotate(90deg); }
+}
+
+.collapse-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dde8f5;
+  flex: 1;
+}
+
+.collapse-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(68, 128, 245, 0.15);
+  border: 1px solid rgba(68, 128, 245, 0.25);
+  color: #6e9abb;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ── Collapsible body ──────────────────────────────────────────────────────────
+.collapsible-body {
+  padding: 16px;
+  transition: none;
+
+  &.collapsed { display: none; }
+}
+
+// ── Env card (wraps table + empty state + add button) ────────────────────────
+.env-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+.env-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead tr {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6e9abb;
+    border-bottom: 1px solid rgba(68, 128, 245, 0.12);
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(68, 128, 245, 0.07);
+    color: #dde8f5;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: rgba(68, 128, 245, 0.05); }
+
+  .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(68, 128, 245, 0.25);
+    border-radius: 6px;
+    color: #dde8f5;
+    font-size: 13px;
+    padding: 5px 10px;
+    width: 100%;
+    outline: none;
+    &:focus { border-color: rgba(68, 128, 245, 0.6); box-shadow: 0 0 0 3px rgba(68, 128, 245, 0.1); }
+    &::placeholder { color: #3a5570; }
+  }
+}
+
+.env-cell-text {
+  display: inline-block;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 13px;
+  color: #dde8f5;
+}
+
+.env-cell-empty { color: #3a5570 !important; font-style: italic; }
+
+// ── Action icons ──────────────────────────────────────────────────────────────
+.env-action-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  cursor: pointer;
+  color: #6e9abb;
+  margin-right: 6px;
+  transition: color 0.15s;
+  vertical-align: middle;
+
+  &:hover { color: #4480f5; }
+
+  &:last-child { margin-right: 0; }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.env-empty-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(68, 128, 245, 0.15);
+  color: #3a5570;
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #3a5570;
+    flex-shrink: 0;
+  }
+}
+
+// ── Add button ────────────────────────────────────────────────────────────────
+.env-add-btn {
+  align-self: flex-start;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  background: rgba(68, 128, 245, 0.12) !important;
+  border: 1px solid rgba(68, 128, 245, 0.3) !important;
+  color: #4480f5 !important;
+  transition: all 0.15s !important;
+  box-shadow: none !important;
+
+  mat-icon {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+  }
+
+  &:hover {
+    background: rgba(68, 128, 245, 0.2) !important;
+    border-color: rgba(68, 128, 245, 0.5) !important;
+    box-shadow: 0 4px 14px rgba(68, 128, 245, 0.2) !important;
+  }
+}
+
+// ── Secret-specific ───────────────────────────────────────────────────────────
+.secret-value-mask {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #dde8f5;
+  font-size: 13px;
+}
+
+.secret-eye-icon {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: #6e9abb !important;
+  cursor: pointer;
+  flex-shrink: 0;
+  &:hover { color: #4480f5 !important; }
+}
+
+.secret-value-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(68, 128, 245, 0.25) !important;
+  border-radius: 6px !important;
+  color: #dde8f5 !important;
+  font-size: 13px !important;
+  padding: 5px 10px !important;
+  width: 100% !important;
+  outline: none !important;
+  &:focus { border-color: rgba(68, 128, 245, 0.6) !important; }
+}
+
+// =============================================================================
+// ENVIRONMENT TAB  (light theme overrides)
+// =============================================================================
+:host-context(body.header-light-theme) {
+  .collapsible-section {
+    border-color: rgba(71, 66, 220, 0.14);
+    background: rgba(71, 66, 220, 0.01);
+  }
+
+  .collapsible-header {
+    background: rgba(71, 66, 220, 0.04);
+    border-bottom-color: rgba(71, 66, 220, 0.1);
+    &:hover { background: rgba(71, 66, 220, 0.08); }
+  }
+
+  .collapse-icon { color: #64748b; }
+
+  .collapse-title { color: #0f172a; }
+
+  .collapse-badge {
+    background: rgba(71, 66, 220, 0.08);
+    border-color: rgba(71, 66, 220, 0.2);
+    color: #4742dc;
+  }
+
+  .env-table {
+    thead tr { background: rgba(71, 66, 220, 0.03); }
+    th { color: #64748b; border-bottom-color: rgba(71, 66, 220, 0.1); }
+    td { color: #0f172a; border-bottom-color: rgba(71, 66, 220, 0.06); }
+    tbody tr:hover td { background: rgba(71, 66, 220, 0.04); }
+
+    .form-control {
+      background: #ffffff;
+      border-color: rgba(71, 66, 220, 0.25);
+      color: #0f172a;
+      &:focus { border-color: rgba(71, 66, 220, 0.55); box-shadow: 0 0 0 3px rgba(71, 66, 220, 0.08); }
+      &::placeholder { color: #94a3b8; }
+    }
+  }
+
+  .env-cell-text { color: #0f172a; }
+  .env-cell-empty { color: #94a3b8 !important; }
+
+  .env-action-icon { color: #64748b; &:hover { color: #4742dc; } }
+
+  .env-empty-state {
+    background: rgba(71, 66, 220, 0.02);
+    border-color: rgba(71, 66, 220, 0.14);
+    color: #94a3b8;
+    mat-icon { color: #94a3b8; }
+  }
+
+  .env-add-btn {
+    background: rgba(71, 66, 220, 0.07) !important;
+    border-color: rgba(71, 66, 220, 0.25) !important;
+    color: #4742dc !important;
+    &:hover {
+      background: rgba(71, 66, 220, 0.13) !important;
+      border-color: rgba(71, 66, 220, 0.45) !important;
+      box-shadow: 0 4px 14px rgba(71, 66, 220, 0.14) !important;
+    }
+  }
+
+  .secret-value-mask { color: #0f172a; }
+  .secret-eye-icon { color: #64748b !important; &:hover { color: #4742dc !important; } }
+
+  .secret-value-input {
+    background: #ffffff !important;
+    border-color: rgba(71, 66, 220, 0.25) !important;
+    color: #0f172a !important;
+    &:focus { border-color: rgba(71, 66, 220, 0.55) !important; }
+  }
+}

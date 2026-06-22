@@ -110,8 +110,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
 
   // Collapsible section state
-  envCollapsed = false;
-  secretsCollapsed = false;
+  envCollapsed = true;
+  secretsCollapsed = true;
 
   // Env-var inline edit state
   envEditIndex: number | null = null;
@@ -2925,9 +2925,26 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
-        
+
         this.runnerServiceStatus = jsonContent.runner_service_status === true;
         this.isPlaygroundEnabled = this.runnerServiceStatus;
+
+        // Restore env vars from jsonContent.environment
+        const envData = jsonContent.environment;
+        if (Array.isArray(envData)) {
+          this.dynamicEnvArray = envData;
+        }
+
+        // Restore secrets from jsonContent.elements[0].attributes.usedSecrets
+        const secretData = jsonContent.elements?.[0]?.attributes?.usedSecrets;
+        if (Array.isArray(secretData)) {
+          this.dynamicSecretsArray = secretData;
+          this.secretsShowValue = secretData.map(() => false);
+        }
+
+        // Auto-expand if data exists, collapse if empty
+        this.envCollapsed = this.dynamicEnvArray.length === 0;
+        this.secretsCollapsed = this.dynamicSecretsArray.length === 0;
 
         // Trigger change detection
         this.cdr.detectChanges();
@@ -3641,10 +3658,37 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  // Call the upload API for pipeline cards
+  // ── Env/Secrets persistence ───────────────────────────────────────────────────
+
+  private async persistEnvAndSecrets(): Promise<void> {
+    if (!this.currentCname) return;
+    try {
+      const organization = this.getOrganization();
+      const url = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      const response = await this.http.get<any>(url).toPromise();
+      if (!response) return;
+      const jsonContent = response.json_content ? JSON.parse(response.json_content) : {};
+      // Write env vars to jsonContent.environment
+      jsonContent.environment = this.dynamicEnvArray;
+      // Write secrets to jsonContent.elements[0].attributes.usedSecrets
+      if (!Array.isArray(jsonContent.elements) || jsonContent.elements.length === 0) {
+        jsonContent.elements = [{ attributes: {} }];
+      }
+      if (!jsonContent.elements[0].attributes) {
+        jsonContent.elements[0].attributes = {};
+      }
+      jsonContent.elements[0].attributes.usedSecrets = this.dynamicSecretsArray;
+      const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+      await this.http.put<any>(updateUrl, { ...response, json_content: JSON.stringify(jsonContent) }).toPromise();
+    } catch (error) {
+      console.error('Error persisting env/secrets:', error);
+    }
+  }
+
   // ── Environment-variable CRUD ────────────────────────────────────────────────
 
   addEnvVar(): void {
+    this.envCollapsed = false;
     this.dynamicEnvArray = [...this.dynamicEnvArray, { name: '', value: '' }];
     this.envEditIndex = this.dynamicEnvArray.length - 1;
     this.envEditMode = true;
@@ -3658,6 +3702,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   saveEnvVar(_index: number): void {
     this.envEditIndex = null;
     this.envEditMode = false;
+    this.persistEnvAndSecrets();
   }
 
   deleteEnvVar(index: number): void {
@@ -3666,11 +3711,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.envEditIndex = null;
       this.envEditMode = false;
     }
+    this.envCollapsed = this.dynamicEnvArray.length === 0;
+    this.persistEnvAndSecrets();
   }
 
   // ── Secrets CRUD ─────────────────────────────────────────────────────────────
 
   addSecret(): void {
+    this.secretsCollapsed = false;
     this.dynamicSecretsArray = [...this.dynamicSecretsArray, { name: '', value: '' }];
     this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
     this.secretsEditMode = true;
@@ -3685,6 +3733,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   saveSecret(_index: number): void {
     this.secretsEditIndex = null;
     this.secretsEditMode = false;
+    this.persistEnvAndSecrets();
   }
 
   deleteSecret(index: number): void {
@@ -3694,6 +3743,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.secretsEditIndex = null;
       this.secretsEditMode = false;
     }
+    this.secretsCollapsed = this.dynamicSecretsArray.length === 0;
+    this.persistEnvAndSecrets();
   }
 
   toggleSecretVisibility(index: number): void {
