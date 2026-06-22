@@ -3688,6 +3688,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // ── Environment-variable CRUD ────────────────────────────────────────────────
 
   addEnvVar(): void {
+    if (this.envEditMode) return;
     this.envCollapsed = false;
     this.dynamicEnvArray = [...this.dynamicEnvArray, { name: '', value: '' }];
     this.envEditIndex = this.dynamicEnvArray.length - 1;
@@ -3695,9 +3696,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   editEnvVar(index: number): void {
+    if (this.envEditMode && this.envEditIndex !== index) return;
     this.envEditIndex = index;
     this.envEditMode = true;
   }
+
+  trackByIndex(index: number): number { return index; }
 
   saveEnvVar(_index: number): void {
     this.envEditIndex = null;
@@ -3718,6 +3722,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // ── Secrets CRUD ─────────────────────────────────────────────────────────────
 
   addSecret(): void {
+    if (this.secretsEditMode) return;
     this.secretsCollapsed = false;
     this.dynamicSecretsArray = [...this.dynamicSecretsArray, { name: '', value: '' }];
     this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
@@ -3726,6 +3731,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   editSecret(index: number): void {
+    if (this.secretsEditMode && this.secretsEditIndex !== index) return;
     this.secretsEditIndex = index;
     this.secretsEditMode = true;
   }
