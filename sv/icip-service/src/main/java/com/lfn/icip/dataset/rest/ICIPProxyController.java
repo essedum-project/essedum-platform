@@ -171,10 +171,8 @@ public class ICIPProxyController {
 	public ResponseEntity<String> getData(@PathVariable(name = "dsetalias") String dsetalias,
 			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
 			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
 		ICIPMlIntstance iCIPMlIntstance=null;
 		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
@@ -249,6 +247,10 @@ public class ICIPProxyController {
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
 				Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy GET", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	private JSONArray addParamsOfDataset(JSONArray parameters, Map<String, String> datasetParamsMap) {
@@ -367,10 +369,8 @@ public class ICIPProxyController {
 			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
 			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestBody String body)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestBody String body) {
+		try {
 		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
 		ICIPMlIntstance iCIPMlIntstance=null;
 		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
@@ -443,16 +443,18 @@ public class ICIPProxyController {
 //		attributes = new JSONObject(dset.getAttributes()).put("Body", body).toString();
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, "10", false, false, 0, null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy POST", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	@DeleteMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> deleteData(@PathVariable(name = "dsetalias") String dsetalias,
 			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
 			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
 		ICIPMlIntstance iCIPMlIntstance=null;
 		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
@@ -525,6 +527,10 @@ public class ICIPProxyController {
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
 				Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy DELETE", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	@GetMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
@@ -564,10 +570,8 @@ public class ICIPProxyController {
 	public ResponseEntity<String> deleteDbData(@PathVariable(name = "dsetalias") String dsetalias,
 			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
 			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestParam Map<String, String> params) {
+		try {
 		ICIPDatasource dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 				.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
 		ICIPDataset2 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
@@ -578,6 +582,10 @@ public class ICIPProxyController {
 		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
 				Integer.parseInt(params.getOrDefault("page", "0")), params.getOrDefault("sortEvent", null),
 				Integer.parseInt(params.getOrDefault("sortOrder", "-1")), removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy DB DELETE", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	/**

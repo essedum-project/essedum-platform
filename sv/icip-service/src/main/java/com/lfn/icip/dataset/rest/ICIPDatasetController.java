@@ -2411,9 +2411,14 @@ public class ICIPDatasetController {
 	
 	@PostMapping(value = "/generateFormTemplate")
 	public ResponseEntity<String> generateFormTemplate(@RequestParam("datasetName") String datasetName,
-			@RequestParam("org") String org, @RequestBody String templateDetails) throws Exception {
-		String formTemplateResp = datasetService.generateFormTemplate(new JSONObject(templateDetails), datasetName, org);
-		return new ResponseEntity<>(HtmlUtils.htmlEscape(formTemplateResp), HttpStatus.OK);
+			@RequestParam("org") String org, @RequestBody String templateDetails) {
+		try {
+			String formTemplateResp = datasetService.generateFormTemplate(new JSONObject(templateDetails), datasetName, org);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(formTemplateResp), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Error generating form template", e);
+			return new ResponseEntity<>("Operation failed", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	private List<ICIPDataset> encryptDatasetAttributes(List<ICIPDataset> datasetList) {
@@ -2595,8 +2600,8 @@ public class ICIPDatasetController {
 			@RequestParam(value = "knowledgeBases", required = false) List<String> knowledgeBases) {
 		logger.info("Advance Filter -Count called : {}", organization);
 		Long results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types, tags,
-				knowledgeBases);
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
+			knowledgeBases);
+		return ResponseEntity.status(200).body(results);
 	}
 
 	@GetMapping("/filter/advanced/list")
@@ -2610,8 +2615,8 @@ public class ICIPDatasetController {
 			@RequestParam(name = "size", defaultValue = "8", required = false) String size) {
 		logger.info("Advance Filter -List called : {}", organization);
 		List<ICIPDataset> results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types,
-				tags, knowledgeBases, page, size);
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
+			tags, knowledgeBases, page, size);
+		return ResponseEntity.status(200).body(results);
 	}
 	
 	@GetMapping("/filter/advanced/types")
@@ -2619,7 +2624,7 @@ public class ICIPDatasetController {
 			@RequestParam(value = "organization") String organization) {
 		logger.info("Advance Filter -Types List called : {}", organization);
 		List<String> results = datasetService.getDatasetTypesForAdvancedFilter(organization);
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
+		return ResponseEntity.status(200).body(results);
 	}
 	
 	@GetMapping("/fetchDatasetForSchemaAliasAndOrganization")
@@ -2631,7 +2636,7 @@ public class ICIPDatasetController {
 				.getDatasetForSchemaAlias(schemaAlias, org);
 		if (resultsFetchDatasetForSchemaNameAndOrganization == null)
 			resultsFetchDatasetForSchemaNameAndOrganization = new ArrayList<>();
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultsFetchDatasetForSchemaNameAndOrganization));
+		return ResponseEntity.status(200).body(resultsFetchDatasetForSchemaNameAndOrganization);
 	}
 
 	@GetMapping("/fetchNavigationDetailsBySchemaNameAndOrganization")
@@ -2641,7 +2646,7 @@ public class ICIPDatasetController {
 		logger.info("Fetching Navigation Details for Schema : {} ,Org : {}", schemaName, org);
 		List<ICIPDatasourceSummary> resultsForNavigationDetailsBySchemaNameAndOrganization = dataset2Service
 				.getNavigationDetailsBySchemaNameAndOrganization(schemaName, org);
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultsForNavigationDetailsBySchemaNameAndOrganization));
+		return ResponseEntity.status(200).body(resultsForNavigationDetailsBySchemaNameAndOrganization);
 	}
 	
 	@GetMapping(path = "/getDataFromDatasets")
