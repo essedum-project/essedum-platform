@@ -107,6 +107,21 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   loadScript: boolean = false;
   scriptFileName = '';
   dynamicEnvArray: Array<DynamicParamsGrid> = [];
+  dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
+
+  // Collapsible section state
+  envCollapsed = false;
+  secretsCollapsed = false;
+
+  // Env-var inline edit state
+  envEditIndex: number | null = null;
+  envEditMode = false;
+
+  // Secrets inline edit state
+  secretsEditIndex: number | null = null;
+  secretsEditMode = false;
+  secretsShowValue: boolean[] = [];
+
   isExpand: boolean = true;
   uploader: FileUploader;
   cardName: any;
@@ -3627,6 +3642,64 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   // Call the upload API for pipeline cards
+  // ── Environment-variable CRUD ────────────────────────────────────────────────
+
+  addEnvVar(): void {
+    this.dynamicEnvArray = [...this.dynamicEnvArray, { name: '', value: '' }];
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+  }
+
+  editEnvVar(index: number): void {
+    this.envEditIndex = index;
+    this.envEditMode = true;
+  }
+
+  saveEnvVar(_index: number): void {
+    this.envEditIndex = null;
+    this.envEditMode = false;
+  }
+
+  deleteEnvVar(index: number): void {
+    this.dynamicEnvArray = this.dynamicEnvArray.filter((_, i) => i !== index);
+    if (this.envEditIndex === index) {
+      this.envEditIndex = null;
+      this.envEditMode = false;
+    }
+  }
+
+  // ── Secrets CRUD ─────────────────────────────────────────────────────────────
+
+  addSecret(): void {
+    this.dynamicSecretsArray = [...this.dynamicSecretsArray, { name: '', value: '' }];
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsShowValue = [...this.secretsShowValue, false];
+  }
+
+  editSecret(index: number): void {
+    this.secretsEditIndex = index;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(_index: number): void {
+    this.secretsEditIndex = null;
+    this.secretsEditMode = false;
+  }
+
+  deleteSecret(index: number): void {
+    this.dynamicSecretsArray = this.dynamicSecretsArray.filter((_, i) => i !== index);
+    this.secretsShowValue = this.secretsShowValue.filter((_, i) => i !== index);
+    if (this.secretsEditIndex === index) {
+      this.secretsEditIndex = null;
+      this.secretsEditMode = false;
+    }
+  }
+
+  toggleSecretVisibility(index: number): void {
+    this.secretsShowValue[index] = !this.secretsShowValue[index];
+  }
+
   /**
    * Component cleanup
    */
