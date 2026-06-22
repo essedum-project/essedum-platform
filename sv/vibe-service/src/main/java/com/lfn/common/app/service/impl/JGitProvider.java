@@ -193,6 +193,7 @@ public class JGitProvider implements GitStorageProvider {
      * Recursively delete a directory
      */
     private void deleteDirectory(File directory) throws IOException {
+        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(directory.getAbsolutePath());
         if (directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null) {

@@ -193,6 +193,11 @@ public class JGitProvider implements GitStorageProvider {
      * Recursively delete a directory
      */
     private void deleteDirectory(File directory) throws IOException {
+        // Defence-in-depth barrier so CodeQL java/path-injection sees a
+        // sanitiser between any user-controlled path and the recursive
+        // Files.delete sink below. Reject traversal sequences in the absolute
+        // path string before walking the tree.
+        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(directory.getAbsolutePath());
         if (directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null) {
@@ -420,7 +425,18 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Write all new files to the directory
                 for (FileContent file : files) {
-                    Path filePath = tempDir.resolve(file.getPath());
+                    // Validate the user-supplied relative path stays inside
+                    // tempDir (CodeQL java/path-injection). Skip suspicious
+                    // entries instead of writing them outside the workdir.
+                    Path filePath;
+                    try {
+                        File safe = com.lfn.common.app.util.PathValidationUtil
+                                .validatePath(tempDir.toFile().getCanonicalPath(), file.getPath());
+                        filePath = safe.toPath();
+                    } catch (IllegalArgumentException iae) {
+                        log.warn("Skipping suspicious file path: {} ({})", file.getPath(), iae.getMessage());
+                        continue;
+                    }
 
                     // Create parent directories if they don't exist
                     Files.createDirectories(filePath.getParent());

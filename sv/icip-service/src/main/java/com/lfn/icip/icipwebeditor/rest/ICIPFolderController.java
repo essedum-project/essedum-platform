@@ -35,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -500,7 +501,7 @@ public class ICIPFolderController {
                 String message = String.format("Successfully uploaded to MinIO: bucket=%s, objectKey=%s",
                                               bucketName, finalObjectKey);
                 logger.info(message);
-                return ResponseEntity.ok(message);
+            return ResponseEntity.ok(HtmlUtils.htmlEscape(message));
             } else {
                 String message = String.format("Failed to upload to MinIO for cname=%s, org=%s", cname, org);
                 logger.error(message);
