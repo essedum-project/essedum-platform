@@ -715,7 +715,7 @@ public class ICIPDatasetController {
 			if (pluginService.getDataSetService(dataset).testConnection(dataset))
 				return new ResponseEntity<>("SUCCESS", new HttpHeaders(), HttpStatus.OK);
 		} catch (EssedumException e) {
-			return new ResponseEntity<>(String.format("%s%s", "FAILED : ", e.getMessage()), new HttpHeaders(),
+			return new ResponseEntity<>("FAILED : connection test failed", new HttpHeaders(),
 					HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(String.format("%s", "FAILED : "), new HttpHeaders(), HttpStatus.BAD_REQUEST);
@@ -873,7 +873,7 @@ public class ICIPDatasetController {
 		}
 		catch (InvalidKeyException |IllegalBlockSizeException | SQLException |NoSuchPaddingException e) {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
-			return new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Failed to fetch dataset data", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -1307,7 +1307,7 @@ public class ICIPDatasetController {
 					pluginService.getAllObjects(datasetName, schemaName, projectName, size, page, sortEvent, sortOrder),
 					new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1329,7 +1329,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.getObjectsCount(datasetName, projectName), new HttpHeaders(),
 					HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1359,7 +1359,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.getS3FileData(datasetService.getDataset(datasetName, org),
 					fileName), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1375,7 +1375,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.getS3FileInfo(datasetService.getDataset(datasetName, org),
 					fileName), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1392,7 +1392,7 @@ public class ICIPDatasetController {
 					fileName), new HttpHeaders(),
 					HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1427,7 +1427,7 @@ public class ICIPDatasetController {
 			return ResponseEntity.status(400).body("Issue with query, please check dataset");
 			
 			}catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1464,7 +1464,7 @@ public class ICIPDatasetController {
 		}
 		
 		catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1507,7 +1507,7 @@ public class ICIPDatasetController {
 					| DataAccessResourceFailureException | JDBCConnectionException | TransactionException
 					| JpaSystemException e) {
 				logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
-				return new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Failed to fetch dataset data", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 			}
 		} else {
 			return new ResponseEntity<>("Scheduler Paused", HttpStatus.CONFLICT);
@@ -1542,7 +1542,7 @@ public class ICIPDatasetController {
 		try {
 			resp = new ResponseEntity<>(pluginService.getDownloadFullCsv(datasetName,projectName), new HttpHeaders(), HttpStatus.OK);	
 			} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1564,7 +1564,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.getDownloadCsv(datasetName, projectName, chunkSize, apiCount,
 					sortEvent, sortOrder, searchParams, fieldsToDownload), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1600,7 +1600,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.getTicketsForRange(datasetName, projectName, size, page,
 					sortEvent, sortOrder, searchParams, "0", columnName, dateFilter), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1624,7 +1624,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.saveEntry(rowData, action, datasetName, projectName),
 					new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1698,7 +1698,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(pluginService.tagDetails(datasetName, projectName, data), new HttpHeaders(),
 					HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -1964,7 +1964,7 @@ public class ICIPDatasetController {
 
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
-			response = new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+			response = new ResponseEntity<String>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 		return response;
 	}
@@ -1994,7 +1994,7 @@ public class ICIPDatasetController {
 
 		} catch (Exception ex) {
 			logger.error(ex.getMessage());
-			response = new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+			response = new ResponseEntity<String>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 
 		return response;
@@ -2131,7 +2131,7 @@ public class ICIPDatasetController {
 			String reStr = datasetService.saveViews(views, datasetName, projectName);
 			resp = new ResponseEntity<>(reStr, new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -2174,7 +2174,7 @@ public class ICIPDatasetController {
 			String reStr = pluginService.saveEntry(rowData, "delete", datasetName, projectName);
 			resp = new ResponseEntity<>(reStr, new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
 		}
 		return resp;
@@ -2195,7 +2195,7 @@ public class ICIPDatasetController {
 			resp = new ResponseEntity<>(dataset, new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("Error in getting dataset from dashboard", e);
-			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(e.getMessage()), HttpStatus.BAD_REQUEST);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 		return resp;
 	}
