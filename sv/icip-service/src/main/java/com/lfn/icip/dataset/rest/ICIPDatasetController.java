@@ -750,11 +750,13 @@ public class ICIPDatasetController {
 	public ResponseEntity<String> getData1(@PathVariable(name = "nameStr") String name,
 			@PathVariable(name = "org") String org,
 			@RequestHeader(name = "attributes", required = false) String attributes,
-			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		return getCompleteData(name, org, attributes, limit, false, false, 0, null, -1);
+			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit) {
+		try {
+			return getCompleteData(name, org, attributes, limit, false, false, 0, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in viewData", e);
+			return ResponseEntity.internalServerError().body("Request failed");
+		}
 	}
 
 	/**
@@ -785,29 +787,29 @@ public class ICIPDatasetController {
 	@PostMapping(path = "/direct/viewData/{name}/{org}")
 	public ResponseEntity<String> getDirectData1(@PathVariable(name = "name") String name,
 			@PathVariable(name = "org") String org, @RequestBody ICIPDatasetDTO datasetDTO,
-			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-
-		ModelMapper modelmapper = new ModelMapper();
-		Converter<Map<String, String>, String> converter = new Converter<>() {
-			@Override
-			public String convert(MappingContext<Map<String, String>, String> attr) {
-				JSONObject jObj = new JSONObject();
-				attr.getSource().entrySet().stream().forEach(entry -> {
-					jObj.put(entry.getKey(), entry.getValue());
-				});
-				return jObj.toString();
-			}
-		};
-		logger.info(datasetDTO.toString());
-		modelmapper.addConverter(converter);
-//		ICIPDatasetDTO datasetDTO = new ObjectMapper().readValue(dataset, ICIPDatasetDTO.class);
-		ICIPDataset datasetstr = modelmapper.map(datasetDTO, ICIPDataset.class);
-		String results = pluginService.getDataSetService(datasetstr).getDatasetData(datasetstr,
-				new SQLPagination(0, Integer.parseInt(limit), null, 0), DATATYPE.DATA, String.class);
-		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
+			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit) {
+		try {
+			ModelMapper modelmapper = new ModelMapper();
+			Converter<Map<String, String>, String> converter = new Converter<>() {
+				@Override
+				public String convert(MappingContext<Map<String, String>, String> attr) {
+					JSONObject jObj = new JSONObject();
+					attr.getSource().entrySet().stream().forEach(entry -> {
+						jObj.put(entry.getKey(), entry.getValue());
+					});
+					return jObj.toString();
+				}
+			};
+			logger.info(datasetDTO.toString());
+			modelmapper.addConverter(converter);
+			ICIPDataset datasetstr = modelmapper.map(datasetDTO, ICIPDataset.class);
+			String results = pluginService.getDataSetService(datasetstr).getDatasetData(datasetstr,
+					new SQLPagination(0, Integer.parseInt(limit), null, 0), DATATYPE.DATA, String.class);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
+		} catch (Exception e) {
+			logger.error("Error in direct viewData", e);
+			return ResponseEntity.internalServerError().body("Request failed");
+		}
 	}
 
 	/**
@@ -838,11 +840,13 @@ public class ICIPDatasetController {
 	@PostMapping(path = "/getData/{nameStr}/{org}")
 	public ResponseEntity<String> getData(@PathVariable(name = "nameStr") String name,
 			@PathVariable(name = "org") String org, @RequestBody(required = false) String attributes,
-			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		return getCompleteData(name, org, attributes, limit, true, false, -1, null, -1);
+			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit) {
+		try {
+			return getCompleteData(name, org, attributes, limit, true, false, -1, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in getData", e);
+			return ResponseEntity.internalServerError().body("Request failed");
+		}
 	}
 
 	@GetMapping(path = "/getAuditDataById/{org}/{name}/{id}")
@@ -906,11 +910,13 @@ public class ICIPDatasetController {
 	public ResponseEntity<String> getDataAsJson(@PathVariable(name = "nameStr") String name,
 			@PathVariable(name = "org") String org,
 			@RequestHeader(name = "attributes", required = false) String attributes,
-			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		return getCompleteData(name, org, attributes, limit, true, true, -1, null, -1);
+			@RequestParam(required = false, name = "limit", defaultValue = "10") String limit) {
+		try {
+			return getCompleteData(name, org, attributes, limit, true, true, -1, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in getDataAsJson", e);
+			return ResponseEntity.internalServerError().body("Request failed");
+		}
 	}
 
 	/**
@@ -948,12 +954,14 @@ public class ICIPDatasetController {
 			@RequestParam(required = false, name = "size", defaultValue = "10") String size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") String page,
 			@RequestParam(required = false, name = "sortEvent") String sortEvent,
-			@RequestParam(required = false, name = "sortOrder", defaultValue = "-1") String sortOrder)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		return getCompleteData(name, org, attributes, size, true, false, Integer.parseInt(page), sortEvent,
-				Integer.parseInt(sortOrder));
+			@RequestParam(required = false, name = "sortOrder", defaultValue = "-1") String sortOrder) {
+		try {
+			return getCompleteData(name, org, attributes, size, true, false, Integer.parseInt(page), sortEvent,
+					Integer.parseInt(sortOrder));
+		} catch (Exception e) {
+			logger.error("Error in getPaginatedData", e);
+			return ResponseEntity.internalServerError().body("Request failed");
+		}
 	}
 
 	/**
@@ -1111,24 +1119,26 @@ public class ICIPDatasetController {
 	 * @throws URISyntaxException                 the URI syntax exception
 	 */
 	@PostMapping("/request")
-	public ResponseEntity<String> sendRequest(@RequestBody ICIPDatasetDTO datasetDTO)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		ModelMapper modelmapper = new ModelMapper();
-		Converter<Map<String, String>, String> converter = new Converter<>() {
-			@Override
-			public String convert(MappingContext<Map<String, String>, String> attr) {
-				JSONObject jObj = new JSONObject();
-				attr.getSource().entrySet().stream().forEach(entry -> {
-					jObj.put(entry.getKey(), entry.getValue());
-				});
-				return jObj.toString();
-			}
-		};
-		modelmapper.addConverter(converter);
-		ICIPDataset dataset = modelmapper.map(datasetDTO, ICIPDataset.class);
-		return new ResponseEntity<>(HtmlUtils.htmlEscape(pluginService.getDataSetService(dataset).getDatasetData(dataset, new SQLPagination(0, 10, null, 0), DATATYPE.DATA, String.class)), new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<String> sendRequest(@RequestBody ICIPDatasetDTO datasetDTO) {
+		try {
+			ModelMapper modelmapper = new ModelMapper();
+			Converter<Map<String, String>, String> converter = new Converter<>() {
+				@Override
+				public String convert(MappingContext<Map<String, String>, String> attr) {
+					JSONObject jObj = new JSONObject();
+					attr.getSource().entrySet().stream().forEach(entry -> {
+						jObj.put(entry.getKey(), entry.getValue());
+					});
+					return jObj.toString();
+				}
+			};
+			modelmapper.addConverter(converter);
+			ICIPDataset dataset = modelmapper.map(datasetDTO, ICIPDataset.class);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(pluginService.getDataSetService(dataset).getDatasetData(dataset, new SQLPagination(0, 10, null, 0), DATATYPE.DATA, String.class)), new HttpHeaders(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Error in sendRequest", e);
+			return new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	/**

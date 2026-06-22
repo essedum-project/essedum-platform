@@ -537,33 +537,29 @@ public class ICIPProxyController {
 	public ResponseEntity<String> getDbData(@PathVariable(name = "dsetalias") String dsetalias,
 			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
 			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		// ICIPDatasource dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-		// 		.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-		// ICIPDataset2 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-		// 		.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			@RequestParam Map<String, String> params) {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = new ICIPDataset2();
 		try {
-		 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-				.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-		 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-				.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
-		}catch (Exception ex) {
-			logger.error(ex.getMessage(), ex);
-			 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			 dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
-						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);			
+			try {
+				dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+						.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+				dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+						.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+				dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			}
+			return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
+					Integer.parseInt(params.getOrDefault("page", "0")), params.getOrDefault("sortEvent", null),
+					Integer.parseInt(params.getOrDefault("sortOrder", "-1")), removeCache);
+		} catch (Exception e) {
+			logger.error("Error in getDbData", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
 		}
-//		String attributes = new JSONObject(dset.getAttributes()).put("params", params).toString();
-//		dset.setAttributes(attributes);
-		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
-				Integer.parseInt(params.getOrDefault("page", "0")), params.getOrDefault("sortEvent", null),
-				Integer.parseInt(params.getOrDefault("sortOrder", "-1")), removeCache);
 	}
 
 	@DeleteMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
