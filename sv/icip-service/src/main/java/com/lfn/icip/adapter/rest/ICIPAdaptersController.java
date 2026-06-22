@@ -114,10 +114,8 @@ public class ICIPAdaptersController {
 	@GetMapping(path = "/{adaptername}/{methodname}/{org}")
 	public ResponseEntity<String> getData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -243,6 +241,10 @@ public class ICIPAdaptersController {
 		return getCompleteData(dsrc, dset, org,
 				params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10),
 				Integer.parseInt(params.getOrDefault(ICIPPluginConstants.PAGE, ICIPPluginConstants.PAGE_0)), null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter GET", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	private JSONArray addParamsOfDataset(JSONArray parameters, Map<String, String> datasetParamsMap) {
@@ -268,10 +270,8 @@ public class ICIPAdaptersController {
 	public ResponseEntity<String> getPostData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestBody String body)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestBody String body) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -398,15 +398,17 @@ public class ICIPAdaptersController {
 				.put(ICIPPluginConstants.BODY, body);
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, ICIPPluginConstants.SIZE_10, 0, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter POST", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	@DeleteMapping(path = "/{adaptername}/{methodname}/{org}")
 	public ResponseEntity<String> deleteData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -531,23 +533,28 @@ public class ICIPAdaptersController {
 		return getCompleteData(dsrc, dset, org,
 				params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10),
 				Integer.parseInt(params.getOrDefault(ICIPPluginConstants.PAGE, ICIPPluginConstants.PAGE_0)), null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter DELETE", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
+
 	private Map<String, String> getMapFromJsonArray(JSONArray jsonArray) {
-		Map<String, String> getMapFromJsonArray = new HashMap<>();
+		Map<String, String> resultMap = new HashMap<>();
 		try {
 			if (jsonArray != null)
 				for (Object o : jsonArray) {
 					JSONObject jsonLineItem = (JSONObject) o;
 					String key = jsonLineItem.getString(ICIPPluginConstants.KEY);
 					String value = jsonLineItem.getString(ICIPPluginConstants.VALUE);
-					getMapFromJsonArray.put(key, value);
+					resultMap.put(key, value);
 				}
 		} catch (Exception e) {
 			logger.error("Cannot get Map from JsonArray");
-			return getMapFromJsonArray;
+			return resultMap;
 		}
-		return getMapFromJsonArray;
+		return resultMap;
 	}
 
 	private JSONArray addHeadersFromDatasource(ICIPDatasource dsrc, JSONArray headerArray,
@@ -684,10 +691,8 @@ public class ICIPAdaptersController {
 	public ResponseEntity<String> getPostDataForFile(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestParam("file") MultipartFile file)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestParam("file") MultipartFile file) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -819,6 +824,10 @@ public class ICIPAdaptersController {
 				.put(ICIPPluginConstants.BODY, fileDetails);
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, ICIPPluginConstants.SIZE_10, 0, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter file POST", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	@PostMapping(value = "/uploadTempFileForAdapter/{org}/{adapterName}/{methodName}")
