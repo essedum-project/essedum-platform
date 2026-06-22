@@ -525,7 +525,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				ResultSet res = null;
 				try {
 					res = stmt.executeQuery();
@@ -592,7 +592,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	 */
 	private String[] parseQuery(String qrystr) {
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
+		Matcher m = Pattern.compile("\\{([^}]*)\\}").matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));
@@ -1285,7 +1285,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 		JSONObject condetails = new JSONObject(ds.getDatasource().getConnectionDetails());
 		String query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + SqlSanitizationUtil.escapeSqlLiteral(tableName) + "' ";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return res.next();
 				}
@@ -1302,7 +1302,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 		List<JSONObject> row = new ArrayList<>();
 		String query = "SELECT COLUMN_NAME AS \"Field\" , DATA_TYPE AS \"Type\" FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = "+"'"+tablename.replaceAll("^\"|\"$", "") + "'";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					while (res.next()) {
 						JSONObject obj = new JSONObject();
@@ -1391,7 +1391,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 				}
 				if (sqlCreate != null) {
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 							stmt.execute();
 						}
 					}
@@ -1403,7 +1403,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 							+ "user VARCHAR(255)," + SqlSanitizationUtil.validateIdentifier(attributes.getString("uniqueIdentifier"))
 							+ " VARCHAR(255),row_data TEXT,primary key (id,entry_timestamp));";
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt.execute();
 						}
 					}
@@ -1453,7 +1453,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			String sqlCreate = "CREATE TABLE IF NOT EXISTS " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME)) + "("
 					+ getcolumnMappingsForCsv(schema) + ");";
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}

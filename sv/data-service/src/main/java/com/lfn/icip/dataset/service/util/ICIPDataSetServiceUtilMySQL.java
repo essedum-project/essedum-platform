@@ -453,7 +453,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(obj)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					// logic to extract schema
 					ResultSetMetaData metadata = res.getMetaData();
@@ -558,7 +558,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				ResultSet res = null;
 				try {
 					res = stmt.executeQuery();
@@ -616,7 +616,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getFilterQuery(attributes);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					res.last();
 					return Long.parseLong(String.valueOf(res.getRow()));
@@ -668,7 +668,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 */
 	private String[] parseQuery(String qrystr) {
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
+		Matcher m = Pattern.compile("\\{([^}]*)\\}").matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));
@@ -838,7 +838,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 				}
 				if (sqlCreate != null) {
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 							stmt.execute();
 						}
 					}
@@ -857,7 +857,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 							+ "user VARCHAR(255)," + uniqueIdentifier
 							+ " VARCHAR(255),row_data TEXT,primary key (id,entry_timestamp));";
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt.execute();
 						}
 					}
@@ -867,7 +867,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 							+ "duration INT(30),due_date DATETIME,sla_met BOOLEAN,extra_time VARCHAR(50),assignee VARCHAR(255),"
 							+ "status VARCHAR(50));";
 					try (Connection conn1 = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt1 = conn1.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt1 = conn1.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt1.execute();
 						}
 					}
@@ -923,7 +923,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			String sqlCreate = "CREATE TABLE IF NOT EXISTS " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME)) + "("
 					+ getcolumnMappingsForCsv(schema) + ");";
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}
@@ -942,7 +942,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		if (attributes.getString(TNAME) != null && attributes.getString(TNAME) != "") {
 			String sqlCreate = "DELETE FROM " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME));
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}
@@ -1265,7 +1265,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 */
 	protected String getJSONHeaderDataset(String query, JSONObject connectionDetails) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractWithHeaderRowsData(res);
 				}
@@ -1286,7 +1286,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private String getDatasetDataAsString(JSONObject connectionDetails, String query, boolean isGraphData)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					if (isGraphData) {
 						return extractDataWithGraphs(res);
@@ -1301,7 +1301,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private List getDatasetDataAsListofString(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsListofString(res);
 				}
@@ -1320,7 +1320,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private JsonArray getDatasetDataAsGsonJson(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsGsonJsonArray(res);
 				}
@@ -1340,7 +1340,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private JSONArray getDatasetDataAsJson(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsJsonArray(res);
 				}
@@ -1360,7 +1360,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private List getDatasetDataAsList(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsList(res);
 				}
@@ -1409,7 +1409,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		String query = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + SqlSanitizationUtil.escapeSqlLiteral(tableName)
 				+ "' AND TABLE_SCHEMA = " + "'" + SqlSanitizationUtil.escapeSqlLiteral(dbName[dbName.length - 1]) + "'";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return res.next();
 				}
@@ -1427,7 +1427,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		//String query = "DESCRIBE " + tablename.replaceAll("^\"|\"$", "");
 		String query = "DESCRIBE " + SqlSanitizationUtil.validateIdentifier(tablename.replaceAll("(^\")|(\"$)", ""));
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					while (res.next()) {
 						JSONObject obj = new JSONObject();
@@ -1515,7 +1515,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		String qryinsert = String.format("INSERT INTO %s_audit (%s) VALUES(%s)", tableName, columns, colvalues);
 		JSONObject obj = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		try (Connection conn = getDbConnection(obj)) {
-			try (PreparedStatement stmt = conn.prepareStatement(qryinsert)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(qryinsert))) {
 				stmt.executeUpdate();
 			}
 		}

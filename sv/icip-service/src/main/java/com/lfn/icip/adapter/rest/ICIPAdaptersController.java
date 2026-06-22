@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.gson.Gson;
 import com.lfn.icip.adapter.service.MlAdaptersService;
@@ -185,9 +186,9 @@ public class ICIPAdaptersController {
 					if (logger.isDebugEnabled()) {
 						logger.error("Error due to:", e);
 					}
-					return ResponseEntity.status(422).body(e.getMessage());
+					return ResponseEntity.status(422).body("Adapter invocation failed");
 				}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -341,9 +342,9 @@ public class ICIPAdaptersController {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -474,9 +475,9 @@ public class ICIPAdaptersController {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -649,10 +650,10 @@ public class ICIPAdaptersController {
 			if (logger.isDebugEnabled()) {
 				logger.error("Error due to:", e);
 			}
-			return ResponseEntity.status(422).body(e.getMessage());
+			return ResponseEntity.status(422).body("Adapter invocation failed");
 		}
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	private String getResult(int page, String limit, String sortEvent, int sortOrder, ICIPDataset dataset)
@@ -759,9 +760,9 @@ public class ICIPAdaptersController {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);

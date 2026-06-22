@@ -194,8 +194,10 @@ public class ICIPUtils {
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public static List<String> readFile(Path path) throws IOException {
+		Path safe = com.lfn.common.app.util.PathValidationUtil
+				.validateAndGetPath(path.toAbsolutePath().toString());
 		List<String> script = new ArrayList<>();
-		try (InputStream is = new FileInputStream(path.toAbsolutePath().toString())) {
+		try (InputStream is = new FileInputStream(safe.toString())) {
 			log.info("Reading file...");
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(is), 2048)) {
 				String line;

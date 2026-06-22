@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
@@ -196,8 +197,11 @@ public class ICIPPluginController {
 	public ResponseEntity<String> deleteGroups(@PathVariable(name = "pluginName") String pluginName,
 			@PathVariable(name = "org")String org) {
 		logger.info("deleting pluginNode", pluginName);
+		// CodeQL java/xss: html-escape user-controlled identifiers before they
+		// are reflected back via response headers.
+		String safePluginName = HtmlUtils.htmlEscape(pluginName);
 		return pluginDetailsService.delete(pluginName,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
-				createEntityDeletionAlert(ENTITY_NAME, pluginName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
+				createEntityDeletionAlert(ENTITY_NAME, safePluginName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
 	}
 	
 //	to delete plugin node details 
@@ -212,8 +216,9 @@ public class ICIPPluginController {
 	public ResponseEntity<String> deleteAllNode(@PathVariable(name = "name") String name,
 			@PathVariable(name = "org")String org) {
 		logger.info("deleting plugin", name);
+		String safeName = HtmlUtils.htmlEscape(name);
 		return pluginService.delete(name,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
-				createEntityDeletionAlert(ENTITY_NAME, name)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
+				createEntityDeletionAlert(ENTITY_NAME, safeName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
 	}
 	
 	

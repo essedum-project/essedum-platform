@@ -12,16 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,60 +34,14 @@ public class GitHubOAuthService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public GitHubOAuthService() {
-        this.restTemplate = createRestTemplate();
-    }
-
-    /**
-     * Create a RestTemplate with SSL verification fully bypassed.
-     *
-     * <p><strong>WARNING — DEVELOPMENT / TEMPORARY BYPASS ONLY.</strong> This
-     * trusts every server certificate and skips hostname verification. It is
-     * intended to work around PKIX path-building failures in environments where
-     * the JDK trust store does not contain the corporate proxy / interception
-     * certificate (typical "unable to find valid certification path to requested
-     * target" error against {@code github.com}). Re-enable verification before
-     * shipping to production by reverting this method and importing the proper
-     * certificate into the JDK trust store.
-     */
-    private RestTemplate createRestTemplate() {
-        try {
-            // 1. Build an SSLContext that trusts every certificate chain.
-            TrustManager[] trustAll = new TrustManager[] {
-                new X509TrustManager() {
-                    @Override public void checkClientTrusted(X509Certificate[] chain, String authType) { /* trust */ }
-                    @Override public void checkServerTrusted(X509Certificate[] chain, String authType) { /* trust */ }
-                    @Override public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-                }
-            };
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAll, new java.security.SecureRandom());
-
-            // 2. Apply globally so JDK HttpsURLConnection-based clients pick it up.
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-            HostnameVerifier allowAllHosts = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allowAllHosts);
-
-            // 3. Force the RestTemplate's request factory to use the same context
-            //    and skip hostname verification, even if a different default ever
-            //    gets installed by another bean during start-up.
-            SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
-                @Override
-                protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws java.io.IOException {
-                    if (connection instanceof HttpsURLConnection) {
-                        HttpsURLConnection https = (HttpsURLConnection) connection;
-                        https.setSSLSocketFactory(sslContext.getSocketFactory());
-                        https.setHostnameVerifier(allowAllHosts);
-                    }
-                    super.prepareConnection(connection, httpMethod);
-                }
-            };
-
-            log.warn("SSL verification is DISABLED for GitHub OAuth — DO NOT USE IN PRODUCTION");
-            return new RestTemplate(factory);
-        } catch (Exception e) {
-            log.error("Failed to create SSL-bypass RestTemplate, falling back to default: {}", e.getMessage(), e);
-            return new RestTemplate();
-        }
+        // Use a plain RestTemplate that relies on the JVM's default SSL trust
+        // configuration. If the corporate proxy / interception certificate is
+        // missing from the JDK trust store, import it via -Djavax.net.ssl.trustStore
+        // or `keytool -importcert` rather than disabling certificate checks. The
+        // previous implementation installed an all-trusting X509TrustManager,
+        // which CodeQL flags as "TrustManager that accepts all certificates"
+        // (CWE-295) and is unsafe in any non-throwaway environment.
+        this.restTemplate = new RestTemplate();
     }
 
     // In-memory storage for tokens (use Redis or database in production)

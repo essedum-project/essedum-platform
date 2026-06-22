@@ -31,7 +31,7 @@ public class RegularExpressionUtil {
 
 	/** Pattern to detect potentially dangerous regex constructs (nested quantifiers causing catastrophic backtracking). */
 	private static final Pattern DANGEROUS_REGEX_PATTERN = Pattern.compile(
-			"(\\(.+\\))(\\*|\\+|\\{\\d+,\\d*\\})(\\*|\\+|\\{\\d+,\\d*\\})"
+			"(\\([^)]+\\))(\\*|\\+|\\{\\d+,\\d*\\})(\\*|\\+|\\{\\d+,\\d*\\})"
 	);
 
 	/**

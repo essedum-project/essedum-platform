@@ -57,6 +57,9 @@ public class JGitProvider implements GitStorageProvider {
     @Override
     public void push(String localPath, String remoteUrl, String branch,
                      String commitMessage, String username, String token, boolean verifySsl) throws Exception {
+        // Reject path-traversal sequences in user-supplied localPath before any
+        // File / Files.* operation (CodeQL java/path-injection).
+        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
         File repoDir = new File(localPath);
 
         if (!repoDir.exists()) {
@@ -190,6 +193,7 @@ public class JGitProvider implements GitStorageProvider {
      * Recursively delete a directory
      */
     private void deleteDirectory(File directory) throws IOException {
+        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(directory.getAbsolutePath());
         if (directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null) {
@@ -417,7 +421,15 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Write all new files to the directory
                 for (FileContent file : files) {
-                    Path filePath = tempDir.resolve(file.getPath());
+                    Path filePath;
+                    try {
+                        File safe = com.lfn.common.app.util.PathValidationUtil
+                                .validatePath(tempDir.toFile().getCanonicalPath(), file.getPath());
+                        filePath = safe.toPath();
+                    } catch (IllegalArgumentException iae) {
+                        log.warn("Skipping suspicious file path: {} ({})", file.getPath(), iae.getMessage());
+                        continue;
+                    }
 
                     // Create parent directories if they don't exist
                     Files.createDirectories(filePath.getParent());
@@ -524,7 +536,9 @@ public class JGitProvider implements GitStorageProvider {
             isTemporary = true;
             log.info("Created temporary directory for pull: {}", targetDir);
         } else {
-            targetDir = new File(localPath).toPath();
+            // Reject path-traversal sequences in user-supplied localPath before
+            // any Files.* operation (CodeQL java/path-injection).
+            targetDir = com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
             }
@@ -580,7 +594,16 @@ public class JGitProvider implements GitStorageProvider {
                         continue;
                     }
 
-                    File file = new File(repoDir, filePath);
+                    // Validate the per-file path stays inside repoDir to defend
+                    // against malicious tree entries (CodeQL java/path-injection).
+                    File file;
+                    try {
+                        file = com.lfn.common.app.util.PathValidationUtil
+                                .validatePath(repoDir.getCanonicalPath(), filePath);
+                    } catch (IllegalArgumentException iae) {
+                        log.warn("Skipping suspicious path from tree: {} ({})", filePath, iae.getMessage());
+                        continue;
+                    }
                     if (file.exists() && file.isFile()) {
                         FileContent fileContent = new FileContent();
                         fileContent.setPath(filePath);

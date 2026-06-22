@@ -204,15 +204,27 @@ public class ICIPAIOpsAdapterService {
 
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(hkDatasource);
 
-			String selectSql = "SELECT COUNT(*) FROM " + project + "_genairecommendations where number = ?";
+			// CodeQL java/sql-injection: SQL table/column identifiers cannot
+			// be bound as JDBC parameters, so validate the user-controlled
+			// `project` and `columnName` against a strict whitelist before
+			// concatenating into the statement text.
+			if (project == null || !project.matches("[A-Za-z0-9_]+")) {
+				throw new IllegalArgumentException("Invalid project identifier");
+			}
+			if (columnName == null || !columnName.matches("[A-Za-z0-9_]+")) {
+				throw new IllegalArgumentException("Invalid column name");
+			}
+
+			String tableName = project + "_genairecommendations";
+			String selectSql = "SELECT COUNT(*) FROM " + tableName + " where number = ?";
 			int count = jdbcTemplate.queryForObject(selectSql, Integer.class, incidentNumber);
 
 			if (count > 0) {
-				String updateSql = "UPDATE " + project + "_genairecommendations SET " + columnName
+				String updateSql = "UPDATE " + tableName + " SET " + columnName
 						+ " = ? where number = ?";
 				jdbcTemplate.update(updateSql, results, incidentNumber);
 			} else {
-				String insertSql = "INSERT " + project + "_genairecommendations (number, " + columnName
+				String insertSql = "INSERT " + tableName + " (number, " + columnName
 						+ ") VALUES (?, ?)";
 				jdbcTemplate.update(insertSql, incidentNumber, results);
 			}

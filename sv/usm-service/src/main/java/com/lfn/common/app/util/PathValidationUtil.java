@@ -2,18 +2,26 @@
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 
-package com.lfn.icip.dataset.util;
+package com.lfn.common.app.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,25 +45,14 @@ public final class PathValidationUtil {
         // Utility class — no instantiation
     }
 
-    /**
-     * Validates that a user-provided file path does not escape the given base directory.
-     * Returns the validated canonical {@link File}.
-     *
-     * @param baseDir      the allowed base directory (trusted)
-     * @param userFilePath the user-provided file path (untrusted)
-     * @return a validated File whose canonical path is under baseDir
-     * @throws IllegalArgumentException if the path is invalid or attempts traversal
-     */
     public static File validatePath(String baseDir, String userFilePath) {
         if (userFilePath == null || userFilePath.trim().isEmpty()) {
             throw new IllegalArgumentException("File path must not be null or empty");
         }
         rejectTraversalSequences(userFilePath);
-
         try {
             File base = new File(baseDir).getCanonicalFile();
             File resolved = new File(base, userFilePath).getCanonicalFile();
-
             if (!resolved.getPath().startsWith(base.getPath() + File.separator)
                     && !resolved.getPath().equals(base.getPath())) {
                 throw new IllegalArgumentException(
@@ -67,34 +64,19 @@ public final class PathValidationUtil {
         }
     }
 
-    /**
-     * Validates that a user-provided file path does not contain path traversal sequences,
-     * and returns a sanitized {@link File}. Use this overload when there is no fixed base
-     * directory — the path itself is validated to not contain traversal patterns, and the
-     * canonical path is compared to the absolute path to detect traversal.
-     *
-     * @param userFilePath the user-provided file path (untrusted)
-     * @return a validated File
-     * @throws IllegalArgumentException if the path contains traversal sequences
-     */
     public static File validatePath(String userFilePath) {
         if (userFilePath == null || userFilePath.trim().isEmpty()) {
             throw new IllegalArgumentException("File path must not be null or empty");
         }
         rejectTraversalSequences(userFilePath);
-
         try {
             File file = new File(userFilePath);
             String canonicalPath = file.getCanonicalPath();
             String absolutePath = file.getAbsolutePath();
-
-            // If canonical != absolute, path normalization removed traversal sequences
             if (!canonicalPath.equals(absolutePath)) {
-                // Allow simple cases like trailing slash differences, but block real traversal
                 String normalizedAbsolute = new File(absolutePath).getCanonicalPath();
                 if (!canonicalPath.equals(normalizedAbsolute)) {
-                    throw new IllegalArgumentException(
-                            "Path traversal detected in file path");
+                    throw new IllegalArgumentException("Path traversal detected in file path");
                 }
             }
             return file.getCanonicalFile();
@@ -103,27 +85,16 @@ public final class PathValidationUtil {
         }
     }
 
-    /**
-     * Validates that a user-provided path does not contain traversal sequences
-     * and returns a sanitized {@link Path}.
-     *
-     * @param userPath the user-provided path string (untrusted)
-     * @return a validated, normalized Path
-     * @throws IllegalArgumentException if the path contains traversal sequences
-     */
     public static Path validateAndGetPath(String userPath) {
         if (userPath == null || userPath.trim().isEmpty()) {
             throw new IllegalArgumentException("Path must not be null or empty");
         }
         rejectTraversalSequences(userPath);
-
         try {
             Path path = Paths.get(userPath).normalize();
-            // After normalization, check that no ".." remains
             for (int i = 0; i < path.getNameCount(); i++) {
                 if ("..".equals(path.getName(i).toString())) {
-                    throw new IllegalArgumentException(
-                            "Path traversal detected after normalization");
+                    throw new IllegalArgumentException("Path traversal detected after normalization");
                 }
             }
             return path;
@@ -132,38 +103,15 @@ public final class PathValidationUtil {
         }
     }
 
-    /**
-     * Rejects paths containing well-known traversal sequences and null bytes.
-     */
     private static void rejectTraversalSequences(String path) {
         if (path.contains("\0")) {
             throw new IllegalArgumentException("Path must not contain null bytes");
         }
-        // Normalize separators for checking
         String normalized = path.replace('\\', '/');
         if (normalized.contains("../") || normalized.contains("/..") || normalized.equals("..")) {
             throw new IllegalArgumentException(
                     "Path must not contain directory traversal sequences (..)");
         }
-    }
-    /**
-     * Strips leading and trailing forward slashes from a string in linear time,
-     * without using regex, to avoid polynomial-regex (ReDoS) findings from
-     * CodeQL.
-     */
-    public static String stripSlashes(String s) {
-        if (s == null || s.isEmpty()) {
-            return s;
-        }
-        int start = 0;
-        int end = s.length();
-        while (start < end && s.charAt(start) == '/') {
-            start++;
-        }
-        while (end > start && s.charAt(end - 1) == '/') {
-            end--;
-        }
-        return s.substring(start, end);
     }
 }
 
