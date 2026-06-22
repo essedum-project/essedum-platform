@@ -5,7 +5,7 @@
     "changeOrigin": true
   },
   "/apps/vibe-pod-watcher": {
-    "target": "https://192.168.28.41",
+    "target": "https://localhost:19443",
     "secure": false,
     "changeOrigin": true,
     "headers": { "Host": "essedum-lfn.infosys.com" }

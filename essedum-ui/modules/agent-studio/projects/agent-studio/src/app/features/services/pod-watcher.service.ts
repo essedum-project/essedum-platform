@@ -3,17 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
-export type PodPhase = 'Running' | 'Queued' | 'Success' | 'Failed' | 'Inactive';
-
-/** Shape returned by GET /apps/vibe-pod-watcher/api/pods?namespace=all */
+/** Normalised shape used by components — matches the new /api/pipeline-pods record shape */
 export interface PodRecord {
   pod_name:         string;
-  container_name:   string;
-  deployment_name:  string;
+  container_name:   string;   // derived: deployment base name
+  deployment_name:  string;   // derived: deployment base name
   namespace:        string;
-  type:             string;
+  type:             string;   // derived from namespace
   description:      string;
-  execution_status: string;
+  execution_status: string;   // normalised from phase
   container_status: string;
   pod_phase:        string;
   ready:            boolean;
@@ -26,12 +24,17 @@ export interface PodRecord {
   age:              string;
 }
 
-/** Shape returned by GET /apps/vibe-pod-watcher/api/deployments */
-export interface DeploymentStatus {
-  name:     string;
+/** Response envelope from GET /apps/vibe-pod-watcher/api/pipeline-pods */
+export interface PipelinePodsResponse {
+  status:    string;
+  total:     number;
   namespace: string;
-  ready:    number;
-  desired:  number;
+  filter:    string;
+  type?:     string;
+  page:      number;
+  size:      number;
+  records:   PodRecord[];
+  summary:   Record<string, number>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,54 +49,73 @@ export class PodWatcherService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Fetches all pods across namespaces.
-   * Used as the primary data source for the Pipelines in Execution table.
-   * GET /apps/vibe-pod-watcher/api/pods?namespace=all
+   * Fetches pipeline pods with server-side pagination and optional filters.
+   * GET /apps/vibe-pod-watcher/api/pipeline-pods?namespace=all&page=1&size=10
    */
-  getPods(namespace = 'all'): Observable<PodRecord[]> {
+  getPipelinePods(
+    namespace  = 'all',
+    page       = 1,
+    size       = 10,
+    status?: string,
+    type?:   string
+  ): Observable<PipelinePodsResponse> {
+    const params: Record<string, string> = {
+      namespace,
+      page: String(page),
+      size: String(size),
+    };
+    if (status && status !== 'all') {
+      params['status'] = status;
+    }
+    if (type && type !== 'all') {
+      params['type'] = this.capitalise(type);   // Agent | MCP | App
+    }
     return this.http
-      .get<PodRecord[]>(`${this.BASE}/api/pods`, { params: { namespace } })
-      .pipe(catchError(() => of([] as PodRecord[])));
+      .get<PipelinePodsResponse>(`${this.BASE}/api/pipeline-pods`, { params })
+      .pipe(
+        map(res => ({
+          ...res,
+          records: (res.records || []).map(r => ({
+            ...r,
+            execution_status: this.mapApiStatus(r.execution_status),
+          })),
+        })),
+        catchError(() => of({
+          status: 'ERROR', total: 0, namespace, filter: '', page, size,
+          records: [], summary: {},
+        } as PipelinePodsResponse))
+      );
   }
 
-  /**
-   * Returns a Map<deployment-name, PodPhase> for all namespaces.
-   * GET /apps/vibe-pod-watcher/api/deployments?namespace=all
-   */
-  getDeploymentStatusMap(): Observable<Map<string, PodPhase>> {
-    return this.http
-      .get<DeploymentStatus[]>(`${this.BASE}/api/deployments`, {
-        params: { namespace: 'all' },
-      })
-      .pipe(
-        catchError(() => of([] as DeploymentStatus[])),
-        map(deps => {
-          const m = new Map<string, PodPhase>();
-          for (const d of deps) {
-            const phase: PodPhase =
-              d.ready > 0   ? 'Running' :
-              d.desired > 0 ? 'Queued'  :
-                              'Inactive';
-            m.set(d.name, phase);
-          }
-          return m;
-        })
-      );
+  /** Lowercases execution_status from API response for consistent comparison. */
+  private mapApiStatus(s: string): string {
+    return (s || '').toLowerCase();
+  }
+
+  /** Capitalises type label for API filter param (mcp→MCP, agent→Agent). */
+  private capitalise(s: string): string {
+    if (!s) { return s; }
+    const up = s.toUpperCase();
+    return up === 'MCP' ? 'MCP' : s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
   }
 
   /**
    * Fetches live logs for a specific pod.
    * GET /apps/vibe-pod-watcher/api/pods/{pod_name}/logs?namespace=...&tail=...
-   * pod_name is the full K8s pod name (e.g. "agent-pipeline-demo-7d6b4c9f5-xkp2n").
+   * Returns { logs: string[], namespace: string, pod: string }
    */
   getPodLogs(podName: string, namespace: string, tail = 200): Observable<string> {
     return this.http
-      .get(`${this.BASE}/api/pods/${encodeURIComponent(podName)}/logs`, {
-        params: { namespace, tail: String(tail) },
-        responseType: 'text',
-      })
+      .get<{ logs: string[]; namespace: string; pod: string }>(
+        `${this.BASE}/api/pods/${encodeURIComponent(podName)}/logs`,
+        { params: { namespace, tail: String(tail) } }
+      )
       .pipe(
-        map(text => (text?.trim() ? text : 'No logs available.')),
+        map(res => {
+          const lines = res?.logs;
+          if (!lines || lines.length === 0) { return 'No logs available.'; }
+          return lines.join('\n');
+        }),
         catchError(() => of('Failed to fetch logs. Check that the pod is Running.'))
       );
   }
@@ -117,13 +139,5 @@ export class PodWatcherService {
     return n.replace(/-+/g, '-').replace(/^-|-$/g, '');
   }
 
-  /** Returns the K8s namespace that corresponds to a given pipelineMode. */
-  namespaceForMode(mode: 'agent' | 'mcp' | 'app'): string {
-    const nsMap: Record<string, string> = {
-      agent: 'vibe-agents',
-      mcp:   'vibe-mcp',
-      app:   'vibe-apps',
-    };
-    return nsMap[mode] ?? 'vibe-agents';
-  }
 }
+

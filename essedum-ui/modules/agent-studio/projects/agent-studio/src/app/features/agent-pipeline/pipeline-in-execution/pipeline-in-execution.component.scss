@@ -403,26 +403,13 @@
     flex-shrink: 0;
   }
 
-  &.status-running  {
-    background: rgba(56, 189, 248, 0.12); color: #38bdf8;
-    .status-icon { color: #38bdf8; animation: spin 1.2s linear infinite; }
-  }
-  &.status-queued   {
-    background: rgba(234, 179, 8, 0.12); color: #facc15;
-    .status-icon { color: #eab308; }
-  }
-  &.status-success  {
-    background: rgba(34, 197, 94, 0.12); color: #4ade80;
-    .status-icon { color: #22c55e; }
-  }
-  &.status-failed   {
-    background: rgba(239, 68, 68, 0.12); color: #f87171;
-    .status-icon { color: #ef4444; }
-  }
-  &.status-inactive {
-    background: rgba(148, 163, 184, 0.1); color: #94a3b8;
-    .status-icon { color: #94a3b8; }
-  }
+  &.status-running   { background: rgba(56, 189, 248, 0.12); color: #38bdf8; .status-icon { color: #38bdf8; animation: spin 1.2s linear infinite; } }
+  &.status-pending   { background: rgba(234, 179, 8, 0.12);  color: #facc15; .status-icon { color: #eab308; } }
+  &.status-queued    { background: rgba(234, 179, 8, 0.12);  color: #facc15; .status-icon { color: #eab308; } }
+  &.status-succeeded { background: rgba(34, 197, 94, 0.12);  color: #4ade80; .status-icon { color: #22c55e; } }
+  &.status-success   { background: rgba(34, 197, 94, 0.12);  color: #4ade80; .status-icon { color: #22c55e; } }
+  &.status-failed    { background: rgba(239, 68, 68, 0.12);  color: #f87171; .status-icon { color: #ef4444; } }
+  &.status-inactive  { background: rgba(148, 163, 184, 0.1); color: #94a3b8; .status-icon { color: #94a3b8; } }
   /* legacy aliases kept for safety */
   &.status-active   { background: rgba(68, 128, 245, 0.15); color: #6ba3f7; .status-icon { color: #4480f5; } }
   &.status-error    { background: rgba(239, 68, 68, 0.12);   color: #f87171; .status-icon { color: #ef4444; } }
@@ -436,11 +423,13 @@
 }
 
 /* Status chips active colours */
-.status-chip-running.active  { background: rgba(56, 189, 248, 0.2) !important; border-color: #38bdf8 !important; color: #38bdf8 !important; .chip-icon { animation: spin 1.2s linear infinite; } }
-.status-chip-queued.active   { background: rgba(234, 179, 8, 0.2) !important; border-color: #eab308 !important; color: #facc15 !important; }
-.status-chip-success.active  { background: rgba(34, 197, 94, 0.2) !important; border-color: #22c55e !important; color: #4ade80 !important; }
-.status-chip-failed.active   { background: rgba(239, 68, 68, 0.2) !important; border-color: #ef4444 !important; color: #f87171 !important; }
-.status-chip-inactive.active { background: rgba(148, 163, 184, 0.15) !important; border-color: #94a3b8 !important; color: #94a3b8 !important; }
+.status-chip-running.active   { background: rgba(56, 189, 248, 0.2) !important; border-color: #38bdf8 !important; color: #38bdf8 !important; .chip-icon { animation: spin 1.2s linear infinite; } }
+.status-chip-pending.active   { background: rgba(234, 179, 8, 0.2) !important;  border-color: #eab308 !important; color: #facc15 !important; }
+.status-chip-queued.active    { background: rgba(234, 179, 8, 0.2) !important;  border-color: #eab308 !important; color: #facc15 !important; }
+.status-chip-succeeded.active { background: rgba(34, 197, 94, 0.2) !important;  border-color: #22c55e !important; color: #4ade80 !important; }
+.status-chip-success.active   { background: rgba(34, 197, 94, 0.2) !important;  border-color: #22c55e !important; color: #4ade80 !important; }
+.status-chip-failed.active    { background: rgba(239, 68, 68, 0.2) !important;  border-color: #ef4444 !important; color: #f87171 !important; }
+.status-chip-inactive.active  { background: rgba(148, 163, 184, 0.15) !important; border-color: #94a3b8 !important; color: #94a3b8 !important; }
 
 /* Actions */
 .exec-action-btn {

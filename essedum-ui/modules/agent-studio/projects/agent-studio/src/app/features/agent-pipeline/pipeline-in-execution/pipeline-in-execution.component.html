@@ -11,7 +11,7 @@
           (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
       </span>
       <span class="exec-header-title">{{ PAGETITLE }}</span>
-      <span class="exec-count-badge">{{ filteredPipelines.length }}</span>
+      <span class="exec-count-badge">{{ totalPods }}</span>
     </div>
     <button mat-icon-button class="exec-refresh-btn" (click)="loadAllPipelines()" matTooltip="Refresh">
       <mat-icon>refresh</mat-icon>
@@ -91,8 +91,8 @@
 
       <!-- Name + icon -->
       <div class="col-name exec-pipeline-info">
-        <div class="exec-type-icon" [ngClass]="'mode-' + pipeline.pipelineMode">
-          <mat-icon>{{ getTypeIcon(pipeline.pipelineMode) }}</mat-icon>
+        <div class="exec-type-icon" [ngClass]="'mode-' + pipeline.type.toLowerCase()">
+          <mat-icon>{{ getTypeIcon(pipeline.type.toLowerCase()) }}</mat-icon>
         </div>
         <div class="exec-name-block">
           <span class="exec-alias" [matTooltip]="pipeline.container_name">{{ pipeline.container_name }}</span>
@@ -107,23 +107,23 @@
 
       <!-- Type Badge -->
       <div class="col-type">
-        <span class="exec-type-badge type-{{ pipeline.pipelineMode }}">
-          {{ getPipelineTypeLabel(pipeline.pipelineMode) }}
+        <span class="exec-type-badge type-{{ pipeline.type.toLowerCase() }}">
+          {{ pipeline.type }}
         </span>
       </div>
 
       <!-- Status -->
       <div class="col-status">
-        <span class="exec-status-badge status-{{ pipeline.execution_status.toLowerCase() }}">
-          <mat-icon class="status-icon">{{ getStatusIcon(pipeline.execution_status) }}</mat-icon>
-          {{ getStatusLabel(pipeline.execution_status) }}
+        <span class="exec-status-badge status-{{ pipeline.pod_phase.toLowerCase() }}">
+          <mat-icon class="status-icon">{{ getStatusIcon(pipeline.pod_phase) }}</mat-icon>
+          {{ getStatusLabel(pipeline.pod_phase) }}
         </span>
       </div>
 
       <!-- Actions (3-dot) -->
       <div class="col-actions">
         <button mat-icon-button [matMenuTriggerFor]="rowMenu" class="exec-action-btn"
-                *ngIf="pipeline.execution_status.toLowerCase() !== 'inactive'">
+                *ngIf="pipeline.pod_phase.toLowerCase() !== 'inactive'">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #rowMenu="matMenu" xPosition="before">
@@ -132,7 +132,7 @@
             <span>{{ VIEWPIPELINE }}</span>
           </button>
           <button mat-menu-item (click)="checkPodLog(pipeline)"
-                  *ngIf="['running','queued','success','failed'].includes(pipeline.execution_status.toLowerCase())">
+                  *ngIf="['running','queued','success','failed'].includes(pipeline.pod_phase.toLowerCase())">
             <mat-icon class="menu-icon-log">description</mat-icon>
             <span>{{ VIEWPODLOGS }}</span>
           </button>

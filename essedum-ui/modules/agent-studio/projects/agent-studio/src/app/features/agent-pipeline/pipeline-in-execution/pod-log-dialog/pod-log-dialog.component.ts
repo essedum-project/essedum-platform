@@ -22,11 +22,14 @@ export class PodLogDialogComponent implements OnInit {
   readonly TITLESUFFIX   = 'Pod Logs';
   readonly PANELTITLE    = 'Log Details';
   readonly PIPELINEKEY   = 'Pipeline';
+  readonly PODKEY        = 'Pod';
+  readonly NAMESPACEKEY  = 'Namespace';
   readonly LOGLABEL      = 'Log :';
   readonly EMPTYLOG      = 'No log content available.';
   readonly COPYTOOLTIP   = 'Copy to clipboard';
   readonly COPIEDTOOLTIP = 'Copied!';
-  readonly CLOSETOOLTIP  = 'Close';
+  readonly CLOSETOOLTIP   = 'Close';
+  readonly REFRESHTOOLTIP = 'Refresh logs';
   readonly LOADINGLABEL  = 'Fetching pod logs…';
 
   get dialogTitle(): string {
@@ -40,6 +43,12 @@ export class PodLogDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.fetchLogs();
+  }
+
+  fetchLogs(): void {
+    this.loading = true;
+    this.logText  = '';
     this.podWatcher.getPodLogs(this.data.pod_name, this.data.namespace).subscribe({
       next: text => {
         this.logText = text;

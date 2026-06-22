@@ -7,6 +7,10 @@
       {{ dialogTitle }}
     </span>
     <div class="pod-log-actions">
+      <button mat-icon-button class="pod-log-action-btn" (click)="fetchLogs()"
+              [matTooltip]="REFRESHTOOLTIP" matTooltipPosition="above" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+      </button>
       <button mat-icon-button class="pod-log-action-btn" (click)="copyText()"
               [matTooltip]="copied ? COPIEDTOOLTIP : COPYTOOLTIP" matTooltipPosition="above">
         <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
@@ -30,6 +34,14 @@
           <div class="pod-log-meta-row">
             <span class="meta-label">{{ PIPELINEKEY }}</span>
             <span class="meta-value">{{ data.pipelineName }}</span>
+          </div>
+          <div class="pod-log-meta-row">
+            <span class="meta-label">{{ PODKEY }}</span>
+            <span class="meta-value">{{ data.pod_name }}</span>
+          </div>
+          <div class="pod-log-meta-row">
+            <span class="meta-label">{{ NAMESPACEKEY }}</span>
+            <span class="meta-value">{{ data.namespace }}</span>
           </div>
         </div>
       </mat-expansion-panel>

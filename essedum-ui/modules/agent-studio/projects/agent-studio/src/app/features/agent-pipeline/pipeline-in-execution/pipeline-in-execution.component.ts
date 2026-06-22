@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { interval, Subject } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { exhaustMap, takeUntil } from 'rxjs/operators';
 import { Services } from '@essedum/shared-lib';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PodLogDialogComponent } from './pod-log-dialog/pod-log-dialog.component';
-import { PodWatcherService } from '../../services/pod-watcher.service';
+import { PodWatcherService, PipelinePodsResponse } from '../../services/pod-watcher.service';
 
 export interface ExecutionPipeline {
   pod_name:         string;
@@ -32,8 +32,8 @@ export interface ExecutionPipeline {
   styleUrls: ['./pipeline-in-execution.component.scss'],
 })
 export class PipelineInExecutionComponent implements OnInit, OnDestroy {
-  loading = true;
-  allPipelines: ExecutionPipeline[] = [];
+  loading   = true;
+  totalPods = 0;
   private destroy$ = new Subject<void>();
   filteredPipelines: ExecutionPipeline[] = [];
   paginatedPipelines: ExecutionPipeline[] = [];
@@ -75,24 +75,22 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   readonly statusOptions = [
-    { value: 'all',      label: 'All', icon: 'layers',                desc: '',                      cssClass: '',                    color: '' },
-    { value: 'running',  label: 'Running',      icon: 'sync',                  desc: 'Actively executing',    cssClass: 'status-chip-running', color: '#38bdf8' },
-    { value: 'queued',   label: 'Queued',       icon: 'schedule',              desc: 'Waiting for execution', cssClass: 'status-chip-queued',  color: '#facc15' },
-    { value: 'success',  label: 'Success',      icon: 'check_circle',          desc: 'Execution completed',   cssClass: 'status-chip-success', color: '#4ade80' },
-    { value: 'failed',   label: 'Failed',       icon: 'error',                 desc: 'Execution failed',      cssClass: 'status-chip-failed',  color: '#f87171' },
-    { value: 'inactive', label: 'Inactive',     icon: 'remove_circle_outline', desc: 'No Active pod',         cssClass: 'status-chip-inactive',color: '#94a3b8' },
+    { value: 'all',       label: 'All',      icon: 'layers',                desc: '',                      cssClass: '',                     color: '' },
+    { value: 'running',   label: 'Running',  icon: 'sync',                  desc: 'Actively executing',    cssClass: 'status-chip-running',  color: '#38bdf8' },
+    { value: 'pending',   label: 'Pending',  icon: 'schedule',              desc: 'Waiting for execution', cssClass: 'status-chip-pending',  color: '#facc15' },
+    { value: 'succeeded', label: 'Success',  icon: 'check_circle',          desc: 'Execution completed',   cssClass: 'status-chip-succeeded',color: '#4ade80' },
+    { value: 'failed',    label: 'Failed',   icon: 'error',                 desc: 'Execution failed',      cssClass: 'status-chip-failed',   color: '#f87171' },
+    { value: 'inactive',  label: 'Inactive', icon: 'remove_circle_outline', desc: 'No active pod',         cssClass: 'status-chip-inactive', color: '#94a3b8' },
   ];
 
   // Pagination
-  readonly pageSize = 5;
+  readonly pageSize = 10;
   pageNumber = 1;
   noOfPages = 0;
   pageArr: number[] = [];      // 0-based indices: [0, 1, 2, ...]
   startIndex = 0;              // window start into pageArr
   endIndex = 0;                // window end into pageArr
   hoverStates: boolean[] = [];
-
-  private organization: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -103,7 +101,6 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.organization = sessionStorage.getItem('organization');
     this.route.queryParams.subscribe(params => {
       this.selectedStatus = params['status'] || 'all';
       this.loadAllPipelines();
@@ -111,11 +108,13 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
     // Auto-refresh pod list every 15 s
     interval(15000)
-      .pipe(takeUntil(this.destroy$), switchMap(() => this.podWatcher.getPods('all')))
-      .subscribe(pods => {
-        this.allPipelines = pods.map(p => ({ ...p, pipelineMode: this.modeFromType(p.type) }));
-        this.applyFilters();
-      });
+      .pipe(
+        takeUntil(this.destroy$),
+        exhaustMap(() => this.podWatcher.getPipelinePods(
+          'all', this.pageNumber, this.pageSize, this.selectedStatus, this.selectedType
+        ))
+      )
+      .subscribe(res => this.applyApiResponse(res));
   }
 
   ngOnDestroy(): void {
@@ -125,14 +124,33 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   loadAllPipelines(): void {
     this.loading = true;
-    this.podWatcher.getPods('all').subscribe(pods => {
-      this.allPipelines = pods.map(p => ({ ...p, pipelineMode: this.modeFromType(p.type) }));
-      this.applyFilters();
-      this.loading = false;
-    });
+    this.podWatcher
+      .getPipelinePods('all', this.pageNumber, this.pageSize, this.selectedStatus, this.selectedType)
+      .subscribe(res => {
+        this.applyApiResponse(res);
+        this.loading = false;
+      });
   }
 
-  /** Maps API type string to internal pipelineMode. */
+  private applyApiResponse(res: PipelinePodsResponse): void {
+    this.totalPods = res.total;
+
+    // Map records and enforce pod_phase filter client-side for exact matching
+    let records = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+    if (this.selectedStatus && this.selectedStatus !== 'all') {
+      records = records.filter(r => (r.pod_phase || '').toLowerCase() === this.selectedStatus);
+    }
+
+    this.filteredPipelines  = records;
+    this.paginatedPipelines = records;
+    this.noOfPages          = Math.ceil(res.total / this.pageSize);
+    this.pageArr            = Array.from({ length: this.noOfPages }, (_, i) => i);
+    this.hoverStates        = new Array(this.noOfPages).fill(false);
+    this.startIndex         = 0;
+    this.endIndex           = this.noOfPages;
+  }
+
+  /** Maps API type string (derived from namespace in service) to internal pipelineMode. */
   private modeFromType(type: string): 'agent' | 'mcp' | 'app' {
     const t = (type || '').toLowerCase();
     if (t === 'agent') { return 'agent'; }
@@ -141,52 +159,28 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   applyFilters(): void {
-    let result = [...this.allPipelines];
-    if (this.selectedType !== 'all') {
-      result = result.filter(p => p.pipelineMode === this.selectedType);
-    }
-    if (this.selectedStatus !== 'all') {
-      result = result.filter(p => p.execution_status.toLowerCase() === this.selectedStatus.toLowerCase());
-    }
-    this.filteredPipelines = result;
     this.pageNumber = 1;
-    this.updatePagination();
-  }
-
-  private updatePagination(): void {
-    const total = this.filteredPipelines.length;
-    this.noOfPages = Math.ceil(total / this.pageSize);
-    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i); // 0-based
-    this.hoverStates = new Array(this.noOfPages).fill(false);
-    this.startIndex = 0;
-    this.endIndex = this.noOfPages;
-    this.slicePage();
-  }
-
-  private slicePage(): void {
-    const dataStart = (this.pageNumber - 1) * this.pageSize;
-    const dataEnd = Math.min(dataStart + this.pageSize, this.filteredPipelines.length);
-    this.paginatedPipelines = this.filteredPipelines.slice(dataStart, dataEnd);
+    this.loadAllPipelines();
   }
 
   onPrevPage(): void {
     if (this.pageNumber > 1) {
       this.pageNumber--;
-      this.slicePage();
+      this.loadAllPipelines();
     }
   }
 
   onNextPage(): void {
     if (this.pageNumber < this.noOfPages) {
       this.pageNumber++;
-      this.slicePage();
+      this.loadAllPipelines();
     }
   }
 
   onChangePage(page: number): void {
     if (page >= 1 && page <= this.noOfPages) {
       this.pageNumber = page;
-      this.slicePage();
+      this.loadAllPipelines();
     }
   }
 
@@ -211,22 +205,19 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   getStatusIcon(status: string): string {
-    const opt = this.statusOptions.find(o => o.value === status.toLowerCase());
-    return opt?.icon || 'help_outline';
+    const s = (status || '').toLowerCase();
+    const opt = this.statusOptions.find(o => o.value === s);
+    return opt?.icon ?? 'help_outline';
   }
 
   getStatusLabel(status: string): string {
-    const opt = this.statusOptions.find(o => o.value === status.toLowerCase());
-    return opt?.label || status;
+    const s = (status || '').toLowerCase();
+    const opt = this.statusOptions.find(o => o.value === s);
+    return opt?.label ?? status;
   }
 
-  getPipelineTypeLabel(mode: 'agent' | 'mcp' | 'app'): string {
-    const opt = this.typeOptions.find(o => o.value === mode);
-    return opt?.label || mode;
-  }
-
-  getTypeIcon(mode: 'agent' | 'mcp' | 'app'): string {
-    const opt = this.typeOptions.find(o => o.value === mode);
+  getTypeIcon(mode: string): string {
+    const opt = this.typeOptions.find(o => o.value === (mode || '').toLowerCase());
     return opt?.icon || 'help_outline';
   }
 
@@ -266,8 +257,9 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         namespace:    pipeline.namespace,
       },
       width:      '760px',
+      height:     '600px',
       maxWidth:   '95vw',
-      maxHeight:  '80vh',
+      maxHeight:  '90vh',
       panelClass: 'pod-log-dialog-panel',
     });
   }
