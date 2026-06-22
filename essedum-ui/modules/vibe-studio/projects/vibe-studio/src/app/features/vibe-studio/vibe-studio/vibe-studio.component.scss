@@ -639,11 +639,7 @@
   border: 1px solid;
   transition: border-color 0.2s;
   align-items: stretch;
-
-  &.is-dragging {
-    user-select: none;
-    cursor: col-resize;
-  }
+  gap: 0;
 }
 
 .panel {
@@ -656,68 +652,35 @@
 }
 
 .panel.left {
-  flex: none;
-  min-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(79,142,247,0.3) transparent;
-  transition: width 0s; // no transition — width is set live during drag
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.3); border-radius: 2px; }
+  flex: 0 0 38%;
+  min-width: 280px;
+  border-right: 1px solid;
+  overflow: hidden;
 }
 
-.panel.right {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(79,142,247,0.3) transparent;
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.3); border-radius: 2px; }
-}
+.panel.right { flex: 1; }
 
 .panel-divider {
-  // Visible bar is 4px, but the clickable hit-zone is 16px so it's easy to grab
-  width: 16px;
+  width: 4px;
   flex-shrink: 0;
   cursor: col-resize;
+  transition: background 0.15s;
   position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  // 4px visible separator line centred inside the 16px hit zone
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    border-radius: 2px;
-    transition: background 0.15s;
-  }
-
-  // Three-dot drag handle shown in the middle
   &::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 4px;
-    height: 36px;
-    border-radius: 3px;
+    width: 2px;
+    height: 28px;
+    border-radius: 2px;
     opacity: 0;
     transition: opacity 0.15s;
   }
 
-  &:hover::after,
-  .is-dragging &::after { opacity: 1; }
+  &:hover::after { opacity: 1; }
 }
 
 // ── Dark theme ────────────────────────────────────────────────────────────────
@@ -812,7 +775,13 @@
     box-shadow: 0 4px 32px rgba(0,0,0,0.22);
   }
 
-  .panel.left { border-right: none; }
+  .panel.left { border-right-color: rgba(79,142,247,0.08); }
+
+  .panel-divider {
+    background: rgba(79,142,247,0.06);
+    &::after { background: rgba(79,142,247,0.4); }
+    &:hover  { background: rgba(79,142,247,0.15); }
+  }
 
   // card created — indigo/blue
   .pipeline-banner.banner-created {
@@ -834,12 +803,6 @@
     .pipeline-banner-icon { color: #4ade80; }
     .pipeline-banner-text strong { color: #f0fdf4; }
     .pipeline-banner-dismiss { color: #86efac; }
-  }
-
-  .panel-divider {
-    &::before { background: rgba(79,142,247,0.15); }
-    &::after  { background: rgba(79,142,247,0.55); }
-    &:hover::before { background: rgba(79,142,247,0.3); }
   }
 }
 
@@ -935,7 +898,13 @@
     box-shadow: 0 4px 24px rgba(99,102,241,0.06), 0 1px 4px rgba(0,0,0,0.04);
   }
 
-  .panel.left { border-right: none; }
+  .panel.left { border-right-color: rgba(99,102,241,0.1); }
+
+  .panel-divider {
+    background: rgba(99,102,241,0.05);
+    &::after { background: rgba(99,102,241,0.35); }
+    &:hover  { background: rgba(99,102,241,0.12); }
+  }
 
   // card created — indigo/blue
   .pipeline-banner.banner-created {
@@ -957,11 +926,5 @@
     .pipeline-banner-icon { color: #16a34a; }
     .pipeline-banner-text strong { color: #14532d; }
     .pipeline-banner-dismiss { color: #166534; }
-  }
-
-  .panel-divider {
-    &::before { background: rgba(99,102,241,0.12); }
-    &::after  { background: rgba(99,102,241,0.45); }
-    &:hover::before { background: rgba(99,102,241,0.25); }
   }
 }

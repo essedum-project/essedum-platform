@@ -105,8 +105,8 @@
       </button>
     </div>
 
-    <div class="vibe-panels" [class.is-dragging]="isDragging">
-      <div class="panel left" [style.width.%]="leftPanelWidth">
+    <div class="vibe-panels">
+      <div class="panel left" [style.flex-basis.%]="leftPanelWidth">
         <app-vibe-left-panel [modelLabel]="selectedAgentLabel"></app-vibe-left-panel>
       </div>
       <div class="panel-divider" (mousedown)="onDividerMouseDown($event)"></div>

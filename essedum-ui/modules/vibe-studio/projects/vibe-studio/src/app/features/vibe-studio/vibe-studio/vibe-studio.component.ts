@@ -46,8 +46,8 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   }
   /** Whether the settings dropdown is open */
   showSettings = false;
-  leftPanelWidth = 28;
-  private isDragging = false;
+  leftPanelWidth = 35;
+  isDragging = false;
   private destroy$ = new Subject<void>();
   /** cancels the per-session messages$ subscription on new-session / re-select */
   private sessionReset$ = new Subject<void>();
@@ -303,25 +303,21 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   onDividerMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.isDragging = true;
-    this.dragContainer =
-      (event.target as HTMLElement).closest('.vibe-panels') ??
-      document.querySelector('.vibe-panels');
   }
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging || !this.dragContainer) return;
-    // Always read a fresh rect so window-resize or layout shifts don't skew the calc.
-    const rect = this.dragContainer.getBoundingClientRect();
-    if (rect.width === 0) return;
+    if (!this.isDragging) return;
+    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
     const pct = ((event.clientX - rect.left) / rect.width) * 100;
-    this.leftPanelWidth = Math.min(75, Math.max(20, pct));
+    this.leftPanelWidth = Math.min(75, Math.max(25, pct));
   }
 
   @HostListener('document:mouseup')
   onMouseUp(): void {
     this.isDragging = false;
-    this.dragContainer = null;
   }
 
   ngOnDestroy(): void {
