@@ -807,7 +807,7 @@ public class ICIPDatasetController {
 		ICIPDataset datasetstr = modelmapper.map(datasetDTO, ICIPDataset.class);
 		String results = pluginService.getDataSetService(datasetstr).getDatasetData(datasetstr,
 				new SQLPagination(0, Integer.parseInt(limit), null, 0), DATATYPE.DATA, String.class);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	/**
@@ -1128,8 +1128,7 @@ public class ICIPDatasetController {
 		};
 		modelmapper.addConverter(converter);
 		ICIPDataset dataset = modelmapper.map(datasetDTO, ICIPDataset.class);
-		return new ResponseEntity<>(pluginService.getDataSetService(dataset).getDatasetData(dataset,
-				new SQLPagination(0, 10, null, 0), DATATYPE.DATA, String.class), new HttpHeaders(), HttpStatus.OK);
+		return new ResponseEntity<>(HtmlUtils.htmlEscape(pluginService.getDataSetService(dataset).getDatasetData(dataset, new SQLPagination(0, 10, null, 0), DATATYPE.DATA, String.class)), new HttpHeaders(), HttpStatus.OK);
 	}
 
 	/**
@@ -1621,8 +1620,7 @@ public class ICIPDatasetController {
 			@RequestParam(required = true, name = "projectName") String projectName, @RequestBody String rowData) {
 		ResponseEntity<String> resp;
 		try {
-			resp = new ResponseEntity<>(pluginService.saveEntry(rowData, action, datasetName, projectName),
-					new HttpHeaders(), HttpStatus.OK);
+			resp = new ResponseEntity<>(HtmlUtils.htmlEscape(pluginService.saveEntry(rowData, action, datasetName, projectName)), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
@@ -1929,7 +1927,7 @@ public class ICIPDatasetController {
 		dataset.setDatasource(datasource);
 		String results = getResult(page, limit, sortEvent, sortOrder, dataset, justData, asJSON);
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	/**
@@ -2172,7 +2170,7 @@ public class ICIPDatasetController {
 		ResponseEntity<String> resp;
 		try {
 			String reStr = pluginService.saveEntry(rowData, "delete", datasetName, projectName);
-			resp = new ResponseEntity<>(reStr, new HttpHeaders(), HttpStatus.OK);
+            resp = new ResponseEntity<>(HtmlUtils.htmlEscape(reStr), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			resp = new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			logger.error(EXCEPTION, e);
@@ -2598,7 +2596,7 @@ public class ICIPDatasetController {
 		logger.info("Advance Filter -Count called : {}", organization);
 		Long results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types, tags,
 				knowledgeBases);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	@GetMapping("/filter/advanced/list")
@@ -2613,7 +2611,7 @@ public class ICIPDatasetController {
 		logger.info("Advance Filter -List called : {}", organization);
 		List<ICIPDataset> results = datasetService.getDatasetsCountForAdvancedFilter(organization, aliasOrName, types,
 				tags, knowledgeBases, page, size);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 	
 	@GetMapping("/filter/advanced/types")
@@ -2621,7 +2619,7 @@ public class ICIPDatasetController {
 			@RequestParam(value = "organization") String organization) {
 		logger.info("Advance Filter -Types List called : {}", organization);
 		List<String> results = datasetService.getDatasetTypesForAdvancedFilter(organization);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 	
 	@GetMapping("/fetchDatasetForSchemaAliasAndOrganization")
@@ -2633,7 +2631,7 @@ public class ICIPDatasetController {
 				.getDatasetForSchemaAlias(schemaAlias, org);
 		if (resultsFetchDatasetForSchemaNameAndOrganization == null)
 			resultsFetchDatasetForSchemaNameAndOrganization = new ArrayList<>();
-		return ResponseEntity.status(200).body(resultsFetchDatasetForSchemaNameAndOrganization);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultsFetchDatasetForSchemaNameAndOrganization));
 	}
 
 	@GetMapping("/fetchNavigationDetailsBySchemaNameAndOrganization")
@@ -2643,7 +2641,7 @@ public class ICIPDatasetController {
 		logger.info("Fetching Navigation Details for Schema : {} ,Org : {}", schemaName, org);
 		List<ICIPDatasourceSummary> resultsForNavigationDetailsBySchemaNameAndOrganization = dataset2Service
 				.getNavigationDetailsBySchemaNameAndOrganization(schemaName, org);
-		return ResponseEntity.status(200).body(resultsForNavigationDetailsBySchemaNameAndOrganization);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultsForNavigationDetailsBySchemaNameAndOrganization));
 	}
 	
 	@GetMapping(path = "/getDataFromDatasets")
