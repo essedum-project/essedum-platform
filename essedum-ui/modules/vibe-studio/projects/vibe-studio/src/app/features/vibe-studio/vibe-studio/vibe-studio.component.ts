@@ -298,19 +298,22 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     this.applyDefaultAgentModel();
   }
 
-  private dragContainerRect: DOMRect | null = null;
+  private dragContainer: Element | null = null;
 
   onDividerMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.isDragging = true;
-    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
-    this.dragContainerRect = container ? container.getBoundingClientRect() : null;
+    this.dragContainer =
+      (event.target as HTMLElement).closest('.vibe-panels') ??
+      document.querySelector('.vibe-panels');
   }
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging || !this.dragContainerRect) return;
-    const rect = this.dragContainerRect;
+    if (!this.isDragging || !this.dragContainer) return;
+    // Always read a fresh rect so window-resize or layout shifts don't skew the calc.
+    const rect = this.dragContainer.getBoundingClientRect();
+    if (rect.width === 0) return;
     const pct = ((event.clientX - rect.left) / rect.width) * 100;
     this.leftPanelWidth = Math.min(75, Math.max(20, pct));
   }
@@ -318,7 +321,7 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   @HostListener('document:mouseup')
   onMouseUp(): void {
     this.isDragging = false;
-    this.dragContainerRect = null;
+    this.dragContainer = null;
   }
 
   ngOnDestroy(): void {

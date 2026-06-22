@@ -662,6 +662,7 @@
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: rgba(79,142,247,0.3) transparent;
+  transition: width 0s; // no transition — width is set live during drag
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.3); border-radius: 2px; }
 }
@@ -678,26 +679,45 @@
 }
 
 .panel-divider {
-  width: 4px;
+  // Visible bar is 4px, but the clickable hit-zone is 16px so it's easy to grab
+  width: 16px;
   flex-shrink: 0;
   cursor: col-resize;
   position: relative;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
+  // 4px visible separator line centred inside the 16px hit zone
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+
+  // Three-dot drag handle shown in the middle
   &::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 3px;
-    height: 32px;
-    border-radius: 2px;
+    width: 4px;
+    height: 36px;
+    border-radius: 3px;
     opacity: 0;
     transition: opacity 0.15s;
   }
 
-  &:hover::after { opacity: 1; }
+  &:hover::after,
+  .is-dragging &::after { opacity: 1; }
 }
 
 // ── Dark theme ────────────────────────────────────────────────────────────────
@@ -817,9 +837,9 @@
   }
 
   .panel-divider {
-    background: rgba(79,142,247,0.06);
-    &::after { background: rgba(79,142,247,0.4); }
-    &:hover  { background: rgba(79,142,247,0.15); }
+    &::before { background: rgba(79,142,247,0.15); }
+    &::after  { background: rgba(79,142,247,0.55); }
+    &:hover::before { background: rgba(79,142,247,0.3); }
   }
 }
 
@@ -940,8 +960,8 @@
   }
 
   .panel-divider {
-    background: rgba(99,102,241,0.05);
-    &::after { background: rgba(99,102,241,0.35); }
-    &:hover  { background: rgba(99,102,241,0.12); }
+    &::before { background: rgba(99,102,241,0.12); }
+    &::after  { background: rgba(99,102,241,0.45); }
+    &:hover::before { background: rgba(99,102,241,0.25); }
   }
 }
