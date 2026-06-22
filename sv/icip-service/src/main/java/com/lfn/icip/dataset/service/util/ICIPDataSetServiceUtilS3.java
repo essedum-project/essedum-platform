@@ -445,7 +445,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;
@@ -678,7 +678,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;

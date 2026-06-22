@@ -668,7 +668,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 */
 	private String[] parseQuery(String qrystr) {
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
+		Matcher m = Pattern.compile("\\{([^}]*)\\}").matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));

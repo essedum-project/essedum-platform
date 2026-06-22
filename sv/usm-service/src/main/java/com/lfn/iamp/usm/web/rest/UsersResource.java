@@ -216,7 +216,7 @@ public class UsersResource {
 
 			ModelMapper modelMapper = new ModelMapper();
 			Users users = modelMapper.map(users_dto, Users.class);
-			boolean validatedUserName = users_dto.getUser_f_name().matches("^[a-zA-Z\\w]*(?:[\\-_.]?[a-zA-Z][a-zA-Z\\w]*)?$");
+			boolean validatedUserName = users_dto.getUser_f_name().matches("^[A-Za-z0-9_]+(?:[-_.][A-Za-z0-9_]+)*$");
             if(!validatedUserName){
                 return new ResponseEntity<String>("Alpha numeric and atmost one special characters -_. allowed", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -287,7 +287,7 @@ public class UsersResource {
 			}
 			ModelMapper modelMapper = new ModelMapper();
 			Users users = modelMapper.map(users_dto, Users.class);
-			boolean validatedUserName = users_dto.getUser_f_name().matches("^[a-zA-Z\\w]*(?:[\\-_.]?[a-zA-Z][a-zA-Z\\w]*)?$");
+			boolean validatedUserName = users_dto.getUser_f_name().matches("^[A-Za-z0-9_]+(?:[-_.][A-Za-z0-9_]+)*$");
             if(!validatedUserName){
                 return new ResponseEntity<String>("Alpha numeric and atmost one special characters -_. allowed", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
             }

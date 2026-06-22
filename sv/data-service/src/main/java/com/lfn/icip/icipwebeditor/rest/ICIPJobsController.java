@@ -409,7 +409,7 @@ public class ICIPJobsController {
 			return new ResponseEntity<>("done", new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			return new ResponseEntity<>(ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Job operation failed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 	}
 

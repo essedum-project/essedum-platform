@@ -71,16 +71,16 @@ public class ICIPJobServiceUtilGenerated {
 
 			for(Map.Entry<String, JsonElement> entry : environment.entrySet()) {
 			    if(cmd.contains(entry.getKey().substring(1, entry.getKey().length()-1))) {
-			    	cmd = cmd.replaceAll("@!"+entry.getKey()+"!@", entry.getValue().getAsString());
+			    	cmd = cmd.replace("@!"+entry.getKey()+"!@", entry.getValue().getAsString());
 			    }
 				
 			}
-			cmd = cmd.replaceAll("@!pipelinename!@", name);
+			cmd = cmd.replace("@!pipelinename!@", name);
 			while(cmd.contains("@!")) {
 				
 			String remain = cmd.substring(cmd.indexOf("@!")+2, cmd.lastIndexOf("!@"));
 			String constant = constantsService.findByKeys(remain, "Core");
-			cmd = cmd.replaceAll("@!"+remain+"!@", constant);
+			cmd = cmd.replace("@!"+remain+"!@", constant == null ? "" : constant);
 	
 			}
 			response.add(cmd);

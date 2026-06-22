@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
@@ -205,7 +206,7 @@ public class ICIPSchemaRegistryController {
 	public ResponseEntity<String> createSchemaName(@PathVariable(name = "org") String org,
 			@PathVariable("alias") String alias) {
 		String name = schemaRegistryService.createName(org, alias);
-		return new ResponseEntity<>(name, new HttpHeaders(), HttpStatus.OK);
+		return new ResponseEntity<>(HtmlUtils.htmlEscape(name), new HttpHeaders(), HttpStatus.OK);
 	}
 
 	/**

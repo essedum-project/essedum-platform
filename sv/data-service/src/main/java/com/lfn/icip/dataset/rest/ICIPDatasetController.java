@@ -2415,7 +2415,7 @@ public class ICIPDatasetController {
 	public ResponseEntity<String> generateFormTemplate(@RequestParam("datasetName") String datasetName,
 			@RequestParam("org") String org, @RequestBody String templateDetails) throws Exception {
 		String formTemplateResp = datasetService.generateFormTemplate(new JSONObject(templateDetails), datasetName, org);
-		return new ResponseEntity<>(formTemplateResp, HttpStatus.OK);
+		return new ResponseEntity<>(HtmlUtils.htmlEscape(formTemplateResp), HttpStatus.OK);
 	}
 	
 	private List<ICIPDataset> encryptDatasetAttributes(List<ICIPDataset> datasetList) {
