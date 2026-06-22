@@ -61,6 +61,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
@@ -667,7 +668,7 @@ public class ICIPProxyController {
 				String resultset = cache.get(id).toString();
 				if (resultset != null) {
 					logger.debug("getDatasetResult ended");
-					return ResponseEntity.status(200).body(resultset);
+					return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultset));
 				}
 			} else {
 				cache.remove(id);
@@ -676,7 +677,7 @@ public class ICIPProxyController {
 		String results = getResult(page, limit, sortEvent, sortOrder, dataset, justData, asJSON);
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
 		cache.put(id, results);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	/**

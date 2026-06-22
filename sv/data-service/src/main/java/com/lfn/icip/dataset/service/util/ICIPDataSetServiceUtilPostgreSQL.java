@@ -184,7 +184,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			}
 		}
 		logger.info("Running the query {}", query);
-		try (ResultSet res = stmt.executeQuery(query)) {
+		try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 			if (asJSON) {
 				JSONObject obj = new JSONObject();
 				if (res.next()) {
@@ -882,7 +882,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					if (isGraphData) {
 						return extractDataWithGraphs(res);
 					}
@@ -895,7 +895,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private JsonArray getDatasetDataAsGsonJson(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsGsonJsonArray(res);
 				}
 			}
@@ -905,7 +905,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private JSONArray getDatasetDataAsJson(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsJsonArray(res);
 				}
 			}
@@ -915,7 +915,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private ArrayList<LinkedHashMap<String, Object>> getDatasetDataAsList(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsList(res);
 				}
 			}
