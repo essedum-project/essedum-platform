@@ -132,7 +132,7 @@
             <span>{{ VIEWPIPELINE }}</span>
           </button>
           <button mat-menu-item (click)="checkPodLog(pipeline)"
-                  *ngIf="['running','queued','success','failed'].includes(pipeline.pod_phase.toLowerCase())">
+                  *ngIf="['running','pending','succeeded','failed'].includes(pipeline.pod_phase.toLowerCase())">
             <mat-icon class="menu-icon-log">description</mat-icon>
             <span>{{ VIEWPODLOGS }}</span>
           </button>

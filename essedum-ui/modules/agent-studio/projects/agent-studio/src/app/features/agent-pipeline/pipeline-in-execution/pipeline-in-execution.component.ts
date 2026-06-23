@@ -37,6 +37,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   filteredPipelines: ExecutionPipeline[] = [];
   paginatedPipelines: ExecutionPipeline[] = [];
+  private allRecords: ExecutionPipeline[] = [];   // all records for current type (unfiltered by status)
 
   selectedType = 'all';
   selectedStatus = 'all';
@@ -84,7 +85,9 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ];
 
   // Pagination
-  readonly pageSize = 10;
+  readonly pageSize = 5;
+  /** Max records to fetch per type to enable client-side pod_phase filtering. */
+  private readonly FETCH_SIZE = 1000;
   pageNumber = 1;
   noOfPages = 0;
   pageArr: number[] = [];      // 0-based indices: [0, 1, 2, ...]
@@ -106,15 +109,18 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
       this.loadAllPipelines();
     });
 
-    // Auto-refresh pod list every 15 s
+    // Auto-refresh: re-fetch all records for current type every 15 s
     interval(15000)
       .pipe(
         takeUntil(this.destroy$),
         exhaustMap(() => this.podWatcher.getPipelinePods(
-          'all', this.pageNumber, this.pageSize, this.selectedStatus, this.selectedType
+          'all', 1, this.FETCH_SIZE, undefined, this.selectedType
         ))
       )
-      .subscribe(res => this.applyApiResponse(res));
+      .subscribe(res => {
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.applyClientFilters();
+      });
   }
 
   ngOnDestroy(): void {
@@ -122,32 +128,63 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /** Fetches ALL records for the current type (no status param) then applies client-side filters. */
   loadAllPipelines(): void {
     this.loading = true;
     this.podWatcher
-      .getPipelinePods('all', this.pageNumber, this.pageSize, this.selectedStatus, this.selectedType)
+      .getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType)
       .subscribe(res => {
-        this.applyApiResponse(res);
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.applyClientFilters();
         this.loading = false;
       });
   }
 
-  private applyApiResponse(res: PipelinePodsResponse): void {
-    this.totalPods = res.total;
-
-    // Map records and enforce pod_phase filter client-side for exact matching
-    let records = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
-    if (this.selectedStatus && this.selectedStatus !== 'all') {
-      records = records.filter(r => (r.pod_phase || '').toLowerCase() === this.selectedStatus);
+  /**
+   * Filters allRecords by pod_phase (selectedStatus) client-side,
+   * then slices the current page into paginatedPipelines.
+   */
+  private applyClientFilters(): void {
+    let filtered = this.allRecords;
+    if (this.selectedStatus !== 'all') {
+      filtered = this.allRecords.filter(
+        r => (r.pod_phase || '').toLowerCase() === this.selectedStatus
+      );
     }
-
-    this.filteredPipelines  = records;
-    this.paginatedPipelines = records;
-    this.noOfPages          = Math.ceil(res.total / this.pageSize);
+    this.filteredPipelines  = filtered;
+    this.totalPods          = filtered.length;
+    this.noOfPages          = Math.ceil(filtered.length / this.pageSize);
     this.pageArr            = Array.from({ length: this.noOfPages }, (_, i) => i);
     this.hoverStates        = new Array(this.noOfPages).fill(false);
-    this.startIndex         = 0;
-    this.endIndex           = this.noOfPages;
+    const start             = (this.pageNumber - 1) * this.pageSize;
+    this.paginatedPipelines = filtered.slice(start, start + this.pageSize);
+    this.initializePagination();
+  }
+
+  /** Computes the sliding window of max 5 visible page numbers. */
+  private initializePagination(): void {
+    const visiblePages = 5;
+    const halfVisible  = Math.floor(visiblePages / 2);
+
+    if (!this.noOfPages) {
+      this.startIndex = 0;
+      this.endIndex   = visiblePages;
+    } else if (this.noOfPages <= visiblePages) {
+      this.startIndex = 0;
+      this.endIndex   = this.noOfPages;
+    } else if (this.pageNumber <= halfVisible + 1) {
+      this.startIndex = 0;
+      this.endIndex   = visiblePages;
+    } else if (this.pageNumber >= this.noOfPages - halfVisible) {
+      this.startIndex = this.noOfPages - visiblePages;
+      this.endIndex   = this.noOfPages;
+    } else {
+      this.startIndex = this.pageNumber - halfVisible - 1;
+      this.endIndex   = this.pageNumber + halfVisible;
+    }
+
+    this.startIndex = Math.max(0, this.startIndex);
+    this.endIndex   = Math.min(this.noOfPages, this.endIndex);
   }
 
   /** Maps API type string (derived from namespace in service) to internal pipelineMode. */
@@ -166,38 +203,41 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   onPrevPage(): void {
     if (this.pageNumber > 1) {
       this.pageNumber--;
-      this.loadAllPipelines();
+      this.applyClientFilters();   // re-slice only, no API call
     }
   }
 
   onNextPage(): void {
     if (this.pageNumber < this.noOfPages) {
       this.pageNumber++;
-      this.loadAllPipelines();
+      this.applyClientFilters();   // re-slice only, no API call
     }
   }
 
   onChangePage(page: number): void {
     if (page >= 1 && page <= this.noOfPages) {
       this.pageNumber = page;
-      this.loadAllPipelines();
+      this.applyClientFilters();   // re-slice only, no API call
     }
   }
 
   onTypeChange(type: string): void {
     this.selectedType = type;
-    this.applyFilters();
+    this.pageNumber = 1;
+    this.loadAllPipelines();       // new type → fetch new data from server
   }
 
   onStatusChange(status: string): void {
     this.selectedStatus = status;
-    this.applyFilters();
+    this.pageNumber = 1;
+    this.applyClientFilters();     // status change → re-filter cached data, no API call
   }
 
   clearFilters(): void {
     this.selectedType = 'all';
     this.selectedStatus = 'all';
-    this.applyFilters();
+    this.pageNumber = 1;
+    this.loadAllPipelines();       // type reset → re-fetch all
   }
 
   get hasActiveFilters(): boolean {
