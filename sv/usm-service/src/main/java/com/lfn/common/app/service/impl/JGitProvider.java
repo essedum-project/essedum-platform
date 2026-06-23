@@ -57,13 +57,14 @@ public class JGitProvider implements GitStorageProvider {
     @Override
     public void push(String localPath, String remoteUrl, String branch,
                      String commitMessage, String username, String token, boolean verifySsl) throws Exception {
-        // Reject path-traversal sequences in user-supplied localPath before any
-        // File / Files.* operation (CodeQL java/path-injection).
-        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
-        File repoDir = new File(localPath);
+        // Validate user-supplied localPath; derive every subsequent File/Path from
+        // the returned validated Path so CodeQL java/path-injection sees the sink
+        // consumes the sanitised value (not the raw localPath String).
+        Path validatedRoot = com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
+        File repoDir = validatedRoot.toFile();
 
         if (!repoDir.exists()) {
-            throw new IllegalArgumentException("Local path does not exist: " + localPath);
+            throw new IllegalArgumentException("Local path does not exist");
         }
 
         log.info("Starting push operation for path: {}, branch: {}", localPath, branch);
@@ -74,8 +75,10 @@ public class JGitProvider implements GitStorageProvider {
             configureInsecureSSL();
         }
 
-        // Remove existing .git folder to ensure fresh commit
-        File gitDir = new File(repoDir, ".git");
+        // Derive .git Path from the already-validated root so the sink consumes
+        // the sanitised value (CodeQL java/path-injection).
+        Path gitPath = validatedRoot.resolve(".git");
+        File gitDir = gitPath.toFile();
         if (gitDir.exists()) {
             log.info("Removing existing .git folder for fresh commit");
             deleteDirectory(gitDir);

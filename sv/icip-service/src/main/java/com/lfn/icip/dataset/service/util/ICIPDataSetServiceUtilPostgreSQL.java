@@ -86,7 +86,8 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilPostgreSQL.class);
 
 	// Possessive quantifier (*+) prevents backtracking and avoids polynomial-time matching on adversarial input.
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\{([^}]*+)\\}");
+	// Linear-time substring parsing is used in parseQuery() instead of a regex
+	// to guarantee O(n) behaviour and avoid CodeQL java/polynomial-redos.
 	private static final int MAX_QUERY_STR_LENGTH = 10_000;
 
 	/** The limit. */
@@ -598,12 +599,21 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
 			return new String[0];
 		}
+		// Manual O(n) scan for {...} tokens (no regex engine, no backtracking).
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = QUERY_PARAM_PATTERN.matcher(qrystr);
-		while (m.find()) {
-			for (int i = 0; i < m.groupCount(); i++) {
-				allMatches.add(m.group(i));
+		int len = qrystr.length();
+		int i = 0;
+		while (i < len) {
+			int open = qrystr.indexOf('{', i);
+			if (open < 0) {
+				break;
 			}
+			int close = qrystr.indexOf('}', open + 1);
+			if (close < 0) {
+				break;
+			}
+			allMatches.add(qrystr.substring(open, close + 1));
+			i = close + 1;
 		}
 		return allMatches.toArray(new String[allMatches.size()]);
 	}
