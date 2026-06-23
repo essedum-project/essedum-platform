@@ -434,7 +434,7 @@
 }
 
 // Remove old button-style model option classes (kept minimal for theming)
-.model-option-selected { /* unused — kept to avoid stale class errors */ }
+.model-option-selected { opacity: 1; /* intentionally kept for compatibility */ }
 
 // ── Step 2 label ─────────────────────────────────────────────────────────────
 .picker-step-label {
@@ -630,7 +630,8 @@
 
 // ── Split Panels ──────────────────────────────────────────────────────────────
 .vibe-panels {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 25%) minmax(0, 75%);
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -649,15 +650,18 @@
   min-height: 0;
   overflow: hidden;
   height: 100%;
+  width: 100%;
 }
 
 .panel.left {
-  flex: 0 0 25%;
   border-right: 1px solid;
   overflow: hidden;
 }
 
-.panel.right { flex: 1; }
+.panel.right {
+  min-width: 0;
+  overflow: hidden;
+}
 
 // ── Dark theme ────────────────────────────────────────────────────────────────
 :host-context(body.header-dark-theme) {
