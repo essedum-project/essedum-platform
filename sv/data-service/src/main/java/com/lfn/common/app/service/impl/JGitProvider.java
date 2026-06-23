@@ -190,19 +190,29 @@ public class JGitProvider implements GitStorageProvider {
     }
 
     /**
-     * Recursively delete a directory
+     * Recursively delete a directory. Re-validates the path and uses a
+     * Path-based traversal that does not follow symlinks (CodeQL
+     * java/path-injection).
      */
     private void deleteDirectory(File directory) throws IOException {
-        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(directory.getAbsolutePath());
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    deleteDirectory(file);
+        Path root = com.lfn.common.app.util.PathValidationUtil
+                .validateAndGetPath(directory.getAbsolutePath());
+        deleteTree(root);
+    }
+
+    private void deleteTree(Path path) throws IOException {
+        if (!Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        if (Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            try (java.util.stream.Stream<Path> children = Files.list(path)) {
+                java.util.Iterator<Path> it = children.iterator();
+                while (it.hasNext()) {
+                    deleteTree(it.next());
                 }
             }
         }
-        Files.delete(directory.toPath());
+        Files.delete(path);
     }
 
     /**

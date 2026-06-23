@@ -234,21 +234,26 @@ public class ICIPAIOpsAdapterService {
 
 	/**
 	 * Strict whitelist sanitiser for SQL identifiers (table/column names).
-	 * Returns the input only if it contains exclusively characters from the
-	 * safe set [A-Za-z0-9_] and is non-empty; otherwise throws
-	 * IllegalArgumentException. The {@code replaceAll} step removes any
-	 * unsafe characters so CodeQL's java/sql-injection analysis recognises the
-	 * returned value as sanitised.
+	 * Validates char-by-char against [A-Za-z0-9_] and rebuilds the string from
+	 * the validated characters so CodeQL's java/sql-injection data-flow
+	 * recognises the returned value as fully sanitised (value-preserving
+	 * transformation through an explicit allow-list).
 	 */
 	private static String sanitizeSqlIdentifier(String value) {
-		if (value == null || value.isEmpty()) {
+		if (value == null || value.isEmpty() || value.length() > 64) {
 			throw new IllegalArgumentException("Invalid SQL identifier");
 		}
-		String sanitized = value.replaceAll("[^A-Za-z0-9_]", "");
-		if (sanitized.isEmpty() || !sanitized.equals(value)) {
-			throw new IllegalArgumentException("Invalid SQL identifier");
+		StringBuilder sb = new StringBuilder(value.length());
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
+					|| (c >= '0' && c <= '9') || c == '_') {
+				sb.append(c);
+			} else {
+				throw new IllegalArgumentException("Invalid SQL identifier character");
+			}
 		}
-		return sanitized;
+		return sb.toString();
 	}
 
 }

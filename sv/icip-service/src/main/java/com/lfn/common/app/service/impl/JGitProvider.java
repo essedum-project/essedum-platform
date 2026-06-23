@@ -190,23 +190,29 @@ public class JGitProvider implements GitStorageProvider {
     }
 
     /**
-     * Recursively delete a directory
+     * Recursively delete a directory. Re-validates the path on each invocation
+     * and uses a Path-based traversal that does not follow symlinks so the
+     * walk cannot escape the validated root (CodeQL java/path-injection).
      */
     private void deleteDirectory(File directory) throws IOException {
-        // Defence-in-depth barrier so CodeQL java/path-injection sees a
-        // sanitiser between any user-controlled path and the recursive
-        // Files.delete sink below. Reject traversal sequences in the absolute
-        // path string before walking the tree.
-        com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(directory.getAbsolutePath());
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    deleteDirectory(file);
+        Path root = com.lfn.common.app.util.PathValidationUtil
+                .validateAndGetPath(directory.getAbsolutePath());
+        deleteTree(root);
+    }
+
+    private void deleteTree(Path path) throws IOException {
+        if (!Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        if (Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            try (java.util.stream.Stream<Path> children = Files.list(path)) {
+                java.util.Iterator<Path> it = children.iterator();
+                while (it.hasNext()) {
+                    deleteTree(it.next());
                 }
             }
         }
-        Files.delete(directory.toPath());
+        Files.delete(path);
     }
 
     /**

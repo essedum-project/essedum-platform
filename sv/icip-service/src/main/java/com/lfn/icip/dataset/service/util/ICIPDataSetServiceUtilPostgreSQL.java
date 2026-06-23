@@ -85,7 +85,8 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilPostgreSQL.class);
 
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\{([^}]*)\\}");
+	// Possessive quantifier (*+) prevents backtracking and avoids polynomial-time matching on adversarial input.
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\{([^}]*+)\\}");
 	private static final int MAX_QUERY_STR_LENGTH = 10_000;
 
 	/** The limit. */

@@ -82,10 +82,11 @@ public class RegularExpressionUtil {
 
 	 public static boolean verifyRegEx(String regex) throws Exception {
 	 try {
-		 if (!isSafeRegex(regex)) {
-			 throw new PatternSyntaxException("Regex pattern rejected: unsafe or too long", regex, -1);
+		 String safe = sanitizeRegex(regex);
+		 if (safe == null) {
+			 throw new PatternSyntaxException("Regex pattern rejected: unsafe or too long", regex == null ? "" : regex, -1);
 		 }
-		 Pattern.compile(regex); // lgtm[java/regex-injection] - input already validated by isSafeRegex
+		 Pattern.compile(safe);
 		 return false;
 	 } catch (PatternSyntaxException e) {
 		 log.info("Pattern failed to be verified {}, error is {}" , regex, e.getDescription());

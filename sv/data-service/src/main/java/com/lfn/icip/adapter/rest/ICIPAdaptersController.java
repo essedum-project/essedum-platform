@@ -179,8 +179,7 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 				} catch (Exception e) {
-					logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-							e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+					logger.error("Error in operation", e);
 					if (logger.isDebugEnabled()) {
 						logger.error("Error due to:", e);
 					}
@@ -337,8 +336,7 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
@@ -472,8 +470,7 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
@@ -651,8 +648,7 @@ public class ICIPAdaptersController {
 		try {
 			results = getResult(page, limit, sortEvent, sortOrder, dataset);
 		} catch (Exception e) {
-			logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(), e.getStackTrace()[0].getClass(),
-					e.getStackTrace()[0].getLineNumber());
+			logger.error("Error in operation", e);
 			if (logger.isDebugEnabled()) {
 				logger.error("Error due to:", e);
 			}
@@ -759,8 +755,7 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
