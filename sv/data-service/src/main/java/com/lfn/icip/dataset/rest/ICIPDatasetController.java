@@ -93,7 +93,6 @@ import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
@@ -642,7 +641,7 @@ public class ICIPDatasetController {
 			});
 		}
 		}catch(Exception e) {
-			logger.error("Error because of:{} at class:{} and line:{}",e.getMessage(),e.getStackTrace()[0].getClass(),e.getStackTrace()[0].getLineNumber());
+			logger.error("Error in operation", e);
 			if(logger.isDebugEnabled()){
 				logger.error("Error due to:",e);
 			}
@@ -1855,9 +1854,10 @@ public class ICIPDatasetController {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred");
+		logger.error("Unhandled exception", ex);
+		// Do NOT propagate the underlying exception message to the response
+		// body (CodeQL java/error-message-exposure).
+		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "error occurred");
 		return new ResponseEntity<>("There is an application error, please contact the application admin",
 				new HttpHeaders(), apiError.getStatus());
 	}
@@ -2366,7 +2366,7 @@ public class ICIPDatasetController {
 		} catch (Exception e) {
 			logger.error("Error in getting dataset attachments", e);
 			List<Object> attachments = new ArrayList<>();
-			attachments.add(e.getMessage());
+			attachments.add("Failed to fetch dataset attachments");
 			resp = new ResponseEntity<List<Object>>(attachments, HttpStatus.BAD_REQUEST);
 		}
 		return resp;

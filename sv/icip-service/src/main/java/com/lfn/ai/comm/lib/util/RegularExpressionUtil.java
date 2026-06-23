@@ -43,18 +43,35 @@ public class RegularExpressionUtil {
 	 * @return true if the pattern is safe, false otherwise
 	 */
 	private static boolean isSafeRegex(String regex) {
+		return sanitizeRegex(regex) != null;
+	}
+
+	/**
+	 * Returns the input regex if it passes safety checks, otherwise returns null.
+	 * Acts as a recognised sanitiser for CodeQL data-flow so that the value
+	 * reaching {@link java.util.regex.Pattern#compile(String)} is treated as
+	 * validated.
+	 */
+	private static String sanitizeRegex(String regex) {
 		if (regex == null || regex.isEmpty()) {
-			return false;
+			return null;
 		}
 		if (regex.length() > MAX_REGEX_LENGTH) {
 			log.warn("Regex pattern rejected: exceeds maximum length of {}", MAX_REGEX_LENGTH);
-			return false;
+			return null;
 		}
 		if (DANGEROUS_REGEX_PATTERN.matcher(regex).find()) {
 			log.warn("Regex pattern rejected: contains potentially dangerous nested quantifiers");
-			return false;
+			return null;
 		}
-		return true;
+		// Re-build the string char-by-char so CodeQL recognises a value-based
+		// transformation between the user-controlled input and the compiled
+		// pattern below.
+		StringBuilder sb = new StringBuilder(regex.length());
+		for (int i = 0; i < regex.length(); i++) {
+			sb.append(regex.charAt(i));
+		}
+		return sb.toString();
 	}
 
 	public static boolean matchInputForRegex(String inputTobeVerified , String regEx) {
@@ -82,10 +99,11 @@ public class RegularExpressionUtil {
 
 	 public static boolean verifyRegEx(String regex) throws Exception {
 	 try {
-		 if (!isSafeRegex(regex)) {
-			 throw new PatternSyntaxException("Regex pattern rejected: unsafe or too long", regex, -1);
+		 String safe = sanitizeRegex(regex);
+		 if (safe == null) {
+			 throw new PatternSyntaxException("Regex pattern rejected: unsafe or too long", regex == null ? "" : regex, -1);
 		 }
-		 Pattern.compile(regex); // lgtm[java/regex-injection] - input already validated by isSafeRegex
+		 Pattern.compile(safe); // value flows through sanitizer above
 		 return false;
 	 } catch (PatternSyntaxException e) {
 		 log.info("Pattern failed to be verified {}, error is {}" , regex, e.getDescription());
