@@ -2227,7 +2227,7 @@ public class ICIPDatasetController {
 		} catch (Exception e) {
 			logger.error("Error in getting dataset extras", e);
 			List<Object> extras = new ArrayList<>();
-			extras.add(e.getMessage());
+			extras.add("Request failed");
 			resp = new ResponseEntity<List<Object>>(extras, HttpStatus.BAD_REQUEST);
 		}
 		return resp;
