@@ -224,7 +224,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
 			return ResponseEntity.status(200).body(results);
 		}
@@ -377,7 +377,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
 			return ResponseEntity.status(200).body(results);
 		}
@@ -474,7 +474,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 			if (logger.isDebugEnabled()) {
 				logger.error("Error due to:", e);
 			}
-			return ResponseEntity.status(422).body(e.getMessage());
+			return ResponseEntity.status(422).body("Adapter invocation failed");
 		}
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
 		return ResponseEntity.status(200).body(results);
@@ -772,7 +772,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
 			return ResponseEntity.status(200).body(results);
 		}
@@ -928,7 +928,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
 			return ResponseEntity.status(200).body(results);
 		}

@@ -245,9 +245,8 @@ createEntityDeletionAlert(ENTITY_NAME, safeName)).build() : ResponseEntity.statu
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+		logger.error("Unhandled exception", ex);
+		return new ResponseEntity<>("An internal server error occurred", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }
