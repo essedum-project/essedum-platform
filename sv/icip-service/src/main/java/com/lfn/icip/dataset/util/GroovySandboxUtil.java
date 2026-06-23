@@ -164,10 +164,10 @@ public final class GroovySandboxUtil {
         secureAst.setMethodDefinitionAllowed(true);
         secureAst.setClosuresAllowed(true);
 
-        // Restrict imports
-        secureAst.setImportsBlacklist(DISALLOWED_IMPORTS);
-        secureAst.setStarImportsBlacklist(DISALLOWED_STAR_IMPORTS);
-        secureAst.setStaticStarImportsBlacklist(DISALLOWED_STATIC_STAR_IMPORTS);
+        // Restrict imports (Groovy 4+ disallowed-* API; replaces deprecated *Blacklist setters)
+        secureAst.setDisallowedImports(DISALLOWED_IMPORTS);
+        secureAst.setDisallowedStarImports(DISALLOWED_STAR_IMPORTS);
+        secureAst.setDisallowedStaticStarImports(DISALLOWED_STATIC_STAR_IMPORTS);
         secureAst.setIndirectImportCheckEnabled(true);
 
         // Allow safe imports for data manipulation

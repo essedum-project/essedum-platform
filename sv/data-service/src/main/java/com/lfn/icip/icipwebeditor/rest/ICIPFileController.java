@@ -954,7 +954,8 @@ public class ICIPFileController {
 			List<String> result = fileService.writeNativeFile(cname, org, fileName, fileType, script);
 			logger.info("Successfully created native script file: {}", fileName);
 
-			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
+			List<String> escapedResult = result.stream().map(HtmlUtils::htmlEscape).toList();
+			return new ResponseEntity<>(escapedResult, HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;

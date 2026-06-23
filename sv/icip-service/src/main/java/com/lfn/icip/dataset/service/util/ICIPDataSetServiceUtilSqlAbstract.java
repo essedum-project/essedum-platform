@@ -302,7 +302,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					JSONObject obj1 = new JSONObject(obj.toString());
 					// if (decrypt) {
 					// 	obj1 = checkIfDecrypted(obj1, dataset);
-					// 	obj = new JsonParser().parse(obj1.toString()).getAsJsonObject();
+					// 	obj = JsonParser.parseString(obj1.toString()).getAsJsonObject();
 					// }
 					return obj;
 				}

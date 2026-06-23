@@ -126,7 +126,6 @@ public class ICIPJsonTransformerRewriteDataset extends ICIPJsonTransformerBase<J
 					JsonArray arr = new JsonArray();
 					val.getAsJsonArray().forEach(ds -> {
 						Gson gson = new Gson();
-						JsonParser parser = new JsonParser();
 						ICIPDataset dataset = null;
 						try {
 							dataset = ((ICIPJsonVisitorRewriteDataset) visitor).getDatasetService()
@@ -134,18 +133,18 @@ public class ICIPJsonTransformerRewriteDataset extends ICIPJsonTransformerBase<J
 						} catch (Exception e2) {
 							logger.error(e2.getMessage(), e2);
 						}
-						JsonElement e1 = parser.parse(gson.toJson(dataset));
+						JsonElement e1 = JsonParser.parseString(gson.toJson(dataset));
 						arr.add(e1);
 						for (Entry<String, JsonElement> schemaentry : e1.getAsJsonObject().entrySet()) {
 							if (schemaentry.getKey().equals(SCHEMA)) {
 								JsonObject obj = schemaentry.getValue().getAsJsonObject();
 								ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
 								String schemaValue = obj.get("schemavalue").getAsString();
-								JsonElement schemaElem = parser.parse(schemaValue);
+								JsonElement schemaElem = JsonParser.parseString(schemaValue);
 								schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
 								schemaDetails.setSchemaId(obj.get("name").getAsString());
 								e1.getAsJsonObject().remove(SCHEMA);
-								e1.getAsJsonObject().add(SCHEMA, parser.parse(gson.toJson(schemaDetails)));
+								e1.getAsJsonObject().add(SCHEMA, JsonParser.parseString(gson.toJson(schemaDetails)));
 								arr.add(e1);
 								break;
 							}
@@ -154,28 +153,26 @@ public class ICIPJsonTransformerRewriteDataset extends ICIPJsonTransformerBase<J
 					e = arr;
 				} else if (val.isJsonObject()) {
 					Gson gson = new Gson();
-					JsonParser parser = new JsonParser();
 					JsonObject data = entry.getValue().getAsJsonObject();
-					e = parser.parse(gson.toJson(data));
+					e = JsonParser.parseString(gson.toJson(data));
 				} else if (!val.getAsString().trim().equals("") && !val.getAsString().equals("dropdown")
 						&& !val.getAsString().equals("text")) {
 					Gson gson = new Gson();
-					JsonParser parser = new JsonParser();
 					ICIPDataset dataset;
 					try {
 						dataset = ((ICIPJsonVisitorRewriteDataset) visitor).getDatasetService()
 								.getDataset(entry.getValue().getAsString(), org);
-						e = parser.parse(gson.toJson(dataset));
+						e = JsonParser.parseString(gson.toJson(dataset));
 						for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
 							if (schemaentry.getKey().equals(SCHEMA)) {
 								JsonObject obj = schemaentry.getValue().getAsJsonObject();
 								ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
 								String schemaValue = obj.get("schemavalue").getAsString();
-								JsonElement schemaElem = parser.parse(schemaValue);
+								JsonElement schemaElem = JsonParser.parseString(schemaValue);
 								schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
 								schemaDetails.setSchemaId(obj.get("name").getAsString());
 								e.getAsJsonObject().remove(SCHEMA);
-								e.getAsJsonObject().add(SCHEMA, parser.parse(gson.toJson(schemaDetails)));
+								e.getAsJsonObject().add(SCHEMA, JsonParser.parseString(gson.toJson(schemaDetails)));
 								break;
 							}
 						}

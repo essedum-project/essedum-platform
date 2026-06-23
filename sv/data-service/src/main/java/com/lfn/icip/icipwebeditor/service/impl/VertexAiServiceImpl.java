@@ -1,4 +1,4 @@
-﻿package com.lfn.icip.icipwebeditor.service.impl;
+package com.lfn.icip.icipwebeditor.service.impl;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
