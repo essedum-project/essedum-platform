@@ -222,7 +222,7 @@ public class ICIPUtils {
 	 */
 	public static List<String> readFileFromLastLines(Path path, int size) throws IOException {
 		List<String> script = new ArrayList<>();
-		try (ReversedLinesFileReader reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
+		try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder().setFile(path.toFile()).setCharset(StandardCharsets.UTF_8).get()) {
 			String line = "";
 			while ((line = reader.readLine()) != null && script.size() < size) {
 				script.add(line);

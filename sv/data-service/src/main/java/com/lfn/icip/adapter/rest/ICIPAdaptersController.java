@@ -538,6 +538,7 @@ public class ICIPAdaptersController {
 
 
 	private Map<String, String> getMapFromJsonArray(JSONArray jsonArray) {
+		Map<String, String> getMapFromJsonArray = new HashMap<>();
 		try {
 			if (jsonArray != null)
 				for (Object o : jsonArray) {

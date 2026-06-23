@@ -1,36 +1,13 @@
-﻿package com.lfn.icip.icipwebeditor.service.impl;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+package com.lfn.icip.icipwebeditor.service.impl;
 
 import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
+import com.lfn.icip.dataset.util.GroovySandboxUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPPrompts;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptChatModel;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptService;
-
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -39,7 +16,16 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import groovy.lang.Binding;
-import com.lfn.icip.dataset.util.GroovySandboxUtil;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import java.util.*;
 
 @Service("vertexaichatmodel")
 public class VertexAiServiceImpl implements ICIPPromptChatModel {

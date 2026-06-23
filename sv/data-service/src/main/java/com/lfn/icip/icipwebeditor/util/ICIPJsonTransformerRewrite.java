@@ -130,16 +130,15 @@ public class ICIPJsonTransformerRewrite extends ICIPJsonTransformerBase<JsonElem
 					id = entry.getValue().getAsString();
 				}
 				if (id != null && !id.equals("text")) {
-					JsonParser parser = new JsonParser();
 					JsonObject tmpObject = new JsonObject();
 					try {
 						String schemaValue = ((ICIPJsonVisitorRewrite) visitor).getSchemaRegistryService()
 								.fetchSchemaValue(id, org);
-						JsonElement schemaElem = parser.parse(schemaValue);
+						JsonElement schemaElem = JsonParser.parseString(schemaValue);
 						tmpObject.addProperty("name", id);
 						tmpObject.add("schemaDetails", schemaElem.getAsJsonArray());
 					} catch (Exception ex) {
-						JsonElement schemaElem = parser.parse("");
+						JsonElement schemaElem = JsonParser.parseString("");
 						tmpObject.add("schemaDetails", schemaElem.getAsJsonNull());
 					}
 					e = gson.fromJson(tmpObject, JsonElement.class);
