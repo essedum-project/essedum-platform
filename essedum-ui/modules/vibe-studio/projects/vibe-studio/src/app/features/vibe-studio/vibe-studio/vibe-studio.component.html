@@ -106,10 +106,9 @@
     </div>
 
     <div class="vibe-panels">
-      <div class="panel left" [style.flex-basis.%]="leftPanelWidth">
+      <div class="panel left">
         <app-vibe-left-panel [modelLabel]="selectedAgentLabel"></app-vibe-left-panel>
       </div>
-      <div class="panel-divider" (mousedown)="onDividerMouseDown($event)"></div>
       <div class="panel right">
         <app-vibe-right-panel [pipelineCname]="registeredCname"></app-vibe-right-panel>
       </div>

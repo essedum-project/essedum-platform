@@ -46,8 +46,6 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   }
   /** Whether the settings dropdown is open */
   showSettings = false;
-  leftPanelWidth = 35;
-  isDragging = false;
   private destroy$ = new Subject<void>();
   /** cancels the per-session messages$ subscription on new-session / re-select */
   private sessionReset$ = new Subject<void>();
@@ -296,28 +294,6 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     this.vibeService.resetSession();
     // Re-apply defaults so user doesn't have to re-select
     this.applyDefaultAgentModel();
-  }
-
-  private dragContainer: Element | null = null;
-
-  onDividerMouseDown(event: MouseEvent): void {
-    event.preventDefault();
-    this.isDragging = true;
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging) return;
-    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const pct = ((event.clientX - rect.left) / rect.width) * 100;
-    this.leftPanelWidth = Math.min(75, Math.max(25, pct));
-  }
-
-  @HostListener('document:mouseup')
-  onMouseUp(): void {
-    this.isDragging = false;
   }
 
   ngOnDestroy(): void {
