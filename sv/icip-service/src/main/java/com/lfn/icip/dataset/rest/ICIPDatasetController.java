@@ -2413,7 +2413,7 @@ public class ICIPDatasetController {
 			logger.error("Error while deleting dataset file ", e);
 			JSONArray respArr = new JSONArray();
 			JSONObject respObj = new JSONObject();
-			respArr.put(respObj.put("Error:","Error while deleting file :"+e.getMessage()));
+			respArr.put(respObj.put("Error:", "Error while deleting file"));
 			resp = new ResponseEntity<List<Object>>(respArr.toList(), HttpStatus.BAD_REQUEST);
 		}
 		return resp;
@@ -2752,7 +2752,7 @@ public class ICIPDatasetController {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Request failed");
 			return new ResponseEntity<>(response, new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 	}
@@ -2789,7 +2789,7 @@ public class ICIPDatasetController {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Request failed");
 			return new ResponseEntity<>(response, new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 	}

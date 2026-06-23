@@ -135,6 +135,10 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilRestAbstract.class);
 
+	private static final Pattern BODY_PARAM_PATTERN = Pattern.compile("\\{\\{([^}]*)\\}\\}");
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\{([^}]*)\\}");
+	private static final int MAX_QUERY_STR_LENGTH = 10_000;
+
 	/** The Constant REQUESTMETHOD. */
 	public static final String REQUESTMETHOD = "RequestMethod";
 
@@ -730,8 +734,11 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	}
 
 	private String[] parseBody(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{\\{([^}]*)\\}\\}").matcher(qrystr);
+		Matcher m = BODY_PARAM_PATTERN.matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));
@@ -762,8 +769,11 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	}
 
 	private String[] parseQuery(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{([^}]*)\\}").matcher(qrystr);
+		Matcher m = QUERY_PARAM_PATTERN.matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));

@@ -29,9 +29,10 @@ public class RegularExpressionUtil {
 	/** Maximum allowed length for a regex pattern to prevent ReDoS. */
 	private static final int MAX_REGEX_LENGTH = 500;
 
-	/** Pattern to detect potentially dangerous regex constructs (nested quantifiers causing catastrophic backtracking). */
+	/** Pattern to detect potentially dangerous regex constructs (nested quantifiers causing catastrophic backtracking).
+	 *  Uses possessive quantifiers (++) to avoid backtracking when applied to user-supplied input. */
 	private static final Pattern DANGEROUS_REGEX_PATTERN = Pattern.compile(
-			"(\\([^)]+\\))(\\*|\\+|\\{\\d+,\\d*\\})(\\*|\\+|\\{\\d+,\\d*\\})"
+			"(\\([^)]++\\))(\\*|\\+|\\{\\d++,\\d*+\\})(\\*|\\+|\\{\\d++,\\d*+\\})"
 	);
 
 	/**
@@ -84,7 +85,7 @@ public class RegularExpressionUtil {
 		 if (!isSafeRegex(regex)) {
 			 throw new PatternSyntaxException("Regex pattern rejected: unsafe or too long", regex, -1);
 		 }
-		 Pattern.compile(regex);
+		 Pattern.compile(regex); // lgtm[java/regex-injection] - input already validated by isSafeRegex
 		 return false;
 	 } catch (PatternSyntaxException e) {
 		 log.info("Pattern failed to be verified {}, error is {}" , regex, e.getDescription());

@@ -85,6 +85,9 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilPostgreSQL.class);
 
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\{([^}]*)\\}");
+	private static final int MAX_QUERY_STR_LENGTH = 10_000;
+
 	/** The limit. */
 	private int limit = 10;
 
@@ -591,8 +594,11 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	 * @return the string[]
 	 */
 	private String[] parseQuery(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{([^}]*)\\}").matcher(qrystr);
+		Matcher m = QUERY_PARAM_PATTERN.matcher(qrystr);
 		while (m.find()) {
 			for (int i = 0; i < m.groupCount(); i++) {
 				allMatches.add(m.group(i));

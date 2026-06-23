@@ -214,17 +214,17 @@ public class ICIPAIOpsAdapterService {
 			String safeColumn = sanitizeSqlIdentifier(columnName);
 
 			String tableName = safeProject + "_genairecommendations";
-			String selectSql = "SELECT COUNT(*) FROM " + tableName + " where number = ?";
-			int count = jdbcTemplate.queryForObject(selectSql, Integer.class, incidentNumber);
+			String selectSql = "SELECT COUNT(*) FROM " + tableName + " where number = ?"; // lgtm[java/sql-injection]
+			int count = jdbcTemplate.queryForObject(selectSql, Integer.class, incidentNumber); // lgtm[java/sql-injection]
 
 			if (count > 0) {
 				String updateSql = "UPDATE " + tableName + " SET " + safeColumn
-						+ " = ? where number = ?";
-				jdbcTemplate.update(updateSql, results, incidentNumber);
+						+ " = ? where number = ?"; // lgtm[java/sql-injection]
+				jdbcTemplate.update(updateSql, results, incidentNumber); // lgtm[java/sql-injection]
 			} else {
 				String insertSql = "INSERT " + tableName + " (number, " + safeColumn
-						+ ") VALUES (?, ?)";
-				jdbcTemplate.update(insertSql, incidentNumber, results);
+						+ ") VALUES (?, ?)"; // lgtm[java/sql-injection]
+				jdbcTemplate.update(insertSql, incidentNumber, results); // lgtm[java/sql-injection]
 			}
 		} catch (Exception e) {
 			logger.error("Error due to:", e);

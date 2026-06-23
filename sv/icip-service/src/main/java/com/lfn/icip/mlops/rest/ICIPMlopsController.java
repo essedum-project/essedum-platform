@@ -1250,7 +1250,7 @@ public class ICIPMlopsController {
 		try {
 			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
 			logger.error("EXCEPTION:", e.getMessage());
 		}
 		return resp;
