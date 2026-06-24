@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -24,9 +24,13 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Null;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.hibernate.annotations.NaturalId;
 
@@ -39,12 +43,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class ICIPStreamingServices.
  */
-// 
+//
 /**
  * The Class ICIPStreamingServices.
  *
@@ -96,6 +101,7 @@ import lombok.Setter;
  * @return the int
  */
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@Slf4j
 public class ICIPStreamingServices extends BaseDomain implements Serializable {
 
 	/** The Constant serialVersionUID. */
@@ -113,7 +119,7 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 
 	/** The description. */
 	private String description;
-	
+
 	private String tags;
 
 	/** The job id. */
@@ -133,7 +139,7 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	/** The type. */
 	private String type;
 	private String interfacetype;
-	
+
 	@Column(name = "is_template", nullable = false)
 	@JsonProperty("is_template")
 	private boolean isTemplate;
@@ -142,7 +148,7 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 
 	/** The deleted. */
 	private boolean deleted;
-	
+
 
 	/** The created by. */
 	@Column(name = "created_by", nullable = false, length = 50, updatable = false)
@@ -153,13 +159,44 @@ public class ICIPStreamingServices extends BaseDomain implements Serializable {
 	@Column(name = "created_date", updatable = false)
 	@JsonProperty("created_date")
 	private Timestamp createdDate = new Timestamp(System.currentTimeMillis());
-	
+
 	@Column(name = "pipeline_metadata")
 	private String pipelineMetadata;
-	
+
 	@Column(name="is_app")
 	@JsonProperty("is_app")
 	private boolean isApp;
+
+	/** The runner service status. Stores "ACTIVE" when runner_service_status is true, "INACTIVE" when false. */
+	@Column(name = "runner_service_status")
+	@JsonProperty("runner_service_status")
+	private String runnerServiceStatus;
+
+	/**
+	 * Sync runner service status from json_content before INSERT and UPDATE.
+	 * runner_service_status: true  → "true"
+	 * runner_service_status: false → "false"
+	 */
+	@PrePersist
+	@PreUpdate
+	private void syncRunnerServiceStatus() {
+		if (this.jsonContent != null && !this.jsonContent.isBlank()) {
+			try {
+				JSONObject json = new JSONObject(this.jsonContent);
+				if (json.has("runner_service_status")) {
+					boolean status = json.getBoolean("runner_service_status");
+					this.runnerServiceStatus = String.valueOf(status);
+				}
+			} catch (JSONException e) {
+				// json_content is not parseable — leave runnerServiceStatus unchanged
+				log.warn("[ICIPStreamingServices] Failed to parse runner_service_status from json_content for pipeline '{}': {}", this.name, e.getMessage());
+			} catch (Exception e) {
+				// Catch all unexpected runtime exceptions to prevent JPA transaction rollback
+				log.error("[ICIPStreamingServices] Unexpected error syncing runner_service_status for pipeline '{}': {}", this.name, e.getMessage(), e);
+			}
+		}
+	}
+
 	/**
 	 * Equals.
 	 *

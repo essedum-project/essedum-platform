@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 	<!-- 1.3.11 changes -->
 	<changeSet author="Essedum (generated)" id="1311v0-cip-58">
 		<validCheckSum>any</validCheckSum>
@@ -585,7 +585,7 @@
 		</addColumn>
 	</changeSet>
 	<changeSet author="Essedum" id="1312v0-cip-1007">
-		<sql dbms="mysql" splitStatements="true" stripComments="true"> 
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
 			UPDATE `mleventjobmapping` t1, (SELECT id, CONCAT('[{"name":"', `jobname`, '","type":"', `jobtype`, '"}]') AS jobdetails FROM `mleventjobmapping`) t2 SET t1.`jobdetails` = t2.`jobdetails` WHERE t1.`id` = t2.`id`;
 		</sql>
 	</changeSet>
@@ -892,7 +892,7 @@
 	</changeSet>
 	<changeSet id="2v1-cip-10" author="Essedum">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
-			ALTER TABLE mlocr MODIFY COLUMN analysisResults LONGTEXT; 
+			ALTER TABLE mlocr MODIFY COLUMN analysisResults LONGTEXT;
 		</sql>
 	</changeSet>
 	<changeSet author="Essedum" id="2v1-cip-11">
@@ -1002,4 +1002,16 @@
 			<column name="active" type="BIT(1)" />
 		</createTable>
 	</changeSet>
-</databaseChangeLog>	
+
+	<!-- Add runner_service_status column to mlpipeline table -->
+	<changeSet author="Essedum" id="3v3-cip-add-runner-service-status">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mlpipeline" columnName="runner_service_status" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mlpipeline">
+			<column name="runner_service_status" type="VARCHAR(5)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

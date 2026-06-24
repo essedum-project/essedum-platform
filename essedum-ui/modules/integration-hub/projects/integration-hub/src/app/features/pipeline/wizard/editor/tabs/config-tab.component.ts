@@ -35,6 +35,14 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .kv:last-child { border-bottom: none; }
     .k  { color: var(--cfg-key, #6b7280); font-size:11px; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
     .v  { color: var(--cfg-val, #111827); font-size:13px; font-weight:500; max-width:62%; text-align:right; word-break:break-all; }
+    :host-context(body.header-light-theme) {
+      --cfg-page-bg:  #ffffff;
+      --cfg-card-bg:  #ffffff;
+      --cfg-border:   #e5e7eb;
+      --cfg-divider:  #f1f5f9;
+      --cfg-key:      #64748b;
+      --cfg-val:      #111827;
+    }
     :host-context(body.header-dark-theme) {
       --cfg-page-bg:  #0d1117;
       --cfg-title:    #e6edf3;

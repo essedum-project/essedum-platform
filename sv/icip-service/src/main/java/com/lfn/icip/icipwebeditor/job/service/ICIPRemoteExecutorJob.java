@@ -260,7 +260,17 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 JSONObject fileObj = null;
                 ICIPStreamingServices pipelineInfo = streamingServicesService
                         .findbyNameAndOrganization(listjobdto.get(index).getName(), jobObject.getOrg());
-                if (!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))) {
+                String pipelineType = pipelineInfo.getType();
+                // NativeScript, TrainingPipeline and DataPipeline (wizard-created) all store
+                // their executable script in the native-script DB table under a sanitized
+                // filename (e.g. SLMTEST_leo1311.py). They do NOT have a separate
+                // ${name}_generatedCode.py on disk and no script-generation event mapping,
+                // so skip the legacy generateScript flow for them — the executor picks up
+                // the script directly from the DB later in this method.
+                boolean usesNativeScriptStorage = pipelineType.equalsIgnoreCase("NativeScript")
+                        || pipelineType.equalsIgnoreCase("TrainingPipeline")
+                        || pipelineType.equalsIgnoreCase("DataPipeline");
+                if (!usesNativeScriptStorage) {
                     fileObj = streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),
                             jobObject.getOrg());
                     String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(), jobObject.getOrg(),
@@ -268,7 +278,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                     JsonObject payload = new JsonObject();
                     payload.addProperty("pipelineName", pipelineInfo.getName());
                     payload.addProperty("scriptPath", path);
-                    String corelid = eventMappingService.trigger("generateScript_" + pipelineInfo.getType(),
+                    String corelid = eventMappingService.trigger("generateScript_" + pipelineType,
                             jobObject.getOrg(), "", payload.toString(), "");
                     String status = iICIPJobsService.getEventStatus(corelid);
                     agenticMeta = pipelineInfo.getPipelineMetadata();
@@ -277,6 +287,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                         allScriptGenerated = 0;
                         logger.debug("Script generation completed");
                     }
+                } else {
+                    agenticMeta = pipelineInfo.getPipelineMetadata();
                 }
             } catch (Exception e) {
                 allScriptGenerated = 0;
@@ -478,10 +490,17 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                             jsonObject.addProperty("org", org);
 
 
-                            environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
-                                    environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
-                                String key = envJSON.get("name").getAsString(); String value =
-                                        envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
+                            // Wizard-created pipelines may omit the top-level "environment"
+                            // array; default to an empty list to avoid NPE.
+                            environ = jsonObject.has("environment") && jsonObject.get("environment").isJsonArray()
+                                    ? jsonObject.getAsJsonArray("environment")
+                                    : new JsonArray();
+                            for (int i = 0; i < environ.size(); i++) {
+                                JsonObject envJSON = environ.get(i).getAsJsonObject();
+                                String key = envJSON.get("name").getAsString();
+                                String value = envJSON.get("value").getAsString();
+                                envJSONO.addProperty(key, value);
+                            }
 
 
                             String data = "{\"input_string\":" + jsonObject.toString() + "}";
@@ -537,7 +556,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                             JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class)
                                     .getAsJsonObject();
                             jsonObject.addProperty("org", org);
-                            environ = jsonObject.getAsJsonArray("environment");
+                            environ = jsonObject.has("environment") && jsonObject.get("environment").isJsonArray()
+                                    ? jsonObject.getAsJsonArray("environment")
+                                    : new JsonArray();
                             for (int i = 0; i < environ.size(); i++) {
                                 JsonObject envJSON = environ.get(i).getAsJsonObject();
                                 String key = envJSON.get("name").getAsString();

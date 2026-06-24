@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -178,35 +178,35 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 
 	/** The datasetformmapping repository. */
 	private IICIPDatasetFormMappingService datasetFormMappingService;
-	
+
 	/** The datasettopic repository. */
 	private ICIPDatasetTopicRepository icipDatasetTopicRepository;
-	
+
 	/** The usmpermissionrepo. */
 //	@Autowired
 //	private UsmPermissionsRepository usmpermissionrepo;
 
 	/** The ncs. */
 	private NameEncoderService ncs;
-	
+
 	final String TYPE="DATASET";
-	
+
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
 	private String claim;
-	
+
 	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
-	
+
 	/** The File Server Service. */
 	private FileServerService fileserverService;
-		
+
 	/** The Constant OAUTH. */
 	public static final String OAUTH = "oauth";
-	
+
 	/** The proxy properties. */
 	private ProxyProperties proxyProperties;
-	
+
 	private WebConfigAIP webClientObj;
 
 	/**
@@ -219,14 +219,14 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	 * @param ncs                   the ncs
 	 */
 	public ICIPDatasetService(ICIPDatasetRepository datasetRepository, ICIPDatasetRepository2 datasetRepository2,
-			IICIPDatasourceService datasourceService, IICIPSchemaRegistryService schemaRegistryService,
-			NameEncoderService ncs, ICIPDatasetFormMappingRepository datasetFormRepository,
-			IICIPSchemaFormService schemaFormService,
-			ICIPDatasetTopicRepository icipDatasetTopicRepository,
-			IICIPDatasetFormMappingService datasetFormMappingService,
-			ProxyProperties proxyProperties,FileServerService fileserverService,
-			WebConfigAIP webClientObj
-			) {
+	                          IICIPDatasourceService datasourceService, IICIPSchemaRegistryService schemaRegistryService,
+	                          NameEncoderService ncs, ICIPDatasetFormMappingRepository datasetFormRepository,
+	                          IICIPSchemaFormService schemaFormService,
+	                          ICIPDatasetTopicRepository icipDatasetTopicRepository,
+	                          IICIPDatasetFormMappingService datasetFormMappingService,
+	                          ProxyProperties proxyProperties,FileServerService fileserverService,
+	                          WebConfigAIP webClientObj
+	) {
 		super();
 		this.datasetRepository = datasetRepository;
 		this.datasetRepository2 = datasetRepository2;
@@ -278,7 +278,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	public ICIPDataset2 getDatasetObject(String name, String org) {
 		return datasetRepository2.findDatasetByNameAndOrganization(name, org);
 	}
-	
+
 	@Override
 	public ICIPDataset2 getDatasetByOrgAndAlias2(String datasetName, String org) {
 		return datasetRepository2.getDatasetByOrgAndAlias2(datasetName, org);
@@ -356,7 +356,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	 */
 	@Override
 	public ICIPDataset2 save(String idOrName, ICIPDataset iCIPDataset2Save, Logger logger, Marker marker,
-			int datasetProjectId, boolean skip) {
+	                         int datasetProjectId, boolean skip) {
 		ICIPDataset2 iCIPDataset = new ICIPDataset2();
 		try {
 			if (StringUtils.isNumeric(idOrName)) {
@@ -627,15 +627,15 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 							fromProjectId);
 					logger.info("Got the schema at 494");
 
-						dset.setSchema(schema);
-						ICIPSchemaRegistry schematoadd = new ICIPSchemaRegistry();
-						schematoadd.setAlias(schema.getAlias());
-						schematoadd.setDescription(schema.getDescription());
-						schematoadd.setOrganization(toProjectId);
-						schematoadd.setLastmodifiedby(schema.getLastmodifiedby());
-						schematoadd.setName(schema.getName());
-						schematoadd.setLastmodifieddate(schema.getLastmodifieddate());
-						schematoadd.setSchemavalue(schema.getSchemavalue());
+					dset.setSchema(schema);
+					ICIPSchemaRegistry schematoadd = new ICIPSchemaRegistry();
+					schematoadd.setAlias(schema.getAlias());
+					schematoadd.setDescription(schema.getDescription());
+					schematoadd.setOrganization(toProjectId);
+					schematoadd.setLastmodifiedby(schema.getLastmodifiedby());
+					schematoadd.setName(schema.getName());
+					schematoadd.setLastmodifieddate(schema.getLastmodifieddate());
+					schematoadd.setSchemavalue(schema.getSchemavalue());
 
 					List<ICIPSchemaForm> schemaForm = (schemaFormService.fetchSchemaForm(schema.getName(),
 							fromProjectId));
@@ -655,7 +655,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 						try {
 							ICIPSchemaForm result = schemaFormService.save(formindex);
 						} catch (Exception e) {
-							joblogger.error("Error in saving schema forms in dataset service");						
+							joblogger.error("Error in saving schema forms in dataset service");
 							joblogger.error(e.getMessage());
 						}
 					}
@@ -669,7 +669,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 					joblogger.error("Error in saving datasources in dataset service ");
 					joblogger.error(e.getMessage());
 				}
-				
+
 				try {
 					save(null, dset, joblogger, marker, datasetProjectId, false);
 				} catch (Exception e) {
@@ -730,11 +730,11 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	public List<ICIPDataset> getDatasetsByOrg(String organization) {
 		return datasetRepository.findByOrganization(organization);
 	}
-	
+
 	public List<ICIPDataset> getDatasetByViewsAndOrg(String viewType, String organization) {
 		return datasetRepository.findByViewsAndOrganization(viewType,organization);
 	}
-	
+
 	public List<ICIPDataset> getDatasetsByOrgandPage(String organization,String search,Pageable paginate, Boolean isTemplate) {
 //		return datasetRepository.findByOrganization(organization,paginate);
 		if(!search.isEmpty()) {
@@ -744,10 +744,10 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			return datasetRepository.findByOrganizationWithTemplate(organization,search,paginate);
 		}
 		else {
-		return datasetRepository.findByOrganization(organization,paginate);
+			return datasetRepository.findByOrganization(organization,paginate);
 		}
 	}
-	
+
 	@Override
 	public Long getAllDatasetsCountByOrganisation(String project,String query,Boolean isTemplate) {
 		Long datasetListCount;
@@ -759,14 +759,14 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			return datasetListCount;
 		}
 	}
-	
+
 	@Override
 	public Long getAllDatasetsCountByOrganisationAndDatasource(String project,String query,String datasource) {
 		Long datasetListCount;
 		datasetListCount = datasetRepository.getAllDatasetsCountByOrgAndDatasource(project,query,datasource);
 		return datasetListCount;
 	}
-	
+
 	@Override
 	public List<ICIPDataset> getAllDatasetsByDatasource(String project,String datasource,String search, Pageable paginate) {
 		if(!search.isEmpty()) {
@@ -850,7 +850,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	 */
 	@Override
 	public List<ICIPDataset> getPaginatedDatasetsByGroupAndOrg(String organization, String groupName, String search,
-			String interfacetype, int page, int size) {
+	                                                           String interfacetype, int page, int size) {
 		if (search == null || search.trim().isEmpty()) {
 			if (!interfacetype.equals("null"))
 				return datasetRepository.findByOrganizationByGroupsByInterfacetype(organization, groupName,
@@ -1021,7 +1021,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	 */
 	@Override
 	public boolean copySelected(Marker marker, String fromProjectId, String toProjectId, int datasetProjectId,
-			List<String> datasets, String toDatasource) {
+	                            List<String> datasets, String toDatasource) {
 		List<ICIPDataset> dsets = datasetRepository.findByOrganization(fromProjectId);
 		ICIPDatasource datasource = datasourceService.getDatasource(toDatasource, toProjectId);
 		List<ICIPDataset> toDsets = dsets.parallelStream().map(dset -> {
@@ -1340,54 +1340,54 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 
 	@Override
 	public Flux<BaseEntity> getObjectByIDTypeAndOrganization(String type, Integer id, String organization) {
-return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIPDataset()).map(s->{
-	BaseEntity entity= new BaseEntity();
-	entity.setAlias(s.getAlias());
-	entity.setData(new JSONObject(s).toString());
-	entity.setDescription(s.getDescription());
-	entity.setId(s.getId());
-	entity.setType(TYPE);
-	return entity;		
-	});
+		return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIPDataset()).map(s->{
+			BaseEntity entity= new BaseEntity();
+			entity.setAlias(s.getAlias());
+			entity.setData(new JSONObject(s).toString());
+			entity.setDescription(s.getDescription());
+			entity.setId(s.getId());
+			entity.setType(TYPE);
+			return entity;
+		});
 	}
 
 	@Override
 	public Flux<BaseEntity>  getAllObjectsByOrganization(String organization, String search, Pageable page) {
-	return Flux.fromIterable(datasetRepository.findByOrganization(organization,search, page)).parallel().map(s->{
-		BaseEntity entity= new BaseEntity();
-		entity.setAlias(s.getAlias());
-		entity.setData(new JSONObject(s).toString());
-		entity.setDescription(s.getDescription());
-		entity.setId(s.getId());
-		entity.setType(TYPE);
-		return entity;		
-	}).sequential()	;
-	
+		return Flux.fromIterable(datasetRepository.findByOrganization(organization,search, page)).parallel().map(s->{
+			BaseEntity entity= new BaseEntity();
+			entity.setAlias(s.getAlias());
+			entity.setData(new JSONObject(s).toString());
+			entity.setDescription(s.getDescription());
+			entity.setId(s.getId());
+			entity.setType(TYPE);
+			return entity;
+		}).sequential()	;
+
 	}
 
 	@Override
 	public String getType() {
-	
+
 		return TYPE;
 	}
-	
+
 	public JsonObject export(Marker marker, String source, JSONArray modNames) {
 		JsonObject jsnObj = new JsonObject();
 		try {
 			joblogger.info(marker,"Exporting dataset started");
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-			
+
 //			List<ICIPDataset> datasets = datasetRepository.findByOrganization(source);
 			List<ICIPDataset> datasets = new ArrayList<>();
 			List<ICIPDatasetFormMapping> formmappings = new ArrayList<>();
 			List<ICIPDatasource> dsetrelateddatasources = new ArrayList<>();
 			List<ICIPSchemaRegistry> dsetrelatedschemas = new ArrayList<>();
 			List<ICIPSchemaForm> dsetrelatedschemaform = new ArrayList<>();
-			
+
 			modNames.forEach(alias -> {
 				datasets.add(datasetRepository.findByAliasAndOrganization(alias.toString(), source).get(0));
 			});
-			
+
 			datasets.stream().forEach(dset -> {
 				List<ICIPDatasetFormMapping> forms = datasetFormRepository.getByDatasetAndOrganization(dset.getName(),source);
 				formmappings.addAll(forms);
@@ -1400,7 +1400,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 					dsetrelatedschemaform.addAll(templates);
 				}
 			});
-			
+
 			jsnObj.add("mldatasets", gson.toJsonTree(datasets));
 			jsnObj.add("mldatasetformmapping", gson.toJsonTree(formmappings));
 			if(dsetrelateddatasources != null)
@@ -1409,7 +1409,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 				jsnObj.add("dsetrelatedschemas", gson.toJsonTree(dsetrelatedschemas));
 			if(dsetrelatedschemaform != null)
 				jsnObj.add("dsetrelatedschemaform", gson.toJsonTree(dsetrelatedschemaform));
-			
+
 			joblogger.info(marker, "Exported dataset successfully");
 		}
 		catch(Exception ex) {
@@ -1474,7 +1474,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 				dsetTosave.setModeltype(dset.getModeltype());
 				dsetTosave.setName(dset.getName());
 				dsetTosave.setOrganization(target);
-				
+
 				dsetTosave.setSchemajson(dset.getSchemajson());
 				dsetTosave.setTags(dset.getTags());
 				dsetTosave.setTaskdetails(dset.getTaskdetails());
@@ -1482,7 +1482,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 				dsetTosave.setViews(dset.getViews());
 				dsetTosave.setId(null);
 				try {
-					if(dsetPresent == null) 
+					if(dsetPresent == null)
 						datasetRepository2.save(dsetTosave);
 				}
 				catch(DataIntegrityViolationException de) {
@@ -1497,7 +1497,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 				form.setId(null);
 				try {
 					if(formPresent == null)
-					datasetFormRepository.save(form);
+						datasetFormRepository.save(form);
 				}
 				catch(DataIntegrityViolationException de) {
 					joblogger.error(marker, "Error in importing duplicate datasetform");
@@ -1524,7 +1524,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 	}
 
 	public ICIPDataset2 updateIndexNameOrSummary(String name, String org,
-			Map<String, String> updateIndexNameOrSummary) {
+	                                             Map<String, String> updateIndexNameOrSummary) {
 		ICIPDataset2 datasetFromDb = datasetRepository2.findDatasetByNameAndOrganization(name, org);
 		if (updateIndexNameOrSummary.containsKey(ICIPPluginConstants.INDEX_NAME)) {
 			datasetFromDb.setIndexname(updateIndexNameOrSummary.get(ICIPPluginConstants.INDEX_NAME));
@@ -1534,7 +1534,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 		}
 		return datasetRepository2.save(datasetFromDb);
 	}
-	
+
 	@Override
 	public List<ICIPDataset> getDoc(String docViewType, String org, Pageable paginate) {
 		List<String> docTypeList = new ArrayList();
@@ -1544,7 +1544,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 		}
 		return datasetRepository.getDocByDatasourceType(docTypeList, org, paginate);
 	}
-	
+
 	@Override
 	public Long getDocCount(String docViewType, String org) {
 		List<String> docTypeList = new ArrayList();
@@ -1556,7 +1556,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 	}
 
 	public Long getDatasetsCountForAdvancedFilter(String organization, String aliasOrName, List<String> types,
-			List<String> tags, List<String> knowledgeBases) {
+	                                              List<String> tags, List<String> knowledgeBases) {
 		Long resultDatasetsCountForAdvancedFilter;
 		if (tags == null || tags.isEmpty()) {
 			if (knowledgeBases == null || knowledgeBases.isEmpty()) {
@@ -1586,7 +1586,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 		}
 		return resultDatasetsCountForAdvancedFilter;
 	}
-	
+
 	public static List<ICIPDataset> filterDatasets(List<ICIPDataset> datasetsForCount, List<String> tags) {
 		Set<ICIPDataset> uniqueDatasets = new HashSet<>();
 
@@ -1602,7 +1602,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 	}
 
 	public List<ICIPDataset> getDatasetsCountForAdvancedFilter(String organization, String aliasOrName,
-			List<String> types, List<String> tags, List<String> knowledgeBases, String page, String size) {
+	                                                           List<String> types, List<String> tags, List<String> knowledgeBases, String page, String size) {
 		Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
 		List<ICIPDataset> datasets = null;
 		if (tags == null || tags.isEmpty()) {
@@ -1636,9 +1636,9 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 
 		}
 	}
-	
+
 	public static List<ICIPDataset> filterDatasetsByTagsAndPageable(List<ICIPDataset> datasetsForCount,
-			List<String> tags, Pageable pageable) {
+	                                                                List<String> tags, Pageable pageable) {
 		// Filter datasets by tags
 		List<ICIPDataset> filteredDatasets = filterDatasets(datasetsForCount, tags);
 
@@ -1660,7 +1660,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 		else
 			return datasetTypes;
 	}
-	
+
 	public boolean callDatasetTestMethodToUploadFile(ICIPDatasetDTO dataset, Map<String, String> headers) {
 		WebClient webClient = webClientObj.webClient();
 		try {
@@ -1680,7 +1680,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			return false;
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public boolean uploadToS3(ICIPDataset dataset) {
 		JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
@@ -1688,8 +1688,11 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 		String secretKey = connectionDetails.optString("secretKey");
 		String region = connectionDetails.optString("Region");
 		URL endpointUrl = null;
+		String rawUrl = connectionDetails.optString("url");
 		try {
-			endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+			URL parsedUrl = new URL(rawUrl);
+			endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+					Collections.singletonList(parsedUrl.getHost()));
 			logger.info("endpointUrl " + endpointUrl);
 		} catch (MalformedURLException e1) {
 			logger.error("Upload DATASOURCE URL not correct" + e1.getMessage());
@@ -1785,7 +1788,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 	}
 
 	public JSONObject createS3Dataset(String bucket, String path, String org, String datasourceName,
-			MultipartFile file, Map<String, String> headers) {
+	                                  MultipartFile file, Map<String, String> headers) {
 		try {
 			// upload file to fileserver
 			Map<String, String> fileDetails = fileserverService.uploadTemp(file);
@@ -1848,8 +1851,8 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			logger.info("Dataset Created : File is successfully uploaded");
 			return response;
 		} catch (EntityNotFoundException | JpaObjectRetrievalFailureException | EmptyResultDataAccessException
-				| DataAccessResourceFailureException | JDBCConnectionException | TransactionException
-				| JpaSystemException | UnsupportedOperationException e) {
+		         | DataAccessResourceFailureException | JDBCConnectionException | TransactionException
+		         | JpaSystemException | UnsupportedOperationException e) {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
@@ -1866,8 +1869,8 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 				JSONArray formArray = new JSONArray(datasetDTO.getSchemajson());
 				formList.forEach(arr -> {
 					JSONArray newarr = new JSONArray(formArray.toList().stream().map(ele -> {
-						return new JSONObject(new Gson().toJson(ele));
-					}).filter(ele -> ele.getString("name").equals(arr.getFormtemplate().getName()))
+								return new JSONObject(new Gson().toJson(ele));
+							}).filter(ele -> ele.getString("name").equals(arr.getFormtemplate().getName()))
 							.collect(Collectors.toList()).toArray());
 					if (newarr.isEmpty()) {
 						datasetFormMappingService.deleteByFormtemplateAndDataset(arr.getFormtemplate(),
@@ -1941,7 +1944,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 	}
 
 	public JSONObject createS3FolderDataset(String bucket, String path, String org, String datasourceName,
-			List<MultipartFile> files, String datasetAlias, Map<String, String> headers) {
+	                                        List<MultipartFile> files, String datasetAlias, Map<String, String> headers) {
 		try {
 			// upload file to fileserver
 			ICIPDatasource datasource = datasourceService.getDatasource(datasourceName, org);
@@ -2007,8 +2010,8 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			logger.info("Folder Dataset Created");
 			return response;
 		} catch (EntityNotFoundException | JpaObjectRetrievalFailureException | EmptyResultDataAccessException
-				| DataAccessResourceFailureException | JDBCConnectionException | TransactionException
-				| JpaSystemException | UnsupportedOperationException e) {
+		         | DataAccessResourceFailureException | JDBCConnectionException | TransactionException
+		         | JpaSystemException | UnsupportedOperationException e) {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
@@ -2016,5 +2019,5 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			return null;
 		}
 	}
-	
+
 }

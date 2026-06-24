@@ -15,12 +15,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
         </div>
       </div>
 
-      <!-- Empty state — no real metrics yet -->
-      <div class="empty-metrics">
-        <mat-icon>bar_chart</mat-icon>
-        <p>No metrics data available yet.</p>
-        <p class="hint">Metrics will appear here after a training run completes and the job reports back results.</p>
-      </div>
+
     </div>
   `,
   styles: [`
@@ -74,28 +69,14 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       margin-top: 4px;
       word-break: break-word;
     }
-    /* ── Empty state ── */
-    .empty-metrics {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 56px 24px;
-      gap: 12px;
-      color: var(--mt-muted, #6b7280);
-      text-align: center;
-      border: 1px dashed var(--mt-border, #e2e8f0);
-      border-radius: 12px;
+    /* ── Light theme ── */
+    :host-context(body.header-light-theme) {
+      --mt-card-bg: #ffffff;
+      --mt-border:  #e2e8f0;
+      --mt-title:   #111827;
+      --mt-val:     #111827;
+      --mt-muted:   #6b7280;
     }
-    .empty-metrics mat-icon {
-      font-size: 52px;
-      height: 52px;
-      width: 52px;
-      color: var(--mt-muted, #9ca3af);
-      opacity: .5;
-    }
-    .empty-metrics p { margin: 0; font-size: 14px; color: var(--mt-title, #374151); }
-    .empty-metrics .hint { font-size: 12px; color: var(--mt-muted, #6b7280); max-width: 400px; line-height: 1.5; }
     /* ── Dark theme ── */
     :host-context(body.header-dark-theme) {
       --mt-title:   #e6edf3;

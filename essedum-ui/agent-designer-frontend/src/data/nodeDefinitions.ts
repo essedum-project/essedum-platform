@@ -395,15 +395,15 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'tools', label: 'Available Tools', type: 'data' },
     ],
     fields: [
-      { id: 'transport', label: 'Transport', type: 'select', default: 'stdio', options: [
-        { label: 'stdio', value: 'stdio' },
-        { label: 'SSE (HTTP)', value: 'sse' },
-        { label: 'WebSocket', value: 'ws' },
+      { id: 'transport', label: 'Transport', type: 'select', default: 'http', options: [
+        { label: 'HTTP (Streamable)', value: 'http' },
       ], group: 'Connection', required: true },
       { id: 'server_url', label: 'Server URL / Command', type: 'text', placeholder: 'ws://localhost:3000 or node server.js', group: 'Connection', required: true },
       { id: 'auth_token', label: 'Auth Token', type: 'password', group: 'Authentication' },
       { id: 'timeout', label: 'Timeout (ms)', type: 'number', default: 30000, group: 'Configuration' },
       { id: 'tool_filter', label: 'Tool Filter (comma-sep)', type: 'text', placeholder: 'read_file, write_file', group: 'Configuration' },
+      { id: 'arg_name', label: 'Tool Arg Name', type: 'text', default: 'input', placeholder: 'input', group: 'Configuration' },
+      { id: 'arguments_json', label: 'Static Arguments (JSON)', type: 'textarea', placeholder: '{ "path": "/tmp/x" }', group: 'Configuration' },
     ],
     tags: ['mcp', 'protocol', 'tools'],
   },

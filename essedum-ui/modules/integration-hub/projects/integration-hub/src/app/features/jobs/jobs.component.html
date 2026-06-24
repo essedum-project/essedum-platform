@@ -26,7 +26,6 @@
             Status
           </th>
           <th scope="col-1">Action</th>
-          <th scope="col-1">Output Artifacts</th>
 
         </tr>
       </thead>
@@ -78,18 +77,7 @@
               </button>
             </span>
             </td>
-          <td>
-            <button
-              *ngIf="job.runtime && (job.runtime.toLowerCase() == 'remote' || job.runtime.split('-')[0].toLowerCase() == 'remote')"
-              mat-icon-button
-              name="outputArtifactButton"
-              id="outputArtifactButton"
-              (click)="showOutputArtifact(job.jobId)"
-              matTooltip="Show Output Artifacts"
-            >
-              <mat-icon>article</mat-icon>
-            </button>
-          </td>
+
 
         </tr>
       </tbody>

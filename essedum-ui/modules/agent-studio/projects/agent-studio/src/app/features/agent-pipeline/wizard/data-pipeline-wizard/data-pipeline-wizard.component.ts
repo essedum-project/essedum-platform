@@ -2,9 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
-import { Services } from '../../../services/service';
-import { WizardStateService } from '../shared/wizard-state.service';
-import { GitLinkService } from '../../../services/git-link.service';
+import { Services } from '@essedum/shared-lib';
+import { StreamingServices } from '@essedum/shared-lib';
 import {
   DATA_PIPELINE_TYPES,
   FALLBACK_SLM_BASE_MODELS,
@@ -13,46 +12,33 @@ import {
   PROBLEM_TYPES,
   EXECUTORS,
   SCHEDULE_PRESETS,
-  GitLinkValue,
-  emptyGitLink,
-} from '../shared/pipeline-options.constants';
-import { VibeStudioService } from '../../../services/vibe-studio.service';
-import { StreamingServices } from '@essedum/shared-lib';
-
+} from '../pipeline-options.constants';
+import { GitLinkValue } from '../shared/git-link-step.component';
 
 @Component({
-  selector: 'app-data-pipeline-wizard',
+  selector: 'app-data-pipeline-wizard-local',
   templateUrl: './data-pipeline-wizard.component.html',
   styleUrls: ['./data-pipeline-wizard.component.scss'],
-  providers: [WizardStateService],
 })
-export class DataPipelineWizardComponent implements OnInit {
+export class DataPipelineWizardLocalComponent implements OnInit {
   @ViewChild('stepper') stepper: MatStepper;
 
-  // dropdown sources
   pipelineTypes = DATA_PIPELINE_TYPES;
 
-  // All datasource objects (loaded once)
   private allDatasources: any[] = [];
-  // Map: alias → datasource name (used for API calls that need the name, not alias)
   private aliasToName = new Map<string, string>();
-  // Full objects of the currently selected datasource and dataset
   private selectedDatasourceObj: any = null;
   private datasetItems: any[] = [];
   private selectedDatasetObj: any = null;
-  // Cascading dropdowns for ML/non-SLM/non-RAG types
-  outputContainers: string[] = [];         // unique types from all datasources
+  outputContainers: string[] = [];
   outputContainersLoaded = false;
-
-  connections: string[] = [];             // aliases filtered by selected container type
+  connections: string[] = [];
   connectionsLoaded = false;
-
-  datasets: string[] = [];                // dataset names filtered by selected connection
+  datasets: string[] = [];
   datasetsLoaded = false;
-
-  targetColumns: string[] = [];           // column names fetched from dataset schema
+  targetColumns: string[] = [];
   targetColumnsLoaded = false;
-  private datasetRows: any[] = [];         // first rows from dataset (schema sample)
+  private datasetRows: any[] = [];
 
   slmBaseModels = FALLBACK_SLM_BASE_MODELS;
   teacherModels = TEACHER_MODELS;
@@ -63,55 +49,75 @@ export class DataPipelineWizardComponent implements OnInit {
   identityForm: FormGroup;
   sourceForm: FormGroup;
   executionForm: FormGroup;
-  gitLink: GitLinkValue = emptyGitLink();
+  gitLink: GitLinkValue = { repo: '', branch: 'main', filePath: '' };
   gitValid = false;
 
   creating = false;
 
-  // ── Agent + Model pre-selection (mirrors Vibe Studio) ──────────────────────
-  selectionDone = false;
+  // Agent + Model pre-selection (auto-defaulted, user can change via settings gear)
+  selectionDone = true;
+  showSettings = false;
   selectedAgent: string | null = null;
   selectedModel: string | null = null;
-  readonly agentOptions: { label: string; value: string }[] = [
-    { label: 'Ollama',       value: 'ollama'       },
-    { label: 'Azure OpenAI', value: 'azure_openai'  },
-    { label: 'Anthropic',    value: 'anthropic'     },
+  readonly agentOptions = [
+    { label: 'Ollama', value: 'ollama' },
+    { label: 'Azure OpenAI', value: 'azure_openai' },
+    { label: 'Anthropic', value: 'anthropic' },
   ];
-  readonly modelOptions: { label: string; value: string }[] = [
-    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
-    { label: 'gemma4:latest',  value: 'gemma4:latest'   },
-    { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
-    { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+  readonly modelOptions = [
+    { label: 'qwen3.6:27b', value: 'qwen3.6:27b' },
+    { label: 'gemma4:latest', value: 'gemma4:latest' },
+    { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
+    { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+    { label: 'phi3:mini', value: 'phi3:mini' },
+    { label: 'gemma3:latest', value: 'gemma3:latest' },
+    { label: 'llama3:latest', value: 'llama3:latest' },
+    { label: 'qwen3:4b', value: 'qwen3:4b' },
   ];
-  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.vibe.setAgentProvider(agent); }
-  onModelSelect(model: string): void { this.selectedModel = model; this.vibe.setModel(model); }
-  proceedToWizard(): void { if (this.selectedAgent && this.selectedModel) this.selectionDone = true; }
+
+  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.showSettings = false; }
+  onModelSelect(model: string): void { this.selectedModel = model; this.showSettings = false; }
+  toggleSettings(): void { this.showSettings = !this.showSettings; }
+
+  private applyDefaultAgentModel(): void {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      this.selectedAgent = 'azure_openai';
+      this.selectedModel = 'gpt-4o-mini';
+    } else if (origin.includes('localhost') || origin.includes('essedum-lfn.infosys.com')) {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    } else {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    }
+  }
 
   constructor(
     private fb: FormBuilder,
     private services: Services,
-    private gitSvc: GitLinkService,
-    public dialogRef: MatDialogRef<DataPipelineWizardComponent>,
-    public vibe: VibeStudioService,
+    public dialogRef: MatDialogRef<DataPipelineWizardLocalComponent>,
   ) {}
 
   ngOnInit(): void {
+    this.applyDefaultAgentModel();
+
     this.identityForm = this.fb.group({
       pipelineType: ['feature-engineering', Validators.required],
-      name:         ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
-      alias:        ['', Validators.required],
-      description:  [''],
+      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 _-]+$/)]],
+      alias: ['', Validators.required],
+      description: [''],
     });
 
     this.sourceForm = this.fb.group({
       outputContainer: [''],
-      connection:      [''],
-      dataset:         ['', Validators.required],
-      problemType:     ['classification'],
-      targetCol:       [''],
-      baseModel:       [''],
-      teacherModel:    [''],
-      outputFormat:    [''],
+      connection: [''],
+      dataset: ['', Validators.required],
+      problemType: ['classification'],
+      targetCol: [''],
+      baseModel: [''],
+      teacherModel: [''],
+      outputFormat: [''],
     });
 
     this.executionForm = this.fb.group({
@@ -119,16 +125,14 @@ export class DataPipelineWizardComponent implements OnInit {
       schedule: [''],
     });
 
-    this.gitLink = this.gitSvc.defaultLinkFor('new-pipeline', 'data-pipeline');
-
-    // keep file path in sync with name
+    // Keep git file path in sync with name
     this.identityForm.get('name').valueChanges.subscribe(name => {
       if (name) {
         this.gitLink = { ...this.gitLink, filePath: `data-pipelines/${name}/pipeline.py` };
       }
     });
 
-    // Cascade: when output container type changes → reload connections
+    // Cascade: outputContainer → connections
     this.sourceForm.get('outputContainer').valueChanges.subscribe(containerType => {
       this.sourceForm.patchValue({ connection: '', dataset: '', targetCol: '' }, { emitEvent: false });
       this.connections = [];
@@ -146,7 +150,7 @@ export class DataPipelineWizardComponent implements OnInit {
       }
     });
 
-    // Cascade: when connection changes → reload datasets
+    // Cascade: connection → datasets
     this.sourceForm.get('connection').valueChanges.subscribe(connectionAlias => {
       this.sourceForm.patchValue({ dataset: '', targetCol: '' }, { emitEvent: false });
       this.datasets = [];
@@ -156,16 +160,14 @@ export class DataPipelineWizardComponent implements OnInit {
       this.datasetItems = [];
       this.selectedDatasetObj = null;
       if (connectionAlias) {
-        // Capture the full datasource object for connection details
         this.selectedDatasourceObj = this.allDatasources.find(
           d => (d.alias || d.name) === connectionAlias
         ) || null;
-        // The API expects the datasource name field, not the alias
         const datasourceName = this.aliasToName.get(connectionAlias) || connectionAlias;
         this.services.getDatasetNamesByDatasource(datasourceName).subscribe({
           next: (res: any[]) => {
             const items: any[] = Array.isArray(res) ? res : [];
-            this.datasetItems = items;  // keep full objects for dataset path
+            this.datasetItems = items;
             this.datasets = items
               .map((d: any) => d.alias || d.name)
               .filter(Boolean)
@@ -177,7 +179,7 @@ export class DataPipelineWizardComponent implements OnInit {
       }
     });
 
-    // When dataset changes → capture full dataset object + fetch real column names via dbdata API
+    // Cascade: dataset → columns
     this.sourceForm.get('dataset').valueChanges.subscribe(datasetName => {
       this.selectedDatasetObj = this.datasetItems.find(
         d => (d.alias || d.name) === datasetName
@@ -186,17 +188,17 @@ export class DataPipelineWizardComponent implements OnInit {
       this.targetColumns = [];
       this.targetColumnsLoaded = false;
       if (!datasetName) return;
-      const containerType  = this.sourceForm.value.outputContainer;
+      const containerType = this.sourceForm.value.outputContainer;
       const connectionAlias = this.sourceForm.value.connection;
       const org = sessionStorage.getItem('organization') || '';
-      const datasetObj  = { alias: datasetName };
-      const dsourceObj  = { type: containerType, alias: connectionAlias };
-      const params      = { page: 0, size: 50 };
+      const datasetObj = { alias: datasetName };
+      const dsourceObj = { type: containerType, alias: connectionAlias };
+      const params = { page: 0, size: 50 };
       this.services.getProxyDbDatasetDetails(datasetObj as any, dsourceObj, params, org, true).subscribe({
         next: (rows: any[]) => {
           if (rows && rows.length > 0) {
             this.targetColumns = Object.keys(rows[0]);
-            this.datasetRows = rows.slice(0, 3);  // keep sample for AI prompt
+            this.datasetRows = rows.slice(0, 3);
           }
           this.targetColumnsLoaded = true;
         },
@@ -208,7 +210,6 @@ export class DataPipelineWizardComponent implements OnInit {
     this.applyTypeDefaults('feature-engineering');
   }
 
-  // ─── reactive helpers ─────────────────────────────────────────────────
   get selectedTypeMeta() {
     return this.pipelineTypes.find(p => p.value === this.identityForm.value.pipelineType);
   }
@@ -229,8 +230,20 @@ export class DataPipelineWizardComponent implements OnInit {
   private applyTypeDefaults(type: string): void {
     const conn = this.sourceForm.get('connection');
     const cont = this.sourceForm.get('outputContainer');
-    conn.setValidators(type === 'slm-cot' ? [] : [Validators.required]);
-    cont.setValidators([Validators.required]);
+    const dataset = this.sourceForm.get('dataset');
+    const baseModel = this.sourceForm.get('baseModel');
+    const teacherModel = this.sourceForm.get('teacherModel');
+    const outputFormat = this.sourceForm.get('outputFormat');
+    const isSlmCot = type === 'slm-cot';
+
+    conn.setValidators(isSlmCot ? [] : [Validators.required]);
+    cont.setValidators(isSlmCot ? [] : [Validators.required]);
+    dataset.setValidators(isSlmCot ? [] : [Validators.required]);
+    baseModel.setValidators(isSlmCot ? [Validators.required] : []);
+    teacherModel.setValidators(isSlmCot ? [Validators.required] : []);
+    outputFormat.setValidators(
+      isSlmCot || OUTPUT_FORMATS_BY_TYPE[type] ? [Validators.required] : []
+    );
 
     if (type === 'rag-ingestion') {
       this.sourceForm.patchValue({ outputFormat: 'qdrant-collection' });
@@ -242,23 +255,21 @@ export class DataPipelineWizardComponent implements OnInit {
 
     conn.updateValueAndValidity();
     cont.updateValueAndValidity();
+    dataset.updateValueAndValidity();
+    baseModel.updateValueAndValidity();
+    teacherModel.updateValueAndValidity();
+    outputFormat.updateValueAndValidity();
   }
 
-  // ─── live dropdown population ─────────────────────────────────────────
   private loadLiveOptions(): void {
-    // Load all datasources once; derive output container types and connections from them
     this.services.getDatasources().subscribe({
       next: (res: any[]) => {
         this.allDatasources = Array.isArray(res) ? res : [];
-
-        // Build alias → name map for API calls
         this.aliasToName.clear();
         this.allDatasources.forEach(d => {
           if (d.alias && d.name) this.aliasToName.set(d.alias, d.name);
           if (d.name) this.aliasToName.set(d.name, d.name);
         });
-
-        // Unique container types
         const typeSet = new Set<string>();
         this.allDatasources.forEach(d => { if (d.type) typeSet.add(d.type); });
         this.outputContainers = Array.from(typeSet).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
@@ -271,10 +282,8 @@ export class DataPipelineWizardComponent implements OnInit {
   pickSchedule(value: string): void { this.executionForm.patchValue({ schedule: value }); }
   onGitLinkChange(v: GitLinkValue): void { this.gitLink = v; }
   onGitValidity(v: boolean): void { this.gitValid = v; }
-
   cancel(): void { this.dialogRef.close(); }
 
-  // ─── Create pipeline ──────────────────────────────────────────────────
   createPipeline(): void {
     if (this.creating) return;
     if (this.identityForm.invalid || this.sourceForm.invalid || this.executionForm.invalid) return;
@@ -296,9 +305,8 @@ export class DataPipelineWizardComponent implements OnInit {
       elements: [{
         attributes: {
           filetype: 'Python3',
-          files: [],           // will be set to cname_org.py after create() responds
+          files: [],
           generatedCode: '',
-
         },
       }],
       pipeline_attributes: {
@@ -314,12 +322,13 @@ export class DataPipelineWizardComponent implements OnInit {
         outputFormat: cfg.outputFormat,
         executor: cfg.executor,
         schedule: cfg.schedule,
-        git: cfg.git,
         kind: 'data-pipeline',
         datasetColumns: this.targetColumns,
         datasetSample: this.datasetRows,
         freshlyCreated: true,
-        // Full datasource connection details so AI generates concrete, non-placeholder code
+        selectedAgent: this.selectedAgent,
+        selectedModel: this.selectedModel,
+        git: cfg.git,
         datasourceConnectionDetails: this.selectedDatasourceObj
           ? (() => { try { return JSON.parse(this.selectedDatasourceObj.connectionDetails || '{}'); } catch { return {}; } })()
           : {},
@@ -335,8 +344,6 @@ export class DataPipelineWizardComponent implements OnInit {
     this.creating = true;
     this.services.create(newSs).subscribe({
       next: (data) => {
-        // Use cname + org from the create API response — mirrors native-script's
-        // saveJson(streamItem.name) → targetFileName = `${pname}_${streamItem.organization}.py`
         const org = data.organization || sessionStorage.getItem('organization') || '';
         const canonicalFile = `${data.name}_${org}.py`;
         try {
@@ -345,9 +352,9 @@ export class DataPipelineWizardComponent implements OnInit {
             pc.elements[0].attributes.files = [canonicalFile];
             data.json_content = JSON.stringify(pc);
           }
-        } catch { /* non-critical — editor will re-derive on save */ }
-        this.services.update(data).subscribe();  // persist canonical filename to DB
-        this.services.message('Pipeline created!', 'success');
+        } catch { /* non-critical */ }
+        this.services.update(data).subscribe();
+        this.services.message('Data Pipeline created!', 'success');
         this.dialogRef.close({ pipeline: data, kind: 'data-pipeline' });
       },
       error: (err: any) => {
