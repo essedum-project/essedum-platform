@@ -1096,9 +1096,10 @@ export class VibeStudioService implements OnDestroy {
         localStorage.getItem('organisation') ||
         'default';
 
-      const url = `${this.baseUrl}/folder/upload/${cname}/${org}?zipFile=null`;
+      const url = `${this.baseUrl}/folder/upload/${cname}/${org}?zipFile=null&type=App`;
       const formData = new FormData();
       formData.append('zipFile', new File([blob], `${cname}.zip`, { type: 'application/zip' }));
+      formData.append('isvibestudio', 'true');
 
       // getHttpHeaders() provides Authorization (jwtToken), Access-Token, Project, Roleid, Rolename.
       // Do NOT set Content-Type — browser must set it with the multipart boundary.

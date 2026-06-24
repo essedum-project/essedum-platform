@@ -154,8 +154,8 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}','2',NULL);
         </sql>
     </changeSet>
-    
-        <changeSet id="3v2-usm-20252402-5" author="Essedum">
+
+    <!--<changeSet id="3v2-usm-20252402-5" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Pipelines%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
@@ -211,8 +211,7 @@
             );
         </sql>
 
-    </changeSet>
-
+    </changeSet>-->
 
     <changeSet id="3v2-usm-20252402-6" author="Essedum">
         <preConditions onFail="MARK_RAN">

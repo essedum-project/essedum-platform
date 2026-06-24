@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatStepperModule } from '@angular/material/stepper';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -70,6 +71,11 @@ import { AgentDirectoryService } from '../features/agent-directory/agent-directo
 // Cross-MFE-domain stubs copied for compile-time satisfaction (pipeline-create is integration domain)
 import { PipelineCreateComponent } from '../features/pipeline/pipeline-create/pipeline-create.component';
 
+// Local wizard components (lightweight versions of integration-hub wizards)
+import { DataPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
+import { GitLinkStepLocalComponent } from '../features/agent-pipeline/wizard/shared/git-link-step.component';
+
 // Migrated from legacy aip-app-ui (2026-05-25): LLM ops + observability iframe wrappers
 import { LitellmComponent } from '../features/litellm/litellm.component';
 import { LangfuseComponent } from '../features/langfuse/langfuse.component';
@@ -121,6 +127,10 @@ import { environment } from '../../environments/environment';
     AgentDirectoryEditComponent,
     GeneralComponent,
     PipelineCreateComponent,
+    // Local wizard components
+    DataPipelineWizardLocalComponent,
+    TrainingPipelineWizardLocalComponent,
+    GitLinkStepLocalComponent,
     // migrated from legacy aip-app-ui
     LitellmComponent,
     LangfuseComponent,
@@ -141,6 +151,7 @@ import { environment } from '../../environments/environment';
     MatToolbarModule,
     MatGridListModule,
     MatChipsModule,
+    MatStepperModule,
     MatTooltipModule,
     MatSelectModule,
     MatError,

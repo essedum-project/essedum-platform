@@ -107,15 +107,21 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   loadScript: boolean = false;
   scriptFileName = '';
   dynamicEnvArray: Array<DynamicParamsGrid> = [];
-  envCollapsed = true;
-  envEditIndex: number = -1;
-  envEditMode: boolean = false;
   dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
+
+  // Collapsible section state
+  envCollapsed = true;
   secretsCollapsed = true;
-  secretsEditIndex: number = -1;
-  secretsEditMode: boolean = false;
+
+  // Env-var inline edit state
+  envEditIndex: number | null = null;
+  envEditMode = false;
+
+  // Secrets inline edit state
+  secretsEditIndex: number | null = null;
+  secretsEditMode = false;
   secretsShowValue: boolean[] = [];
-  private _saveEnvDebounceTimer: any = null;
+
   isExpand: boolean = true;
   uploader: FileUploader;
   cardName: any;
@@ -541,34 +547,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getStreamService() {
-    const nameToFetch = this.cardName || this.currentCname;
-    if (!nameToFetch) { return; }
-    this.service.getStreamingServicesByName(nameToFetch).subscribe((res) => {
+    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
-
-      // Load environment variables and user secrets from json_content
-      const rawContent = res.json_content || (res as any).jsonContent;
-      if (rawContent) {
-        try {
-          const parsed = JSON.parse(rawContent);
-          this.dynamicEnvArray = parsed.environment || [];
-          if (this.dynamicEnvArray.length) { this.envCollapsed = false; }
-          // Secrets live inside elements[0].attributes.usedSecrets
-          const attrs = parsed.elements?.[0]?.attributes;
-          this.dynamicSecretsArray = attrs?.usedSecrets || [];
-          if (this.dynamicSecretsArray.length) { this.secretsCollapsed = false; }
-          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
-          // Reset edit state — loaded data should display as read-only
-          this.envEditIndex = -1;
-          this.envEditMode = false;
-          this.secretsEditIndex = -1;
-          this.secretsEditMode = false;
-        } catch (e) {
-          this.dynamicEnvArray = [];
-          this.dynamicSecretsArray = [];
-        }
-      }
 
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
@@ -2944,9 +2925,27 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
-        
+
         this.runnerServiceStatus = jsonContent.runner_service_status === true;
-        
+        this.isPlaygroundEnabled = this.runnerServiceStatus;
+
+        // Restore env vars from jsonContent.environment
+        const envData = jsonContent.environment;
+        if (Array.isArray(envData)) {
+          this.dynamicEnvArray = envData;
+        }
+
+        // Restore secrets from jsonContent.elements[0].attributes.usedSecrets
+        const secretData = jsonContent.elements?.[0]?.attributes?.usedSecrets;
+        if (Array.isArray(secretData)) {
+          this.dynamicSecretsArray = secretData;
+          this.secretsShowValue = secretData.map(() => false);
+        }
+
+        // Auto-expand if data exists, collapse if empty
+        this.envCollapsed = this.dynamicEnvArray.length === 0;
+        this.secretsCollapsed = this.dynamicSecretsArray.length === 0;
+
         // Trigger change detection
         this.cdr.detectChanges();
       } else {
@@ -3454,17 +3453,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.fileSystemData = [];
     this.consoleOutput = []; // Console starts empty - only WebSocket data during deployment
     this.clearFileSelection();
-
-    // Reset env/secrets edit state so loaded data always renders read-only
-    this.envEditIndex = -1;
-    this.envEditMode = false;
-    this.secretsEditIndex = -1;
-    this.secretsEditMode = false;
-    this.dynamicEnvArray = [];
-    this.dynamicSecretsArray = [];
-    this.secretsShowValue = [];
-    this.envCollapsed = true;
-    this.secretsCollapsed = true;
     
     // Ensure script content is empty for new agents
     if (!this.loadScript || !this.script || this.script.length === 0) {
@@ -3509,108 +3497,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       'Deployment configuration saved successfully. You can now deploy using the Deploy button.',
       'success'
     );
-  }
-
-  // ── Environment Variables ────────────────────────────────────────────────────
-
-  addEnvVar(): void {
-    if (this.envEditMode) { return; }
-    if (!this.dynamicEnvArray) { this.dynamicEnvArray = []; }
-    this.dynamicEnvArray.push({ name: '', value: '' });
-    this.envEditIndex = this.dynamicEnvArray.length - 1;
-    this.envEditMode = true;
-    this.envCollapsed = false;
-  }
-
-  editEnvVar(i: number): void {
-    this.envEditIndex = i;
-    this.envEditMode = true;
-  }
-
-  saveEnvVar(i: number): void {
-    this.envEditMode = false;
-    this.envEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  deleteEnvVar(i: number): void {
-    this.dynamicEnvArray.splice(i, 1);
-    this.envEditMode = false;
-    this.envEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  saveEnvAndSecrets(): void {
-    if (this._saveEnvDebounceTimer) { clearTimeout(this._saveEnvDebounceTimer); }
-    this._saveEnvDebounceTimer = setTimeout(() => {
-      this._saveEnvDebounceTimer = null;
-      this.persistEnvAndSecrets();
-    }, 300);
-  }
-
-  private persistEnvAndSecrets(): void {
-    try {
-      if (!this.streamItem) { return; }
-      const current = this.streamItem.json_content
-        ? JSON.parse(this.streamItem.json_content)
-        : { elements: [{ attributes: {} }] };
-      current.environment = this.dynamicEnvArray || [];
-      this.ensureElementsStructure(current);
-      current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
-      this.streamItem.json_content = JSON.stringify(current);
-      this.service.update(this.streamItem).subscribe({
-        next: () => {
-          this.service.message('Configuration saved', 'success');
-        },
-        error: (err: any) => {
-          console.error('Failed to save configuration:', err);
-          this.service.message('Failed to save configuration', 'error');
-        }
-      });
-    } catch (e) {
-      console.error('saveEnvAndSecrets error:', e);
-    }
-  }
-
-  private ensureElementsStructure(current: any): void {
-    if (!current.elements) { current.elements = [{ attributes: {} }]; }
-    if (!current.elements[0]) { current.elements[0] = { attributes: {} }; }
-    if (!current.elements[0].attributes) { current.elements[0].attributes = {}; }
-  }
-
-  // ── User Secrets ─────────────────────────────────────────────────────────────
-
-  addSecret(): void {
-    if (this.secretsEditMode) { return; }
-    if (!this.dynamicSecretsArray) { this.dynamicSecretsArray = []; }
-    this.dynamicSecretsArray.push({ name: '', value: '' });
-    this.secretsShowValue.push(false);
-    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
-    this.secretsEditMode = true;
-    this.secretsCollapsed = false;
-  }
-
-  editSecret(i: number): void {
-    this.secretsEditIndex = i;
-    this.secretsEditMode = true;
-  }
-
-  saveSecret(i: number): void {
-    this.secretsEditMode = false;
-    this.secretsEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  deleteSecret(i: number): void {
-    this.dynamicSecretsArray.splice(i, 1);
-    this.secretsShowValue.splice(i, 1);
-    this.secretsEditMode = false;
-    this.secretsEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  toggleSecretVisibility(i: number): void {
-    this.secretsShowValue[i] = !this.secretsShowValue[i];
   }
 
   /**
@@ -3698,12 +3584,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           // No data from list API, show only script tab
           this.showScriptTabOnly();
         }
-
-        // Always load streamItem and env vars regardless of file presence
-        this.getStreamService();
-
         this.isLoadingFiles = false;
-        // Trigger change detection
+         // Trigger change detection
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -3717,9 +3599,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         // On error, show only script tab
         this.showScriptTabOnly();
         this.isLoadingFiles = false;
-        // Still try to load env vars
-        this.getStreamService();
-        // Trigger change detection
+            // Trigger change detection
         this.cdr.detectChanges();
       }
     });
@@ -3751,17 +3631,22 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         if (listResponse && listResponse.length > 0) {
           // List API succeeded - enable codespace tab and populate with response data
           this.enableCodespaceTabOnly(listResponse);
+          
+          this.isLoadingFiles = false;
+
+               
+          // Trigger change detection
+          this.cdr.detectChanges();
         } else {
           // No data from list API, show only script tab and continue with old flow
           this.showScriptTabOnly();
+          this.isLoadingFiles = false;
+          // Fall back to the original getStreamService flow
+          this.getStreamService();
+
+                  // Trigger change detection
+          this.cdr.detectChanges();
         }
-
-        // Always load streamItem and env vars regardless of file presence
-        this.getStreamService();
-
-        this.isLoadingFiles = false;
-        // Trigger change detection
-        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error calling pipeline folder list API:', error);
@@ -3773,7 +3658,105 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  // Call the upload API for pipeline cards
+  // ── Env/Secrets persistence ───────────────────────────────────────────────────
+
+  private async persistEnvAndSecrets(): Promise<void> {
+    if (!this.currentCname) return;
+    try {
+      const organization = this.getOrganization();
+      const url = this.baseUrl + `/service/v1/streamingServices/${this.currentCname}/${organization}`;
+      const response = await this.http.get<any>(url).toPromise();
+      if (!response) return;
+      const jsonContent = response.json_content ? JSON.parse(response.json_content) : {};
+      // Write env vars to jsonContent.environment
+      jsonContent.environment = this.dynamicEnvArray;
+      // Write secrets to jsonContent.elements[0].attributes.usedSecrets
+      if (!Array.isArray(jsonContent.elements) || jsonContent.elements.length === 0) {
+        jsonContent.elements = [{ attributes: {} }];
+      }
+      if (!jsonContent.elements[0].attributes) {
+        jsonContent.elements[0].attributes = {};
+      }
+      jsonContent.elements[0].attributes.usedSecrets = this.dynamicSecretsArray;
+      const updateUrl = this.baseUrl + '/service/v1/streamingServices/update';
+      await this.http.put<any>(updateUrl, { ...response, json_content: JSON.stringify(jsonContent) }).toPromise();
+    } catch (error) {
+      console.error('Error persisting env/secrets:', error);
+    }
+  }
+
+  // ── Environment-variable CRUD ────────────────────────────────────────────────
+
+  addEnvVar(): void {
+    if (this.envEditMode) return;
+    this.envCollapsed = false;
+    this.dynamicEnvArray = [...this.dynamicEnvArray, { name: '', value: '' }];
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+  }
+
+  editEnvVar(index: number): void {
+    if (this.envEditMode && this.envEditIndex !== index) return;
+    this.envEditIndex = index;
+    this.envEditMode = true;
+  }
+
+  trackByIndex(index: number): number { return index; }
+
+  saveEnvVar(_index: number): void {
+    this.envEditIndex = null;
+    this.envEditMode = false;
+    this.persistEnvAndSecrets();
+  }
+
+  deleteEnvVar(index: number): void {
+    this.dynamicEnvArray = this.dynamicEnvArray.filter((_, i) => i !== index);
+    if (this.envEditIndex === index) {
+      this.envEditIndex = null;
+      this.envEditMode = false;
+    }
+    this.envCollapsed = this.dynamicEnvArray.length === 0;
+    this.persistEnvAndSecrets();
+  }
+
+  // ── Secrets CRUD ─────────────────────────────────────────────────────────────
+
+  addSecret(): void {
+    if (this.secretsEditMode) return;
+    this.secretsCollapsed = false;
+    this.dynamicSecretsArray = [...this.dynamicSecretsArray, { name: '', value: '' }];
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsShowValue = [...this.secretsShowValue, false];
+  }
+
+  editSecret(index: number): void {
+    if (this.secretsEditMode && this.secretsEditIndex !== index) return;
+    this.secretsEditIndex = index;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(_index: number): void {
+    this.secretsEditIndex = null;
+    this.secretsEditMode = false;
+    this.persistEnvAndSecrets();
+  }
+
+  deleteSecret(index: number): void {
+    this.dynamicSecretsArray = this.dynamicSecretsArray.filter((_, i) => i !== index);
+    this.secretsShowValue = this.secretsShowValue.filter((_, i) => i !== index);
+    if (this.secretsEditIndex === index) {
+      this.secretsEditIndex = null;
+      this.secretsEditMode = false;
+    }
+    this.secretsCollapsed = this.dynamicSecretsArray.length === 0;
+    this.persistEnvAndSecrets();
+  }
+
+  toggleSecretVisibility(index: number): void {
+    this.secretsShowValue[index] = !this.secretsShowValue[index];
+  }
+
   /**
    * Component cleanup
    */

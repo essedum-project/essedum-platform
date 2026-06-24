@@ -8,292 +8,7 @@
 
 .spin-icon { animation: spin 1s linear infinite !important; }
 
-// ── Environment Tab ────────────────────────────────────────────────────────────
-.env-tab-wrapper {
-  padding: 20px 24px !important;
-}
-
-// ── Collapsible sections (Environment Variables, User Secrets) ─────────────────
-.collapsible-section {
-  background: rgba(13,17,23,0.4) !important;
-  border: 1px solid rgba(88,166,255,0.1) !important;
-  border-radius: 8px !important;
-  margin-bottom: 16px !important;
-  overflow: hidden !important;
-}
-
-.collapsible-header {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 10px 14px !important;
-  cursor: pointer !important;
-  user-select: none !important;
-  transition: background 0.15s !important;
-  &:hover { background: rgba(88,166,255,0.04) !important; }
-
-  .collapse-icon {
-    color: #58a6ff !important;
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1) !important;
-    &.expanded { transform: rotate(90deg) !important; }
-  }
-
-  .collapse-title {
-    color: #c9d1d9 !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-  }
-
-  .collapse-badge {
-    margin-left: auto !important;
-    background: rgba(88,166,255,0.12) !important;
-    color: #58a6ff !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-    border-radius: 10px !important;
-    min-width: 20px !important;
-    text-align: center !important;
-  }
-}
-
-.collapsible-body {
-  max-height: 800px !important;
-  overflow: hidden !important;
-  transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s, padding 0.3s !important;
-  opacity: 1 !important;
-  padding: 0 14px 14px !important;
-  &.collapsed {
-    max-height: 0 !important;
-    opacity: 0 !important;
-    padding: 0 14px !important;
-  }
-}
-
-// ── Card wrapper (same as legacy .env-card) ───────────────────────────────────
-.env-card {
-  background: rgba(13,22,48,0.88) !important;
-  border: 1px solid rgba(88,166,255,0.14) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(12px) !important;
-  padding: 16px 20px !important;
-  margin-top: 4px !important;
-}
-
-// ── Table (mirrors legacy .env-table exactly, adds password input) ─────────────
-.env-table {
-  width: 100% !important;
-  border-collapse: collapse !important;
-  background: transparent !important;
-  margin-bottom: 10px !important;
-
-  thead tr th {
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    color: #8b949e !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.6px !important;
-    border-bottom: none !important;
-    padding: 8px 10px !important;
-    background: rgba(88,166,255,0.04) !important;
-  }
-
-  tbody tr {
-    background: transparent !important;
-    border-bottom: none !important;
-    &:hover { background: rgba(88,166,255,0.04) !important; }
-
-    td {
-      padding: 8px 10px !important;
-      font-size: 13px !important;
-      color: #c9d1d9 !important;
-      -webkit-text-fill-color: #c9d1d9 !important;
-      vertical-align: middle !important;
-      background: transparent !important;
-    }
-  }
-
-  .table-striped > tbody > tr:nth-of-type(odd) > *,
-  .table-striped > tbody > tr:nth-of-type(even) > * {
-    background: transparent !important;
-    --bs-table-accent-bg: transparent !important;
-    --bs-table-striped-bg: transparent !important;
-    --bs-table-bg: transparent !important;
-  }
-
-  .form-control,
-  input.form-control,
-  input[type="text"],
-  input[type="password"],
-  .table .form-control,
-  .table td input,
-  .table td .form-control {
-    background: rgba(13,17,23,0.9) !important;
-    background-color: rgba(13,17,23,0.9) !important;
-    border: 1px solid rgba(88,166,255,0.25) !important;
-    border-radius: 5px !important;
-    color: #e6edf3 !important;
-    -webkit-text-fill-color: #e6edf3 !important;
-    font-size: 12px !important;
-    padding: 6px 10px !important;
-    height: 32px !important;
-    width: 100% !important;
-    &:focus {
-      border-color: #58a6ff !important;
-      outline: none !important;
-      box-shadow: 0 0 0 2px rgba(88,166,255,0.1) !important;
-    }
-    &::placeholder { color: #484f58 !important; -webkit-text-fill-color: #484f58 !important; }
-  }
-}
-
-// ── Action icons (edit / save / delete / eye) ──────────────────────────────────
-.env-action-icon {
-  font-size: 17px !important;
-  width: 17px !important;
-  height: 17px !important;
-  vertical-align: middle !important;
-  cursor: pointer !important;
-  color: #8b949e !important;
-  margin-right: 6px !important;
-  transition: color 0.15s !important;
-  &:hover { color: #58a6ff !important; }
-}
-
-// ── Cell display text ──────────────────────────────────────────────────────────
-.env-cell-text {
-  color: #c9d1d9 !important;
-  -webkit-text-fill-color: #c9d1d9 !important;
-  font-size: 13px !important;
-}
-.env-cell-empty {
-  color: #484f58 !important;
-  -webkit-text-fill-color: #484f58 !important;
-  font-style: italic !important;
-}
-
-// ── Empty state ────────────────────────────────────────────────────────────────
-.env-empty-state {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  color: #484f58 !important;
-  font-size: 13px !important;
-  padding: 10px 4px !important;
-  margin-bottom: 8px !important;
-  mat-icon {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    color: #484f58 !important;
-  }
-}
-
-// ── Add button (gradient, exact match to legacy) ───────────────────────────────
-.env-add-btn {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%) !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  border: none !important;
-  border-radius: 6px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  padding: 4px 16px !important;
-  height: 30px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 2px !important;
-  cursor: pointer !important;
-  box-shadow: 0 2px 10px rgba(79,70,229,0.35) !important;
-  transition: box-shadow 0.2s, transform 0.2s !important;
-  mat-icon { font-size: 16px !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
-  &:hover:not([disabled]) {
-    box-shadow: 0 4px 20px rgba(79,70,229,0.55) !important;
-    transform: translateY(-1px) !important;
-  }
-  &[disabled] { opacity: 0.45 !important; cursor: not-allowed !important; }
-}
-
-// ── Secret value mask & eye toggle ─────────────────────────────────────────────
-.secret-value-mask {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  color: #c9d1d9 !important;
-  -webkit-text-fill-color: #c9d1d9 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.08em !important;
-}
-
-.secret-eye-icon {
-  font-size: 16px !important;
-  width: 16px !important;
-  height: 16px !important;
-  cursor: pointer !important;
-  color: #8b949e !important;
-  vertical-align: middle !important;
-  transition: color 0.15s !important;
-  &:hover { color: #58a6ff !important; }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ── CSS custom properties for env inputs (dark theme defaults) ───────────────
-// Defined on :host so they are inherited the instant *ngIf renders the input —
-// no paint-cycle gap, no flash of Bootstrap white.
-:host {
-  display: block !important;
-  width: 100% !important;
-  min-width: 0;
-  box-sizing: border-box;
-  --_env-input-bg:           rgba(13,17,23,0.9);
-  --_env-input-bg-autofill:  rgba(13,17,23,0.95);
-  --_env-input-color:        #e6edf3;
-  --_env-input-border:       rgba(88,166,255,0.25);
-  --_env-input-focus-border: #58a6ff;
-  --_env-input-focus-shadow: rgba(88,166,255,0.1);
-  --_env-placeholder-color:  #484f58;
-}
-
-// ── ng-deep: consumes the CSS vars — always correct, zero flash ───────────────
-:host ::ng-deep .env-card {
-  input,
-  input.form-control,
-  input[type="text"],
-  input[type="password"],
-  .form-control {
-    background:            var(--_env-input-bg) !important;
-    background-color:      var(--_env-input-bg) !important;
-    border:                1px solid var(--_env-input-border) !important;
-    border-radius:         5px !important;
-    color:                 var(--_env-input-color) !important;
-    -webkit-text-fill-color: var(--_env-input-color) !important;
-    font-size:  12px !important;
-    padding:    6px 10px !important;
-    height:     32px !important;
-    width:      100% !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
-    &:focus {
-      border-color: var(--_env-input-focus-border) !important;
-      outline:      none !important;
-      box-shadow:   0 0 0 2px var(--_env-input-focus-shadow) !important;
-    }
-    &::placeholder {
-      color:                   var(--_env-placeholder-color) !important;
-      -webkit-text-fill-color: var(--_env-placeholder-color) !important;
-    }
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus {
-      -webkit-box-shadow:      0 0 0 1000px var(--_env-input-bg-autofill) inset !important;
-      -webkit-text-fill-color: var(--_env-input-color) !important;
-    }
-  }
-}
+:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
 // Override inline background-color:white and bootstrap padding on wrapper
 .aip-panel-shadow {
@@ -536,8 +251,11 @@
         background: rgba(88,166,255,0.12) !important;
         border-color: rgba(88,166,255,0.4) !important;
         color: #58a6ff !important;
-        transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(88,166,255,0.2);
+      }
+
+      &:not(.git-push-button):hover {
+        transform: translateY(-1px);
       }
     }
 
@@ -989,88 +707,6 @@
 // LIGHT THEME
 // =============================================================================
 :host-context(body.header-light-theme) {
-
-  // ── Environment Tab – light theme (mirrors user-secrets panel in legacy) ────
-  .env-tab-wrapper { background: transparent !important; }
-
-  .collapsible-section {
-    background: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
-  }
-  .collapsible-header {
-    background: transparent !important;
-    &:hover { background: rgba(71,66,220,0.03) !important; }
-    .collapse-icon { color: #4742dc !important; }
-    .collapse-title { color: #334155 !important; }
-    .collapse-badge { background: rgba(71,66,220,0.08) !important; color: #4742dc !important; }
-  }
-  .collapsible-body { background: transparent !important; }
-
-  // Card – identical to user-secrets mat-card in light theme
-  .env-card {
-    background: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    backdrop-filter: none !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-  }
-
-  .env-table {
-    thead tr th {
-      color: #64748b !important;
-      background: rgba(71,66,220,0.04) !important;
-    }
-    tbody tr {
-      &:hover { background: rgba(71,66,220,0.03) !important; }
-      td { color: #334155 !important; -webkit-text-fill-color: #334155 !important; background: transparent !important; }
-    }
-    .table-striped > tbody > tr:nth-of-type(odd) > *,
-    .table-striped > tbody > tr:nth-of-type(even) > * {
-      background: transparent !important;
-      background-color: transparent !important;
-      --bs-table-accent-bg: transparent !important;
-      --bs-table-striped-bg: transparent !important;
-      --bs-table-bg: transparent !important;
-    }
-    .form-control,
-    input.form-control,
-    input[type="text"],
-    input[type="password"],
-    .table .form-control,
-    .table td input,
-    .table td .form-control {
-      background: #ffffff !important;
-      background-color: #ffffff !important;
-      border-color: #e2e8f0 !important;
-      color: #0f172a !important;
-      -webkit-text-fill-color: #0f172a !important;
-      &:focus { border-color: #4742dc !important; box-shadow: 0 0 0 2px rgba(71,66,220,0.12) !important; }
-      &::placeholder { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
-    }
-  }
-
-  .env-action-icon { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
-  .env-cell-text { color: #334155 !important; -webkit-text-fill-color: #334155 !important; }
-  .env-cell-empty { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
-  .env-empty-state { color: #94a3b8 !important; mat-icon { color: #cbd5e1 !important; } }
-  .env-add-btn {
-    background: linear-gradient(135deg, #4742dc 0%, #7c3aed 50%, #6366f1 100%) !important;
-    box-shadow: 0 2px 10px rgba(71,66,220,0.3) !important;
-    &:hover:not([disabled]) { box-shadow: 0 4px 20px rgba(71,66,220,0.45) !important; }
-  }
-  .secret-value-mask { color: #334155 !important; -webkit-text-fill-color: #334155 !important; }
-  .secret-eye-icon { color: #94a3b8 !important; &:hover { color: #4742dc !important; } }
-
-  // ── Override CSS vars for light theme — inputs inherit correct values instantly
-  --_env-input-bg:           #ffffff;
-  --_env-input-bg-autofill:  #ffffff;
-  --_env-input-color:        #0f172a;
-  --_env-input-border:       #e2e8f0;
-  --_env-input-focus-border: #4742dc;
-  --_env-input-focus-shadow: rgba(71,66,220,0.12);
-  --_env-placeholder-color:  #94a3b8;
-  // ──────────────────────────────────────────────────────────────────────────
-
   .aip-panel-shadow {
     background-color: #ffffff !important;
     border-color: #e1e4e8 !important;
@@ -1243,11 +879,13 @@
 
   // GitHub Pull button (app-github-push in pull mode)
   ::ng-deep app-github-push {
-    display: block;
+    display: block !important;
+    width: 100% !important;
     margin-top: 12px;
 
     .github-pull-input-container {
-      width: 100%;
+      display: block !important;
+      width: 100% !important;
     }
 
     .github-pull-input-label {
@@ -1356,4 +994,187 @@
     }
   }
   .upload-dialog-footer { border-top-color: #e1e4e8; .cancel-btn { border-color: #e1e4e8 !important; color: #656d76 !important; &:hover { border-color: rgba(79, 70, 229, 0.3) !important; color: #4f46e5 !important; } } }
+}
+
+// =============================================================================
+// ENVIRONMENT TAB
+// =============================================================================
+.env-tab-wrapper {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.collapsible-section {
+  background: rgba(13,17,23,0.4);
+  border: 1px solid rgba(88,166,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+  &:hover { background: rgba(88,166,255,0.04); }
+
+  .collapse-icon { color: #58a6ff; font-size: 14px; }
+  .collapse-title { color: #c9d1d9; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .collapse-badge {
+    margin-left: auto;
+    background: rgba(88,166,255,0.12);
+    color: #58a6ff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+  }
+}
+
+.collapsible-body {
+  max-height: 600px;
+  overflow: hidden;
+  transition: max-height 0.3s, opacity 0.2s, padding 0.3s;
+  opacity: 1;
+  padding: 0 14px 14px;
+  &.collapsed { max-height: 0; opacity: 0; padding: 0 14px; }
+}
+
+.env-card {
+  background: rgba(13,22,48,0.88);
+  border: 1px solid rgba(88,166,255,0.14);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 4px;
+}
+
+.env-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+
+  thead th {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 8px 10px;
+    border-bottom: none;
+  }
+
+  tbody tr {
+    &:hover { background: rgba(88,166,255,0.04); }
+    td {
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #c9d1d9;
+      vertical-align: middle;
+    }
+  }
+}
+
+.env-input {
+  background: rgba(13,17,23,0.9);
+  border: 1px solid rgba(88,166,255,0.25);
+  border-radius: 5px;
+  color: #e6edf3;
+  font-size: 12px;
+  padding: 6px 10px;
+  height: 32px;
+  width: 100%;
+  &:focus { border-color: #58a6ff; outline: none; box-shadow: 0 0 0 2px rgba(88,166,255,0.1); }
+  &::placeholder { color: #484f58; }
+}
+
+.env-action-icon {
+  font-size: 15px;
+  cursor: pointer;
+  color: #8b949e;
+  margin-right: 6px;
+  transition: color 0.15s;
+  &:hover { color: #58a6ff; }
+}
+
+.action-cell { white-space: nowrap; }
+
+.env-cell-text { color: #c9d1d9; font-size: 13px; }
+.env-cell-empty { color: #484f58; font-style: italic; }
+
+.env-empty-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #484f58;
+  font-size: 13px;
+  padding: 10px 4px;
+  margin-bottom: 8px;
+  i { font-size: 16px; }
+}
+
+.env-add-btn {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 10px rgba(79,70,229,0.35);
+  transition: box-shadow 0.2s, transform 0.2s;
+  &:hover { box-shadow: 0 4px 20px rgba(79,70,229,0.55); transform: translateY(-1px); }
+}
+
+.secret-value-mask {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #c9d1d9;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.secret-eye-icon {
+  font-size: 14px;
+  cursor: pointer;
+  color: #8b949e;
+  transition: color 0.15s;
+  &:hover { color: #58a6ff; }
+}
+
+// =============================================================================
+// ENVIRONMENT TAB  (light theme overrides)
+// =============================================================================
+:host-context(body.header-light-theme) {
+  .collapsible-section { background: #ffffff; border-color: #e2e8f0; }
+  .collapsible-header {
+    &:hover { background: rgba(71,66,220,0.04); }
+    .collapse-icon { color: #4742dc; }
+    .collapse-title { color: #334155; }
+    .collapse-badge { background: rgba(71,66,220,0.08); color: #4742dc; }
+  }
+  .env-card { background: #ffffff; border-color: #e2e8f0; }
+  .env-table {
+    thead th { color: #64748b; }
+    tbody td { color: #334155; }
+    tbody tr:hover { background: rgba(71,66,220,0.04); }
+  }
+  .env-input { background: #ffffff; border-color: #e2e8f0; color: #0f172a; &:focus { border-color: #4742dc; } }
+  .env-action-icon { color: #94a3b8; &:hover { color: #4742dc; } }
+  .env-cell-text { color: #334155; }
+  .env-cell-empty { color: #94a3b8; font-style: italic; }
+  .env-empty-state { color: #94a3b8; i { color: #94a3b8; } }
+  .secret-value-mask { color: #334155; }
+  .secret-eye-icon { color: #94a3b8; &:hover { color: #4742dc; } }
 }

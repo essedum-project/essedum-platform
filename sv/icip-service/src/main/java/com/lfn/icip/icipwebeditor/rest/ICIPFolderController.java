@@ -40,7 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 // TODO: Auto-generated Javadoc
-// 
+//
 
 /**
  * The Class ICIPFileController.
@@ -89,11 +89,12 @@ public class ICIPFolderController {
     public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(
             @PathVariable(name = "cname") String cname,
             @PathVariable(name = "org") String org,
-            @RequestParam(value = "type",required=true) String type,
+            @RequestParam(value = "type", required = true) String type,
             @RequestParam(value = "zipFile", required = false) MultipartFile zipFile,
-            @RequestParam(value = "folderPath", required = false) String folderPath) {
+            @RequestParam(value = "folderPath", required = false) String folderPath,
+            @RequestParam(value = "isvibestudio", required = false, defaultValue = "false") boolean isVibeStudio) {
 
-        logger.info("request to upload ai-agent scripts for cname={}, org={}, type={}", cname, org, type);
+        logger.info("request to upload ai-agent scripts for cname={}, org={}, type={}, isVibeStudio={}", cname, org, type, isVibeStudio);
 
         try {
             // Validate pipeline type param
@@ -118,19 +119,24 @@ public class ICIPFolderController {
             }
 
             // ── Pipeline metadata.json validation ─────────────────────────────
+            // Skipped entirely when isVibeStudio=true (Vibe Studio uploads bypass validation).
             // Runs BEFORE deleting existing records to prevent data loss on a bad upload.
-            logger.info("Validating pipeline metadata.json for cname={}, org={}, type={}", cname, org, type);
-            if (zipFile != null && !zipFile.isEmpty()) {
-                pipelineMetadataValidator.validateFromZip(zipFile, type);
-            } else if (folderPath != null && !folderPath.isBlank()) {
-                pipelineMetadataValidator.validateFromFolderPath(folderPath, type);
+            if (!isVibeStudio) {
+                logger.info("Validating pipeline metadata.json for cname={}, org={}, type={}", cname, org, type);
+                if (zipFile != null && !zipFile.isEmpty()) {
+                    pipelineMetadataValidator.validateFromZip(zipFile, type);
+                } else if (folderPath != null && !folderPath.isBlank()) {
+                    pipelineMetadataValidator.validateFromFolderPath(folderPath, type);
+                }
+                logger.info("Pipeline metadata validation passed for cname={}, org={}, type={}", cname, org, type);
+            } else {
+                logger.info("Skipping pipeline metadata validation for cname={}, org={} — isVibeStudio=true", cname, org);
             }
-            logger.info("Pipeline metadata validation passed for cname={}, org={}, type={}", cname, org, type);
             // ── End metadata validation ────────────────────────────────────────
             List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
             if (existingFiles != null && !existingFiles.isEmpty()) {
                 logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
-                            existingFiles.size(), cname, org);
+                        existingFiles.size(), cname, org);
                 try {
                     folderService.deleteAllByCnameAndOrg(cname, org);
                     logger.info("Successfully deleted all existing files for cname={}, org={}", cname, org);
@@ -207,7 +213,7 @@ public class ICIPFolderController {
             return new ResponseEntity<>(result, HttpStatus.OK);
 
         } catch (InvalidRequestException | FileDeletionException | FileUploadException
-                | PipelineMetadataValidationException e) {
+                 | PipelineMetadataValidationException e) {
             // Re-throw custom exceptions to be handled by GlobalControllerException
             throw e;
         } catch (Exception e) {
@@ -434,7 +440,7 @@ public class ICIPFolderController {
             @RequestParam(value="alias", required = false, defaultValue ="Sample-S3") String alias)
     {
         logger.info("request to push ai-agent scripts to MinIO for cname={}, org={}, type={}, alias={}",
-                    cname, org, type, alias);
+                cname, org, type, alias);
 
         try {
             // Validate input parameters
@@ -449,7 +455,7 @@ public class ICIPFolderController {
             ICIPDatasource datasource = datasourceService.getDatasourceByTypeAndAlias(type, alias, org);
             if (datasource == null) {
                 String message = String.format("No datasource found with type=%s, alias=%s for organization=%s",
-                                              type, alias, org);
+                        type, alias, org);
                 logger.error(message);
                 throw new DatasourceNotFoundException(message);
             }
@@ -486,17 +492,17 @@ public class ICIPFolderController {
                 // Upload provided zip file
                 logger.info("Uploading provided zip file to MinIO");
                 success = folderService.pushZipToMinIO(zipFile, null, bucketName, finalObjectKey, cname, org,
-                                                       minioUrl, minioAccessKey, minioSecretKey);
+                        minioUrl, minioAccessKey, minioSecretKey);
             } else {
                 // Export from database and upload
                 logger.info("Exporting from database and uploading to MinIO");
                 success = folderService.exportAndPushToMinIO(cname, org, bucketName, finalObjectKey,
-                                                             minioUrl, minioAccessKey, minioSecretKey);
+                        minioUrl, minioAccessKey, minioSecretKey);
             }
 
             if (success) {
                 String message = String.format("Successfully uploaded to MinIO: bucket=%s, objectKey=%s",
-                                              bucketName, finalObjectKey);
+                        bucketName, finalObjectKey);
                 logger.info(message);
                 return ResponseEntity.ok(message);
             } else {

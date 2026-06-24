@@ -245,124 +245,108 @@
                 <mat-tab label="Environment" class="lfx-u-header-xl">
                   <div class="tab-content mb-5 env-tab-wrapper">
 
-                    <!-- Environment Variables Section -->
+                    <!-- Environment Variables -->
                     <div class="collapsible-section">
                       <div class="collapsible-header" (click)="envCollapsed = !envCollapsed">
-                        <mat-icon class="collapse-icon" [class.expanded]="!envCollapsed">chevron_right</mat-icon>
+                        <i class="bi collapse-icon" [class.bi-chevron-right]="envCollapsed" [class.bi-chevron-down]="!envCollapsed"></i>
                         <span class="collapse-title">Environment Variables</span>
                         <span class="collapse-badge">{{ dynamicEnvArray?.length || 0 }}</span>
                       </div>
                       <div class="collapsible-body" [class.collapsed]="envCollapsed">
                         <div class="env-card">
-                          <table class="table table-striped env-table" *ngIf="dynamicEnvArray?.length > 0">
+                          <table class="env-table" *ngIf="dynamicEnvArray?.length > 0">
                             <thead>
                               <tr>
-                                <th class="col-md-5" scope="col">Key</th>
-                                <th class="col-md-5" scope="col">Value</th>
-                                <th class="col-md-2" scope="col">Action</th>
+                                <th>Key</th>
+                                <th>Value</th>
+                                <th>Action</th>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr *ngFor="let env of dynamicEnvArray; let i = index">
+                              <tr *ngFor="let env of dynamicEnvArray; let i = index; trackBy: trackByIndex">
                                 <td>
                                   <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.name">{{ env.name || '—' }}</span>
                                   <input *ngIf="envEditIndex === i && envEditMode"
                                     [(ngModel)]="dynamicEnvArray[i].name"
-                                    class="form-control" type="text" placeholder="KEY" />
+                                    class="env-input" type="text" placeholder="KEY" />
                                 </td>
                                 <td>
                                   <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.value">{{ env.value || '—' }}</span>
                                   <input *ngIf="envEditIndex === i && envEditMode"
                                     [(ngModel)]="dynamicEnvArray[i].value"
-                                    class="form-control" type="text" placeholder="value" />
+                                    class="env-input" type="text" placeholder="value" />
                                 </td>
-                                <td>
-                                  <mat-icon matTooltip="Edit"
-                                    class="env-action-icon"
-                                    (click)="editEnvVar(i)">edit</mat-icon>
-                                  <mat-icon *ngIf="envEditMode && envEditIndex === i"
-                                    matTooltip="Save"
-                                    class="env-action-icon"
-                                    (click)="saveEnvVar(i)">save</mat-icon>
-                                  <mat-icon matTooltip="Delete"
-                                    class="env-action-icon"
-                                    (click)="deleteEnvVar(i)">delete</mat-icon>
+                                <td class="action-cell">
+                                  <i class="bi bi-pencil env-action-icon" (click)="editEnvVar(i)" title="Edit"></i>
+                                  <i *ngIf="envEditMode && envEditIndex === i" class="bi bi-floppy env-action-icon" (click)="saveEnvVar(i)" title="Save"></i>
+                                  <i class="bi bi-trash env-action-icon" (click)="deleteEnvVar(i)" title="Delete"></i>
                                 </td>
                               </tr>
                             </tbody>
                           </table>
                           <div *ngIf="!dynamicEnvArray?.length" class="env-empty-state">
-                            <mat-icon>tune</mat-icon>
+                            <i class="bi bi-sliders"></i>
                             <span>No environment variables defined</span>
                           </div>
-                          <button mat-raised-button class="env-add-btn"
-                            (click)="addEnvVar()">
-                            <mat-icon>add</mat-icon> Add
+                          <button class="env-add-btn" (click)="addEnvVar()">
+                            <i class="bi bi-plus-lg"></i> Add
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    <!-- User Secrets Section -->
+                    <!-- User Secrets -->
                     <div class="collapsible-section">
                       <div class="collapsible-header" (click)="secretsCollapsed = !secretsCollapsed">
-                        <mat-icon class="collapse-icon" [class.expanded]="!secretsCollapsed">chevron_right</mat-icon>
+                        <i class="bi collapse-icon" [class.bi-chevron-right]="secretsCollapsed" [class.bi-chevron-down]="!secretsCollapsed"></i>
                         <span class="collapse-title">User Secrets</span>
                         <span class="collapse-badge">{{ dynamicSecretsArray?.length || 0 }}</span>
                       </div>
                       <div class="collapsible-body" [class.collapsed]="secretsCollapsed">
                         <div class="env-card">
-                          <table class="table table-striped env-table" *ngIf="dynamicSecretsArray?.length > 0">
+                          <table class="env-table" *ngIf="dynamicSecretsArray?.length > 0">
                             <thead>
                               <tr>
-                                <th class="col-md-5" scope="col">Name</th>
-                                <th class="col-md-5" scope="col">Value</th>
-                                <th class="col-md-2" scope="col">Action</th>
+                                <th>Name</th>
+                                <th>Value</th>
+                                <th>Action</th>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr *ngFor="let secret of dynamicSecretsArray; let i = index">
+                              <tr *ngFor="let secret of dynamicSecretsArray; let i = index; trackBy: trackByIndex">
                                 <td>
                                   <span *ngIf="secretsEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!secret.name">{{ secret.name || '—' }}</span>
                                   <input *ngIf="secretsEditIndex === i && secretsEditMode"
                                     [(ngModel)]="dynamicSecretsArray[i].name"
-                                    class="form-control" type="text" placeholder="secret name" />
+                                    class="env-input" type="text" placeholder="KEY" />
                                 </td>
                                 <td>
                                   <span *ngIf="secretsEditIndex !== i" class="env-cell-text secret-value-mask">
                                     <span *ngIf="!secretsShowValue[i]">••••••••</span>
                                     <span *ngIf="secretsShowValue[i]">{{ secret.value || '—' }}</span>
-                                    <mat-icon class="env-action-icon secret-eye-icon" matTooltip="Toggle visibility"
-                                      (click)="toggleSecretVisibility(i)">
-                                      {{ secretsShowValue[i] ? 'visibility_off' : 'visibility' }}
-                                    </mat-icon>
+                                    <i class="bi env-action-icon secret-eye-icon"
+                                       [class.bi-eye]="!secretsShowValue[i]"
+                                       [class.bi-eye-slash]="secretsShowValue[i]"
+                                       (click)="toggleSecretVisibility(i)" title="Toggle visibility"></i>
                                   </span>
                                   <input *ngIf="secretsEditIndex === i && secretsEditMode"
                                     [(ngModel)]="dynamicSecretsArray[i].value"
-                                    class="form-control" type="password" placeholder="secret value" />
+                                    class="env-input" type="text" placeholder="value" />
                                 </td>
-                                <td>
-                                  <mat-icon matTooltip="Edit"
-                                    class="env-action-icon"
-                                    (click)="editSecret(i)">edit</mat-icon>
-                                  <mat-icon *ngIf="secretsEditMode && secretsEditIndex === i"
-                                    matTooltip="Save"
-                                    class="env-action-icon"
-                                    (click)="saveSecret(i)">save</mat-icon>
-                                  <mat-icon matTooltip="Delete"
-                                    class="env-action-icon"
-                                    (click)="deleteSecret(i)">delete</mat-icon>
+                                <td class="action-cell">
+                                  <i class="bi bi-pencil env-action-icon" (click)="editSecret(i)" title="Edit"></i>
+                                  <i *ngIf="secretsEditMode && secretsEditIndex === i" class="bi bi-floppy env-action-icon" (click)="saveSecret(i)" title="Save"></i>
+                                  <i class="bi bi-trash env-action-icon" (click)="deleteSecret(i)" title="Delete"></i>
                                 </td>
                               </tr>
                             </tbody>
                           </table>
                           <div *ngIf="!dynamicSecretsArray?.length" class="env-empty-state">
-                            <mat-icon>lock</mat-icon>
+                            <i class="bi bi-lock"></i>
                             <span>No user secrets defined</span>
                           </div>
-                          <button mat-raised-button class="env-add-btn"
-                            (click)="addSecret()">
-                            <mat-icon>add</mat-icon> Add
+                          <button class="env-add-btn" (click)="addSecret()">
+                            <i class="bi bi-plus-lg"></i> Add
                           </button>
                         </div>
                       </div>

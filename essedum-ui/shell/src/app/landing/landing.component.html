@@ -387,7 +387,7 @@
                             item.icon.includes('data:image/jpg') ||
                             item.icon.includes('data:image/jpeg')) &&
                           item.label !== 'Agent Designer' &&
-                          item.label !== 'Agent MCP Pipelines' &&
+                          item.label !== 'Pipelines' &&
                           item.label !== 'Lite LLM' &&
                           item.label !== 'Langfuse' &&
                           item.label !== 'Salus' &&
@@ -409,8 +409,8 @@
                         </svg>
                       </div>
 
-                      <!-- Agent MCP Pipelines: Custom pipeline flow SVG -->
-                      <div *ngIf="item.label === 'Agent MCP Pipelines'"
+                      <!-- Pipelines: Custom pipeline flow SVG -->
+                      <div *ngIf="item.label === 'Pipelines'"
                            class="sidebar-ai-icon"
                            [ngStyle]="{height: sideMenuIconSize, width: sideMenuIconSize}"
                            [ngClass]="{'sidebar-svg-iconcolor': sidebartextcolor == true, 'sidebar-svg-iconcolordefault': sidebartextcolor != true}">
@@ -482,7 +482,7 @@
                           !item.icon.startsWith('fa-') &&
                           !item.icon.startsWith('icon') &&
                           item.label !== 'Agent Designer' &&
-                          item.label !== 'Agent MCP Pipelines' &&
+                          item.label !== 'Pipelines' &&
                           item.label !== 'Lite LLM' &&
                           item.label !== 'Langfuse' &&
                           item.label !== 'Salus' &&

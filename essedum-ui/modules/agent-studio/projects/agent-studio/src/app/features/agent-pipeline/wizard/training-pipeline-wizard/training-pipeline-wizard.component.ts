@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
-import { Services } from '../../../services/service';
-import { GitLinkService } from '../../../services/git-link.service';
+import { Services } from '@essedum/shared-lib';
+import { StreamingServices } from '@essedum/shared-lib';
 import {
   TRAINING_JOB_TYPES,
   FRAMEWORKS_BY_JOB_TYPE,
@@ -12,34 +12,28 @@ import {
   FALLBACK_SLM_BASE_MODELS,
   TEACHER_MODELS,
   EXECUTORS,
-  GitLinkValue,
-  emptyGitLink,
-} from '../shared/pipeline-options.constants';
-import { VibeStudioService } from '../../../services/vibe-studio.service';
-import { StreamingServices } from '@essedum/shared-lib';
+} from '../pipeline-options.constants';
+import { GitLinkValue } from '../shared/git-link-step.component';
 
 @Component({
-  selector: 'app-training-pipeline-wizard',
+  selector: 'app-training-pipeline-wizard-local',
   templateUrl: './training-pipeline-wizard.component.html',
   styleUrls: ['./training-pipeline-wizard.component.scss'],
 })
-export class TrainingPipelineWizardComponent implements OnInit {
+export class TrainingPipelineWizardLocalComponent implements OnInit {
   @ViewChild('stepper') stepper: MatStepper;
 
   jobTypes = TRAINING_JOB_TYPES;
   datasets: string[] = [];
   datasetsLoaded = false;
-  private allDatasetObjects: any[] = [];   // full dataset objects (have datasource info)
-  private datasetObjectMap = new Map<string, any>(); // alias → full object
-  datasetColumns: string[] = [];           // columns fetched from selected dataset
+  private allDatasetObjects: any[] = [];
+  private datasetObjectMap = new Map<string, any>();
+  datasetColumns: string[] = [];
   datasetColumnsLoaded = false;
-  private datasetRows: any[] = [];         // schema sample rows
+  private datasetRows: any[] = [];
   slmBaseModels = FALLBACK_SLM_BASE_MODELS;
   readonly traditionalBaseModels = [
-    'Logistic Regression',
-    'Linear Regression',
-    'Decision Tree',
-    'Random Forest',
+    'Logistic Regression', 'Linear Regression', 'Decision Tree', 'Random Forest',
   ];
   teacherModels = TEACHER_MODELS;
   executors = EXECUTORS;
@@ -48,75 +42,94 @@ export class TrainingPipelineWizardComponent implements OnInit {
   modeForm: FormGroup;
   identityForm: FormGroup;
   dataExecForm: FormGroup;
-  gitLink: GitLinkValue = emptyGitLink();
+  gitLink: GitLinkValue = { repo: '', branch: 'main', filePath: '' };
   gitValid = false;
   creating = false;
 
-  // ── Agent + Model pre-selection (mirrors Vibe Studio) ──────────────────────
-  selectionDone = false;
+  // Agent + Model pre-selection (auto-defaulted, user can change via settings gear)
+  selectionDone = true;
+  showSettings = false;
   selectedAgent: string | null = null;
   selectedModel: string | null = null;
-  readonly agentOptions: { label: string; value: string }[] = [
-    { label: 'Ollama',       value: 'ollama'       },
-    { label: 'Azure OpenAI', value: 'azure_openai'  },
-    { label: 'Anthropic',    value: 'anthropic'     },
+  readonly agentOptions = [
+    { label: 'Ollama', value: 'ollama' },
+    { label: 'Azure OpenAI', value: 'azure_openai' },
+    { label: 'Anthropic', value: 'anthropic' },
   ];
-  readonly modelOptions: { label: string; value: string }[] = [
-    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
-    { label: 'gemma4:latest',  value: 'gemma4:latest'   },
-    { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
-    { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
-    { label: 'phi3:mini',      value: 'phi3:mini'       },
-    { label: 'gemma3:latest',  value: 'gemma3:latest'   },
-    { label: 'llama3:latest',  value: 'llama3:latest'   },
-    { label: 'qwen3:4b',      value: 'qwen3:4b'        },
+  readonly modelOptions = [
+    { label: 'qwen3.6:27b', value: 'qwen3.6:27b' },
+    { label: 'gemma4:latest', value: 'gemma4:latest' },
+    { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
+    { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+    { label: 'phi3:mini', value: 'phi3:mini' },
+    { label: 'gemma3:latest', value: 'gemma3:latest' },
+    { label: 'llama3:latest', value: 'llama3:latest' },
+    { label: 'qwen3:4b', value: 'qwen3:4b' },
   ];
-  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.vibe.setAgentProvider(agent); }
-  onModelSelect(model: string): void { this.selectedModel = model; this.vibe.setModel(model); }
-  proceedToWizard(): void { if (this.selectedAgent && this.selectedModel) this.selectionDone = true; }
+
+  onAgentSelect(agent: string): void { this.selectedAgent = agent; this.showSettings = false; }
+  onModelSelect(model: string): void { this.selectedModel = model; this.showSettings = false; }
+  toggleSettings(): void { this.showSettings = !this.showSettings; }
+
+  private applyDefaultAgentModel(): void {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      this.selectedAgent = 'azure_openai';
+      this.selectedModel = 'gpt-4o-mini';
+    } else if (origin.includes('localhost') || origin.includes('essedum-lfn.infosys.com')) {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    } else {
+      this.selectedAgent = 'ollama';
+      this.selectedModel = 'qwen3:4b';
+    }
+  }
+  onGitLinkChange(v: GitLinkValue): void { this.gitLink = v; }
+  onGitValidity(v: boolean): void { this.gitValid = v; }
 
   constructor(
     private fb: FormBuilder,
     private services: Services,
-    private gitSvc: GitLinkService,
-    public dialogRef: MatDialogRef<TrainingPipelineWizardComponent>,
-    public vibe: VibeStudioService,
+    public dialogRef: MatDialogRef<TrainingPipelineWizardLocalComponent>,
   ) {}
 
   ngOnInit(): void {
+    this.applyDefaultAgentModel();
+
     this.modeForm = this.fb.group({
       jobType: ['traditional', Validators.required],
     });
 
     this.identityForm = this.fb.group({
-      name:        ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
-      alias:       ['', Validators.required],
+      name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9 _-]+$/)]],
+      alias: ['', Validators.required],
       description: [''],
-      framework:   ['XGBoost 1.7', Validators.required],
-      baseModel:   ['Logistic Regression', Validators.required],
-      method:      [''],
-      quantization:[''],
-      teacher:     [''],
+      framework: ['XGBoost 1.7', Validators.required],
+      baseModel: ['Logistic Regression', Validators.required],
+      method: [''],
+      quantization: [''],
+      teacher: [''],
     });
 
     this.dataExecForm = this.fb.group({
-      dataset:   ['', Validators.required],
-      executor:  ['py-job-executor', Validators.required],
-      epochs:    [3, [Validators.required, Validators.min(1)]],
+      dataset: ['', Validators.required],
+      executor: ['py-job-executor', Validators.required],
+      epochs: [3, [Validators.required, Validators.min(1)]],
       batchSize: [4, [Validators.required, Validators.min(1)]],
-      lr:        ['2e-4', Validators.required],
-      loraRank:  [16],
+      lr: ['2e-4', Validators.required],
+      loraRank: [16],
       loraAlpha: [32],
-      maxLen:    [2048],
+      maxLen: [2048],
     });
 
-    this.gitLink = this.gitSvc.defaultLinkFor('new-training', 'training-job');
-
+    // Keep git file path in sync with name
     this.identityForm.get('name').valueChanges.subscribe(name => {
-      if (name) this.gitLink = { ...this.gitLink, filePath: `training-jobs/${name}/train.py` };
+      if (name) {
+        this.gitLink = { ...this.gitLink, filePath: `training-jobs/${name}/train.py` };
+      }
     });
 
-    // Cascade: when dataset changes → fetch schema columns
+    // Cascade: dataset → columns
     this.dataExecForm.get('dataset').valueChanges.subscribe(datasetAlias => {
       this.datasetColumns = [];
       this.datasetRows = [];
@@ -129,7 +142,7 @@ export class TrainingPipelineWizardComponent implements OnInit {
       }
       const org = sessionStorage.getItem('organization') || '';
       const datasetRef = { alias: datasetAlias };
-      const dsourceRef  = { type: obj.datasource.type, alias: obj.datasource.alias };
+      const dsourceRef = { type: obj.datasource.type, alias: obj.datasource.alias };
       this.services.getProxyDbDatasetDetails(datasetRef as any, dsourceRef, { page: 0, size: 50 }, org, true).subscribe({
         next: (rows: any[]) => {
           if (rows && rows.length > 0) {
@@ -152,7 +165,6 @@ export class TrainingPipelineWizardComponent implements OnInit {
       next: (res: any) => {
         const items: any[] = Array.isArray(res) ? res : (res?.content ?? []);
         this.allDatasetObjects = items;
-        // Build lookup map: alias → full object
         this.datasetObjectMap.clear();
         items.forEach((d: any) => {
           const key = d.alias || d.name;
@@ -168,12 +180,8 @@ export class TrainingPipelineWizardComponent implements OnInit {
     });
   }
 
-  get frameworks(): string[] {
-    return FRAMEWORKS_BY_JOB_TYPE[this.modeForm.value.jobType] ?? [];
-  }
-  get methods(): string[] {
-    return METHODS_BY_JOB_TYPE[this.modeForm.value.jobType] ?? [];
-  }
+  get frameworks(): string[] { return FRAMEWORKS_BY_JOB_TYPE[this.modeForm.value.jobType] ?? []; }
+  get methods(): string[] { return METHODS_BY_JOB_TYPE[this.modeForm.value.jobType] ?? []; }
   get isLLM(): boolean {
     const t = this.modeForm.value.jobType;
     return t === 'slm-finetune' || t === 'reasoning' || t === 'distillation';
@@ -197,8 +205,6 @@ export class TrainingPipelineWizardComponent implements OnInit {
     }
   }
 
-  onGitLinkChange(v: GitLinkValue): void { this.gitLink = v; }
-  onGitValidity(v: boolean): void { this.gitValid = v; }
   cancel(): void { this.dialogRef.close(); }
 
   createJob(): void {
@@ -222,7 +228,7 @@ export class TrainingPipelineWizardComponent implements OnInit {
       elements: [{
         attributes: {
           filetype: 'Python3',
-          files: [],           // will be set to cname_org.py after create() responds
+          files: [],
           generatedCode: '',
         },
       }],
@@ -242,19 +248,19 @@ export class TrainingPipelineWizardComponent implements OnInit {
         loraRank: cfg.loraRank,
         loraAlpha: cfg.loraAlpha,
         maxLen: cfg.maxLen,
-        git: cfg.git,
         kind: 'training-job',
         datasetColumns: this.datasetColumns,
         datasetSample: this.datasetRows,
         freshlyCreated: true,
+        selectedAgent: this.selectedAgent,
+        selectedModel: this.selectedModel,
+        git: cfg.git,
       },
     });
 
     this.creating = true;
     this.services.create(newSs).subscribe({
       next: (data) => {
-        // Use cname + org from the create API response — mirrors native-script's
-        // saveJson(streamItem.name) → targetFileName = `${pname}_${streamItem.organization}.py`
         const org = data.organization || sessionStorage.getItem('organization') || '';
         const canonicalFile = `${data.name}_${org}.py`;
         try {
@@ -263,18 +269,14 @@ export class TrainingPipelineWizardComponent implements OnInit {
             pc.elements[0].attributes.files = [canonicalFile];
             data.json_content = JSON.stringify(pc);
           }
-        } catch { /* non-critical — editor will re-derive on save */ }
-        this.services.update(data).subscribe();  // persist canonical filename to DB
+        } catch { /* non-critical */ }
+        this.services.update(data).subscribe();
         this.services.message('Training job created!', 'success');
-        // Parent (PipelineComponent) reads { pipeline, kind } and navigates
-        // relatively so the shell's mount prefix is preserved.
         this.dialogRef.close({ pipeline: data, kind: 'training-job' });
       },
       error: (err: any) => {
         this.creating = false;
-        // err = error.error (BE response body) from handleError's throwError(errMsg)
-        const msg =
-          err?.details || err?.message || err?.error ||
+        const msg = err?.details || err?.message || err?.error ||
           (typeof err === 'string' && err.length < 600 ? err : null) ||
           'Could not create training job';
         this.services.message(msg, 'error');

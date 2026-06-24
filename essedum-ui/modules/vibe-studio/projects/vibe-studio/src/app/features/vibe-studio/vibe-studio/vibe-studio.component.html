@@ -8,6 +8,37 @@
       <h1>Vibe Studio</h1>
     </div>
     <div class="header-actions">
+      <!-- Settings gear button -->
+      <div class="settings-dropdown-wrap">
+        <button class="settings-btn" (click)="toggleSettings()" [class.active]="showSettings"
+                title="Agent & Model settings">
+          <i class="bi bi-gear-fill"></i>
+          <span class="settings-label">{{ selectedAgentLabel }} / {{ selectedModel }}</span>
+          <i class="bi bi-chevron-down settings-chevron" [class.open]="showSettings"></i>
+        </button>
+        <div class="settings-dropdown" *ngIf="showSettings">
+          <div class="settings-row">
+            <label class="settings-field-label">Agent Provider</label>
+            <div class="provider-select-wrap">
+              <select class="provider-select" [(ngModel)]="selectedAgent" (ngModelChange)="onAgentSelect($event)">
+                <option [ngValue]="null" disabled>Select agent…</option>
+                <option *ngFor="let p of providerOptions" [value]="p.value">{{ p.label }}</option>
+              </select>
+              <i class="bi bi-chevron-down provider-select-chevron"></i>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label class="settings-field-label">Model</label>
+            <div class="provider-select-wrap">
+              <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)">
+                <option [ngValue]="null" disabled>Select model…</option>
+                <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+              </select>
+              <i class="bi bi-chevron-down provider-select-chevron"></i>
+            </div>
+          </div>
+        </div>
+      </div>
       <button *ngIf="selectedAppType" mat-stroked-button class="new-session-btn" (click)="onNewSession()">
         <i class="bi bi-plus-lg"></i> New Session
       </button>
@@ -30,73 +61,11 @@
       </div>
     </div>
 
-    <!-- Steps 1 & 2: Agent + Model in a compact inline row -->
-    <div class="steps-row">
-
-      <!-- Step 1: Agent -->
-      <div class="step-col">
-        <div class="model-picker-label">
-          <span class="step-badge">1</span>
-          <span>Agent</span>
-        </div>
-        <div class="model-picker-dropdown">
-          <div *ngIf="providersLoading" class="providers-loading">
-            <i class="bi bi-arrow-repeat providers-loading-spin"></i>
-            Loading…
-          </div>
-          <div *ngIf="!providersLoading" class="provider-select-wrap">
-            <select
-              class="provider-select"
-              [(ngModel)]="selectedAgent"
-              (ngModelChange)="onAgentSelect($event)"
-            >
-              <option [ngValue]="null" disabled>Select agent…</option>
-              <option *ngFor="let p of providerOptions" [value]="p.value">{{ p.label }}</option>
-            </select>
-            <i class="bi bi-chevron-down provider-select-chevron"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="steps-row-sep"><i class="bi bi-chevron-right"></i></div>
-
-      <!-- Step 2: Model (locked until agent chosen) -->
-      <div class="step-col" [class.step-col--locked]="!selectedAgent">
-        <div class="model-picker-label" [class.model-picker-label--inactive]="!selectedAgent">
-          <span class="step-badge" [class.step-badge--inactive]="!selectedAgent">2</span>
-          <span>Model</span>
-          <span *ngIf="!selectedAgent" class="step-hint">← pick agent first</span>
-        </div>
-        <div class="model-picker-dropdown">
-          <div class="provider-select-wrap">
-            <select
-              class="provider-select"
-              [(ngModel)]="selectedModel"
-              (ngModelChange)="onModelSelect($event)"
-              [disabled]="!selectedAgent"
-            >
-              <option [ngValue]="null" disabled>Select model…</option>
-              <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
-            </select>
-            <i class="bi bi-chevron-down provider-select-chevron"></i>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Step 3: App type cards (locked until both step 1 + 2 done) -->
-    <div class="picker-step-label">
-      <span class="step-badge" [class.step-badge--inactive]="!stepsDone">3</span>
-      <span [class.step-label--inactive]="!stepsDone">Select project type</span>
-      <span *ngIf="!selectedAgent" class="step-hint">← Select an agent first</span>
-      <span *ngIf="selectedAgent && !selectedModel" class="step-hint">← Select a model first</span>
-    </div>
-    <div class="picker-cards" [class.cards-locked]="!stepsDone">
+    <!-- App type cards (no longer locked behind agent/model selection) -->
+    <div class="picker-cards">
       <div
         *ngFor="let option of appTypeOptions"
         class="picker-card"
-        [class.picker-card--locked]="!stepsDone"
         (click)="selectAppType(option.value)"
       >
         <div class="picker-card-icon">
@@ -104,7 +73,6 @@
         </div>
         <div class="picker-card-label">{{ option.label }}</div>
         <div class="picker-card-desc">{{ option.description }}</div>
-        <div *ngIf="!stepsDone" class="picker-card-lock"><i class="bi bi-lock-fill"></i></div>
       </div>
     </div>
   </div>
@@ -138,10 +106,9 @@
     </div>
 
     <div class="vibe-panels">
-      <div class="panel left" [style.flex]="'0 0 ' + leftPanelWidth + '%'">
+      <div class="panel left">
         <app-vibe-left-panel [modelLabel]="selectedAgentLabel"></app-vibe-left-panel>
       </div>
-      <div class="panel-divider" (mousedown)="onDividerMouseDown($event)"></div>
       <div class="panel right">
         <app-vibe-right-panel [pipelineCname]="registeredCname"></app-vibe-right-panel>
       </div>
