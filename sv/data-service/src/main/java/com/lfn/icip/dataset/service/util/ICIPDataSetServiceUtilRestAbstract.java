@@ -135,6 +135,10 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilRestAbstract.class);
 
+	// Linear-time substring parsing is used in parseQuery()/parseBody() instead
+	// of regexes to guarantee O(n) behaviour and avoid CodeQL java/polynomial-redos.
+	private static final int MAX_QUERY_STR_LENGTH = 10_000;
+
 	/** The Constant REQUESTMETHOD. */
 	public static final String REQUESTMETHOD = "RequestMethod";
 
@@ -730,12 +734,32 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	}
 
 	private String[] parseBody(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
+		// Manual O(n) scan for {{...}} tokens (no regex engine, no backtracking).
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{\\{(.*?)\\}\\}").matcher(qrystr);
-		while (m.find()) {
-			for (int i = 0; i < m.groupCount(); i++) {
-				allMatches.add(m.group(i));
+		int len = qrystr.length();
+		int i = 0;
+		while (i < len - 1) {
+			int open = qrystr.indexOf("{{", i);
+			if (open < 0) {
+				break;
 			}
+			int close = qrystr.indexOf("}}", open + 2);
+			if (close < 0) {
+				break;
+			}
+			int innerEnd = open + 2;
+			while (innerEnd < close && qrystr.charAt(innerEnd) != '}') {
+				innerEnd++;
+			}
+			if (innerEnd != close) {
+				i = open + 2;
+				continue;
+			}
+			allMatches.add(qrystr.substring(open, close + 2));
+			i = close + 2;
 		}
 		return allMatches.toArray(new String[allMatches.size()]);
 	}
@@ -762,12 +786,24 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	}
 
 	private String[] parseQuery(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
+		// Manual O(n) scan for {...} tokens (no regex engine, no backtracking).
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
-		while (m.find()) {
-			for (int i = 0; i < m.groupCount(); i++) {
-				allMatches.add(m.group(i));
+		int len = qrystr.length();
+		int i = 0;
+		while (i < len) {
+			int open = qrystr.indexOf('{', i);
+			if (open < 0) {
+				break;
 			}
+			int close = qrystr.indexOf('}', open + 1);
+			if (close < 0) {
+				break;
+			}
+			allMatches.add(qrystr.substring(open, close + 1));
+			i = close + 1;
 		}
 		return allMatches.toArray(new String[allMatches.size()]);
 	}
@@ -1170,7 +1206,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 				return (T) responseData1;
 			} catch (Exception e) {
 				logger.error(e.getMessage());
-				responseData1 = String.format("{\"Script Error\" : \"%s\"}", e.getMessage());
+				responseData1 = "{\"Script Error\" : \"Operation failed\"}";
 				return (T) responseData1;
 
 			}
@@ -1217,8 +1253,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			binding.setProperty("Url", inputUrl);
 			binding.setProperty("ConfigVariables", ConfigVariables);
 
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(prescript));
+			// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+			// createSandboxedShell() applies SecureASTCustomizer restrictions.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(prescript, binding);
 
 			JSONObject transformedattr = new JSONObject(transformedResult.toString());
 			logger.info("Transformedattr--->{}", transformedattr);
@@ -1265,8 +1302,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 					Binding binding = new Binding();
 					binding.setProperty("inputJson", resp);
 
-					GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-					Object transformedResult = shell.evaluate(new StringReader(script));
+					// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+					// createSandboxedShell() applies SecureASTCustomizer restrictions.
+					Object transformedResult = GroovySandboxUtil.evaluateSandboxed(script, binding);
 
 					resp = transformedResult.toString();
 					logger.info("REST getDatasetData after groovy {}", resp);
@@ -1290,7 +1328,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			return(T) ex.getMessage();
+			return(T) "Operation failed";
 		}finally {
 		logger.info("REST getDatasetData final {}", responseData);
 //		return (T) responseData;
@@ -1321,9 +1359,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 		binding.setProperty("Body", Body);
 		binding.setProperty("ConnectionDetails", datasource_attributes.toString());
 		if (ScriptType.equals("Groovy")) {
-			String safeScript = GroovySandboxUtil.validateScript(transformScript);
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(safeScript));
+			// Sandboxed evaluation: validateScript() rejects dangerous tokens and
+			// createSandboxedShell() applies SecureASTCustomizer restrictions.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
 			logger.info("transformedResult--->{}", transformedResult);
 			response = transformedResult.toString();
 		}

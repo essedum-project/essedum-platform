@@ -65,6 +65,7 @@ import lombok.extern.log4j.Log4j2;
 
 // TODO: Auto-generated Javadoc
 //
+
 /**
  * The Class ICIPJobServiceUtilNativeScript.
  *
@@ -79,131 +80,131 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil implements IICIPJobServiceUtil {
 
-	/**
-	 * Instantiates a new ICIP job service util native script.
-	 */
-	public ICIPJobServiceUtilNativeScript() {
-		super();
-	}
+    /**
+     * Instantiates a new ICIP job service util native script.
+     */
+    public ICIPJobServiceUtilNativeScript() {
+        super();
+    }
 
-	/** The pipeline service. */
-	@Autowired
-	private ICIPPipelineService pipelineService;
+    /** The pipeline service. */
+    @Autowired
+    private ICIPPipelineService pipelineService;
 
-	/** The datasource service. */
-	@Autowired
-	private ICIPDatasourceService datasourceService;
+    /** The datasource service. */
+    @Autowired
+    private ICIPDatasourceService datasourceService;
 
-	/** The dataset service. */
-	@Autowired
-	private ICIPDatasetService datasetService;
+    /** The dataset service. */
+    @Autowired
+    private ICIPDatasetService datasetService;
 
-	/** The schema registry service. */
-	@Autowired
-	private ICIPSchemaRegistryService schemaRegistryService;
+    /** The schema registry service. */
+    @Autowired
+    private ICIPSchemaRegistryService schemaRegistryService;
 
-	/** The i CIP file service. */
-	@Autowired
-	private ICIPFileService iCIPFileService;
+    /** The i CIP file service. */
+    @Autowired
+    private ICIPFileService iCIPFileService;
 
-	/** The resolver. */
-	@Autowired
-	private IAIResolverAspect resolver;
+    /** The resolver. */
+    @Autowired
+    private IAIResolverAspect resolver;
 
-	/** The nativescript python command. */
-	@EssedumProperty("icip.pipeline.nativescript.python.command")
-	private String nativescriptPythonCommand;
+    /** The nativescript python command. */
+    @EssedumProperty("icip.pipeline.nativescript.python.command")
+    private String nativescriptPythonCommand;
 
-	/** The nativescript python 2 command. */
-	@EssedumProperty("icip.pipeline.nativescript.python2.command")
-	private String nativescriptPython2Command;
+    /** The nativescript python 2 command. */
+    @EssedumProperty("icip.pipeline.nativescript.python2.command")
+    private String nativescriptPython2Command;
 
-	/** The nativescript javascript command. */
-	@EssedumProperty("icip.pipeline.nativescript.javascript.command")
-	private String nativescriptJavascriptCommand;
+    /** The nativescript javascript command. */
+    @EssedumProperty("icip.pipeline.nativescript.javascript.command")
+    private String nativescriptJavascriptCommand;
 
-	/** The nativescript python V 2 command. */
-	@EssedumProperty("icip.pipeline.nativescript.v2.python.command")
-	private String nativescriptPythonV2Command;
+    /** The nativescript python V 2 command. */
+    @EssedumProperty("icip.pipeline.nativescript.v2.python.command")
+    private String nativescriptPythonV2Command;
 
-	/** The nativescript python 2 V 2 command. */
-	@EssedumProperty("icip.pipeline.nativescript.v2.python2.command")
-	private String nativescriptPython2V2Command;
+    /** The nativescript python 2 V 2 command. */
+    @EssedumProperty("icip.pipeline.nativescript.v2.python2.command")
+    private String nativescriptPython2V2Command;
 
-	/** The nativescript javascript V 2 command. */
-	@EssedumProperty("icip.pipeline.nativescript.v2.javascript.command")
-	private String nativescriptJavascriptV2Command;
+    /** The nativescript javascript V 2 command. */
+    @EssedumProperty("icip.pipeline.nativescript.v2.javascript.command")
+    private String nativescriptJavascriptV2Command;
 
-	/** The Constant INVALID_TYPE. */
-	private static final String INVALID_TYPE = "Invalid Type";
+    /** The Constant INVALID_TYPE. */
+    private static final String INVALID_TYPE = "Invalid Type";
 
-	/**
-	 * Gets the command.
-	 *
-	 * @param jobDetails the job details
-	 * @return the command
-	 * @throws EssedumException the essedum exception
-	 * @throws GitAPIException
-	 * @throws TransportException
-	 * @throws InvalidRemoteException
-	 */
-	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
-		String cname = jobDetails.getCname();
-		String org = jobDetails.getOrg();
-		String params = jobDetails.getParams();
-		String cmdStr = null;
-		log.info("running native script");
-		String data = pipelineService.getJson(cname, org);
+    /**
+     * Gets the command.
+     *
+     * @param jobDetails the job details
+     * @return the command
+     * @throws EssedumException the essedum exception
+     * @throws GitAPIException
+     * @throws TransportException
+     * @throws InvalidRemoteException
+     */
+    @Override
+    public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
+        String cname = jobDetails.getCname();
+        String org = jobDetails.getOrg();
+        String params = jobDetails.getParams();
+        String cmdStr = null;
+        log.info("running native script");
+        String data = pipelineService.getJson(cname, org);
 
-		JsonObject attrObject;
-		try {
-			attrObject = gson.fromJson(data, JsonElement.class).getAsJsonObject().get("elements").getAsJsonArray()
-					.get(0).getAsJsonObject().get("attributes").getAsJsonObject();
-		} catch (Exception ex) {
-			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
-					+ ex.getMessage();
-			log.error(msg, ex);
-			throw new EssedumException(msg, ex);
-		}
+        JsonObject attrObject;
+        try {
+            attrObject = gson.fromJson(data, JsonElement.class).getAsJsonObject().get("elements").getAsJsonArray()
+                    .get(0).getAsJsonObject().get("attributes").getAsJsonObject();
+        } catch (Exception ex) {
+            String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
+                    + ex.getMessage();
+            log.error(msg, ex);
+            throw new EssedumException(msg, ex);
+        }
 
-		String tmpfileType;
-		try {
-			tmpfileType = attrObject.get("filetype").getAsString().toLowerCase().trim();
-		} catch (Exception ex) {
-			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-			log.error(msg, ex);
-			throw new EssedumException(msg, ex);
-		}
+        String tmpfileType;
+        try {
+            tmpfileType = attrObject.get("filetype").getAsString().toLowerCase().trim();
+        } catch (Exception ex) {
+            String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+            log.error(msg, ex);
+            throw new EssedumException(msg, ex);
+        }
 
 		String[] separator = new String[] { "" };
 		switch (tmpfileType) {
-			case IAIJobConstants.PYTHON2:
-			case IAIJobConstants.PYTHON3:
-			case IAIJobConstants.JYTHON_LANG:
-				separator[0] = ":";
-				break;
-			case "javascript":
-				separator[0] = "=";
-				break;
-			default:
-				log.error(INVALID_TYPE);
+		case IAIJobConstants.PYTHON2:
+		case IAIJobConstants.PYTHON3:
+		case IAIJobConstants.JYTHON_LANG:
+			separator[0] = ":";
+			break;
+		case "javascript":
+			separator[0] = "=";
+			break;
+		default:
+			log.error(INVALID_TYPE);
 		}
 		StringBuilder paths = new StringBuilder();
 
-		JsonArray files;
-		try {
-			files = attrObject.get("files").getAsJsonArray();
-		} catch (Exception ex) {
-			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-			log.error(msg, ex);
-			throw new EssedumException(msg, ex);
-		}
+        JsonArray files;
+        try {
+            files = attrObject.get("files").getAsJsonArray();
+        } catch (Exception ex) {
+            String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+            log.error(msg, ex);
+            throw new EssedumException(msg, ex);
+        }
 
-		for (JsonElement file : files) {
-			String filePathString = file.getAsString();
-			Path path;
-			InputStream is = null;
+        for (JsonElement file : files) {
+            String filePathString = file.getAsString();
+            Path path;
+            InputStream is = null;
 
 			// ✅ Remove brackets and trim spaces
 			filePathString = filePathString.replace("[", "").replace("]", "").trim();
@@ -222,27 +223,27 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 
 			try {
 
-				is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
-				path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
-			} catch (IOException | SQLException ex) {
-				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
-						+ ex.getMessage();
-				log.error(msg, ex);
-				throw new EssedumException(msg, ex);
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (IOException ex) {
-						log.error(ex.getMessage(), ex);
-					}
-				}
-			}
-			paths.append(path.toAbsolutePath());
-			paths.append(",");
-		}
-		if (paths.length() > 0)
-			paths.replace(paths.length() - 1, paths.length(), "");
+                is = iCIPFileService.getNativeCodeInputStream(cname, org, pyFileName);
+                path = iCIPFileService.getFileInServer(is, pyFileName, FileConstants.NATIVE_CODE);
+            } catch (IOException | SQLException ex) {
+                String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
+                        + ex.getMessage();
+                log.error(msg, ex);
+                throw new EssedumException(msg, ex);
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex) {
+                        log.error(ex.getMessage(), ex);
+                    }
+                }
+            }
+            paths.append(path.toAbsolutePath());
+            paths.append(",");
+        }
+        if (paths.length() > 0)
+            paths.replace(paths.length() - 1, paths.length(), "");
 
 		Map<String, String> argumentBuilder = new HashMap<>();
 		JsonArray argumentArray = getLatestArgument(attrObject, params, gson);
@@ -254,71 +255,71 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			if (element.has("type") && !element.get("type").getAsString().equals("Text")) {
 				value = tmpValue.getAsString();
 				switch (element.get("type").getAsString()) {
-					case "Datasource":
-						ICIPDatasource datasource = datasourceService.getDatasource(value, org);
-						JsonObject connDetails;
-						try {
-							connDetails = gson.fromJson(datasource.getConnectionDetails(), JsonElement.class)
-									.getAsJsonObject();
-						} catch (Exception ex) {
-							String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
-									+ ex.getMessage();
-							log.error(msg, ex);
-							throw new EssedumException(msg, ex);
-						}
-						connDetails.addProperty("salt", datasource.getSalt());
-						value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-								StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
-						break;
-					case "Dataset":
-						JsonParser parser = new JsonParser();
-						ICIPDataset dataset = datasetService.getDataset(value, org);
-						JsonElement e;
-						try {
-							e = parser.parse(gson.toJson(dataset));
-						} catch (Exception ex) {
-							String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
-									+ ex.getMessage();
-							log.error(msg, ex);
-							throw new EssedumException(msg, ex);
-						}
-						for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
-							if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
-								JsonObject obj = schemaentry.getValue().getAsJsonObject();
-								ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
-								try {
-									String schemaValue = obj.get("schemavalue").getAsString();
-									JsonElement schemaElem = parser.parse(schemaValue);
-									schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
-									schemaDetails.setSchemaId(obj.get("name").getAsString());
-									e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
-									e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
-											parser.parse(gson.toJson(schemaDetails)));
-								} catch (Exception ex) {
-									String msg = "Error in getting schema from dataset : "
-											+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-									log.error(msg, ex);
-									throw new EssedumException(msg, ex);
-								}
-								break;
+				case "Datasource":
+					ICIPDatasource datasource = datasourceService.getDatasource(value, org);
+					JsonObject connDetails;
+					try {
+						connDetails = gson.fromJson(datasource.getConnectionDetails(), JsonElement.class)
+								.getAsJsonObject();
+					} catch (Exception ex) {
+						String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
+								+ ex.getMessage();
+						log.error(msg, ex);
+						throw new EssedumException(msg, ex);
+					}
+					connDetails.addProperty("salt", datasource.getSalt());
+					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
+							StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
+					break;
+				case "Dataset":
+					JsonParser parser = new JsonParser();
+					ICIPDataset dataset = datasetService.getDataset(value, org);
+					JsonElement e;
+					try {
+						e = parser.parse(gson.toJson(dataset));
+					} catch (Exception ex) {
+						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
+								+ ex.getMessage();
+						log.error(msg, ex);
+						throw new EssedumException(msg, ex);
+					}
+					for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
+						if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
+							JsonObject obj = schemaentry.getValue().getAsJsonObject();
+							ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
+							try {
+								String schemaValue = obj.get("schemavalue").getAsString();
+								JsonElement schemaElem = parser.parse(schemaValue);
+								schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
+								schemaDetails.setSchemaId(obj.get("name").getAsString());
+								e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
+								e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
+										parser.parse(gson.toJson(schemaDetails)));
+							} catch (Exception ex) {
+								String msg = "Error in getting schema from dataset : "
+										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+								log.error(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
+							break;
 						}
+					}
+					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
+							StringEscapeUtils.escapeJson(gson.toJson(e)), "\"");
+					break;
+				case "Schema":
+					try {
 						value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-								StringEscapeUtils.escapeJson(gson.toJson(e)), "\"");
-						break;
-					case "Schema":
-						try {
-							value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
-									StringEscapeUtils.escapeJson(schemaRegistryService.fetchSchemaValue(value, org)), "\"");
-						} catch (Exception ex) {
-							String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
-									+ ex.getMessage();
-							log.error(msg, ex);
-							throw new EssedumException(msg, ex);
-						}
-						break;
-					default:
-						log.error(INVALID_TYPE);
+								StringEscapeUtils.escapeJson(schemaRegistryService.fetchSchemaValue(value, org)), "\"");
+					} catch (Exception ex) {
+						String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
+								+ ex.getMessage();
+						log.error(msg, ex);
+						throw new EssedumException(msg, ex);
+					}
+					break;
+				default:
+					log.error(INVALID_TYPE);
 				}
 			}
 			argumentBuilder.put(key, resolver.resolveDatasetData(value, org));
@@ -345,50 +346,26 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			arguments = args.toString();
 		}
 		switch (tmpfileType) {
-			case IAIJobConstants.PYTHON2:
-				cmdStr = resolveCommand(
-						stripPythonPathPlaceholder(
-								version.equalsIgnoreCase("v2") ? nativescriptPython2V2Command : nativescriptPython2Command),
-						new String[] { paths.toString(), arguments });
-				break;
-			case IAIJobConstants.PYTHON3:
-			case IAIJobConstants.JYTHON_LANG:
-				cmdStr = resolveCommand(
-						stripPythonPathPlaceholder(
-								version.equalsIgnoreCase("v2") ? nativescriptPythonV2Command : nativescriptPythonCommand),
-						new String[] { paths.toString(), arguments });
-				break;
-			case "javascript":
-				cmdStr = resolveCommand(
-						stripPythonPathPlaceholder(version.equalsIgnoreCase("v2") ? nativescriptJavascriptV2Command
-								: nativescriptJavascriptCommand),
-						new String[] { paths.toString(), arguments });
-				break;
-			default:
-				log.error(INVALID_TYPE);
+		case IAIJobConstants.PYTHON2:
+			cmdStr = resolveCommand(
+					version.equalsIgnoreCase("v2") ? nativescriptPython2V2Command : nativescriptPython2Command,
+					new String[] { paths.toString(), arguments });
+			break;
+		case IAIJobConstants.PYTHON3:
+		case IAIJobConstants.JYTHON_LANG:
+			cmdStr = resolveCommand(
+					version.equalsIgnoreCase("v2") ? nativescriptPythonV2Command : nativescriptPythonCommand,
+					new String[] { paths.toString(), arguments });
+			break;
+		case "javascript":
+			cmdStr = resolveCommand(
+					version.equalsIgnoreCase("v2") ? nativescriptJavascriptV2Command : nativescriptJavascriptCommand,
+					new String[] { paths.toString(), arguments });
+			break;
+		default:
+			log.error(INVALID_TYPE);
 		}
 		return cmdStr;
-	}
-
-	/**
-	 * The USM constant {@code icip.pythonpath} is referenced by the various
-	 * {@code icip.pipeline.nativescript.*.command} templates but is not seeded in
-	 * the USM database. As a result {@code @EssedumProperty} leaves the literal
-	 * {@code @!icip.pythonpath!@} placeholder in the command string. The downstream
-	 * {@link com.lfn.icip.icipwebeditor.job.service.util.ICIPCommonJobServiceUtil#resolveCommand}
-	 * treats {@code @} as a "not required" marker and consumes those characters
-	 * before substituting the {@code #} placeholders, producing a broken command
-	 * like {@code !icip.pythonpath! # #}. Replace the unresolved placeholder with
-	 * the literal {@code python} interpreter so the {@code #} substitution can
-	 * proceed normally.
-	 */
-	private String stripPythonPathPlaceholder(String cmd) {
-		if (cmd == null) {
-			return null;
-		}
-		return cmd
-				.replace("@!icip.pythonpath!@", "python")
-				.replace("!icip.pythonpath!", "python");
 	}
 
 	/**
@@ -402,14 +379,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 */
 	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
-			// Wizard-created pipelines (TrainingPipeline / DataPipeline) do not include
-			// an "arguments" array in their element attributes. Treat a missing or
-			// non-array "arguments" entry as an empty argument list rather than NPE.
-			JsonElement argumentsElement = binary.get("arguments");
-			if (argumentsElement == null || argumentsElement.isJsonNull() || !argumentsElement.isJsonArray()) {
-				return new JsonArray();
-			}
-			JsonArray binaryArray = argumentsElement.getAsJsonArray();
+			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
 				JsonObject paramsObject = gson.fromJson(params, JsonElement.class).getAsJsonObject();
 				for (JsonElement binaryElement : binaryArray) {
@@ -442,30 +412,30 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		}
 	}
 
-	/**
-	 * Creates the native yamlscript.
-	 *
-	 * @param data the data
-	 * @return the string builder
-	 * @throws EssedumException the essedum exception
-	 */
-	private StringBuilder createNativeYamlscript(Map<String, String> data) throws EssedumException {
-		try {
-			log.info("creating native yaml script");
-			Yaml yaml = new Yaml();
-			return new StringBuilder().append(yaml.dumpAsMap(data));
-		} catch (Exception ex) {
-			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-			log.error(msg, ex);
-			throw new EssedumException(msg, ex);
-		}
-	}
+    /**
+     * Creates the native yamlscript.
+     *
+     * @param data the data
+     * @return the string builder
+     * @throws EssedumException the essedum exception
+     */
+    private StringBuilder createNativeYamlscript(Map<String, String> data) throws EssedumException {
+        try {
+            log.info("creating native yaml script");
+            Yaml yaml = new Yaml();
+            return new StringBuilder().append(yaml.dumpAsMap(data));
+        } catch (Exception ex) {
+            String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+            log.error(msg, ex);
+            throw new EssedumException(msg, ex);
+        }
+    }
 
-	@Override
-	public Path getFilePath(ICIPNativeJobDetails jobDetails) throws InvalidRemoteException, TransportException, GitAPIException {
-		String cname = jobDetails.getCname();
-		String org = jobDetails.getOrg();
-		String data = pipelineService.getJson(cname, org);
+    @Override
+    public Path getFilePath(ICIPNativeJobDetails jobDetails) throws InvalidRemoteException, TransportException, GitAPIException {
+        String cname = jobDetails.getCname();
+        String org = jobDetails.getOrg();
+        String data = pipelineService.getJson(cname, org);
 
 		JsonObject attrObject = null;
 		try {
@@ -479,14 +449,14 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		}
 		StringBuilder paths = new StringBuilder();
 
-		JsonArray files = null;
-		try {
-			files = attrObject.get("files").getAsJsonArray();
-		} catch (Exception ex) {
-			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-			log.error(msg, ex);
+        JsonArray files = null;
+        try {
+            files = attrObject.get("files").getAsJsonArray();
+        } catch (Exception ex) {
+            String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
+            log.error(msg, ex);
 
-		}
+        }
 
 		for (JsonElement file : files) {
 			String filePathString = file.getAsString();

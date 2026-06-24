@@ -1,0 +1,8 @@
+name: essedum/essedum-sanitizers
+version: 0.0.1
+library: true
+extensionTargets:
+  codeql/java-all: "*"
+dataExtensions:
+  - models/**/*.yml
+

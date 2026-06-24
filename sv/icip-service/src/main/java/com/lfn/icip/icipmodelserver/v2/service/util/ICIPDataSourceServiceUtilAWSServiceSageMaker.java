@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -132,13 +133,7 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 
 
             // Disable SSL certificate validation
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-                    }
-            };
+            TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());

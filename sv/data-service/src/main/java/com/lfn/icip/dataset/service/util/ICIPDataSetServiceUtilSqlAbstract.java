@@ -302,7 +302,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					JSONObject obj1 = new JSONObject(obj.toString());
 					// if (decrypt) {
 					// 	obj1 = checkIfDecrypted(obj1, dataset);
-					// 	obj = new JsonParser().parse(obj1.toString()).getAsJsonObject();
+					// 	obj = JsonParser.parseString(obj1.toString()).getAsJsonObject();
 					// }
 					return obj;
 				}
@@ -563,7 +563,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					}
 
 				} catch (SQLException e) {
-					resp.setResponse("Error: " + e.getMessage());
+					resp.setResponse("Error: Operation failed");
 					logger.error(marker, "Error while inserting entry in {}", tableName, e);
 				}
 			} else {
@@ -572,7 +572,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						dataset.getName());
 			}
 		} catch (Exception ex) {
-			resp.setResponse("Error: " + ex.getMessage());
+			resp.setResponse("Error: Operation failed");
 			logger.error(marker, "Error while saving {} dataset entry: ", dataset.getName(), ex);
 		}
 		return resp;
@@ -651,7 +651,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					}
 
 				} catch (SQLException e) {
-					resp.setResponse("Error: " + e.getMessage());
+					resp.setResponse("Error: Operation failed");
 					logger.error("Error while updating {} entry in {} : {}", entryObj.get(uniqueIdentifier), tableName,
 							e);
 				}
@@ -661,7 +661,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						+ " dataset entry: Both table name and unique identifier are required for updating entry");
 			}
 		} catch (Exception ex) {
-			resp.setResponse("Error: " + ex.getMessage());
+			resp.setResponse("Error: Operation failed");
 			logger.error("Error while saving " + dataset.getName() + " dataset entry: " + ex);
 		}
 		return resp;
@@ -803,7 +803,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					}
 
 				} catch (SQLException e) {
-					resp.setResponse("Error: " + e.getMessage());
+					resp.setResponse("Error: Operation failed");
 					logger.error("Error while updating {} entry in {} : {}",businessKeyId,
 							tableName, e);
 				}
@@ -813,7 +813,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						+ " dataset entry: Both table name and unique identifier are required for updating entry");
 			}
 		} catch (Exception ex) {
-			resp.setResponse("Error: " + ex.getMessage());
+			resp.setResponse("Error: Operation failed");
 			logger.error("Error while saving " + dataset.getName() + " dataset entry: " + ex);
 		}
 		
@@ -849,7 +849,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					logger.info("{} entry successfully updated in table {}", businessKeyId, tableName);
 
 				} catch (SQLException e) {
-					resp.setResponse("Error: " + e.getMessage());
+					resp.setResponse("Error: Operation failed");
 					logger.error("Error while updating {} entry in {} : {}", businessKeyId, tableName, e);
 				}
 			} else {
@@ -858,7 +858,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						+ " dataset entry: Both table name and unique identifier are required for updating entry");
 			}
 		} catch (Exception ex) {
-			resp.setResponse("Error: " + ex.getMessage());
+			resp.setResponse("Error: Operation failed");
 			logger.error("Error while saving " + dataset.getName() + " dataset entry: " + ex);
 		}
 		return resp;
@@ -2067,7 +2067,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						}
 					} catch (NumberFormatException | SQLException e) {
 						logger.error("Error while applying tag: ", e);
-						resStr = "Error: " + e.getMessage();
+						resStr = "Error: Operation failed";
 					}
 				} else if (dataJobj.has(TICKETIDLIST) && dataJobj.get(TICKETIDLIST) != JSONObject.NULL) {
 					JSONObject ticketList = new JSONObject(dataJobj.get(TICKETIDLIST).toString());
@@ -2161,7 +2161,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						logger.info("Entry successfully deleted from table " + tableName);
 					}
 				} catch (SQLException e) {
-					resp = "Error: " + e.getMessage();
+					resp = "Error: Operation failed";
 					logger.error("Error while deleting entry in " + tableName + " ");
 				}
 
@@ -2171,7 +2171,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						+ " dataset entry: Table name and Unique identifier is required for deleting entry");
 			}
 		} catch (Exception ex) {
-			resp = "Error: " + ex.getMessage();
+			resp = "Error: Operation failed";
 			logger.error("Error while deleting " + dataset.getName() + " dataset entry: " + ex);
 		}
 		return resp;
@@ -2245,7 +2245,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						}
 
 					} catch (SQLException e) {
-						resp.setResponse("Error: " + e.getMessage());
+						resp.setResponse("Error: Operation failed");
 						logger.error("Error while updating %s entry in %s,%s", entryObj.getString("BID"), tableName, e);
 					}
 				} else {
@@ -2260,7 +2260,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						dataset.getName());
 			}
 		} catch (Exception ex) {
-			resp.setResponse("Error: " + ex.getMessage());
+			resp.setResponse("Error: Operation failed");
 			logger.error("Error while saving %s dataset entry: %s ", dataset.getName(), ex);
 		}
 		return resp;
@@ -2431,7 +2431,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 					logger.info(entryObj.getString(uniqueIdentifier) + " row sent for approval " + tableName);
 
 				} catch (SQLException e) {
-					resp = "Error: " + e.getMessage();
+					resp = "Error: Operation failed";
 					logger.error("Error while updating " + entryObj.getString(uniqueIdentifier) + " entry in "
 							+ tableName + " " + e);
 				}
@@ -2441,7 +2441,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 						+ " dataset entry: Both table name and unique identifier are required for updating entry");
 			}
 		} catch (Exception ex) {
-			resp = "Error: " + ex.getMessage();
+			resp = "Error: Operation failed";
 			logger.error("Error while saving " + dataset.getName() + " dataset entry: " + ex);
 		}
 		return resp;
@@ -2528,7 +2528,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 		} catch (JSONException | SQLException e) {
 			logger.error("Error: Error in fetching row extras " + e);
 			return new JSONArray()
-					.put(new JSONObject().put("Error:", "Error in fetching row extras " + e.getMessage()));
+					.put(new JSONObject().put("Error:", "Error in fetching row extras"));
 		}
 	}
 
@@ -2853,10 +2853,10 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 				}
 
 			} catch (NoSuchAlgorithmException e) {
-				resp.setResponse("Error: " + e.getMessage());
+				resp.setResponse("Error: Operation failed");
 				logger.error(marker, "Error while inserting entries in {}", tableName, e);
 			} catch (SQLException e) {
-				resp.setResponse("Error: " + e.getMessage());
+				resp.setResponse("Error: Operation failed");
 				logger.error(marker, "Error while inserting entries in {}", tableName, e);
 			}
 		}
@@ -2902,7 +2902,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 		} catch (JSONException | SQLException e) {
 			logger.error("Error: Error in fetching row extras " + e);
 			return new JSONArray()
-					.put(new JSONObject().put("Error:", "Error in fetching row extras " + e.getMessage()));
+					.put(new JSONObject().put("Error:", "Error in fetching row extras"));
 		}
 	}
 }

@@ -40,6 +40,7 @@ import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.properties.HttpClientUtil;
 import com.lfn.icip.dataset.properties.ProxyProperties;
 import com.lfn.icip.dataset.properties.ProxyProperties.HttpProxyConfiguration;
+// SsrfProtectionUtil is in the same package (com.lfn.icip.dataset.util)
 
 
 /**
@@ -57,6 +58,32 @@ public final class ICIPRestPluginUtils {
 	/** The Constant AUTHURL. */
 	private static final String AUTHURL = "authUrl";
     
+	/**
+	 * Validates a URI against SSRF (scheme, host, internal/loopback IP ranges)
+	 * and returns a URI that is freshly reconstructed from the validated
+	 * scheme/host/port. Callers must use the returned value when building outbound
+	 * HTTP requests so that static-analysis taint flow visibly passes through this
+	 * sanitisation barrier.
+	 *
+	 * @param uri the URI to validate (must not be null)
+	 * @return a sanitised URI built from validated components
+	 */
+	private static URI validateUriForSsrf(URI uri) {
+		if (uri == null) {
+			throw new IllegalArgumentException("URI must not be null");
+		}
+		try {
+			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(uri.toString());
+			// Rebuild the URI strictly from the validated URL's components so that
+			// the value flowing into HTTP sinks is no longer the raw input.
+			return new URI(safe.getProtocol(), null, safe.getHost(), safe.getPort(),
+					safe.getPath(), safe.getQuery(), null);
+		} catch (java.net.MalformedURLException | URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+		}
+	}
+
+
     /**
      * Instantiates a new ICIP rest plugin utils.
      */
@@ -213,6 +240,7 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
+		validateUriForSsrf(uri);
 		HttpGet httpget = new HttpGet(uri.toString());
 		
 		if(!Strings.isNullOrEmpty(authToken))
@@ -262,7 +290,8 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost, String bodyType) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		HttpPost post = new HttpPost(uri.toString());
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPost post = new HttpPost(safeUri.toString());
 		String uploadDirecoryPath = null;
 		if(!Strings.isNullOrEmpty(authToken))
 			post.addHeader("Authorization", headerPrefix + " " + authToken);
@@ -362,8 +391,9 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		HttpPut httpput = new HttpPut(uri.toString());
-		
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPut httpput = new HttpPut(safeUri.toString());
+
 		if(!Strings.isNullOrEmpty(authToken))
 			httpput.addHeader("Authorization", headerPrefix + " " + authToken);
 		
@@ -414,7 +444,8 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		HttpDelete httpdelete = new HttpDelete(uri.toString());
+		URI safeUri = validateUriForSsrf(uri);
+		HttpDelete httpdelete = new HttpDelete(safeUri.toString());
 
 		if (!Strings.isNullOrEmpty(authToken))
 			httpdelete.addHeader("Authorization", headerPrefix + " " + authToken);
@@ -451,8 +482,9 @@ public final class ICIPRestPluginUtils {
 			String headers, String params, HttpClientContext context , CloseableHttpClient httpclient,
 			HttpHost targetHost) throws URISyntaxException, ClientProtocolException, IOException {
 		
-		HttpPatch post = new HttpPatch(uri.toString());
-		
+		URI safeUri = validateUriForSsrf(uri);
+		HttpPatch post = new HttpPatch(safeUri.toString());
+
 		if(!Strings.isNullOrEmpty(authToken))
 			post.addHeader("Authorization", headerPrefix + " " + authToken);
 		

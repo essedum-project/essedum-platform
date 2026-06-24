@@ -76,10 +76,15 @@ public class CommandSanitizer {
 	 * @throws IllegalArgumentException if the flag is not in the allowlist
 	 */
 	public static String validateShellFlag(String flag) {
-		if (flag == null || !ALLOWED_FLAGS.contains(flag)) {
-			throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
+		if (flag == null) {
+			throw new IllegalArgumentException("Shell flag not in allowlist: null");
 		}
-		return flag;
+		for (String allowed : ALLOWED_FLAGS) {
+			if (allowed.equals(flag)) {
+				return allowed;
+			}
+		}
+		throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
 	}
 
 	/**
@@ -145,6 +150,27 @@ public class CommandSanitizer {
 			}
 		}
 		return sanitized;
+	}
+
+	/**
+	 * Safely builds a {@link ProcessBuilder} for a 3-element shell command of the form
+	 * {@code [shell, flag, scriptArg]}. Single audited entry point for
+	 * {@code ProcessBuilder} construction; satisfies CodeQL CWE-78/CWE-88 by routing
+	 * all tainted input through {@link #validateExecutable}, {@link #validateShellFlag},
+	 * and {@link #sanitizeArgument} before reaching the sink.
+	 *
+	 * @param cmd a 3-element command array: {shell, flag, argument}
+	 * @return a {@link ProcessBuilder} initialized with the sanitized command tokens
+	 * @throws IllegalArgumentException if {@code cmd} is null, not of length 3, or fails any check
+	 */
+	public static ProcessBuilder buildProcessBuilder(String[] cmd) {
+		if (cmd == null || cmd.length != 3) {
+			throw new IllegalArgumentException("Command must be a 3-element array: {shell, flag, argument}");
+		}
+		String shell = validateExecutable(cmd[0]);
+		String flag = validateShellFlag(cmd[1]);
+		String arg = sanitizeArgument(cmd[2]);
+		return new ProcessBuilder(shell, flag, arg);
 	}
 }
 

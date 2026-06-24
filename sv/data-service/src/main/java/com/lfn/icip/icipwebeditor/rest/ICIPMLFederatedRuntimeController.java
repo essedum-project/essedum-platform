@@ -200,7 +200,7 @@ public class ICIPMLFederatedRuntimeController {
 			return new ResponseEntity<>("Successfully Released the port", HttpStatus.OK);
 		} catch (Exception e) {
 			e.getMessage();
-			return new ResponseEntity<>("Error" + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Error releasing port", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}

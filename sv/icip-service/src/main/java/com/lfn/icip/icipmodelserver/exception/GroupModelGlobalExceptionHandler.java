@@ -51,7 +51,7 @@ public class GroupModelGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "Entity Not Found",
-                ex.getMessage(),
+                "Entity not found",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -71,7 +71,7 @@ public class GroupModelGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Group Model Operation Failed",
-                ex.getMessage(),
+                "Group model operation failed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -91,7 +91,7 @@ public class GroupModelGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Missing Required Parameter",
-                ex.getMessage(),
+                "A required request parameter is missing",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -197,7 +197,7 @@ public class GroupModelGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.METHOD_NOT_ALLOWED.value(),
                 "Method Not Allowed",
-                ex.getMessage(),
+                "HTTP method not allowed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -237,7 +237,7 @@ public class GroupModelGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid Argument",
-                ex.getMessage(),
+                "Invalid argument provided",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -271,11 +271,7 @@ public class GroupModelGlobalExceptionHandler {
      * Extract the root cause message from an exception.
      */
     private String getCauseMessage(Throwable ex) {
-        Throwable cause = ex;
-        while (cause.getCause() != null && cause.getCause() != cause) {
-            cause = cause.getCause();
-        }
-        return cause.getMessage();
+        return null;
     }
 }
 

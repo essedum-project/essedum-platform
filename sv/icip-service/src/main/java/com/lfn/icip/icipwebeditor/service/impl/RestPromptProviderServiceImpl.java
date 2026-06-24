@@ -3,7 +3,6 @@ package com.lfn.icip.icipwebeditor.service.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -55,7 +54,6 @@ import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import com.lfn.icip.dataset.util.GroovySandboxUtil;
 
 @Service("restchatmodel")
@@ -214,9 +212,11 @@ public class RestPromptProviderServiceImpl implements ICIPPromptChatModel {
 			Binding binding = new Binding();
 			binding.setProperty("response", resp);
 	
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(transformScript));
-	
+			// Route through the single audited sink in GroovySandboxUtil so static
+			// analysers (CodeQL Groovy injection / CWE-94) see a sanitisation barrier
+			// (validation + SecureASTCustomizer sandbox) immediately before evaluation.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
+
 			resp = transformedResult.toString();
 		}
 		return resp;

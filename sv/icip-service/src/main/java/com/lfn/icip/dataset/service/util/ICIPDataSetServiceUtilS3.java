@@ -40,6 +40,7 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -447,14 +448,22 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;
             if (!downloadTo.isEmpty()) {
-                Path p = Paths.get(downloadTo);
+                // Reject path-traversal sequences in the user-supplied downloadPath
+                // BEFORE any Files.* operation, so taint trackers (CodeQL
+                // java/path-injection) see a sanitiser between the request body
+                // and the Files.exists / createDirectories sinks.
+                Path p = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(downloadTo);
                 if (Files.exists(p) && Files.isDirectory(p)) {
-                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                    String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                            .toString();
+                    destination = p.resolve(safeName);
                 } else {
                     destination = p;
                     if (destination.getParent() != null) {
@@ -462,8 +471,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                     }
                 }
             } else {
-                destination = Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve(Paths.get(objectName).getFileName().toString());
+                String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                        .toString();
+                destination = Paths.get(System.getProperty("java.io.tmpdir")).resolve(safeName);
                 if (destination.getParent() != null) {
                     Files.createDirectories(destination.getParent());
                 }
@@ -501,11 +512,15 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
     // Helper to resolve a unique filename by appending _1, _2, etc. if needed
     private Path resolveUniqueFileNameGCP(Path destination) throws IOException {
-        if (!Files.exists(destination)) {
-            return destination;
+        // Re-validate the (user-influenced) destination path against traversal
+        // before any Files.* check, so CodeQL java/path-injection sees a barrier.
+        Path safeDestination = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(destination.toString());
+        if (!Files.exists(safeDestination)) {
+            return safeDestination;
         }
-        Path parent = destination.getParent();
-        String fileName = destination.getFileName().toString();
+        Path parent = safeDestination.getParent();
+        String fileName = safeDestination.getFileName().toString();
         String name;
         String ext = "";
         int dot = fileName.lastIndexOf('.');
@@ -519,7 +534,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         Path candidate;
         do {
             String newName = String.format("%s_%d%s", name, counter, ext);
-            candidate = (parent != null) ? parent.resolve(newName) : Paths.get(newName);
+            Path raw = (parent != null) ? parent.resolve(newName) : Paths.get(newName);
+            candidate = com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(raw.toString());
             counter++;
         } while (Files.exists(candidate));
         return candidate;
@@ -664,14 +681,22 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;
             if (!downloadTo.isEmpty()) {
-                Path p = Paths.get(downloadTo);
+                // Reject path-traversal sequences in the user-supplied downloadPath
+                // BEFORE any Files.* operation, so taint trackers (CodeQL
+                // java/path-injection) see a sanitiser between the request body
+                // and the Files.exists / createDirectories sinks.
+                Path p = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(downloadTo);
                 if (Files.exists(p) && Files.isDirectory(p)) {
-                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                    String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                            .toString();
+                    destination = p.resolve(safeName);
                 } else {
                     destination = p;
                     if (destination.getParent() != null) {
@@ -679,8 +704,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                     }
                 }
             } else {
-                destination = Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve(Paths.get(objectName).getFileName().toString());
+                String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                        .toString();
+                destination = Paths.get(System.getProperty("java.io.tmpdir")).resolve(safeName);
                 Files.createDirectories(destination.getParent());
             }
 
@@ -716,11 +743,16 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * If file exists, append _copy1, _copy2, etc. until unique name is found.
      */
     private Path resolveUniqueFileName(Path original) {
-        if (!Files.exists(original)) {
-            return original;
+        // Re-validate the (user-influenced) destination path against traversal
+        // before any Files.exists check, so CodeQL java/path-injection sees a
+        // sanitiser between the request data and these sinks.
+        Path safeOriginal = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(original.toString());
+        if (!Files.exists(safeOriginal)) {
+            return safeOriginal;
         }
 
-        String fileName = original.getFileName().toString();
+        String fileName = safeOriginal.getFileName().toString();
         String baseName;
         String extension = "";
 
@@ -733,11 +765,13 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         }
 
         int counter = 1;
-        Path parent = original.getParent();
+        Path parent = safeOriginal.getParent();
         Path newPath;
         do {
             String newFileName = baseName + "_copy" + counter + extension;
-            newPath = parent.resolve(newFileName);
+            Path raw = parent.resolve(newFileName);
+            newPath = com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(raw.toString());
             counter++;
         } while (Files.exists(newPath));
 
@@ -2174,27 +2208,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     }
 
     private TrustManager[] getTrustAllCerts() {
-        logger.info("certificateCheck value: {}", certificateCheck);
-        try {
-            // Always load the default trust store for proper certificate validation
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init((KeyStore) null);
-            // Get the trust managers from the factory
-            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-            // Ensure we have at least one X509TrustManager
-            for (TrustManager trustManager : trustManagers) {
-                if (trustManager instanceof X509TrustManager) {
-                    return new TrustManager[]{(X509TrustManager) trustManager};
-                }
-            }
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load trust store: {}", e.getMessage(), e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Failed to load trust manager algorithm: {}", e.getMessage(), e);
-        }
-        throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     private SSLContext getSslContext(TrustManager[] trustAllCerts) {

@@ -53,6 +53,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
@@ -1333,7 +1334,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			return formTemplateObj.formTemplateStr;
 		} catch (Exception e) {
 			logger.error("Error while generating form template " + e);
-			return "ERROR:Error while generating form template " + e.getMessage();
+			return "ERROR:Error while generating form template";
 		}
 	}
 
@@ -1772,45 +1773,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	}
 
 	private TrustManager[] getTrustAllCerts() {
-		logger.info("certificateCheck value: {}", certificateCheck);
-		if ("true".equalsIgnoreCase(certificateCheck)) {
-			try {
-				// Load the default trust store
-				TrustManagerFactory trustManagerFactory = TrustManagerFactory
-						.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-				trustManagerFactory.init((KeyStore) null);
-				// Get the trust managers from the factory
-				TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-				// Ensure we have at least one X509TrustManager
-				for (TrustManager trustManager : trustManagers) {
-					if (trustManager instanceof X509TrustManager) {
-						return new TrustManager[] { (X509TrustManager) trustManager };
-					}
-				}
-			} catch (KeyStoreException e) {
-				logger.info(e.getMessage());
-			} catch (NoSuchAlgorithmException e) {
-				logger.info(e.getMessage());
-			}
-			throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-		} else {
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-
-				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return new java.security.cert.X509Certificate[] {};
-				}
-			} };
-			return trustAllCerts;
-		}
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {
@@ -1893,7 +1856,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Operation failed");
 			return null;
 		}
 	}
@@ -2052,7 +2015,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Operation failed");
 			return null;
 		}
 	}

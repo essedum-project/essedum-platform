@@ -410,7 +410,7 @@ public class FileServerService {
 			return this.fileUploadHelper1(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, maxDepth, selectedRoles);
 		} catch (Exception e) {
 			Map<String,String> metadata = new LinkedHashMap<String,String>();
-			metadata.put("Error:", e.getMessage());
+			metadata.put("Error:", "Operation failed");
 			return metadata;
 		}
 		
@@ -424,7 +424,7 @@ public class FileServerService {
 			return this.fileUploadHelper(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, maxDepth);
 		} catch (Exception e) {
 			Map<String,String> metadata = new LinkedHashMap<String,String>();
-			metadata.put("Error:", e.getMessage());
+			metadata.put("Error:", "Operation failed");
 			return metadata;
 		}
 		
@@ -540,9 +540,31 @@ public class FileServerService {
 		Map<String,String> resDeleteUploadedTemp=new HashMap<>();
 		try {
 			String uploadFile=fileDetails.get("uploadFilePath");
-			Path path = Paths.get(uploadFile);
+			// Refuse to delete arbitrary filesystem paths supplied by the client.
+			// The uploadFilePath value MUST point inside the configured
+			// `folderPath`; PathValidationUtil canonicalises the path and asserts
+			// containment, providing the sanitisation barrier that taint trackers
+			// (e.g. CodeQL java/path-injection) recognise on the Files.deleteIfExists
+			// sinks below.
+			java.io.File baseDir = new java.io.File(folderPath).getCanonicalFile();
+			java.io.File requested = new java.io.File(uploadFile).getCanonicalFile();
+			if (!requested.getPath().startsWith(baseDir.getPath() + java.io.File.separator)
+					&& !requested.getPath().equals(baseDir.getPath())) {
+				throw new IOException("Refusing to delete path outside base directory: " + uploadFile);
+			}
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(requested.getPath());
 			Files.deleteIfExists(path);
-			Files.deleteIfExists(path.getParent());
+			java.nio.file.Path parent = path.getParent();
+			if (parent != null) {
+				Path safeParent = com.lfn.icip.dataset.util.PathValidationUtil
+						.validateAndGetPath(parent.toString());
+				// Only delete the parent if it is still under the base directory.
+				if (safeParent.toFile().getCanonicalPath()
+						.startsWith(baseDir.getPath() + java.io.File.separator)) {
+					Files.deleteIfExists(safeParent);
+				}
+			}
 		} catch (Exception e) {
 			resDeleteUploadedTemp.put("failed", "file not deleted or not found");
 			logger.error("Error because of:{} at class:{} and line:{}",e.getMessage(),e.getStackTrace()[0].getClass(),e.getStackTrace()[0].getLineNumber());
@@ -555,16 +577,23 @@ public class FileServerService {
 		return resDeleteUploadedTemp;
 	}
 	
-	public Map<String, String> saveFileChunk(MultipartFile file, ICIPChunkMetaData metadata, String organization,
+    public Map<String, String> saveFileChunk(MultipartFile file, ICIPChunkMetaData metadata, String organization,
             String fileid) throws IOException {
         // TODO Auto-generated method stub
         Map<String, String> map = new HashMap<>();
         String chunkIndex = String.valueOf(file.getOriginalFilename());
-        Path path = getPath(metadata);
-        Files.createDirectories(path.getParent());
+        // Path is validated inside getPath; re-validate the resolved path and its
+        // parent against traversal here so static-analysis taint trackers (e.g.
+        // CodeQL java/path-injection) see an explicit sanitiser at each Files.*
+        // sink in this method.
+        Path path = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(getPath(metadata).toString());
+        java.nio.file.Path parentPath = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(path.getParent().toString());
+        Files.createDirectories(parentPath);
         Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        try (Stream<Path> stream = Files.walk(path.getParent()).parallel()
-                .filter(p -> !p.toFile().isDirectory() && p.getParent().equals(path.getParent()))) {
+        try (Stream<Path> stream = Files.walk(parentPath).parallel()
+                .filter(p -> !p.toFile().isDirectory() && p.getParent().equals(parentPath))) {
             long count = stream.count();
             if (count == metadata.getTotalCount()) {
                 Path mergedPath = mergeFiles(path);
@@ -579,9 +608,18 @@ public class FileServerService {
     }
  
     private Path getPath(ICIPChunkMetaData metadata) {
-        // TODO Auto-generated method stub
-        return Paths.get(folderPath, ICIPUtils.removeSpecialCharacter(metadata.getFileGuid()),
-                metadata.getIndex() + "_" + metadata.getFileName().trim().replace(" ", ""));
+        // Build the chunk-file path from the trusted base `folderPath` and
+        // user-controlled metadata. Validate that the resolved path stays inside
+        // the configured base directory — this is the single sanitisation barrier
+        // for downstream callers (saveFileChunk / mergeFiles) so taint trackers
+        // (e.g. CodeQL java/path-injection) see all subsequent Files.* calls as
+        // operating on a sanitised path.
+        String relative = ICIPUtils.removeSpecialCharacter(metadata.getFileGuid())
+                + java.io.File.separator
+                + metadata.getIndex() + "_"
+                + metadata.getFileName().trim().replace(" ", "");
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(folderPath, relative).toPath();
     }
  
     private Path mergeFiles(Path path) {
@@ -596,18 +634,34 @@ public class FileServerService {
                     })) {
                 List<Path> paths = stream.collect(Collectors.toList());
                 Path mergedPath = path;
-                mergedPath = Files.createDirectory(Paths.get(path.getParent().toString(), "merged"));
-                File merged = new File(
-                        Paths.get(mergedPath.toString(), path.getFileName().toString().replaceFirst("^[0-9]*_", ""))
-                                .toString());
-                if (!merged.createNewFile()) {
+                // Resolve `merged` sub-directory relative to the validated parent
+                // path and re-assert containment in the configured base folder.
+                java.io.File mergedDirCandidate = new java.io.File(path.getParent().toFile(), "merged");
+                mergedPath = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validatePath(folderPath,
+                                java.nio.file.Paths.get(folderPath).toAbsolutePath().relativize(
+                                        mergedDirCandidate.getAbsoluteFile().toPath()).toString())
+                        .toPath();
+                java.nio.file.Files.createDirectories(mergedPath);
+                String mergedName = path.getFileName().toString().replaceFirst("^[0-9]*_", "");
+                java.io.File merged = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validatePath(folderPath,
+                                java.nio.file.Paths.get(folderPath).toAbsolutePath().relativize(
+                                        new java.io.File(mergedPath.toFile(), mergedName).getAbsoluteFile().toPath()).toString());
+                if (!merged.exists() && !merged.createNewFile()) {
                     throw new IOException(
                             String.format("Merge file could not be created: %s", merged.getAbsolutePath()));
                 }
                 paths.forEach(chunkPath -> {
-                    File chunk = chunkPath.toFile();
+                    java.io.File chunk = chunkPath.toFile();
                     try (FileOutputStream fos = new FileOutputStream(merged, true)) {
-                        Files.copy(Paths.get(chunk.getAbsolutePath()), fos);
+                        // Re-validate each chunk path is also within the base folder
+                        // before copying its bytes into the merged file.
+                        java.io.File safeChunk = com.lfn.icip.dataset.util.PathValidationUtil
+                                .validatePath(folderPath,
+                                        java.nio.file.Paths.get(folderPath).toAbsolutePath().relativize(
+                                                chunk.getAbsoluteFile().toPath()).toString());
+                        Files.copy(safeChunk.toPath(), fos);
                         fos.flush();
                     } catch (IOException e) {
                         logger.error("Error merging file: {}", e.getMessage());

@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
@@ -196,8 +197,9 @@ public class ICIPPluginController {
 	public ResponseEntity<String> deleteGroups(@PathVariable(name = "pluginName") String pluginName,
 			@PathVariable(name = "org")String org) {
 		logger.info("deleting pluginNode", pluginName);
-		return pluginDetailsService.delete(pluginName,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
-				createEntityDeletionAlert(ENTITY_NAME, pluginName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
+String safePluginName = HtmlUtils.htmlEscape(pluginName);
+return pluginDetailsService.delete(pluginName,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
+createEntityDeletionAlert(ENTITY_NAME, safePluginName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
 	}
 	
 //	to delete plugin node details 
@@ -212,8 +214,9 @@ public class ICIPPluginController {
 	public ResponseEntity<String> deleteAllNode(@PathVariable(name = "name") String name,
 			@PathVariable(name = "org")String org) {
 		logger.info("deleting plugin", name);
-		return pluginService.delete(name,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
-				createEntityDeletionAlert(ENTITY_NAME, name)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
+String safeName = HtmlUtils.htmlEscape(name);
+return pluginService.delete(name,org)? ResponseEntity.ok().headers(ICIPHeaderUtil.
+createEntityDeletionAlert(ENTITY_NAME, safeName)).build() : ResponseEntity.status(502).body("Could not delete: Organisation mismatch");
 	}
 	
 	
@@ -242,9 +245,8 @@ public class ICIPPluginController {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+		logger.error("Unhandled exception", ex);
+		return new ResponseEntity<>("An internal server error occurred", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 }

@@ -76,7 +76,12 @@ public final class SsrfProtectionUtil {
             validateNoInternalAddress(url);
         }
 
-        return url;
+        // Reconstruct the URL from its validated components. This breaks the
+        // taint flow at static-analysis tools (e.g. CodeQL's java/ssrf query):
+        // the returned URL is built from the already-checked scheme/host/port,
+        // not the original user-controlled string, so taint propagation stops
+        // at this sanitisation barrier.
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
     }
 
     /**
@@ -90,6 +95,24 @@ public final class SsrfProtectionUtil {
      */
     public static URL validateAndCreateUrl(String urlString) throws MalformedURLException {
         return validateAndCreateUrl(urlString, Collections.emptyList());
+    }
+
+    /**
+     * Convenience wrapper around {@link #validateAndCreateUrl(String)} that converts the
+     * checked {@link MalformedURLException} into an unchecked {@link IllegalArgumentException}.
+     * This lets callers validate a URL inline at an HTTP/OkHttp sink (passing the returned
+     * {@link URL} object) without having to alter their method signatures.
+     *
+     * @param urlString the raw, potentially user-controlled URL string
+     * @return a validated {@link URL}
+     * @throws IllegalArgumentException if the URL is malformed or fails SSRF validation
+     */
+    public static URL safeUrl(String urlString) {
+        try {
+            return validateAndCreateUrl(urlString);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
     }
 
     /**

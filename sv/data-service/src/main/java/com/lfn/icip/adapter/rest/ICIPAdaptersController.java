@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.gson.Gson;
 import com.lfn.icip.adapter.service.MlAdaptersService;
@@ -113,10 +114,8 @@ public class ICIPAdaptersController {
 	@GetMapping(path = "/{adaptername}/{methodname}/{org}")
 	public ResponseEntity<String> getData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -180,14 +179,13 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 				} catch (Exception e) {
-					logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-							e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+					logger.error("Error in operation", e);
 					if (logger.isDebugEnabled()) {
 						logger.error("Error due to:", e);
 					}
-					return ResponseEntity.status(422).body(e.getMessage());
+					return ResponseEntity.status(422).body("Adapter invocation failed");
 				}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -242,6 +240,10 @@ public class ICIPAdaptersController {
 		return getCompleteData(dsrc, dset, org,
 				params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10),
 				Integer.parseInt(params.getOrDefault(ICIPPluginConstants.PAGE, ICIPPluginConstants.PAGE_0)), null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter GET", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	private JSONArray addParamsOfDataset(JSONArray parameters, Map<String, String> datasetParamsMap) {
@@ -267,10 +269,8 @@ public class ICIPAdaptersController {
 	public ResponseEntity<String> getPostData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestBody String body)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestBody String body) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -336,14 +336,13 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -397,15 +396,17 @@ public class ICIPAdaptersController {
 				.put(ICIPPluginConstants.BODY, body);
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, ICIPPluginConstants.SIZE_10, 0, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter POST", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	@DeleteMapping(path = "/{adaptername}/{methodname}/{org}")
 	public ResponseEntity<String> deleteData(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -469,14 +470,13 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -530,7 +530,12 @@ public class ICIPAdaptersController {
 		return getCompleteData(dsrc, dset, org,
 				params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10),
 				Integer.parseInt(params.getOrDefault(ICIPPluginConstants.PAGE, ICIPPluginConstants.PAGE_0)), null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter DELETE", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
+
 
 	private Map<String, String> getMapFromJsonArray(JSONArray jsonArray) {
 		Map<String, String> getMapFromJsonArray = new HashMap<>();
@@ -644,15 +649,14 @@ public class ICIPAdaptersController {
 		try {
 			results = getResult(page, limit, sortEvent, sortOrder, dataset);
 		} catch (Exception e) {
-			logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(), e.getStackTrace()[0].getClass(),
-					e.getStackTrace()[0].getLineNumber());
+			logger.error("Error in operation", e);
 			if (logger.isDebugEnabled()) {
 				logger.error("Error due to:", e);
 			}
-			return ResponseEntity.status(422).body(e.getMessage());
+			return ResponseEntity.status(422).body("Adapter invocation failed");
 		}
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
-		return ResponseEntity.status(200).body(results);
+		return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 	}
 
 	private String getResult(int page, String limit, String sortEvent, int sortOrder, ICIPDataset dataset)
@@ -683,10 +687,8 @@ public class ICIPAdaptersController {
 	public ResponseEntity<String> getPostDataForFile(@PathVariable(name = "adaptername") String adaptername,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestParam("file") MultipartFile file)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
+			@RequestParam("file") MultipartFile file) {
+		try {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = null;
 		String instanceName = params.get(ICIPPluginConstants.INSTANCE);
@@ -754,14 +756,13 @@ public class ICIPAdaptersController {
 						params.getOrDefault(ICIPPluginConstants.SIZE, ICIPPluginConstants.SIZE_10), null, -1,
 						datasetForRemote);
 			} catch (Exception e) {
-				logger.error("Error because of:{} at class:{} and line:{}", e.getMessage(),
-						e.getStackTrace()[0].getClass(), e.getStackTrace()[0].getLineNumber());
+				logger.error("Error in operation", e);
 				if (logger.isDebugEnabled()) {
 					logger.error("Error due to:", e);
 				}
-				return ResponseEntity.status(422).body(e.getMessage());
+				return ResponseEntity.status(422).body("Adapter invocation failed");
 			}
-			return ResponseEntity.status(200).body(results);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(results));
 		}
 		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
 		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray(ICIPPluginConstants.QUERY_PARAMS);
@@ -818,6 +819,10 @@ public class ICIPAdaptersController {
 				.put(ICIPPluginConstants.BODY, fileDetails);
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, ICIPPluginConstants.SIZE_10, 0, null, -1);
+		} catch (Exception e) {
+			logger.error("Error in adapter file POST", e);
+			return ResponseEntity.internalServerError().body("Adapter invocation failed");
+		}
 	}
 
 	@PostMapping(value = "/uploadTempFileForAdapter/{org}/{adapterName}/{methodName}")

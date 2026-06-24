@@ -3,8 +3,6 @@ package com.lfn.icip.icipwebeditor.exception;
 import com.lfn.icip.icipwebeditor.model.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,59 +16,45 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.io.IOException;
 import java.util.Map;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 public class GlobalControllerException {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalControllerException.class);
 
-
 	@ExceptionHandler(AddRuntimeException.class)
 	public ResponseEntity<?> handleAddRuntimeException(AddRuntimeException ex) {
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.BAD_REQUEST);
-	}
-
-	/**
-	 * Handle pipeline metadata.json validation failures — HTTP 422 Unprocessable Entity.
-	 * The full validation message is surfaced directly in the 'message' field.
-	 */
-	@ExceptionHandler(PipelineMetadataValidationException.class)
-	public ResponseEntity<ErrorResponse> handlePipelineMetadataValidationException(
-			PipelineMetadataValidationException ex, WebRequest request) {
-		logger.error("Pipeline metadata validation failed: {}", ex.getMessage());
-		ErrorResponse errorResponse = new ErrorResponse(
-				HttpStatus.UNPROCESSABLE_ENTITY.value(),
-				"Pipeline Metadata Validation Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
-				request.getDescription(false).replace("uri=", "")
-		);
-		errorResponse.setException(ex.getClass().getSimpleName());
-		return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+		logger.error("AddRuntimeException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime operation failed"), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(RuntimePortsNotSavedException.class)
-	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
+	public ResponseEntity<?> handleRuntimePortsNotSavedException(RuntimePortsNotSavedException ex) {
+		logger.error("RuntimePortsNotSavedException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime port configuration failed"), HttpStatus.BAD_REQUEST);
+	}
 
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
+		logger.error("ResourceNotFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Resource not found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(NoUnassignedPortFoundException.class)
 	public ResponseEntity<?> handleNoUnassignedPortFoundException(NoUnassignedPortFoundException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("NoUnassignedPortFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "No unassigned port found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(RuntimeListNotFoundException.class)
 	public ResponseEntity<?> handleRuntimeListNotFoundException(RuntimeListNotFoundException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("RuntimeListNotFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime list not found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("NullPointerException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "An internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -87,8 +71,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"File Upload Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"File upload operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -111,8 +95,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Invalid Request",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Invalid request parameters",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -135,8 +119,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				"Datasource Not Found",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Datasource not found",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -159,8 +143,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"MinIO Storage Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Storage operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -183,8 +167,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"File Deletion Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"File deletion operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -205,7 +189,7 @@ public class GlobalControllerException {
 		logger.error("Data integrity violation: {}", ex.getMessage(), ex);
 
 		String message = "Database constraint violation occurred";
-		String details = ex.getMostSpecificCause().getMessage();
+		String details = "An internal database error occurred";
 		String suggestedAction = "Check database schema constraints";
 
 		// Check for specific data truncation error
@@ -266,7 +250,7 @@ public class GlobalControllerException {
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"I/O Operation Failed",
 				"An error occurred during file I/O operation",
-				ex.getMessage(),
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -342,7 +326,7 @@ public class GlobalControllerException {
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"Internal Server Error",
 				"An unexpected error occurred while processing your request",
-				ex.getMessage(),
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
