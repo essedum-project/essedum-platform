@@ -445,7 +445,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
                         s3Client.abortMultipartUpload(new AbortMultipartUploadRequest(
                                 bucketName, objectKey, uploadId));
                         s3Client.shutdown();
-                        return "Failed to upload part: " + e.getMessage();
+                        return "Failed to upload part";
                     }
                     filePosition += partSizeRemaining;
                 }

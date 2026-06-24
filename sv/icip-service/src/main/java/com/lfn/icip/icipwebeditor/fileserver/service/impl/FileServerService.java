@@ -410,7 +410,7 @@ public class FileServerService {
 			return this.fileUploadHelper1(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, maxDepth, selectedRoles);
 		} catch (Exception e) {
 			Map<String,String> metadata = new LinkedHashMap<String,String>();
-			metadata.put("Error:", e.getMessage());
+			metadata.put("Error:", "Operation failed");
 			return metadata;
 		}
 		
@@ -424,7 +424,7 @@ public class FileServerService {
 			return this.fileUploadHelper(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, maxDepth);
 		} catch (Exception e) {
 			Map<String,String> metadata = new LinkedHashMap<String,String>();
-			metadata.put("Error:", e.getMessage());
+			metadata.put("Error:", "Operation failed");
 			return metadata;
 		}
 		

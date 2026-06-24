@@ -57,7 +57,6 @@ import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.ai.comm.lib.util.service.SecretsManagerService;
 import com.lfn.icip.adapter.service.ICIPAdaptersV1Service;
 import com.lfn.icip.adapter.service.MlAdaptersService;
@@ -444,8 +443,7 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex) {
 		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred");
+		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred", "error occurred");
 		return new ResponseEntity<>("There is an application error, please contact the application admin",
 				new HttpHeaders(), apiError.getStatus());
 	}

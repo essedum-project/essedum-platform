@@ -302,7 +302,11 @@ public abstract class AbstractNio2BlobStore extends BaseBlobStore {
 
     @Override
     public final boolean containerExists(String container) {
-        return Files.exists(root.resolve(container));
+        var containerPath = root.resolve(container).normalize();
+        if (!containerPath.startsWith(root)) {
+            throw new IllegalArgumentException("Invalid container name: path traversal attempt detected");
+        }
+        return Files.exists(containerPath);
     }
 
     @Override
@@ -315,8 +319,12 @@ public abstract class AbstractNio2BlobStore extends BaseBlobStore {
     @Override
     public final boolean createContainerInLocation(Location location,
             String container, CreateContainerOptions options) {
+        var containerPath = root.resolve(container).normalize();
+        if (!containerPath.startsWith(root)) {
+            throw new IllegalArgumentException("Invalid container name: path traversal attempt detected");
+        }
         try {
-            Files.createDirectory(root.resolve(container));
+            Files.createDirectory(containerPath);
         } catch (FileAlreadyExistsException faee) {
             return false;
         } catch (IOException ioe) {
@@ -548,7 +556,8 @@ public abstract class AbstractNio2BlobStore extends BaseBlobStore {
         }
         checkValidPath(containerPath, path);
         // TODO: should we use a known suffix to filter these out during list?
-        var tmpPath = root.resolve(container).resolve(blob.getMetadata().getName() + "-" + UUID.randomUUID());
+        var tmpPath = path.resolveSibling(path.getFileName() + "-" + UUID.randomUUID()).normalize();
+        checkValidPath(containerPath, tmpPath);
         logger.debug("Creating blob at: {}", path);
 
         if (blob.getMetadata().getName().endsWith("/")) {
