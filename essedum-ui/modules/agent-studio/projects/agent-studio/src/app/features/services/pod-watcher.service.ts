@@ -121,15 +121,32 @@ export class PodWatcherService {
   }
 
   /**
-   * Deletes the K8s deployment via the Java backend (vibe-pod-watcher exposes no DELETE).
+   * Deletes a single pod — K8s automatically recreates it via the ReplicaSet.
+   * DELETE /apps/vibe-pod-watcher/api/pods/{pod_name}?namespace=vibe-agents|vibe-mcp|vibe-apps
    */
-  deleteContainer(cname: string, namespace: string): Observable<void> {
-    const sanitized = this.sanitizeCname(cname);
+  deletePod(podName: string, namespace: string): Observable<any> {
     return this.http
-      .delete<void>(`${this.JAVA_BASE}/containers/${sanitized}`, {
+      .delete<any>(`${this.BASE}/api/pods/${encodeURIComponent(podName)}`, {
         params: { namespace },
       })
-      .pipe(catchError(() => of(undefined as void)));
+      .pipe(catchError(() => of(null)));
+  }
+
+  /**
+   * Deletes the full deployment + its Service + its Secret ({name}-secrets). Full teardown.
+   * DELETE /apps/vibe-pod-watcher/api/deployments/{deployment_name}?namespace=vibe-agents|vibe-mcp|vibe-apps
+   */
+  deleteDeployment(deploymentName: string, namespace: string): Observable<any> {
+    return this.http
+      .delete<any>(`${this.BASE}/api/deployments/${encodeURIComponent(deploymentName)}`, {
+        params: { namespace },
+      })
+      .pipe(catchError(() => of(null)));
+  }
+
+  /** @deprecated Use deleteDeployment() instead. Retained for backward compatibility. */
+  deleteContainer(cname: string, namespace: string): Observable<any> {
+    return this.deleteDeployment(cname, namespace);
   }
 
   /** Converts a pipeline name to a valid K8s deployment name. */

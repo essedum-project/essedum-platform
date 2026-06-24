@@ -26,11 +26,12 @@ export class PodLogDialogComponent implements OnInit {
   readonly NAMESPACEKEY  = 'Namespace';
   readonly LOGLABEL      = 'Log :';
   readonly EMPTYLOG      = 'No log content available.';
-  readonly COPYTOOLTIP   = 'Copy to clipboard';
-  readonly COPIEDTOOLTIP = 'Copied!';
-  readonly CLOSETOOLTIP   = 'Close';
-  readonly REFRESHTOOLTIP = 'Refresh logs';
-  readonly LOADINGLABEL  = 'Fetching pod logs…';
+  readonly COPYTOOLTIP       = 'Copy to clipboard';
+  readonly COPIEDTOOLTIP     = 'Copied!';
+  readonly CLOSETOOLTIP      = 'Close';
+  readonly REFRESHTOOLTIP    = 'Refresh logs';
+  readonly LOADINGLABEL      = 'Fetching pod logs…';
+  readonly FETCHLOGSERROR    = 'Failed to fetch logs. Check that the pod is Running.';
 
   get dialogTitle(): string {
     return `${this.data.pipelineName} — ${this.TITLESUFFIX}`;
@@ -55,7 +56,7 @@ export class PodLogDialogComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.logText = 'Failed to fetch logs. Check that the pod is Running.';
+        this.logText = this.FETCHLOGSERROR;
         this.loading = false;
       },
     });

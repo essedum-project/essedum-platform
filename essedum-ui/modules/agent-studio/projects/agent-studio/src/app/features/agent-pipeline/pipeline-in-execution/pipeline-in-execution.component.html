@@ -127,14 +127,19 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #rowMenu="matMenu" xPosition="before">
-          <button mat-menu-item (click)="viewPipeline(pipeline)">
+          <!-- <button mat-menu-item (click)="viewPipeline(pipeline)">
             <mat-icon class="menu-icon-view">visibility</mat-icon>
             <span>{{ VIEWPIPELINE }}</span>
-          </button>
+          </button> -->
           <button mat-menu-item (click)="checkPodLog(pipeline)"
                   *ngIf="['running','pending','succeeded','failed'].includes(pipeline.pod_phase.toLowerCase())">
             <mat-icon class="menu-icon-log">description</mat-icon>
             <span>{{ VIEWPODLOGS }}</span>
+          </button>
+          <button mat-menu-item (click)="deletePipelinePod(pipeline)"
+                  *ngIf="['running','pending','failed'].includes(pipeline.pod_phase.toLowerCase())">
+            <mat-icon class="menu-icon-delete-pod">delete_sweep</mat-icon>
+            <span>{{ DELETEPOD }}</span>
           </button>
           <mat-divider></mat-divider>
           <button mat-menu-item class="exec-delete-item" (click)="deletePipelineAsContainer(pipeline)">

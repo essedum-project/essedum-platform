@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { interval, Subject } from 'rxjs';
 import { exhaustMap, takeUntil } from 'rxjs/operators';
@@ -55,9 +55,12 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly EMPTYMESSAGE       = 'No pipelines found';
   readonly CLEARFILTERSLABEL  = 'Clear filters';
   readonly LOADINGMESSAGE     = 'Loading pipelines…';
-  readonly VIEWPIPELINE       = 'View Pipeline';
-  readonly VIEWPODLOGS        = 'View Pod Logs';
-  readonly DELETECONTAINER    = 'Delete Container';
+  readonly VIEWPIPELINE              = 'View Pipeline';
+  readonly VIEWPODLOGS               = 'View Pod Logs';
+  readonly DELETEPOD                 = 'Delete Pod';
+  readonly DELETECONTAINER           = 'Delete Container';
+  readonly PODDELETEDSUCCESS         = 'Pod deleted successfully!';
+  readonly DEPLOYMENTDELETEDSUCCESS  = 'Pipeline deployment deleted!';
 
   // ── Dynamic filter option definitions ───────────────────────────────────
   readonly typeOptions = [
@@ -269,22 +272,38 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   viewPipeline(pipeline: ExecutionPipeline): void {
     const name = pipeline.container_name;
     this.service.getStreamingServicesByName(name).subscribe((res: any) => {
-      this.router.navigate(
-        [`../view/${name}`],
-        {
-          state: {
-            cardTitle: pipeline.pipelineMode === 'mcp'
-              ? 'MCP Pipelines'
-              : pipeline.pipelineMode === 'app'
-              ? 'App Pipelines'
-              : 'Pipeline Agent',
-            pipelineAlias: res?.alias || pipeline.container_name,
-            streamItem: res,
-            card: pipeline,
-            pipelineMode: pipeline.pipelineMode,
-          },
-        }
-      );
+      const navigationExtras: NavigationExtras = {
+        queryParams: {
+          page: 1,
+          search: '',
+          pipelineType: pipeline.pipelineMode === 'agent' ? '' : pipeline.pipelineMode,
+          org: sessionStorage.getItem('organization'),
+          roleId: JSON.parse(sessionStorage.getItem('role') || '{}').id,
+        },
+        queryParamsHandling: 'merge',
+        state: {
+          cardTitle: pipeline.pipelineMode === 'mcp'
+            ? 'MCP Pipelines'
+            : pipeline.pipelineMode === 'app'
+            ? 'App Pipelines'
+            : 'Pipeline Agent',
+          pipelineAlias: res?.alias || pipeline.container_name,
+          streamItem: res,
+          card: pipeline,
+          pipelineMode: pipeline.pipelineMode,
+        },
+        relativeTo: this.route,
+      };
+
+      if (res?.type === 'AIAgent' ||
+          res?.type === 'mcpServer' ||
+          res?.type === 'appPipeline' ||
+          res?.type === 'NativeScript' ||
+          pipeline.pipelineMode === 'mcp' ||
+          pipeline.pipelineMode === 'app' ||
+          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent')) {
+        this.router.navigate([`../view/${name}`], navigationExtras);
+      }
     });
   }
 
@@ -304,17 +323,34 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Stops the K8s deployment (container_name used as the deployment name). */
-  deletePipelineAsContainer(pipeline: ExecutionPipeline): void {
+  /** Deletes the pod — K8s recreates it via the ReplicaSet. */
+  deletePipelinePod(pipeline: ExecutionPipeline): void {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { entityName: pipeline.container_name }
+      data: { entityName: pipeline.pod_name }
     });
     ref.afterClosed().subscribe(result => {
       if (result === 'delete') {
         this.podWatcher
-          .deleteContainer(pipeline.container_name, pipeline.namespace)
+          .deletePod(pipeline.pod_name, pipeline.namespace)
           .subscribe(() => {
-            this.service.message('Pipeline container deleted!', 'success');
+            this.service.message(this.PODDELETEDSUCCESS, 'success');
+            this.loadAllPipelines();
+          });
+      }
+    });
+  }
+
+  /** Deletes the full K8s deployment + Service + Secret (full teardown). */
+  deletePipelineAsContainer(pipeline: ExecutionPipeline): void {
+    const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: { entityName: pipeline.deployment_name }
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result === 'delete') {
+        this.podWatcher
+          .deleteDeployment(pipeline.deployment_name, pipeline.namespace)
+          .subscribe(() => {
+            this.service.message(this.DEPLOYMENTDELETEDSUCCESS, 'success');
             this.loadAllPipelines();
           });
       }
