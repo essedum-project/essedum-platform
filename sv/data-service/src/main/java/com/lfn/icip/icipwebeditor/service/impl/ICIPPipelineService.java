@@ -872,7 +872,7 @@ public class ICIPPipelineService implements IICIPSearchable{
 					HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -912,7 +912,7 @@ public class ICIPPipelineService implements IICIPSearchable{
 					HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -938,7 +938,7 @@ public class ICIPPipelineService implements IICIPSearchable{
 					ICIPNativeServiceJob.class, corelid, feoffset, ICIPUtils.getUser(claim)), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 		}
 	}
 

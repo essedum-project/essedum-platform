@@ -1334,7 +1334,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 			return formTemplateObj.formTemplateStr;
 		} catch (Exception e) {
 			logger.error("Error while generating form template " + e);
-			return "ERROR:Error while generating form template " + e.getMessage();
+			return "ERROR:Error while generating form template";
 		}
 	}
 
@@ -1853,7 +1853,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Operation failed");
 			return null;
 		}
 	}
@@ -2012,7 +2012,7 @@ return Flux.just(datasetRepository.findById((id)).get()).defaultIfEmpty(new ICIP
 			logger.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", "error");
-			response.put("errorDesc", e.getMessage());
+			response.put("errorDesc", "Operation failed");
 			return null;
 		}
 	}

@@ -411,7 +411,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			return resultList.toList();
 		} catch (Exception ex) {
 			logger.error("Error: Error in fetching dataset results {}", ex.getMessage(), ex);
-			resultList.put(new JSONObject().put(ERROR, "Error in fetching dataset results " + ex.getMessage()));
+			resultList.put(new JSONObject().put(ERROR, "Error in fetching dataset results"));
 			return resultList.toList();
 		}
 	}
@@ -550,7 +550,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 		} catch (Exception ex) {
 			logger.error("Error: Error in fetching dataset results {}", ex.getMessage(), ex);
 			LinkedHashMap<String, Object> errObject = new LinkedHashMap<>();
-			errObject.put(ERROR, "Error in fetching dataset results " + ex.getMessage());
+			errObject.put(ERROR, "Error in fetching dataset results");
 			resultList.add(errObject);
 		}
 		return resultList;
@@ -609,8 +609,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 					} catch (NumberFormatException e) {
 						logger.error("Error: Error in fetching result count for dataset {} {}", dataset.getAlias(),
 								e.getMessage(), e);
-						searchObjCount = "Error: Error in fetching result count for dataset " + dataset.getAlias() + " "
-								+ e.getMessage();
+						searchObjCount = "Error: Error in fetching result count for dataset " + dataset.getAlias();
 					}
 				}
 			} else {
@@ -619,7 +618,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			return searchObjCount;
 		} catch (Exception ex) {
 			logger.error("Error: Error in fetching result count for dataset {} {}", dataset.getAlias(), ex.getMessage(), ex);
-			searchObjCount = "Error: Error in fetching result count for dataset " + dataset.getAlias() + " " + ex.getMessage();
+			searchObjCount = "Error: Error in fetching result count for dataset " + dataset.getAlias();
 			return searchObjCount;
 		}
 	}
@@ -668,7 +667,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 				return allowedProps;
 		} catch (Exception ex) {
 			logger.error("Error: Error in extracting allowed properties from schema {}", ex.getMessage(), ex);
-			allowedProps.add("Error: Error in extracting allowed properties from schema " + ex.getMessage());
+			allowedProps.add("Error: Error in extracting allowed properties from schema");
 			return allowedProps;
 		}
 	}
@@ -730,7 +729,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			}
 		} catch (Exception e) {
 			logger.error("Error while fetching download objects ", e);
-			resultCsv = "Error: Error while fetching download objects " + e.getMessage();
+			resultCsv = "Error: Error while fetching download objects";
 		}
 		return resultCsv;
 	}
@@ -779,7 +778,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			}
 		} catch (Exception e) {
 			logger.error("Error while fetching download objects ", e);
-			resultCsv = "Error: Error while fetching download objects " + e.getMessage();
+			resultCsv = "Error: Error while fetching download objects";
 		}
 		return resultCsv;
 	}
@@ -825,7 +824,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			resultCsv = csv;
 		} catch (Exception e) {
 			logger.error("Error while fetching download objects ", e);
-			resultCsv = "Error: Error while fetching download objects " + e.getMessage();
+			resultCsv = "Error: Error while fetching download objects";
 		}
 		return resultCsv;
 	}
@@ -872,7 +871,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			resultCsv = csv;
 		} catch (Exception e) {
 			logger.error("Error while fetching download objects ", e);
-			resultCsv = "Error: Error while fetching download objects " + e.getMessage();
+			resultCsv = "Error: Error while fetching download objects";
 		}
 		return resultCsv;
 	}
@@ -901,7 +900,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 						resStr = "Tag applied successfully";
 					} catch (SQLException e) {
 						logger.error("Error while applying tag: ", e);
-						resStr = ERROR + e.getMessage();
+						resStr = ERROR + "Operation failed";
 					}
 				} else if (!resStr.startsWith("Error: ")) {
 					logger.error("Error while applying tag: Uncaught exception");
@@ -913,7 +912,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 			}
 		} catch (Exception e) {
 			logger.error("Error while applying tag: ", e);
-			resStr = ERROR + e.getMessage();
+			resStr = ERROR + "Operation failed";
 		}
 		return resStr;
 	}
@@ -1055,7 +1054,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 				logger.error("Error while saving {} dataset entry: Invalid action value", datasetName);
 			}
 		} catch (Exception ex) {
-			resp = ERROR + ex.getMessage();
+			resp = ERROR + "Operation failed";
 			logger.error("Error while saving {} dataset entry: {}", datasetName, ex.getMessage(), ex);
 		}
 		return resp;

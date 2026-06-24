@@ -23,38 +23,38 @@ public class GlobalControllerException {
 
 	@ExceptionHandler(AddRuntimeException.class)
 	public ResponseEntity<?> handleAddRuntimeException(AddRuntimeException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.BAD_REQUEST);
+		logger.error("AddRuntimeException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime operation failed"), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(RuntimePortsNotSavedException.class)
 	public ResponseEntity<?> handleRuntimePortsNotSavedException(RuntimePortsNotSavedException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.BAD_REQUEST);
+		logger.error("RuntimePortsNotSavedException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime port configuration failed"), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("ResourceNotFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Resource not found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(NoUnassignedPortFoundException.class)
 	public ResponseEntity<?> handleNoUnassignedPortFoundException(NoUnassignedPortFoundException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("NoUnassignedPortFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "No unassigned port found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(RuntimeListNotFoundException.class)
 	public ResponseEntity<?> handleRuntimeListNotFoundException(RuntimeListNotFoundException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("RuntimeListNotFoundException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "Runtime list not found"), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-
-		return new ResponseEntity<>(Map.of("Error Message", ex.getMessage()), HttpStatus.NOT_FOUND);
+		logger.error("NullPointerException: {}", ex.getMessage(), ex);
+		return new ResponseEntity<>(Map.of("Error Message", "An internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -71,8 +71,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"File Upload Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"File upload operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -95,8 +95,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.BAD_REQUEST.value(),
 				"Invalid Request",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Invalid request parameters",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -119,8 +119,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.NOT_FOUND.value(),
 				"Datasource Not Found",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Datasource not found",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -143,8 +143,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"MinIO Storage Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"Storage operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -167,8 +167,8 @@ public class GlobalControllerException {
 		ErrorResponse errorResponse = new ErrorResponse(
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"File Deletion Failed",
-				ex.getMessage(),
-				getCauseMessage(ex),
+				"File deletion operation failed",
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -189,7 +189,7 @@ public class GlobalControllerException {
 		logger.error("Data integrity violation: {}", ex.getMessage(), ex);
 
 		String message = "Database constraint violation occurred";
-		String details = ex.getMostSpecificCause().getMessage();
+		String details = "An internal database error occurred";
 		String suggestedAction = "Check database schema constraints";
 
 		// Check for specific data truncation error
@@ -250,7 +250,7 @@ public class GlobalControllerException {
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"I/O Operation Failed",
 				"An error occurred during file I/O operation",
-				ex.getMessage(),
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());
@@ -326,7 +326,7 @@ public class GlobalControllerException {
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
 				"Internal Server Error",
 				"An unexpected error occurred while processing your request",
-				ex.getMessage(),
+				null,
 				request.getDescription(false).replace("uri=", "")
 		);
 		errorResponse.setException(ex.getClass().getSimpleName());

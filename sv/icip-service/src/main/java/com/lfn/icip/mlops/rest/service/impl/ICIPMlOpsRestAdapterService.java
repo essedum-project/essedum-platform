@@ -421,7 +421,7 @@ public class ICIPMlOpsRestAdapterService {
                     HttpStatus.OK);
         } catch (Exception e) {
             logger.error("EXCEPTION:", e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -509,7 +509,7 @@ public class ICIPMlOpsRestAdapterService {
             }
         } catch (Exception e) {
             logger.error("EXCEPTION:", e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

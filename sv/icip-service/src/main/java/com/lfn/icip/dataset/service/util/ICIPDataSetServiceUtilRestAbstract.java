@@ -1206,7 +1206,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 				return (T) responseData1;
 			} catch (Exception e) {
 				logger.error(e.getMessage());
-				responseData1 = String.format("{\"Script Error\" : \"%s\"}", e.getMessage());
+				responseData1 = "{\"Script Error\" : \"Operation failed\"}";
 				return (T) responseData1;
 
 			}
@@ -1328,7 +1328,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			return(T) ex.getMessage();
+			return(T) "Operation failed";
 		}finally {
 		logger.info("REST getDatasetData final {}", responseData);
 //		return (T) responseData;
