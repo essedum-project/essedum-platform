@@ -117,9 +117,9 @@ def execute_function(save_path, module_name, function_name, *args):
             print(f"{function_name} doesn't exists")
     except Exception as e:
         exc_trace = traceback.format_exc()
-        print(exc_trace)
-        print("Exception occured: ", {e})
-        result = e
+        logger.error(exc_trace)
+        logger.error("Exception occurred while executing function", exc_info=True)
+        result = "An internal error occurred."
     return result
 
 def function_execute(request_body):
@@ -138,5 +138,6 @@ def function_execute(request_body):
 
         return result
     except Exception as err:
-        return str(err)
+        logger.error("Unexpected error in function_execute", exc_info=True)
+        return {'logs': {'content': 'An internal error occurred.'}}
 

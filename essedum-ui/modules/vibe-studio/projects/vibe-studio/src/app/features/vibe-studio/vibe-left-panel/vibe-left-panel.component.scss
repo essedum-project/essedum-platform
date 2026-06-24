@@ -47,13 +47,15 @@
 
 .model-indicator-icon {
   font-size: 12px;
+  line-height: 1;
 }
 
 .model-indicator-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  line-height: 1.2;
 }
 
 // ── Messages Area ─────────────────────────────────────────────────────────────
@@ -371,9 +373,12 @@
 
   .model-indicator-bar {
     border-bottom-color: rgba(79,142,247,0.1);
-    background: rgba(79,142,247,0.05);
-    .model-indicator-icon  { color: #a78bfa; }
-    .model-indicator-label { color: #8faec8; }
+    background: rgba(15,23,42,0.58);
+    .model-indicator-icon  { color: #93c5fd; }
+    .model-indicator-label {
+      color: #e2e8f0;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    }
   }
 
   .messages-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
@@ -443,9 +448,9 @@
 
   .model-indicator-bar {
     border-bottom-color: rgba(99,102,241,0.1);
-    background: rgba(99,102,241,0.04);
-    .model-indicator-icon  { color: #7c3aed; }
-    .model-indicator-label { color: #4f46e5; }
+    background: rgba(99,102,241,0.08);
+    .model-indicator-icon  { color: #4338ca; }
+    .model-indicator-label { color: #1e293b; }
   }
 
   .messages-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }

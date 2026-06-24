@@ -483,6 +483,7 @@ export class AgentPipelineService {
     // Create FormData for file upload
     const formData = new FormData();
     formData.append('zipFile', zipFile);
+    formData.append('isvibestudio', 'false');
 
     // Get auth token from localStorage or session storage
     const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';

@@ -125,6 +125,7 @@ def function_execute(request_body):
         return result
     except Exception as err:
         os.chdir(wd)
-        return str(err)
+        logger.error("Unexpected error in function_execute", exc_info=True)
+        return {'logs': {'content': 'An internal error occurred.'}}
 
 
