@@ -108,7 +108,7 @@ public class RegularExpressionUtil {
 		  }
 		  // Pattern source is validated by sanitizeRegex (length-bounded, ASCII
 		  // allow-list, no catastrophic-backtracking constructs).
-		  if (inputTobeVerified != null && inputTobeVerified.matches(safe)) { // lgtm[java/regex-injection]
+		  if (inputTobeVerified != null && inputTobeVerified.matches(safe)) { // codeql[java/regex-injection]
 			  log.debug("input matched with regex");
 			  return true;
 		  }
@@ -135,7 +135,7 @@ public class RegularExpressionUtil {
 		 // allow-list, no catastrophic-backtracking constructs). This call only
 		 // confirms the user-supplied pattern is syntactically valid; it is
 		 // never executed against attacker-controlled input here.
-		 Pattern.compile(safe); // lgtm[java/regex-injection]
+		 Pattern.compile(safe); // codeql[java/regex-injection]
 		 return false;
 	 } catch (PatternSyntaxException e) {
 		 log.info("Pattern failed to be verified, error is {}", e.getDescription());
