@@ -5,6 +5,11 @@ metadata:
   namespace: aipns
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: essedum-backend-vibe
@@ -13,11 +18,15 @@ spec:
       labels:
         app: essedum-backend-vibe
     spec:
+      tolerations:
+      - key: "node.kubernetes.io/disk-pressure"
+        operator: "Exists"
+        effect: "NoSchedule"
       hostAliases:
-      - ip: "localhost"
+      - ip: "127.0.0.1"
         hostnames:
-        - "login.essedum-lfn.infosys.com"
-        - "essedum-lfn.infosys.com"
+        - "your-host"
+        - "your-host"
       containers:
       - name: essedum-backend-vibe
         image: localhost:5000/essedum-vibe-service:micro_latest
@@ -26,38 +35,40 @@ spec:
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
-              name: essedum-db-secret
+              name: your-db-secret
               key: MYSQL_DATASOURCE_URL
         - name: MYSQL_USER
           valueFrom:
             secretKeyRef:
-              name: essedum-db-secret
+              name: your-db-secret
               key: MYSQL_USER
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: essedum-db-secret
+              name: your-db-secret
               key: MYSQL_PASSWORD
         - name: VIBE_AZURE_OPENAI_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: essedum-vibe-secret
+              name: your-vibe-secret
               key: VIBE_AZURE_OPENAI_ENDPOINT
         - name: VIBE_AZURE_OPENAI_DEPLOYMENT_NAME
           valueFrom:
             secretKeyRef:
-              name: essedum-vibe-secret
+              name: your-vibe-secret
               key: VIBE_AZURE_OPENAI_DEPLOYMENT_NAME
         - name: VIBE_AZURE_OPENAI_API_VERSION
           valueFrom:
             secretKeyRef:
-              name: essedum-vibe-secret
+              name: your-vibe-secret
               key: VIBE_AZURE_OPENAI_API_VERSION
         - name: VIBE_AZURE_OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
-              name: essedum-vibe-secret
+              name: your-vibe-secret
               key: VIBE_AZURE_OPENAI_API_KEY
+        - name: GOOSE_URL
+          value: "http://goosed-service:3005"
         ports:
         - containerPort: 8084
 ---

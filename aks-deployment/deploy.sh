@@ -67,6 +67,16 @@ deploy() {
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   success "Namespace '${NAMESPACE}' ready."
 
+  # 2b. Vibe Studio deployment namespaces
+  info "--- [3b/9] Vibe Studio namespaces ---"
+  kubectl create namespace vibe-apps   --dry-run=client -o yaml | kubectl apply -f -
+  kubectl create namespace vibe-mcp    --dry-run=client -o yaml | kubectl apply -f -
+  kubectl create namespace vibe-agents --dry-run=client -o yaml | kubectl apply -f -
+  success "Vibe Studio namespaces (vibe-apps, vibe-mcp, vibe-agents) ready."
+  apply "vibe-apps-rbac"   "vibe-apps-rbac.yaml"
+  apply "vibe-mcp-rbac"    "vibe-mcp-rbac.yaml"
+  apply "vibe-agents-rbac" "vibe-agents-rbac.yaml"
+
   # 3. Secrets (must be applied before workloads that reference them)
   info "--- [3.5/9] Secrets ---"
   apply "minio-secret" "essedum-minio-secret.yaml"
@@ -106,17 +116,19 @@ deploy() {
   wait_for "essedum-backend-vibe"        "${NAMESPACE}"
 
   # Frontend microservices (1 shell host + 4 MFE pods)
-  apply "essedum-frontend-shell"        "essedum-frontend-shell.yaml"
-  apply "essedum-frontend-agent"        "essedum-frontend-agent.yaml"
-  apply "essedum-frontend-data-ops"     "essedum-frontend-data-ops.yaml"
-  apply "essedum-frontend-integration"  "essedum-frontend-integration.yaml"
-  apply "essedum-frontend-vibe-studio"  "essedum-frontend-vibe-studio.yaml"
+  apply "essedum-frontend-shell"              "essedum-frontend-shell.yaml"
+  apply "essedum-frontend-agent"              "essedum-frontend-agent.yaml"
+  apply "essedum-frontend-agent-designer"     "essedum-frontend-agent-designer.yaml"
+  apply "essedum-frontend-data-ops"           "essedum-frontend-data-ops.yaml"
+  apply "essedum-frontend-integration"        "essedum-frontend-integration.yaml"
+  apply "essedum-frontend-vibe-studio"        "essedum-frontend-vibe-studio.yaml"
 
-  wait_for "essedum-frontend-shell"       "${NAMESPACE}"
-  wait_for "essedum-frontend-agent"       "${NAMESPACE}"
-  wait_for "essedum-frontend-data-ops"    "${NAMESPACE}"
-  wait_for "essedum-frontend-integration" "${NAMESPACE}"
-  wait_for "essedum-frontend-vibe-studio" "${NAMESPACE}"
+  wait_for "essedum-frontend-shell"           "${NAMESPACE}"
+  wait_for "essedum-frontend-agent"           "${NAMESPACE}"
+  wait_for "essedum-frontend-agent-designer"  "${NAMESPACE}"
+  wait_for "essedum-frontend-data-ops"        "${NAMESPACE}"
+  wait_for "essedum-frontend-integration"     "${NAMESPACE}"
+  wait_for "essedum-frontend-vibe-studio"     "${NAMESPACE}"
 
   # Supporting services
   apply "pyjob-executor"               "pyjob-executor.yaml"
