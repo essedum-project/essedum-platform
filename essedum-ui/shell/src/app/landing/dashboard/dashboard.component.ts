@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -10,6 +11,7 @@ interface ModuleStat {
   icon: string;
   accent: string;
   route: string;
+  state?: Record<string, any>;
 }
 
 interface PipelineCard {
@@ -33,9 +35,9 @@ export class DashboardComponent implements OnInit {
     { label: 'Connections',     count: 0, sub: '0 total', icon: 'fa-plug',           accent: '#3b82f6', route: '/landing/data/connections' },
     { label: 'Datasets',        count: 0, sub: '0 total', icon: 'fa-database',       accent: '#10b981', route: '/landing/data/datasets' },
     { label: 'Models',          count: 0, sub: '0 total', icon: 'fa-cubes',          accent: '#8b5cf6', route: '/landing/data/models' },
-    { label: 'Agent Pipelines', count: 0, sub: '0 total', icon: 'fa-code-fork',      accent: '#fb923c', route: '/landing/agent/pipeline' },
-    { label: 'MCP Pipelines',   count: 0, sub: '0 total', icon: 'fa-server',         accent: '#06b6d4', route: '/landing/integration/pipelines' },
-    { label: 'App Pipelines',   count: 0, sub: '0 total', icon: 'fa-window-restore', accent: '#fbbf24', route: '/landing/integration/apps' },
+    { label: 'Agent Pipelines', count: 0, sub: '0 total', icon: 'fa-code-fork',      accent: '#fb923c', route: '/landing/agent/pipeline', state: { pipelineMode: 'agent' } },
+    { label: 'MCP Pipelines',   count: 0, sub: '0 total', icon: 'fa-server',         accent: '#06b6d4', route: '/landing/agent/pipeline', state: { pipelineMode: 'mcp'   } },
+    { label: 'App Pipelines',   count: 0, sub: '0 total', icon: 'fa-window-restore', accent: '#fbbf24', route: '/landing/agent/pipeline', state: { pipelineMode: 'app'   } },
   ];
 
   topAgentPipelines: PipelineCard[] = [];
@@ -46,10 +48,14 @@ export class DashboardComponent implements OnInit {
   // (apps/<name>/src/environments/environment.ts) and the host's nginx proxy_pass.
   private readonly api = '/api/aip';
 
-  constructor(private https: HttpClient) {}
+  constructor(private https: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
+  }
+
+  navigateTo(mod: ModuleStat): void {
+    this.router.navigate([mod.route], { state: mod.state || {} });
   }
 
   private loadDashboardData(): void {

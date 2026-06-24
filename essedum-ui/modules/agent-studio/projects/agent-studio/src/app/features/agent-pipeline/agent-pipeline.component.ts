@@ -2816,10 +2816,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.isUploadingFiles = true;
     const organization = this.getOrganization();
 
-
-    // Call the upload API - the service should handle MCP vs Agent differentiation
-    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile).subscribe({
-      next: (response) => {
+// Call the upload API with type param: Agent | MCP | App
+    const uploadType = this.pipelineMode === 'mcp' ? 'MCP' : this.pipelineMode === 'app' ? 'Application' : 'Agent';
+    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType).subscribe({
+         next: (response) => {
         this.service.message(
           `${this.pipelineMode === 'mcp' ? 'MCP server' : 'Agent'} files uploaded successfully!`, 
           'success'
