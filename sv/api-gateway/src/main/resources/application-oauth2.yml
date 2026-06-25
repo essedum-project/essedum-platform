@@ -10,8 +10,8 @@
 # =====================================================
 
 security:
-  issuer-uri: ${OAUTH2_ISSUER_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM}
-  jwk-set-uri: ${OAUTH2_JWK_URI:https://login.essedum-lfn.infosys.com/realms/ESSEDUM/protocol/openid-connect/certs}
+  issuer-uri: ${OAUTH2_ISSUER_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM}
+  jwk-set-uri: ${OAUTH2_JWK_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM/protocol/openid-connect/certs}
   clientId: ${OAUTH2_CLIENT_ID:essedum-45}
   scope: ${OAUTH2_SCOPE:openid profile email}
   claim: ${OAUTH2_USER_CLAIM:email||admin}

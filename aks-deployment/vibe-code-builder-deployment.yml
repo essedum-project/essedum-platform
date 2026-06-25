@@ -15,9 +15,11 @@ spec:
         app: vibe-code-builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: vibe-code-builder
-          image:  localhost:5000/vibe-code-builder-service:latest
+          image: acrreq0762935.azurecr.io/vibe-code-builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

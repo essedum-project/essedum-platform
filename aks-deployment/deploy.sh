@@ -60,7 +60,8 @@ deploy() {
   wait_for "ingress-nginx-controller" "ingress-nginx"
 
   info "--- [2/9] MetalLB config (if applicable) ---"
-  apply "metallb-config" "metallib-config.yaml"
+  # MetalLB is not used on AKS — skip
+  info "  Skipping MetalLB (AKS uses Azure Load Balancer)"
 
   # 2. Application namespace
   info "--- [3/9] Namespace: ${NAMESPACE} ---"
@@ -79,18 +80,22 @@ deploy() {
 
   # 3. Secrets (must be applied before workloads that reference them)
   info "--- [3.5/9] Secrets ---"
-  apply "minio-secret" "essedum-minio-secret.yaml"
+  if [[ -f "${SCRIPT_DIR}/create-secrets.sh" ]]; then
+    bash "${SCRIPT_DIR}/create-secrets.sh" || warn "create-secrets.sh encountered an issue – check secret values and re-run manually if needed."
+  else
+    warn "create-secrets.sh not found – skipping automated secret creation. Ensure all secrets exist in namespace '${NAMESPACE}'."
+  fi
 
-  # 4. Persistent storage
+  # 4. Persistent storage (PVs are immutable after creation — errors here are non-fatal)
   info "--- [4/9] Persistent Volumes & Claims ---"
-  apply "mysql-pv"    "mysql_file_pv.yaml"
-  apply "qdrant-pv"   "qdrantfilepv.yaml"
-  apply "langflow-pv" "langflow_file_pv.yaml"
+  apply "mysql-pv"    "mysql_file_pv.yaml"    || warn "mysql-pv: already exists or immutable — skipping"
+  apply "qdrant-pv"   "qdrantfilepv.yaml"     || warn "qdrant-pv: already exists or immutable — skipping"
+  apply "langflow-pv" "langflow_file_pv.yaml" || warn "langflow-pv: already exists or immutable — skipping"
 
-  # 4. Stateful data-plane services
+  # 4. Stateful data-plane services (PVCs are immutable — errors are non-fatal)
   info "--- [5/9] Data stores (MySQL, Qdrant) ---"
-  apply "mysql"  "mysql_deployment_v3.yaml"
-  apply "qdrant" "qdrant_deployment.yaml"
+  apply "mysql"  "mysql_deployment_v3.yaml"  || warn "mysql: apply had errors (PVC may be immutable) — continuing"
+  apply "qdrant" "qdrant_deployment.yaml"    || warn "qdrant: apply had errors (PVC may be immutable) — continuing"
   wait_for "mysql"  "${NAMESPACE}"
   wait_for "qdrant" "${NAMESPACE}"
 
@@ -147,6 +152,7 @@ deploy() {
   # 7. Horizontal Pod Autoscalers
   info "--- [8/9] Horizontal Pod Autoscalers ---"
   apply "essedum-backend-api-gateway-hpa" "essedum-backend-hpa.yaml"
+  apply "essedum-ui-hpa"                  "essedum-ui-hpa.yaml"
   apply "keycloak-hpa"                    "keycloak-hpa.yaml"
   apply "pyjob-hpa"                       "pyjob-executor-hpa.yaml"
 

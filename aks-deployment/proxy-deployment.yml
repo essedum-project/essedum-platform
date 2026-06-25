@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: proxy
-        image: localhost:5000/proxy-service:latest
+        image: acrreq0762935.azurecr.io/proxy-service:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
