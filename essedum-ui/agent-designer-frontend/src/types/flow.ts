@@ -57,6 +57,8 @@ export interface SavedFlow {
   createdAt: string;
   updatedAt: string;
   tags?: string[];
+  env_vars?: Array<{ name: string; value: string }>;
+  secrets?: Array<{ name: string; value: string }>;
 }
 
 export interface LogEntry {

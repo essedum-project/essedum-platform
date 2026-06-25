@@ -13,9 +13,11 @@ spec:
       labels:
         app: essedum-frontend-integration
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-integration
-        image: localhost:5000/essedum-frontend-integration:micro_latest
+        image: acrreq0762935.azurecr.io/essedum-frontend-integration:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 80

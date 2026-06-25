@@ -6,7 +6,9 @@
     "agent-studio": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular:component": { "style": "scss" }
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
       },
       "root": "projects/agent-studio",
       "sourceRoot": "projects/agent-studio/src",
@@ -28,14 +30,11 @@
             "styles": [],
             "scripts": [],
             "extraWebpackConfig": "projects/agent-studio/webpack.config.js",
-            "commonChunk": false
+            "commonChunk": false,
+            "extractLicenses": false
           },
           "configurations": {
             "production": {
-              "budgets": [
-                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
-              ],
               "fileReplacements": [
                 {
                   "replace": "projects/agent-studio/src/environments/environment.ts",
@@ -59,8 +58,12 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "configurations": {
-            "production": { "browserTarget": "agent-studio:build:production" },
-            "development": { "browserTarget": "agent-studio:build:development" }
+            "production": {
+              "browserTarget": "agent-studio:build:production"
+            },
+            "development": {
+              "browserTarget": "agent-studio:build:development"
+            }
           },
           "defaultConfiguration": "development",
           "options": {
@@ -79,5 +82,7 @@
       }
     }
   },
-  "cli": { "analytics": false }
+  "cli": {
+    "analytics": false
+  }
 }

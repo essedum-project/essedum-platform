@@ -27,6 +27,8 @@ async def create_flow(db: AsyncSession, data: FlowCreate) -> Flow:
         nodes=data.nodes,
         edges=data.edges,
         tags=data.tags,
+        env_vars=data.env_vars,
+        secrets=data.secrets,
     )
     db.add(flow)
     await db.commit()

@@ -13,9 +13,11 @@ spec:
       labels:
         app: pyjob-executor
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: pyjob-executor-container
-        image: localhost:5000/pyjob-excecutor:latest # Updated to use the ACR image
+        image: acrreq0762935.azurecr.io/pyjob-excecutor:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
@@ -23,6 +25,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: pyjob-executor-service
   namespace: aipns
 spec:

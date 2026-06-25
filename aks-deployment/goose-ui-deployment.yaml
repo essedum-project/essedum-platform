@@ -13,9 +13,11 @@ spec:
       labels:
         app: goose-ui
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: goose-ui
-        image: localhost:5000/goose-ui:latest
+        image: acrreq0762935.azurecr.io/goose-ui:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
@@ -33,6 +35,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: goose-ui-service
   namespace: aipns
 spec:

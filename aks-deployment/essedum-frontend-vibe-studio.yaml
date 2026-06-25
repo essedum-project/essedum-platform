@@ -13,9 +13,11 @@ spec:
       labels:
         app: essedum-frontend-vibe-studio
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-vibe-studio
-        image: localhost:5000/essedum-frontend-vibe-studio:micro_latest
+        image: acrreq0762935.azurecr.io/essedum-frontend-vibe-studio:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 80

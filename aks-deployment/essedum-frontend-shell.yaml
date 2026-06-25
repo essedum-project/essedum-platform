@@ -13,16 +13,28 @@ spec:
       labels:
         app: essedum-frontend-shell
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-shell
-        image: localhost:5000/essedum-frontend-shell:micro_latest
+        image: acrreq0762935.azurecr.io/essedum-frontend-shell:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 8084
+        volumeMounts:
+        - name: auth-config
+          mountPath: /app/ui/shell/configs/auth-config.json
+          subPath: auth-config.json
+      volumes:
+      - name: auth-config
+        configMap:
+          name: essedum-auth-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: essedum-frontend-shell-service
   namespace: aipns
 spec:

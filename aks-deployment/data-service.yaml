@@ -13,16 +13,21 @@ spec:
       labels:
         app: essedum-backend-data
     spec:
-      hostAliases:
-      - ip: "localhost"
-        hostnames:
-        - "login.essedum-lfn.infosys.com"
-        - "essedum-lfn.infosys.com"
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-backend-data
-        image: localhost:5000/essedum-data-service:micro_latest
+        image: acrreq0762935.azurecr.io/essedum-data-service:v15
         imagePullPolicy: Always
+        command: ["/bin/bash", "-c"]
+        args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/data-service*.jar | head -1)"]
         env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "mysql,oauth2,dbconstants"
+        - name: OAUTH2_ISSUER_URI
+          value: "https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM"
+        - name: OAUTH2_JWK_URI
+          value: "http://keycloak:8180/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
@@ -38,6 +43,8 @@ spec:
             secretKeyRef:
               name: essedum-db-secret
               key: MYSQL_PASSWORD
+        - name: ENCRYPTION_KEY
+          value: "leap$123##"
         ports:
         - containerPort: 8083
 ---

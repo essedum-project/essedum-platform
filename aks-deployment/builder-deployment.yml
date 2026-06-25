@@ -15,9 +15,11 @@ spec:
         app: builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: builder
-          image:  localhost:5000/builder-service:latest
+          image: acrreq0762935.azurecr.io/builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

@@ -1,11 +1,11 @@
 {
   "minio": {
-    "endpoint": "__FE_MINIO_ENDPOINT__",
-    "bucketName": "__FE_MINIO_BUCKET__"
+    "endpoint": "http://100.78.49.155:9000",
+    "bucketName": "aiptest"
   },
   "containerRegistry": {
-    "registryPrefix": "__FE_CONTAINER_REGISTRY_PREFIX__",
-    "imageVersion": "__FE_CONTAINER_REGISTRY_VERSION__"
+    "registryPrefix": "acrreq0762935.azurecr.io/",
+    "imageVersion": "v1"
   }
 }
  

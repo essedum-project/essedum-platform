@@ -40,7 +40,7 @@ spec:
             - name: KC_HTTPS_ENABLED
               value: "true"
             - name: KC_HOSTNAME
-              value: "login.essedum-lfn.infosys.com"
+              value: "aiplatform.az.ad.idemo-ppc.com"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "true"
             - name: KC_HTTPS_CERTIFICATE_FILE
@@ -79,13 +79,20 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: keycloak
   namespace: aipns
 spec:
   selector:
     app: keycloak
   ports:
-    - protocol: TCP
+    - name: keycloak-https
+      protocol: TCP
       port: 8443
       targetPort: 8443
+    - name: keycloak-http
+      protocol: TCP
+      port: 8180
+      targetPort: 8180
   type: LoadBalancer

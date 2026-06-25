@@ -13,9 +13,11 @@ spec:
       labels:
         app: essedum-frontend-data-ops
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-data-ops
-        image: localhost:5000/essedum-frontend-data-ops:micro_latest
+        image: acrreq0762935.azurecr.io/essedum-frontend-data-ops:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 80
