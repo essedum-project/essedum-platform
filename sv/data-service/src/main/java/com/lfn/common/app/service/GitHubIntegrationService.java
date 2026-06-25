@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.*;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -98,15 +99,7 @@ public class GitHubIntegrationService {
      */
     private OkHttpClient createInsecureOkHttpClient() throws NoSuchAlgorithmException, KeyManagementException {
         // Create a trust manager that accepts all certificates
-        TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-            }
-        };
+        TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
         // Install the all-trusting trust manager
         SSLContext sslContext = SSLContext.getInstance("TLS");

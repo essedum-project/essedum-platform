@@ -117,6 +117,12 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     isBackHovered=false;
     envCollapsed = true;
     secretsCollapsed = true;
+    envEditIndex: number = -1;
+    envEditMode: boolean = false;
+    secretsEditIndex: number = -1;
+    secretsEditMode: boolean = false;
+    secretsShowValue: boolean[] = [];
+    private _saveDebounceTimer: any = null;
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -187,6 +193,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
             this.streamItem.jsonContent
           ).elements[0].attributes;
           this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
+    if (this.dynamicEnvArray?.length) {
+      this.envCollapsed = false;
+    }
 
         } else {
           if (this.streamItem.json_content) {
@@ -198,7 +207,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
             this.streamItem.json_content
           ).elements[0].attributes;
           this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
-          
+    if (this.dynamicEnvArray?.length) {
+      this.envCollapsed = false;
+    }
 
         }
         if (this.data.dataset) {
@@ -233,6 +244,8 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         }
         if(this.data.usedSecrets){
           this.dynamicSecretsArray=this.data.usedSecrets;
+          if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
+          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
         }
         if(this.data.files==null || this.data.files==undefined){
           this.data['files'] = [];
@@ -810,16 +823,117 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.getRelatedComponent();
   }
 
+  addEnvVar() {
+    if (this.isAuth) { return; }
+    // If already editing a row, don't add another blank one
+    if (this.envEditMode) { return; }
+    if (!this.dynamicEnvArray) { this.dynamicEnvArray = []; }
+    this.dynamicEnvArray.push({ name: '', value: '' });
+    this.envEditIndex = this.dynamicEnvArray.length - 1;
+    this.envEditMode = true;
+    this.envCollapsed = false;
+  }
+
+  editEnvVar(i: number) {
+    if (this.isAuth) { return; }
+    this.envEditIndex = i;
+    this.envEditMode = true;
+  }
+
+  saveEnvVar(i: number) {
+    this.envEditMode = false;
+    this.envEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteEnvVar(i: number) {
+    if (this.isAuth) { return; }
+    this.dynamicEnvArray.splice(i, 1);
+    this.saveEnvAndSecrets();
+  }
+
   onEnvDataChange($event) {
     this.environment = $event;
     this.dynamicEnvArray = $event;
     this.envModified = true;
+    if (this.dynamicEnvArray?.length) { this.envCollapsed = false; }
   }
 
   onSecretsDataChange($event) {
     this.secrets = $event;
     this.dynamicSecretsArray = $event;
     this.secretsModified = true;
+    if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
+    this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
+    this.saveEnvAndSecrets();
+  }
+
+  addSecret(): void {
+    if (this.secretsEditMode) { return; }
+    if (!this.dynamicSecretsArray) { this.dynamicSecretsArray = []; }
+    this.dynamicSecretsArray.push({ name: '', value: '' });
+    this.secretsShowValue.push(false);
+    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
+    this.secretsEditMode = true;
+    this.secretsCollapsed = false;
+  }
+
+  editSecret(i: number): void {
+    this.secretsEditIndex = i;
+    this.secretsEditMode = true;
+  }
+
+  saveSecret(i: number): void {
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  deleteSecret(i: number): void {
+    this.dynamicSecretsArray.splice(i, 1);
+    this.secretsShowValue.splice(i, 1);
+    this.secretsEditMode = false;
+    this.secretsEditIndex = -1;
+    this.saveEnvAndSecrets();
+  }
+
+  toggleSecretVisibility(i: number): void {
+    this.secretsShowValue[i] = !this.secretsShowValue[i];
+  }
+
+  saveEnvAndSecrets() {
+    // Debounce: collapse multiple rapid calls into a single API request
+    if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
+    this._saveDebounceTimer = setTimeout(() => {
+      this._saveDebounceTimer = null;
+      this.persistEnvAndSecrets();
+    }, 300);
+  }
+
+  private persistEnvAndSecrets(): void {
+    try {
+      if (!this.streamItem) { return; }
+      const current = this.streamItem.json_content
+        ? JSON.parse(this.streamItem.json_content)
+        : { elements: [{ attributes: this.data || {} }] };
+      current.environment = this.dynamicEnvArray || [];
+      if (current.elements?.[0]?.attributes) {
+        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
+      }
+      current.default_runtime = this.selectedRunType;
+      this.streamItem.json_content = JSON.stringify(current);
+      this.service.update(this.streamItem).subscribe({
+        next: () => {
+          this.service.message('Configuration saved', 'success');
+        },
+        error: (err) => {
+          console.error('Failed to save env/secrets:', err);
+          this.service.message('Failed to save configuration', 'error');
+        }
+      });
+    } catch (e) {
+      console.error('saveEnvAndSecrets error:', e);
+    }
   }
 
   // File structure methods

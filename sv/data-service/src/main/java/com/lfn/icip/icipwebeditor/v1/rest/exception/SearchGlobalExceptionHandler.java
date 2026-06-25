@@ -64,7 +64,7 @@ public class SearchGlobalExceptionHandler {
 		ApiError apiError = new ApiError(
 			HttpStatus.BAD_REQUEST,
 			"Invalid JSON format",
-			"Failed to parse JSON: " + ex.getMessage()
+			"Failed to parse JSON"
 		);
 		return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
 	}

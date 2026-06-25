@@ -63,7 +63,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import com.lfn.ai.comm.lib.util.FileValidate;
 import com.lfn.ai.comm.lib.util.FileValidateV2;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
@@ -108,9 +107,6 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	@Autowired
 	private FileServerService fileserverService;
 	
-	@Autowired
-	private FileValidate fileValidate;
-
 	@Autowired
 	private FileValidateV2 fileValidateV2;
 
@@ -174,6 +170,9 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	 */
 	@Override
 	public String getHeaders(Path path) throws IOException, CsvValidationException, JSONException, ScriptException {
+		// Defence-in-depth: reject path-traversal sequences before opening any
+		// stream on a user-controlled path (CodeQL java/path-injection).
+		path = PathValidationUtil.validateAndGetPath(path.toString());
 		logger.info("Reading first line of file {}", path.getFileName());
 		if (path.toString().endsWith("xlsx")) {
 			try (FileInputStream is = new FileInputStream(path.toFile())) {
@@ -217,6 +216,9 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	
 	@Override
 	public String getJsonHeaders(Path path, String query) throws FileNotFoundException, IOException, ScriptException {
+		// Defence-in-depth: reject path-traversal sequences before opening any
+		// stream on a user-controlled path (CodeQL java/path-injection).
+		path = PathValidationUtil.validateAndGetPath(path.toString());
 		logger.info("Reading first line of file {}", path.getFileName());
 		if(path.toString().endsWith("json")) {
 			JSONParser jsonParser = new JSONParser();	        
@@ -453,8 +455,20 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	 * @return the path
 	 */
 	Path getPath(ICIPChunkMetaData metadata) {
-		return Paths.get(icipUploadDir, DATASETFILESPATH, ICIPUtils.removeSpecialCharacter(metadata.getFileGuid()),
-				metadata.getIndex() + "_" + metadata.getFileName().trim().replace(" ", ""));
+		// Sanitise user-supplied components of the path before passing them to
+		// Paths.get(...) so that downstream Files.* calls cannot be steered
+		// outside icipUploadDir (CodeQL java/path-injection).
+		String safeGuid = ICIPUtils.removeSpecialCharacter(metadata.getFileGuid());
+		String safeName = metadata.getFileName() == null ? ""
+				: metadata.getFileName().trim().replace(" ", "");
+		safeName = safeName.replace("\\", "_").replace("/", "_");
+		if (safeName.contains("..")) {
+			safeName = safeName.replace("..", "_");
+		}
+		String relative = DATASETFILESPATH + "/" + safeGuid + "/"
+				+ metadata.getIndex() + "_" + safeName;
+		File resolved = PathValidationUtil.validatePath(icipUploadDir, relative);
+		return resolved.toPath();
 	}
 
 	/**
@@ -466,7 +480,15 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	 * @return the path
 	 */
 	Path getPath(String id, int index, String filename) {
-		return Paths.get(icipUploadDir, DATASETFILESPATH, id, index + "_" + filename);
+		String safeId = ICIPUtils.removeSpecialCharacter(id);
+		String safeName = filename == null ? "" : filename.trim().replace(" ", "");
+		safeName = safeName.replace("\\", "_").replace("/", "_");
+		if (safeName.contains("..")) {
+			safeName = safeName.replace("..", "_");
+		}
+		String relative = DATASETFILESPATH + "/" + safeId + "/" + index + "_" + safeName;
+		File resolved = PathValidationUtil.validatePath(icipUploadDir, relative);
+		return resolved.toPath();
 	}
 
 	/**
@@ -612,7 +634,9 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	 * @throws Exception the exception
 	 */	
 	public void copyFileFromServer(ICIPDatasetFiles datasetFile) throws Exception {
-		Path filepath = Paths.get(datasetFile.getFilepath());
+		// Reject traversal sequences in the persisted file path before any
+		// Files.* operation (CodeQL java/path-injection).
+		Path filepath = PathValidationUtil.validateAndGetPath(datasetFile.getFilepath());
 		if (!Files.exists(filepath) && datasetFile.getMetadata() != null
 				&& !datasetFile.getMetadata().trim().isEmpty()) {
 			try {

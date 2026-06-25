@@ -537,7 +537,16 @@ public abstract class ICIPDataSourceServiceUtilRestAbstract extends ICIPDataSour
 	 */
 	protected JSONObject readJsonFile(ICIPDatasource datasource){
 		
-		String content = "{}", path = "/datasets/"+ datasource.getType().toLowerCase() + ".json";
+		String content = "{}";
+		// Sanitize the datasource type before using it in a resource path to
+		// avoid path-traversal (CodeQL java/path-injection). Restrict to a
+		// conservative whitelist.
+		String rawType = datasource.getType() == null ? "" : datasource.getType().toLowerCase();
+		if (rawType.isEmpty() || !rawType.matches("[a-z0-9_.-]+") || rawType.contains("..")) {
+			logger.error("Invalid datasource type for json file lookup: {}", rawType);
+			return new JSONObject(content);
+		}
+		String path = "/datasets/" + rawType + ".json";
 		InputStream in = null;
 		BufferedReader reader = null;
 		try {

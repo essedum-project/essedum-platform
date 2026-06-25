@@ -107,8 +107,7 @@ public class ICIPMlOpsRestAdapterService {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
-        HttpGet httpGet = new HttpGet(host + icipPathPrefix + "/adapters/" +
-                adaptername + "/" + methodname + "/" + org);
+        HttpGet httpGet = new HttpGet(buildAdapterUri(host, adaptername, methodname, org));
 
         if (headers != null) {
             headers.forEach((k, v) -> {
@@ -172,8 +171,7 @@ public class ICIPMlOpsRestAdapterService {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
-        HttpPost httpPost = new HttpPost(
-                host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
+        HttpPost httpPost = new HttpPost(buildAdapterUri(host, adaptername, methodname, org));
 
         if (headers != null) {
             headers.forEach((k, v) -> {
@@ -242,8 +240,7 @@ public class ICIPMlOpsRestAdapterService {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
         CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
-        HttpDelete httpDelete = new HttpDelete(
-                host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
+        HttpDelete httpDelete = new HttpDelete(buildAdapterUri(host, adaptername, methodname, org));
 
         if (headers != null) {
             headers.forEach((k, v) -> {
@@ -323,6 +320,93 @@ public class ICIPMlOpsRestAdapterService {
         return hostFromHeader;
     }
 
+    /**
+     * Validates the {@code host} value (taken from request headers or configuration) against
+     * the trusted {@code referer} configured for this service, ensuring that only requests
+     * targeted at the configured Essedum back-end host are issued. This prevents
+     * Server-Side Request Forgery (SSRF) where an attacker-controlled Referer header could
+     * otherwise direct outbound HTTP requests to arbitrary internal or external hosts.
+     *
+     * @param host the candidate host (scheme + authority, possibly with path)
+     * @return the validated host string
+     * @throws IllegalArgumentException if the host is malformed or not allowlisted
+     */
+    private String validateHost(String host) {
+        if (host == null || host.isBlank()) {
+            throw new IllegalArgumentException("Host must not be null or empty");
+        }
+        URI candidate;
+        try {
+            candidate = URI.create(host);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid host URI: " + host, ex);
+        }
+        String scheme = candidate.getScheme();
+        String authority = candidate.getHost();
+        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                || authority == null || authority.isBlank()) {
+            throw new IllegalArgumentException("Host must be an http(s) URL with a valid authority: " + host);
+        }
+        // Only allow the configured referer's host (or localhost for local development)
+        String allowedHost;
+        try {
+            allowedHost = URI.create(referer).getHost();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Configured referer is invalid", ex);
+        }
+        if (!"localhost".equalsIgnoreCase(authority)
+                && !"127.0.0.1".equals(authority)
+                && (allowedHost == null || !allowedHost.equalsIgnoreCase(authority))) {
+            throw new IllegalArgumentException(
+                    "Host not in allowlist (expected '" + allowedHost + "' or localhost): " + authority);
+        }
+        return host;
+    }
+
+    /**
+     * Builds the adapter target URI in an SSRF-safe way: the host is validated against
+     * an allowlist and each user-controlled path segment is added through {@link URIBuilder}
+     * so it is percent-encoded and cannot inject additional path/query components.
+     */
+    private URI buildAdapterUri(String host, String adaptername, String methodname, String org)
+            throws URISyntaxException {
+        String safeHost = validateHost(host);
+        URIBuilder builder = new URIBuilder(safeHost + icipPathPrefix);
+        // Use setPathSegments so each segment is encoded individually (no '/', '?', '#' smuggling).
+        builder.setPathSegments(
+                concatSegments(builder.getPathSegments(),
+                        "adapters", safeSegment(adaptername), safeSegment(methodname), safeSegment(org)));
+        return builder.build();
+    }
+
+    private static List<String> concatSegments(List<String> existing, String... extra) {
+        List<String> all = new ArrayList<>();
+        if (existing != null) {
+            for (String s : existing) {
+                if (s != null && !s.isEmpty()) {
+                    all.add(s);
+                }
+            }
+        }
+        for (String s : extra) {
+            all.add(s);
+        }
+        return all;
+    }
+
+    private static String safeSegment(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Path segment must not be null");
+        }
+        // Reject path/query/fragment separators outright.
+        if (value.indexOf('/') >= 0 || value.indexOf('\\') >= 0
+                || value.indexOf('?') >= 0 || value.indexOf('#') >= 0
+                || value.indexOf('\n') >= 0 || value.indexOf('\r') >= 0) {
+            throw new IllegalArgumentException("Invalid characters in path segment: " + value);
+        }
+        return value;
+    }
+
     public ResponseEntity<?> getS3FileData(String modelName, String fileName, String org) {
         try {
             ICIPDataset datasetForModel = new ICIPDataset();
@@ -337,7 +421,7 @@ public class ICIPMlOpsRestAdapterService {
                     HttpStatus.OK);
         } catch (Exception e) {
             logger.error("EXCEPTION:", e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -425,7 +509,7 @@ public class ICIPMlOpsRestAdapterService {
             }
         } catch (Exception e) {
             logger.error("EXCEPTION:", e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

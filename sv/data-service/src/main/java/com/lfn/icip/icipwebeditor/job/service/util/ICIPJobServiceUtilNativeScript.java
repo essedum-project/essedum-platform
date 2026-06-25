@@ -271,11 +271,10 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 							StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
 					break;
 				case "Dataset":
-					JsonParser parser = new JsonParser();
 					ICIPDataset dataset = datasetService.getDataset(value, org);
 					JsonElement e;
 					try {
-						e = parser.parse(gson.toJson(dataset));
+						e = JsonParser.parseString(gson.toJson(dataset));
 					} catch (Exception ex) {
 						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
@@ -288,12 +287,12 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 							ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
 							try {
 								String schemaValue = obj.get("schemavalue").getAsString();
-								JsonElement schemaElem = parser.parse(schemaValue);
+								JsonElement schemaElem = JsonParser.parseString(schemaValue);
 								schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
 								schemaDetails.setSchemaId(obj.get("name").getAsString());
 								e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
 								e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
-										parser.parse(gson.toJson(schemaDetails)));
+										JsonParser.parseString(gson.toJson(schemaDetails)));
 							} catch (Exception ex) {
 								String msg = "Error in getting schema from dataset : "
 										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();

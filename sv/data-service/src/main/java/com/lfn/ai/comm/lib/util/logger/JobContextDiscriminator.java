@@ -42,6 +42,7 @@ public class JobContextDiscriminator extends AbstractDiscriminator<ILoggingEvent
 	 * @param event the event
 	 * @return the discriminating value
 	 */
+	@SuppressWarnings("deprecation")
 	public String getDiscriminatingValue(ILoggingEvent event) {
 		if (event == null || event.getMarker() == null) {
 			return defaultValue;

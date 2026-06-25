@@ -54,6 +54,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
@@ -82,6 +83,7 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import com.lfn.icip.dataset.util.SsrfProtectionUtil;
 
 // TODO: Auto-generated Javadoc
 // 
@@ -502,21 +504,7 @@ public class ICIPJobsService implements IICIPJobsService {
     }
 
     public TrustManager[] getTrustAllCerts() {
-        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[] {};
-            }
-        } };
-        return trustAllCerts;
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     public SSLContext getSslContext(TrustManager[] trustAllCerts) {
@@ -542,7 +530,7 @@ public class ICIPJobsService implements IICIPJobsService {
         newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
         newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
         OkHttpClient client = newBuilder.build();
-        Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+        Request requestokHttp = new Request.Builder().url(toSafeUrl(url)).addHeader("accept", "application/json").build();
         logger.info("getLog request " + requestokHttp.toString());
         Response response = null;
         try {
@@ -1119,6 +1107,19 @@ public class ICIPJobsService implements IICIPJobsService {
         return stringToReturn;
     }
 
+    /**
+     * Validates a raw URL against SSRF (scheme + host + internal/loopback IP ranges) and
+     * returns a safe {@link java.net.URL}. Throws {@link IllegalArgumentException} if the URL
+     * is malformed or targets a disallowed/internal address, blocking the outbound request.
+     */
+    private static java.net.URL toSafeUrl(String rawUrl) {
+        try {
+            return SsrfProtectionUtil.validateAndCreateUrl(rawUrl);
+        } catch (java.net.MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
+    }
+
     public String getAllRemoteJobs(String url) throws EssedumException {
         TrustManager[] trustAllCerts = getTrustAllCerts();
         SSLContext sslContext = getSslContext(trustAllCerts);
@@ -1127,7 +1128,7 @@ public class ICIPJobsService implements IICIPJobsService {
         newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
         OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
                 .writeTimeout(50, TimeUnit.SECONDS).build();
-        Request requestokHttp = new Request.Builder().url(url).addHeader("Content-Type", "application/json")
+        Request requestokHttp = new Request.Builder().url(toSafeUrl(url)).addHeader("Content-Type", "application/json")
                 .addHeader("accept", "application/json").build();
         Response response = null;
         try {
@@ -1152,7 +1153,7 @@ public class ICIPJobsService implements IICIPJobsService {
         OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
                 .writeTimeout(50, TimeUnit.SECONDS).build();
         String logUrl = url + "/" + jobId + "/getLog";
-        Request requestokHttp = new Request.Builder().url(logUrl).addHeader("Content-Type", "application/json")
+        Request requestokHttp = new Request.Builder().url(toSafeUrl(logUrl)).addHeader("Content-Type", "application/json")
                 .addHeader("accept", "application/json").build();
         Response response = null;
         try {
@@ -1177,7 +1178,7 @@ public class ICIPJobsService implements IICIPJobsService {
         OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
                 .writeTimeout(50, TimeUnit.SECONDS).build();
         String logUrl = url + "/" + jobId + "/stop";
-        Request requestokHttp = new Request.Builder().url(logUrl).addHeader("Content-Type", "application/json")
+        Request requestokHttp = new Request.Builder().url(toSafeUrl(logUrl)).addHeader("Content-Type", "application/json")
                 .addHeader("accept", "application/json").build();
         Response response = null;
         try {

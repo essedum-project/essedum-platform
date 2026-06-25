@@ -962,7 +962,15 @@ public class ICIPFileService {
      * @return the path
      */
     public Path returnPath(String fileTypeFolder, String filename) {
-        return Paths.get(folderPath, fileTypeFolder, filename);
+        // Sanitise the user-controlled fileTypeFolder/filename so the resolved
+        // path is guaranteed to stay inside the configured `folderPath`. The
+        // returned Path is freshly constructed from a canonicalised File whose
+        // containment in the base directory has been asserted — this is the
+        // sanitisation barrier that downstream Files.* sinks (and CodeQL's
+        // java/path-injection query) need to see.
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(folderPath, fileTypeFolder + java.io.File.separator + filename)
+                .toPath();
     }
 
     /**
@@ -1460,16 +1468,25 @@ public class ICIPFileService {
         paths.add(requirementpath);
         paths.add(eggpath);
         for (JsonElement element : pathArray) {
-            paths.add(Paths.get(element.getAsString()));
+            // Reject traversal sequences in user-controlled extra paths so the
+            // downstream Files.exists / FileInputStream sinks see a sanitised Path.
+            paths.add(com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(element.getAsString()));
         }
-        FileOutputStream fos = new FileOutputStream(zipPath.toAbsolutePath().toString());
+        FileOutputStream fos = new FileOutputStream(com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(zipPath.toAbsolutePath().toString()).toFile());
         try (fos) {
             ZipOutputStream zipOut = null;
             try {
                 zipOut = new ZipOutputStream(fos);
                 for (Path path : paths) {
-                    if (path != null && java.nio.file.Files.exists(path) && !java.nio.file.Files.isDirectory(path)) {
-                        File fileToZip = path.toFile();
+                    // Re-validate each Path against traversal before treating it as a
+                    // file to zip — CodeQL recognises this as the sanitiser barrier
+                    // for both Files.exists and the FileInputStream sink below.
+                    java.nio.file.Path safePath = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(path.toString());
+                    if (java.nio.file.Files.exists(safePath) && !java.nio.file.Files.isDirectory(safePath)) {
+                        File fileToZip = safePath.toFile();
                         try (FileInputStream fis = new FileInputStream(fileToZip)) {
                             ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
                             zipOut.putNextEntry(zipEntry);
@@ -1510,7 +1527,12 @@ public class ICIPFileService {
      * @return the path
      */
     public Path returnDefaultConfigPath(String agentType, String filename) {
-        return Paths.get(agentPath, agentType, filename);
+        // Sanitise against path traversal: the returned Path is built from a
+        // canonicalised File whose containment under `agentPath` has been
+        // asserted by PathValidationUtil.
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, agentType + java.io.File.separator + filename)
+                .toPath();
     }
 
     /**
@@ -1523,8 +1545,18 @@ public class ICIPFileService {
      * @return the path
      */
     private Path returnConfigPath(String cname, String org, String agentType, String filename) {
-        return Paths.get(agentPath, agentType.toLowerCase(), ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
-                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()), filename);
+        // Sanitise: build a relative segment from the (already sanitised) cname/org
+        // plus user-supplied agentType/filename, then assert canonical containment
+        // under `agentPath`. The returned Path is fresh, so taint trackers (e.g.
+        // CodeQL java/path-injection) treat downstream Files.* calls as safe.
+        String relative = String.join(java.io.File.separator,
+                agentType.toLowerCase(),
+                ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
+                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()),
+                filename);
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, relative)
+                .toPath();
     }
 
     /**
@@ -1538,8 +1570,15 @@ public class ICIPFileService {
      * @return the path
      */
     private Path returnConfigPath(String cname, String org, String agentType, String filename1, String filename2) {
-        return Paths.get(agentPath, agentType.toLowerCase(), ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
-                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()), filename1, filename2);
+        // Same canonical-containment guard as the 4-arg overload.
+        String relative = String.join(java.io.File.separator,
+                agentType.toLowerCase(),
+                ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
+                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()),
+                filename1, filename2);
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, relative)
+                .toPath();
     }
 
     /**
@@ -1550,7 +1589,11 @@ public class ICIPFileService {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private byte[] getFile(Path path) throws IOException {
-        File file = path.toFile();
+        // Reject traversal sequences in the supplied Path before opening a
+        // FileInputStream so CodeQL's java/path-injection query sees a sanitiser
+        // on the data-flow into this sink.
+        File file = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(path.toString()).toFile();
         byte[] bytesArray = new byte[(int) file.length()];
         int readLength = 0;
         try (FileInputStream fileInputStream = new FileInputStream(file)) {

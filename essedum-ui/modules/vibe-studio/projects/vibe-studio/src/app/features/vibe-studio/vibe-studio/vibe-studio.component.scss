@@ -101,6 +101,74 @@
   &:hover { transform: translateY(-1px); }
 }
 
+// ── Settings dropdown ─────────────────────────────────────────────────────────
+.settings-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: all 0.15s;
+
+  i:first-child { font-size: 14px; }
+
+  .settings-label {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .settings-chevron {
+    font-size: 10px;
+    transition: transform 0.2s;
+    &.open { transform: rotate(180deg); }
+  }
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  min-width: 260px;
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+  animation: settings-drop 0.15s ease;
+}
+
+@keyframes settings-drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
 // ── App Type Picker ───────────────────────────────────────────────────────────
 .app-type-screen {
   display: flex;
@@ -366,7 +434,7 @@
 }
 
 // Remove old button-style model option classes (kept minimal for theming)
-.model-option-selected { /* unused — kept to avoid stale class errors */ }
+.model-option-selected { opacity: 1; /* intentionally kept for compatibility */ }
 
 // ── Step 2 label ─────────────────────────────────────────────────────────────
 .picker-step-label {
@@ -562,7 +630,8 @@
 
 // ── Split Panels ──────────────────────────────────────────────────────────────
 .vibe-panels {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 25%) minmax(0, 75%);
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -571,6 +640,7 @@
   border: 1px solid;
   transition: border-color 0.2s;
   align-items: stretch;
+  gap: 0;
 }
 
 .panel {
@@ -580,37 +650,17 @@
   min-height: 0;
   overflow: hidden;
   height: 100%;
+  width: 100%;
 }
 
 .panel.left {
-  flex: 0 0 38%;
-  min-width: 280px;
   border-right: 1px solid;
+  overflow: hidden;
 }
 
-.panel.right { flex: 1; }
-
-.panel-divider {
-  width: 4px;
-  flex-shrink: 0;
-  cursor: col-resize;
-  transition: background 0.15s;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 2px;
-    height: 28px;
-    border-radius: 2px;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-
-  &:hover::after { opacity: 1; }
+.panel.right {
+  min-width: 0;
+  overflow: hidden;
 }
 
 // ── Dark theme ────────────────────────────────────────────────────────────────
@@ -625,6 +675,20 @@
       background-clip: text;
     }
   }
+
+  .settings-btn {
+    color: #94a3b8;
+    border-color: rgba(79,142,247,0.2);
+    &:hover, &.active { background: rgba(79,142,247,0.1); color: #e2e8f0; border-color: rgba(79,142,247,0.4); }
+  }
+
+  .settings-dropdown {
+    background: #1e293b;
+    border: 1px solid rgba(79,142,247,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .settings-field-label { color: #94a3b8; }
 
   .picker-icon-wrap {
     background: linear-gradient(135deg, rgba(79,142,247,0.3), rgba(124,58,237,0.22));
@@ -693,6 +757,12 @@
 
   .panel.left { border-right-color: rgba(79,142,247,0.08); }
 
+  .panel-divider {
+    background: rgba(79,142,247,0.06);
+    &::after { background: rgba(79,142,247,0.4); }
+    &:hover  { background: rgba(79,142,247,0.15); }
+  }
+
   // card created — indigo/blue
   .pipeline-banner.banner-created {
     background: rgba(79,142,247,0.1);
@@ -714,12 +784,6 @@
     .pipeline-banner-text strong { color: #f0fdf4; }
     .pipeline-banner-dismiss { color: #86efac; }
   }
-
-  .panel-divider {
-    background: rgba(79,142,247,0.06);
-    &::after { background: rgba(79,142,247,0.4); }
-    &:hover  { background: rgba(79,142,247,0.15); }
-  }
 }
 
 // ── Light theme ───────────────────────────────────────────────────────────────
@@ -734,6 +798,20 @@
       background-clip: text;
     }
   }
+
+  .settings-btn {
+    color: #64748b;
+    border-color: rgba(99,102,241,0.2);
+    &:hover, &.active { background: rgba(99,102,241,0.07); color: #1e293b; border-color: rgba(99,102,241,0.4); }
+  }
+
+  .settings-dropdown {
+    background: #ffffff;
+    border: 1px solid rgba(99,102,241,0.15);
+    box-shadow: 0 8px 32px rgba(99,102,241,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .settings-field-label { color: #64748b; }
 
   .picker-icon-wrap {
     background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(124,58,237,0.14));
@@ -802,6 +880,12 @@
 
   .panel.left { border-right-color: rgba(99,102,241,0.1); }
 
+  .panel-divider {
+    background: rgba(99,102,241,0.05);
+    &::after { background: rgba(99,102,241,0.35); }
+    &:hover  { background: rgba(99,102,241,0.12); }
+  }
+
   // card created — indigo/blue
   .pipeline-banner.banner-created {
     background: rgba(99,102,241,0.07);
@@ -822,11 +906,5 @@
     .pipeline-banner-icon { color: #16a34a; }
     .pipeline-banner-text strong { color: #14532d; }
     .pipeline-banner-dismiss { color: #166534; }
-  }
-
-  .panel-divider {
-    background: rgba(99,102,241,0.05);
-    &::after { background: rgba(99,102,241,0.35); }
-    &:hover  { background: rgba(99,102,241,0.12); }
   }
 }

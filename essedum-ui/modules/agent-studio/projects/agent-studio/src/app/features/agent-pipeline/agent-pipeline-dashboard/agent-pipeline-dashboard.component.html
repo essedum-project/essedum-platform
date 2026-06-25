@@ -88,6 +88,27 @@
         type="button">
         App Pipelines
       </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'pipeline'"
+        (click)="switchToPipelineMode('pipeline')"
+        type="button">
+        Native Pipeline
+      </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'data'"
+        (click)="switchToPipelineMode('data')"
+        type="button">
+        Data Pipeline
+      </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'training'"
+        (click)="switchToPipelineMode('training')"
+        type="button">
+        Training Pipeline
+      </button>
     </div>
 
     <!-- Last refreshed + refresh icon -->

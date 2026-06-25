@@ -16,6 +16,7 @@
 package com.lfn.common.app.service;
 
 import com.lfn.common.app.exception.GitOperationException;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.common.app.web.rest.dto.*;
 import okhttp3.OkHttpClient;
 import org.kohsuke.github.*;
@@ -98,15 +99,7 @@ public class GitHubIntegrationService {
      */
     private OkHttpClient createInsecureOkHttpClient() throws NoSuchAlgorithmException, KeyManagementException {
         // Create a trust manager that accepts all certificates
-        TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-            }
-        };
+        TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
         // Install the all-trusting trust manager
         SSLContext sslContext = SSLContext.getInstance("TLS");

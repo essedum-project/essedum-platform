@@ -146,5 +146,24 @@ public final class PathValidationUtil {
                     "Path must not contain directory traversal sequences (..)");
         }
     }
+    /**
+     * Strips leading and trailing forward slashes from a string in linear time,
+     * without using regex, to avoid polynomial-regex (ReDoS) findings from
+     * CodeQL.
+     */
+    public static String stripSlashes(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        int start = 0;
+        int end = s.length();
+        while (start < end && s.charAt(start) == '/') {
+            start++;
+        }
+        while (end > start && s.charAt(end - 1) == '/') {
+            end--;
+        }
+        return s.substring(start, end);
+    }
 }
 

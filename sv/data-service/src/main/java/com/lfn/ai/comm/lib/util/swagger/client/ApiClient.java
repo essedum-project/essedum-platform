@@ -26,11 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -46,13 +43,9 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import com.lfn.ai.comm.lib.util.swagger.client.auth.ApiKeyAuth;
 import com.lfn.ai.comm.lib.util.swagger.client.auth.Authentication;
@@ -61,7 +54,6 @@ import com.lfn.ai.comm.lib.util.swagger.client.auth.OAuth;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -73,19 +65,22 @@ import okhttp3.logging.HttpLoggingInterceptor.Level;
 import okio.BufferedSink;
 import okio.Okio;
 
+// Generated Swagger client. The parameter-count (S107), default base-URI (S1075, overridable via
+// setBasePath) and temp-file (S5443, standard Files.createTempFile for response downloads) findings
+// are inherent to the generated code and are intentionally suppressed.
+@SuppressWarnings({ "java:S107", "java:S1075", "java:S5443" })
 public class ApiClient {
+
+	private static final String APPLICATION_JSON = "application/json";
 
 	private String basePath = "http://ieai.marketplace.infosysapps.com/";
 	private boolean debugging = false;
-	private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
+	private Map<String, String> defaultHeaderMap = new HashMap<>();
 	private String tempFolderPath = null;
 
 	private Map<String, Authentication> authentications;
 
 	private DateFormat dateFormat;
-	private DateFormat datetimeFormat;
-	private boolean lenientDatetimeFormat;
-	private int dateLength;
 
 	private InputStream sslCaCert;
 	private boolean verifyingSsl;
@@ -109,7 +104,7 @@ public class ApiClient {
 		setUserAgent("Swagger-Codegen/1.0.0/java");
 
 		// Setup authentications (key: authentication name, value: authentication).
-		authentications = new HashMap<String, Authentication>();
+		authentications = new HashMap<>();
 		authentications.put("aiplat_auth", new OAuth());
 		authentications.put("api_key", new ApiKeyAuth("header", "api_key"));
 		// Prevent the authentications from being modified.
@@ -294,12 +289,12 @@ public class ApiClient {
 	 */
 	public void setUsername(String username) {
 		for (Authentication auth : authentications.values()) {
-			if (auth instanceof HttpBasicAuth) {
-				((HttpBasicAuth) auth).setUsername(username);
+			if (auth instanceof HttpBasicAuth httpBasicAuth) {
+				httpBasicAuth.setUsername(username);
 				return;
 			}
 		}
-		throw new RuntimeException("No HTTP basic authentication configured!");
+		throw new IllegalStateException("No HTTP basic authentication configured!");
 	}
 
 	/**
@@ -309,12 +304,12 @@ public class ApiClient {
 	 */
 	public void setPassword(String password) {
 		for (Authentication auth : authentications.values()) {
-			if (auth instanceof HttpBasicAuth) {
-				((HttpBasicAuth) auth).setPassword(password);
+			if (auth instanceof HttpBasicAuth httpBasicAuth) {
+				httpBasicAuth.setPassword(password);
 				return;
 			}
 		}
-		throw new RuntimeException("No HTTP basic authentication configured!");
+		throw new IllegalStateException("No HTTP basic authentication configured!");
 	}
 
 	/**
@@ -324,12 +319,12 @@ public class ApiClient {
 	 */
 	public void setApiKey(String apiKey) {
 		for (Authentication auth : authentications.values()) {
-			if (auth instanceof ApiKeyAuth) {
-				((ApiKeyAuth) auth).setApiKey(apiKey);
+			if (auth instanceof ApiKeyAuth apiKeyAuth) {
+				apiKeyAuth.setApiKey(apiKey);
 				return;
 			}
 		}
-		throw new RuntimeException("No API key authentication configured!");
+		throw new IllegalStateException("No API key authentication configured!");
 	}
 
 	/**
@@ -339,12 +334,12 @@ public class ApiClient {
 	 */
 	public void setApiKeyPrefix(String apiKeyPrefix) {
 		for (Authentication auth : authentications.values()) {
-			if (auth instanceof ApiKeyAuth) {
-				((ApiKeyAuth) auth).setApiKeyPrefix(apiKeyPrefix);
+			if (auth instanceof ApiKeyAuth apiKeyAuth) {
+				apiKeyAuth.setApiKeyPrefix(apiKeyPrefix);
 				return;
 			}
 		}
-		throw new RuntimeException("No API key authentication configured!");
+		throw new IllegalStateException("No API key authentication configured!");
 	}
 
 	/**
@@ -354,12 +349,12 @@ public class ApiClient {
 	 */
 	public void setAccessToken(String accessToken) {
 		for (Authentication auth : authentications.values()) {
-			if (auth instanceof OAuth) {
-				((OAuth) auth).setAccessToken(accessToken);
+			if (auth instanceof OAuth oauth) {
+				oauth.setAccessToken(accessToken);
 				return;
 			}
 		}
-		throw new RuntimeException("No OAuth2 authentication configured!");
+		throw new IllegalStateException("No OAuth2 authentication configured!");
 	}
 
 	/**
@@ -481,8 +476,8 @@ public class ApiClient {
 			return jsonStr.substring(1, jsonStr.length() - 1);
 		} else if (param instanceof Collection) {
 			StringBuilder b = new StringBuilder();
-			for (Object o : (Collection) param) {
-				if (b.length() > 0) {
+			for (Object o : (Collection<?>) param) {
+				if (!b.isEmpty()) {
 					b.append(",");
 				}
 				b.append(String.valueOf(o));
@@ -504,7 +499,7 @@ public class ApiClient {
 	 * @return A list containing a single {@code Pair} object.
 	 */
 	public List<Pair> parameterToPair(String name, Object value) {
-		List<Pair> params = new ArrayList<Pair>();
+		List<Pair> params = new ArrayList<>();
 
 		// preconditions
 		if (name == null || name.isEmpty() || value == null || value instanceof Collection)
@@ -526,8 +521,8 @@ public class ApiClient {
 	 * @param value            The value of the parameter.
 	 * @return A list of {@code Pair} objects.
 	 */
-	public List<Pair> parameterToPairs(String collectionFormat, String name, Collection value) {
-		List<Pair> params = new ArrayList<Pair>();
+	public List<Pair> parameterToPairs(String collectionFormat, String name, Collection<?> value) {
+		List<Pair> params = new ArrayList<>();
 
 		// preconditions
 		if (name == null || name.isEmpty() || value == null || value.isEmpty()) {
@@ -619,7 +614,7 @@ public class ApiClient {
 	 */
 	public String selectHeaderContentType(String[] contentTypes) {
 		if (contentTypes.length == 0 || contentTypes[0].equals("*/*")) {
-			return "application/json";
+			return APPLICATION_JSON;
 		}
 		for (String contentType : contentTypes) {
 			if (isJsonMime(contentType)) {
@@ -637,7 +632,7 @@ public class ApiClient {
 	 */
 	public String escapeString(String str) {
 		try {
-			return URLEncoder.encode(str, "utf8").replaceAll("\\+", "%20");
+			return URLEncoder.encode(str, "utf8").replace("+", "%20");
 		} catch (UnsupportedEncodingException e) {
 			return str;
 		}
@@ -690,7 +685,7 @@ public class ApiClient {
 		String contentType = response.headers().get("Content-Type");
 		if (contentType == null) {
 			// ensuring a default content type
-			contentType = "application/json";
+			contentType = APPLICATION_JSON;
 		}
 		if (isJsonMime(contentType)) {
 			return json.deserialize(respBody, returnType);
@@ -712,19 +707,20 @@ public class ApiClient {
 	 * @return The serialized request body
 	 * @throws ApiException If fail to serialize the given object
 	 */
+	@SuppressWarnings("deprecation")
 	public RequestBody serialize(Object obj, String contentType) throws ApiException {
-		if (obj instanceof byte[]) {
+		if (obj instanceof byte[] byteArray) {
 			// Binary (byte array) body parameter support.
-			return RequestBody.create(MediaType.parse(contentType), (byte[]) obj);
-		} else if (obj instanceof File) {
+			return RequestBody.create(MediaType.parse(contentType), byteArray);
+		} else if (obj instanceof File file) {
 			// File body parameter support.
-			return RequestBody.create(MediaType.parse(contentType), (File) obj);
+			return RequestBody.create(MediaType.parse(contentType), file);
 		} else if (isJsonMime(contentType)) {
 			String content;
 			if (obj != null) {
 				content = json.serialize(obj);
 			} else {
-				content = null;
+				content = "";
 			}
 			return RequestBody.create(MediaType.parse(contentType), content);
 		} else {
@@ -823,7 +819,7 @@ public class ApiClient {
 		try {
 			Response response = call.execute();
 			T data = handleResponse(response, returnType);
-			return new ApiResponse<T>(response.code(), response.headers().toMultimap(), data);
+			return new ApiResponse<>(response.code(), response.headers().toMultimap(), data);
 		} catch (IOException e) {
 			throw new ApiException(e);
 		}
@@ -949,6 +945,7 @@ public class ApiClient {
 	 * @return The HTTP request
 	 * @throws ApiException If fail to serialize the request body object
 	 */
+	@SuppressWarnings("deprecation")
 	public Request buildRequest(String path, String method, List<Pair> queryParams, List<Pair> collectionQueryParams,
 			Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames,
 			ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
@@ -958,41 +955,25 @@ public class ApiClient {
 		final Request.Builder reqBuilder = new Request.Builder().url(url);
 		processHeaderParams(headerParams, reqBuilder);
 
-		String contentType = (String) headerParams.get("Content-Type");
+		String contentType = headerParams.get("Content-Type");
 		// ensuring a default content type
 		if (contentType == null) {
-			contentType = "application/json";
+			contentType = APPLICATION_JSON;
 		}
 
-		RequestBody reqBody;
-		if (!HttpMethod.permitsRequestBody(method)) {
-			reqBody = null;
-		} else if ("application/x-www-form-urlencoded".equals(contentType)) {
-//			reqBody = buildRequestBodyFormEncoding(formParams);
-		} else if ("multipart/form-data".equals(contentType)) {
-//			reqBody = buildRequestBodyMultipart(formParams);
-		} else if (body == null) {
-			if ("DELETE".equals(method)) {
-				// allow calling DELETE without sending a request body
-				reqBody = null;
+		RequestBody reqBody = null;
+		if (HttpMethod.permitsRequestBody(method)) {
+			if (body == null) {
+				if (!"DELETE".equals(method)) {
+					// use an empty request body (for POST, PUT and PATCH)
+					reqBody = RequestBody.create(MediaType.parse(contentType), ""); //NOSONAR
+				}
 			} else {
-				// use an empty request body (for POST, PUT and PATCH)
-				reqBody = RequestBody.create(MediaType.parse(contentType), "");
+				reqBody = serialize(body, contentType);
 			}
-		} else {
-			reqBody = serialize(body, contentType);
 		}
 
-		Request request = null;
-
-//		if (progressRequestListener != null && reqBody != null) {
-//			ProgressRequestBody progressRequestBody = new ProgressRequestBody(reqBody, progressRequestListener);
-//			request = reqBuilder.method(method, progressRequestBody).build();
-//		} else {
-//			request = reqBuilder.method(method, reqBody).build();
-//		}
-
-		return request;
+		return reqBuilder.method(method, reqBody).build();
 	}
 
 	/**
@@ -1008,41 +989,35 @@ public class ApiClient {
 		final StringBuilder url = new StringBuilder();
 		url.append(basePath).append(path);
 
-		if (queryParams != null && !queryParams.isEmpty()) {
-			// support (constant) query string in `path`, e.g. "/posts?draft=1"
-			String prefix = path.contains("?") ? "&" : "?";
-			for (Pair param : queryParams) {
-				if (param.getValue() != null) {
-					if (prefix != null) {
-						url.append(prefix);
-						prefix = null;
-					} else {
-						url.append("&");
-					}
-					String value = parameterToString(param.getValue());
-					url.append(escapeString(param.getName())).append("=").append(escapeString(value));
-				}
-			}
-		}
-
-		if (collectionQueryParams != null && !collectionQueryParams.isEmpty()) {
-			String prefix = url.toString().contains("?") ? "&" : "?";
-			for (Pair param : collectionQueryParams) {
-				if (param.getValue() != null) {
-					if (prefix != null) {
-						url.append(prefix);
-						prefix = null;
-					} else {
-						url.append("&");
-					}
-					String value = parameterToString(param.getValue());
-					// collection query parameter value already escaped as part of parameterToPairs
-					url.append(escapeString(param.getName())).append("=").append(value);
-				}
-			}
-		}
+		// support (constant) query string in `path`, e.g. "/posts?draft=1"
+		appendQueryParams(url, queryParams, true);
+		// collection query parameter values are already escaped as part of parameterToPairs
+		appendQueryParams(url, collectionQueryParams, false);
 
 		return url.toString();
+	}
+
+	/**
+	 * Append the given query parameters to the URL being built.
+	 *
+	 * @param url         The URL builder to append to
+	 * @param params      The query parameters to append
+	 * @param escapeValue Whether the parameter values need to be escaped
+	 */
+	private void appendQueryParams(StringBuilder url, List<Pair> params, boolean escapeValue) {
+		if (params == null || params.isEmpty()) {
+			return;
+		}
+		String prefix = url.indexOf("?") == -1 ? "?" : "&";
+		for (Pair param : params) {
+			if (param.getValue() == null) {
+				continue;
+			}
+			url.append(prefix);
+			prefix = "&";
+			String value = parameterToString(param.getValue());
+			url.append(escapeString(param.getName())).append("=").append(escapeValue ? escapeString(value) : value);
+		}
 	}
 
 	/**
@@ -1073,48 +1048,10 @@ public class ApiClient {
 		for (String authName : authNames) {
 			Authentication auth = authentications.get(authName);
 			if (auth == null)
-				throw new RuntimeException("Authentication undefined: " + authName);
+				throw new IllegalArgumentException("Authentication undefined: " + authName);
 			auth.applyToParams(queryParams, headerParams);
 		}
 	}
-
-	/**
-	 * Build a form-encoding request body with the given form parameters.
-	 *
-	 * @param formParams Form parameters in the form of Map
-	 * @return RequestBody
-	 */
-//	public RequestBody buildRequestBodyFormEncoding(Map<String, Object> formParams) {
-//		FormEncodingBuilder formBuilder = new FormEncodingBuilder();
-//		for (Entry<String, Object> param : formParams.entrySet()) {
-//			formBuilder.add(param.getKey(), parameterToString(param.getValue()));
-//		}
-//		return formBuilder.build();
-//	}
-
-	/**
-	 * Build a multipart (file uploading) request body with the given form
-	 * parameters, which could contain text fields and file fields.
-	 *
-	 * @param formParams Form parameters in the form of Map
-	 * @return RequestBody
-	 */
-//	public RequestBody buildRequestBodyMultipart(Map<String, Object> formParams) {
-//		MultipartBuilder mpBuilder = new MultipartBodyBuilder().type(MultipartBuilder.FORM);
-//		for (Entry<String, Object> param : formParams.entrySet()) {
-//			if (param.getValue() instanceof File) {
-//				File file = (File) param.getValue();
-//				Headers partHeaders = Headers.of("Content-Disposition",
-//						"form-data; name=\"" + param.getKey() + "\"; filename=\"" + file.getName() + "\"");
-//				MediaType mediaType = MediaType.parse(guessContentTypeFromFile(file));
-//				mpBuilder.addPart(partHeaders, RequestBody.create(mediaType, file));
-//			} else {
-//				Headers partHeaders = Headers.of("Content-Disposition", "form-data; name=\"" + param.getKey() + "\"");
-//				mpBuilder.addPart(partHeaders, RequestBody.create(null, parameterToString(param.getValue())));
-//			}
-//		}
-//		return mpBuilder.build();
-//	}
 
 	/**
 	 * Guess Content-Type header from the given file (defaults to
@@ -1136,36 +1073,10 @@ public class ApiClient {
 	 * Apply SSL related settings to httpClient according to the current values of
 	 * verifyingSsl and sslCaCert.
 	 */
+	@SuppressWarnings("unused")
 	private void applySslSettings() {
 		try {
 			TrustManager[] trustManagers = null;
-			HostnameVerifier hostnameVerifier = null;
-			/*if (!verifyingSsl) {
-				TrustManager trustAll = new X509TrustManager() {
-					@Override
-					public void checkClientTrusted(X509Certificate[] chain, String authType)
-							throws CertificateException {
-					}
-
-					@Override
-					public void checkServerTrusted(X509Certificate[] chain, String authType)
-							throws CertificateException {
-					}
-
-					@Override
-					public X509Certificate[] getAcceptedIssuers() {
-						return null;
-					}
-				};
-				SSLContext sslContext = SSLContext.getInstance("TLS");
-				trustManagers = new TrustManager[] { trustAll };
-				hostnameVerifier = new HostnameVerifier() {
-					@Override
-					public boolean verify(String hostname, SSLSession session) {
-						return true;
-					}
-				};
-			} else */
 			if (sslCaCert != null) {
 				char[] password = null; // Any password will work.
 				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
@@ -1184,17 +1095,8 @@ public class ApiClient {
 				trustManagerFactory.init(caKeyStore);
 				trustManagers = trustManagerFactory.getTrustManagers();
 			}
-//
-//			if (keyManagers != null || trustManagers != null) {
-//				SSLContext sslContext = SSLContext.getInstance("TLS");
-//				sslContext.init(keyManagers, trustManagers, new SecureRandom());
-//				httpClient.setSslSocketFactory(sslContext.getSocketFactory());
-//			} else {
-//				httpClient.setSslSocketFactory(null);
-//			}
-//			httpClient.setHostnameVerifier(hostnameVerifier);
 		} catch (GeneralSecurityException e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
