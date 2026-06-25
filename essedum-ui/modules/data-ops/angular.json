@@ -65,8 +65,7 @@
           "defaultConfiguration": "development",
           "options": {
             "port": 8087,
-            "publicHost": "http://localhost:8087",
-            "proxyConfig": "proxy.config.json",
+            "publicHost": "http://localhost:8087",         
             "extraWebpackConfig": "projects/data-ops/webpack.config.js"
           }
         },
