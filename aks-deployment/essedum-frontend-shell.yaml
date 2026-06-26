@@ -17,8 +17,15 @@ spec:
       - name: regcred
       containers:
       - name: essedum-frontend-shell
-        image: acrreq0762935.azurecr.io/essedum-frontend-shell:v15
+        image: acrreq0762935.azurecr.io/essedum-frontend-shell:v16
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 8084
         volumeMounts:

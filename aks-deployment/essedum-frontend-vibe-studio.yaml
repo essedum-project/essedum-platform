@@ -19,6 +19,13 @@ spec:
       - name: essedum-frontend-vibe-studio
         image: acrreq0762935.azurecr.io/essedum-frontend-vibe-studio:v15
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 80
 ---

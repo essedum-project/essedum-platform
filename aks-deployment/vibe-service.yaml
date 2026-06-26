@@ -24,11 +24,6 @@ spec:
       - key: "node.kubernetes.io/disk-pressure"
         operator: "Exists"
         effect: "NoSchedule"
-      hostAliases:
-      - ip: "127.0.0.1"
-        hostnames:
-        - "your-host"
-        - "your-host"
       containers:
       - name: essedum-backend-vibe
         image: acrreq0762935.azurecr.io/essedum-vibe-service:v15
@@ -45,42 +40,54 @@ spec:
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
-              name: your-db-secret
+              name: essedum-db-secret
               key: MYSQL_DATASOURCE_URL
         - name: MYSQL_USER
           valueFrom:
             secretKeyRef:
-              name: your-db-secret
+              name: essedum-db-secret
               key: MYSQL_USER
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: your-db-secret
+              name: essedum-db-secret
               key: MYSQL_PASSWORD
         - name: VIBE_AZURE_OPENAI_ENDPOINT
           valueFrom:
             secretKeyRef:
-              name: your-vibe-secret
+              name: essedum-vibe-secret
               key: VIBE_AZURE_OPENAI_ENDPOINT
         - name: VIBE_AZURE_OPENAI_DEPLOYMENT_NAME
           valueFrom:
             secretKeyRef:
-              name: your-vibe-secret
+              name: essedum-vibe-secret
               key: VIBE_AZURE_OPENAI_DEPLOYMENT_NAME
         - name: VIBE_AZURE_OPENAI_API_VERSION
           valueFrom:
             secretKeyRef:
-              name: your-vibe-secret
+              name: essedum-vibe-secret
               key: VIBE_AZURE_OPENAI_API_VERSION
         - name: VIBE_AZURE_OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
-              name: your-vibe-secret
+              name: essedum-vibe-secret
               key: VIBE_AZURE_OPENAI_API_KEY
         - name: GOOSE_URL
           value: "http://goosed-service:3005"
+        - name: GOOSE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-secret
+              key: secret-key
         - name: ENCRYPTION_KEY
           value: "leap$123##"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "768Mi"
         ports:
         - containerPort: 8084
 ---

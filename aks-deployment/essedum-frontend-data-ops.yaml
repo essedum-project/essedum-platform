@@ -19,6 +19,13 @@ spec:
       - name: essedum-frontend-data-ops
         image: acrreq0762935.azurecr.io/essedum-frontend-data-ops:v15
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 80
 ---

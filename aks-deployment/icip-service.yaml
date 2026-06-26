@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
       - name: essedum-backend-icip
-        image: acrreq0762935.azurecr.io/essedum-icip-service:v15
+        image: acrreq0762935.azurecr.io/essedum-icip-service:v17
         imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/icip-service*.jar | head -1)"]
@@ -45,6 +45,13 @@ spec:
               key: MYSQL_PASSWORD
         - name: ENCRYPTION_KEY
           value: "leap$123##"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "768Mi"
         ports:
         - containerPort: 8082
 ---

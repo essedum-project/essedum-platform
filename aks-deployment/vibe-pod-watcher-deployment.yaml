@@ -14,12 +14,21 @@ spec:
         app: vibe-pod-watcher
     spec:
       serviceAccountName: pod-watcher-sa
+      imagePullSecrets:
+      - name: regcred
       containers:
         - name: vibe-pod-watcher
-          image: localhost:5000/vibe-pod-watcher:latest
+          image: acrreq0762935.azurecr.io/vibe-pod-watcher:v16
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
           livenessProbe:
             httpGet:
               path: /health

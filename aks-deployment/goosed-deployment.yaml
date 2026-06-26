@@ -6,8 +6,6 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: goosed
   template:
     metadata:
       labels:
@@ -21,6 +19,13 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3005
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
         env:
         - name: GOOSE_HOST
           value: "0.0.0.0"

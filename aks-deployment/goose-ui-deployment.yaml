@@ -6,8 +6,6 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: goose-ui
   template:
     metadata:
       labels:
@@ -21,6 +19,13 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
         - name: GOOSE_URL
           value: "http://goosed-service.aipns.svc.cluster.local:3005"

@@ -51,6 +51,13 @@ spec:
           value: "leap$123##"
         - name: SPRING_LIQUIBASE_ENABLED
           value: "true"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "768Mi"
         ports:
         - containerPort: 8081
 ---
