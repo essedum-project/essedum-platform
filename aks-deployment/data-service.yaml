@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
       - name: essedum-backend-data
-        image: acrreq0762935.azurecr.io/essedum-data-service:v15
+        image: localhost:5000/essedum-data-service:v18
         imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/data-service*.jar | head -1)"]
@@ -44,7 +44,17 @@ spec:
               name: essedum-db-secret
               key: MYSQL_PASSWORD
         - name: ENCRYPTION_KEY
-          value: "leap$123##"
+          valueFrom:
+            secretKeyRef:
+              name: essedum-encryption-secret
+              key: ENCRYPTION_KEY
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "768Mi"
         ports:
         - containerPort: 8083
 ---

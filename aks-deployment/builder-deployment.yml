@@ -19,10 +19,17 @@ spec:
         - name: regcred
       containers:
         - name: builder
-          image: acrreq0762935.azurecr.io/builder-service:v15
+          image: localhost:5000/builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
           env:
             - name: BUILDKIT_ADDR
               value: "tcp://buildkitd:1234"   # Points to your buildkitd Service

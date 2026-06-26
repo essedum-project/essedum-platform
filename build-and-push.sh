@@ -10,8 +10,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ACR_REGISTRY="acrreq0762935.azurecr.io"
-TAG="v15"
+ACR_REGISTRY="Your Registry Name Here"  # e.g. myregistry.azurecr.io
+TAG="v18"
+
+# ─── Colour helpers ──────────────────────────────────────────────────────────
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
+info()    { echo -e "${CYAN}[INFO]${NC}  $*"; }
+success() { echo -e "${GREEN}[OK]${NC}    $*"; }
+warn()    { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+error()   { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 # ─── Load NPM / Artifactory credentials from docker/.env.sample ─────────────
 ENV_SAMPLE="${SCRIPT_DIR}/docker/.env.sample"
@@ -30,13 +37,6 @@ fi
 export JAVA_HOME="/usr/lib/jvm/java-21-openjdk-amd64"
 export PATH="${JAVA_HOME}/bin:${PATH}"
 hash -r  # flush bash's PATH cache so javac resolves to JDK 21
-
-# ─── Colour helpers ──────────────────────────────────────────────────────────
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
-info()    { echo -e "${CYAN}[INFO]${NC}  $*"; }
-success() { echo -e "${GREEN}[OK]${NC}    $*"; }
-warn()    { echo -e "${YELLOW}[WARN]${NC}  $*"; }
-error()   { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
 
 # ─── ACR Login ───────────────────────────────────────────────────────────────
 acr_login() {

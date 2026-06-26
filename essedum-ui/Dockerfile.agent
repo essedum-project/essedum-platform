@@ -21,6 +21,9 @@ WORKDIR /workspace/modules/agent-studio
 RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
+# Explicitly install dayjs — required by @jsonforms/angular-material as a peer dep.
+# Artifactory npm-remote may not cache it on first fetch; this ensures it is present.
+RUN node -e "require('dayjs')" 2>/dev/null || npm install dayjs --save --legacy-peer-deps
 RUN npm run build-prod
 
 FROM nginx:alpine

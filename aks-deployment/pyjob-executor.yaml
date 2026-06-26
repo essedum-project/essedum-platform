@@ -17,8 +17,15 @@ spec:
       - name: regcred
       containers:
       - name: pyjob-executor-container
-        image: acrreq0762935.azurecr.io/pyjob-excecutor:v15
+        image: localhost:5000/pyjob-excecutor:v15
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
 ---

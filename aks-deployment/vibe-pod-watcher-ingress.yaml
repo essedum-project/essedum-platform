@@ -16,10 +16,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - localhost
-    secretName: your-tls-secret
+    - essedum.az.ad.idemo-ppc.com
+    secretName: your-secret
   rules:
-  - host: localhost
+  - host: essedum.az.ad.idemo-ppc.com
     http:
       paths:
       - backend:

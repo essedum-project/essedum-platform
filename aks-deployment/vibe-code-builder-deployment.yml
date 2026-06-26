@@ -19,13 +19,20 @@ spec:
         - name: regcred
       containers:
         - name: vibe-code-builder
-          image: acrreq0762935.azurecr.io/vibe-code-builder-service:v15
+          image: localhost:5000/vibe-code-builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
           envFrom:
             - secretRef:
-                name: your-secret
+                name: vibe-code-builder-secret
           volumeMounts:
             - name: dockerfile-template
               mountPath: /opt/fallback
@@ -37,6 +44,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: vibe-code-builder-service
   namespace: aipns
 spec:

@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
       - name: essedum-backend-usm
-        image: acrreq0762935.azurecr.io/essedum-usm-service:v15
+        image: localhost:5000/essedum-usm-service:v15
         imagePullPolicy: Always
         command: ["/bin/bash", "-c"]
         args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/usm-service*.jar | head -1)"]
@@ -48,9 +48,19 @@ spec:
               name: essedum-db-secret
               key: MYSQL_PASSWORD
         - name: ENCRYPTION_KEY
-          value: "leap$123##"
+          valueFrom:
+            secretKeyRef:
+              name: essedum-encryption-secret
+              key: ENCRYPTION_KEY
         - name: SPRING_LIQUIBASE_ENABLED
           value: "true"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "768Mi"
         ports:
         - containerPort: 8081
 ---

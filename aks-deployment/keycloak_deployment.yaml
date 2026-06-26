@@ -64,7 +64,13 @@ spec:
           ports:
             - containerPort: 8443
               protocol: TCP
-
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
           volumeMounts:
             - name: tls-cert
               mountPath: /etc/keycloak/certs

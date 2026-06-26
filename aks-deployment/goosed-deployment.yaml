@@ -6,8 +6,6 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: goosed
   template:
     metadata:
       labels:
@@ -17,10 +15,17 @@ spec:
       - name: regcred
       containers:
       - name: goosed
-        image: acrreq0762935.azurecr.io/goosed:v15
+        image: localhost:5000/goosed:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 3005
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
         env:
         - name: GOOSE_HOST
           value: "0.0.0.0"
