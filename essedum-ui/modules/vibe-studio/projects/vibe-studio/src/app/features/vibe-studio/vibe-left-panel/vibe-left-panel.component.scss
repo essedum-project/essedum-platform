@@ -2,8 +2,12 @@
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
+  max-width: none !important;
   height: 100% !important;
   min-height: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden !important;
 }
 
@@ -32,7 +36,12 @@
 .copilot-panel {
   display: flex;
   flex-direction: column;
-  height: 100%;  min-height: 0;  overflow: hidden;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 // ── Model indicator bar ───────────────────────────────────────────────────────
@@ -61,9 +70,11 @@
 // ── Messages Area ─────────────────────────────────────────────────────────────
 .messages-area {
   flex: 1;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px 14px;
+  padding: 16px 10px 16px 14px;
   display: flex;
   flex-direction: column;
   gap: 14px;
