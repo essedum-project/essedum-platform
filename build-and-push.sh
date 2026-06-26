@@ -10,7 +10,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ACR_REGISTRY="acrreq0762935.azurecr.io"
+ACR_REGISTRY="Your Registry Name Here"  # e.g. myregistry.azurecr.io
 TAG="v18"
 
 # ─── Colour helpers ──────────────────────────────────────────────────────────
