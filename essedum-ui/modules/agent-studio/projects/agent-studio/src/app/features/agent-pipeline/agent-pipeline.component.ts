@@ -2158,10 +2158,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         
         const deletePayload = {
           deployment_name: deploymentName,
-          namespace: 'aipns'
+          namespace: this.getTargetNamespace()
         };
         
-        this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: aipns`);
+        this.addToConsole(`Deleting deployment: ${deploymentName} from namespace: ${this.getTargetNamespace()}`);
         this.socket?.emit('delete_deployment', deletePayload);
       });
       
@@ -2462,7 +2462,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
-              interface: apiParams.interface
+              interface: apiParams.interface,
+              namespace: this.getTargetNamespace()
             };
            
             this.addToConsole(`Starting ${this.getPipelineTypeName()} pipeline with deployment: ${deploymentAlias}`);
@@ -2489,7 +2490,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               cname: this.currentCname,
               organization: organization,
               type: apiParams.type,
-              interface: apiParams.interface
+              interface: apiParams.interface,
+              namespace: this.getTargetNamespace()
             };
             
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
@@ -2902,6 +2904,33 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
+   * Get the target Kubernetes namespace based on pipeline mode.
+   * Agents → vibe-agents, MCP servers → vibe-mcp, Apps → vibe-apps.
+   */
+  private getTargetNamespace(): string {
+    if (this.pipelineMode === 'mcp') {
+      return 'vibe-mcp';
+    } else if (this.pipelineMode === 'app') {
+      return 'vibe-apps';
+    } else {
+      return 'vibe-agents';
+    }
+  }
+
+  /**
+   * Derive pipelineMode from the StreamingServices interfacetype field.
+   * This is the authoritative source of truth stored in the database:
+   *   pipeline-agent  → agent
+   *   mcp-pipeline    → mcp
+   *   app-pipeline    → app
+   */
+  private modeFromInterfaceType(interfacetype: string): 'agent' | 'mcp' | 'app' {
+    if (interfacetype === 'mcp-pipeline') return 'mcp';
+    if (interfacetype === 'app-pipeline') return 'app';
+    return 'agent';
+  }
+
+  /**
    * Check if run and playground buttons should be shown (only when files exist)
    */
   shouldShowRunPlaygroundButtons(): boolean {
@@ -2925,6 +2954,22 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       
       if (response && response.json_content) {
         const jsonContent = JSON.parse(response.json_content);
+
+        // Use interfacetype from the API as the authoritative source for pipelineMode.
+        // This corrects any stale router-state default (e.g. page refresh, direct URL).
+        if (response.interfacetype) {
+          const derivedMode = this.modeFromInterfaceType(response.interfacetype);
+          if (derivedMode !== this.pipelineMode) {
+            this.pipelineMode = derivedMode;
+            if (this.pipelineMode === 'mcp') {
+              this.cardTitle = 'MCP Pipelines';
+            } else if (this.pipelineMode === 'app') {
+              this.cardTitle = 'App Pipelines';
+            } else {
+              this.cardTitle = 'Agent Pipelines';
+            }
+          }
+        }
 
         this.runnerServiceStatus = jsonContent.runner_service_status === true;
         this.isPlaygroundEnabled = this.runnerServiceStatus;
