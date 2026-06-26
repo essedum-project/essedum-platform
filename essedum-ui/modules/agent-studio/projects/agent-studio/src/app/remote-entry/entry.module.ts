@@ -55,6 +55,8 @@ import { AgentComponent } from '../features/agent/agent.component';
 // Features: agent-pipeline
 import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
+import { PodLogDialogComponent } from '../features/agent-pipeline/pipeline-in-execution/pod-log-dialog/pod-log-dialog.component';
 import { GithubLoginComponent } from '../features/agent-pipeline/github-login/github-login.component';
 import { PlaygroundTabComponent } from '../features/agent-pipeline/playground-tab/playground-tab.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from '../features/agent-pipeline/deployment-form/deployment-form.component';
@@ -118,6 +120,8 @@ import { environment } from '../../environments/environment';
     AgentComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
+    PipelineInExecutionComponent,
+    PodLogDialogComponent,
     PlaygroundTabComponent,
     DeploymentFormComponent,
     BranchSelectionDialogComponent,

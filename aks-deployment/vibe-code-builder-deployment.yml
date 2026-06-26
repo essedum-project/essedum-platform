@@ -25,7 +25,7 @@ spec:
             - containerPort: 5000
           envFrom:
             - secretRef:
-                name: vibe-code-builder-secret
+                name: your-secret
           volumeMounts:
             - name: dockerfile-template
               mountPath: /opt/fallback

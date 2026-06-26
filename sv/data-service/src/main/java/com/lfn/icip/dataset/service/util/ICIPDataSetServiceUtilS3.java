@@ -929,73 +929,41 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         } else
             objectKey = attr.optString(OBJECT_KEY);
         File localFilePath = PathValidationUtil.validatePath(uploadFile);
+        if (!localFilePath.exists() || !localFilePath.isFile()) {
+            throw new EssedumException("Upload file not found on server: " + uploadFile);
+        }
+        String effectiveRegion = (region != null && !region.isEmpty()) ? region : "us-east-1";
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), effectiveRegion))
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withPathStyleAccessEnabled(true)
                 .build();
         long partSize = 100L * 1024 * 1024;
 
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucketName, objectKey);
+        InitiateMultipartUploadResult initResponse = s3Client.initiateMultipartUpload(initRequest);
+        String uploadId = initResponse.getUploadId();
 
-        try {
+        List<PartETag> partETags = new ArrayList<>();
+        long contentLength = localFilePath.length();
+        long filePosition = 0;
 
-            InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucketName, objectKey);
-            InitiateMultipartUploadResult initResponse = s3Client.initiateMultipartUpload(initRequest);
-            String uploadId = initResponse.getUploadId();
-
-            List<PartETag> partETags = new ArrayList<>();
-            long contentLength = localFilePath.length();
-            long filePosition = 0;
-
-            List<CompletableFuture<PartETag>> futures = new ArrayList<>();
-            for (int i = 1; filePosition < contentLength; i++) {
-                long partSizeRemaining = Math.min(partSize, contentLength - filePosition);
-                UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(bucketName).withKey(objectKey)
-                        .withUploadId(uploadId).withPartNumber(i).withFileOffset(filePosition).withFile(localFilePath)
-                        .withPartSize(partSizeRemaining);
-
-                CompletableFuture<PartETag> future = CompletableFuture.supplyAsync(() -> {
-                    try {
-                        UploadPartResult uploadPartResult = s3Client.uploadPart(uploadRequest);
-                        return uploadPartResult.getPartETag();
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                        return null;
-                    }
-                }, executorService);
-
-                futures.add(future);
-                filePosition += partSizeRemaining;
-            }
-
-            CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-            allOf.thenRunAsync(() -> {
-                futures.forEach(future -> {
-                    try {
-                        PartETag partETag = future.get();
-                        if (partETag != null) {
-                            partETags.add(partETag);
-                        }
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                });
-
-                CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(bucketName,
-                        objectKey, uploadId, partETags);
-                s3Client.completeMultipartUpload(completeRequest);
-                logger.info("File Uploaded successfully");
-                webSocketController.sendUploadStatus("Success");
-            });
-
-            logger.info("File Upload Initiated");
-        } catch (Exception e) {
-            logger.error("Error occurred in upload method", e);
-            webSocketController.sendUploadStatus("Error");
+        for (int i = 1; filePosition < contentLength; i++) {
+            long partSizeRemaining = Math.min(partSize, contentLength - filePosition);
+            UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(bucketName).withKey(objectKey)
+                    .withUploadId(uploadId).withPartNumber(i).withFileOffset(filePosition).withFile(localFilePath)
+                    .withPartSize(partSizeRemaining);
+            UploadPartResult uploadPartResult = s3Client.uploadPart(uploadRequest);
+            partETags.add(uploadPartResult.getPartETag());
+            filePosition += partSizeRemaining;
         }
 
+        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(bucketName,
+                objectKey, uploadId, partETags);
+        s3Client.completeMultipartUpload(completeRequest);
+        logger.info("File Uploaded successfully to {}/{}", bucketName, objectKey);
+        webSocketController.sendUploadStatus("Success");
     }
 
     private S3Client buildS3Client(ICIPDataset dataset) {
@@ -2303,9 +2271,15 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     private byte[] downloadFromMinIO(String endpointUrl, String accessKey, String secretKey,
                                      String bucketName, String objectKey) throws Exception {
 
+        TrustManager[] trustAllCerts = getTrustAllCerts();
+        SSLContext sslContext = getSslContext(trustAllCerts);
+        OkHttpClient customHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                .hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE).build();
         MinioClient minioClient = MinioClient.builder()
                 .endpoint(endpointUrl)
                 .credentials(accessKey, secretKey)
+                .httpClient(customHttpClient)
                 .build();
 
         try (InputStream inputStream = minioClient.getObject(

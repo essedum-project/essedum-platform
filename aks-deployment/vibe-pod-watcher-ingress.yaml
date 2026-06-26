@@ -1,17 +1,16 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: vibe-code-builder-ingress
+  name: vibe-pod-watcher-ingress
   namespace: aipns
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
-    # WebSocket support
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    nginx.ingress.kubernetes.io/websocket-services: "vibe-code-builder-service"
+    nginx.ingress.kubernetes.io/websocket-services: "vibe-pod-watcher"
     nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "3600"
 spec:
   ingressClassName: nginx
@@ -25,8 +24,8 @@ spec:
       paths:
       - backend:
           service:
-            name: vibe-code-builder-service
+            name: vibe-pod-watcher
             port:
               number: 80
-        path: /apps/vibe-code-builder-service(/|$)(.*)
+        path: /apps/vibe-pod-watcher(/|$)(.*)
         pathType: ImplementationSpecific

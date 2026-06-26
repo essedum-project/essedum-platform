@@ -324,7 +324,7 @@ public class ICIPJobsService implements IICIPJobsService {
                     org.json.JSONObject connDetails = new org.json.JSONObject(dsObject.getConnectionDetails());
 
                     boolean shouldFetchRemote = status.equalsIgnoreCase(JobStatus.RUNNING.toString())
-                            || !Files.exists(path);
+                            || !Files.exists(path) || Files.size(path) == 0;
                     if (shouldFetchRemote) {
                         try {
                             org.json.JSONObject res = getLog(jobMetaData.getString("taskId"), connDetails);

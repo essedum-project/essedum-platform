@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer-role
+  namespace: vibe-agents
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create","get","list","watch","patch","update","delete"]
+  - apiGroups: [""]
+    resources: ["secrets","services"]
+    verbs: ["get","list","watch","create","update","patch","delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployer-binding
+  namespace: vibe-agents
+subjects:
+  - kind: ServiceAccount
+    name: builder-sa
+    namespace: aipns
+roleRef:
+  kind: Role
+  name: deployer-role
+  apiGroup: rbac.authorization.k8s.io

@@ -592,6 +592,17 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     }
   }
 
+  openExecutionDialog(): void {
+    this.router.navigate(['pipeline-in-execution'], { relativeTo: this.route });
+  }
+
+  navigateToExecution(status: string): void {
+    this.router.navigate(['pipeline-in-execution'], {
+      relativeTo: this.route,
+      queryParams: status && status !== 'all' ? { status } : {},
+    });
+  }
+
   onNextPage(): void {
     if (this.pageNumber < this.noOfPages) {
       this.pageNumber++;

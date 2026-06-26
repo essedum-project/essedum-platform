@@ -487,7 +487,8 @@ public class ICIPMlOpsRestAdapterService {
                     data = pluginService.getS3FileData(datasetForModel, fileUploaded);
                     fileAttached = true;
                 } catch (Exception exc) {
-                    return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+                    // File not yet in storage — fall through to testConnection which uploads it from the temp path
+                    logger.info("File not found in storage, will attempt upload via testConnection: {}", fileUploaded);
                 }
             }
 

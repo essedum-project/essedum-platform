@@ -176,7 +176,7 @@ vibe:
       api-key: ${AZURE_OPENAI_API_KEY:}
   goose:
     service:
-      url: ${GOOSE_URL:goosed-service:3005}
+      url: ${GOOSE_URL:http://goosed-service:3005}
       connect-timeout-ms: 10000
       response-timeout-seconds: 300
       secret-key: ${GOOSE_SECRET_KEY:sk-1234}
