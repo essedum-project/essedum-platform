@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
       - name: pyjob-executor-container
-        image: acrreq0762935.azurecr.io/pyjob-excecutor:v15
+        image: localhost:5000/pyjob-excecutor:v15
         imagePullPolicy: Always
         resources:
           requests:

@@ -19,7 +19,7 @@ spec:
         - name: regcred
       containers:
         - name: builder
-          image: acrreq0762935.azurecr.io/builder-service:v15
+          image: localhost:5000/builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

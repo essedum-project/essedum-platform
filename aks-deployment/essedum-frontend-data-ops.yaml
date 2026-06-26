@@ -17,7 +17,7 @@ spec:
       - name: regcred
       containers:
       - name: essedum-frontend-data-ops
-        image: acrreq0762935.azurecr.io/essedum-frontend-data-ops:v15
+        image: localhost:5000/essedum-frontend-data-ops:v15
         imagePullPolicy: Always
         resources:
           requests:
