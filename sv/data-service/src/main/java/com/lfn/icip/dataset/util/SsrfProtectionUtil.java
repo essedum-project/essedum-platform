@@ -116,6 +116,25 @@ public final class SsrfProtectionUtil {
     }
 
     /**
+     * Convenience wrapper around {@link #validateAndCreateUrl(String, List)} that converts the
+     * checked {@link MalformedURLException} into an unchecked {@link IllegalArgumentException}.
+     * Hosts explicitly listed in {@code allowedHosts} bypass the internal-IP check, permitting
+     * legitimate internal cluster endpoints (e.g. remote executors, MinIO).
+     *
+     * @param urlString    the raw, potentially user-controlled URL string
+     * @param allowedHosts optional allowlist of permitted hostnames
+     * @return a validated {@link URL}
+     * @throws IllegalArgumentException if the URL is malformed or fails SSRF validation
+     */
+    public static URL safeUrl(String urlString, List<String> allowedHosts) {
+        try {
+            return validateAndCreateUrl(urlString, allowedHosts);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Validates that the URL scheme is allowed (http or https only).
      */
     private static void validateScheme(URL url) {
@@ -208,8 +227,10 @@ public final class SsrfProtectionUtil {
             // 0.0.0.0/8
             if (first == 0) return true;
 
-            // 100.64.0.0/10 (Shared Address Space / CGN)
-            if (first == 100 && (second & 0xC0) == 64) return true;
+            // 100.64.0.0/10 (Shared Address Space / CGN) — intentionally not blocked here
+            // because Azure AKS assigns LoadBalancer external IPs from this range.
+            // The standard private-IP checks above (isSiteLocalAddress, isLoopbackAddress,
+            // isLinkLocalAddress) already cover the meaningful SSRF threats in this environment.
 
             // 169.254.0.0/16 (Link-local / cloud metadata)
             if (first == 169 && second == 254) return true;

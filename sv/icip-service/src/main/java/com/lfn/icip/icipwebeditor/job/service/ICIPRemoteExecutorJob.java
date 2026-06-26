@@ -197,6 +197,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
     @EssedumProperty("icip.certificateCheck")
     private String certificateCheck;
 
+    @EssedumProperty("icip.ssrf.allowedHosts")
+    private String ssrfAllowedHosts;
+
     /** The resolver. */
     @Autowired
     private IAIResolverAspect resolver;
@@ -1081,7 +1084,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             OkHttpClient client = newBuilder.build();
             // MediaType mediaType = MediaType.parse("application/json");
             // JSONObject bodyObject = new JSONObject();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url)).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
             logger.info("getStatus request " + requestokHttp);
             try {
                 Response response = client.newCall(requestokHttp).execute();
@@ -1113,7 +1116,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
             newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
             OkHttpClient client = newBuilder.build();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url)).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
             logger.info("getLog request " + requestokHttp.toString());
             Response response = null;
 
@@ -1211,7 +1214,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 OkHttpClient client = newBuilder.build();
                 MediaType mediaType = MediaType.parse("application/json");
                 RequestBody requestBody = RequestBody.create(payload, mediaType);
-                Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url)).method("POST", requestBody).build();
+                Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).method("POST", requestBody).build();
                 logger.info("About to submit payload to remote");
                 Response response = client.newCall(requestokHttp).execute();
                 logger.info("Response code is :" + response.code());

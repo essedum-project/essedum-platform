@@ -557,5 +557,28 @@
         </sql>
     </changeSet>
 
+    <changeSet id="3v2-usm-vibe-coding-api-perms" author="Essedum" dbms="mssql,mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_permissions WHERE module = 'cip' AND permission = 'vibe-coding-all';
+            </sqlCheck>
+        </preConditions>
+        <sql splitStatements="true" stripComments="true">
+            INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'vibe-coding-all');
+
+            INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+            SELECT '/api/aip/service/v1/vibe-coding/.*', 'ALL', 0, 'vibe-coding all APIs', MAX(id)
+            FROM usm_permissions WHERE module = 'cip' AND permission = 'vibe-coding-all';
+
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Portfolio Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Portfolio Client' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Project Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Project Client' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+        </sql>
+    </changeSet>
+
 
 </databaseChangeLog>

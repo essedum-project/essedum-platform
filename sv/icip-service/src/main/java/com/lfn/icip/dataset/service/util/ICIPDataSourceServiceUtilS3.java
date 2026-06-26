@@ -390,11 +390,11 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
                     SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
             logger.info("endpointUrl "+endpointUrl);
         } catch (MalformedURLException e1) {
-            logger.error("Upload DATASOURCE URL not correct" + e1.getMessage());
-            return "Error";
+            logger.error("Upload DATASOURCE URL not correct: " + e1.getMessage());
+            return "Error: " + e1.getMessage();
         } catch (IllegalArgumentException e1) {
             logger.error("SSRF validation failed: " + e1.getMessage());
-            return "Error";
+            return "Error: " + e1.getMessage();
         }
         TrustManager[] trustAllCerts = getTrustAllCerts();
         SSLContext sslContext = getSslContext(trustAllCerts);
