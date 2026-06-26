@@ -17,7 +17,7 @@ spec:
   tls:
   - hosts:
     - essedum.az.ad.idemo-ppc.com
-    secretName: essedum-az-tls
+    secretName: your-secret
   rules:
   - host: essedum.az.ad.idemo-ppc.com
     http:

@@ -44,7 +44,10 @@ spec:
               name: essedum-db-secret
               key: MYSQL_PASSWORD
         - name: ENCRYPTION_KEY
-          value: "leap$123##"
+          valueFrom:
+            secretKeyRef:
+              name: essedum-encryption-secret
+              key: ENCRYPTION_KEY
         resources:
           requests:
             cpu: "200m"
