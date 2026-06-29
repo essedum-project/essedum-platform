@@ -5,10 +5,10 @@ import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.servic
 import JSZip from 'jszip';
 import { Services } from '@essedum/shared-lib';
 @Component({
-    selector: 'app-github-push',
-    templateUrl: './github-push.component.html',
-    styleUrls: ['./github-push.component.scss'],
-    standalone: false
+  selector: 'app-github-push',
+  templateUrl: './github-push.component.html',
+  styleUrls: ['./github-push.component.scss'],
+  standalone: false
 })
 export class GitHubPushComponent implements OnInit {
   @Input() mode: 'push' | 'pull' = 'push';
@@ -39,6 +39,9 @@ export class GitHubPushComponent implements OnInit {
   showModal = false;
   errorMessage = '';
   successMessage = '';
+  private isModalTransitioning = false;
+  private allowOverlayClose = false;
+  private overlayCloseGuardTimer: ReturnType<typeof setTimeout> | null = null;
 
   @Input() cname: string;
   constructor(private githubService: GitHubService,
@@ -93,10 +96,25 @@ export class GitHubPushComponent implements OnInit {
   /**
    * Open modal — auth check is deferred until here so dialog opening is instant
    */
-  openModal(): void {
+  openModal(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (this.showModal || this.isModalTransitioning) {
+      return;
+    }
+
+    this.isModalTransitioning = true;
     this.errorMessage = '';
     this.successMessage = '';
     this.showModal = true;
+    this.allowOverlayClose = false;
+    this.clearOverlayCloseGuardTimer();
+    this.overlayCloseGuardTimer = setTimeout(() => {
+      this.allowOverlayClose = true;
+      this.isModalTransitioning = false;
+    }, 250);
     this.cdr.detectChanges(); // Paint the modal immediately
 
     // If we don't have a confirmed auth state yet, check now (user already clicked the button)
@@ -129,8 +147,33 @@ export class GitHubPushComponent implements OnInit {
    * Close modal
    */
   closeModal(): void {
+    if (this.isModalTransitioning) {
+      return;
+    }
+    this.clearOverlayCloseGuardTimer();
+    this.allowOverlayClose = false;
+    this.isModalTransitioning = false;
     this.showModal = false;
     this.resetForm();
+  }
+
+  /**
+   * Close from backdrop only after a small guard delay to avoid open/close race.
+   */
+  onOverlayClick(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.allowOverlayClose) {
+      return;
+    }
+    this.closeModal();
+  }
+
+  private clearOverlayCloseGuardTimer(): void {
+    if (this.overlayCloseGuardTimer) {
+      clearTimeout(this.overlayCloseGuardTimer);
+      this.overlayCloseGuardTimer = null;
+    }
   }
 
   /**

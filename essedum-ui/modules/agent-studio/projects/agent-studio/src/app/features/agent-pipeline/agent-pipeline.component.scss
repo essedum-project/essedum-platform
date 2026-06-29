@@ -1,15 +1,15 @@
 @use 'overlays';
-
+ 
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes floatIn { from { opacity:0; transform:translateY(20px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
+ 
 .spin-icon { animation: spin 1s linear infinite !important; }
-
+ 
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
-
+ 
 // Override inline background-color:white and bootstrap padding on wrapper
 .aip-panel-shadow {
   background-color: #0d1117 !important;
@@ -20,7 +20,7 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 1px 0 rgba(88,166,255,0.05) inset !important;
   overflow: hidden;
   position: relative;
-
+ 
   &::before {
     content: '';
     position: absolute;
@@ -33,17 +33,17 @@
     pointer-events: none;
   }
 }
-
+ 
 // Override bootstrap utility classes
 .mx-4 { margin-left: 0 !important; margin-right: 0 !important; }
 .px-5 { padding-left: 0 !important; padding-right: 0 !important; }
 .my-4 { margin-top: 12px !important; margin-bottom: 0 !important; }
 .mt-0 { margin-top: 0 !important; }
 .mb-5 { margin-bottom: 0 !important; }
-
+ 
 // Container
 .aip-container { width: 100% !important; padding: 0 16px !important; box-sizing: border-box; }
-
+ 
 // Title
 .aip-desc-title {
   font-size: 16px !important;
@@ -57,7 +57,7 @@
   transition: color 0.2s, transform 0.2s;
   &:hover { color: #58a6ff !important; transform: translateX(-2px); }
 }
-
+ 
 // =============================================================================
 // TAB GROUP
 // =============================================================================
@@ -96,7 +96,7 @@
   .mdc-tab-indicator__content--underline { border-color: #58a6ff !important; border-width: 2px !important; }
   .mat-mdc-tab-body-wrapper { flex: 1 !important; min-height: 0; }
 }
-
+ 
 .tab-content {
   padding: 0 !important;
   display: flex;
@@ -105,7 +105,7 @@
   height: 100% !important;
   min-width: 0 !important;
 }
-
+ 
 // Material's tab-body chain (mat-tab-group → mat-mdc-tab-body-wrapper →
 // mat-mdc-tab-body → mat-mdc-tab-body-content) collapses to shrink-to-content
 // inside the federated MFE bundle (the host's Material CSS singleton doesn't
@@ -135,7 +135,7 @@
   height: 100% !important;
   position: relative !important;
 }
-
+ 
 // =============================================================================
 // FILE STRUCTURE (CODESPACE TAB) - VS Code Layout
 // =============================================================================
@@ -148,7 +148,7 @@
   min-height: 0 !important;
   background: #0d1117;
 }
-
+ 
 // CRITICAL: explorer + editor side-by-side. Using CSS grid so the editor's
 // width is computed explicitly (1fr after the explorer's fixed column) rather
 // than relying on flex propagation, which the federated chunk doesn't get
@@ -162,7 +162,7 @@
   flex: 1;
   overflow: hidden;
 }
-
+ 
 // RIGHT SIDE - FILE EDITOR (1fr column in the grid above)
 .file-editor-container {
   min-width: 0 !important;
@@ -172,7 +172,7 @@
   flex-direction: column !important;
   overflow: hidden !important;
 }
-
+ 
 // =============================================================================
 // LEFT SIDEBAR - FILE EXPLORER
 // =============================================================================
@@ -187,7 +187,7 @@
   flex-shrink: 0;
   overflow: hidden;
 }
-
+ 
 .explorer-header {
   display: flex;
   align-items: center;
@@ -197,13 +197,13 @@
   border-bottom: none !important;
   min-height: 42px;
   gap: 8px;
-
+ 
   .header-left {
     display: flex;
     align-items: center;
     gap: 7px;
     overflow: hidden;
-
+ 
     mat-icon {
       font-size: 16px; width: 16px; height: 16px;
       color: #58a6ff;
@@ -218,13 +218,13 @@
       white-space: nowrap;
     }
   }
-
+ 
   .header-right {
     display: flex;
     align-items: center;
     gap: 4px;
     flex-shrink: 0;
-
+ 
     button:not(.upload-files-button), .upload-button, .download-button, .git-push-button {
       width: 30px !important;
       height: 30px !important;
@@ -239,23 +239,26 @@
       color: #8b949e !important;
       transition: all 0.2s ease !important;
       cursor: pointer;
-
+ 
       mat-icon {
         font-size: 16px !important;
         width: 16px !important;
         height: 16px !important;
       }
       span { display: none !important; }
-
+ 
       &:hover {
         background: rgba(88,166,255,0.12) !important;
         border-color: rgba(88,166,255,0.4) !important;
         color: #58a6ff !important;
-        transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(88,166,255,0.2);
       }
+ 
+      &:not(.git-push-button):hover {
+        transform: translateY(-1px);
+      }
     }
-
+ 
     .upload-files-button {
       width: auto !important;
       padding: 6px 12px !important;
@@ -276,28 +279,28 @@
       position: relative !important;
       overflow: visible !important;
       pointer-events: auto !important;
-
+ 
       mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; }
       span { display: inline !important; font-size: 11px !important; white-space: nowrap !important; }
-
+ 
       &:hover {
         box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important;
         transform: translateY(-1px);
       }
     }
-
+ 
     app-github-push {
       display: inline-flex;
       align-items: center;
     }
   }
 }
-
+ 
 // Override github-push child component styles
 ::ng-deep app-github-push {
   display: inline-flex !important;
   align-items: center !important;
-
+ 
   .git-push-trigger {
     width: 30px !important;
     height: 30px !important;
@@ -311,14 +314,14 @@
     border-radius: 6px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-
+ 
     svg, .octicon {
       width: 16px !important;
       height: 16px !important;
       fill: #8b949e !important;
       transition: fill 0.2s ease !important;
     }
-
+ 
     &:hover {
       background: rgba(88,166,255,0.12) !important;
       border-color: rgba(88,166,255,0.4) !important;
@@ -328,7 +331,7 @@
     }
   }
 }
-
+ 
 // =============================================================================
 // FILE TREE - VS Code style
 // =============================================================================
@@ -338,23 +341,23 @@
   overflow-x: hidden;
   padding: 6px 0;
   background: #161b22;
-
+ 
   &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; &:hover { background: #484f58; } }
 }
-
+ 
 .tree-loading {
   display: flex; align-items: center; gap: 8px; padding: 16px;
   color: #8b949e; font-size: 12px;
   mat-icon { font-size: 16px; width: 16px; height: 16px; animation: pulse 1.2s infinite; }
 }
-
+ 
 // Tree template items
 ::ng-deep {
   .tree-level { width: 100%; }
   .tree-node { width: 100%; }
-
+ 
   .tree-node-content {
     display: flex !important;
     align-items: center !important;
@@ -365,16 +368,16 @@
     border-left: 2px solid transparent !important;
     min-height: 26px !important;
     user-select: none;
-
+ 
     &:hover {
       background: rgba(88,166,255,0.06) !important;
     }
-
+ 
     &.selected {
       background: rgba(88,166,255,0.1) !important;
       border-left-color: #58a6ff !important;
     }
-
+ 
     // Folder toggle arrow
     .folder-toggle {
       font-size: 16px !important; width: 16px !important; height: 16px !important;
@@ -384,7 +387,7 @@
       transition: transform 0.15s;
     }
     .folder-spacer { width: 16px; flex-shrink: 0; }
-
+ 
     // File/folder icons - VS Code colors
     .node-icon {
       font-size: 16px !important; width: 16px !important; height: 16px !important;
@@ -392,10 +395,10 @@
       transition: color 0.15s;
     }
     .folder-icon { color: #e8ab53 !important; }
-
+ 
     // File icons colored by type
     .file-icon { color: #8b949e !important; }
-
+ 
     // Node name - VS Code style
     .node-name {
       font-size: 13px !important;
@@ -406,15 +409,15 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
       line-height: 1.4 !important;
     }
-
+ 
     // Selected state - brighter text
     &.selected .node-name { color: #ffffff !important; font-weight: 500 !important; }
     &.selected .file-icon { color: #58a6ff !important; }
     &.selected .folder-icon { color: #f0883e !important; }
-
+ 
     // File type specific colors on the file name
     &.file-node .node-name { color: #c9d1d9 !important; }
-
+ 
     // Modified indicator
     &.file-modified .node-name { color: #d29922 !important; }
     &.file-modified::after {
@@ -424,10 +427,10 @@
       margin-left: 4px;
     }
   }
-
+ 
   .tree-children { width: 100%; }
 }
-
+ 
 // =============================================================================
 // FILE EDITOR (RIGHT SIDE)
 // =============================================================================
@@ -439,7 +442,7 @@
   background: #0d1117 !important;
   overflow: hidden;
 }
-
+ 
 .editor-controls-bar {
   display: flex;
   align-items: center;
@@ -450,14 +453,14 @@
   height: 38px;
   min-height: 38px;
   gap: 8px;
-
+ 
   .file-info {
     display: flex;
     align-items: center;
     gap: 6px;
     overflow: hidden;
     flex: 1;
-
+ 
     .file-type-icon {
       font-size: 15px; width: 15px; height: 15px; color: #8b949e;
     }
@@ -474,11 +477,11 @@
     .file-path-breadcrumb { font-size: 11px; color: #484f58; margin-left: 8px; }
     .modified-indicator { color: #d29922; font-size: 18px; line-height: 1; margin-left: 4px; }
   }
-
+ 
   .editor-actions {
     display: flex;
     gap: 4px;
-
+ 
     button, .action-button {
       width: 30px !important; height: 30px !important; min-width: 30px !important;
       padding: 0 !important;
@@ -487,7 +490,7 @@
       border: none !important;
       background: transparent !important;
       transition: all 0.15s !important;
-
+ 
       mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
     }
     .save-button {
@@ -505,7 +508,7 @@
     }
   }
 }
-
+ 
 // Editor content area
 .editor-content-wrapper {
   display: flex !important;
@@ -515,14 +518,14 @@
   min-height: 0 !important;
   overflow: hidden !important;
 }
-
+ 
 .text-editor-container {
   display: flex;
   flex: 1;
   overflow: auto;
   background: #0d1117;
 }
-
+ 
 .python-editor-container {
   flex: 1 1 auto !important;
   width: 100% !important;
@@ -533,7 +536,7 @@
   background: #0d1117;
   display: flex !important;
   flex-direction: column !important;
-
+ 
   app-enl-code-editor {
     display: flex !important;
     flex-direction: column !important;
@@ -543,7 +546,7 @@
     min-height: 400px;
   }
 }
-
+ 
 // Line numbers gutter - VS Code style
 .line-numbers-column {
   display: flex;
@@ -553,7 +556,7 @@
   border-right: 1px solid #21262d;
   min-width: 50px;
   user-select: none;
-
+ 
   .line-number {
     display: flex;
     align-items: center;
@@ -565,7 +568,7 @@
     font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
     line-height: 20px;
     position: relative;
-
+ 
     .diff-indicator {
       position: absolute;
       left: 2px;
@@ -578,7 +581,7 @@
       color: #58a6ff;
       font-size: 8px;
     }
-
+ 
     &.line-added {
       .line-number-text { color: #3fb950; }
       .diff-indicator { color: #3fb950; }
@@ -597,9 +600,9 @@
     }
   }
 }
-
+ 
 .text-editor-column { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-
+ 
 // The actual code textarea
 .file-content-editor {
   flex: 1;
@@ -618,22 +621,22 @@
   overflow: auto;
   caret-color: #58a6ff;
   width: 100%;
-
+ 
   &::placeholder { color: #484f58; font-style: italic; }
   &:focus { background: #0d1117 !important; }
-
+ 
   &::-webkit-scrollbar { width: 8px; height: 8px; }
   &::-webkit-scrollbar-track { background: #0d1117; }
   &::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; &:hover { background: #484f58; } }
   &::-webkit-scrollbar-corner { background: #0d1117; }
 }
-
+ 
 // JSON specific
 .json-editor { color: #7ee787 !important; }
 .java-editor { color: #ff7b72 !important; }
 .xml-editor { color: #79c0ff !important; }
 .properties-editor { color: #d2a8ff !important; }
-
+ 
 // =============================================================================
 // PLACEHOLDER (No file selected) - Make it beautiful
 // =============================================================================
@@ -650,7 +653,7 @@
   animation: floatIn 0.5s ease-out;
   position: relative;
   overflow: hidden;
-
+ 
   // Subtle grid pattern background
   &::before {
     content: '';
@@ -661,14 +664,14 @@
       radial-gradient(circle at 75% 75%, rgba(124,58,237,0.03) 0%, transparent 50%);
     pointer-events: none;
   }
-
+ 
   .placeholder-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
     z-index: 1;
-
+ 
     mat-icon {
       font-size: 56px !important;
       width: 56px !important;
@@ -676,14 +679,14 @@
       color: #30363d !important;
       opacity: 0.8;
     }
-
+ 
     h3 {
       font-size: 15px !important;
       font-weight: 600 !important;
       color: #8b949e !important;
       margin: 0 !important;
     }
-
+ 
     p {
       font-size: 13px !important;
       color: #484f58 !important;
@@ -692,14 +695,14 @@
     }
   }
 }
-
+ 
 // No-file-selected fallback (if used without .placeholder-content wrapper)
 .no-file-selected {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   flex: 1; background: #0d1117; color: #484f58;
   font-size: 14px; text-align: center; padding: 40px;
 }
-
+ 
 // =============================================================================
 // LIGHT THEME
 // =============================================================================
@@ -710,17 +713,17 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
     &::before { background: linear-gradient(90deg, #4742dc, #7c3aed, #06b6d4, #4742dc); background-size: 200% 100%; }
   }
-
+ 
   .aip-desc-title { color: #24292f !important; span { color: #57606a !important; } }
   .aip-led-icons { color: #57606a !important; &:hover { color: #4742dc !important; } }
-
+ 
   ::ng-deep .mat-mdc-tab-group {
     .mat-mdc-tab-header { background: #f6f8fa !important; border-bottom: none !important; }
     .mdc-tab .mdc-tab__text-label { color: #57606a !important; }
     .mdc-tab--active .mdc-tab__text-label { color: #4742dc !important; }
     .mdc-tab-indicator__content--underline { border-color: #4742dc !important; }
   }
-
+ 
   .file-structure-container { background: #ffffff; }
   .file-explorer { background: #f6f8fa; border-right-color: #d0d7de; }
   .explorer-header {
@@ -754,7 +757,7 @@
     .folder-icon { color: #d4a72c !important; }
     .file-icon { color: #57606a !important; }
   }
-
+ 
   .editor-controls-bar { background: #f6f8fa; border-bottom: none !important; .file-info .file-name { color: #24292f; } .file-info .file-path-breadcrumb { color: #8c959f; } }
   .line-numbers-column { background: #f6f8fa; border-right-color: #d0d7de; .line-number { color: #8c959f; } }
   .file-content-editor { background: #ffffff !important; color: #24292f !important; caret-color: #4742dc; }
@@ -762,7 +765,7 @@
   .java-editor { color: #a40e26 !important; }
   .xml-editor { color: #0550ae !important; }
   .properties-editor { color: #6639ba !important; }
-
+ 
   .file-editor-placeholder {
     background: #ffffff !important;
     &::before { background-image: radial-gradient(circle at 25% 25%, rgba(71,66,220,0.03) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(6,182,212,0.02) 0%, transparent 50%); }
@@ -771,7 +774,7 @@
     .placeholder-content p { color: #8c959f !important; }
   }
 }
-
+ 
 // =============================================================================
 // UPLOAD DIALOG OVERLAY
 // =============================================================================
@@ -790,7 +793,7 @@
   z-index: 9999 !important;
   animation: fadeUp 0.2s ease-out;
 }
-
+ 
 .upload-dialog {
   background: #161b22 !important;
   border: 1px solid #30363d !important;
@@ -800,7 +803,7 @@
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6) !important;
   overflow: hidden;
   position: relative;
-
+ 
   &::before {
     content: '';
     position: absolute;
@@ -810,21 +813,21 @@
     pointer-events: none;
   }
 }
-
+ 
 .upload-dialog-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: none !important;
-
+ 
   h3 {
     font-size: 15px !important;
     font-weight: 600 !important;
     color: #e6edf3 !important;
     margin: 0 !important;
   }
-
+ 
   .close-button {
     width: 28px !important;
     height: 28px !important;
@@ -833,22 +836,22 @@
     &:hover { color: #f85149 !important; }
   }
 }
-
+ 
 .upload-dialog-content {
   padding: 20px;
-
+ 
   p {
     font-size: 13px;
     color: #8b949e;
     margin: 0 0 16px;
   }
-
+ 
   .file-input-container {
     margin-bottom: 12px;
   }
-
+ 
   .file-input { display: none; }
-
+ 
   .file-input-label {
     display: flex;
     align-items: center;
@@ -864,25 +867,25 @@
     background: rgba(88, 166, 255, 0.04);
     width: 100%;
     box-sizing: border-box;
-
+ 
     mat-icon { color: #58a6ff; font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
-
+ 
     &:hover {
       border-color: rgba(88, 166, 255, 0.45);
       background: rgba(88, 166, 255, 0.08);
       color: #e6edf3;
     }
   }
-
+ 
   // GitHub Pull button (app-github-push in pull mode)
   ::ng-deep app-github-push {
     display: block;
     margin-top: 12px;
-
+ 
     .github-pull-input-container {
       width: 100%;
     }
-
+ 
     .github-pull-input-label {
       display: flex !important;
       align-items: center !important;
@@ -898,7 +901,7 @@
       font-weight: 500 !important;
       width: 100% !important;
       box-sizing: border-box !important;
-
+ 
       mat-icon {
         font-size: 18px !important;
         width: 18px !important;
@@ -906,12 +909,12 @@
         color: #58a6ff !important;
         flex-shrink: 0 !important;
       }
-
+ 
       span {
         display: inline !important;
         color: #c9d1d9 !important;
       }
-
+ 
       &:hover {
         background: rgba(88, 166, 255, 0.08) !important;
         border-color: rgba(88, 166, 255, 0.45) !important;
@@ -921,14 +924,14 @@
     }
   }
 }
-
+ 
 .upload-dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 20px;
   border-top: 1px solid #30363d;
-
+ 
   .cancel-btn {
     background: transparent !important;
     color: #8b949e !important;
@@ -939,7 +942,7 @@
     height: 32px !important;
     &:hover { border-color: #58a6ff !important; color: #e6edf3 !important; }
   }
-
+ 
   .upload-btn {
     background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
     color: #ffffff !important;
@@ -958,7 +961,7 @@
     mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
   }
 }
-
+ 
 // Light theme upload dialog
 :host-context(body.header-light-theme) {
   .upload-overlay { background: rgba(0, 0, 0, 0.3) !important; }
@@ -990,3 +993,5 @@
   }
   .upload-dialog-footer { border-top-color: #e1e4e8; .cancel-btn { border-color: #e1e4e8 !important; color: #656d76 !important; &:hover { border-color: rgba(79, 70, 229, 0.3) !important; color: #4f46e5 !important; } } }
 }
+ 
+ 

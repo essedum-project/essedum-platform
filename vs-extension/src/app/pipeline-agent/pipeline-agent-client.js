@@ -225,7 +225,7 @@ class PipelineAgentClient {
         this.hideEmptyState();
 
         // Render cards using exact Pipeline structure
-        this.cardsContainer.innerHTML = message.cards.map(card => this.createCardElement(card)).join(''); // lgtm[js/xss]
+        this.cardsContainer.innerHTML = message.cards.map(card => this.createCardElement(card)).join('');  
 
         // Update pagination with the pagination object from message
         if (message.pagination) {
@@ -254,7 +254,7 @@ class PipelineAgentClient {
         const escapedPipelineId = this.escapeHtml(String(pipelineId));
 
         // Use exact HTML structure from Pipeline cards — all user content escaped
-        return ` // lgtm[js/xss]
+        return `  
             <div class="pipeline-card" tabindex="0" role="article" 
                  aria-label="Pipeline Agent: ${this.escapeHtml(titleCased)}" 
                  data-pipeline-id="${escapedPipelineId}">
@@ -321,7 +321,7 @@ class PipelineAgentClient {
 
         if (this.pipelineInfo) {
             const DEF = this.constants.DEFAULTS;
-            this.pipelineInfo.innerHTML = ` // lgtm[js/xss]
+            this.pipelineInfo.innerHTML = `  
                 <p><strong>Pipeline ID:</strong> ${this.escapeHtml(data.pipelineId || DEF.PIPELINE_ID)}</p>
                 <p><strong>Type:</strong> ${this.escapeHtml(data.type || DEF.PIPELINE_ID)}</p>
                 <p><strong>Organization:</strong> ${this.escapeHtml(data.organization || DEF.PIPELINE_ID)}</p>
@@ -521,7 +521,7 @@ class PipelineAgentClient {
         }
 
         // Set the HTML - built from safe numeric values only
-        this.paginationPages.innerHTML = pagesHtml; // lgtm[js/xss]
+        this.paginationPages.innerHTML = pagesHtml;  
 
         // Add click listeners to all page number buttons
         this.paginationPages.querySelectorAll('.page-number').forEach(btn => {

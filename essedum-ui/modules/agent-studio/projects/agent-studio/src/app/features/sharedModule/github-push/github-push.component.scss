@@ -1,4 +1,79 @@
-:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+:host { display: inline-flex !important; min-width: 0; box-sizing: border-box; }
+
+.git-push-trigger,
+.github-pull-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.github-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  isolation: isolate;
+}
+
+.github-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.github-modal-content {
+  position: relative;
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.github-modal,
+.github-modal-overlay,
+.github-modal-content {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+.github-modal-header,
+.github-modal-body,
+.github-modal-footer {
+  padding: 16px 20px;
+}
+
+.github-modal-header,
+.github-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.github-modal-footer {
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 0;
+}
+
+.close-btn {
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
 
 :host ::ng-deep mat-form-field,
 :host ::ng-deep .mat-mdc-form-field { width: 100% !important; min-width: 0 !important; }

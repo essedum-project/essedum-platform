@@ -113,7 +113,10 @@ function renderJobs(jobs) {
         console.log('Job', job.jobId, 'status:', job.jobStatus, 'show stop button:', showStopButton);
 
         // Escape all user data to prevent XSS
+        // Display column shows the numeric DB id, but the log/stop/artifact
+        // APIs expect the encoded jobId string (matches the Angular jobs component).
         const escapedJobId = escapeHtml(job.id || job.jobId);
+        const escapedActionJobId = escapeHtml(job.jobId || job.id);
         const escapedSubmittedBy = escapeHtml(job.submittedBy || '-');
         const escapedJobStatus = escapeHtml(job.jobStatus);
         const escapedRuntime = escapeHtml(job.runtime || '-');
@@ -124,7 +127,7 @@ function renderJobs(jobs) {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
 
-        row.innerHTML = ` // lgtm[js/xss]
+        row.innerHTML = `  
             <td class="job-id">${escapedJobId}</td>
             <td>
                 <div>${escapedSubmittedBy}</div>
@@ -137,17 +140,17 @@ function renderJobs(jobs) {
                 <span class="badge ${getStatusBadgeClass(job.jobStatus)}">${escapedJobStatus}</span>
             </td>
             <td>
-                <button class="action-btn" onclick="showConsole('${escapedJobId}', '${escapedRuntime}', '${escapedJobStatus}', ${jobDataJson})" title="View Logs">
+                <button class="action-btn" onclick="showConsole('${escapedActionJobId}', '${escapedRuntime}', '${escapedJobStatus}', ${jobDataJson})" title="View Logs">
                     📄
                 </button>
                 ${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ?
-                `<button class="action-btn" onclick="stopJob('${escapedJobId}')" title="Stop Job">⏹️</button>` :
+                `<button class="action-btn" onclick="stopJob('${escapedActionJobId}')" title="Stop Job">⏹️</button>` :
                 ''
             }
             </td>
             <td>
                 ${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ?
-                `<button class="action-btn" onclick="showOutputArtifact('${escapedJobId}')" title="Show Output Artifacts">📊</button>` :
+                `<button class="action-btn" onclick="showOutputArtifact('${escapedActionJobId}')" title="Show Output Artifacts">📊</button>` :
                 '-'
             }
             </td>

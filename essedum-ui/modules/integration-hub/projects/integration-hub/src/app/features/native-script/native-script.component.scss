@@ -503,9 +503,13 @@
 
 .code-editor-content {
   flex: 1 !important;
+  min-height: 0 !important;
   background: #0d1117 !important;
   position: relative !important;
-  overflow: hidden !important;
+  // ACE editor is created with maxLines: Infinity, so it grows to fit the whole
+  // file instead of scrolling internally. Allow this panel to scroll so long
+  // scripts aren't clipped by the fixed-height container.
+  overflow: auto !important;
   // Code editor child overrides
   :host ::ng-deep app-enl-code-editor,
   :host ::ng-deep .CodeMirror,

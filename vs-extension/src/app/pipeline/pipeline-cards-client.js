@@ -435,7 +435,7 @@ class PipelineCardsClient {
 
         // Render pipeline cards
         if (this.cardsContainer) {
-            this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join(''); // lgtm[js/xss]
+            this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join('');  
 
             // Add event listeners to view details buttons
             document.querySelectorAll('.pipeline-action-btn').forEach(btn => {
@@ -662,7 +662,7 @@ class PipelineCardsClient {
         }
 
         // Set the HTML - built from safe numeric page numbers only
-        this.paginationPages.innerHTML = pagesHtml; // lgtm[js/xss]
+        this.paginationPages.innerHTML = pagesHtml;  
 
         // Add click listeners to all page number buttons
         this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
@@ -802,7 +802,7 @@ class PipelineCardsClient {
         const createdDate = pipeline.createdDate || 'Unknown';
         const createdBy = pipeline.target?.created_by || 'Unknown';
 
-        this.pipelineInfo.innerHTML = ` // lgtm[js/xss]                   
+        this.pipelineInfo.innerHTML = `                     
                     <span class="pipeline-title">${Utils.sanitizeHtml(Utils.toTitleCase(pipeline.alias))}</span>
                     <span class="pipeline-type-badge">${Utils.sanitizeHtml(pipeline.type.toUpperCase())}</span>
                 </div>
@@ -859,7 +859,7 @@ class PipelineCardsClient {
             </div>
         `).join('');
 
-        this.scriptsContainer.innerHTML = scriptsHtml; // lgtm[js/xss]
+        this.scriptsContainer.innerHTML = scriptsHtml;  
     }
 
     /**
@@ -886,7 +886,7 @@ class PipelineCardsClient {
             </option>
         `).join('');
 
-        this.runTypesContainer.innerHTML = ` // lgtm[js/xss]
+        this.runTypesContainer.innerHTML = `  
             <div class="form-group">
                 <label for="runTypeSelect" class="form-label">Select Run Type:</label>
                 <select id="runTypeSelect" class="form-select" onchange="window.pipelineClient.selectRunType(this.value)">
