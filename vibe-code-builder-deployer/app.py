@@ -513,29 +513,47 @@ def handle_pipeline_trigger(data):
 
         k8s_core = client.CoreV1Api()
 
+        # Build merged dict from payload env_vars and secrets (pipeline-defined vars override .env)
+        payload_env_vars = {
+            item["name"]: item["value"]
+            for item in data.get("env_vars", []) or []
+            if item.get("name")
+        }
+        payload_secrets = {
+            item["name"]: item["value"]
+            for item in data.get("secrets", []) or []
+            if item.get("name")
+        }
+        extra_vars = {**payload_env_vars, **payload_secrets}
+
         # Check if .env exists in the root of extracted code
         if os.path.exists(env_file_path):
             log_to_client(f"Found .env file. Creating Secret {secret_name}...", step="SECRET")
-            secret_obj = create_env_secret(secret_name, target_namespace, env_file_path)
-
-            if secret_obj:
-                try:
-                    # Upsert Logic for Secret
-                    k8s_core.delete_namespaced_secret(name=secret_name, namespace=target_namespace)
-                except:
-                    pass # Ignore if it didn't exist
-
-                k8s_core.create_namespaced_secret(namespace=target_namespace, body=secret_obj)
-                has_secrets = True
-                log_to_client("Secret created successfully.", step="SECRET")
-
+            secret_obj = create_env_secret(secret_name, target_namespace, env_file_path=env_file_path, extra_vars=extra_vars)
+        elif extra_vars:
+            log_to_client(f"No .env file found, using pipeline-defined vars. Creating Secret {secret_name}...", step="SECRET")
+            secret_obj = create_env_secret(secret_name, target_namespace, extra_vars=extra_vars)
         else:
-             # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
-             fallback_candidates = [
-                     data.get("secret_name"),
-                     secret_name,
-                     "adk-global-secrets",
-                     ]
+            secret_obj = None
+
+        if secret_obj:
+            try:
+                # Upsert Logic for Secret
+                k8s_core.delete_namespaced_secret(name=secret_name, namespace=target_namespace)
+            except Exception:
+                pass  # Ignore if it didn't exist
+
+            k8s_core.create_namespaced_secret(namespace=target_namespace, body=secret_obj)
+            has_secrets = True
+            log_to_client(f"Secret created successfully with {len(extra_vars)} pipeline var(s).", step="SECRET")
+
+        if not has_secrets:
+            # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
+            fallback_candidates = [
+                data.get("secret_name"),
+                secret_name,
+                "adk-global-secrets",
+            ]
 
         # 6) BUILD & PUSH (BuildKit)
         log_to_client(f"Starting BuildKit for {image_tag}...", step="BUILD")
@@ -808,8 +826,8 @@ def find_existing_secret(k8s_core, namespace, candidates):
     return None
 
 
-def create_env_secret(secret_name, namespace, env_file_path):
-    """Reads a .env file and creates a Kubernetes Secret"""
+def create_env_secret(secret_name, namespace, env_file_path=None, extra_vars: dict | None = None):
+    """Reads a .env file and/or a dict of extra vars and creates a Kubernetes Secret"""
     data = {}
 
     if not os.path.exists(env_file_path):
@@ -846,6 +864,13 @@ def create_env_secret(secret_name, namespace, env_file_path):
                 continue
 
             data[key] = value
+
+    if not data:
+        return None
+
+    # extra_vars (from pipeline payload) override .env file values
+    if extra_vars:
+        data.update({k: str(v) for k, v in extra_vars.items() if k})
 
     if not data:
         return None

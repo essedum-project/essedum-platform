@@ -65,22 +65,11 @@
               "file-saver",
               "ng4-loading-spinner",
               "@linuxfoundation/lfx-ui-core"
-            ]
+            ],
+            "extractLicenses": false
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "3mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "1mb",
-                  "maximumError": "5mb"
-                }
-              ],
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -91,9 +80,13 @@
               "extraWebpackConfig": "webpack.prod.config.js",
               "optimization": {
                 "scripts": true,
-                "styles": { "minify": true, "inlineCritical": true },
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
                 "fonts": false
-              }
+              },
+              "extractLicenses": false
             },
             "development": {
               "buildOptimizer": false,
@@ -139,8 +132,13 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           }
         }

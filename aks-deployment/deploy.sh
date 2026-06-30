@@ -60,27 +60,42 @@ deploy() {
   wait_for "ingress-nginx-controller" "ingress-nginx"
 
   info "--- [2/9] MetalLB config (if applicable) ---"
-  apply "metallb-config" "metallib-config.yaml"
+  # MetalLB is not used on AKS — skip
+  info "  Skipping MetalLB (AKS uses Azure Load Balancer)"
 
   # 2. Application namespace
   info "--- [3/9] Namespace: ${NAMESPACE} ---"
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   success "Namespace '${NAMESPACE}' ready."
 
+  # 2b. Vibe Studio deployment namespaces
+  info "--- [3b/9] Vibe Studio namespaces ---"
+  kubectl create namespace vibe-apps   --dry-run=client -o yaml | kubectl apply -f -
+  kubectl create namespace vibe-mcp    --dry-run=client -o yaml | kubectl apply -f -
+  kubectl create namespace vibe-agents --dry-run=client -o yaml | kubectl apply -f -
+  success "Vibe Studio namespaces (vibe-apps, vibe-mcp, vibe-agents) ready."
+  apply "vibe-apps-rbac"   "vibe-apps-rbac.yaml"
+  apply "vibe-mcp-rbac"    "vibe-mcp-rbac.yaml"
+  apply "vibe-agents-rbac" "vibe-agents-rbac.yaml"
+
   # 3. Secrets (must be applied before workloads that reference them)
   info "--- [3.5/9] Secrets ---"
-  apply "minio-secret" "essedum-minio-secret.yaml"
+  if [[ -f "${SCRIPT_DIR}/create-secrets.sh" ]]; then
+    bash "${SCRIPT_DIR}/create-secrets.sh" || warn "create-secrets.sh encountered an issue – check secret values and re-run manually if needed."
+  else
+    warn "create-secrets.sh not found – skipping automated secret creation. Ensure all secrets exist in namespace '${NAMESPACE}'."
+  fi
 
-  # 4. Persistent storage
+  # 4. Persistent storage (PVs are immutable after creation — errors here are non-fatal)
   info "--- [4/9] Persistent Volumes & Claims ---"
-  apply "mysql-pv"    "mysql_file_pv.yaml"
-  apply "qdrant-pv"   "qdrantfilepv.yaml"
-  apply "langflow-pv" "langflow_file_pv.yaml"
+  apply "mysql-pv"    "mysql_file_pv.yaml"    || warn "mysql-pv: already exists or immutable — skipping"
+  apply "qdrant-pv"   "qdrantfilepv.yaml"     || warn "qdrant-pv: already exists or immutable — skipping"
+  apply "langflow-pv" "langflow_file_pv.yaml" || warn "langflow-pv: already exists or immutable — skipping"
 
-  # 4. Stateful data-plane services
+  # 4. Stateful data-plane services (PVCs are immutable — errors are non-fatal)
   info "--- [5/9] Data stores (MySQL, Qdrant) ---"
-  apply "mysql"  "mysql_deployment_v3.yaml"
-  apply "qdrant" "qdrant_deployment.yaml"
+  apply "mysql"  "mysql_deployment_v3.yaml"  || warn "mysql: apply had errors (PVC may be immutable) — continuing"
+  apply "qdrant" "qdrant_deployment.yaml"    || warn "qdrant: apply had errors (PVC may be immutable) — continuing"
   wait_for "mysql"  "${NAMESPACE}"
   wait_for "qdrant" "${NAMESPACE}"
 
@@ -106,17 +121,19 @@ deploy() {
   wait_for "essedum-backend-vibe"        "${NAMESPACE}"
 
   # Frontend microservices (1 shell host + 4 MFE pods)
-  apply "essedum-frontend-shell"        "essedum-frontend-shell.yaml"
-  apply "essedum-frontend-agent"        "essedum-frontend-agent.yaml"
-  apply "essedum-frontend-data-ops"     "essedum-frontend-data-ops.yaml"
-  apply "essedum-frontend-integration"  "essedum-frontend-integration.yaml"
-  apply "essedum-frontend-vibe-studio"  "essedum-frontend-vibe-studio.yaml"
+  apply "essedum-frontend-shell"              "essedum-frontend-shell.yaml"
+  apply "essedum-frontend-agent"              "essedum-frontend-agent.yaml"
+  apply "essedum-frontend-agent-designer"     "essedum-frontend-agent-designer.yaml"
+  apply "essedum-frontend-data-ops"           "essedum-frontend-data-ops.yaml"
+  apply "essedum-frontend-integration"        "essedum-frontend-integration.yaml"
+  apply "essedum-frontend-vibe-studio"        "essedum-frontend-vibe-studio.yaml"
 
-  wait_for "essedum-frontend-shell"       "${NAMESPACE}"
-  wait_for "essedum-frontend-agent"       "${NAMESPACE}"
-  wait_for "essedum-frontend-data-ops"    "${NAMESPACE}"
-  wait_for "essedum-frontend-integration" "${NAMESPACE}"
-  wait_for "essedum-frontend-vibe-studio" "${NAMESPACE}"
+  wait_for "essedum-frontend-shell"           "${NAMESPACE}"
+  wait_for "essedum-frontend-agent"           "${NAMESPACE}"
+  wait_for "essedum-frontend-agent-designer"  "${NAMESPACE}"
+  wait_for "essedum-frontend-data-ops"        "${NAMESPACE}"
+  wait_for "essedum-frontend-integration"     "${NAMESPACE}"
+  wait_for "essedum-frontend-vibe-studio"     "${NAMESPACE}"
 
   # Supporting services
   apply "pyjob-executor"               "pyjob-executor.yaml"
@@ -135,6 +152,7 @@ deploy() {
   # 7. Horizontal Pod Autoscalers
   info "--- [8/9] Horizontal Pod Autoscalers ---"
   apply "essedum-backend-api-gateway-hpa" "essedum-backend-hpa.yaml"
+  apply "essedum-ui-hpa"                  "essedum-ui-hpa.yaml"
   apply "keycloak-hpa"                    "keycloak-hpa.yaml"
   apply "pyjob-hpa"                       "pyjob-executor-hpa.yaml"
 

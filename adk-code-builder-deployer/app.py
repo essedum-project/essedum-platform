@@ -613,16 +613,34 @@ def handle_pipeline_trigger(data):
         env_file_path = os.path.join(build_context_path, ".env")
         secret_name = f"{deploy_name}-secrets"
 
+        # Build merged dict from payload env_vars and secrets
+        payload_env_vars = {
+            item["name"]: item["value"]
+            for item in data.get("env_vars", []) or []
+            if item.get("name")
+        }
+        payload_secrets = {
+            item["name"]: item["value"]
+            for item in data.get("secrets", []) or []
+            if item.get("name")
+        }
+        extra_vars = {**payload_env_vars, **payload_secrets}
+
         if DEPLOY_MODE == "docker":
             # ── Docker deployment path ──
 
-            # Parse .env into a dict (no K8s Secret needed)
+            # Parse .env into a dict (no K8s Secret needed), then merge pipeline vars
             env_dict = {}
             if os.path.exists(env_file_path):
                 log_to_client("Found .env file. Parsing environment variables...", step="SECRET")
                 env_dict = parse_env_file(env_file_path)
                 if env_dict:
                     log_to_client(f"Parsed {len(env_dict)} environment variables.", step="SECRET")
+
+            # Pipeline-defined vars override .env file values
+            if extra_vars:
+                env_dict.update(extra_vars)
+                log_to_client(f"Merged {len(extra_vars)} pipeline-defined var(s) into container environment.", step="SECRET")
 
             # 6) BUILD (Docker via subprocess to avoid blocking eventlet)
             log_to_client(f"Building Docker image {image_tag}...", step="BUILD")
@@ -718,26 +736,31 @@ def handle_pipeline_trigger(data):
             # Check if .env exists in the root of extracted code
             if os.path.exists(env_file_path):
                 log_to_client(f"Found .env file. Creating Secret {secret_name}...", step="SECRET")
-                secret_obj = create_env_secret(secret_name, target_namespace, env_file_path)
-
-                if secret_obj:
-                    try:
-                        # Upsert Logic for Secret
-                        k8s_core.delete_namespaced_secret(name=secret_name, namespace=target_namespace)
-                    except:
-                        pass # Ignore if it didn't exist
-
-                    k8s_core.create_namespaced_secret(namespace=target_namespace, body=secret_obj)
-                    has_secrets = True
-                    log_to_client("Secret created successfully.", step="SECRET")
-
+                secret_obj = create_env_secret(secret_name, target_namespace, env_file_path=env_file_path, extra_vars=extra_vars)
+            elif extra_vars:
+                log_to_client(f"No .env file found, using pipeline-defined vars. Creating Secret {secret_name}...", step="SECRET")
+                secret_obj = create_env_secret(secret_name, target_namespace, extra_vars=extra_vars)
             else:
-                 # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
-                 fallback_candidates = [
-                         data.get("secret_name"),
-                         secret_name,
-                         "adk-global-secrets",
-                         ]
+                secret_obj = None
+
+            if secret_obj:
+                try:
+                    # Upsert Logic for Secret
+                    k8s_core.delete_namespaced_secret(name=secret_name, namespace=target_namespace)
+                except Exception:
+                    pass  # Ignore if it didn't exist
+
+                k8s_core.create_namespaced_secret(namespace=target_namespace, body=secret_obj)
+                has_secrets = True
+                log_to_client(f"Secret created successfully with {len(extra_vars)} pipeline var(s).", step="SECRET")
+
+            if not has_secrets:
+                # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
+                fallback_candidates = [
+                    data.get("secret_name"),
+                    secret_name,
+                    "adk-global-secrets",
+                ]
 
             # 6) BUILD & PUSH (BuildKit)
             log_to_client(f"Starting BuildKit for {image_tag}...", step="BUILD")
@@ -1038,44 +1061,47 @@ def find_existing_secret(k8s_core, namespace, candidates):
     return None
 
 
-def create_env_secret(secret_name, namespace, env_file_path):
-    """Reads a .env file and creates a Kubernetes Secret"""
+def create_env_secret(secret_name, namespace, env_file_path=None, extra_vars: dict | None = None):
+    """Reads a .env file and/or a dict of extra vars and creates a Kubernetes Secret"""
     data = {}
 
-    if not os.path.exists(env_file_path):
-        return None
+    if env_file_path and not os.path.exists(env_file_path):
+        pass  # no file; extra_vars will be checked below
+    elif env_file_path:
+        with open(env_file_path, "r", encoding="utf-8") as f:
+            for raw in f:
+                line = raw.strip()
 
-    with open(env_file_path, "r", encoding="utf-8") as f:
-        for raw in f:
-            line = raw.strip()
+                # Skip empty or commented lines
+                if not line or line.startswith("#"):
+                    continue
 
-            # Skip empty or commented lines
-            if not line or line.startswith("#"):
-                continue
+                # Optional 'export ' prefix
+                if line.lower().startswith("export "):
+                    line = line[7:].lstrip()
 
-            # Optional 'export ' prefix
-            if line.lower().startswith("export "):
-                line = line[7:].lstrip()
+                # Must contain '='
+                if "=" not in line:
+                    # Safely ignore malformed lines instead of crashing
+                    continue
 
-            # Must contain '='
-            if "=" not in line:
-                # Safely ignore malformed lines instead of crashing
-                continue
+                key, value = line.split("=", 1)
 
-            key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip()
 
-            key = key.strip()
-            value = value.strip()
+                # Trim surrounding quotes if present
+                if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+                    value = value[1:-1]
 
-            # Trim surrounding quotes if present
-            if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
-                value = value[1:-1]
+                # Skip if key is empty
+                if not key:
+                    continue
 
-            # Skip if key is empty
-            if not key:
-                continue
+                data[key] = value
 
-            data[key] = value
+    if extra_vars:
+        data.update({k: str(v) for k, v in extra_vars.items() if k})
 
     if not data:
         return None

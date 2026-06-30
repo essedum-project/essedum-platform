@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 import java.security.*;
 import java.time.Instant;
 import java.util.*;
@@ -63,7 +64,7 @@ public class ICIPLangflowController {
     @GetMapping("/get_langflow_agent_export")
     public ResponseEntity<String> sayHello(@RequestParam(name = "name", defaultValue = "Received") String name) {
         String message = "JSON file " + name;
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(HtmlUtils.htmlEscape(message));
     }
 
     /**

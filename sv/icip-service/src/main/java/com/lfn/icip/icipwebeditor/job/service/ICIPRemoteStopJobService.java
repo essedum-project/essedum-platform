@@ -19,6 +19,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -30,6 +31,7 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import com.lfn.icip.dataset.util.SsrfProtectionUtil;
 import okhttp3.Response;
 @Log4j2
 @Service("remotestopjobservice")
@@ -82,7 +84,7 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 		OkHttpClient client = newBuilder.build();
 		MediaType mediaType = MediaType.parse("application/json");
 		JSONObject bodyObject = new JSONObject();
-		Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+		Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url)).addHeader("accept", "application/json").build();
 		logger.info("terminate job request " + requestokHttp);
 		try {
 			Response response = client.newCall(requestokHttp).execute();
@@ -135,54 +137,7 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 //		return trustAllCerts;
 //	}
 	private TrustManager[] getTrustAllCerts() {
-	    if ("true".equalsIgnoreCase(certificateCheck)) {
-	        try {
-	            // Load the default trust store
-	            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-	                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-	            trustManagerFactory.init((KeyStore) null);
-	            // Get the trust managers from the factory
-	            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-	            // Ensure we have at least one X509TrustManager
-	            for (TrustManager trustManager : trustManagers) {
-	                if (trustManager instanceof X509TrustManager) {
-	                    return new TrustManager[] { (X509TrustManager) trustManager };
-	                }
-	            }
-	        } catch (KeyStoreException e) {
-	            logger.info(e.getMessage());
-	        } catch (NoSuchAlgorithmException e) {
-	            logger.info(e.getMessage());
-	        }
-	        throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-	    } else {
-	        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-	        	@Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkClientTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Client certificate: {}", cert.getSubjectDN());
-                    }
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkServerTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Server certificate: {}", cert.getSubjectDN());
-                    }
-                }
-
-	            @Override
-	            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-	                return new java.security.cert.X509Certificate[] {};
-	            }
-	        } };
-	        return trustAllCerts;
-	    }
+	    return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {

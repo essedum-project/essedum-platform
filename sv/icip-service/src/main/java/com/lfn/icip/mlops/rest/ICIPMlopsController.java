@@ -59,6 +59,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.XSSUtils;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -774,12 +775,12 @@ public class ICIPMlopsController {
                     .getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
             if (fedModels != null && fedModels.size() > 0) {
                 if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
-                    return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
+                    return new ResponseEntity<>("Model with name '" + XSSUtils.stripXSS(fedModeldto.getName()) + "' already exists",
                             HttpStatus.BAD_REQUEST);
                 else if (fedModeldto.getId() != null && fedModels.size() == 1
                         && !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
                     return new ResponseEntity<>(
-                            "Another Model with name '" + fedModeldto.getName() + "' already exists",
+                            "Another Model with name '" + XSSUtils.stripXSS(fedModeldto.getName()) + "' already exists",
                             HttpStatus.BAD_REQUEST);
                 }
             }
@@ -1249,7 +1250,7 @@ public class ICIPMlopsController {
 		try {
 			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
 		} catch (Exception e) {
-			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			resp = new ResponseEntity<>("Request failed", HttpStatus.INTERNAL_SERVER_ERROR);
 			logger.error("EXCEPTION:", e.getMessage());
 		}
 		return resp;
@@ -1876,9 +1877,9 @@ public class ICIPMlopsController {
             // Replace all non-alphanumeric characters with hyphen
             String sanitizedAlias = originalAlias.replaceAll("[^a-zA-Z0-9]", "-");
             // Remove consecutive hyphens
-            sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+            sanitizedAlias = sanitizedAlias.replaceAll("-++", "-");
             // Remove leading and trailing hyphens
-            sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+            sanitizedAlias = sanitizedAlias.replaceAll("^-++|-++$", "");
             streamingServicesDTO.setAlias(sanitizedAlias);
         } else {
             // If alias is null or empty, use name as alias and sanitize it
@@ -1886,9 +1887,9 @@ public class ICIPMlopsController {
             if (name != null && !name.trim().isEmpty()) {
                 String sanitizedAlias = name.replaceAll("[^a-zA-Z0-9]", "-");
                 // Remove consecutive hyphens
-                sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+                sanitizedAlias = sanitizedAlias.replaceAll("-++", "-");
                 // Remove leading and trailing hyphens
-                sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+                sanitizedAlias = sanitizedAlias.replaceAll("^-++|-++$", "");
                 streamingServicesDTO.setAlias(sanitizedAlias);
             }
         }
@@ -1991,18 +1992,18 @@ public class ICIPMlopsController {
 			if (name != null && !name.trim().isEmpty()) {
 				String sanitizedAlias = name.replaceAll("[^a-zA-Z0-9]", "-");
 				// Remove consecutive hyphens
-				sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+				sanitizedAlias = sanitizedAlias.replaceAll("-++", "-");
 				// Remove leading and trailing hyphens
-				sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+				sanitizedAlias = sanitizedAlias.replaceAll("^-++|-++$", "");
 				streamingServicesDTO.setAlias(sanitizedAlias);
 			}
 		} else {
 			// Sanitize the provided alias
 			String sanitizedAlias = streamingServicesDTO.getAlias().replaceAll("[^a-zA-Z0-9]", "-");
 			// Remove consecutive hyphens
-			sanitizedAlias = sanitizedAlias.replaceAll("-+", "-");
+			sanitizedAlias = sanitizedAlias.replaceAll("-++", "-");
 			// Remove leading and trailing hyphens
-			sanitizedAlias = sanitizedAlias.replaceAll("^-+|-+$", "");
+			sanitizedAlias = sanitizedAlias.replaceAll("^-++|-++$", "");
 			streamingServicesDTO.setAlias(sanitizedAlias);
 		}
 

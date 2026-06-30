@@ -15,6 +15,11 @@
 
 package com.lfn.ai.comm.lib.util;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -28,8 +33,68 @@ public class CommandSanitizer {
 	/** Pattern for validating that a command argument contains only safe characters. */
 	private static final Pattern SAFE_ARG_PATTERN = Pattern.compile("^[a-zA-Z0-9_.\\-/\\\\:= @\"']+$");
 
+	/** Allowlist of shell executable basenames that may be invoked via {@link ProcessBuilder}. */
+	private static final Set<String> ALLOWED_EXECUTABLES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			"sh", "bash", "zsh", "cmd", "cmd.exe", "powershell", "powershell.exe", "pwsh", "pwsh.exe"
+	)));
+
+	/** Allowlist of shell flags. */
+	private static final Set<String> ALLOWED_FLAGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			"-c", "/c", "/C", "-Command", "-command"
+	)));
+
 	private CommandSanitizer() {
 		// Utility class
+	}
+
+	/**
+	 * Validates that the given executable path refers to a known, allowlisted shell.
+	 * <p>
+	 * This prevents an attacker-controlled value from causing {@link ProcessBuilder}
+	 * to launch an arbitrary binary.
+	 *
+	 * @param executable the executable path (may be absolute or just a basename)
+	 * @return the original value if it is allowlisted
+	 * @throws IllegalArgumentException if the executable is not in the allowlist
+	 */
+	public static String validateExecutable(String executable) {
+		if (executable == null) {
+			throw new IllegalArgumentException("Executable must not be null");
+		}
+		String base = new File(executable).getName().toLowerCase();
+		// Return the matched allowlist entry (a String literal stored in
+		// ALLOWED_EXECUTABLES) instead of the user-supplied path. This both
+		// guarantees an allowlisted basename is launched (the OS resolves it
+		// via PATH) and gives static-analysis taint trackers (e.g. CodeQL
+		// java/command-line-injection) a recognisable sanitisation barrier:
+		// the returned value flows from a constant Set, not from user input.
+		for (String allowed : ALLOWED_EXECUTABLES) {
+			if (allowed.equals(base)) {
+				return allowed;
+			}
+		}
+		throw new IllegalArgumentException("Executable not in allowlist: " + base);
+	}
+
+	/**
+	 * Validates that the given shell flag is on a known allowlist (e.g. {@code -c}, {@code /c}).
+	 *
+	 * @param flag the flag value
+	 * @return the original value if it is allowlisted
+	 * @throws IllegalArgumentException if the flag is not in the allowlist
+	 */
+	public static String validateShellFlag(String flag) {
+		if (flag == null) {
+			throw new IllegalArgumentException("Shell flag not in allowlist: null");
+		}
+		// Return the matched allowlist constant (not the input) so taint
+		// trackers see a value originating from a constant Set.
+		for (String allowed : ALLOWED_FLAGS) {
+			if (allowed.equals(flag)) {
+				return allowed;
+			}
+		}
+		throw new IllegalArgumentException("Shell flag not in allowlist: " + flag);
 	}
 
 	/**
@@ -86,14 +151,45 @@ public class CommandSanitizer {
 		}
 		String[] sanitized = new String[cmd.length];
 		for (int i = 0; i < cmd.length; i++) {
-			// Don't sanitize the shell executable itself (index 0) or flag (index 1)
-			if (i <= 1) {
-				sanitized[i] = cmd[i];
+			if (i == 0) {
+				sanitized[i] = validateExecutable(cmd[i]);
+			} else if (i == 1) {
+				sanitized[i] = validateShellFlag(cmd[i]);
 			} else {
 				sanitized[i] = sanitizeArgument(cmd[i]);
 			}
 		}
 		return sanitized;
+	}
+
+	/**
+	 * Safely builds a {@link ProcessBuilder} for a 3-element shell command of the form
+	 * {@code [shell, flag, scriptArg]}. This is the single, audited entry point that
+	 * the rest of the codebase MUST use to construct a {@code ProcessBuilder} from
+	 * potentially user-influenced data.
+	 * <p>
+	 * Sanitization applied (in order):
+	 * <ol>
+	 *   <li>{@link #validateExecutable(String)} — strict allowlist for {@code cmd[0]}.</li>
+	 *   <li>{@link #validateShellFlag(String)} — strict allowlist for {@code cmd[1]}.</li>
+	 *   <li>{@link #sanitizeArgument(String)} — strips shell metacharacters from {@code cmd[2]}.</li>
+	 * </ol>
+	 * Encapsulating the {@link ProcessBuilder} construction here gives static analyzers
+	 * (e.g. CodeQL "Uncontrolled command line", CWE-78/CWE-88) a single, recognizable
+	 * sanitization barrier between any tainted source and the sink.
+	 *
+	 * @param cmd a 3-element command array: {shell, flag, argument}
+	 * @return a {@link ProcessBuilder} initialized with the sanitized command tokens
+	 * @throws IllegalArgumentException if {@code cmd} is null, not of length 3, or fails any check
+	 */
+	public static ProcessBuilder buildProcessBuilder(String[] cmd) {
+		if (cmd == null || cmd.length != 3) {
+			throw new IllegalArgumentException("Command must be a 3-element array: {shell, flag, argument}");
+		}
+		String shell = validateExecutable(cmd[0]);
+		String flag = validateShellFlag(cmd[1]);
+		String arg = sanitizeArgument(cmd[2]);
+		return new ProcessBuilder(shell, flag, arg);
 	}
 }
 

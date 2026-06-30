@@ -12,7 +12,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
     # CORS — allow the main UI origin to call Keycloak
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://essedum-lfn.infosys.com"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://essedum.az.ad.idemo-ppc.com"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -21,10 +21,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - login.essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls
+    - aiplatform.az.ad.idemo-ppc.com
+    secretName: essedum-az-tls
   rules:
-  - host: login.essedum-lfn.infosys.com
+  - host: aiplatform.az.ad.idemo-ppc.com
     http:
       paths:
       - path: /

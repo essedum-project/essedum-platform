@@ -21,7 +21,10 @@
         @if (!action){
         <!-- Action icons section -->
         <div class="header-actions">
-            <p>Last refreshed on: {{ lastRefreshedTime | date:'medium' }}</p>
+            <p *ngIf="showLastRefreshed">Last refreshed on: {{ lastRefreshedTime | date:'medium' }}</p>
+
+            <!-- Extra action slot (optional projected content, e.g. Pipeline Status button) -->
+            <ng-content select="[header-extra-action]"></ng-content>
 
             <div class="header-search lfx-panel d-flex" style="display: flex !important;">
                 <!-- Input field -->
@@ -51,7 +54,7 @@
             </div>
 
             <!-- Refresh button -->
-            <div class="action-button" (click)="onRefreshClick()"
+            <div class="action-button" *ngIf="showRefreshButton" (click)="onRefreshClick()"
                  matTooltip="Refresh" [matTooltipPosition]="TOOLTIP_POSITION"
                  (mouseenter)="isRefreshHovered = true" (mouseleave)="isRefreshHovered = false"
                  role="button" tabindex="0" aria-label="Refresh data">

@@ -24,9 +24,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +31,9 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.HttpMethod;
-import com.amazonaws.SDKGlobalConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -104,12 +94,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public final class AwsSdkTest {
-    static {
-        System.setProperty(
-                SDKGlobalConfiguration.DISABLE_CERT_CHECKING_SYSTEM_PROPERTY,
-                "true");
-        disableSslVerification();
-    }
 
     private static final ByteSource BYTE_SOURCE = ByteSource.wrap(new byte[1]);
     private static final ClientConfiguration V2_SIGNER_CONFIG =
@@ -1803,52 +1787,6 @@ public final class AwsSdkTest {
             }
         } catch (AmazonS3Exception e) {
             // expected
-        }
-    }
-
-    private static final class NullX509TrustManager
-            implements X509TrustManager {
-        @Override
-        @Nullable
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] certs,
-                String authType) {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] certs,
-                String authType) {
-        }
-    }
-
-    static void disableSslVerification() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            var trustAllCerts = new TrustManager[] {
-                new NullX509TrustManager() };
-
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(
-                    sc.getSocketFactory());
-
-            // Create all-trusting host name verifier
-            var allHostsValid = new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            };
-
-            // Install the all-trusting host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
         }
     }
 

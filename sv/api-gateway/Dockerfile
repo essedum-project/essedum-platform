@@ -1,27 +1,7 @@
 # -------------------------------------------------------
-# Stage 1: Build with Maven
-# -------------------------------------------------------
-FROM maven:3.9.6-eclipse-temurin-21 AS maven_builder
-
-WORKDIR /sv
-
-COPY . .
-
-RUN mvn clean install -pl api-gateway -am -Dmaven.test.skip=true -Dlicense.skip=true
-
-RUN mkdir -p /app/conf /app/lib /app/log
-
-RUN cp /sv/api-gateway/src/main/resources/*.yml /app/conf
-
-# Copy the compiled api-gateway JAR
-RUN cp /sv/api-gateway/target/api-gateway*.jar /app/
-
-# Use Maven dependency plugin to copy only runtime dependencies
-RUN cd /sv/api-gateway && mvn dependency:copy-dependencies -DoutputDirectory=/app/lib -Dmdep.prependGroupId=false -DskipTests -DincludeScope=runtime
-
-
-# -------------------------------------------------------
-# Stage 2: Runtime image
+# Pre-built image (JAR built on host via build-and-push.sh)
+# Build context: sv/api-gateway/
+# Requires: target/api-gateway*.jar, target/dependency/, src/main/resources/*.yml
 # -------------------------------------------------------
 FROM eclipse-temurin:21-jdk
 
@@ -31,10 +11,13 @@ LABEL service="api-gateway"
 ENV JAVA_HOME=/usr/local/openjdk-21
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
-# Copy from first stage
-COPY --from=maven_builder /app /app/
+RUN mkdir -p /app/conf /app/lib /app/log
 
 WORKDIR /app
+
+COPY target/api-gateway*.jar ./
+COPY target/dependency/ ./lib/
+COPY src/main/resources/*.yml ./conf/
 
 ENV ESSEDUM_HOME=/app
 ENV JAVA_OPTS="-Xms128m -Xmx256m"
@@ -44,4 +27,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -cp api-gateway-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.gateway.ApiGatewayApplication"]
+CMD ["/bin/bash", "-c", "java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.profiles.active=mysql,oauth2,dbconstants -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/api-gateway*.jar | head -1)"]

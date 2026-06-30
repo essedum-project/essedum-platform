@@ -1,36 +1,13 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
+import com.lfn.icip.dataset.util.GroovySandboxUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPPrompts;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptChatModel;
 import com.lfn.icip.icipwebeditor.service.ICIPPromptService;
-
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.StringReader;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -39,8 +16,16 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import com.lfn.icip.dataset.util.GroovySandboxUtil;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import java.util.*;
 
 @Service("vertexaichatmodel")
 public class VertexAiServiceImpl implements ICIPPromptChatModel {
@@ -175,8 +160,10 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 			Binding binding = new Binding();
 			binding.setProperty("response", Answer);
 
-			GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-			Object transformedResult = shell.evaluate(new StringReader(transformScript));
+			// Route through the single audited sink in GroovySandboxUtil so static
+			// analysers (CodeQL Groovy injection / CWE-94) see a sanitisation barrier
+			// (validation + SecureASTCustomizer sandbox) immediately before evaluation.
+			Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
 
 			Answer = transformedResult != null ? transformedResult.toString() : "";
 		}
@@ -186,40 +173,7 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 	}
 	
 	private TrustManager[] getTrustAllCerts() throws Exception {
-		//logger.info("certificateCheck value: {}", certificateCheck);
-		if("true".equalsIgnoreCase(certificateCheck)) {
-			// Load the default trust store
-		    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		    trustManagerFactory.init((KeyStore) null);
-	
-		    // Get the trust managers from the factory
-		    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-	
-		    // Ensure we have at least one X509TrustManager
-		    for (TrustManager trustManager : trustManagers) {
-		        if (trustManager instanceof X509TrustManager) {
-		            return new TrustManager[] { (X509TrustManager) trustManager };
-		        }
-		    }
-	
-		    throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-		}else {
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-	
-				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-				}
-	
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return new java.security.cert.X509Certificate[] {};
-				}
-			} };
-			return trustAllCerts;
-		}   
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	@Override

@@ -46,17 +46,16 @@ public class ICIPJobServiceUtilGenerated {
 
 
 	public List<String> getCommand(String type, String name,String org) {
-		JsonParser parser = new JsonParser();
 		List<String> response = new ArrayList<String>();
 		ICIPPlugin plugin = pluginRepository.getByTypeAndOrg(type,org);
 //		String plugin = pluginService.fetchByType(type);
 		Map<String, String> map = new HashMap<>();
 
-//		JsonElement pluginJson  = parser.parse(plugin.toString());
+//		JsonElement pluginJson  = JsonParser.parseString(plugin.toString());
 //		String config = pluginJson.getAsJsonObject().get("configData").getAsString();
 		String config = plugin.getConfig().toString();
 		config = config.substring(1, config.length()-1);
-		JsonObject configJson = parser.parse(config.toString()).getAsJsonObject();
+		JsonObject configJson = JsonParser.parseString(config.toString()).getAsJsonObject();
 		JsonArray commands = configJson.get("commands").getAsJsonArray();
 		JsonObject environment = configJson.get("environment").getAsJsonObject();
 		
@@ -71,16 +70,16 @@ public class ICIPJobServiceUtilGenerated {
 
 			for(Map.Entry<String, JsonElement> entry : environment.entrySet()) {
 			    if(cmd.contains(entry.getKey().substring(1, entry.getKey().length()-1))) {
-			    	cmd = cmd.replaceAll("@!"+entry.getKey()+"!@", entry.getValue().getAsString());
+			    	cmd = cmd.replace("@!"+entry.getKey()+"!@", entry.getValue().getAsString());
 			    }
 				
 			}
-			cmd = cmd.replaceAll("@!pipelinename!@", name);
+			cmd = cmd.replace("@!pipelinename!@", name);
 			while(cmd.contains("@!")) {
 				
 			String remain = cmd.substring(cmd.indexOf("@!")+2, cmd.lastIndexOf("!@"));
 			String constant = constantsService.findByKeys(remain, "Core");
-			cmd = cmd.replaceAll("@!"+remain+"!@", constant);
+			cmd = cmd.replace("@!"+remain+"!@", constant == null ? "" : constant);
 	
 			}
 			response.add(cmd);

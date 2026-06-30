@@ -133,6 +133,7 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
 
+    @SuppressWarnings("null")
     private Mono<Void> onUnauthorized(ServerWebExchange exchange, String message) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -144,6 +145,7 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         return response.writeWith(Mono.just(buffer));
     }
 
+    @SuppressWarnings("null")
     private boolean isOpenPath(String path) {
         for (String pattern : authProperties.getOpenPaths()) {
             if (pathMatcher.match(pattern.trim(), path)) {

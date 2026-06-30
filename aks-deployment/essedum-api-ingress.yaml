@@ -12,10 +12,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls
+    - essedum.az.ad.idemo-ppc.com
+    secretName: essedum-az-tls
   rules:
-  - host: essedum-lfn.infosys.com
+  - host: essedum.az.ad.idemo-ppc.com
     http:
       paths:
       - path: /api

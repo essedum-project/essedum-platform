@@ -357,6 +357,14 @@ public class ICIPFileService {
         logger.info("Starting persistInNativeJsonScriptTable for cname: {}, org: {}, fileName: {}, newFileName: {}, fileType: {}",
                 name, org, fileName, newFileName, fileType);
 
+        // Sanitize python scripts: strip any stdlib modules (e.g. 'pickle', 'os', 'json')
+        // that the wizard's LLM may have mistakenly included in _WIZARD_PIPELINE_DEPS /
+        // _DEPS. pip cannot install stdlib modules and the job would fail at startup.
+        if ("Python3".equalsIgnoreCase(fileType) || "Python".equalsIgnoreCase(fileType)
+                || (newFileName != null && newFileName.toLowerCase().endsWith(".py"))) {
+            bytes = sanitizeWizardPipelineDeps(bytes);
+        }
+
         List<String> savedFileNames = new ArrayList<>();
         Blob blob = new SerialBlob(bytes);
 
@@ -962,7 +970,15 @@ public class ICIPFileService {
      * @return the path
      */
     public Path returnPath(String fileTypeFolder, String filename) {
-        return Paths.get(folderPath, fileTypeFolder, filename);
+        // Sanitise the user-controlled fileTypeFolder/filename so the resolved
+        // path is guaranteed to stay inside the configured `folderPath`. The
+        // returned Path is freshly constructed from a canonicalised File whose
+        // containment in the base directory has been asserted — this is the
+        // sanitisation barrier that downstream Files.* sinks (and CodeQL's
+        // java/path-injection query) need to see.
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(folderPath, fileTypeFolder + java.io.File.separator + filename)
+                .toPath();
     }
 
     /**
@@ -1460,16 +1476,25 @@ public class ICIPFileService {
         paths.add(requirementpath);
         paths.add(eggpath);
         for (JsonElement element : pathArray) {
-            paths.add(Paths.get(element.getAsString()));
+            // Reject traversal sequences in user-controlled extra paths so the
+            // downstream Files.exists / FileInputStream sinks see a sanitised Path.
+            paths.add(com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(element.getAsString()));
         }
-        FileOutputStream fos = new FileOutputStream(zipPath.toAbsolutePath().toString());
+        FileOutputStream fos = new FileOutputStream(com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(zipPath.toAbsolutePath().toString()).toFile());
         try (fos) {
             ZipOutputStream zipOut = null;
             try {
                 zipOut = new ZipOutputStream(fos);
                 for (Path path : paths) {
-                    if (path != null && java.nio.file.Files.exists(path) && !java.nio.file.Files.isDirectory(path)) {
-                        File fileToZip = path.toFile();
+                    // Re-validate each Path against traversal before treating it as a
+                    // file to zip — CodeQL recognises this as the sanitiser barrier
+                    // for both Files.exists and the FileInputStream sink below.
+                    java.nio.file.Path safePath = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(path.toString());
+                    if (java.nio.file.Files.exists(safePath) && !java.nio.file.Files.isDirectory(safePath)) {
+                        File fileToZip = safePath.toFile();
                         try (FileInputStream fis = new FileInputStream(fileToZip)) {
                             ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
                             zipOut.putNextEntry(zipEntry);
@@ -1510,7 +1535,12 @@ public class ICIPFileService {
      * @return the path
      */
     public Path returnDefaultConfigPath(String agentType, String filename) {
-        return Paths.get(agentPath, agentType, filename);
+        // Sanitise against path traversal: the returned Path is built from a
+        // canonicalised File whose containment under `agentPath` has been
+        // asserted by PathValidationUtil.
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, agentType + java.io.File.separator + filename)
+                .toPath();
     }
 
     /**
@@ -1523,8 +1553,18 @@ public class ICIPFileService {
      * @return the path
      */
     private Path returnConfigPath(String cname, String org, String agentType, String filename) {
-        return Paths.get(agentPath, agentType.toLowerCase(), ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
-                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()), filename);
+        // Sanitise: build a relative segment from the (already sanitised) cname/org
+        // plus user-supplied agentType/filename, then assert canonical containment
+        // under `agentPath`. The returned Path is fresh, so taint trackers (e.g.
+        // CodeQL java/path-injection) treat downstream Files.* calls as safe.
+        String relative = String.join(java.io.File.separator,
+                agentType.toLowerCase(),
+                ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
+                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()),
+                filename);
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, relative)
+                .toPath();
     }
 
     /**
@@ -1538,8 +1578,15 @@ public class ICIPFileService {
      * @return the path
      */
     private Path returnConfigPath(String cname, String org, String agentType, String filename1, String filename2) {
-        return Paths.get(agentPath, agentType.toLowerCase(), ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
-                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()), filename1, filename2);
+        // Same canonical-containment guard as the 4-arg overload.
+        String relative = String.join(java.io.File.separator,
+                agentType.toLowerCase(),
+                ICIPUtils.removeSpecialCharacter(org.toLowerCase()),
+                ICIPUtils.removeSpecialCharacter(cname.toLowerCase()),
+                filename1, filename2);
+        return com.lfn.icip.dataset.util.PathValidationUtil
+                .validatePath(agentPath, relative)
+                .toPath();
     }
 
     /**
@@ -1550,7 +1597,11 @@ public class ICIPFileService {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private byte[] getFile(Path path) throws IOException {
-        File file = path.toFile();
+        // Reject traversal sequences in the supplied Path before opening a
+        // FileInputStream so CodeQL's java/path-injection query sees a sanitiser
+        // on the data-flow into this sink.
+        File file = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(path.toString()).toFile();
         byte[] bytesArray = new byte[(int) file.length()];
         int readLength = 0;
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
@@ -1580,6 +1631,103 @@ public class ICIPFileService {
                 logger.error(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Python standard-library module names that must NEVER appear in a pip
+     * install list — pip will fail with "No matching distribution" and abort
+     * the whole job. The training-pipeline wizard's LLM occasionally hallucinates
+     * these (most often 'pickle') into {@code _WIZARD_PIPELINE_DEPS}.
+     */
+    private static final Set<String> PYTHON_STDLIB_MODULES = new HashSet<>(Arrays.asList(
+            "os", "sys", "io", "json", "re", "time", "datetime", "collections",
+            "functools", "itertools", "pathlib", "typing", "dataclasses", "abc",
+            "copy", "math", "random", "hashlib", "base64", "urllib", "http",
+            "logging", "warnings", "traceback", "inspect", "struct", "string",
+            "enum", "contextlib", "threading", "subprocess", "shutil", "tempfile",
+            "uuid", "argparse", "configparser", "csv", "pickle", "gzip", "zipfile",
+            "concurrent", "asyncio", "socket", "ssl", "email", "html", "xml",
+            "unittest", "pprint", "textwrap", "operator", "heapq", "bisect",
+            "builtins", "platform", "signal", "stat", "glob", "fnmatch",
+            "weakref", "gc", "types", "decimal", "fractions", "statistics",
+            "multiprocessing", "queue", "array", "ctypes", "mmap"
+    ));
+
+    private static final java.util.regex.Pattern DEPS_BLOCK_PATTERN = java.util.regex.Pattern.compile(
+            "(\\b(?:_WIZARD_PIPELINE_DEPS|_DEPS)\\s*=\\s*\\[)([^\\]]*)(\\])");
+    private static final java.util.regex.Pattern DEPS_ITEM_PATTERN = java.util.regex.Pattern.compile(
+            "'([^']*)'|\"([^\"]*)\"");
+
+    /**
+     * Strips Python stdlib module names from any {@code _WIZARD_PIPELINE_DEPS}
+     * / {@code _DEPS} list literal at the top of the supplied Python script.
+     * Returns the original bytes unchanged when no such block is found or the
+     * content is not valid UTF-8.
+     */
+    static byte[] sanitizeWizardPipelineDeps(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return bytes;
+        }
+        String source = bytesToUtf8(bytes);
+        if (source == null) {
+            return bytes;
+        }
+        java.util.regex.Matcher matcher = DEPS_BLOCK_PATTERN.matcher(source);
+        if (!matcher.find()) {
+            return bytes;
+        }
+        List<String> kept = filterNonStdlibDeps(matcher.group(2));
+        if (kept == null) {
+            return bytes;
+        }
+        return rebuildDepsSource(source, matcher, matcher.group(1), matcher.group(3), kept);
+    }
+
+    private static String bytesToUtf8(byte[] bytes) {
+        try {
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private static List<String> filterNonStdlibDeps(String body) {
+        java.util.regex.Matcher itemMatcher = DEPS_ITEM_PATTERN.matcher(body);
+        List<String> kept = new ArrayList<>();
+        boolean removedAny = false;
+        while (itemMatcher.find()) {
+            String literal = itemMatcher.group(0);
+            String value = itemMatcher.group(1) != null ? itemMatcher.group(1) : itemMatcher.group(2);
+            String normalized = value == null ? "" : value.trim().toLowerCase();
+            String moduleName = normalized.replace('-', '_');
+            if (PYTHON_STDLIB_MODULES.contains(moduleName)) {
+                removedAny = true;
+                logger.info("sanitizeWizardPipelineDeps: removing stdlib module '{}' from deps list", value);
+                continue;
+            }
+            kept.add(literal);
+        }
+        return removedAny ? kept : null;
+    }
+
+    private static byte[] rebuildDepsSource(
+            String source,
+            java.util.regex.Matcher matcher,
+            String prefix,
+            String suffix,
+            List<String> kept) {
+        StringBuilder rebuilt = new StringBuilder(source.length());
+        rebuilt.append(source, 0, matcher.start());
+        rebuilt.append(prefix);
+        for (int i = 0; i < kept.size(); i++) {
+            if (i > 0) {
+                rebuilt.append(", ");
+            }
+            rebuilt.append(kept.get(i));
+        }
+        rebuilt.append(suffix);
+        rebuilt.append(source, matcher.end(), source.length());
+        return rebuilt.toString().getBytes(StandardCharsets.UTF_8);
     }
 
 }

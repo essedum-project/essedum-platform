@@ -63,7 +63,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.Crypt;
-import com.lfn.ai.comm.lib.util.FileValidate;
 import com.lfn.ai.comm.lib.util.FileValidateV2;
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.HeadersUtil;
@@ -116,8 +115,6 @@ public class ProjectResource {
     @Autowired
     DashConstantRepository dashConstantRepository;
 	
-    @Autowired
-    FileValidate filevalidate;
     @Autowired
     FileValidateV2 fileValidateV2;
         

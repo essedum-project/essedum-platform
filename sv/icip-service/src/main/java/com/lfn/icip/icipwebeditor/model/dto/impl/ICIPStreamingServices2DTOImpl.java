@@ -105,5 +105,16 @@ public class ICIPStreamingServices2DTOImpl implements ICIPStreamingServices2DTO 
         }
         return null;
     }
+
+    /**
+     * Gets the runner service status.
+     * Returns "ACTIVE" if runner was deployed, "INACTIVE" if stopped, null if never deployed.
+     *
+     * @return the runner service status
+     */
+    @Override
+    public String getRunnerServiceStatus() {
+        return (String) data.get("runnerServiceStatus");
+    }
 }
 

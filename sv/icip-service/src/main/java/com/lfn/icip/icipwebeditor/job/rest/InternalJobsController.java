@@ -258,7 +258,7 @@ public class InternalJobsController {
 				return new ResponseEntity<>("pipeline imported", HttpStatus.OK);
 			} catch (IOException e) {
 				log.error("Exception {}:{}", e.getClass().getName(), e.getMessage());
-				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
 			}
 		} else {
 			return new ResponseEntity<>("Scheduler Paused", HttpStatus.CONFLICT);

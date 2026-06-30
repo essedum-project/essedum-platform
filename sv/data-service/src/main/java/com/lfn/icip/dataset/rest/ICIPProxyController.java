@@ -1,13 +1,13 @@
 /**
  * The MIT License (MIT)
  * Copyright © 2025 Infosys Limited
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -16,7 +16,9 @@
 package com.lfn.icip.dataset.rest;
 
 import java.io.IOException;
+
 import lombok.extern.log4j.Log4j2;
+
 import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -61,10 +64,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
-import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
@@ -86,6 +89,7 @@ import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 // TODO: Auto-generated Javadoc
+
 /**
  * The Class ICIPDatasetController.
  *
@@ -99,47 +103,65 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RefreshScope
 public class ICIPProxyController {
 
-	/** The Constant logger. */
+	/**
+	 * The Constant logger.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPProxyController.class);
 
-	/** The plugin service. */
+	/**
+	 * The plugin service.
+	 */
 	@Autowired
 	private ICIPDatasetPluginsService pluginService;
 
-	/** The i ICIP dataset 2 service. */
+	/**
+	 * The i ICIP dataset 2 service.
+	 */
 	@Autowired
 	private IICIPDataset2Service dataset2Service;
 
 	@Autowired
 	private ICIPDatasetRepository2 datasetRepository2;
 
-	/** The i ICIP dataset service. */
+	/**
+	 * The i ICIP dataset service.
+	 */
 	@Autowired
 	private ICIPDatasetService datasetService;
 
-	/** The i ICIP datasource service. */
+	/**
+	 * The i ICIP datasource service.
+	 */
 	@Autowired
 	private IICIPDatasourceService datasourceService;
-	
+
 	@Autowired
 	private ICIPMlIntstanceService iCIPMlIntstanceService;
 
-	/** The ds util. */
+	/**
+	 * The ds util.
+	 */
 	@Autowired
 	IICIPDataSetServiceUtilFactory dsUtil;
 
-	/** The claim. */
+	/**
+	 * The claim.
+	 */
 	@Value("${security.claim:#{null}}")
 	private String claim;
 
-	/** The encryption key. */
+	/**
+	 * The encryption key.
+	 */
 	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 
-	/** The cm. */
+	/**
+	 * The cm.
+	 */
 	@Resource(name = "cacheManagerBean")
 	private CacheManager cm;
-	
+
 
 	/**
 	 * Gets the data 1.
@@ -168,124 +190,127 @@ public class ICIPProxyController {
 	 */
 	@GetMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
-		ICIPMlIntstance iCIPMlIntstance=null;
-		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
-			iCIPMlIntstance =iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
-		}
-		ICIPDatasource dsrc=new ICIPDatasource();
-		ICIPDataset2 dset=new ICIPDataset2();
-		if(iCIPMlIntstance!=null) {
-			headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
-			instanceName=iCIPMlIntstance.getDatasourcenameforconnection();
-			dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
-					.findFirst().get();
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
-		}else {
-			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
-		}
-		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
-		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
-		Map<String,String> queryParamsMapOFDataset=getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
-		JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
-		Map<String,String> headersMapOFDataset=getMapFromJsonArray(jSONArrayHeadersOfDataset);
-		JSONArray parameters = new JSONArray();
-		for (Map.Entry<String, String> entry : params.entrySet()) {
-			JSONObject paramObj = new JSONObject();
-			paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			parameters.put(paramObj);
-		}
-		/*
-		 * Taking QueryParams data available in Dataset and adding if not available in parameters
-		 */
-		parameters=addParamsOfDataset(parameters,queryParamsMapOFDataset);
-		JSONArray headerArray = new JSONArray();
-		if(instanceName!=null && !instanceName.isEmpty()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
-			headerObj.put(ICIPPluginConstants.VALUE, instanceName);
-			headerArray.put(headerObj);
-		}
-		for (Map.Entry<String, String> entry : headers.entrySet()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			JSONArray headersArr = new JSONArray();
-			try {
-				headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
-			} catch (JSONException jex) {
-				logger.error("Cannot parse json");
+	                                      @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                      @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                      @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
+			String instanceName = params.get(ICIPPluginConstants.INSTANCE);
+			ICIPMlIntstance iCIPMlIntstance = null;
+			if (instanceName != null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
+				iCIPMlIntstance = iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
 			}
-			for (int i = 0; i < headersArr.length(); ++i) {
-				if (headersArr.getJSONObject(i).get(ICIPPluginConstants.KEY).toString().equalsIgnoreCase(entry.getKey())) {
-					headerArray.put(headerObj);
-					break;
+			ICIPDatasource dsrc = new ICIPDatasource();
+			ICIPDataset2 dset = new ICIPDataset2();
+			if (iCIPMlIntstance != null) {
+				headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
+				instanceName = iCIPMlIntstance.getDatasourcenameforconnection();
+				dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
+						.findFirst().get();
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			} else {
+				dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+						.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			}
+			JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
+			JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
+			Map<String, String> queryParamsMapOFDataset = getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
+			JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
+			Map<String, String> headersMapOFDataset = getMapFromJsonArray(jSONArrayHeadersOfDataset);
+			JSONArray parameters = new JSONArray();
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				JSONObject paramObj = new JSONObject();
+				paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				parameters.put(paramObj);
+			}
+			/*
+			 * Taking QueryParams data available in Dataset and adding if not available in parameters
+			 */
+			parameters = addParamsOfDataset(parameters, queryParamsMapOFDataset);
+			JSONArray headerArray = new JSONArray();
+			if (instanceName != null && !instanceName.isEmpty()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
+				headerObj.put(ICIPPluginConstants.VALUE, instanceName);
+				headerArray.put(headerObj);
+			}
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				JSONArray headersArr = new JSONArray();
+				try {
+					headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
+				} catch (JSONException jex) {
+					logger.error("Cannot parse json");
+				}
+				for (int i = 0; i < headersArr.length(); ++i) {
+					if (headersArr.getJSONObject(i).get(ICIPPluginConstants.KEY).toString().equalsIgnoreCase(entry.getKey())) {
+						headerArray.put(headerObj);
+						break;
+					}
+
 				}
 
 			}
-
-		}
-		headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
-		/*
-		 * Taking Headers data available in Dataset and adding if not available in headerArray
-		 */
-		headerArray=addParamsOfDataset(headerArray,headersMapOFDataset);
-		JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
-				.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters);
+			headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
+			/*
+			 * Taking Headers data available in Dataset and adding if not available in headerArray
+			 */
+			headerArray = addParamsOfDataset(headerArray, headersMapOFDataset);
+			JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
+					.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters);
 //		new JSONObject(attributes).put("Headers", headerArray).toString();
 //		new JSONObject(attributes).put("EssedumParams", parameters).toString();
-		dset.setAttributes(attributes.toString());
-		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
-				Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
+			dset.setAttributes(attributes.toString());
+			return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
+					Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy GET", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	private JSONArray addParamsOfDataset(JSONArray parameters, Map<String, String> datasetParamsMap) {
-		Map<String,String> parametersMap=getMapFromJsonArray(parameters);
+		Map<String, String> parametersMap = getMapFromJsonArray(parameters);
 		try {
 			for (Map.Entry<String, String> entry : datasetParamsMap.entrySet()) {
-				if(!parametersMap.containsKey(entry.getKey()) && !parametersMap.containsKey(entry.getKey().toLowerCase())) {
+				if (!parametersMap.containsKey(entry.getKey()) && !parametersMap.containsKey(entry.getKey().toLowerCase())) {
 					JSONObject paramObj = new JSONObject();
 					paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
 					paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
 					parameters.put(paramObj);
 				}
 			}
-			}catch(Exception e) {
-				logger.error("Cannot add attributes Of Dataset");
-				return parameters;
-			}
+		} catch (Exception e) {
+			logger.error("Cannot add attributes Of Dataset");
+			return parameters;
+		}
 		return parameters;
 	}
-	private Map<String,String> getMapFromJsonArray(JSONArray jsonArray){
-		Map<String,String> getMapFromJsonArray=new HashMap<>();
+
+	private Map<String, String> getMapFromJsonArray(JSONArray jsonArray) {
+		Map<String, String> getMapFromJsonArray = new HashMap<>();
 		try {
-			if(jsonArray!=null)
+			if (jsonArray != null)
 				for (Object o : jsonArray) {
 					JSONObject jsonLineItem = (JSONObject) o;
 					String key = jsonLineItem.getString(ICIPPluginConstants.KEY);
 					String value = jsonLineItem.getString(ICIPPluginConstants.VALUE);
 					getMapFromJsonArray.put(key, value);
 				}
-			}catch(Exception e) {
-				logger.error("Cannot get Map from JsonArray");
-				return getMapFromJsonArray;
-			}
-		return getMapFromJsonArray;	
+		} catch (Exception e) {
+			logger.error("Cannot get Map from JsonArray");
+			return getMapFromJsonArray;
+		}
+		return getMapFromJsonArray;
 	}
 
 	private JSONArray addHeadersFromDatasource(ICIPDatasource dsrc, JSONArray headerArray,
-			Map<String, String> headers) {
+	                                           Map<String, String> headers) {
 		List<HeaderAttributes> dsrcHeaderAttributes = new ArrayList<>();
 		Gson gson = new Gson();
 		/*
@@ -363,174 +388,178 @@ public class ICIPProxyController {
 
 	@PostMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getPostData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
-			@RequestBody String body)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
-		ICIPMlIntstance iCIPMlIntstance=null;
-		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
-			iCIPMlIntstance =iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
-		}
-		ICIPDatasource dsrc=new ICIPDatasource();
-		ICIPDataset2 dset=new ICIPDataset2();
-		if(iCIPMlIntstance!=null) {
-			headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
-			instanceName=iCIPMlIntstance.getDatasourcenameforconnection();
-			dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
-					.findFirst().get();
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
-		}else {
-			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
-		}
-		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
-		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
-		Map<String,String> queryParamsMapOFDataset=getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
-		JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
-		Map<String,String> headersMapOFDataset=getMapFromJsonArray(jSONArrayHeadersOfDataset);
-		JSONArray parameters = new JSONArray();
-		for (Map.Entry<String, String> entry : params.entrySet()) {
-			JSONObject paramObj = new JSONObject();
-			paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			parameters.put(paramObj);
-		}
-		/*
-		 * Taking QueryParams data available in Dataset and adding if not available in parameters
-		 */
-		parameters=addParamsOfDataset(parameters,queryParamsMapOFDataset);
-		JSONArray headerArray = new JSONArray();
-		if(instanceName!=null && !instanceName.isEmpty()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
-			headerObj.put(ICIPPluginConstants.VALUE, instanceName);
-			headerArray.put(headerObj);
-		}
-		for (Map.Entry<String, String> entry : headers.entrySet()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			JSONArray headersArr = new JSONArray();
-			try {
-				headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
-			} catch (JSONException jex) {
-				logger.info("No header");		
-				}
-			for (int i = 0; i < headersArr.length(); ++i) {
-				if (headersArr.getJSONObject(i).get(ICIPPluginConstants.KEY).toString().equalsIgnoreCase(entry.getKey())) {
-					headerArray.put(headerObj);
-					break;
-				}
-
+	                                          @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                          @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                          @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
+	                                          @RequestBody String body) {
+		try {
+			String instanceName = params.get(ICIPPluginConstants.INSTANCE);
+			ICIPMlIntstance iCIPMlIntstance = null;
+			if (instanceName != null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
+				iCIPMlIntstance = iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
 			}
-		}
-		headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
-		/*
-		 * Taking Headers data available in Dataset and adding if not available in headerArray
-		 */
-		headerArray=addParamsOfDataset(headerArray,headersMapOFDataset);
-		JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
-				.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters).put("Body", body);
+			ICIPDatasource dsrc = new ICIPDatasource();
+			ICIPDataset2 dset = new ICIPDataset2();
+			if (iCIPMlIntstance != null) {
+				headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
+				instanceName = iCIPMlIntstance.getDatasourcenameforconnection();
+				dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
+						.findFirst().get();
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			} else {
+				dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+						.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			}
+			JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
+			JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
+			Map<String, String> queryParamsMapOFDataset = getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
+			JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
+			Map<String, String> headersMapOFDataset = getMapFromJsonArray(jSONArrayHeadersOfDataset);
+			JSONArray parameters = new JSONArray();
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				JSONObject paramObj = new JSONObject();
+				paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				parameters.put(paramObj);
+			}
+			/*
+			 * Taking QueryParams data available in Dataset and adding if not available in parameters
+			 */
+			parameters = addParamsOfDataset(parameters, queryParamsMapOFDataset);
+			JSONArray headerArray = new JSONArray();
+			if (instanceName != null && !instanceName.isEmpty()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
+				headerObj.put(ICIPPluginConstants.VALUE, instanceName);
+				headerArray.put(headerObj);
+			}
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				JSONArray headersArr = new JSONArray();
+				try {
+					headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
+				} catch (JSONException jex) {
+					logger.info("No header");
+				}
+				for (int i = 0; i < headersArr.length(); ++i) {
+					if (headersArr.getJSONObject(i).get(ICIPPluginConstants.KEY).toString().equalsIgnoreCase(entry.getKey())) {
+						headerArray.put(headerObj);
+						break;
+					}
+
+				}
+			}
+			headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
+			/*
+			 * Taking Headers data available in Dataset and adding if not available in headerArray
+			 */
+			headerArray = addParamsOfDataset(headerArray, headersMapOFDataset);
+			JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
+					.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters).put("Body", body);
 //		attributes = new JSONObject(dset.getAttributes()).put("Headers", headerArray).toString();
 //		attributes = new JSONObject(dset.getAttributes()).put("Body", body).toString();
-		dset.setAttributes(attributes.toString());
-		return getCompleteData(dsrc, dset, org, "10", false, false, 0, null, -1, removeCache);
+			dset.setAttributes(attributes.toString());
+			return getCompleteData(dsrc, dset, org, "10", false, false, 0, null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy POST", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	@DeleteMapping(path = "/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> deleteData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		String instanceName=params.get(ICIPPluginConstants.INSTANCE);
-		ICIPMlIntstance iCIPMlIntstance=null;
-		if(instanceName!=null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
-			iCIPMlIntstance =iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
-		}
-		ICIPDatasource dsrc=new ICIPDatasource();
-		ICIPDataset2 dset=new ICIPDataset2();
-		if(iCIPMlIntstance!=null) {
-			headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
-			instanceName=iCIPMlIntstance.getDatasourcenameforconnection();
-			dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
-					.findFirst().get();
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
-		}else {
-			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			dset= dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);	
-		}
-		JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
-		JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
-		Map<String,String> queryParamsMapOFDataset=getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
-		JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
-		Map<String,String> headersMapOFDataset=getMapFromJsonArray(jSONArrayHeadersOfDataset);
-		JSONArray parameters = new JSONArray();
-		for (Map.Entry<String, String> entry : params.entrySet()) {
-			JSONObject paramObj = new JSONObject();
-			paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			parameters.put(paramObj);
-		}
-		/*
-		 * Taking QueryParams data available in Dataset and adding if not available in parameters
-		 */
-		parameters=addParamsOfDataset(parameters,queryParamsMapOFDataset);
-		JSONArray headerArray = new JSONArray();
-		if(instanceName!=null && !instanceName.isEmpty()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
-			headerObj.put(ICIPPluginConstants.VALUE, instanceName);
-			headerArray.put(headerObj);
-		}
-		for (Map.Entry<String, String> entry : headers.entrySet()) {
-			JSONObject headerObj = new JSONObject();
-			headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
-			headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
-			JSONArray headersArr = new JSONArray();
-			try {
-				headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS));
-			} catch (JSONException jex) {
-				logger.error(jex.getMessage(), jex);
+	                                         @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                         @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                         @RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
+		try {
+			String instanceName = params.get(ICIPPluginConstants.INSTANCE);
+			ICIPMlIntstance iCIPMlIntstance = null;
+			if (instanceName != null && !instanceName.isEmpty() && ICIPPluginConstants.TRUE.equalsIgnoreCase(instanceName)) {
+				iCIPMlIntstance = iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(dsrcalias, org).get(0);
 			}
-			for (int i = 0; i < headersArr.length(); ++i) {
-				if (headersArr.getJSONObject(i).has(entry.getKey())) {
-					headerArray.put(headerObj);
-					break;
+			ICIPDatasource dsrc = new ICIPDatasource();
+			ICIPDataset2 dset = new ICIPDataset2();
+			if (iCIPMlIntstance != null) {
+				headers.replace(ICIPPluginConstants.INSTANCE, iCIPMlIntstance.getDatasourcenameforconnection());
+				instanceName = iCIPMlIntstance.getDatasourcenameforconnection();
+				dsrc = datasourceService.getDatasourceByNameSearch(iCIPMlIntstance.getDatasourcealiasforconnection(), org, dtype, 0, 5).stream()
+						.findFirst().get();
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, iCIPMlIntstance.getAdapaternameformethods(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			} else {
+				dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+						.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+				dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+			}
+			JSONObject attributesFromDataset = new JSONObject(dset.getAttributes());
+			JSONArray jSONArrayQueryParamsOfDataset = attributesFromDataset.optJSONArray("QueryParams");
+			Map<String, String> queryParamsMapOFDataset = getMapFromJsonArray(jSONArrayQueryParamsOfDataset);
+			JSONArray jSONArrayHeadersOfDataset = attributesFromDataset.optJSONArray("Headers");
+			Map<String, String> headersMapOFDataset = getMapFromJsonArray(jSONArrayHeadersOfDataset);
+			JSONArray parameters = new JSONArray();
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				JSONObject paramObj = new JSONObject();
+				paramObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				paramObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				parameters.put(paramObj);
+			}
+			/*
+			 * Taking QueryParams data available in Dataset and adding if not available in parameters
+			 */
+			parameters = addParamsOfDataset(parameters, queryParamsMapOFDataset);
+			JSONArray headerArray = new JSONArray();
+			if (instanceName != null && !instanceName.isEmpty()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, ICIPPluginConstants.INSTANCE);
+				headerObj.put(ICIPPluginConstants.VALUE, instanceName);
+				headerArray.put(headerObj);
+			}
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+				JSONObject headerObj = new JSONObject();
+				headerObj.put(ICIPPluginConstants.KEY, entry.getKey());
+				headerObj.put(ICIPPluginConstants.VALUE, entry.getValue());
+				JSONArray headersArr = new JSONArray();
+				try {
+					headersArr = new JSONArray(new JSONObject(dset.getAttributes()).get(ICIPPluginConstants.HEADERS));
+				} catch (JSONException jex) {
+					logger.error(jex.getMessage(), jex);
+				}
+				for (int i = 0; i < headersArr.length(); ++i) {
+					if (headersArr.getJSONObject(i).has(entry.getKey())) {
+						headerArray.put(headerObj);
+						break;
+					}
+
 				}
 
 			}
-
+			headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
+			/*
+			 * Taking Headers data available in Dataset and adding if not available in headerArray
+			 */
+			headerArray = addParamsOfDataset(headerArray, headersMapOFDataset);
+			JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
+					.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters);
+			dset.setAttributes(attributes.toString());
+			return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
+					Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy DELETE", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
 		}
-		headerArray = addHeadersFromDatasource(dsrc, headerArray, headers);
-		/*
-		 * Taking Headers data available in Dataset and adding if not available in headerArray
-		 */
-		headerArray=addParamsOfDataset(headerArray,headersMapOFDataset);
-		JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
-				.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters);
-		dset.setAttributes(attributes.toString());
-		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
-				Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);
 	}
 
 	@GetMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> getDbData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
+	                                        @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                        @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                        @RequestParam Map<String, String> params)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -541,16 +570,16 @@ public class ICIPProxyController {
 		ICIPDatasource dsrc = new ICIPDatasource();
 		ICIPDataset2 dset = new ICIPDataset2();
 		try {
-		 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-				.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-		 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-				.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
-		}catch (Exception ex) {
-			logger.error(ex.getMessage(), ex);
-			 dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
 					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-			 dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
-						.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);			
+			dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+			dset = datasetRepository2.findDataset(org, dsrc.getName(), dsetalias)
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 		}
 //		String attributes = new JSONObject(dset.getAttributes()).put("params", params).toString();
 //		dset.setAttributes(attributes);
@@ -561,22 +590,24 @@ public class ICIPProxyController {
 
 	@DeleteMapping(path = "/dbdata/{dtype}/{dsrcalias}/{dsetalias}/{org}/{removeCache}")
 	public ResponseEntity<String> deleteDbData(@PathVariable(name = "dsetalias") String dsetalias,
-			@PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
-			@PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
-			@RequestParam Map<String, String> params)
-			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
-			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
-			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
-		ICIPDatasource dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
-				.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
-		ICIPDataset2 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
-				.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
+	                                           @PathVariable(name = "dtype") String dtype, @PathVariable(name = "dsrcalias") String dsrcalias,
+	                                           @PathVariable(name = "org") String org, @PathVariable(name = "removeCache") Boolean removeCache,
+	                                           @RequestParam Map<String, String> params) {
+		try {
+			ICIPDatasource dsrc = datasourceService.getDatasourceByNameSearch(dsrcalias, org, dtype, 0, 5).stream()
+					.filter(ele -> ele.getAlias().equals(dsrcalias)).collect(Collectors.toList()).get(0);
+			ICIPDataset2 dset = dataset2Service.getPaginatedDatasetsByOrgAndDatasource(org, dsrc.getName(), dsetalias, 0, 5)
+					.stream().filter(ele -> ele.getAlias().equals(dsetalias)).collect(Collectors.toList()).get(0);
 
-		String attributes = new JSONObject(dset.getAttributes()).put("params", params.get("param")).toString();
-		dset.setAttributes(attributes);
-		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
-				Integer.parseInt(params.getOrDefault("page", "0")), params.getOrDefault("sortEvent", null),
-				Integer.parseInt(params.getOrDefault("sortOrder", "-1")), removeCache);
+			String attributes = new JSONObject(dset.getAttributes()).put("params", params.get("param")).toString();
+			dset.setAttributes(attributes);
+			return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
+					Integer.parseInt(params.getOrDefault("page", "0")), params.getOrDefault("sortEvent", null),
+					Integer.parseInt(params.getOrDefault("sortOrder", "-1")), removeCache);
+		} catch (Exception e) {
+			logger.error("Error in proxy DB DELETE", e);
+			return ResponseEntity.internalServerError().body("Operation failed");
+		}
 	}
 
 	/**
@@ -587,9 +618,10 @@ public class ICIPProxyController {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred");
+		logger.error("Unhandled exception", ex);
+		// Do NOT propagate the underlying exception message to the response
+		// body (CodeQL java/error-message-exposure).
+		ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "error occurred");
 		return new ResponseEntity<>("There is an application error, please contact the application admin",
 				new HttpHeaders(), apiError.getStatus());
 	}
@@ -644,7 +676,7 @@ public class ICIPProxyController {
 	 * @throws URISyntaxException                 the URI syntax exception
 	 */
 	ResponseEntity<String> getCompleteData(ICIPDatasource datasource, ICIPDataset2 dataset2, String org, String limit,
-			boolean justData, boolean asJSON, int page, String sortEvent, int sortOrder, Boolean removeCache)
+	                                       boolean justData, boolean asJSON, int page, String sortEvent, int sortOrder, Boolean removeCache)
 			throws InvalidKeyException, KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
 			KeyStoreException, ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException {
@@ -667,7 +699,7 @@ public class ICIPProxyController {
 				String resultset = cache.get(id).toString();
 				if (resultset != null) {
 					logger.debug("getDatasetResult ended");
-					return ResponseEntity.status(200).body(resultset);
+					return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(resultset));
 				}
 			} else {
 				cache.remove(id);
@@ -675,7 +707,9 @@ public class ICIPProxyController {
 		}
 		String results = getResult(page, limit, sortEvent, sortOrder, dataset, justData, asJSON);
 		logger.debug("Executed in {} ms", System.currentTimeMillis() - start);
-		cache.put(id, results);
+		if (cache != null) {
+			cache.put(id, results);
+		}
 		return ResponseEntity.status(200).body(results);
 	}
 
@@ -693,27 +727,27 @@ public class ICIPProxyController {
 	 * @throws SQLException the SQL exception
 	 */
 	private String getResult(int page, String limit, String sortEvent, int sortOrder, ICIPDataset dataset,
-			boolean justData, boolean asJSON) throws SQLException {
+	                         boolean justData, boolean asJSON) throws SQLException {
 		ICIPDataset2 dataset2 = datasetService.getDataset2(dataset.getName(), dataset.getOrganization());
-		String instance=null;
+		String instance = null;
 		JSONArray headersArr = new JSONArray();
 		try {
 			headersArr = new JSONArray(new JSONObject(dataset.getAttributes()).get(ICIPPluginConstants.HEADERS).toString());
-			for(Object header:headersArr) {
-				JSONObject jSONObject=(JSONObject) header;
-				if(ICIPPluginConstants.INSTANCE.equalsIgnoreCase(jSONObject.optString(ICIPPluginConstants.KEY))){
-					instance=jSONObject.optString(ICIPPluginConstants.VALUE);
+			for (Object header : headersArr) {
+				JSONObject jSONObject = (JSONObject) header;
+				if (ICIPPluginConstants.INSTANCE.equalsIgnoreCase(jSONObject.optString(ICIPPluginConstants.KEY))) {
+					instance = jSONObject.optString(ICIPPluginConstants.VALUE);
 					break;
 				}
 			}
 		} catch (JSONException jex) {
 			logger.error("Cannot parse json");
 		}
-		ICIPDatasource datasource=new ICIPDatasource();
-		if(instance!=null){
+		ICIPDatasource datasource = new ICIPDatasource();
+		if (instance != null) {
 			datasource = datasourceService.getDatasource(instance,
-					dataset2.getOrganization());	
-		}else {
+					dataset2.getOrganization());
+		} else {
 			datasource = datasourceService.getDatasource(dataset2.getDatasource(),
 					dataset2.getOrganization());
 		}
@@ -733,5 +767,4 @@ public class ICIPProxyController {
 		return pluginService.getDataSetService(dataset).getDatasetData(dataset,
 				new SQLPagination(page, Integer.parseInt(limit), sortEvent, sortOrder), DATATYPE.ALL, String.class);
 	}
-
 }
