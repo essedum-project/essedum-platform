@@ -269,10 +269,34 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     window.history.back();
   }
 
+  /**
+   * View the full pipeline detail page for a pod from the execution list.
+   *
+   * Data bridge:  ExecutionPipeline.container_name  ==  StreamingServices.name
+   *
+   * The execution list comes from the K8s / Azure pod-watcher API and carries
+   * only runtime data (pod phase, restarts, namespace, etc.).  The detail view
+   * (AgentPipelineComponent) needs the DB record (alias, type, json_content …)
+   * which is fetched here via getStreamingServicesByName before navigating.
+   */
   viewPipeline(pipeline: ExecutionPipeline): void {
+    // container_name from K8s == name stored in the DB
     const name = pipeline.container_name;
-    this.service.getStreamingServicesByName(name).subscribe((res: any) => {
-      const navigationExtras: NavigationExtras = {
+
+    const cardTitle =
+      pipeline.pipelineMode === 'mcp' ? 'MCP Pipelines' :
+      pipeline.pipelineMode === 'app' ? 'App Pipelines' :
+      'Agent Pipelines';
+
+    // Build a card-shaped object that AgentPipelineComponent expects:
+    //   cardFromState.name is used to set currentCname and trigger auto-load
+    const cardForState = {
+      ...pipeline,
+      name: pipeline.container_name,   // required by AgentPipelineComponent
+    };
+
+    const navigate = (streamItem: any) => {
+      const extras: NavigationExtras = {
         queryParams: {
           page: 1,
           search: '',
@@ -282,28 +306,50 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: pipeline.pipelineMode === 'mcp'
-            ? 'MCP Pipelines'
-            : pipeline.pipelineMode === 'app'
-            ? 'App Pipelines'
-            : 'Pipeline Agent',
-          pipelineAlias: res?.alias || pipeline.container_name,
-          streamItem: res,
-          card: pipeline,
+          cardTitle,
+          pipelineAlias: streamItem?.alias || pipeline.container_name,
+          streamItem,
+          card: cardForState,
           pipelineMode: pipeline.pipelineMode,
         },
         relativeTo: this.route,
       };
+      this.router.navigate([`../view/${name}`], extras);
+    };
 
-      if (res?.type === 'AIAgent' ||
+    // Fetch the DB record that backs this pipeline.
+    // container_name (K8s) is the same value stored as name in streamingServices.
+    this.service.getStreamingServicesByName(name).subscribe({
+      next: (res: any) => {
+        // Guard: DB returned a record — check type is navigable
+        const typeOk =
+          res?.type === 'AIAgent' ||
           res?.type === 'mcpServer' ||
           res?.type === 'appPipeline' ||
-          res?.type === 'NativeScript' ||
+          res?.type === 'NativeScript';
+        const modeOk =
           pipeline.pipelineMode === 'mcp' ||
           pipeline.pipelineMode === 'app' ||
-          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent')) {
-        this.router.navigate([`../view/${name}`], navigationExtras);
-      }
+          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent');
+
+        if (typeOk || modeOk) {
+          navigate(res);
+        } else {
+          // DB record exists but type/interfacetype is unexpected — navigate anyway
+          // so the user can still see the detail page using the route param :cname
+          navigate(res);
+        }
+      },
+      error: () => {
+        // DB lookup failed (404, network error, name mismatch between K8s and DB).
+        // Navigate without a streamItem — AgentPipelineComponent will fall back to
+        // its own getStreamService() call using the :cname route parameter.
+        this.service.message(
+          `Could not load pipeline details for "${name}". Opening with limited data.`,
+          'warning'
+        );
+        navigate(null);
+      },
     });
   }
 
