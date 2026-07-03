@@ -78,6 +78,35 @@ interface AgentState {
   originalFileContent?: string;
 }
 
+// ─── AI Chat panel (VS Code Copilot-style) ────────────────────────────────
+// NOTE: Currently a mockup. Agent + model dropdowns are populated from the
+// real /service/v1/vibe-coding/config/providers endpoint (same one Vibe
+// Studio uses); the rest of the wiring (skills, message stream, send/reply)
+// is intentionally simulated for now — real API integration will follow.
+export interface AiChatSkill {
+  value: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+export interface AiChatOption {
+  value: string;
+  label: string;
+}
+export interface AiChatEvent {
+  text: string;
+  pending?: boolean;
+}
+export interface AiChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  skills?: AiChatSkill[];
+  events?: AiChatEvent[];
+  streaming?: boolean;
+}
+
 @Component({
   selector: 'app-agent-pipeline',
   templateUrl: './agent-pipeline.component.html',
@@ -278,6 +307,65 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // App Pipeline embedded viewer
   showAppViewer = false;
   appUrl = '';
+
+  // ─── AI Chat Panel state (mockup) ────────────────────────────────────────
+  @ViewChild('aiChatMessagesEl') aiChatMessagesEl?: ElementRef<HTMLDivElement>;
+  @ViewChild('aiChatTextarea') aiChatTextareaEl?: ElementRef<HTMLTextAreaElement>;
+
+  aiChatMessages: AiChatMessage[] = [];
+  aiChatInput: string = '';
+  aiChatStreaming: boolean = false;
+  aiChatOpenMenu: 'skill' | 'model' | 'agent' | null = null;
+  aiChatAttachedSkills: AiChatSkill[] = [];
+  private aiChatMockTimers: any[] = [];
+
+  /** Skill catalogue — mock data. Later this comes from an API. */
+  readonly aiChatSkills: AiChatSkill[] = [
+    { value: 'codebase',      label: 'Analyze codebase',   icon: 'account_tree',    description: 'Search & understand the project' },
+    { value: 'file',          label: 'This file',          icon: 'description',     description: 'Attach the currently open file' },
+    { value: 'generate-tests',label: 'Generate tests',     icon: 'science',         description: 'Draft unit / integration tests' },
+    { value: 'docs',          label: 'Write docs',         icon: 'menu_book',       description: 'Generate docstrings & README' },
+    { value: 'refactor',      label: 'Refactor',           icon: 'auto_fix_high',   description: 'Improve readability & structure' },
+    { value: 'debug',         label: 'Debug error',        icon: 'bug_report',      description: 'Analyze stack traces & fix bugs' },
+    { value: 'security',      label: 'Security review',    icon: 'shield',          description: 'Scan for common vulnerabilities' },
+    { value: 'perf',          label: 'Optimize performance', icon: 'speed',         description: 'Suggest performance improvements' },
+  ];
+
+  /** Suggestion chips shown on the empty state. */
+  readonly aiChatSuggestions: AiChatSkill[] = [
+    { value: 'explain',   label: 'Explain this file',      icon: 'lightbulb',    description: '' },
+    { value: 'gen-tests', label: 'Generate tests',         icon: 'science',      description: '' },
+    { value: 'find-bugs', label: 'Find potential bugs',    icon: 'bug_report',   description: '' },
+    { value: 'add-docs',  label: 'Add documentation',      icon: 'menu_book',    description: '' },
+  ];
+
+  /** Agent + model dropdowns — hydrated from the real API on init with a hardcoded fallback. */
+  aiChatAgents: AiChatOption[] = [
+    { label: 'Ollama',        value: 'ollama' },
+    { label: 'Azure OpenAI',  value: 'azure_openai' },
+    { label: 'Anthropic',     value: 'anthropic' },
+  ];
+  aiChatModels: AiChatOption[] = [
+    { label: 'gpt-4o-mini',    value: 'gpt-4o-mini' },
+    { label: 'gpt-4o',         value: 'gpt-4o' },
+    { label: 'qwen3:4b',       value: 'qwen3:4b' },
+    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b' },
+    { label: 'llama3:latest',  value: 'llama3:latest' },
+    { label: 'gemma3:latest',  value: 'gemma3:latest' },
+    { label: 'phi3:mini',      value: 'phi3:mini' },
+    { label: 'claude-3.5-sonnet', value: 'claude-3-5-sonnet-20241022' },
+  ];
+  aiChatSelectedAgent: string = 'azure_openai';
+  aiChatSelectedModel: string = 'gpt-4o-mini';
+
+  get aiChatSelectedAgentLabel(): string {
+    return this.aiChatAgents.find(a => a.value === this.aiChatSelectedAgent)?.label
+      ?? this.aiChatSelectedAgent ?? 'Select agent';
+  }
+  get aiChatSelectedModelLabel(): string {
+    return this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)?.label
+      ?? this.aiChatSelectedModel ?? 'Select model';
+  }
   appPort = ''; // Store app port from deployment
 
   // GitHub Push functionality
@@ -530,7 +618,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
     
     this.getPipelineByName();
-    
+
+    // Hydrate the AI Chat panel dropdowns (agent + model) from the real API,
+    // silently falling back to the hardcoded lists on failure.
+    this.loadAiChatProviders();
+
     // Add beforeunload protection for unsaved changes
     window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
   }
@@ -3278,6 +3370,251 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  // ═════════════════════════════════════════════════════════════════════════
+  //  AI CHAT PANEL METHODS (mockup — replace with real API integration later)
+  // ═════════════════════════════════════════════════════════════════════════
+
+  /** trackBy for the message *ngFor to avoid re-rendering the whole list */
+  trackAiMsg = (_i: number, msg: AiChatMessage) => msg.id;
+
+  /**
+   * Loads the real agent providers + models from the same endpoint Vibe Studio
+   * uses. Silently keeps the hardcoded fallback on failure.
+   */
+  private loadAiChatProviders(): void {
+    const base = (this.baseUrl && this.baseUrl.trim()) ? this.baseUrl : window.location.origin;
+    const url = `${base}/service/v1/vibe-coding/config/providers`;
+    this.http.get<any>(url).subscribe({
+      next: (res) => this.applyProvidersResponse(res),
+      error: () => { /* keep hardcoded fallback silently */ },
+    });
+  }
+
+  /**
+   * Normalises the /config/providers response into the flat pill-dropdown
+   * shapes used by the AI chat panel. The backend response has been observed
+   * in a few shapes across environments — this method is deliberately forgiving.
+   */
+  private applyProvidersResponse(res: any): void {
+    if (!res) return;
+    const list = Array.isArray(res) ? res : (res.providers || res.data || res.items);
+    if (!Array.isArray(list) || list.length === 0) return;
+
+    const agents: AiChatOption[] = [];
+    const modelSet = new Map<string, string>();
+
+    for (const p of list) {
+      const value = p?.value ?? p?.id ?? p?.name ?? p?.provider;
+      const label = p?.label ?? p?.displayName ?? p?.name ?? value;
+      if (value) agents.push({ value, label });
+
+      const models = p?.models ?? p?.availableModels ?? p?.supportedModels ?? [];
+      if (Array.isArray(models)) {
+        for (const m of models) {
+          const mv = typeof m === 'string' ? m : (m?.value ?? m?.id ?? m?.name);
+          const ml = typeof m === 'string' ? m : (m?.label ?? m?.displayName ?? m?.name ?? mv);
+          if (mv && !modelSet.has(mv)) modelSet.set(mv, ml);
+        }
+      }
+    }
+
+    if (agents.length) {
+      this.aiChatAgents = agents;
+      if (!agents.find(a => a.value === this.aiChatSelectedAgent)) {
+        this.aiChatSelectedAgent = agents[0].value;
+      }
+    }
+    if (modelSet.size) {
+      this.aiChatModels = Array.from(modelSet.entries()).map(([value, label]) => ({ value, label }));
+      if (!this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)) {
+        this.aiChatSelectedModel = this.aiChatModels[0].value;
+      }
+    }
+    this.cdr.markForCheck?.();
+  }
+
+  /** Close menus when clicking anywhere in the chat panel background. */
+  onAiChatPanelClick(ev: MouseEvent): void {
+    const target = ev.target as HTMLElement;
+    if (target?.closest('.ai-pill-dropdown') || target?.closest('.ai-menu-popover')) return;
+    this.aiChatOpenMenu = null;
+  }
+
+  toggleAiChatMenu(menu: 'skill' | 'model' | 'agent', ev?: MouseEvent): void {
+    ev?.stopPropagation();
+    this.aiChatOpenMenu = this.aiChatOpenMenu === menu ? null : menu;
+  }
+
+  isSkillAttached(s: AiChatSkill): boolean {
+    return this.aiChatAttachedSkills.some(a => a.value === s.value);
+  }
+  toggleAttachSkill(s: AiChatSkill): void {
+    const i = this.aiChatAttachedSkills.findIndex(a => a.value === s.value);
+    if (i >= 0) this.aiChatAttachedSkills.splice(i, 1);
+    else this.aiChatAttachedSkills.push(s);
+  }
+  removeAttachedSkill(i: number): void {
+    this.aiChatAttachedSkills.splice(i, 1);
+  }
+
+  selectAiChatAgent(a: AiChatOption): void {
+    this.aiChatSelectedAgent = a.value;
+    this.aiChatOpenMenu = null;
+  }
+  selectAiChatModel(m: AiChatOption): void {
+    this.aiChatSelectedModel = m.value;
+    this.aiChatOpenMenu = null;
+  }
+
+  useAiChatSuggestion(s: AiChatSkill): void {
+    this.aiChatInput = s.label;
+    // Focus the textarea after Angular renders
+    setTimeout(() => this.aiChatTextareaEl?.nativeElement?.focus(), 0);
+  }
+
+  onAiChatKeydown(ev: KeyboardEvent): void {
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      if (this.aiChatInput.trim() && !this.aiChatStreaming) this.sendAiChatMessage();
+    }
+  }
+
+  clearAiChat(): void {
+    this.cancelAiChatMockTimers();
+    this.aiChatMessages = [];
+    this.aiChatAttachedSkills = [];
+    this.aiChatInput = '';
+    this.aiChatStreaming = false;
+  }
+
+  /**
+   * Sends the message and simulates an event-stream response. Real API wiring
+   * will replace the setTimeout chain below.
+   */
+  sendAiChatMessage(): void {
+    const text = (this.aiChatInput || '').trim();
+    if (!text || this.aiChatStreaming) return;
+
+    // 1) Push user message with attached skills
+    const attached = [...this.aiChatAttachedSkills];
+    this.aiChatMessages.push({
+      id: 'u-' + Date.now(),
+      role: 'user',
+      content: text,
+      timestamp: new Date(),
+      skills: attached.length ? attached : undefined,
+    });
+
+    // Reset input state
+    this.aiChatInput = '';
+    this.aiChatAttachedSkills = [];
+    this.aiChatOpenMenu = null;
+    this.aiChatStreaming = true;
+
+    // 2) Push placeholder assistant message that we'll populate progressively
+    const assistantId = 'a-' + Date.now();
+    const assistant: AiChatMessage = {
+      id: assistantId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      events: [],
+      streaming: true,
+    };
+    this.aiChatMessages.push(assistant);
+    this.scrollAiChatToBottom();
+
+    // 3) Simulate a Copilot-style event stream (tool calls, then final answer)
+    this.runAiChatMock(assistant, text, attached);
+  }
+
+  private runAiChatMock(assistant: AiChatMessage, prompt: string, attached: AiChatSkill[]): void {
+    const events: AiChatEvent[] = [];
+    if (attached.some(a => a.value === 'codebase')) {
+      events.push({ text: 'Searching codebase for relevant symbols…', pending: true });
+    }
+    if (attached.some(a => a.value === 'file') || this.selectedFileName) {
+      events.push({ text: `Reading ${this.selectedFileName || 'active file'}…`, pending: true });
+    }
+    events.push({ text: `Reasoning with ${this.aiChatSelectedModelLabel}…`, pending: true });
+
+    assistant.events = events;
+
+    // Reveal + resolve events one by one
+    let delay = 500;
+    events.forEach((ev, idx) => {
+      const t = setTimeout(() => {
+        ev.pending = false;
+        this.scrollAiChatToBottom();
+      }, delay + idx * 700);
+      this.aiChatMockTimers.push(t);
+    });
+
+    // Then stream the reply text
+    const reply = this.buildMockReply(prompt, attached);
+    const startTypingAt = delay + events.length * 700 + 300;
+    const t1 = setTimeout(() => this.streamText(assistant, reply), startTypingAt);
+    this.aiChatMockTimers.push(t1);
+  }
+
+  private buildMockReply(prompt: string, attached: AiChatSkill[]): string {
+    const skillNames = attached.map(a => a.label).join(', ');
+    const fileHint = this.selectedFileName ? ` in \`${this.selectedFileName}\`` : '';
+    const kind = this.pipelineMode === 'mcp' ? 'MCP server' : this.pipelineMode === 'app' ? 'app' : 'agent';
+
+    // A few canned answer templates picked by keyword
+    const p = prompt.toLowerCase();
+    if (p.includes('test')) {
+      return `Here's a test skeleton you can drop${fileHint}:\n\n\`\`\`\nimport pytest\n\ndef test_happy_path():\n    assert True  # TODO: replace with real assertion\n\ndef test_error_path():\n    with pytest.raises(ValueError):\n        raise ValueError("expected")\n\`\`\`\n\nWould you like me to also generate integration tests for your ${kind}?`;
+    }
+    if (p.includes('explain') || p.includes('what does')) {
+      return `This ${kind} orchestrates three main stages:\n\n1. **Ingest** — pulls records from the configured source (S3 / DB / stream).\n2. **Reason** — invokes the selected LLM (${this.aiChatSelectedModelLabel}) with the built prompt.\n3. **Emit** — returns the JSON response and optionally forwards it to downstream services.\n\nAsk me to dive into any function — I can show call sites and unit-test coverage.`;
+    }
+    if (p.includes('bug') || p.includes('debug') || p.includes('error')) {
+      return `I scanned${fileHint} and spotted **2 likely issues**:\n\n• Missing \`await\` on the async \`fetch_records()\` call — the coroutine is discarded.\n• The retry loop swallows the underlying exception, which will make production incidents hard to diagnose.\n\nWant me to open a diff with the fixes applied?`;
+    }
+    if (p.includes('doc') || p.includes('readme')) {
+      return `I've drafted a README section${fileHint}:\n\n\`\`\`\n## Overview\nThis module implements the ${kind}'s request / response cycle.\n\n## Usage\n\`\`\`python\nfrom app import handler\nresult = handler({"query": "hello"})\n\`\`\`\n\`\`\`\n\nSay the word and I'll write it directly to the repo.`;
+    }
+    if (skillNames) {
+      return `Working with **${skillNames}**${fileHint}, here's what I recommend:\n\n1. Confirm the input contract (schema + auth headers).\n2. Add a tracing span around the LLM call so latency is observable.\n3. Persist the raw provider response so replays are cheap.\n\nWant me to open a PR with any of these?`;
+    }
+    return `Sure — I can help with that${fileHint}. In the real integration this response will be streamed from the selected agent (**${this.aiChatSelectedAgentLabel}**) using **${this.aiChatSelectedModelLabel}**.\n\nTry attaching a skill (＋ button) to give me more context, or open a file on the left so I can reason about it directly.`;
+  }
+
+  /** Types out reply text one chunk at a time to mimic token streaming. */
+  private streamText(assistant: AiChatMessage, fullText: string): void {
+    const chunks = fullText.split(/(\s+)/); // keep whitespace
+    let i = 0;
+    const step = () => {
+      if (i >= chunks.length) {
+        assistant.streaming = false;
+        this.aiChatStreaming = false;
+        this.scrollAiChatToBottom();
+        return;
+      }
+      assistant.content += chunks[i++];
+      this.scrollAiChatToBottom();
+      const t = setTimeout(step, 25 + Math.random() * 40);
+      this.aiChatMockTimers.push(t);
+    };
+    step();
+  }
+
+  private cancelAiChatMockTimers(): void {
+    for (const t of this.aiChatMockTimers) clearTimeout(t);
+    this.aiChatMockTimers = [];
+  }
+
+  private scrollAiChatToBottom(): void {
+    const el = this.aiChatMessagesEl?.nativeElement;
+    if (!el) return;
+    // Use rAF to wait for DOM render
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+
   // GitHub Push methods
   private isGitHubAuthenticated(): boolean {
     // Check if user has GitHub authentication token
@@ -3815,6 +4152,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Tear down the Material tab-body width forcer.
     this.tabSizeObserver?.disconnect();
     this.tabSizeObserver = null;
+
+    // Cancel any AI chat streaming timers still pending.
+    this.cancelAiChatMockTimers();
   }
 
   // ---------------------------------------------------------------------------

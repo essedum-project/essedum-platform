@@ -1,4 +1,5 @@
 @use 'overlays';
+@use 'ai-chat-panel';
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -149,13 +150,14 @@
   background: #0d1117;
 }
 
-// CRITICAL: explorer + editor side-by-side. Using CSS grid so the editor's
-// width is computed explicitly (1fr after the explorer's fixed column) rather
-// than relying on flex propagation, which the federated chunk doesn't get
-// reliably from Material's tab-body styles.
+// CRITICAL: explorer + editor + ai-chat side-by-side. Using CSS grid so the
+// editor's width is computed explicitly (1fr between the explorer's fixed
+// left column and the chat panel's fixed right column) rather than relying on
+// flex propagation, which the federated chunk doesn't get reliably from
+// Material's tab-body styles.
 .file-panel {
   display: grid !important;
-  grid-template-columns: 260px minmax(0, 1fr) !important;
+  grid-template-columns: 260px minmax(0, 1fr) 380px !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 100%;

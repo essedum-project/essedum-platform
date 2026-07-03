@@ -200,6 +200,197 @@
                             <p>Choose a file from the project explorer to start editing</p>
                           </div>
                         </div>
+
+                        <!-- ═══════════════════════════════════════════════════════════
+                             AI CHAT PANEL (VS Code Copilot-style)
+                             Always visible — 3rd column of .file-panel grid
+                             All wiring is mock for now; agent + model dropdowns are
+                             populated from the real /vibe-coding/config/providers API
+                             (same one Vibe Studio uses) with a hardcoded fallback.
+                             ═══════════════════════════════════════════════════════════ -->
+                        <div class="ai-chat-panel" (click)="onAiChatPanelClick($event)">
+                          <!-- Header -->
+                          <div class="ai-chat-header">
+                            <div class="ai-chat-title">
+                              <span class="ai-avatar">
+                                <mat-icon>auto_awesome</mat-icon>
+                              </span>
+                              <div class="ai-title-text">
+                                <span class="ai-title-name">Essedum AI Assistant</span>
+                                <span class="ai-title-sub">{{ aiChatSelectedAgentLabel }} · {{ aiChatSelectedModelLabel }}</span>
+                              </div>
+                            </div>
+                            <div class="ai-chat-header-actions">
+                              <button type="button" (click)="clearAiChat()" matTooltip="New chat" matTooltipPosition="above">
+                                <mat-icon>add_comment</mat-icon>
+                              </button>
+                              <button type="button" (click)="clearAiChat()" matTooltip="Clear history" matTooltipPosition="above">
+                                <mat-icon>delete_sweep</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Message stream -->
+                          <div class="ai-chat-messages" #aiChatMessagesEl>
+                            <!-- Empty state (welcome) -->
+                            <div class="ai-chat-empty" *ngIf="aiChatMessages.length === 0">
+                              <span class="empty-hero"><mat-icon>auto_awesome</mat-icon></span>
+                              <h4>How can I help with this codespace?</h4>
+                              <p>Ask about a file, generate code, fix bugs, write tests, or explain what the {{ pipelineMode === 'mcp' ? 'MCP server' : (pipelineMode === 'app' ? 'app' : 'agent') }} is doing.</p>
+                              <div class="suggestion-chips">
+                                <button type="button" *ngFor="let s of aiChatSuggestions" (click)="useAiChatSuggestion(s)">
+                                  <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Message list -->
+                            <div class="ai-msg" *ngFor="let msg of aiChatMessages; trackBy: trackAiMsg" [ngClass]="msg.role">
+                              <div class="ai-msg-header">
+                                <span class="ai-msg-avatar">
+                                  <mat-icon *ngIf="msg.role === 'assistant'">auto_awesome</mat-icon>
+                                  <mat-icon *ngIf="msg.role === 'user'">person</mat-icon>
+                                  <mat-icon *ngIf="msg.role === 'system'">info</mat-icon>
+                                </span>
+                                <span class="ai-msg-name">
+                                  {{ msg.role === 'user' ? 'You' : (msg.role === 'system' ? 'System' : (aiChatSelectedAgentLabel || 'Assistant')) }}
+                                </span>
+                                <span class="ai-msg-time">{{ msg.timestamp | date:'shortTime' }}</span>
+                              </div>
+
+                              <!-- Attached-skill chips on user messages -->
+                              <div class="ai-chat-attached" *ngIf="msg.role === 'user' && msg.skills?.length" style="padding:0 2px;">
+                                <span class="attached-chip" *ngFor="let s of msg.skills">
+                                  <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                                </span>
+                              </div>
+
+                              <div class="ai-msg-body">
+                                <ng-container *ngIf="!msg.streaming; else typingTpl">{{ msg.content }}</ng-container>
+                                <ng-template #typingTpl>
+                                  <span *ngIf="msg.content">{{ msg.content }}</span>
+                                  <span class="ai-typing" *ngIf="!msg.content"><span></span><span></span><span></span></span>
+                                </ng-template>
+                              </div>
+
+                              <!-- Streaming event lines (VS Code Copilot-style tool trace) -->
+                              <div class="ai-msg-events" *ngIf="msg.events?.length">
+                                <div class="event-line" *ngFor="let ev of msg.events" [class.pending]="ev.pending">
+                                  <mat-icon>{{ ev.pending ? 'radio_button_unchecked' : 'check_circle' }}</mat-icon>
+                                  <span>{{ ev.text }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Attached skills preview above input -->
+                          <div class="ai-chat-attached" *ngIf="aiChatAttachedSkills.length > 0">
+                            <span class="attached-chip" *ngFor="let s of aiChatAttachedSkills; let i = index">
+                              <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                              <button type="button" class="remove-chip" (click)="removeAttachedSkill(i)">
+                                <mat-icon>close</mat-icon>
+                              </button>
+                            </span>
+                          </div>
+
+                          <!-- Input area -->
+                          <div class="ai-chat-input-wrap">
+                            <div class="ai-chat-input-shell">
+                              <textarea
+                                class="ai-chat-textarea"
+                                #aiChatTextarea
+                                [(ngModel)]="aiChatInput"
+                                (keydown)="onAiChatKeydown($event)"
+                                placeholder="Ask the assistant anything about your codespace…"
+                                rows="2"></textarea>
+
+                              <div class="ai-chat-toolbar">
+                                <div class="toolbar-left">
+                                  <!-- Attach skill -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="ai-attach-btn"
+                                            [class.active]="aiChatOpenMenu === 'skill'"
+                                            (click)="toggleAiChatMenu('skill', $event)"
+                                            matTooltip="Attach skill" matTooltipPosition="above">
+                                      <mat-icon>add</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover" *ngIf="aiChatOpenMenu === 'skill'">
+                                      <div class="menu-heading">Attach a skill</div>
+                                      <div class="menu-item" *ngFor="let s of aiChatSkills"
+                                           [class.selected]="isSkillAttached(s)"
+                                           (click)="toggleAttachSkill(s)">
+                                        <mat-icon>{{ s.icon }}</mat-icon>
+                                        <div style="flex:1;min-width:0;">
+                                          <div class="menu-item-label">{{ s.label }}</div>
+                                          <div class="menu-item-desc">{{ s.description }}</div>
+                                        </div>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Agent picker -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="pill-trigger"
+                                            [class.open]="aiChatOpenMenu === 'agent'"
+                                            (click)="toggleAiChatMenu('agent', $event)">
+                                      <mat-icon class="pill-icon">smart_toy</mat-icon>
+                                      <span class="pill-label">{{ aiChatSelectedAgentLabel }}</span>
+                                      <mat-icon class="pill-caret">expand_more</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover" *ngIf="aiChatOpenMenu === 'agent'">
+                                      <div class="menu-heading">Agent provider</div>
+                                      <div class="menu-item" *ngFor="let a of aiChatAgents"
+                                           [class.selected]="a.value === aiChatSelectedAgent"
+                                           (click)="selectAiChatAgent(a)">
+                                        <mat-icon>smart_toy</mat-icon>
+                                        <span class="menu-item-label">{{ a.label }}</span>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                      <div class="menu-empty" *ngIf="aiChatAgents.length === 0">No agents available</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="toolbar-right">
+                                  <!-- Model picker (right-aligned) -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="pill-trigger"
+                                            [class.open]="aiChatOpenMenu === 'model'"
+                                            (click)="toggleAiChatMenu('model', $event)">
+                                      <mat-icon class="pill-icon">memory</mat-icon>
+                                      <span class="pill-label">{{ aiChatSelectedModelLabel }}</span>
+                                      <mat-icon class="pill-caret">expand_more</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover align-right" *ngIf="aiChatOpenMenu === 'model'">
+                                      <div class="menu-heading">Model</div>
+                                      <div class="menu-item" *ngFor="let m of aiChatModels"
+                                           [class.selected]="m.value === aiChatSelectedModel"
+                                           (click)="selectAiChatModel(m)">
+                                        <mat-icon>memory</mat-icon>
+                                        <span class="menu-item-label">{{ m.label }}</span>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                      <div class="menu-empty" *ngIf="aiChatModels.length === 0">No models available</div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Send -->
+                                  <button type="button" class="ai-send-btn"
+                                          [disabled]="!aiChatInput.trim() || aiChatStreaming"
+                                          (click)="sendAiChatMessage()"
+                                          matTooltip="Send (Enter)" matTooltipPosition="above">
+                                    <mat-icon>{{ aiChatStreaming ? 'stop' : 'send' }}</mat-icon>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="ai-chat-footer">
+                              <kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> for newline
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
