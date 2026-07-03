@@ -529,15 +529,9 @@ class PipelineCardsClient {
     //         </div>
     //     `;
     // }
-    /**
-        * Creates a DOM element for a single pipeline card
-        * @param {Object} pipeline - Pipeline data
-        * @returns {HTMLElement} Card element
-        */
+    /** Creates a DOM element for a single pipeline card */
     createCardElement(pipeline) {
-        const createdDate = Utils.formatDate(pipeline.createdDate);
         const title = Utils.toTitleCase(pipeline.alias);
-        const avatarLetter = Utils.getAvatarLetter(pipeline.target?.created_by);
         const createdBy = pipeline.target?.created_by || 'Unknown User';
 
         const card = document.createElement('div');
@@ -547,6 +541,14 @@ class PipelineCardsClient {
         card.setAttribute('aria-label', `Pipeline: ${title}`);
         card.dataset.pipelineId = pipeline.id;
 
+        card.appendChild(this._buildCardHeader(title, pipeline.type));
+        card.appendChild(this._buildCardBody(Utils.formatDate(pipeline.createdDate)));
+        card.appendChild(this._buildCardActions(pipeline.id, title, createdBy,
+            Utils.getAvatarLetter(pipeline.target?.created_by)));
+        return card;
+    }
+
+    _buildCardHeader(title, type) {
         const header = document.createElement('div');
         header.className = CSS_CLASSES.CARD_HEADER;
         const titleSpan = document.createElement('span');
@@ -554,25 +556,29 @@ class PipelineCardsClient {
         titleSpan.textContent = title;
         const typeBadge = document.createElement('span');
         typeBadge.className = 'pipeline-type-badge';
-        typeBadge.textContent = pipeline.type.toUpperCase();
+        typeBadge.textContent = type.toUpperCase();
         header.appendChild(titleSpan);
         header.appendChild(typeBadge);
-        card.appendChild(header);
+        return header;
+    }
 
+    _buildCardBody(createdDate) {
         const body = document.createElement('div');
         body.className = CSS_CLASSES.CARD_BODY;
         const dateSpan = document.createElement('span');
         dateSpan.className = 'metadata-value';
         dateSpan.textContent = createdDate;
         body.appendChild(dateSpan);
-        card.appendChild(body);
+        return body;
+    }
 
+    _buildCardActions(pipelineId, title, createdBy, avatarLetter) {
         const actions = document.createElement('div');
         actions.className = CSS_CLASSES.CARD_ACTIONS;
 
         const viewBtn = document.createElement('button');
         viewBtn.className = 'pipeline-action-btn primary';
-        viewBtn.dataset.pipelineId = pipeline.id;
+        viewBtn.dataset.pipelineId = pipelineId;
         viewBtn.setAttribute('aria-label', `View details for ${title}`);
         const iconSpan = document.createElement('span');
         iconSpan.className = 'action-icon';
@@ -592,9 +598,7 @@ class PipelineCardsClient {
         avatar.textContent = avatarLetter;
         avatarSection.appendChild(avatar);
         actions.appendChild(avatarSection);
-
-        card.appendChild(actions);
-        return card;
+        return actions;
     }
 
     // ================================
