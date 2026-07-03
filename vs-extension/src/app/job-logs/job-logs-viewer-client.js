@@ -112,49 +112,72 @@ function renderJobs(jobs) {
         const showStopButton = job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN';
         console.log('Job', job.jobId, 'status:', job.jobStatus, 'show stop button:', showStopButton);
 
-        // Escape all user data to prevent XSS
-        // Display column shows the numeric DB id, but the log/stop/artifact
-        // APIs expect the encoded jobId string (matches the Angular jobs component).
-        const escapedJobId = escapeHtml(job.id || job.jobId);
-        const escapedActionJobId = escapeHtml(job.jobId || job.id);
-        const escapedSubmittedBy = escapeHtml(job.submittedBy || '-');
-        const escapedJobStatus = escapeHtml(job.jobStatus);
-        const escapedRuntime = escapeHtml(job.runtime || '-');
-        const jobDataJson = JSON.stringify(job)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        // Display column shows the numeric DB id; log/stop/artifact APIs expect the encoded jobId string.
+        const actionJobId = job.jobId || job.id;
 
-        row.innerHTML = `  
-            <td class="job-id">${escapedJobId}</td>
-            <td>
-                <div>${escapedSubmittedBy}</div>
-                <div class="trigger-tag">${triggerType}</div>
-            </td>
-            <td>${formatDate(job.submittedOn)}</td>
-            <td>${formatDate(job.finishtime)}</td>
-            <td>${escapedRuntime}</td>
-            <td>
-                <span class="badge ${getStatusBadgeClass(job.jobStatus)}">${escapedJobStatus}</span>
-            </td>
-            <td>
-                <button class="action-btn" onclick="showConsole('${escapedActionJobId}', '${escapedRuntime}', '${escapedJobStatus}', ${jobDataJson})" title="View Logs">
-                    📄
-                </button>
-                ${job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN' ?
-                `<button class="action-btn" onclick="stopJob('${escapedActionJobId}')" title="Stop Job">⏹️</button>` :
-                ''
-            }
-            </td>
-            <td>
-                ${job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote') ?
-                `<button class="action-btn" onclick="showOutputArtifact('${escapedActionJobId}')" title="Show Output Artifacts">📊</button>` :
-                '-'
-            }
-            </td>
-        `;
+        const tdJobId = document.createElement('td');
+        tdJobId.className = 'job-id';
+        tdJobId.textContent = job.id || job.jobId;
+        row.appendChild(tdJobId);
+
+        const tdSubmittedBy = document.createElement('td');
+        const divName = document.createElement('div');
+        divName.textContent = job.submittedBy || '-';
+        const divTrigger = document.createElement('div');
+        divTrigger.className = 'trigger-tag';
+        divTrigger.textContent = triggerType;
+        tdSubmittedBy.appendChild(divName);
+        tdSubmittedBy.appendChild(divTrigger);
+        row.appendChild(tdSubmittedBy);
+
+        const tdSubmittedOn = document.createElement('td');
+        tdSubmittedOn.textContent = formatDate(job.submittedOn);
+        row.appendChild(tdSubmittedOn);
+
+        const tdFinishTime = document.createElement('td');
+        tdFinishTime.textContent = formatDate(job.finishtime);
+        row.appendChild(tdFinishTime);
+
+        const tdRuntime = document.createElement('td');
+        tdRuntime.textContent = job.runtime || '-';
+        row.appendChild(tdRuntime);
+
+        const tdStatus = document.createElement('td');
+        const statusSpan = document.createElement('span');
+        statusSpan.className = `badge ${getStatusBadgeClass(job.jobStatus)}`;
+        statusSpan.textContent = job.jobStatus;
+        tdStatus.appendChild(statusSpan);
+        row.appendChild(tdStatus);
+
+        const tdActions = document.createElement('td');
+        const logsBtn = document.createElement('button');
+        logsBtn.className = 'action-btn';
+        logsBtn.title = 'View Logs';
+        logsBtn.textContent = '📄';
+        logsBtn.addEventListener('click', () => showConsole(actionJobId, job.runtime || '-', job.jobStatus, job));
+        tdActions.appendChild(logsBtn);
+        if (job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN') {
+            const stopBtn = document.createElement('button');
+            stopBtn.className = 'action-btn';
+            stopBtn.title = 'Stop Job';
+            stopBtn.textContent = '⏹️';
+            stopBtn.addEventListener('click', () => stopJob(actionJobId));
+            tdActions.appendChild(stopBtn);
+        }
+        row.appendChild(tdActions);
+
+        const tdArtifacts = document.createElement('td');
+        if (job.runtime && (job.runtime.toLowerCase() === 'remote' || job.runtime.split('-')[0].toLowerCase() === 'remote')) {
+            const artifactBtn = document.createElement('button');
+            artifactBtn.className = 'action-btn';
+            artifactBtn.title = 'Show Output Artifacts';
+            artifactBtn.textContent = '📊';
+            artifactBtn.addEventListener('click', () => showOutputArtifact(actionJobId));
+            tdArtifacts.appendChild(artifactBtn);
+        } else {
+            tdArtifacts.textContent = '-';
+        }
+        row.appendChild(tdArtifacts);
 
         tbody.appendChild(row);
     });

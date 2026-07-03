@@ -795,22 +795,44 @@ class PipelineCardsClient {
         const createdDate = pipeline.createdDate || 'Unknown';
         const createdBy = pipeline.target?.created_by || 'Unknown';
 
-        this.pipelineInfo.innerHTML = `                     
-                    <span class="pipeline-title">${Utils.sanitizeHtml(Utils.toTitleCase(pipeline.alias))}</span>
-                    <span class="pipeline-type-badge">${Utils.sanitizeHtml(pipeline.type.toUpperCase())}</span>
-                </div>
-                <div class="pipeline-card-body">                                              
-                    <div class="metadata-item">
-                        <strong>Created Date: </strong>
-                        <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <strong>Created By: </strong>
-                        <span class="metadata-value">${Utils.sanitizeHtml(createdBy)}</span>
-                    </div>
-                </div>
-            </div>            
-        `;
+        this.pipelineInfo.textContent = '';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'pipeline-title';
+        titleSpan.textContent = Utils.toTitleCase(pipeline.alias);
+        this.pipelineInfo.appendChild(titleSpan);
+
+        const typeBadge = document.createElement('span');
+        typeBadge.className = 'pipeline-type-badge';
+        typeBadge.textContent = pipeline.type.toUpperCase();
+        this.pipelineInfo.appendChild(typeBadge);
+
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'pipeline-card-body';
+
+        const createdDateItem = document.createElement('div');
+        createdDateItem.className = 'metadata-item';
+        const dateStrong = document.createElement('strong');
+        dateStrong.textContent = 'Created Date: ';
+        createdDateItem.appendChild(dateStrong);
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'metadata-value';
+        dateSpan.textContent = createdDate;
+        createdDateItem.appendChild(dateSpan);
+        bodyDiv.appendChild(createdDateItem);
+
+        const createdByItem = document.createElement('div');
+        createdByItem.className = 'metadata-item';
+        const byStrong = document.createElement('strong');
+        byStrong.textContent = 'Created By: ';
+        createdByItem.appendChild(byStrong);
+        const bySpan = document.createElement('span');
+        bySpan.className = 'metadata-value';
+        bySpan.textContent = createdBy;
+        createdByItem.appendChild(bySpan);
+        bodyDiv.appendChild(createdByItem);
+
+        this.pipelineInfo.appendChild(bodyDiv);
     }
 
     /**
@@ -831,28 +853,48 @@ class PipelineCardsClient {
             return;
         }
 
-        const scriptsHtml = scripts.files.map((file, index) => `
-            <div class="script-item">
-                <div class="script-info">
-                    <div class="script-name">${Utils.sanitizeHtml(file.fileName)}</div>                    
-                    <div class="script-type">${Utils.sanitizeHtml(file.language)} (${Utils.sanitizeHtml(file.extension)})</div>
-                </div>
-                <div class="script-actions">                    
-                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_PRIMARY}" 
-                            onclick="window.pipelineClient.openScript(${index})" 
-                            title="Open ${Utils.sanitizeHtml(file.fileName)}">
-                        ${UI_TEXT.BUTTONS.OPEN}
-                    </button>                  
-                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_SECONDARY}" 
-                            onclick="window.pipelineClient.copyScript(${index})" 
-                            title="Copy ${Utils.sanitizeHtml(file.fileName)}">
-                        ${UI_TEXT.BUTTONS.COPY}
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        const fragment = document.createDocumentFragment();
+        scripts.files.forEach((file, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'script-item';
 
-        this.scriptsContainer.innerHTML = scriptsHtml;  
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'script-info';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'script-name';
+            nameDiv.textContent = file.fileName;
+            infoDiv.appendChild(nameDiv);
+
+            const typeDiv = document.createElement('div');
+            typeDiv.className = 'script-type';
+            typeDiv.textContent = `${file.language} (${file.extension})`;
+            infoDiv.appendChild(typeDiv);
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'script-actions';
+
+            const openBtn = document.createElement('button');
+            openBtn.className = `${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_PRIMARY}`;
+            openBtn.title = `Open ${file.fileName}`;
+            openBtn.textContent = UI_TEXT.BUTTONS.OPEN;
+            openBtn.addEventListener('click', () => window.pipelineClient.openScript(index));
+            actionsDiv.appendChild(openBtn);
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = `${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_SECONDARY}`;
+            copyBtn.title = `Copy ${file.fileName}`;
+            copyBtn.textContent = UI_TEXT.BUTTONS.COPY;
+            copyBtn.addEventListener('click', () => window.pipelineClient.copyScript(index));
+            actionsDiv.appendChild(copyBtn);
+
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(actionsDiv);
+            fragment.appendChild(itemDiv);
+        });
+
+        this.scriptsContainer.textContent = '';
+        this.scriptsContainer.appendChild(fragment);
     }
 
     /**
@@ -873,20 +915,31 @@ class PipelineCardsClient {
             return;
         }
 
-        const runTypeOptions = runTypes.map((runType, index) => `
-            <option value="${index}" ${index === 0 ? 'selected' : ''}>
-                ${Utils.sanitizeHtml(runType.type || 'Unknown Type')} - ${Utils.sanitizeHtml(runType.dsAlias || 'Default')}
-            </option>
-        `).join('');
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
 
-        this.runTypesContainer.innerHTML = `  
-            <div class="form-group">
-                <label for="runTypeSelect" class="form-label">Select Run Type:</label>
-                <select id="runTypeSelect" class="form-select" onchange="window.pipelineClient.selectRunType(this.value)">
-                    ${runTypeOptions}
-                </select>
-            </div>
-        `;
+        const label = document.createElement('label');
+        label.setAttribute('for', 'runTypeSelect');
+        label.className = 'form-label';
+        label.textContent = 'Select Run Type:';
+        formGroup.appendChild(label);
+
+        const select = document.createElement('select');
+        select.id = 'runTypeSelect';
+        select.className = 'form-select';
+        select.addEventListener('change', () => window.pipelineClient.selectRunType(select.value));
+
+        runTypes.forEach((runType, index) => {
+            const option = document.createElement('option');
+            option.value = String(index);
+            if (index === 0) { option.selected = true; }
+            option.textContent = `${runType.type || 'Unknown Type'} - ${runType.dsAlias || 'Default'}`;
+            select.appendChild(option);
+        });
+
+        formGroup.appendChild(select);
+        this.runTypesContainer.textContent = '';
+        this.runTypesContainer.appendChild(formGroup);
 
         // Store selected run type (default to first one)
         this.selectedRunType = runTypes[0] || null;
