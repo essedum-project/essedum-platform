@@ -20,11 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -45,33 +43,33 @@ import com.lfn.iamp.usm.repository.DashConstantRepository2;
 
 /**
  * Service Implementation for managing DashConstant.
- */
-/**
+ *
  * @author essedum
  */
-
 public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 
-	/** Project ID **/
-	private Integer projectId;
-
-	@Autowired
 	/** The configurationkey service of comm lib util. */
-	private ConfigurationKeysService configurationKeysService;
+	private final ConfigurationKeysService configurationKeysService;
 
 	/** The log. */
 	private final Logger log = LoggerFactory.getLogger(ConstantsServiceImplAbstract.class);
 
-	@Autowired
 	/** The dash constant repository. */
-	private DashConstantRepository dash_constantRepository;
+	private final DashConstantRepository dashConstantRepository;
 
-	@Autowired
 	/** The dash constant repository. */
-	private DashConstantRepository2 dash_constantRepository2;
+	protected final DashConstantRepository2 dashConstantRepository2;
 
-	@Autowired
-	private Environment environment;
+	protected final Environment environment;
+
+	protected ConstantsServiceImplAbstract(ConfigurationKeysService configurationKeysService,
+			DashConstantRepository dashConstantRepository, DashConstantRepository2 dashConstantRepository2,
+			Environment environment) {
+		this.configurationKeysService = configurationKeysService;
+		this.dashConstantRepository = dashConstantRepository;
+		this.dashConstantRepository2 = dashConstantRepository2;
+		this.environment = environment;
+	}
 
 	/**
 	 * Save a dash_constant.
@@ -83,8 +81,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	@Override
 	public DashConstant save(DashConstant dashconstant) throws SQLException {
 		log.debug("Request to save DashConstant : {}", dashconstant);
-		DashConstant2 dashconstant2 = toDashConstant2(dashconstant);	
-		dashconstant2 = dash_constantRepository2.save(toDashConstant2(dashconstant));
+		DashConstant2 dashconstant2 = dashConstantRepository2.save(toDashConstant2(dashconstant));
 		return toDashConstant(dashconstant2);
 	}
 
@@ -125,7 +122,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	@Transactional(readOnly = true)
 	public Page<DashConstant> findAll(Pageable pageable) throws SQLException {
 		log.debug("Request to get all DashConstants");
-		return dash_constantRepository.findAll(pageable);
+		return dashConstantRepository.findAll(pageable);
 	}
 
 	/**
@@ -140,7 +137,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	public DashConstant findOne(Integer id) throws SQLException {
 		log.debug("Request to get DashConstant : {}", id);
 		DashConstant content = null;
-		Optional<DashConstant> value = dash_constantRepository.findById(id);
+		Optional<DashConstant> value = dashConstantRepository.findById(id);
 		if (value.isPresent()) {
 			content = toDTO(value.get(), 1);
 		}
@@ -161,18 +158,11 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	 * @param project the project
 	 * @return the list
 	 */
-	/*
-	 * @Override
-	 * 
-	 * @Transactional(readOnly = true) public List<DashConstant>
-	 * findByProjectId(Project id) { log.debug("Request to get DashConstant : {}",
-	 * id); return dash_constantRepository.findByProjectId(id); }
-	 */
 	@Override
 	@Transactional(readOnly = true)
 	public List<DashConstant> findByProjectId(Integer projectId) {
 		log.debug("Request to get DashConstant : {}", projectId);
-		return dash_constantRepository.findByProjectId(projectId);
+		return dashConstantRepository.findByProjectId(projectId);
 	}
 
 	/**
@@ -184,7 +174,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	@Override
 	public void delete(Integer id) throws SQLException {
 		log.debug("Request to delete DashConstant : {}", id);
-		dash_constantRepository.deleteById(id);
+		dashConstantRepository.deleteById(id);
 	}
 
 	/**
@@ -199,39 +189,34 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	public PageResponse<DashConstant> getAll(PageRequestByExample<DashConstant> req) throws SQLException {
 		log.debug("Request to get all DashConstant");
 		Example<DashConstant> example = null;
-		DashConstant dash_constant = req.getExample();
+		DashConstant dashConstant = req.getExample();
 
-		if (dash_constant != null) {
+		if (dashConstant != null) {
 			ExampleMatcher matcher = ExampleMatcher.matching() // example matcher for project_name,keys
-					/*
-					 * .withMatcher("projectName", match -> match.ignoreCase().startsWith())
-					 * .withMatcher("keys", match -> match.ignoreCase().startsWith())
-					 */
-					// ;
 					.withMatcher("project_name", match -> match.ignoreCase().startsWith())
 					.withMatcher("keys", match -> match.ignoreCase().startsWith());
-			example = Example.of(dash_constant, matcher);
+			example = Example.of(dashConstant, matcher);
 		}
 
 		Page<DashConstant> page;
 		if (example != null) {
-			page = dash_constantRepository.findAll(example, req.toPageable());
+			page = dashConstantRepository.findAll(example, req.toPageable());
 		} else {
-			page = dash_constantRepository.findAll(req.toPageable());
+			page = dashConstantRepository.findAll(req.toPageable());
 		}
 
 		return new PageResponse<>(page.getTotalPages(), page.getTotalElements(),
-				page.getContent().stream().map(this::toDTO).collect(Collectors.toList()));
+				page.getContent().stream().map(this::toDTO).toList());
 	}
 
 	/**
 	 * To DTO.
 	 *
-	 * @param dash_constant the dash constant
+	 * @param dashConstant the dash constant
 	 * @return the dash constant
 	 */
-	public DashConstant toDTO(DashConstant dash_constant) {
-		return toDTO(dash_constant, 1);
+	public DashConstant toDTO(DashConstant dashConstant) {
+		return toDTO(dashConstant, 1);
 	}
 
 	/**
@@ -239,7 +224,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	 * amount of association you want. It also prevents potential infinite
 	 * serialization cycles.
 	 *
-	 * @param dash_constant the dash constant
+	 * @param dashConstant the dash constant
 	 * @param depth         the depth of the serialization. A depth equals to 0,
 	 *                      means no x-to-one association will be serialized. A
 	 *                      depth equals to 1 means that xToOne associations will be
@@ -247,24 +232,24 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	 *                      associations will be serialized, etc.
 	 * @return the dash constant
 	 */
-	public DashConstant toDTO(DashConstant dash_constant, int depth) {
-		if (dash_constant == null) {
+	public DashConstant toDTO(DashConstant dashConstant, int depth) {
+		if (dashConstant == null) {
 			return null;
 		}
 
 		DashConstant dto = new DashConstant();
 
-		dto.setId(dash_constant.getId());
+		dto.setId(dashConstant.getId());
 
-		dto.setProject_name(dash_constant.getProject_name());
+		dto.setProject_name(dashConstant.getProject_name());
 
-		dto.setKeys(dash_constant.getKeys());
+		dto.setKeys(dashConstant.getKeys());
 
-		dto.setValue(dash_constant.getValue());
+		dto.setValue(dashConstant.getValue());
 
-		dto.setProject_id(dash_constant.getProject_id());
-		
-		dto.setPortfolio_id(dash_constant.getPortfolio_id());
+		dto.setProject_id(dashConstant.getProject_id());
+
+		dto.setPortfolio_id(dashConstant.getPortfolio_id());
 
 		return dto;
 	}
@@ -272,38 +257,23 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	/**
 	 * Find all dash constants.
 	 *
-	 * @param project_id the project id
+	 * @param projectId   the project id
+	 * @param portfolioId the portfolio id
 	 * @return the list
 	 */
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.lfn.iamp.ccl.service.DashConstantService#findAllDashConstants(
-	 * java.lang.Integer)
-	 */
 	@Override
-	/*
-	 * public List<DashConstant> findAllDashConstants(Integer projectId) {
-	 * log.debug("Request to get Dash Constants for caching"); return
-	 * dash_constantRepository.findAllDashConstants(projectId, "%default"); }
-	 */
-
-	public List<DashConstant> findAllDashConstants(Integer project_id, Integer portfolio_id) {
+	public List<DashConstant> findAllDashConstants(Integer projectId, Integer portfolioId) {
 		log.debug("Request to get Dash Constants for caching");
-		List<DashConstant> dashConstants = dash_constantRepository.findAllDashConstants(project_id, "%default");
-		List<DashConstant> dashConstantDTOList = new ArrayList<DashConstant>();
-		dashConstants.stream().forEach(dashConstant -> {
+		List<DashConstant> dashConstants = dashConstantRepository.findAllDashConstants(projectId, "%default");
+		List<DashConstant> dashConstantDTOList = new ArrayList<>();
+		dashConstants.forEach(dashConstant -> {
 			DashConstant dashConstantDTO = setDashConstantDTO(dashConstant);
 			dashConstantDTOList.add(dashConstantDTO);
 
 		});
-		List<DashConstant> sbxWorkbenchList = dashConstantDTOList.stream()
-				.filter(dc -> dc.getKeys().equals("icip.sbx.workbench")).collect(Collectors.toList());
-		
-		if (project_id != 1) {
-			List<DashConstant> dashConstantsSides = dash_constantRepository.findAllDashConstantsSides("Core", portfolio_id, "%side");
-			dashConstantsSides.stream().forEach(dashConstant -> {
+		if (projectId != 1) {
+			List<DashConstant> dashConstantsSides = dashConstantRepository.findAllDashConstantsSides("Core", portfolioId, "%side");
+			dashConstantsSides.forEach(dashConstant -> {
 				DashConstant dashConstantDTO = setDashConstantDTO(dashConstant);
 				dashConstantDTOList.add(dashConstantDTO);
 
@@ -315,7 +285,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	@Override
 	public DashConstant getByKeys(String key, String project) {
 		log.debug("Request to get dash-constants for essedumPropertyCache");
-		DashConstant dashConstant = dash_constantRepository.findByKeys(key, project);
+		DashConstant dashConstant = dashConstantRepository.findByKeys(key, project);
 		if (dashConstant != null) {
 			String element = dashConstant.getValue();
 			int index1 = element.indexOf("@!");
@@ -331,19 +301,19 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 		return dashConstant;
 	}
 
-	private String createElement(String element, String value, int index1, int index2) {
+	protected String createElement(String element, String value, int index1, int index2) {
 		return element.substring(0, index1) + value + element.substring(index2 + 2);
 	}
 
 	@Override
-	public List<DashConstant> getDashConstantsbyitemAndname(String item, String project_name) {
-		return dash_constantRepository.findAllDashConstantsbyItemAndProject(item, project_name);
+	public List<DashConstant> getDashConstantsbyitemAndname(String item, String projectName) {
+		return dashConstantRepository.findAllDashConstantsbyItemAndProject(item, projectName);
 	}
 
 	@Override
 	public List<DashConstant> findAllKeys() {
 
-		return dash_constantRepository.findAll();
+		return dashConstantRepository.findAll();
 	}
 
 	@Override
@@ -381,25 +351,26 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 	 *                   Core.
 	 */
 	@Override
-	public String findExtensionKey(Integer project_id, String key) {
+	public String findExtensionKey(Integer projectId, String key) {
 		log.debug("Request to get Extension Key");
-		List<DashConstant> dashConstants = dash_constantRepository.findExtensionKey(key, project_id);
+		List<DashConstant> dashConstants = dashConstantRepository.findExtensionKey(key, projectId);
 
-		if (dashConstants.size() > 0) {
-			List<DashConstant> list = dashConstants.stream().filter((item) -> item.getProject_id().getId().equals(project_id))
-					.collect(Collectors.toList());
-			List<DashConstant> listForCore = dashConstants.stream().filter((item)-> item.getProject_name().equals("Core"))
-					.collect(Collectors.toList());
-			return list.size()>0?list.get(0).getValue(): listForCore.size()>0 
-					? listForCore.get(0).getValue() : "";
-		} else {
+		if (dashConstants.isEmpty()) {
 			return "";
 		}
+		List<DashConstant> list = dashConstants.stream()
+				.filter(item -> item.getProject_id().getId().equals(projectId)).toList();
+		if (!list.isEmpty()) {
+			return list.get(0).getValue();
+		}
+		List<DashConstant> listForCore = dashConstants.stream()
+				.filter(item -> item.getProject_name().equals("Core")).toList();
+		return listForCore.isEmpty() ? "" : listForCore.get(0).getValue();
 	}
 
 	@Override
-	public List<DashConstant> getDashConstantsForProcess(List<String> item, String project_name) {
-		return dash_constantRepository.findAllDashConstantsForProcess(item, project_name);
+	public List<DashConstant> getDashConstantsForProcess(List<String> item, String projectName) {
+		return dashConstantRepository.findAllDashConstantsForProcess(item, projectName);
 	}
 	
 	private DashConstant setDashConstantDTO(DashConstant dashConstant) {

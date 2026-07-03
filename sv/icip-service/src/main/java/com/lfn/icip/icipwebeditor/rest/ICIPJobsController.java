@@ -409,7 +409,7 @@ public class ICIPJobsController {
 			return new ResponseEntity<>("done", new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			return new ResponseEntity<>(ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Job operation failed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -514,7 +514,7 @@ public class ICIPJobsController {
 			return new ResponseEntity<>(iICIPJobsService.getAllRemoteJobs(url), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
     }
 	
@@ -527,7 +527,7 @@ public class ICIPJobsController {
 			return new ResponseEntity<>(iICIPJobsService.getLogData(url,jobId), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
     }
 	
@@ -540,7 +540,7 @@ public class ICIPJobsController {
 			return new ResponseEntity<>(iICIPJobsService.stopRemoteJob(url,jobId), new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Request failed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
 		}
     }
 	

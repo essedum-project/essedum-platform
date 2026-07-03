@@ -179,6 +179,8 @@ icip:
   script:
     github:
       enabled: true
+  ssrf:
+    allowedHosts: ${SSRF_ALLOWED_HOSTS:}
 # File server configuration
 fileserver:
   local:

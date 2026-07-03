@@ -1,12 +1,12 @@
 {
   "auth": {
-    "authRequired": false,
+    "authRequired": true,
     "authInIframe": false,
     "iframeHtmlPath": "assets/login-iframe.html",
-    "issuer":"",
-    "clientId": "",
+    "issuer": "https://login.essedum.az.ad.idemo-ppc.com/realms/ESSEDUM",
+    "clientId": "essedum-45",
     "responseType": "code",
-    "scope": "",
+    "scope": "openid profile email",
     "showDebugInformation": true,
     "timeoutFactor": 0.5,
     "strictDiscoveryDocumentValidation": false

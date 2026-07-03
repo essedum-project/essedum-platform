@@ -6,6 +6,8 @@ export interface FlowCreateRequest {
   nodes: Record<string, unknown>[];
   edges: Record<string, unknown>[];
   tags?: string[];
+  env_vars?: Array<{ name: string; value: string }>;
+  secrets?: Array<{ name: string; value: string }>;
 }
 
 export interface FlowUpdateRequest {
@@ -14,6 +16,8 @@ export interface FlowUpdateRequest {
   nodes?: Record<string, unknown>[];
   edges?: Record<string, unknown>[];
   tags?: string[];
+  env_vars?: Array<{ name: string; value: string }>;
+  secrets?: Array<{ name: string; value: string }>;
 }
 
 export interface FlowResponse {
@@ -23,6 +27,8 @@ export interface FlowResponse {
   nodes: Record<string, unknown>[];
   edges: Record<string, unknown>[];
   tags: string[];
+  env_vars: Array<{ name: string; value: string }>;
+  secrets: Array<{ name: string; value: string }>;
   created_at: string;
   updated_at: string;
 }

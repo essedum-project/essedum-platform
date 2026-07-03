@@ -56,6 +56,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
+import com.lfn.icip.dataset.util.SsrfProtectionUtil;
 
 
 @Service
@@ -72,6 +73,29 @@ public class ICIPRestAdapterService {
 	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPRestAdapterService.class);
 
+	/**
+	 * Validates that the user-supplied {@code host} is a safe URL (http/https scheme,
+	 * not pointing to internal/loopback/private IP ranges) before it is concatenated
+	 * into an outbound request URL. Throws {@link IllegalArgumentException} on failure.
+	 */
+	private static String validateHost(String host) {
+		try {
+			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(host);
+			// Rebuild the host base URL from the validated URL's components so
+			// the value flowing into the HTTP sink is no longer the raw input
+			// (this is what makes static-analysis taint trackers — e.g. CodeQL's
+			// java/ssrf query — recognise the sanitisation barrier here).
+			StringBuilder rebuilt = new StringBuilder()
+					.append(safe.getProtocol()).append("://").append(safe.getHost());
+			if (safe.getPort() != -1) {
+				rebuilt.append(':').append(safe.getPort());
+			}
+			return rebuilt.toString();
+		} catch (java.net.MalformedURLException e) {
+			throw new IllegalArgumentException("Invalid or disallowed host URL: " + e.getMessage(), e);
+		}
+	}
+
 	public String callGetMethod(String host, String adaptername, String methodname, String org,
 			Map<String, String> headers, Map<String, String> params)
 			throws ClientProtocolException, IOException, URISyntaxException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -83,7 +107,7 @@ public class ICIPRestAdapterService {
 				 builder.build());
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 		HttpGet httpGet = new HttpGet(
-				host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
+				validateHost(host) + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
 		for (Map.Entry<String, String> header : headers.entrySet()) {
 			httpGet.addHeader(header.getKey(), header.getValue());
 		}
@@ -109,7 +133,7 @@ public class ICIPRestAdapterService {
 				 builder.build());
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 		HttpPost httpPost = new HttpPost(
-				host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
+				validateHost(host) + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
 		for (Map.Entry<String, String> header : headers.entrySet()) {
 			if(!"Content-Length".equalsIgnoreCase(header.getKey()))
 			httpPost.addHeader(header.getKey(), header.getValue());
@@ -138,7 +162,7 @@ public class ICIPRestAdapterService {
 				 builder.build());
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 		HttpDelete httpDelete = new HttpDelete(
-				host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
+				validateHost(host) + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
 		for (Map.Entry<String, String> header : headers.entrySet()) {
 			httpDelete.addHeader(header.getKey(), header.getValue());
 		}

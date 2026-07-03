@@ -13,10 +13,19 @@ spec:
       labels:
         app: essedum-frontend-agent
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-agent
-        image: localhost:5000/essedum-frontend-agent:micro_latest
+        image: localhost:5000/essedum-frontend-agent:v18
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 80
 ---

@@ -15,18 +15,25 @@ import { StreamingServices } from '@essedum/shared-lib';
 export class VibeStudioComponent implements OnInit, OnDestroy {
   readonly appTypeOptions = APP_TYPE_OPTIONS;
 
-  /** Agent options loaded from the /config/providers API (Step 1). */
-  providerOptions: { label: string; value: string }[] = [];
-  providersLoading = true;
-  /** Selected agent value from the Step 1 dropdown. */
+  /** Fixed agent options. */
+  readonly providerOptions: { label: string; value: string }[] = [
+    { label: 'Ollama', value: 'ollama' },
+    { label: 'Azure OpenAI', value: 'azure_openai' },
+    { label: 'Anthropic', value: 'anthropic' },
+  ];
+  /** Selected agent value from the dropdown. */
   selectedAgent: VibeModel | null = null;
 
-  /** Fixed model options for Step 2. */
+  /** Fixed model options. */
   readonly modelOptions: { label: string; value: string }[] = [
     { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
     { label: 'gemma4:latest',  value: 'gemma4:latest'   },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
     { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+    { label: 'phi3:mini',      value: 'phi3:mini'       },
+    { label: 'gemma3:latest',  value: 'gemma3:latest'   },
+    { label: 'llama3:latest',  value: 'llama3:latest'   },
+    { label: 'qwen3:4b',       value: 'qwen3:4b'        },
   ];
 
   selectedAppType: AppType | null = null;
@@ -38,13 +45,13 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   get selectedAgentLabel(): string {
     return this.providerOptions.find(p => p.value === this.selectedAgent)?.label ?? this.selectedAgent ?? '';
   }
-  leftPanelWidth = 35;
-  private isDragging = false;
+  /** Whether the settings dropdown is open */
+  showSettings = false;
   private destroy$ = new Subject<void>();
   /** cancels the per-session messages$ subscription on new-session / re-select */
   private sessionReset$ = new Subject<void>();
   /** cname returned by the streaming-services create API */
-  private registeredCname: string | null = null;
+  registeredCname: string | null = null;
   /** app name extracted from the user's requirements message */
   private appName: string | null = null;
   /** files buffered from generationComplete$ while waiting for registeredCname */
@@ -61,16 +68,8 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Load agent options from the /config/providers endpoint (Step 1 dropdown).
-    this.vibeService.getProviders()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          this.providerOptions = this.normalizeProviders(data);
-          this.providersLoading = false;
-        },
-        error: () => { this.providersLoading = false; },
-      });
+    // Auto-select agent + model based on origin
+    this.applyDefaultAgentModel();
 
     // When generation fully completes, buffer the files and attempt upload.
     // tryFlushUpload() will also be called when registeredCname arrives, so
@@ -150,37 +149,53 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     this.vibeService.setAgentProvider(name);
   }
 
-  /** Normalises the /config/providers API response into a flat label+value list. */
-  private normalizeProviders(data: any): { label: string; value: string }[] {
-    const arr: any[] = Array.isArray(data) ? data : (data?.providers ?? data?.data ?? []);
-    return arr.map((item: any) => ({
-      label: this.toTitleCase(item.name ?? item.displayName ?? item.label ?? item.id ?? item.value ?? String(item)),
-      value: item.id ?? item.value ?? item.provider ?? item.name ?? String(item),
-    }));
+  /** Determines default agent + model from the page origin/referer. */
+  private applyDefaultAgentModel(): void {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      this.selectedAgent = 'azure_openai' as any;
+      this.selectedModel = 'gpt-4o-mini' as any;
+    } else if (origin.includes('localhost') || origin.includes('essedum-lfn.infosys.com')) {
+      this.selectedAgent = 'ollama' as any;
+      this.selectedModel = 'qwen3:4b' as any;
+    } else {
+      // Fallback default for any unrecognised origin
+      this.selectedAgent = 'ollama' as any;
+      this.selectedModel = 'qwen3:4b' as any;
+    }
+    this.vibeService.setAgentProvider(this.selectedAgent as string);
+    this.vibeService.setModel(this.selectedModel as VibeModel);
   }
 
-  /** Converts snake_case, kebab-case, camelCase or plain strings to Title Case. */
-  private toTitleCase(s: string): string {
-    return s
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/[_\-]+/g, ' ')
-      .replace(/\b\w/g, ch => ch.toUpperCase());
+  toggleSettings(): void {
+    this.showSettings = !this.showSettings;
   }
 
-  /** Called when user picks an agent from the Step 1 dropdown. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showSettings) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest('.settings-dropdown-wrap')) {
+      this.showSettings = false;
+    }
+  }
+
+  /** Called when user picks an agent from the dropdown. */
   onAgentSelect(agent: VibeModel): void {
     this.selectedAgent = agent;
     this.vibeService.setAgentProvider(agent);
+    this.showSettings = false;
   }
 
   onModelSelect(model: VibeModel): void {
     this.selectedModel = model;
     this.vibeService.setModel(model);
+    this.showSettings = false;
   }
 
   selectAppType(appType: AppType): void {
-    if (!this.stepsDone) return;
     this.selectedAppType = appType;
+    this.showSettings = false;
     // Cancel any leftover subscription from a previous session and start a fresh one.
     this.sessionReset$.next();
 
@@ -270,35 +285,16 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   onNewSession(): void {
     this.sessionReset$.next();
     this.selectedAppType = null;
-    this.selectedAgent = null;
-    this.selectedModel = null;
     this.registeredCname = null;
     this.appName = null;
     this.pendingUploadFiles = null;
     this.uploadFired = false;
     this.registrationBanner = null;
     this.registrationBannerDismissed = false;
+    this.showSettings = false;
     this.vibeService.resetSession();
-  }
-
-  onDividerMouseDown(event: MouseEvent): void {
-    event.preventDefault();
-    this.isDragging = true;
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging) return;
-    const container = (event.target as HTMLElement).closest('.vibe-panels') || document.querySelector('.vibe-panels');
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const pct = ((event.clientX - rect.left) / rect.width) * 100;
-    this.leftPanelWidth = Math.min(75, Math.max(25, pct));
-  }
-
-  @HostListener('document:mouseup')
-  onMouseUp(): void {
-    this.isDragging = false;
+    // Re-apply defaults so user doesn't have to re-select
+    this.applyDefaultAgentModel();
   }
 
   ngOnDestroy(): void {

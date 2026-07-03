@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.engine.compiler import AgentFlowState, compile_flow
 from app.engine.executors import get_executor
+from app.engine.graph import get_node_type
 from app.models.execution import Execution, ExecutionLog, ExecutionStatus, LogLevel
 
 logger = logging.getLogger(__name__)
@@ -128,7 +129,7 @@ async def run_flow(
     # ── Validate V1 node types (after execution record exists so we can mark error) ──
     try:
         for node in nodes:
-            get_executor(node["type"])  # raises for unsupported types
+            get_executor(get_node_type(node))  # raises for unsupported types
     except Exception as exc:
         await _fail_execution(execution, db, str(exc))
         return execution_id
@@ -168,7 +169,7 @@ async def run_flow(
     # ── Collect final output from chat_output node ─────────────────────────
     final_output: dict = {}
     for node in nodes:
-        if node.get("type") == "chat_output":
+        if get_node_type(node) == "chat_output":
             final_output = final_state["node_outputs"].get(node["id"], {})
             break
 

@@ -804,7 +804,7 @@ public abstract class ICIPCommonJobServiceUtil {
 		Files.deleteIfExists(outPath);
 		Files.createFile(outPath);
 
-		ProcessBuilder pb = new ProcessBuilder(cmd[0], cmd[1], CommandSanitizer.sanitizeArgument(cmd[2]));
+		ProcessBuilder pb = CommandSanitizer.buildProcessBuilder(cmd);
 		pb.redirectErrorStream(true);
 		pb.redirectOutput(outPath.toFile());
 

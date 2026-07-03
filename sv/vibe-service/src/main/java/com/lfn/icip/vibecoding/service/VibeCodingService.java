@@ -59,12 +59,12 @@ public class VibeCodingService {
             logger.error("Goose POST {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(ex.getResponseBodyAsString());
+                    .body("{\"error\":\"Upstream service returned an error\"}");
         } catch (Exception ex) {
             logger.error("Goose POST {} error: {}", path, ex.getMessage(), ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}");
+                    .body("{\"error\":\"Request failed\"}");
         }
     }
 
@@ -88,12 +88,12 @@ public class VibeCodingService {
             logger.error("Goose GET {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(ex.getResponseBodyAsString());
+                    .body("{\"error\":\"Upstream service returned an error\"}");
         } catch (Exception ex) {
             logger.error("Goose GET {} error: {}", path, ex.getMessage(), ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}");
+                    .body("{\"error\":\"Request failed\"}");
         }
     }
 
@@ -114,12 +114,12 @@ public class VibeCodingService {
             logger.error("Goose PUT {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(ex.getResponseBodyAsString());
+                    .body("{\"error\":\"Upstream service returned an error\"}");
         } catch (Exception ex) {
             logger.error("Goose PUT {} error: {}", path, ex.getMessage(), ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"" + sanitize(ex.getMessage()) + "\"}");
+                    .body("{\"error\":\"Request failed\"}");
         }
     }
 
@@ -220,17 +220,12 @@ public class VibeCodingService {
     private void completeWithError(SseEmitter emitter, Throwable ex) {
         try {
             emitter.send(SseEmitter.event()
-                    .data("{\"type\":\"error\",\"message\":\"" + sanitize(ex.getMessage()) + "\"}",
+                    .data("{\"type\":\"error\",\"message\":\"Stream error\"}",
                             MediaType.APPLICATION_JSON));
             emitter.complete();
         } catch (Exception ignored) {
             emitter.completeWithError(ex);
         }
-    }
-
-    private static String sanitize(String msg) {
-        if (msg == null) return "unknown error";
-        return msg.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
 

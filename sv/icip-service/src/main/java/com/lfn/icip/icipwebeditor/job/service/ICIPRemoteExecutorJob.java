@@ -60,6 +60,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
@@ -117,6 +118,7 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import com.lfn.icip.dataset.util.SsrfProtectionUtil;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -195,6 +197,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
     @EssedumProperty("icip.certificateCheck")
     private String certificateCheck;
 
+    @EssedumProperty("icip.ssrf.allowedHosts")
+    private String ssrfAllowedHosts;
+
     /** The resolver. */
     @Autowired
     private IAIResolverAspect resolver;
@@ -258,7 +263,17 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 JSONObject fileObj = null;
                 ICIPStreamingServices pipelineInfo = streamingServicesService
                         .findbyNameAndOrganization(listjobdto.get(index).getName(), jobObject.getOrg());
-                if (!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))) {
+                String pipelineType = pipelineInfo.getType();
+                // NativeScript, TrainingPipeline and DataPipeline (wizard-created) all store
+                // their executable script in the native-script DB table under a sanitized
+                // filename (e.g. SLMTEST_leo1311.py). They do NOT have a separate
+                // ${name}_generatedCode.py on disk and no script-generation event mapping,
+                // so skip the legacy generateScript flow for them — the executor picks up
+                // the script directly from the DB later in this method.
+                boolean usesNativeScriptStorage = pipelineType.equalsIgnoreCase("NativeScript")
+                        || pipelineType.equalsIgnoreCase("TrainingPipeline")
+                        || pipelineType.equalsIgnoreCase("DataPipeline");
+                if (!usesNativeScriptStorage) {
                     fileObj = streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),
                             jobObject.getOrg());
                     String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(), jobObject.getOrg(),
@@ -266,7 +281,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                     JsonObject payload = new JsonObject();
                     payload.addProperty("pipelineName", pipelineInfo.getName());
                     payload.addProperty("scriptPath", path);
-                    String corelid = eventMappingService.trigger("generateScript_" + pipelineInfo.getType(),
+                    String corelid = eventMappingService.trigger("generateScript_" + pipelineType,
                             jobObject.getOrg(), "", payload.toString(), "");
                     String status = iICIPJobsService.getEventStatus(corelid);
                     agenticMeta = pipelineInfo.getPipelineMetadata();
@@ -275,6 +290,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                         allScriptGenerated = 0;
                         logger.debug("Script generation completed");
                     }
+                } else {
+                    agenticMeta = pipelineInfo.getPipelineMetadata();
                 }
             } catch (Exception e) {
                 allScriptGenerated = 0;
@@ -476,10 +493,17 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                             jsonObject.addProperty("org", org);
 
 
-                            environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
-                                    environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
-                                String key = envJSON.get("name").getAsString(); String value =
-                                        envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
+                            // Wizard-created pipelines may omit the top-level "environment"
+                            // array; default to an empty list to avoid NPE.
+                            environ = jsonObject.has("environment") && jsonObject.get("environment").isJsonArray()
+                                    ? jsonObject.getAsJsonArray("environment")
+                                    : new JsonArray();
+                            for (int i = 0; i < environ.size(); i++) {
+                                JsonObject envJSON = environ.get(i).getAsJsonObject();
+                                String key = envJSON.get("name").getAsString();
+                                String value = envJSON.get("value").getAsString();
+                                envJSONO.addProperty(key, value);
+                            }
 
 
                             String data = "{\"input_string\":" + jsonObject.toString() + "}";
@@ -535,7 +559,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                             JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class)
                                     .getAsJsonObject();
                             jsonObject.addProperty("org", org);
-                            environ = jsonObject.getAsJsonArray("environment");
+                            environ = jsonObject.has("environment") && jsonObject.get("environment").isJsonArray()
+                                    ? jsonObject.getAsJsonArray("environment")
+                                    : new JsonArray();
                             for (int i = 0; i < environ.size(); i++) {
                                 JsonObject envJSON = environ.get(i).getAsJsonObject();
                                 String key = envJSON.get("name").getAsString();
@@ -1058,7 +1084,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             OkHttpClient client = newBuilder.build();
             // MediaType mediaType = MediaType.parse("application/json");
             // JSONObject bodyObject = new JSONObject();
-            Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
             logger.info("getStatus request " + requestokHttp);
             try {
                 Response response = client.newCall(requestokHttp).execute();
@@ -1090,7 +1116,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
             newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
             OkHttpClient client = newBuilder.build();
-            Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
             logger.info("getLog request " + requestokHttp.toString());
             Response response = null;
 
@@ -1188,7 +1214,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                 OkHttpClient client = newBuilder.build();
                 MediaType mediaType = MediaType.parse("application/json");
                 RequestBody requestBody = RequestBody.create(payload, mediaType);
-                Request requestokHttp = new Request.Builder().url(url).method("POST", requestBody).build();
+                Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).method("POST", requestBody).build();
                 logger.info("About to submit payload to remote");
                 Response response = client.newCall(requestokHttp).execute();
                 logger.info("Response code is :" + response.code());
@@ -1505,11 +1531,10 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                                 StringEscapeUtils.escapeJson(gson.toJson(connDetails)), "\"");
                         break;
                     case "Dataset":
-                        JsonParser parser = new JsonParser();
                         ICIPDataset dataset = datasetService.getDataset(value, org);
                         JsonElement e;
                         try {
-                            e = parser.parse(gson.toJson(dataset));
+                            e = JsonParser.parseString(gson.toJson(dataset));
                         } catch (Exception ex) {
                             String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
                                     + ex.getMessage();
@@ -1522,12 +1547,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
                                 ICIPSchemaDetails schemaDetails = new ICIPSchemaDetails();
                                 try {
                                     String schemaValue = obj.get("schemavalue").getAsString();
-                                    JsonElement schemaElem = parser.parse(schemaValue);
+                                    JsonElement schemaElem = JsonParser.parseString(schemaValue);
                                     schemaDetails.setSchemaDetails(schemaElem.getAsJsonArray());
                                     schemaDetails.setSchemaId(obj.get("name").getAsString());
                                     e.getAsJsonObject().remove(IAIJobConstants.SCHEMA);
                                     e.getAsJsonObject().add(IAIJobConstants.SCHEMA,
-                                            parser.parse(gson.toJson(schemaDetails)));
+                                            JsonParser.parseString(gson.toJson(schemaDetails)));
                                 } catch (Exception ex) {
                                     String msg = "Error in getting schema from dataset : "
                                             + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
@@ -1884,54 +1909,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 //		return trustAllCerts;
 //	}
     private TrustManager[] getTrustAllCerts() {
-        if ("true".equalsIgnoreCase(certificateCheck)) {
-            try {
-                // Load the default trust store
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                        .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init((KeyStore) null);
-                // Get the trust managers from the factory
-                TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-                // Ensure we have at least one X509TrustManager
-                for (TrustManager trustManager : trustManagers) {
-                    if (trustManager instanceof X509TrustManager) {
-                        return new TrustManager[] { (X509TrustManager) trustManager };
-                    }
-                }
-            } catch (KeyStoreException e) {
-                logger.info(e.getMessage());
-            } catch (NoSuchAlgorithmException e) {
-                logger.info(e.getMessage());
-            }
-            throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-        } else {
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkClientTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Client certificate: {}", cert.getSubjectDN());
-                    }
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkServerTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Server certificate: {}", cert.getSubjectDN());
-                    }
-                }
-
-                @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new java.security.cert.X509Certificate[] {};
-                }
-            } };
-            return trustAllCerts;
-        }
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     private SSLContext getSslContext(TrustManager[] trustAllCerts) {

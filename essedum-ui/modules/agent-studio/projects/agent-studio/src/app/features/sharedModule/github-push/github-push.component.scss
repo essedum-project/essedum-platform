@@ -1,43 +1,59 @@
 :host { display: inline-flex !important; min-width: 0; box-sizing: border-box; }
-
-.git-push-trigger,
-.github-pull-input-label {
+:host(.pull-mode) { display: block !important; width: 100% !important; }
+ 
+.git-push-trigger {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
 }
 
+.github-pull-input-container {
+  display: block;
+  width: 100%;
+}
+
+.github-pull-input-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+ 
 .github-modal {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 99999;
   isolation: isolate;
 }
-
+ 
 .github-modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   pointer-events: auto;
   cursor: pointer;
 }
-
+ 
 .github-modal-content {
   position: relative;
   width: min(640px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   overflow: auto;
-  background: #ffffff;
+  background: #161b22;
+  border: 1px solid #30363d;
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   z-index: 1;
   pointer-events: auto;
+  color: #e6edf3;
 }
-
+ 
 .github-modal,
 .github-modal-overlay,
 .github-modal-content {
@@ -45,77 +61,304 @@
   transition: none !important;
   transform: none !important;
 }
-
+ 
 .github-modal-header,
 .github-modal-body,
 .github-modal-footer {
   padding: 16px 20px;
 }
-
-.github-modal-header,
-.github-modal-footer {
+ 
+.github-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #30363d;
+
+  h2 {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #e6edf3 !important;
+    margin: 0 !important;
+  }
 }
 
 .github-modal-footer {
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
-  border-top: 1px solid #e2e8f0;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #30363d;
   border-bottom: 0;
 }
-
+ 
 .close-btn {
   border: 0;
   background: transparent;
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
+  color: #8b949e;
+  &:hover { color: #f85149; }
 }
 
+// =============================================================================
+// FORM ELEMENTS - Dark theme
+// =============================================================================
+.github-modal-body {
+  .content-section {
+    color: #e6edf3;
+  }
+
+  .user-info {
+    margin-bottom: 16px;
+    p { color: #c9d1d9; margin: 0 0 4px; }
+    strong { color: #e6edf3; }
+  }
+
+  .btn-link {
+    background: none;
+    border: none;
+    color: #58a6ff;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+    &:hover { text-decoration: underline; color: #79c0ff; }
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #c9d1d9;
+      margin-bottom: 6px;
+    }
+
+    .form-text {
+      display: block;
+      font-size: 12px;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #e6edf3 !important;
+    background-color: #0d1117 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #58a6ff !important;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+    }
+
+    &::placeholder { color: #484f58; }
+
+    // Dropdown/select styling
+    option {
+      background: #0d1117 !important;
+      color: #e6edf3 !important;
+      padding: 8px;
+    }
+  }
+
+  select.form-control {
+    appearance: auto;
+    background-color: #0d1117 !important;
+    color: #e6edf3 !important;
+    cursor: pointer;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 40px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    input[type="checkbox"] {
+      accent-color: #58a6ff;
+      width: 16px;
+      height: 16px;
+    }
+
+    label {
+      display: inline;
+      margin-bottom: 0;
+      font-weight: 400;
+      color: #c9d1d9;
+      cursor: pointer;
+    }
+  }
+
+  // Alert messages
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .alert-error {
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.3);
+    color: #f85149;
+  }
+  .alert-success {
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid rgba(63, 185, 80, 0.3);
+    color: #3fb950;
+  }
+
+  // Loading
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    color: #8b949e;
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #30363d;
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+
+  // Logged out section
+  .logged-out-section {
+    text-align: center;
+    padding: 16px 0;
+
+    .logged-out-icon {
+      color: #8b949e;
+      margin-bottom: 12px;
+    }
+
+    h3 { color: #e6edf3; margin: 0 0 8px; font-size: 16px; }
+    p { color: #8b949e; margin: 0 0 12px; font-size: 13px; }
+
+    .logout-instructions {
+      text-align: left;
+      color: #c9d1d9;
+      font-size: 13px;
+      padding-left: 20px;
+      margin: 12px 0;
+      li { margin-bottom: 6px; }
+      a { color: #58a6ff; &:hover { text-decoration: underline; } }
+    }
+  }
+
+  .btn-github {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #238636;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { background: #2ea043; }
+  }
+}
+
+// Footer buttons
+.github-modal-footer {
+  .btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 100%);
+    color: #fff;
+    &:hover:not([disabled]) { box-shadow: 0 4px 14px rgba(79, 142, 247, 0.4); }
+    &[disabled] { opacity: 0.4; cursor: not-allowed; }
+  }
+  .btn-secondary {
+    background: transparent;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    &:hover { border-color: #58a6ff; color: #e6edf3; }
+  }
+}
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+// =============================================================================
+// Material form field overrides (inside modal)
+// =============================================================================
 :host ::ng-deep mat-form-field,
 :host ::ng-deep .mat-mdc-form-field { width: 100% !important; min-width: 0 !important; }
 :host ::ng-deep .mat-mdc-text-field-wrapper { width: 100% !important; }
-:host ::ng-deep .mdc-text-field--filled { background: rgba(255,255,255,0.05) !important; border-radius: 8px 8px 0 0 !important; }
-:host ::ng-deep .mdc-floating-label, :host ::ng-deep mat-label { color: #b8cce0 !important; font-size: 13px !important; }
-:host ::ng-deep .mat-mdc-input-element { color: #e2e8f0 !important; font-size: 14px !important; }
-:host ::ng-deep .mdc-line-ripple::before { border-bottom-color: rgba(79,142,247,0.55) !important; }
-:host ::ng-deep .mdc-line-ripple::after { border-bottom-color: #4f8ef7 !important; }
-
+:host ::ng-deep .mdc-text-field--filled { background: rgba(13,17,23,0.8) !important; border-radius: 8px 8px 0 0 !important; }
+:host ::ng-deep .mdc-floating-label, :host ::ng-deep mat-label { color: #8b949e !important; font-size: 13px !important; }
+:host ::ng-deep .mat-mdc-input-element { color: #e6edf3 !important; font-size: 14px !important; }
+:host ::ng-deep .mdc-line-ripple::before { border-bottom-color: rgba(88,166,255,0.4) !important; }
+:host ::ng-deep .mdc-line-ripple::after { border-bottom-color: #58a6ff !important; }
+ 
 .github-push-container {
   width: 100%;
   padding: 20px 24px;
   box-sizing: border-box;
 }
-
+ 
 .github-header {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(79,142,247,0.08);
-
+  border-bottom: 1px solid rgba(48,54,61,0.5);
+ 
   h2 {
     font-size: 17px !important;
     font-weight: 700 !important;
-    color: #e2e8f0 !important;
+    color: #e6edf3 !important;
     margin: 0 !important;
   }
-
-  mat-icon { color: #4f8ef7; font-size: 20px !important; width: 20px !important; height: 20px !important; }
+ 
+  mat-icon { color: #58a6ff; font-size: 20px !important; width: 20px !important; height: 20px !important; }
 }
-
+ 
 .dialog-actions, .form-actions {
   display: flex !important;
   justify-content: flex-end !important;
   gap: 8px !important;
   padding: 16px 0 0 !important;
-  border-top: 1px solid rgba(79,142,247,0.08) !important;
+  border-top: 1px solid rgba(48,54,61,0.5) !important;
 }
-
+ 
 button[mat-raised-button][color="primary"] {
   background: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 100%) !important;
   color: #fff !important;
@@ -125,7 +368,101 @@ button[mat-raised-button][color="primary"] {
   padding: 6px 20px !important;
 }
 
-body.header-light-theme {
-  .github-header h2 { color: #0f172a !important; }
-  :host ::ng-deep .mat-mdc-input-element { color: #0f172a !important; }
+// =============================================================================
+// LIGHT THEME
+// =============================================================================
+:host-context(body.header-light-theme) {
+  .github-modal-content {
+    background: #ffffff;
+    border-color: #d0d7de;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    color: #1f2328;
+  }
+
+  .github-modal-overlay {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .github-modal-header {
+    border-bottom-color: #d0d7de;
+    h2 { color: #1f2328 !important; }
+  }
+
+  .close-btn { color: #656d76; &:hover { color: #cf222e; } }
+
+  .github-modal-body {
+    .content-section { color: #1f2328; }
+    .user-info {
+      p { color: #1f2328; }
+      strong { color: #0f172a; }
+    }
+    .btn-link { color: #0969da; &:hover { color: #0550ae; } }
+
+    .form-group {
+      label { color: #24292f; }
+      .form-text { color: #656d76; }
+    }
+
+    .form-control {
+      color: #1f2328 !important;
+      background-color: #ffffff !important;
+      border-color: #d0d7de !important;
+
+      &:focus {
+        border-color: #0969da !important;
+        box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+      }
+
+      &::placeholder { color: #8c959f; }
+
+      option {
+        background: #ffffff !important;
+        color: #1f2328 !important;
+      }
+    }
+
+    select.form-control {
+      background-color: #ffffff !important;
+      color: #1f2328 !important;
+    }
+
+    .checkbox-wrapper {
+      input[type="checkbox"] { accent-color: #0969da; }
+      label { color: #24292f; }
+    }
+
+    .alert-error {
+      background: rgba(207, 34, 46, 0.06);
+      border-color: rgba(207, 34, 46, 0.2);
+      color: #cf222e;
+    }
+    .alert-success {
+      background: rgba(26, 127, 55, 0.06);
+      border-color: rgba(26, 127, 55, 0.2);
+      color: #1a7f37;
+    }
+
+    .loading { color: #656d76; .spinner { border-color: #d0d7de; border-top-color: #0969da; } }
+
+    .logged-out-section {
+      .logged-out-icon { color: #656d76; }
+      h3 { color: #1f2328; }
+      p { color: #656d76; }
+      .logout-instructions { color: #24292f; a { color: #0969da; } }
+    }
+
+    .btn-github { background: #1f883d; &:hover { background: #1a7f37; } }
+  }
+
+  .github-modal-footer {
+    border-top-color: #d0d7de;
+    .btn-secondary { color: #656d76; border-color: #d0d7de; &:hover { border-color: #0969da; color: #0969da; } }
+  }
+
+  .github-header h2 { color: #1f2328 !important; }
+  :host ::ng-deep .mdc-floating-label, :host ::ng-deep mat-label { color: #656d76 !important; }
+  :host ::ng-deep .mat-mdc-input-element { color: #1f2328 !important; }
+  :host ::ng-deep .mdc-text-field--filled { background: rgba(246,248,250,0.8) !important; }
+  :host ::ng-deep .mdc-line-ripple::before { border-bottom-color: rgba(9,105,218,0.4) !important; }
+  :host ::ng-deep .mdc-line-ripple::after { border-bottom-color: #0969da !important; }
 }

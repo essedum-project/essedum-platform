@@ -21,6 +21,7 @@ import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
 import com.lfn.icip.icipwebeditor.exception.*;
 import com.lfn.icip.icipwebeditor.folder.service.ICIPFolderService;
+import com.lfn.icip.icipwebeditor.folder.service.PipelineMetadataValidator;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPAiAgentScriptDTO;
 import com.lfn.icip.icipwebeditor.repository.ICIPAiAgentScriptRepository;
@@ -35,11 +36,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
 // TODO: Auto-generated Javadoc
-// 
+//
 
 /**
  * The Class ICIPFileController.
@@ -70,13 +72,17 @@ public class ICIPFolderController {
     @EssedumProperty("icip.script.github.enabled")
     private String remoteScript;
 
+    /** Validates metadata.json inside every uploaded pipeline package. */
+    @Autowired
+    private PipelineMetadataValidator pipelineMetadataValidator;
 
     /**
      * Upload file.
      *
-     * @param cname the customer name
-     * @param org the organization
-     * @param zipFile the zip file (optional - multipart upload)
+     * @param cname      the customer name
+     * @param org        the organization
+     * @param type       the pipeline type: App, Agent, or MCP
+     * @param zipFile    the zip file (optional - multipart upload)
      * @param folderPath the folder path (optional - if not uploading a file)
      * @return the response entity
      */
@@ -84,16 +90,25 @@ public class ICIPFolderController {
     public ResponseEntity<List<ICIPAiAgentScript>> uploadFile(
             @PathVariable(name = "cname") String cname,
             @PathVariable(name = "org") String org,
+            @RequestParam(value = "type", required = true) String type,
             @RequestParam(value = "zipFile", required = false) MultipartFile zipFile,
-            @RequestParam(value = "folderPath", required = false) String folderPath) {
+            @RequestParam(value = "folderPath", required = false) String folderPath,
+            @RequestParam(value = "isvibestudio", required = false, defaultValue = "false") boolean isVibeStudio) {
 
-        logger.info("request to upload ai-agent scripts for cname={}, org={}", cname, org);
+        logger.info("request to upload ai-agent scripts for cname={}, org={}, type={}, isVibeStudio={}", cname, org, type, isVibeStudio);
 
         try {
+            // Validate pipeline type param
+            if (type == null || type.isBlank()) {
+                throw new InvalidRequestException(
+                        "Pipeline type is required. Provide a valid type value.");
+            }
+
             // Validate that at least one option is provided
             if ((zipFile == null || zipFile.isEmpty()) && (folderPath == null || folderPath.isBlank())) {
                 logger.warn("Neither zipFile nor folderPath provided for cname={}, org={}", cname, org);
-                throw new InvalidRequestException("Either zipFile or folderPath must be provided. Please upload a ZIP file or specify a folder path.");
+                throw new InvalidRequestException(
+                        "Either zipFile or folderPath must be provided. Please upload a ZIP file or specify a folder path.");
             }
 
             // Validate cname and org
@@ -104,11 +119,25 @@ public class ICIPFolderController {
                 throw new InvalidRequestException("Organization (org) cannot be null or empty");
             }
 
-            // Check if files already exist for this cname and org
+            // ── Pipeline metadata.json validation ─────────────────────────────
+            // Skipped entirely when isVibeStudio=true (Vibe Studio uploads bypass validation).
+            // Runs BEFORE deleting existing records to prevent data loss on a bad upload.
+            if (!isVibeStudio) {
+                logger.info("Validating pipeline metadata.json for cname={}, org={}, type={}", cname, org, type);
+                if (zipFile != null && !zipFile.isEmpty()) {
+                    pipelineMetadataValidator.validateFromZip(zipFile, type);
+                } else if (folderPath != null && !folderPath.isBlank()) {
+                    pipelineMetadataValidator.validateFromFolderPath(folderPath, type);
+                }
+                logger.info("Pipeline metadata validation passed for cname={}, org={}, type={}", cname, org, type);
+            } else {
+                logger.info("Skipping pipeline metadata validation for cname={}, org={} — isVibeStudio=true", cname, org);
+            }
+            // ── End metadata validation ────────────────────────────────────────
             List<ICIPAiAgentScriptDTO> existingFiles = folderService.listAsDTO(cname, org);
             if (existingFiles != null && !existingFiles.isEmpty()) {
                 logger.info("Found {} existing files for cname={}, org={}. Deleting them before uploading new files.",
-                            existingFiles.size(), cname, org);
+                        existingFiles.size(), cname, org);
                 try {
                     folderService.deleteAllByCnameAndOrg(cname, org);
                     logger.info("Successfully deleted all existing files for cname={}, org={}", cname, org);
@@ -160,7 +189,32 @@ public class ICIPFolderController {
                         java.util.zip.ZipEntry entry;
                         while ((entry = zis.getNextEntry()) != null) {
                             if (!entry.isDirectory()) {
-                                filesToPush.put(entry.getName(), zis.readAllBytes());
+                                // Zip-slip protection: reject absolute paths, parent traversal,
+                                // null bytes and OS path separators that could escape the
+                                // intended sub-tree once the entry name is interpreted as
+                                // a path component on the remote git repo.
+                                String entryName = entry.getName();
+                                if (entryName == null || entryName.isEmpty()
+                                        || entryName.contains("\0")
+                                        || entryName.contains("..")
+                                        || entryName.startsWith("/")
+                                        || entryName.startsWith("\\")
+                                        || entryName.contains(":")
+                                        || entryName.contains("\\")) {
+                                    logger.warn("Skipping unsafe zip entry: {}", entryName);
+                                    zis.closeEntry();
+                                    continue;
+                                }
+                                // Normalise to verify that, when resolved against a dummy root,
+                                // the entry stays inside that root (defence in depth).
+                                java.nio.file.Path safeRoot = java.nio.file.Paths.get("/__safe_root__").normalize();
+                                java.nio.file.Path resolved = safeRoot.resolve(entryName).normalize();
+                                if (!resolved.startsWith(safeRoot)) {
+                                    logger.warn("Skipping zip entry that escapes its root: {}", entryName);
+                                    zis.closeEntry();
+                                    continue;
+                                }
+                                filesToPush.put(entryName, zis.readAllBytes());
                             }
                             zis.closeEntry();
                         }
@@ -184,7 +238,8 @@ public class ICIPFolderController {
                     githubPushSuccess ? "" : " - Reason: " + githubPushError);
             return new ResponseEntity<>(result, HttpStatus.OK);
 
-        } catch (InvalidRequestException | FileDeletionException | FileUploadException e) {
+        } catch (InvalidRequestException | FileDeletionException | FileUploadException
+                 | PipelineMetadataValidationException e) {
             // Re-throw custom exceptions to be handled by GlobalControllerException
             throw e;
         } catch (Exception e) {
@@ -411,7 +466,7 @@ public class ICIPFolderController {
             @RequestParam(value="alias", required = false, defaultValue ="Sample-S3") String alias)
     {
         logger.info("request to push ai-agent scripts to MinIO for cname={}, org={}, type={}, alias={}",
-                    cname, org, type, alias);
+                cname, org, type, alias);
 
         try {
             // Validate input parameters
@@ -426,7 +481,7 @@ public class ICIPFolderController {
             ICIPDatasource datasource = datasourceService.getDatasourceByTypeAndAlias(type, alias, org);
             if (datasource == null) {
                 String message = String.format("No datasource found with type=%s, alias=%s for organization=%s",
-                                              type, alias, org);
+                        type, alias, org);
                 logger.error(message);
                 throw new DatasourceNotFoundException(message);
             }
@@ -463,19 +518,19 @@ public class ICIPFolderController {
                 // Upload provided zip file
                 logger.info("Uploading provided zip file to MinIO");
                 success = folderService.pushZipToMinIO(zipFile, null, bucketName, finalObjectKey, cname, org,
-                                                       minioUrl, minioAccessKey, minioSecretKey);
+                        minioUrl, minioAccessKey, minioSecretKey);
             } else {
                 // Export from database and upload
                 logger.info("Exporting from database and uploading to MinIO");
                 success = folderService.exportAndPushToMinIO(cname, org, bucketName, finalObjectKey,
-                                                             minioUrl, minioAccessKey, minioSecretKey);
+                        minioUrl, minioAccessKey, minioSecretKey);
             }
 
             if (success) {
                 String message = String.format("Successfully uploaded to MinIO: bucket=%s, objectKey=%s",
-                                              bucketName, finalObjectKey);
+                        bucketName, finalObjectKey);
                 logger.info(message);
-                return ResponseEntity.ok(message);
+            return ResponseEntity.ok(HtmlUtils.htmlEscape(message));
             } else {
                 String message = String.format("Failed to upload to MinIO for cname=%s, org=%s", cname, org);
                 logger.error(message);

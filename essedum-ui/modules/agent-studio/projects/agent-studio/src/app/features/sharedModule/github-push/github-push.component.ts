@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, EventEmitter, Output, ChangeDetectorRef, HostBinding, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { GitHubService } from '../services/github.service';
 import { GitHubRepository, PushRequest, PullRequest } from '../models/github.models';
 import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.service';
@@ -10,19 +10,24 @@ import { Services } from '@essedum/shared-lib';
   styleUrls: ['./github-push.component.scss'],
   standalone: false
 })
-export class GitHubPushComponent implements OnInit {
+export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() mode: 'push' | 'pull' = 'push';
   @Output() zipFileCreated = new EventEmitter<File>();
 
+  @HostBinding('class.pull-mode') get isPullMode() { return this.mode === 'pull'; }
+
+  @ViewChild('modalPortal', { static: false }) modalPortalRef: ElementRef<HTMLElement>;
+  private modalMovedToBody = false;
+ 
   // Authentication state
   isAuthenticated = false;
   username = '';
   isLoading = false;
-
+ 
   // Repository data
   repositories: GitHubRepository[] = [];
   branches: string[] = [];
-
+ 
   // Form data
   selectedRepo = '';
   selectedRepoObject: GitHubRepository | null = null;
@@ -30,11 +35,11 @@ export class GitHubPushComponent implements OnInit {
   useCustomMessage = false;
   commitMessage = '';
   localPath = '/server/path/to/files'; // Server-side path
-
+ 
   // Pull mode specific
   repoUrl = '';
   extractedRepoName = '';
-
+ 
   // UI state
   showModal = false;
   errorMessage = '';
@@ -42,14 +47,14 @@ export class GitHubPushComponent implements OnInit {
   private isModalTransitioning = false;
   private allowOverlayClose = false;
   private overlayCloseGuardTimer: ReturnType<typeof setTimeout> | null = null;
-
+ 
   @Input() cname: string;
   constructor(private githubService: GitHubService,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
     private cdr: ChangeDetectorRef,
   ) { }
-
+ 
   ngOnInit(): void {
     // Defer auth check to avoid blocking the UI on dialog open.
     // Restore cached session data so the component is ready instantly.
@@ -60,6 +65,21 @@ export class GitHubPushComponent implements OnInit {
     }
   }
 
+  ngAfterViewChecked(): void {
+    // Teleport modal to body when it appears (escapes any overflow:hidden ancestor)
+    if (this.showModal && this.modalPortalRef && !this.modalMovedToBody) {
+      document.body.appendChild(this.modalPortalRef.nativeElement);
+      this.modalMovedToBody = true;
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Clean up modal from body if component is destroyed while modal is open
+    if (this.modalMovedToBody && this.modalPortalRef?.nativeElement?.parentNode === document.body) {
+      document.body.removeChild(this.modalPortalRef.nativeElement);
+    }
+  }
+ 
   /**
    * Check if user is already authenticated (called lazily on modal open)
    */
@@ -92,7 +112,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Open modal — auth check is deferred until here so dialog opening is instant
    */
@@ -104,7 +124,7 @@ export class GitHubPushComponent implements OnInit {
     if (this.showModal || this.isModalTransitioning) {
       return;
     }
-
+ 
     this.isModalTransitioning = true;
     this.errorMessage = '';
     this.successMessage = '';
@@ -116,33 +136,33 @@ export class GitHubPushComponent implements OnInit {
       this.isModalTransitioning = false;
     }, 250);
     this.cdr.detectChanges(); // Paint the modal immediately
-
+ 
     // If we don't have a confirmed auth state yet, check now (user already clicked the button)
     if (!this.isAuthenticated) {
       this.checkAuthStatus();
       return;
     }
-
+ 
     // Already authenticated via cache — load repos for push mode if not loaded yet
     if (this.mode === 'push' && this.repositories.length === 0) {
       this.loadRepositories();
     }
   }
-
+ 
   /**
    * Get modal title based on mode
    */
   getModalTitle(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Clone Repository from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Pull from GitHub';
   }
-
+ 
   /**
    * Get button text based on mode
    */
   getButtonText(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Upload from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Pull from GitHub';
   }
-
+ 
   /**
    * Close modal
    */
@@ -153,10 +173,15 @@ export class GitHubPushComponent implements OnInit {
     this.clearOverlayCloseGuardTimer();
     this.allowOverlayClose = false;
     this.isModalTransitioning = false;
+    // Remove modal from body before hiding (Angular needs it back in the view tree for *ngIf cleanup)
+    if (this.modalMovedToBody && this.modalPortalRef?.nativeElement?.parentNode === document.body) {
+      document.body.removeChild(this.modalPortalRef.nativeElement);
+    }
+    this.modalMovedToBody = false;
     this.showModal = false;
     this.resetForm();
   }
-
+ 
   /**
    * Close from backdrop only after a small guard delay to avoid open/close race.
    */
@@ -168,14 +193,14 @@ export class GitHubPushComponent implements OnInit {
     }
     this.closeModal();
   }
-
+ 
   private clearOverlayCloseGuardTimer(): void {
     if (this.overlayCloseGuardTimer) {
       clearTimeout(this.overlayCloseGuardTimer);
       this.overlayCloseGuardTimer = null;
     }
   }
-
+ 
   /**
    * Initiate GitHub login
    */
@@ -183,7 +208,7 @@ export class GitHubPushComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.cdr.detectChanges();
-
+ 
     this.githubService.initiateOAuthFlow().subscribe({
       next: (status) => {
         this.isLoading = false;
@@ -202,7 +227,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Logout
    */
@@ -232,7 +257,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Load repositories
    */
@@ -240,7 +265,7 @@ export class GitHubPushComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     this.cdr.detectChanges();
-
+ 
     this.githubService.getRepositories().subscribe({
       next: (repos) => {
         this.repositories = repos;
@@ -254,7 +279,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Handle repository selection
    */
@@ -266,18 +291,18 @@ export class GitHubPushComponent implements OnInit {
       //this.updateGitHubConfig();
       return;
     }
-
+ 
     // Find and store the selected repository object
     this.selectedRepoObject = this.repositories.find(repo => repo.fullName === this.selectedRepo) || null;
-
+ 
     // Store selected repo in sessionStorage
     //sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
     this.loadSourceBranch();
     //this.updateGitHubConfig();
-
+ 
     this.isLoading = true;
     this.errorMessage = '';
-
+ 
     this.githubService.getBranches(this.selectedRepo).subscribe({
       next: (branches) => {
         this.branches = branches;
@@ -294,7 +319,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Handle branch selection change
    */
@@ -305,7 +330,7 @@ export class GitHubPushComponent implements OnInit {
       //this.updateGitHubConfig();
     }
   }
-
+ 
   /**
    * Update GitHub config object in sessionStorage
    */
@@ -315,10 +340,10 @@ export class GitHubPushComponent implements OnInit {
   //     git_selected_Repo: sessionStorage.getItem('git_selected_Repo') || this.selectedRepo || '',
   //     git_selected_branch: sessionStorage.getItem('git_selected_branch') || this.selectedBranch || ''
   //   };
-
+ 
   //sessionStorage.setItem('github_config', JSON.stringify(githubConfig));
   //}
-
+ 
   /**
    * Handle repository URL input change (Pull mode only)
    */
@@ -327,20 +352,20 @@ export class GitHubPushComponent implements OnInit {
     this.selectedBranch = '';
     this.errorMessage = '';
     this.extractedRepoName = '';
-
+ 
     if (!this.repoUrl.trim()) {
       return;
     }
-
+ 
     // Extract owner/repo from URL
     const repoName = this.extractRepoFromUrl(this.repoUrl);
     if (!repoName) {
       this.errorMessage = 'Invalid GitHub repository URL. Expected format: https://github.com/owner/repository';
       return;
     }
-
+ 
     this.extractedRepoName = repoName;
-
+ 
     // Fetch branches for the repository
     this.isLoading = true;
     this.githubService.getBranches(repoName).subscribe({
@@ -357,7 +382,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Extract owner/repo from GitHub URL
    */
@@ -365,14 +390,14 @@ export class GitHubPushComponent implements OnInit {
     try {
       // Remove trailing slashes
       url = url.trim().replace(/\/+$/, '');
-
+ 
       // Try to match GitHub URL patterns
       // Supports: https://github.com/owner/repo, github.com/owner/repo, owner/repo
       const patterns = [
         /github\.com\/([^\/]+)\/([^\/]+)/i,  // https://github.com/owner/repo or github.com/owner/repo
         /^([^\/]+)\/([^\/]+)$/                // owner/repo
       ];
-
+ 
       for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match) {
@@ -381,13 +406,13 @@ export class GitHubPushComponent implements OnInit {
           return `${owner}/${repo}`;
         }
       }
-
+ 
       return null;
     } catch (error) {
       return null;
     }
   }
-
+ 
   /**
    * Generate default commit message
    */
@@ -397,7 +422,7 @@ export class GitHubPushComponent implements OnInit {
     }
     return `Automated commit - ${new Date().toISOString()}`;
   }
-
+ 
   /**
    * Push to GitHub
    */
@@ -406,14 +431,14 @@ export class GitHubPushComponent implements OnInit {
       this.errorMessage = 'Please select a repository and branch';
       return;
     }
-
+ 
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
     this.agentPipelineService.getFilesList(this.cname).subscribe({
       next: (fetchedFiles) => {
         console.log('Fetched files:', fetchedFiles);
-
+ 
         const request: PushRequest = {
           repoName: this.selectedRepo,
           branch: this.selectedBranch,
@@ -425,7 +450,7 @@ export class GitHubPushComponent implements OnInit {
             content: file.filescript
           }))
         };
-
+ 
         this.githubService.pushToGitHub(request).subscribe({
           next: (response) => {
             this.isLoading = false;
@@ -447,7 +472,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Pull from GitHub
    */
@@ -456,29 +481,29 @@ export class GitHubPushComponent implements OnInit {
       this.errorMessage = 'Please select a branch';
       return;
     }
-
+ 
     if (!this.repoUrl || !this.extractedRepoName) {
       this.errorMessage = 'Please enter a valid GitHub repository URL';
       return;
     }
-
+ 
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-
+ 
     // Use the URL provided by the user
     const repoUrl = this.repoUrl.trim();
-
+ 
     const request: PullRequest = {
       repoUrl: repoUrl,
       branch: this.selectedBranch
     };
-
+ 
     this.githubService.pullFromGitHub(request).subscribe({
       next: (response) => {
         this.successMessage = 'Successfully pulled from GitHub! Creating ZIP file...';
         this.cdr.detectChanges();
-
+ 
         this.createZipFromPulledFiles(response.files).then((zipFile) => {
           this.isLoading = false;
           this.successMessage = 'ZIP file created successfully!';
@@ -498,39 +523,39 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Create ZIP file from pulled files
    */
   private async createZipFromPulledFiles(files: any[]): Promise<File> {
     const zip = new JSZip();
-
+ 
     // For pull mode, use extracted repo name
     const repoName = this.mode === 'pull' && this.extractedRepoName
       ? this.extractedRepoName.split('/')[1] || 'repository'
       : this.selectedRepo.split('/')[1] || 'repository';
-
+ 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
     const zipFileName = `${repoName}-${this.selectedBranch}-${timestamp}.zip`;
-
+ 
     // Add each file to the zip
     for (const file of files) {
       const filePath = file.path || file.fileName || 'unknown';
       const content = file.content || '';
-
+ 
       // Add file to zip with its path
       zip.file(filePath, content);
     }
-
+ 
     // Generate the zip file as a Blob
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-
+ 
     // Convert Blob to File
     const zipFile = new File([zipBlob], zipFileName, { type: 'application/zip' });
-
+ 
     return zipFile;
   }
-
+ 
   /**
    * Execute the appropriate action based on mode
    */
@@ -541,7 +566,7 @@ export class GitHubPushComponent implements OnInit {
       this.pullFromGitHub();
     }
   }
-
+ 
   /**
    * Check if action can be executed
    */
@@ -552,7 +577,7 @@ export class GitHubPushComponent implements OnInit {
       return !!(this.repoUrl && this.extractedRepoName && this.selectedBranch);
     }
   }
-
+ 
   /**
    * Save git configuration after successful push
    */
@@ -561,7 +586,7 @@ export class GitHubPushComponent implements OnInit {
       this.service.message('Missing required data for saving git config', 'warning');
       return;
     }
-
+ 
     const currentUser = sessionStorage.getItem('username') || 'demo';
     const gitConfigPayload = {
       id: null,
@@ -575,7 +600,7 @@ export class GitHubPushComponent implements OnInit {
       updatedby: currentUser,
       updatedat: new Date().toISOString()
     };
-
+ 
     this.githubService.saveGitConfig(gitConfigPayload).subscribe({
       next: (response) => {
         this.service.message(
@@ -589,7 +614,7 @@ export class GitHubPushComponent implements OnInit {
       }
     });
   }
-
+ 
   /**
    * Load source branch from API and pre-populate if available
    */
@@ -609,8 +634,8 @@ export class GitHubPushComponent implements OnInit {
       }
     );
   }
-
-
+ 
+ 
   /**
    * Reset form
    */

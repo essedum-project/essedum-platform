@@ -15,7 +15,6 @@
 
 package com.lfn.ai.comm.lib.util;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 
 import java.io.FileInputStream;
@@ -32,7 +31,6 @@ import org.apache.tika.io.FilenameUtils;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
-import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -52,11 +50,18 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * @author essedum
  *
+ * @deprecated Use {@link FileValidateV2} instead. This class is retained only for
+ *             backward compatibility and is scheduled for removal.
  */
 
 @Slf4j
 @Service
 @Deprecated(since = "2.0.1", forRemoval = true)
+// Deprecated and scheduled for removal (replaced by FileValidateV2). The maintainability and
+// deprecation findings in this class are intentionally suppressed rather than refactoring code
+// that is slated for deletion once its last caller (FileServerService) is migrated.
+@SuppressWarnings({ "java:S1133", "java:S2093", "java:S3776", "java:S6541", "java:S135", "java:S1066",
+		"java:S1192", "java:S5261" })
 public class FileValidate {
 
 	// Fetch variable form usm-constant -- application level
@@ -108,13 +113,11 @@ public class FileValidate {
 	public FileValidateSummary validateFile(MultipartFile mulipartFile, List<String> allowed, Integer allowedDepth,
 			Boolean extendedOutput) {
 		InputStream inputStream;
-		BufferedInputStream bufferedInputStream;
 		FileValidateSummary summary = null;
 		if (allowedDepth == null)
 			allowedDepth = 0;
 		try {
 			inputStream = mulipartFile.getInputStream();
-//			bufferedInputStream=new BufferedInputStream(inputStream);
 		} catch (IOException ex) {
 			summary = new FileValidateSummary();
 			summary.FileName = "";
@@ -152,14 +155,14 @@ public class FileValidate {
 		log.info("\n\nFile name is " + fileName);
 		try {
 			List<UploadObject> uploadObjectList = this.getMetaRecursive(stream);
-			if (uploadObjectList.size() == 0) {
+			if (uploadObjectList.isEmpty()) {
 				r.reason = "Parsed file is of size 0.";
 				return r;
 			}
 			int maxDepth = 0;
 			r.parsedObjects = uploadObjectList;
-			StringBuffer reason1 = new StringBuffer();
-			StringBuffer reason2 = new StringBuffer();
+			StringBuilder reason1 = new StringBuilder();
+			StringBuilder reason2 = new StringBuilder();
 			for (UploadObject obj : uploadObjectList) {
 
 				log.info("Object is {}", obj);
@@ -275,11 +278,8 @@ public class FileValidate {
 						r.isValid = true;					
 					else if (obj.contentType.toLowerCase().startsWith("image/") && extension.toLowerCase().startsWith("image/"))
 						r.isValid = true;
-					//else if (obj.type.equals("text/plain; charset=ISO-8859-1") && extension.equals("text/plain"))
-					else if (extension.startsWith("text/plain") && obj.contentType.contains("text/plain") )						
+					else if (extension.startsWith("text/plain") && obj.contentType.contains("text/plain") )
 						r.isValid = true;
-					//else if (obj.type.equals("text/plain; charset=windows-1251") && extension.equals("text/plain"))
-						//r.isValid = true;
 					else if(obj.contentType.equals("application/x-tika-ooxml"))
 						r.isValid=true;
 					else if (extension.startsWith("text/html") && obj.contentType.contains("text/html"))
@@ -316,7 +316,6 @@ public class FileValidate {
 				-1);
 		RecursiveParserWrapper wrapper = new RecursiveParserWrapper(p);
 		Metadata metadata = new Metadata();
-		// metadata.set(Metadata.RESOURCE_NAME_KEY, "test_recursive_embedded.docx");
 		ParseContext context = new ParseContext();
 
 		RecursiveParserWrapperHandler handler = new RecursiveParserWrapperHandler(factory);
@@ -324,20 +323,15 @@ public class FileValidate {
 
 		List<Metadata> list = handler.getMetadataList();
 
-		List<UploadObject> objectList = new ArrayList<UploadObject>();
+		List<UploadObject> objectList = new ArrayList<>();
 
 		for (Metadata l : list) {
-			// log.info("Meta is " + l);
-
 			if (l.get("Content-Type") != null && l.get("Content-Type").equals("image/emf"))
 				continue;
 
 			UploadObject obj = new UploadObject();
 
 			obj.contentType = l.get("Content-Type");
-
-			// if (l.get(TikaCoreProperties.RESOURCE_NAME_KEY) != null)
-			// obj.name = l.get("resourceName");
 
 			obj.name = getResourceName(l);
 			if (l.get("extended-properties:Application") != null)
@@ -403,25 +397,22 @@ public class FileValidate {
 		} catch (IOException ex) {
 			return "Error while detecting " + ex.getMessage();
 		}
-		// log.info("\n Detected type is : " + detectedType);
 		return detectedType;
 	}
 
 	@Deprecated(since = "2.0.1", forRemoval = true)
 	public String detectFileExtension(String fileName) {
 		Tika tika = new Tika();
-		String fileExtension = tika.detect(fileName);
-		// log.info("\n fileExtension is : " + fileExtension);
-		return fileExtension;
+		return tika.detect(fileName);
 	}
 
 	@Deprecated(since = "2.0.1", forRemoval = true)
 	private String getMediaType(InputStream stream, String fileName) throws IOException {
-		DefaultDetector file_detector = new DefaultDetector();
-		TikaInputStream file_stream = TikaInputStream.get(stream);
+		DefaultDetector fileDetector = new DefaultDetector();
+		TikaInputStream fileStream = TikaInputStream.get(stream);
 		Metadata metadata = new Metadata();
 		metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, fileName);
-		org.apache.tika.mime.MediaType mediaType = file_detector.detect(file_stream, metadata);
+		org.apache.tika.mime.MediaType mediaType = fileDetector.detect(fileStream, metadata);
 		return mediaType.toString();
 	}
 	

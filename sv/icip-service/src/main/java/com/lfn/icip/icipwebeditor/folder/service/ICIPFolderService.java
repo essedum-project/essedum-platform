@@ -15,6 +15,7 @@
 
 package com.lfn.icip.icipwebeditor.folder.service;
 
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
 import com.lfn.icip.icipwebeditor.model.ICIPAiAgentScript;
@@ -171,7 +172,12 @@ public class ICIPFolderService {
             if (zipFile != null && !zipFile.isEmpty()) {
                 processZipInputStream(zipFile.getInputStream(), name, org);
             } else if (zipFolderPath != null && !zipFolderPath.isBlank()) {
-                Path path = Paths.get(zipFolderPath);
+                // Sanitise the user-supplied filesystem path: reject ".." traversal
+                // sequences and null bytes before any Files.* operation, so taint
+                // trackers (e.g. CodeQL java/path-injection) recognise the barrier
+                // on the Files.exists / Files.newInputStream sinks below.
+                Path path = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(zipFolderPath);
 
                 if (!Files.exists(path)) {
                     throw new NoSuchFileException("Provided path does not exist: " + zipFolderPath);
@@ -244,7 +250,12 @@ public class ICIPFolderService {
                         .replace('\\', '/'); // normalize to forward slashes for consistency
 
                 String fileName = file.getFileName().toString();
-                byte[] fileData = Files.readAllBytes(file);
+                // Walked file is already inside `normalizedRoot`; explicitly
+                // re-validate the path against traversal so the Files.readAllBytes
+                // sink is paired with a recognised sanitiser.
+                java.nio.file.Path safeFile = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(file.toString());
+                byte[] fileData = Files.readAllBytes(safeFile);
                 Blob blob = new SerialBlob(fileData);
 
                 ICIPAiAgentScript script = new ICIPAiAgentScript();
@@ -894,24 +905,7 @@ public class ICIPFolderService {
      * @return array of TrustManager
      */
     private TrustManager[] getTrustAllCerts() {
-        return new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all client certificates
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                        // Trust all server certificates
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                }
-        };
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     /**

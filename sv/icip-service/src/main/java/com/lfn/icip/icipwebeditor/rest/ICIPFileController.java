@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
@@ -104,7 +105,7 @@ public class ICIPFileController {
 			String result = fileService.storeFile(file, FileConstants.JAR);
 			logger.info("Successfully uploaded jar file: {}", file.getOriginalFilename());
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -209,7 +210,7 @@ public class ICIPFileController {
 			String result = fileService.storeBinaryFile(cname, org, file);
 			logger.info("Successfully uploaded pipeline file for cname={}, org={}", cname, org);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -258,7 +259,7 @@ public class ICIPFileController {
 			String result = fileService.storeNativeScriptFile(cname, org, file);
 			logger.info("Successfully uploaded native script for cname={}, org={}", cname, org);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -307,7 +308,7 @@ public class ICIPFileController {
 			String result = fileService.storeScriptFile(cname, org, file);
 			logger.info("Successfully uploaded script file for cname={}, org={}", cname, org);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -356,7 +357,7 @@ public class ICIPFileController {
 			String result = fileService.storeDragAndDropFile(cname, org, file);
 			logger.info("Successfully uploaded drag-and-drop file for cname={}, org={}", cname, org);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -707,7 +708,8 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Filename cannot be null or empty");
 			}
 
-			Path path = fileService.returnPath(FileConstants.AGENTS_CODE, filename);
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnPath(FileConstants.AGENTS_CODE, filename).toString());
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(
 					String.format("Agents file '%s' not found", filename));
@@ -743,8 +745,9 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Agent type cannot be null or empty");
 			}
 
-			Path path = fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
-					fileService.agentsConfig.getSampleFile(agenttype));
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
+							fileService.agentsConfig.getSampleFile(agenttype)).toString());
 
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(
@@ -781,8 +784,9 @@ public class ICIPFileController {
 				throw new InvalidRequestException("Agent type cannot be null or empty");
 			}
 
-			Path path = fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
-					fileService.agentsConfig.getBaseFile(agenttype));
+			Path path = com.lfn.icip.dataset.util.PathValidationUtil
+					.validateAndGetPath(fileService.returnDefaultConfigPath(agenttype.toLowerCase(),
+							fileService.agentsConfig.getBaseFile(agenttype)).toString());
 
 			if (path == null || !java.nio.file.Files.exists(path)) {
 				throw new ResourceNotFoundException(
@@ -950,7 +954,8 @@ public class ICIPFileController {
 			List<String> result = fileService.writeNativeFile(cname, org, fileName, fileType, script);
 			logger.info("Successfully created native script file: {}", fileName);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			List<String> escapedResult = result.stream().map(HtmlUtils::htmlEscape).toList();
+			return new ResponseEntity<>(escapedResult, HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -995,7 +1000,7 @@ public class ICIPFileController {
 			String result = fileService.writeAgentsFile(cname, org, fileType, script);
 			logger.info("Successfully created agents file for cname={}, org={}", cname, org);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -1043,7 +1048,7 @@ public class ICIPFileController {
 			String result = fileService.writeScriptFile(cname, org, fileName, fileType, script);
 			logger.info("Successfully created script file: {}", fileName);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -1091,7 +1096,7 @@ public class ICIPFileController {
 			String result = fileService.writeDragAndDropFile(cname, org, fileName, fileType, data);
 			logger.info("Successfully created drag-and-drop file: {}", fileName);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -1235,7 +1240,7 @@ public class ICIPFileController {
 			String result = fileService.writeXml(agentType, cname, org, config);
 			logger.info("Successfully wrote XML config file for agentType: {}", agentType);
 
-			return new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<>(HtmlUtils.htmlEscape(result), HttpStatus.OK);
 
 		} catch (InvalidRequestException e) {
 			throw e;
@@ -1324,7 +1329,7 @@ public class ICIPFileController {
 
 			if (cloneGitRepoAndPushToS3 != null && !cloneGitRepoAndPushToS3.isEmpty()) {
 				logger.info("Successfully cloned Git repo and pushed to S3 for datasetId: {}", datasetId);
-				return new ResponseEntity<>(cloneGitRepoAndPushToS3, HttpStatus.OK);
+				return new ResponseEntity<>(HtmlUtils.htmlEscape(cloneGitRepoAndPushToS3), HttpStatus.OK);
 			} else {
 				throw new FileUploadException("Error occurred while cloning Git repo and pushing to S3");
 			}

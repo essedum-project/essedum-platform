@@ -53,7 +53,6 @@ export class SidebarComponent implements OnInit {
       icon: "plug",
       children: [
         { label: "Adapters", icon: "exchange", url: "./integration/implementations", children: [] },
-        { label: "Pipelines", icon: "sitemap", url: "./integration/pipelines", children: [] },
         { label: "Apps", icon: "th-large", url: "./integration/apps", children: [] },
         { label: "Instances", icon: "server", url: "./integration/instances", children: [] },
         { label: "Jobs", icon: "tasks", url: "./integration/jobs", children: [] },
@@ -237,6 +236,21 @@ export class SidebarComponent implements OnInit {
         // modules/integration-hub, modules/vibe-studio) instead of the buggy icip_app/aip_app
         // cross-remote chain that fails with "Cannot access 'AipModule' before init".
         this.remapLegacyUrls(this.sidebarMenu);
+
+        // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
+        // (kept for backward-compat with older DB entries)
+        this.sidebarMenu.forEach((item: any) => {
+          if (item && item.label === 'Agent MCP Pipelines') {
+            item.label = 'Pipelines';
+          }
+          if (item && Array.isArray(item.children)) {
+            item.children.forEach((child: any) => {
+              if (child && child.label === 'Agent MCP Pipelines') {
+                child.label = 'Pipelines';
+              }
+            });
+          }
+        });
       });
     }
   }
@@ -1150,8 +1164,8 @@ export class SidebarComponent implements OnInit {
     './aip/agent-directory':    './agent/directory',
 
     // Integrations (was aip_app pipelines/apps/instances/jobs)
-    './aibrain/pipelines':      './integration/pipelines',
-    './aip/pipelines':          './integration/pipelines',
+    './aibrain/pipelines':      './agent/pipeline',
+    './aip/pipelines':          './agent/pipeline',
     './aip/implementations':    './integration/implementations',
     './aip/app-list':           './integration/apps',
     './aip/instances':          './integration/instances',

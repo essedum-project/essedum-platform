@@ -154,8 +154,8 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}','2',NULL);
         </sql>
     </changeSet>
-    
-        <changeSet id="3v2-usm-20252402-5" author="Essedum">
+
+    <!--<changeSet id="3v2-usm-20252402-5" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Pipelines%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
@@ -211,8 +211,7 @@
             );
         </sql>
 
-    </changeSet>
-
+    </changeSet>-->
 
     <changeSet id="3v2-usm-20252402-6" author="Essedum">
         <preConditions onFail="MARK_RAN">
@@ -555,6 +554,29 @@
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             UPDATE usm_permission_api SET api = REGEXP_REPLACE(api, '^/api/aip/secrets/', '/api/secrets/') WHERE permission_id IN (SELECT id FROM usm_permissions WHERE permission IN ('secrets-create', 'secrets-delete', 'secrets-update') ) AND api LIKE '/api/aip/secrets/%';
+        </sql>
+    </changeSet>
+
+    <changeSet id="3v2-usm-vibe-coding-api-perms" author="Essedum" dbms="mssql,mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_permissions WHERE module = 'cip' AND permission = 'vibe-coding-all';
+            </sqlCheck>
+        </preConditions>
+        <sql splitStatements="true" stripComments="true">
+            INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'vibe-coding-all');
+
+            INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+            SELECT '/api/aip/service/v1/vibe-coding/.*', 'ALL', 0, 'vibe-coding all APIs', MAX(id)
+            FROM usm_permissions WHERE module = 'cip' AND permission = 'vibe-coding-all';
+
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Portfolio Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Portfolio Client' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Project Admin' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
+            INSERT INTO usm_role_permissions (permission, role) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Project Client' AND p.permission = 'vibe-coding-all' AND p.module='cip' AND r.project_id IS NULL;
         </sql>
     </changeSet>
 

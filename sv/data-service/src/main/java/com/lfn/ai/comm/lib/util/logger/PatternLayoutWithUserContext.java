@@ -22,6 +22,7 @@ import ch.qos.logback.classic.PatternLayout;
  *
  * @author essedum
  */
+@SuppressWarnings("deprecation")
 public class PatternLayoutWithUserContext extends PatternLayout {
     static {
         PatternLayout.defaultConverterMap.put(

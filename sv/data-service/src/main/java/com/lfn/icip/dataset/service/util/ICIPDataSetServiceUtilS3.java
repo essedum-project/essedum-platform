@@ -87,6 +87,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 import javax.imageio.ImageIO;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.awt.image.BufferedImage;
@@ -152,6 +153,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
     @EssedumProperty("icip.certificateCheck")
     private String certificateCheck;
+
+    @EssedumProperty("icip.ssrf.allowedHosts")
+    private String ssrfAllowedHosts;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilS3.class);
@@ -444,14 +448,22 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;
             if (!downloadTo.isEmpty()) {
-                Path p = Paths.get(downloadTo);
+                // Reject path-traversal sequences in the user-supplied downloadPath
+                // BEFORE any Files.* operation, so taint trackers (CodeQL
+                // java/path-injection) see a sanitiser between the request body
+                // and the Files.exists / createDirectories sinks.
+                Path p = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(downloadTo);
                 if (Files.exists(p) && Files.isDirectory(p)) {
-                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                    String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                            .toString();
+                    destination = p.resolve(safeName);
                 } else {
                     destination = p;
                     if (destination.getParent() != null) {
@@ -459,8 +471,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                     }
                 }
             } else {
-                destination = Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve(Paths.get(objectName).getFileName().toString());
+                String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                        .toString();
+                destination = Paths.get(System.getProperty("java.io.tmpdir")).resolve(safeName);
                 if (destination.getParent() != null) {
                     Files.createDirectories(destination.getParent());
                 }
@@ -498,11 +512,15 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
     // Helper to resolve a unique filename by appending _1, _2, etc. if needed
     private Path resolveUniqueFileNameGCP(Path destination) throws IOException {
-        if (!Files.exists(destination)) {
-            return destination;
+        // Re-validate the (user-influenced) destination path against traversal
+        // before any Files.* check, so CodeQL java/path-injection sees a barrier.
+        Path safeDestination = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(destination.toString());
+        if (!Files.exists(safeDestination)) {
+            return safeDestination;
         }
-        Path parent = destination.getParent();
-        String fileName = destination.getFileName().toString();
+        Path parent = safeDestination.getParent();
+        String fileName = safeDestination.getFileName().toString();
         String name;
         String ext = "";
         int dot = fileName.lastIndexOf('.');
@@ -516,7 +534,9 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         Path candidate;
         do {
             String newName = String.format("%s_%d%s", name, counter, ext);
-            candidate = (parent != null) ? parent.resolve(newName) : Paths.get(newName);
+            Path raw = (parent != null) ? parent.resolve(newName) : Paths.get(newName);
+            candidate = com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(raw.toString());
             counter++;
         } while (Files.exists(candidate));
         return candidate;
@@ -661,14 +681,22 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             String objectKey = Stream.of(remotePrefix, objectName)
                     .filter(s -> s != null && !s.isBlank())
-                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .map(s -> com.lfn.icip.dataset.util.PathValidationUtil.stripSlashes(s))
                     .collect(Collectors.joining("/"));
 
             Path destination;
             if (!downloadTo.isEmpty()) {
-                Path p = Paths.get(downloadTo);
+                // Reject path-traversal sequences in the user-supplied downloadPath
+                // BEFORE any Files.* operation, so taint trackers (CodeQL
+                // java/path-injection) see a sanitiser between the request body
+                // and the Files.exists / createDirectories sinks.
+                Path p = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(downloadTo);
                 if (Files.exists(p) && Files.isDirectory(p)) {
-                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                    String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                            .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                            .toString();
+                    destination = p.resolve(safeName);
                 } else {
                     destination = p;
                     if (destination.getParent() != null) {
@@ -676,8 +704,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                     }
                 }
             } else {
-                destination = Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve(Paths.get(objectName).getFileName().toString());
+                String safeName = com.lfn.icip.dataset.util.PathValidationUtil
+                        .validateAndGetPath(Paths.get(objectName).getFileName().toString())
+                        .toString();
+                destination = Paths.get(System.getProperty("java.io.tmpdir")).resolve(safeName);
                 Files.createDirectories(destination.getParent());
             }
 
@@ -713,11 +743,16 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * If file exists, append _copy1, _copy2, etc. until unique name is found.
      */
     private Path resolveUniqueFileName(Path original) {
-        if (!Files.exists(original)) {
-            return original;
+        // Re-validate the (user-influenced) destination path against traversal
+        // before any Files.exists check, so CodeQL java/path-injection sees a
+        // sanitiser between the request data and these sinks.
+        Path safeOriginal = com.lfn.icip.dataset.util.PathValidationUtil
+                .validateAndGetPath(original.toString());
+        if (!Files.exists(safeOriginal)) {
+            return safeOriginal;
         }
 
-        String fileName = original.getFileName().toString();
+        String fileName = safeOriginal.getFileName().toString();
         String baseName;
         String extension = "";
 
@@ -730,11 +765,13 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         }
 
         int counter = 1;
-        Path parent = original.getParent();
+        Path parent = safeOriginal.getParent();
         Path newPath;
         do {
             String newFileName = baseName + "_copy" + counter + extension;
-            newPath = parent.resolve(newFileName);
+            Path raw = parent.resolve(newFileName);
+            newPath = com.lfn.icip.dataset.util.PathValidationUtil
+                    .validateAndGetPath(raw.toString());
             counter++;
         } while (Files.exists(newPath));
 
@@ -864,13 +901,18 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
             logger.info("endpointUrl: {}", endpointUrl);
         } catch (MalformedURLException e1) {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         } catch (IllegalArgumentException e1) {
             logger.error("SSRF validation failed: {}", e1.getMessage());
+        }
+        if (endpointUrl == null) {
+            throw new EssedumException("Endpoint URL is invalid or blocked by SSRF validation: " + rawUrl);
         }
         TrustManager[] trustAllCerts = getTrustAllCerts();
         SSLContext sslContext = getSslContext(trustAllCerts);
@@ -887,73 +929,41 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         } else
             objectKey = attr.optString(OBJECT_KEY);
         File localFilePath = PathValidationUtil.validatePath(uploadFile);
+        if (!localFilePath.exists() || !localFilePath.isFile()) {
+            throw new EssedumException("Upload file not found on server: " + uploadFile);
+        }
+        String effectiveRegion = (region != null && !region.isEmpty()) ? region : "us-east-1";
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfiguration)
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl.toString(), effectiveRegion))
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withPathStyleAccessEnabled(true)
                 .build();
         long partSize = 100L * 1024 * 1024;
 
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucketName, objectKey);
+        InitiateMultipartUploadResult initResponse = s3Client.initiateMultipartUpload(initRequest);
+        String uploadId = initResponse.getUploadId();
 
-        try {
+        List<PartETag> partETags = new ArrayList<>();
+        long contentLength = localFilePath.length();
+        long filePosition = 0;
 
-            InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(bucketName, objectKey);
-            InitiateMultipartUploadResult initResponse = s3Client.initiateMultipartUpload(initRequest);
-            String uploadId = initResponse.getUploadId();
-
-            List<PartETag> partETags = new ArrayList<>();
-            long contentLength = localFilePath.length();
-            long filePosition = 0;
-
-            List<CompletableFuture<PartETag>> futures = new ArrayList<>();
-            for (int i = 1; filePosition < contentLength; i++) {
-                long partSizeRemaining = Math.min(partSize, contentLength - filePosition);
-                UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(bucketName).withKey(objectKey)
-                        .withUploadId(uploadId).withPartNumber(i).withFileOffset(filePosition).withFile(localFilePath)
-                        .withPartSize(partSizeRemaining);
-
-                CompletableFuture<PartETag> future = CompletableFuture.supplyAsync(() -> {
-                    try {
-                        UploadPartResult uploadPartResult = s3Client.uploadPart(uploadRequest);
-                        return uploadPartResult.getPartETag();
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                        return null;
-                    }
-                }, executorService);
-
-                futures.add(future);
-                filePosition += partSizeRemaining;
-            }
-
-            CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-            allOf.thenRunAsync(() -> {
-                futures.forEach(future -> {
-                    try {
-                        PartETag partETag = future.get();
-                        if (partETag != null) {
-                            partETags.add(partETag);
-                        }
-                    } catch (Exception e) {
-                        e.getMessage();
-                    }
-                });
-
-                CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(bucketName,
-                        objectKey, uploadId, partETags);
-                s3Client.completeMultipartUpload(completeRequest);
-                logger.info("File Uploaded successfully");
-                webSocketController.sendUploadStatus("Success");
-            });
-
-            logger.info("File Upload Initiated");
-        } catch (Exception e) {
-            logger.error("Error occurred in upload method", e);
-            webSocketController.sendUploadStatus("Error");
+        for (int i = 1; filePosition < contentLength; i++) {
+            long partSizeRemaining = Math.min(partSize, contentLength - filePosition);
+            UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(bucketName).withKey(objectKey)
+                    .withUploadId(uploadId).withPartNumber(i).withFileOffset(filePosition).withFile(localFilePath)
+                    .withPartSize(partSizeRemaining);
+            UploadPartResult uploadPartResult = s3Client.uploadPart(uploadRequest);
+            partETags.add(uploadPartResult.getPartETag());
+            filePosition += partSizeRemaining;
         }
 
+        CompleteMultipartUploadRequest completeRequest = new CompleteMultipartUploadRequest(bucketName,
+                objectKey, uploadId, partETags);
+        s3Client.completeMultipartUpload(completeRequest);
+        logger.info("File Uploaded successfully to {}/{}", bucketName, objectKey);
+        webSocketController.sendUploadStatus("Success");
     }
 
     private S3Client buildS3Client(ICIPDataset dataset) {
@@ -1000,9 +1010,11 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             String secretKey = connectionDetails.optString(SECRET_KEY);
             String region = connectionDetails.optString(REGION_KEY);
             URL endpointUrl = null;
+            String rawUrl = connectionDetails.optString("url");
             String filePath2;
             try {
-                endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+                endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                        SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
                 logger.info("endpointUrl " + endpointUrl);
             } catch (MalformedURLException e1) {
                 logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
@@ -1064,8 +1076,10 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
         } catch (MalformedURLException e1) {
             logger.error("Error occured while fetching FileInfo" + e1.getMessage());
         } catch (IllegalArgumentException e1) {
@@ -1150,15 +1164,20 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
         URL endpointUrl = null;
+        String rawUrl = connectionDetails.optString("url");
         try {
-            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("url"));
+            endpointUrl = SsrfProtectionUtil.validateAndCreateUrl(rawUrl,
+                    SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
         } catch (MalformedURLException e1) {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         } catch (IllegalArgumentException e1) {
             logger.error("SSRF validation failed: " + e1.getMessage());
         }
 
-        if (!(connectionDetails.optString("url").contains("blob") || (connectionDetails.optString("url").contains("aws")) || (connectionDetails.optString("url").contains("google")))) {
+        if (!(rawUrl.contains("blob") || rawUrl.contains("aws") || rawUrl.contains("google"))) {
+            if (endpointUrl == null) {
+                throw new EssedumException("Endpoint URL is invalid or blocked by SSRF validation: " + rawUrl);
+            }
             BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             TrustManager[] trustAllCerts = getTrustAllCerts();
             SSLContext sslContext = getSslContext(trustAllCerts);
@@ -2157,27 +2176,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
     }
 
     private TrustManager[] getTrustAllCerts() {
-        logger.info("certificateCheck value: {}", certificateCheck);
-        try {
-            // Always load the default trust store for proper certificate validation
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init((KeyStore) null);
-            // Get the trust managers from the factory
-            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-            // Ensure we have at least one X509TrustManager
-            for (TrustManager trustManager : trustManagers) {
-                if (trustManager instanceof X509TrustManager) {
-                    return new TrustManager[]{(X509TrustManager) trustManager};
-                }
-            }
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load trust store: {}", e.getMessage(), e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Failed to load trust manager algorithm: {}", e.getMessage(), e);
-        }
-        throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
+        return SecureTrustManagerUtil.getValidatingTrustManagers();
     }
 
     private SSLContext getSslContext(TrustManager[] trustAllCerts) {
@@ -2270,18 +2269,24 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * Download file bytes from MinIO or S3-compatible endpoint
      */
     private byte[] downloadFromMinIO(String endpointUrl, String accessKey, String secretKey,
-                                      String bucketName, String objectKey) throws Exception {
+                                     String bucketName, String objectKey) throws Exception {
 
+        TrustManager[] trustAllCerts = getTrustAllCerts();
+        SSLContext sslContext = getSslContext(trustAllCerts);
+        OkHttpClient customHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                .hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE).build();
         MinioClient minioClient = MinioClient.builder()
-            .endpoint(endpointUrl)
-            .credentials(accessKey, secretKey)
-            .build();
+                .endpoint(endpointUrl)
+                .credentials(accessKey, secretKey)
+                .httpClient(customHttpClient)
+                .build();
 
         try (InputStream inputStream = minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(objectKey)
-                    .build())) {
+                        .bucket(bucketName)
+                        .object(objectKey)
+                        .build())) {
 
             byte[] fileBytes = inputStream.readAllBytes();
             logger.info("Downloaded {} bytes from MinIO: {}", fileBytes.length, objectKey);
@@ -2293,7 +2298,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      * Download file bytes from AWS S3
      */
     private byte[] downloadFromS3(String accessKey, String secretKey, String region,
-                                   String bucketName, String objectKey) throws Exception {
+                                  String bucketName, String objectKey) throws Exception {
 
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
 
@@ -2301,15 +2306,15 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
                 .serviceConfiguration(S3Configuration.builder()
-                    .pathStyleAccessEnabled(true)
-                    .build())
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build()) {
 
             software.amazon.awssdk.services.s3.model.GetObjectRequest getObjectRequest =
-                software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(objectKey)
-                    .build();
+                    software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(objectKey)
+                            .build();
 
             byte[] fileBytes = s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
             logger.info("Downloaded {} bytes from S3: {}", fileBytes.length, objectKey);

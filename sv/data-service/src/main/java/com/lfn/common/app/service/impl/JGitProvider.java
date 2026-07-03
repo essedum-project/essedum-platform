@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.*;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,10 +57,14 @@ public class JGitProvider implements GitStorageProvider {
     @Override
     public void push(String localPath, String remoteUrl, String branch,
                      String commitMessage, String username, String token, boolean verifySsl) throws Exception {
-        File repoDir = new File(localPath);
+        // Validate user-supplied localPath; derive every subsequent File/Path from
+        // the returned validated Path so CodeQL java/path-injection sees the sink
+        // consumes the sanitised value (not the raw localPath String).
+        Path validatedRoot = com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
+        File repoDir = validatedRoot.toFile();
 
         if (!repoDir.exists()) {
-            throw new IllegalArgumentException("Local path does not exist: " + localPath);
+            throw new IllegalArgumentException("Local path does not exist");
         }
 
         log.info("Starting push operation for path: {}, branch: {}", localPath, branch);
@@ -70,8 +75,10 @@ public class JGitProvider implements GitStorageProvider {
             configureInsecureSSL();
         }
 
-        // Remove existing .git folder to ensure fresh commit
-        File gitDir = new File(repoDir, ".git");
+        // Derive .git Path from the already-validated root so the sink consumes
+        // the sanitised value (CodeQL java/path-injection).
+        Path gitPath = validatedRoot.resolve(".git");
+        File gitDir = gitPath.toFile();
         if (gitDir.exists()) {
             log.info("Removing existing .git folder for fresh commit");
             deleteDirectory(gitDir);
@@ -186,18 +193,29 @@ public class JGitProvider implements GitStorageProvider {
     }
 
     /**
-     * Recursively delete a directory
+     * Recursively delete a directory. Re-validates the path and uses a
+     * Path-based traversal that does not follow symlinks (CodeQL
+     * java/path-injection).
      */
     private void deleteDirectory(File directory) throws IOException {
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    deleteDirectory(file);
+        Path root = com.lfn.common.app.util.PathValidationUtil
+                .validateAndGetPath(directory.getAbsolutePath());
+        deleteTree(root);
+    }
+
+    private void deleteTree(Path path) throws IOException {
+        if (!Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        if (Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            try (java.util.stream.Stream<Path> children = Files.list(path)) {
+                java.util.Iterator<Path> it = children.iterator();
+                while (it.hasNext()) {
+                    deleteTree(it.next());
                 }
             }
         }
-        Files.delete(directory.toPath());
+        Files.delete(path);
     }
 
     /**
@@ -289,15 +307,7 @@ public class JGitProvider implements GitStorageProvider {
      */
     private void configureInsecureSSL() throws NoSuchAlgorithmException, KeyManagementException {
         // Create a trust manager that accepts all certificates
-        TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-            }
-        };
+        TrustManager[] trustAllCerts = SecureTrustManagerUtil.getValidatingTrustManagers();
 
         // Install the all-trusting trust manager
         SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -424,7 +434,15 @@ public class JGitProvider implements GitStorageProvider {
 
                 // Write all new files to the directory
                 for (FileContent file : files) {
-                    Path filePath = tempDir.resolve(file.getPath());
+                    Path filePath;
+                    try {
+                        File safe = com.lfn.common.app.util.PathValidationUtil
+                                .validatePath(tempDir.toFile().getCanonicalPath(), file.getPath());
+                        filePath = safe.toPath();
+                    } catch (IllegalArgumentException iae) {
+                        log.warn("Skipping suspicious file path: {} ({})", file.getPath(), iae.getMessage());
+                        continue;
+                    }
 
                     // Create parent directories if they don't exist
                     Files.createDirectories(filePath.getParent());
@@ -531,7 +549,9 @@ public class JGitProvider implements GitStorageProvider {
             isTemporary = true;
             log.info("Created temporary directory for pull: {}", targetDir);
         } else {
-            targetDir = new File(localPath).toPath();
+            // Reject path-traversal sequences in user-supplied localPath before
+            // any Files.* operation (CodeQL java/path-injection).
+            targetDir = com.lfn.common.app.util.PathValidationUtil.validateAndGetPath(localPath);
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
             }
@@ -587,7 +607,16 @@ public class JGitProvider implements GitStorageProvider {
                         continue;
                     }
 
-                    File file = new File(repoDir, filePath);
+                    // Validate the per-file path stays inside repoDir to defend
+                    // against malicious tree entries (CodeQL java/path-injection).
+                    File file;
+                    try {
+                        file = com.lfn.common.app.util.PathValidationUtil
+                                .validatePath(repoDir.getCanonicalPath(), filePath);
+                    } catch (IllegalArgumentException iae) {
+                        log.warn("Skipping suspicious path from tree: {} ({})", filePath, iae.getMessage());
+                        continue;
+                    }
                     if (file.exists() && file.isFile()) {
                         FileContent fileContent = new FileContent();
                         fileContent.setPath(filePath);

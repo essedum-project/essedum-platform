@@ -1,13 +1,39 @@
+import re
 from typing import Any
 from app.engine.executors.base import BaseExecutor
 
 
+# Matches a single brace-pair placeholder like ``{name}`` or ``{ name }``.
+# Excludes already-doubled braces (``{{`` / ``}}``) so JSON examples and other
+# literal-brace content can coexist with templated variables.
+_PLACEHOLDER_RE = re.compile(r"(?<!\{)\{\s*([A-Za-z_][\w\.]*)\s*\}(?!\})")
+
+
+def _safe_substitute(template: str, mapping: dict[str, Any]) -> str:
+    """Replace ``{key}`` with ``mapping[key]`` only for keys present in
+    ``mapping``. Any other ``{...}`` content is left untouched, so authors
+    can paste raw JSON / curly-brace examples into prompts without escaping.
+
+    Doubled braces ``{{`` / ``}}`` are likewise preserved verbatim.
+    """
+    def _replace(match: re.Match[str]) -> str:
+        key = match.group(1)
+        if key in mapping:
+            return str(mapping[key])
+        # Unknown key -> leave the original ``{key}`` text in place.
+        return match.group(0)
+
+    return _PLACEHOLDER_RE.sub(_replace, template)
+
+
 class PromptExecutor(BaseExecutor):
     """
-    Formats a prompt template using Python str.format_map.
+    Formats a prompt template using a permissive ``{key}`` substitution.
 
-    Template syntax: use {input}, {message}, {history}, or any
-    key that arrives in the inputs dict.
+    Template syntax: use ``{input}``, ``{message}``, ``{history}``, ``{variables}``
+    or any key that arrives in the inputs dict. Literal ``{`` / ``}`` (e.g. JSON
+    examples) are left untouched as long as the enclosed token isn't a key we
+    can substitute — no escaping required.
     """
 
     async def execute(
@@ -29,12 +55,7 @@ class PromptExecutor(BaseExecutor):
                 for e in sub_map["history"]
             )
 
-        try:
-            formatted = template.format_map(sub_map)
-        except KeyError as exc:
-            raise ValueError(
-                f"Prompt template references undefined variable: {exc}"
-            ) from exc
+        formatted = _safe_substitute(template, sub_map)
 
         return {
             "prompt": formatted,

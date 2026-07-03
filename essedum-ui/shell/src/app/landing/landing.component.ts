@@ -2256,6 +2256,20 @@ export class LandingComponent implements OnInit, AfterViewInit {
         // Set sidebar menu if we have collected configurations
         if (sidebarMenutemp.length > 0) {
           this.sidebarMenu = sidebarMenutemp;
+
+          // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
+          this.sidebarMenu.forEach((item: any) => {
+            if (item && item.label === 'Agent MCP Pipelines') {
+              item.label = 'Pipelines';
+            }
+            if (item && Array.isArray(item.children)) {
+              item.children.forEach((child: any) => {
+                if (child && child.label === 'Agent MCP Pipelines') {
+                  child.label = 'Pipelines';
+                }
+              });
+            }
+          });
           
           // Only perform auto-navigation when all conditions are met
           const currentUrl = this.router.url;
@@ -3815,10 +3829,15 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
 
   /** Returns the sidebarMenu with advanced items hidden unless the user has opted in. */
   get visibleSidebarMenu(): any[] {
+    const seen = new Set<string>();
     return this.sidebarMenu.filter(
-      (item) =>
-        !this.ADVANCED_MENU_LABELS.includes(item.label) ||
-        this.customMenuState[item.label] === true
+      (item) => {
+        // Deduplicate items with the same label (e.g. renamed "Pipelines")
+        if (seen.has(item.label)) return false;
+        seen.add(item.label);
+        return (!this.ADVANCED_MENU_LABELS.includes(item.label) ||
+          this.customMenuState[item.label] === true);
+      }
     );
   }
 

@@ -51,6 +51,8 @@ export class AipHeaderComponent {
   @Input() action: string = '';
   @Input() lastRefreshedTime: Date | null = null;
   @Input() showAddButton: boolean = false;
+  @Input() showRefreshButton: boolean = true;
+  @Input() showLastRefreshed: boolean = true;
   @Input() backAction: boolean = false;
   @Input() closeAction: boolean = false;
   @Input() showRelatedInstances: boolean = false;

@@ -5,6 +5,7 @@ import com.lfn.icip.vibecoding.model.VibeGitHubConfig;
 import com.lfn.icip.vibecoding.model.VibeGitHubConfig.PushStatus;
 import com.lfn.icip.vibecoding.model.VibeGitHubConfig.StorageType;
 import com.lfn.icip.vibecoding.repository.VibeGitHubConfigRepository;
+import com.lfn.icip.vibecoding.util.PathSafety;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -206,7 +207,7 @@ public class VibeGitHubService {
             }
             if (relativePath.isBlank()) continue;
 
-            Path appFile = targetDir.resolve(relativePath);
+            Path appFile = PathSafety.resolveSafely(targetDir, relativePath);
             Files.createDirectories(appFile.getParent());
             Files.writeString(appFile, exportResp.getBody(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             logger.info("Wrote '{}' → {}", appName, appFile);
@@ -255,8 +256,16 @@ public class VibeGitHubService {
                            List<String> excludeDirs, List<String> allowedFiles, String pushDir)
             throws IOException, GitAPIException, URISyntaxException {
 
-        // Use a unique temp directory per session to avoid cross-contamination
-        Path localRepoPath = Paths.get(props.getWorkDir(), "tmp-vibe-" + sessionId + "-" + System.currentTimeMillis());
+        // Create a unique temp directory under the configured work dir using the JDK's
+        // own atomic createTempDirectory. The path is derived solely from trusted
+        // configuration (props.getWorkDir()) plus a system-generated suffix — no part
+        // of the user-supplied sessionId flows into it. This breaks the CodeQL
+        // "uncontrolled data used in path expression" taint flow at its source.
+        Path workRoot = Paths.get(props.getWorkDir()).toAbsolutePath().normalize();
+        Files.createDirectories(workRoot);
+        Path localRepoPath = Files.createTempDirectory(workRoot, "tmp-vibe-");
+        // Defense in depth: assert the freshly created directory lives inside workRoot.
+        PathSafety.assertWithin(localRepoPath, workRoot);
         File localRepoDir = localRepoPath.toFile();
         UsernamePasswordCredentialsProvider creds =
                 new UsernamePasswordCredentialsProvider(props.getUsername(), props.getToken());
@@ -264,11 +273,7 @@ public class VibeGitHubService {
         Git git = null;
 
         try {
-            // Clone or init
-            if (localRepoDir.exists()) {
-                deleteDirectory(localRepoPath);
-            }
-            Files.createDirectories(localRepoPath);
+            // createTempDirectory already produced an empty directory; nothing to clean.
 
             // Try clone; if repo is empty, init fresh
             boolean freshRepo = false;
@@ -371,6 +376,13 @@ public class VibeGitHubService {
 
     private void deleteDirectory(Path dir) throws IOException {
         if (!Files.exists(dir)) return;
+        // Defense in depth: refuse to recursively delete anything outside the
+        // configured work directory. Together with sanitizeId() on sessionId,
+        // this prevents the CodeQL path-injection alert at the Files.delete()
+        // below — a tainted sessionId can no longer steer this walk outside
+        // {workDir}/tmp-vibe-*.
+        Path workRoot = Paths.get(props.getWorkDir()).toAbsolutePath().normalize();
+        PathSafety.assertWithin(dir, workRoot);
         try (Stream<Path> walk = Files.walk(dir)) {
             walk.sorted(Comparator.reverseOrder())
                     .forEach(p -> {

@@ -16,9 +16,9 @@
 package com.lfn.ai.comm.lib.util;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -35,32 +35,46 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * AES-GCM based encryption/decryption helper.
+ *
+ * <p>
+ * The {@code encrypt} and {@code decrypt} methods keep two checked exceptions in their throws
+ * clauses for backward compatibility with existing callers' multi-catch blocks. After the
+ * StandardCharsets migration those exceptions are no longer actually thrown, so rule S1130
+ * ("exception cannot be thrown") is intentionally suppressed.
+ */
+@SuppressWarnings("java:S1130")
 public class Crypt {
-	private static final String ALGO = "AES/GCM/PKCS5Padding"; // Default uses ECB PKCS5Padding
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(Crypt.class);
 
-	public static String encrypt(String Data, String secret) throws InvalidKeyException, NoSuchPaddingException,
+	/** Reusable cryptographically strong random number generator. */
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+	private Crypt() {
+	}
+
+	public static String encrypt(String data, String secret) throws InvalidKeyException, NoSuchPaddingException,
 			IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException,
 			InvalidAlgorithmParameterException, UnsupportedEncodingException {
 
         // Generate random 12-byte IV
         byte[] iv = new byte[12];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
+        SECURE_RANDOM.nextBytes(iv);
 
 		// Create AES-GCM cipher
 		Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
 		// Generate AES key from the password
-		SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "AES");
+		SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
 
 		// Initialize cipher for encryption
 		GCMParameterSpec parameterSpec = new GCMParameterSpec(128, iv);
 		cipher.init(Cipher.ENCRYPT_MODE, skeySpec, parameterSpec);
 
 		// Encrypt the plaintext
-		byte[] encVal = cipher.doFinal(Data.getBytes());
+		byte[] encVal = cipher.doFinal(data.getBytes());
 		String encryptedValue = Base64.getEncoder().encodeToString(encVal);
 		String encodedIV = Base64.getEncoder().encodeToString(iv);
 
@@ -81,7 +95,7 @@ public class Crypt {
 			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
 			// Generate AES key from the password
-			SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "AES");
+			SecretKeySpec skeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
 
 			// Initialize cipher for decryption
 			GCMParameterSpec parameterSpec = new GCMParameterSpec(128, iv);

@@ -3,35 +3,122 @@
 
   <!-- Header Section - Keep Original Layout -->
   <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" 
-    [showAddButton]="true" 
+    [showAddButton]="true" [showRefreshButton]="false" [showLastRefreshed]="false"
     (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
+
+    <!-- Pipeline Status button projected into the header action row -->
+    <div header-extra-action>
+      <button class="execution-btn" type="button" [matMenuTriggerFor]="execStatusMenu">
+        <mat-icon class="execution-btn-icon">play_circle_filled</mat-icon>
+        Pipeline Status
+        <mat-icon class="execution-btn-arrow">arrow_drop_down</mat-icon>
+      </button>
+
+      <mat-menu #execStatusMenu="matMenu" class="exec-status-menu" xPosition="before">
+        <div class="exec-menu-header">Pipeline Status</div>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('all')">
+          <mat-icon class="exec-si-icon si-all">layers</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label">All Pipelines</span>
+            <span class="exec-si-desc">View all pipeline states</span>
+          </div>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('running')">
+          <mat-icon class="exec-si-icon si-running">sync</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label si-label-running">Running</span>
+            <span class="exec-si-desc">Actively executing</span>
+          </div>
+        </button>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('queued')">
+          <mat-icon class="exec-si-icon si-queued">schedule</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label si-label-queued">Queued</span>
+            <span class="exec-si-desc">Waiting for execution</span>
+          </div>
+        </button>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('success')">
+          <mat-icon class="exec-si-icon si-success">check_circle</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label si-label-success">Success</span>
+            <span class="exec-si-desc">Execution completed</span>
+          </div>
+        </button>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('failed')">
+          <mat-icon class="exec-si-icon si-failed">error</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label si-label-failed">Failed</span>
+            <span class="exec-si-desc">Execution failed</span>
+          </div>
+        </button>
+        <button mat-menu-item class="exec-status-item" (click)="navigateToExecution('inactive')">
+          <mat-icon class="exec-si-icon si-inactive">remove_circle_outline</mat-icon>
+          <div class="exec-si-body">
+            <span class="exec-si-label si-label-inactive">Inactive</span>
+            <span class="exec-si-desc">No Active pod</span>
+          </div>
+        </button>
+      </mat-menu>
+    </div>
+
   </app-aip-header>
 
   <!-- Pipeline Mode Toggle - Separate Section -->
   <div class="pipeline-toggle-section">
     <div class="pipeline-mode-toggle">
-      <button 
-        class="toggle-button" 
+      <button
+        class="toggle-button"
         [class.active]="pipelineMode === 'agent'"
         (click)="switchToPipelineMode('agent')"
         type="button">
         Agent Pipelines
       </button>
-      <button 
-        class="toggle-button" 
+      <button
+        class="toggle-button"
         [class.active]="pipelineMode === 'mcp'"
         (click)="switchToPipelineMode('mcp')"
         type="button">
         MCP Pipelines
       </button>
-      <button 
-        class="toggle-button" 
+      <button
+        class="toggle-button"
         [class.active]="pipelineMode === 'app'"
         (click)="switchToPipelineMode('app')"
         type="button">
         App Pipelines
       </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'pipeline'"
+        (click)="switchToPipelineMode('pipeline')"
+        type="button">
+        Native Pipeline
+      </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'data'"
+        (click)="switchToPipelineMode('data')"
+        type="button">
+        Data Pipeline
+      </button>
+      <button 
+        class="toggle-button" 
+        [class.active]="pipelineMode === 'training'"
+        (click)="switchToPipelineMode('training')"
+        type="button">
+        Training Pipeline
+      </button>
     </div>
+
+    <!-- Last refreshed + refresh icon -->
+    <div class="toggle-refresh-row">
+      <span class="toggle-last-refreshed">Last refreshed on: {{ lastRefreshedTime | date:'medium' }}</span>
+      <button class="toggle-refresh-btn" type="button" (click)="onRefresh()" matTooltip="Refresh" matTooltipPosition="above">
+        <mat-icon>autorenew</mat-icon>
+      </button>
+    </div>
+
   </div>
 
   <!-- Filter Section -->

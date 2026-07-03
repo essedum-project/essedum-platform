@@ -13,7 +13,8 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(129,140,248,0.12);
   backdrop-filter: blur(16px);
   min-width: 280px;
-  max-width: 480px;
+  max-width: min(90vw, 720px);
+  width: max-content;
 }
 
 .snackbar-content {
@@ -47,9 +48,9 @@
   font-weight: 500;
   color: #e2e8f0;
   line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .snackbar-close-btn {

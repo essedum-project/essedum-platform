@@ -19,6 +19,13 @@ import com.lfn.icip.adapter.exception.MLErrorResponse;
 import com.lfn.icip.adapter.exception.MLResourceNotFoundException;
 import com.lfn.icip.adapter.exception.DuplicateMLResourceException;
 import com.lfn.icip.adapter.exception.PortAllocationException;
+import com.lfn.icip.icipwebeditor.exception.InvalidRequestException;
+import com.lfn.icip.icipwebeditor.exception.FileUploadException;
+import com.lfn.icip.icipwebeditor.exception.FileDeletionException;
+import com.lfn.icip.icipwebeditor.exception.DatasourceNotFoundException;
+import com.lfn.icip.icipwebeditor.exception.MinIOStorageException;
+import com.lfn.icip.icipwebeditor.exception.ResourceNotFoundException;
+import com.lfn.icip.icipwebeditor.exception.PipelineMetadataValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -287,6 +294,145 @@ public class MLGlobalExceptionHandler {
         );
         errorResponse.setException(ex.getClass().getSimpleName());
         errorResponse.setSuggestedAction("Verify the URL path and HTTP method. Check the API documentation for available endpoints.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handle pipeline metadata.json validation failures — HTTP 422 Unprocessable Entity.
+     * The full validation message is surfaced directly in the 'message' field.
+     */
+    @ExceptionHandler(PipelineMetadataValidationException.class)
+    public ResponseEntity<MLErrorResponse> handlePipelineMetadataValidationException(
+            PipelineMetadataValidationException ex, WebRequest request) {
+        logger.error("Pipeline metadata validation failed: {}", ex.getMessage());
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Pipeline Metadata Validation Failed",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    /**
+     * Handle invalid request exceptions (400 Bad Request).
+     */
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<MLErrorResponse> handleInvalidRequestException(InvalidRequestException ex, WebRequest request) {
+        logger.error("Invalid request: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Request",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Check the request parameters. Ensure all required fields are provided correctly.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle file upload exceptions (400 Bad Request).
+     */
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<MLErrorResponse> handleFileUploadException(FileUploadException ex, WebRequest request) {
+        logger.error("File upload failed: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "File Upload Failed",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Verify that the file is a valid ZIP file and not corrupted. Ensure the file contains valid AI agent scripts.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle file deletion exceptions (500 Internal Server Error).
+     */
+    @ExceptionHandler(FileDeletionException.class)
+    public ResponseEntity<MLErrorResponse> handleFileDeletionException(FileDeletionException ex, WebRequest request) {
+        logger.error("File deletion failed: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "File Deletion Failed",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Verify that the file exists and you have permission to delete it.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handle datasource not found exceptions (404 Not Found).
+     */
+    @ExceptionHandler(DatasourceNotFoundException.class)
+    public ResponseEntity<MLErrorResponse> handleDatasourceNotFoundException(DatasourceNotFoundException ex, WebRequest request) {
+        logger.error("Datasource not found: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Datasource Not Found",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Ensure the datasource is configured correctly. Verify the type and alias parameters match an existing datasource.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handle MinIO storage exceptions (500 Internal Server Error).
+     */
+    @ExceptionHandler(MinIOStorageException.class)
+    public ResponseEntity<MLErrorResponse> handleMinIOStorageException(MinIOStorageException ex, WebRequest request) {
+        logger.error("MinIO storage operation failed: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "MinIO Storage Failed",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Verify MinIO connection details (URL, access key, secret key). Ensure the bucket exists and you have write permissions.");
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handle resource not found exceptions (404 Not Found).
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<MLErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+        logger.error("Resource not found: {}", ex.getMessage(), ex);
+
+        MLErrorResponse errorResponse = new MLErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Resource Not Found",
+                ex.getMessage(),
+                getCauseMessage(ex),
+                request.getDescription(false).replace("uri=", "")
+        );
+        errorResponse.setException(ex.getClass().getSimpleName());
+        errorResponse.setSuggestedAction("Verify the resource exists. Check the provided identifiers and try again.");
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }

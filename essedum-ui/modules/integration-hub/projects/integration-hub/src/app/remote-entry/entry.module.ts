@@ -56,10 +56,7 @@ import { AdapterDescriptionComponent } from '../features/adapter/adapter-descrip
 import { MethodCreateEditComponent } from '../features/adapter/method-create-edit/method-create-edit.component';
 
 // Features: pipeline
-import { PipelineComponent } from '../features/pipeline/pipeline.component';
 import { PipelineCreateComponent } from '../features/pipeline/pipeline-create/pipeline-create.component';
-import { DataPipelineWizardComponent } from '../features/pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
-import { TrainingPipelineWizardComponent } from '../features/pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 import { PipelineEditorComponent } from '../features/pipeline/wizard/editor/pipeline-editor.component';
 // Pipeline editor tabs (referenced from pipeline-editor.component.html)
 import { CodeEditorTabComponent } from '../features/pipeline/wizard/editor/tabs/code-editor-tab.component';
@@ -73,14 +70,10 @@ import { VibeCodeTabComponent } from '../features/pipeline/wizard/editor/tabs/vi
 import { GitLinkStepComponent } from '../features/pipeline/wizard/shared/git-link-step.component';
 import { FunctionLibraryComponent } from '../features/pipeline/wizard/editor/function-library/function-library.component';
 
-// Features: pipeline-dialog
-import { PipelineDialogComponent } from '../features/pipeline-dialog/pipeline-dialog.component';
-
 // Features: pipeline.description
 import { JobDataViewerComponent } from '../features/pipeline.description/job-data-viewer/job-data-viewer.component';
 import { ShowOutputArtifactsComponent } from '../features/pipeline.description/show-output-artifacts/show-output-artifacts.component';
 import { NotebookDialogComponent } from '../features/pipeline.description/notebook-dialog/notebook-dialog.component';
-import { UserSecretsComponent } from '../features/pipeline.description/user-secrets/user-secrets.component';
 
 // Features: native-script (ported from legacy aip-app-ui — fixes NG04002 on pipelines/view/:cname)
 import { NativeScriptComponent } from '../features/native-script/native-script.component';
@@ -171,11 +164,7 @@ import { environment } from '../../environments/environment';
     AdapterDescriptionComponent,
     MethodCreateEditComponent,
     // pipeline
-    PipelineComponent,
     PipelineCreateComponent,
-    PipelineDialogComponent,
-    DataPipelineWizardComponent,
-    TrainingPipelineWizardComponent,
     PipelineEditorComponent,
     // Pipeline editor tab components
     CodeEditorTabComponent,
@@ -191,7 +180,6 @@ import { environment } from '../../environments/environment';
     JobDataViewerComponent,
     ShowOutputArtifactsComponent,
     NotebookDialogComponent,
-    UserSecretsComponent,
     // native-script
     NativeScriptComponent,
     NativeScriptDialogComponent,

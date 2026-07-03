@@ -64,6 +64,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SqlStatementValidator;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -83,6 +84,10 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilPostgreSQL.class);
+
+	// Linear-time substring parsing is used in parseQuery() instead of a regex
+	// to guarantee O(n) behaviour and avoid CodeQL java/polynomial-redos.
+	private static final int MAX_QUERY_STR_LENGTH = 10_000;
 
 	/** The limit. */
 	private int limit = 10;
@@ -183,7 +188,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			}
 		}
 		logger.info("Running the query {}", query);
-		try (ResultSet res = stmt.executeQuery(query)) {
+		try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 			if (asJSON) {
 				JSONObject obj = new JSONObject();
 				if (res.next()) {
@@ -524,7 +529,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				ResultSet res = null;
 				try {
 					res = stmt.executeQuery();
@@ -590,12 +595,24 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	 * @return the string[]
 	 */
 	private String[] parseQuery(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
+		// Manual O(n) scan for {...} tokens (no regex engine, no backtracking).
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
-		while (m.find()) {
-			for (int i = 0; i < m.groupCount(); i++) {
-				allMatches.add(m.group(i));
+		int len = qrystr.length();
+		int i = 0;
+		while (i < len) {
+			int open = qrystr.indexOf('{', i);
+			if (open < 0) {
+				break;
 			}
+			int close = qrystr.indexOf('}', open + 1);
+			if (close < 0) {
+				break;
+			}
+			allMatches.add(qrystr.substring(open, close + 1));
+			i = close + 1;
 		}
 		return allMatches.toArray(new String[allMatches.size()]);
 	}
@@ -881,7 +898,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					if (isGraphData) {
 						return extractDataWithGraphs(res);
 					}
@@ -894,7 +911,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private JsonArray getDatasetDataAsGsonJson(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsGsonJsonArray(res);
 				}
 			}
@@ -904,7 +921,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private JSONArray getDatasetDataAsJson(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsJsonArray(res);
 				}
 			}
@@ -914,7 +931,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	private ArrayList<LinkedHashMap<String, Object>> getDatasetDataAsList(JSONObject connectionDetails, String query) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
 			try (Statement stmt = conn.createStatement()) {
-				try (ResultSet res = stmt.executeQuery(query)) {
+				try (ResultSet res = stmt.executeQuery(SqlStatementValidator.validateSingleStatement(query))) {
 					return extractAsList(res);
 				}
 			}
@@ -1284,7 +1301,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 		JSONObject condetails = new JSONObject(ds.getDatasource().getConnectionDetails());
 		String query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + SqlSanitizationUtil.escapeSqlLiteral(tableName) + "' ";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return res.next();
 				}
@@ -1301,7 +1318,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 		List<JSONObject> row = new ArrayList<>();
 		String query = "SELECT COLUMN_NAME AS \"Field\" , DATA_TYPE AS \"Type\" FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = "+"'"+tablename.replaceAll("^\"|\"$", "") + "'";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					while (res.next()) {
 						JSONObject obj = new JSONObject();
@@ -1342,7 +1359,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1352,7 +1369,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 					
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU))) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)))) {
 					stmt.execute();
 				}
 			}
@@ -1390,7 +1407,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 				}
 				if (sqlCreate != null) {
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 							stmt.execute();
 						}
 					}
@@ -1402,7 +1419,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 							+ "user VARCHAR(255)," + SqlSanitizationUtil.validateIdentifier(attributes.getString("uniqueIdentifier"))
 							+ " VARCHAR(255),row_data TEXT,primary key (id,entry_timestamp));";
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt.execute();
 						}
 					}
@@ -1452,7 +1469,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			String sqlCreate = "CREATE TABLE IF NOT EXISTS " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME)) + "("
 					+ getcolumnMappingsForCsv(schema) + ");";
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}
@@ -1508,7 +1525,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1518,7 +1535,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 					return ICIPUtils.getGeneratedKey(stmt);
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU),
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)),
 						Statement.RETURN_GENERATED_KEYS)) {
 					stmt.executeUpdate();
 					return ICIPUtils.getGeneratedKey(stmt);
