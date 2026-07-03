@@ -435,7 +435,10 @@ class PipelineCardsClient {
 
         // Render pipeline cards
         if (this.cardsContainer) {
-            this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join('');  
+            this.cardsContainer.textContent = '';
+            const cardFragment = document.createDocumentFragment();
+            cards.forEach(pipeline => cardFragment.appendChild(this.createCardElement(pipeline)));
+            this.cardsContainer.appendChild(cardFragment);
 
             // Add event listeners to view details buttons
             document.querySelectorAll('.pipeline-action-btn').forEach(btn => {
@@ -527,44 +530,71 @@ class PipelineCardsClient {
     //     `;
     // }
     /**
-        * Creates HTML for a single pipeline card
+        * Creates a DOM element for a single pipeline card
         * @param {Object} pipeline - Pipeline data
-        * @returns {string} HTML string for the card
+        * @returns {HTMLElement} Card element
         */
-    createCardHTML(pipeline) {
+    createCardElement(pipeline) {
         const createdDate = Utils.formatDate(pipeline.createdDate);
         const title = Utils.toTitleCase(pipeline.alias);
         const avatarLetter = Utils.getAvatarLetter(pipeline.target?.created_by);
         const createdBy = pipeline.target?.created_by || 'Unknown User';
 
-        return `
-            <div class="${CSS_CLASSES.PIPELINE_CARD}" tabindex="0" role="article" 
-                 aria-label="Pipeline: ${Utils.sanitizeHtml(title)}" 
-                 data-pipeline-id="${pipeline.id}">
-                <div class="${CSS_CLASSES.CARD_HEADER}">                   
-                    <span class="pipeline-title">${Utils.sanitizeHtml(title)}</span>
-                    <span class="pipeline-type-badge">${Utils.sanitizeHtml(pipeline.type.toUpperCase())}</span>
-                </div>
+        const card = document.createElement('div');
+        card.className = CSS_CLASSES.PIPELINE_CARD;
+        card.tabIndex = 0;
+        card.setAttribute('role', 'article');
+        card.setAttribute('aria-label', `Pipeline: ${title}`);
+        card.dataset.pipelineId = pipeline.id;
 
-                <div class="${CSS_CLASSES.CARD_BODY}">
-                    <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>
-                </div>
+        const header = document.createElement('div');
+        header.className = CSS_CLASSES.CARD_HEADER;
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'pipeline-title';
+        titleSpan.textContent = title;
+        const typeBadge = document.createElement('span');
+        typeBadge.className = 'pipeline-type-badge';
+        typeBadge.textContent = pipeline.type.toUpperCase();
+        header.appendChild(titleSpan);
+        header.appendChild(typeBadge);
+        card.appendChild(header);
 
-                <div class="${CSS_CLASSES.CARD_ACTIONS}">
-                    <button class="pipeline-action-btn primary"
-                            data-pipeline-id="${pipeline.id}"
-                            aria-label="View details for ${Utils.sanitizeHtml(title)}">
-                        <span class="action-icon">👁</span>
-                        <span class="action-text">${UI_TEXT.BUTTONS.VIEW_DETAILS}</span>
-                    </button>
-                    <div class="pipeline-avatar-section">
-                        <div class="pipeline-avatar" title="${Utils.sanitizeHtml(createdBy)}">
-                            ${Utils.sanitizeHtml(avatarLetter)}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const body = document.createElement('div');
+        body.className = CSS_CLASSES.CARD_BODY;
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'metadata-value';
+        dateSpan.textContent = createdDate;
+        body.appendChild(dateSpan);
+        card.appendChild(body);
+
+        const actions = document.createElement('div');
+        actions.className = CSS_CLASSES.CARD_ACTIONS;
+
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'pipeline-action-btn primary';
+        viewBtn.dataset.pipelineId = pipeline.id;
+        viewBtn.setAttribute('aria-label', `View details for ${title}`);
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'action-icon';
+        iconSpan.textContent = '👁';
+        const textSpan = document.createElement('span');
+        textSpan.className = 'action-text';
+        textSpan.textContent = UI_TEXT.BUTTONS.VIEW_DETAILS;
+        viewBtn.appendChild(iconSpan);
+        viewBtn.appendChild(textSpan);
+        actions.appendChild(viewBtn);
+
+        const avatarSection = document.createElement('div');
+        avatarSection.className = 'pipeline-avatar-section';
+        const avatar = document.createElement('div');
+        avatar.className = 'pipeline-avatar';
+        avatar.title = createdBy;
+        avatar.textContent = avatarLetter;
+        avatarSection.appendChild(avatar);
+        actions.appendChild(avatarSection);
+
+        card.appendChild(actions);
+        return card;
     }
 
     // ================================
