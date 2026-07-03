@@ -19,8 +19,3 @@ paths-ignore:
   - "**/node_modules/**"
   - "**/*.min.js"
 
-# Include the project-local model pack containing our sanitizer declarations.
-packs:
-  java:
-    - ./extensions/essedum-sanitizers
-
