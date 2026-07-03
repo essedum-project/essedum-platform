@@ -82,6 +82,10 @@ import { GitLinkStepLocalComponent } from '../features/agent-pipeline/wizard/sha
 import { LitellmComponent } from '../features/litellm/litellm.component';
 import { LangfuseComponent } from '../features/langfuse/langfuse.component';
 
+// Features: skills
+import { SkillsComponent } from '../features/skills/skills.component';
+import { SkillsAddEditComponent } from '../features/skills/skills-add-edit/skills-add-edit.component';
+
 // EnlCodeEditorComponent now lives in @essedum/shared-lib (2026-06-03 refactor).
 // It's declared by SharedLibUiModule which agent-studio already imports below.
 
@@ -138,6 +142,8 @@ import { environment } from '../../environments/environment';
     // migrated from legacy aip-app-ui
     LitellmComponent,
     LangfuseComponent,
+    SkillsComponent,
+    SkillsAddEditComponent,
     GitHubPushComponent,
     // sharedModule aip-* — remaining MFE-private (rest moved to SharedLibUiModule)
     AipFilterComponent,

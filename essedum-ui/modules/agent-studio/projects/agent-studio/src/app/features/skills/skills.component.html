@@ -1,0 +1,150 @@
+<div class="skills-page">
+
+  <!-- Header: aip-header pattern (title, last-refreshed, search, add, refresh) -->
+  <app-aip-header
+    [cardTitle]="PAGETITLE"
+    [lastRefreshedTime]="lastRefreshedTime"
+    [showAddButton]="true"
+    [showRefreshButton]="true"
+    [showLastRefreshed]="true"
+    (search)="onSearch($event)"
+    (refresh)="onRefresh()"
+    (add)="openAdd()">
+  </app-aip-header>
+
+  <!-- Filter panel: connections-style collapsible -->
+  <div class="skills-filter-panel">
+    <!-- Filter header row -->
+    <div
+      class="skills-filter-header"
+      [class.expanded]="isFilterExpanded"
+      (click)="toggleFilter()">
+      <div class="skills-filter-header-left">
+        <mat-icon class="skills-filter-icon">filter_list</mat-icon>
+        <span class="skills-filter-title">{{ FILTERTITLE }}</span>
+      </div>
+      <mat-icon class="skills-filter-toggle" [class.rotated]="isFilterExpanded">
+        keyboard_arrow_up
+      </mat-icon>
+    </div>
+
+    <!-- Filter content (collapsible) -->
+    <div class="skills-filter-content" *ngIf="isFilterExpanded">
+      <!-- TYPE filter -->
+      <div class="skills-filter-group">
+        <label class="skills-filter-label">{{ FILTERTYPELBL }}</label>
+        <mat-form-field appearance="fill" class="skills-filter-field">
+          <mat-select
+            [value]="selectedType"
+            (selectionChange)="onTypeChange($event.value)"
+            placeholder="{{ FILTERALLOPT }}">
+            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
+            <mat-option *ngFor="let opt of typeOptions.slice(1)" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-chip-set *ngIf="selectedType" class="skills-chip-set">
+          <mat-chip removable (removed)="clearTypeFilter()">
+            {{ getTypeLabel(selectedType) }}
+            <mat-icon matChipRemove>close</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+  </div>
+
+  <!-- Column Headers -->
+  <div class="skills-table-header">
+    <span class="col-sk-name">{{ COLNAME }}</span>
+    <span class="col-sk-desc">{{ COLDESC }}</span>
+    <span class="col-sk-type">{{ COLTYPE }}</span>
+    <span class="col-sk-createdby">{{ COLCREATEDBY }}</span>
+    <span class="col-sk-date">{{ COLDATE }}</span>
+    <span class="col-sk-actions">{{ COLACTIONS }}</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="skills-loading">
+    <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+    <span>{{ LOADINGMSG }}</span>
+  </div>
+
+  <!-- Skills list -->
+  <div *ngIf="!loading" class="skills-list">
+
+    <!-- Empty State -->
+    <div *ngIf="filteredSkills.length === 0" class="skills-empty">
+      <mat-icon>psychology</mat-icon>
+      <p>{{ EMPTYMESSAGE }}</p>
+    </div>
+
+    <!-- Rows -->
+    <div *ngFor="let skill of paginatedSkills" class="skills-row">
+
+      <!-- Skill Name -->
+      <div class="col-sk-name skills-name-info">
+        <div class="skills-icon">
+          <mat-icon>psychology</mat-icon>
+        </div>
+        <span class="skills-name-text" [matTooltip]="skill.name">{{ skill.name }}</span>
+      </div>
+
+      <!-- Description -->
+      <div class="col-sk-desc">
+        <span class="skills-desc-text" [matTooltip]="skill.description">{{ skill.description }}</span>
+      </div>
+
+      <!-- Type -->
+      <div class="col-sk-type">
+        <span class="skills-type-badge type-{{ skill.type }}">{{ getTypeLabel(skill.type) }}</span>
+      </div>
+
+      <!-- Created By -->
+      <div class="col-sk-createdby">
+        <span class="skills-createdby-badge">
+          <mat-icon class="skills-user-icon">person</mat-icon>
+          {{ skill.createdBy }}
+        </span>
+      </div>
+
+      <!-- Date -->
+      <div class="col-sk-date">
+        <span class="skills-date-text">{{ formatDate(skill.createdAt) }}</span>
+      </div>
+
+      <!-- Actions (dot menu) -->
+      <div class="col-sk-actions">
+        <button
+          mat-icon-button
+          class="skills-action-dot-btn"
+          [matMenuTriggerFor]="actionsMenu"
+          [matTooltip]="OPTIONSTIP">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #actionsMenu="matMenu" class="skills-actions-menu" xPosition="before">
+          <button mat-menu-item (click)="openView(skill)">
+            <mat-icon>visibility</mat-icon>
+            <span>{{ VIEWLABEL }}</span>
+          </button>
+          <button mat-menu-item (click)="openEdit(skill)">
+            <mat-icon>edit</mat-icon>
+            <span>{{ EDITLABEL }}</span>
+          </button>
+          <button mat-menu-item class="skills-menu-delete" (click)="deleteSkill(skill)">
+            <mat-icon>delete</mat-icon>
+            <span>{{ DELETELABEL }}</span>
+          </button>
+        </mat-menu>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <app-aip-pagination *ngIf="filteredSkills && filteredSkills.length>0" [pageNumber]="pageNumber"
+    [noOfPages]="noOfPages" [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex"
+    [hoverStates]="hoverStates" (prevPage)="prevPage()" (nextPage)="nextPage()" (changePage)="changePage($event)">
+  </app-aip-pagination>
+
+</div>

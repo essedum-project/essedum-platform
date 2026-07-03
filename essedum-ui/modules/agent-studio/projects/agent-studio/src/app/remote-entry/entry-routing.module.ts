@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AgentComponent } from '../features/agent/agent.component';
 import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipeline.component';
+import { SkillsComponent } from '../features/skills/skills.component';
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
 import { AgentDirectoryComponent } from '../features/agent-directory/agent-directory.component';
@@ -43,6 +44,13 @@ const routes: Routes = [
       { path: 'view/:name', component: AgentDirectoryViewComponent },
       { path: 'edit/:name', component: AgentDirectoryEditComponent },
       { path: 'add', component: AgentDirectoryEditComponent },
+    ],
+  },
+
+  {
+    path: 'skills',
+    children: [
+      { path: '', component: SkillsComponent },
     ],
   },
 ];
