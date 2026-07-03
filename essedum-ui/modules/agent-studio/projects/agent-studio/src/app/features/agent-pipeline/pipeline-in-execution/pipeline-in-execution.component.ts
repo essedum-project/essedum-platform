@@ -30,6 +30,7 @@ export interface ExecutionPipeline {
   selector: 'app-pipeline-in-execution',
   templateUrl: './pipeline-in-execution.component.html',
   styleUrls: ['./pipeline-in-execution.component.scss'],
+  standalone: false
 })
 export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   loading   = true;

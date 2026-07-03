@@ -12,6 +12,7 @@ export interface PodLogDialogData {
   selector: 'app-pod-log-dialog',
   templateUrl: './pod-log-dialog.component.html',
   styleUrls: ['./pod-log-dialog.component.scss'],
+  standalone: false
 })
 export class PodLogDialogComponent implements OnInit {
   copied  = false;
