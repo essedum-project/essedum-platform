@@ -543,23 +543,23 @@ class PipelineCardsClient {
                  data-pipeline-id="${pipeline.id}">
                 <div class="${CSS_CLASSES.CARD_HEADER}">                   
                     <span class="pipeline-title">${Utils.sanitizeHtml(title)}</span>
-                    <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+                    <span class="pipeline-type-badge">${Utils.sanitizeHtml(pipeline.type.toUpperCase())}</span>
                 </div>
-                
-                <div class="${CSS_CLASSES.CARD_BODY}">                                              
-                    <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>                       
+
+                <div class="${CSS_CLASSES.CARD_BODY}">
+                    <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>
                 </div>
-                
+
                 <div class="${CSS_CLASSES.CARD_ACTIONS}">
-                    <button class="pipeline-action-btn primary" 
-                            data-pipeline-id="${pipeline.id}" 
+                    <button class="pipeline-action-btn primary"
+                            data-pipeline-id="${pipeline.id}"
                             aria-label="View details for ${Utils.sanitizeHtml(title)}">
                         <span class="action-icon">👁</span>
                         <span class="action-text">${UI_TEXT.BUTTONS.VIEW_DETAILS}</span>
                     </button>
                     <div class="pipeline-avatar-section">
                         <div class="pipeline-avatar" title="${Utils.sanitizeHtml(createdBy)}">
-                            ${avatarLetter}
+                            ${Utils.sanitizeHtml(avatarLetter)}
                         </div>
                     </div>
                 </div>
@@ -636,48 +636,41 @@ class PipelineCardsClient {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
-        // Build HTML string for page numbers
-        let pagesHtml = '';
-
-        // Add first page and ellipsis if needed
-        if (startPage > 1) {
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
-            if (startPage > 2) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-        }
-
-        // Add visible page numbers
-        for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
-        }
-
-        // Add ellipsis and last page if needed
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
-        }
-
-        // Set the HTML - built from safe numeric page numbers only
-        this.paginationPages.innerHTML = pagesHtml;  
-
-        // Add click listeners to all page number buttons
-        this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Use currentTarget to always get the button element, not its children
-                const button = e.currentTarget;
-                const page = parseInt(button.dataset.page);
-                if (!isNaN(page)) {
-                    this.vscode.postMessage({
-                        command: 'goToPage',
-                        page: page
-                    });
-                }
+        const makePageBtn = (page, isActive) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-pagination page-number' + (isActive ? ' active' : '');
+            btn.dataset.page = page;
+            btn.textContent = page;
+            btn.addEventListener('click', () => {
+                this.vscode.postMessage({ command: 'goToPage', page });
             });
-        });
+            return btn;
+        };
+        const makeEllipsis = () => {
+            const span = document.createElement('span');
+            span.className = 'page-ellipsis';
+            span.textContent = '...';
+            return span;
+        };
+
+        const fragment = document.createDocumentFragment();
+
+        if (startPage > 1) {
+            fragment.appendChild(makePageBtn(1, false));
+            if (startPage > 2) { fragment.appendChild(makeEllipsis()); }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            fragment.appendChild(makePageBtn(i, i === currentPage));
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) { fragment.appendChild(makeEllipsis()); }
+            fragment.appendChild(makePageBtn(totalPages, false));
+        }
+
+        this.paginationPages.textContent = '';
+        this.paginationPages.appendChild(fragment);
     }
 
     // ================================

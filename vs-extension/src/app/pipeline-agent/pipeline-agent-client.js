@@ -495,46 +495,39 @@ class PipelineAgentClient {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
-        // Build HTML string for page numbers
-        let pagesHtml = '';
+        const makePageBtn = (page, isActive) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-pagination page-number' + (isActive ? ' active' : '');
+            btn.dataset.page = page;
+            btn.textContent = page;
+            btn.addEventListener('click', () => this.goToPage(page));
+            return btn;
+        };
+        const makeEllipsis = () => {
+            const span = document.createElement('span');
+            span.className = 'page-ellipsis';
+            span.textContent = '...';
+            return span;
+        };
 
-        // Add first page and ellipsis if needed
+        const fragment = document.createDocumentFragment();
+
         if (startPage > 1) {
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
-            if (startPage > 2) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
+            fragment.appendChild(makePageBtn(1, false));
+            if (startPage > 2) { fragment.appendChild(makeEllipsis()); }
         }
 
-        // Add visible page numbers
         for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
+            fragment.appendChild(makePageBtn(i, i === currentPage));
         }
 
-        // Add ellipsis and last page if needed
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
+            if (endPage < totalPages - 1) { fragment.appendChild(makeEllipsis()); }
+            fragment.appendChild(makePageBtn(totalPages, false));
         }
 
-        // Set the HTML - built from safe numeric values only
-        this.paginationPages.innerHTML = pagesHtml;  
-
-        // Add click listeners to all page number buttons
-        this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Use currentTarget to always get the button element, not its children
-                const button = e.currentTarget;
-                const page = parseInt(button.dataset.page);
-                if (!isNaN(page)) {
-                    console.log('[Pipeline Agent Client] Navigating to page:', page);
-                    this.goToPage(page);
-                }
-            });
-        });
+        this.paginationPages.textContent = '';
+        this.paginationPages.appendChild(fragment);
     }
 
     showLoading() {
