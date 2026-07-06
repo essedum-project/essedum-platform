@@ -84,7 +84,8 @@ import { LangfuseComponent } from '../features/langfuse/langfuse.component';
 
 // Features: skills
 import { SkillsComponent } from '../features/skills/skills.component';
-import { SkillsAddEditComponent } from '../features/skills/skills-add-edit/skills-add-edit.component';
+import { SkillsAddComponent } from '../features/skills/skills-add/skills-add.component';
+import { SkillsEditViewComponent } from '../features/skills/skills-edit-view/skills-edit-view.component';
 
 // EnlCodeEditorComponent now lives in @essedum/shared-lib (2026-06-03 refactor).
 // It's declared by SharedLibUiModule which agent-studio already imports below.
@@ -143,7 +144,8 @@ import { environment } from '../../environments/environment';
     LitellmComponent,
     LangfuseComponent,
     SkillsComponent,
-    SkillsAddEditComponent,
+    SkillsAddComponent,
+    SkillsEditViewComponent,
     GitHubPushComponent,
     // sharedModule aip-* — remaining MFE-private (rest moved to SharedLibUiModule)
     AipFilterComponent,

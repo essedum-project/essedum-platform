@@ -1,7 +1,7 @@
 :host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
 
 // ──────────────────────────────────────────────────────────────────────
-// Dark-mode defaults (matching existing pipeline-in-execution style)
+// Dark-mode defaults
 // ──────────────────────────────────────────────────────────────────────
 
 .skills-page {
@@ -129,7 +129,7 @@
 // ── Table Header ───────────────────────────────────────────────────
 .skills-table-header {
   display: grid;
-  grid-template-columns: 25% 30% 10% 10% 15% 10%;
+  grid-template-columns:  20% 15% 10% 25% 10% 10% 10%;
   padding: 10px 0;
   margin-top: 12px;
   background: rgba(68, 128, 245, 0.06);
@@ -174,7 +174,7 @@
 // ── Row ────────────────────────────────────────────────────────────
 .skills-row {
   display: grid;
-  grid-template-columns: 25% 30% 10% 10% 15% 10%;
+  grid-template-columns: 20% 15% 10% 25% 10% 10% 10%;
   align-items: center;
   padding: 11px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -183,11 +183,13 @@
   &:hover { background: rgba(68, 128, 245, 0.05); }
 }
 
-.col-sk-name     { display: flex; align-items: center; }
-.col-sk-desc     { padding-right: 12px; }
-.col-sk-type     { }
-.col-sk-createdby { }
-.col-sk-date     { }
+.col-sk-name     { display: flex; align-items: center; padding-right: 8px; }
+.col-sk-version  { display: flex; align-items: center; }
+.col-sk-type     { display: flex; align-items: center; padding-right: 6px; }
+.col-sk-category { display: flex; align-items: center; }
+.col-sk-desc     { display: flex; align-items: center; padding-right: 12px; }
+.col-sk-createdby { display: flex; align-items: center; }
+.col-sk-date     { display: flex; align-items: center; }
 .col-sk-actions  {
   display: flex;
   justify-content: center;
@@ -222,7 +224,35 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 130px;
+  max-width: 160px;
+}
+
+.skills-version-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: #7eb8ff;
+  background: rgba(79, 142, 247, 0.1);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+  border-radius: 8px;
+  padding: 2px 7px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.skills-category-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  text-transform: capitalize;
+
+  &.cat-backend  { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+  &.cat-frontend { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+  &.cat-ml       { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+  &.cat-devops   { background: rgba(239, 68, 68, 0.12);  color: #f87171; }
+  &.cat-data     { background: rgba(6, 182, 212, 0.12);  color: #22d3ee; }
 }
 
 .skills-desc-text {
@@ -237,17 +267,27 @@
 
 .skills-type-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   border-radius: 10px;
-  padding: 2px 8px;
+  padding: 2px 7px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
 
-  &.type-nlp    { background: rgba(79, 142, 247, 0.15); color: #7eb8ff; }
-  &.type-code   { background: rgba(16, 185, 129, 0.12); color: #34d399; }
-  &.type-data   { background: rgba(250, 204, 21, 0.12); color: #fbbf24; }
-  &.type-vision { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+  &.type-code-generation  { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+  &.type-test-generation  { background: rgba(6, 182, 212, 0.12);  color: #22d3ee; }
+  &.type-debugging        { background: rgba(239, 68, 68, 0.12);  color: #f87171; }
+  &.type-refactoring      { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+  &.type-documentation    { background: rgba(79, 142, 247, 0.15); color: #7eb8ff; }
+  &.type-deployment       { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+  &.type-code-review      { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; }
+  &.type-security-scan    { background: rgba(248, 113, 113, 0.12); color: #fca5a5; }
+  &.type-data-pipeline    { background: rgba(251, 191, 36, 0.12); color: #fde68a; }
+  &.type-custom           { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
 }
 
 .skills-createdby-badge {
@@ -378,11 +418,31 @@ body.header-light-theme ::ng-deep .skills-actions-menu {
   .skills-name-text { color: #1e293b; }
   .skills-desc-text { color: #64748b; }
 
+  .skills-version-badge {
+    color: #4f46e5;
+    background: rgba(79, 70, 229, 0.08);
+    border-color: rgba(79, 70, 229, 0.2);
+  }
+
+  .skills-category-badge {
+    &.cat-backend  { background: rgba(5, 150, 105, 0.08);  color: #059669; }
+    &.cat-frontend { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+    &.cat-ml       { background: rgba(217, 119, 6, 0.08);  color: #d97706; }
+    &.cat-devops   { background: rgba(220, 38, 38, 0.08);  color: #dc2626; }
+    &.cat-data     { background: rgba(8, 145, 178, 0.08);  color: #0891b2; }
+  }
+
   .skills-type-badge {
-    &.type-nlp    { background: rgba(79, 70, 229, 0.1);  color: #4f46e5; }
-    &.type-code   { background: rgba(5, 150, 105, 0.1);  color: #059669; }
-    &.type-data   { background: rgba(217, 119, 6, 0.1);  color: #d97706; }
-    &.type-vision { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+    &.type-code-generation  { background: rgba(5, 150, 105, 0.08);  color: #059669; }
+    &.type-test-generation  { background: rgba(8, 145, 178, 0.08);  color: #0891b2; }
+    &.type-debugging        { background: rgba(220, 38, 38, 0.08);  color: #dc2626; }
+    &.type-refactoring      { background: rgba(217, 119, 6, 0.08);  color: #d97706; }
+    &.type-documentation    { background: rgba(79, 70, 229, 0.08);  color: #4f46e5; }
+    &.type-deployment       { background: rgba(99, 102, 241, 0.1);  color: #4338ca; }
+    &.type-code-review      { background: rgba(16, 185, 129, 0.08); color: #047857; }
+    &.type-security-scan    { background: rgba(220, 38, 38, 0.08);  color: #b91c1c; }
+    &.type-data-pipeline    { background: rgba(217, 119, 6, 0.08);  color: #b45309; }
+    &.type-custom           { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
   }
 
   .skills-createdby-badge { background: rgba(0,0,0,0.04); color: #64748b; }

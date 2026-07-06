@@ -4,6 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { AgentComponent } from '../features/agent/agent.component';
 import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipeline.component';
 import { SkillsComponent } from '../features/skills/skills.component';
+import { SkillsAddComponent } from '../features/skills/skills-add/skills-add.component';
+import { SkillsEditViewComponent } from '../features/skills/skills-edit-view/skills-edit-view.component';
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
 import { AgentDirectoryComponent } from '../features/agent-directory/agent-directory.component';
@@ -51,6 +53,9 @@ const routes: Routes = [
     path: 'skills',
     children: [
       { path: '', component: SkillsComponent },
+      { path: 'add', component: SkillsAddComponent },
+      { path: 'edit/:id', component: SkillsEditViewComponent },
+      { path: 'view/:id', component: SkillsEditViewComponent },
     ],
   },
 ];

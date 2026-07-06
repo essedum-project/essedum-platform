@@ -1,6 +1,6 @@
 <div class="skills-page">
 
-  <!-- Header: aip-header pattern (title, last-refreshed, search, add, refresh) -->
+  <!-- Header -->
   <app-aip-header
     [cardTitle]="PAGETITLE"
     [lastRefreshedTime]="lastRefreshedTime"
@@ -12,9 +12,8 @@
     (add)="openAdd()">
   </app-aip-header>
 
-  <!-- Filter panel: connections-style collapsible -->
+  <!-- Filter panel: collapsible -->
   <div class="skills-filter-panel">
-    <!-- Filter header row -->
     <div
       class="skills-filter-header"
       [class.expanded]="isFilterExpanded"
@@ -28,8 +27,8 @@
       </mat-icon>
     </div>
 
-    <!-- Filter content (collapsible) -->
     <div class="skills-filter-content" *ngIf="isFilterExpanded">
+
       <!-- TYPE filter -->
       <div class="skills-filter-group">
         <label class="skills-filter-label">{{ FILTERTYPELBL }}</label>
@@ -38,8 +37,7 @@
             [value]="selectedType"
             (selectionChange)="onTypeChange($event.value)"
             placeholder="{{ FILTERALLOPT }}">
-            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
-            <mat-option *ngFor="let opt of typeOptions.slice(1)" [value]="opt.value">
+            <mat-option *ngFor="let opt of skillTypeOptions" [value]="opt.value">
               {{ opt.label }}
             </mat-option>
           </mat-select>
@@ -51,16 +49,60 @@
           </mat-chip>
         </mat-chip-set>
       </div>
+
+      <!-- CATEGORY filter -->
+      <div class="skills-filter-group">
+        <label class="skills-filter-label">{{ FILTERCATEGORYLBL }}</label>
+        <mat-form-field appearance="fill" class="skills-filter-field">
+          <mat-select
+            [value]="selectedCategory"
+            (selectionChange)="onCategoryChange($event.value)"
+            placeholder="{{ FILTERALLOPT }}">
+            <mat-option *ngFor="let opt of categoryOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-chip-set *ngIf="selectedCategory" class="skills-chip-set">
+          <mat-chip removable (removed)="clearCategoryFilter()">
+            {{ getCategoryLabel(selectedCategory) }}
+            <mat-icon matChipRemove>close</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <!-- SUBCATEGORY filter -->
+      <div class="skills-filter-group">
+        <label class="skills-filter-label">{{ FILTERSUBCATLBL }}</label>
+        <mat-form-field appearance="fill" class="skills-filter-field">
+          <mat-select
+            [value]="selectedSubcategory"
+            (selectionChange)="onSubcategoryChange($event.value)"
+            placeholder="{{ FILTERALLOPT }}">
+            <mat-option *ngFor="let opt of subcategoryOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-chip-set *ngIf="selectedSubcategory" class="skills-chip-set">
+          <mat-chip removable (removed)="clearSubcategoryFilter()">
+            {{ selectedSubcategory }}
+            <mat-icon matChipRemove>close</mat-icon>
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
     </div>
   </div>
 
   <!-- Column Headers -->
   <div class="skills-table-header">
     <span class="col-sk-name">{{ COLNAME }}</span>
-    <span class="col-sk-desc">{{ COLDESC }}</span>
     <span class="col-sk-type">{{ COLTYPE }}</span>
-    <span class="col-sk-createdby">{{ COLCREATEDBY }}</span>
+    <span class="col-sk-category">{{ COLCATEGORY }}</span>
+    <span class="col-sk-desc">{{ COLDESC }}</span>
     <span class="col-sk-date">{{ COLDATE }}</span>
+    <span class="col-sk-createdby">{{ COLCREATEDBY }}</span>
     <span class="col-sk-actions">{{ COLACTIONS }}</span>
   </div>
 
@@ -90,14 +132,29 @@
         <span class="skills-name-text" [matTooltip]="skill.name">{{ skill.name }}</span>
       </div>
 
+      <!-- Type -->
+      <div class="col-sk-type">
+        <span class="skills-type-badge" [ngClass]="getTypeBadgeClass(skill.skillType)"
+          [matTooltip]="getTypeLabel(skill.skillType)">
+          {{ getTypeLabel(skill.skillType) }}
+        </span>
+      </div>
+
+      <!-- Category -->
+      <div class="col-sk-category">
+        <span class="skills-category-badge" [ngClass]="getCategoryBadgeClass(skill.category)">
+          {{ skill.category }}
+        </span>
+      </div>
+
       <!-- Description -->
       <div class="col-sk-desc">
         <span class="skills-desc-text" [matTooltip]="skill.description">{{ skill.description }}</span>
       </div>
 
-      <!-- Type -->
-      <div class="col-sk-type">
-        <span class="skills-type-badge type-{{ skill.type }}">{{ getTypeLabel(skill.type) }}</span>
+      <!-- Date -->
+      <div class="col-sk-date">
+        <span class="skills-date-text">{{ formatDate(skill.createdAt) }}</span>
       </div>
 
       <!-- Created By -->
@@ -106,11 +163,6 @@
           <mat-icon class="skills-user-icon">person</mat-icon>
           {{ skill.createdBy }}
         </span>
-      </div>
-
-      <!-- Date -->
-      <div class="col-sk-date">
-        <span class="skills-date-text">{{ formatDate(skill.createdAt) }}</span>
       </div>
 
       <!-- Actions (dot menu) -->
