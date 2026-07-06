@@ -435,7 +435,10 @@ class PipelineCardsClient {
 
         // Render pipeline cards
         if (this.cardsContainer) {
-            this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join(''); // lgtm[js/xss]
+            this.cardsContainer.textContent = '';
+            const cardFragment = document.createDocumentFragment();
+            cards.forEach(pipeline => cardFragment.appendChild(this.createCardElement(pipeline)));
+            this.cardsContainer.appendChild(cardFragment);
 
             // Add event listeners to view details buttons
             document.querySelectorAll('.pipeline-action-btn').forEach(btn => {
@@ -526,45 +529,76 @@ class PipelineCardsClient {
     //         </div>
     //     `;
     // }
-    /**
-        * Creates HTML for a single pipeline card
-        * @param {Object} pipeline - Pipeline data
-        * @returns {string} HTML string for the card
-        */
-    createCardHTML(pipeline) {
-        const createdDate = Utils.formatDate(pipeline.createdDate);
+    /** Creates a DOM element for a single pipeline card */
+    createCardElement(pipeline) {
         const title = Utils.toTitleCase(pipeline.alias);
-        const avatarLetter = Utils.getAvatarLetter(pipeline.target?.created_by);
         const createdBy = pipeline.target?.created_by || 'Unknown User';
 
-        return `
-            <div class="${CSS_CLASSES.PIPELINE_CARD}" tabindex="0" role="article" 
-                 aria-label="Pipeline: ${Utils.sanitizeHtml(title)}" 
-                 data-pipeline-id="${pipeline.id}">
-                <div class="${CSS_CLASSES.CARD_HEADER}">                   
-                    <span class="pipeline-title">${Utils.sanitizeHtml(title)}</span>
-                    <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
-                </div>
-                
-                <div class="${CSS_CLASSES.CARD_BODY}">                                              
-                    <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>                       
-                </div>
-                
-                <div class="${CSS_CLASSES.CARD_ACTIONS}">
-                    <button class="pipeline-action-btn primary" 
-                            data-pipeline-id="${pipeline.id}" 
-                            aria-label="View details for ${Utils.sanitizeHtml(title)}">
-                        <span class="action-icon">👁</span>
-                        <span class="action-text">${UI_TEXT.BUTTONS.VIEW_DETAILS}</span>
-                    </button>
-                    <div class="pipeline-avatar-section">
-                        <div class="pipeline-avatar" title="${Utils.sanitizeHtml(createdBy)}">
-                            ${avatarLetter}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const card = document.createElement('div');
+        card.className = CSS_CLASSES.PIPELINE_CARD;
+        card.tabIndex = 0;
+        card.setAttribute('role', 'article');
+        card.setAttribute('aria-label', `Pipeline: ${title}`);
+        card.dataset.pipelineId = pipeline.id;
+
+        card.appendChild(this._buildCardHeader(title, pipeline.type));
+        card.appendChild(this._buildCardBody(Utils.formatDate(pipeline.createdDate)));
+        card.appendChild(this._buildCardActions(pipeline.id, title, createdBy,
+            Utils.getAvatarLetter(pipeline.target?.created_by)));
+        return card;
+    }
+
+    _buildCardHeader(title, type) {
+        const header = document.createElement('div');
+        header.className = CSS_CLASSES.CARD_HEADER;
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'pipeline-title';
+        titleSpan.textContent = title;
+        const typeBadge = document.createElement('span');
+        typeBadge.className = 'pipeline-type-badge';
+        typeBadge.textContent = type.toUpperCase();
+        header.appendChild(titleSpan);
+        header.appendChild(typeBadge);
+        return header;
+    }
+
+    _buildCardBody(createdDate) {
+        const body = document.createElement('div');
+        body.className = CSS_CLASSES.CARD_BODY;
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'metadata-value';
+        dateSpan.textContent = createdDate;
+        body.appendChild(dateSpan);
+        return body;
+    }
+
+    _buildCardActions(pipelineId, title, createdBy, avatarLetter) {
+        const actions = document.createElement('div');
+        actions.className = CSS_CLASSES.CARD_ACTIONS;
+
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'pipeline-action-btn primary';
+        viewBtn.dataset.pipelineId = pipelineId;
+        viewBtn.setAttribute('aria-label', `View details for ${title}`);
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'action-icon';
+        iconSpan.textContent = '👁';
+        const textSpan = document.createElement('span');
+        textSpan.className = 'action-text';
+        textSpan.textContent = UI_TEXT.BUTTONS.VIEW_DETAILS;
+        viewBtn.appendChild(iconSpan);
+        viewBtn.appendChild(textSpan);
+        actions.appendChild(viewBtn);
+
+        const avatarSection = document.createElement('div');
+        avatarSection.className = 'pipeline-avatar-section';
+        const avatar = document.createElement('div');
+        avatar.className = 'pipeline-avatar';
+        avatar.title = createdBy;
+        avatar.textContent = avatarLetter;
+        avatarSection.appendChild(avatar);
+        actions.appendChild(avatarSection);
+        return actions;
     }
 
     // ================================
@@ -636,48 +670,41 @@ class PipelineCardsClient {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
-        // Build HTML string for page numbers
-        let pagesHtml = '';
-
-        // Add first page and ellipsis if needed
-        if (startPage > 1) {
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
-            if (startPage > 2) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-        }
-
-        // Add visible page numbers
-        for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
-        }
-
-        // Add ellipsis and last page if needed
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
-        }
-
-        // Set the HTML - built from safe numeric page numbers only
-        this.paginationPages.innerHTML = pagesHtml; // lgtm[js/xss]
-
-        // Add click listeners to all page number buttons
-        this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Use currentTarget to always get the button element, not its children
-                const button = e.currentTarget;
-                const page = parseInt(button.dataset.page);
-                if (!isNaN(page)) {
-                    this.vscode.postMessage({
-                        command: 'goToPage',
-                        page: page
-                    });
-                }
+        const makePageBtn = (page, isActive) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-pagination page-number' + (isActive ? ' active' : '');
+            btn.dataset.page = page;
+            btn.textContent = page;
+            btn.addEventListener('click', () => {
+                this.vscode.postMessage({ command: 'goToPage', page });
             });
-        });
+            return btn;
+        };
+        const makeEllipsis = () => {
+            const span = document.createElement('span');
+            span.className = 'page-ellipsis';
+            span.textContent = '...';
+            return span;
+        };
+
+        const fragment = document.createDocumentFragment();
+
+        if (startPage > 1) {
+            fragment.appendChild(makePageBtn(1, false));
+            if (startPage > 2) { fragment.appendChild(makeEllipsis()); }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            fragment.appendChild(makePageBtn(i, i === currentPage));
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) { fragment.appendChild(makeEllipsis()); }
+            fragment.appendChild(makePageBtn(totalPages, false));
+        }
+
+        this.paginationPages.textContent = '';
+        this.paginationPages.appendChild(fragment);
     }
 
     // ================================
@@ -802,22 +829,44 @@ class PipelineCardsClient {
         const createdDate = pipeline.createdDate || 'Unknown';
         const createdBy = pipeline.target?.created_by || 'Unknown';
 
-        this.pipelineInfo.innerHTML = ` // lgtm[js/xss]                   
-                    <span class="pipeline-title">${Utils.sanitizeHtml(Utils.toTitleCase(pipeline.alias))}</span>
-                    <span class="pipeline-type-badge">${Utils.sanitizeHtml(pipeline.type.toUpperCase())}</span>
-                </div>
-                <div class="pipeline-card-body">                                              
-                    <div class="metadata-item">
-                        <strong>Created Date: </strong>
-                        <span class="metadata-value">${Utils.sanitizeHtml(createdDate)}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <strong>Created By: </strong>
-                        <span class="metadata-value">${Utils.sanitizeHtml(createdBy)}</span>
-                    </div>
-                </div>
-            </div>            
-        `;
+        this.pipelineInfo.textContent = '';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'pipeline-title';
+        titleSpan.textContent = Utils.toTitleCase(pipeline.alias);
+        this.pipelineInfo.appendChild(titleSpan);
+
+        const typeBadge = document.createElement('span');
+        typeBadge.className = 'pipeline-type-badge';
+        typeBadge.textContent = pipeline.type.toUpperCase();
+        this.pipelineInfo.appendChild(typeBadge);
+
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'pipeline-card-body';
+
+        const createdDateItem = document.createElement('div');
+        createdDateItem.className = 'metadata-item';
+        const dateStrong = document.createElement('strong');
+        dateStrong.textContent = 'Created Date: ';
+        createdDateItem.appendChild(dateStrong);
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'metadata-value';
+        dateSpan.textContent = createdDate;
+        createdDateItem.appendChild(dateSpan);
+        bodyDiv.appendChild(createdDateItem);
+
+        const createdByItem = document.createElement('div');
+        createdByItem.className = 'metadata-item';
+        const byStrong = document.createElement('strong');
+        byStrong.textContent = 'Created By: ';
+        createdByItem.appendChild(byStrong);
+        const bySpan = document.createElement('span');
+        bySpan.className = 'metadata-value';
+        bySpan.textContent = createdBy;
+        createdByItem.appendChild(bySpan);
+        bodyDiv.appendChild(createdByItem);
+
+        this.pipelineInfo.appendChild(bodyDiv);
     }
 
     /**
@@ -838,28 +887,48 @@ class PipelineCardsClient {
             return;
         }
 
-        const scriptsHtml = scripts.files.map((file, index) => `
-            <div class="script-item">
-                <div class="script-info">
-                    <div class="script-name">${Utils.sanitizeHtml(file.fileName)}</div>                    
-                    <div class="script-type">${Utils.sanitizeHtml(file.language)} (${Utils.sanitizeHtml(file.extension)})</div>
-                </div>
-                <div class="script-actions">                    
-                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_PRIMARY}" 
-                            onclick="window.pipelineClient.openScript(${index})" 
-                            title="Open ${Utils.sanitizeHtml(file.fileName)}">
-                        ${UI_TEXT.BUTTONS.OPEN}
-                    </button>                  
-                    <button class="${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_SECONDARY}" 
-                            onclick="window.pipelineClient.copyScript(${index})" 
-                            title="Copy ${Utils.sanitizeHtml(file.fileName)}">
-                        ${UI_TEXT.BUTTONS.COPY}
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        const fragment = document.createDocumentFragment();
+        scripts.files.forEach((file, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'script-item';
 
-        this.scriptsContainer.innerHTML = scriptsHtml; // lgtm[js/xss]
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'script-info';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'script-name';
+            nameDiv.textContent = file.fileName;
+            infoDiv.appendChild(nameDiv);
+
+            const typeDiv = document.createElement('div');
+            typeDiv.className = 'script-type';
+            typeDiv.textContent = `${file.language} (${file.extension})`;
+            infoDiv.appendChild(typeDiv);
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'script-actions';
+
+            const openBtn = document.createElement('button');
+            openBtn.className = `${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_PRIMARY}`;
+            openBtn.title = `Open ${file.fileName}`;
+            openBtn.textContent = UI_TEXT.BUTTONS.OPEN;
+            openBtn.addEventListener('click', () => window.pipelineClient.openScript(index));
+            actionsDiv.appendChild(openBtn);
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = `${CSS_CLASSES.BTN} ${CSS_CLASSES.BTN_SMALL} ${CSS_CLASSES.BTN_SECONDARY}`;
+            copyBtn.title = `Copy ${file.fileName}`;
+            copyBtn.textContent = UI_TEXT.BUTTONS.COPY;
+            copyBtn.addEventListener('click', () => window.pipelineClient.copyScript(index));
+            actionsDiv.appendChild(copyBtn);
+
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(actionsDiv);
+            fragment.appendChild(itemDiv);
+        });
+
+        this.scriptsContainer.textContent = '';
+        this.scriptsContainer.appendChild(fragment);
     }
 
     /**
@@ -880,20 +949,31 @@ class PipelineCardsClient {
             return;
         }
 
-        const runTypeOptions = runTypes.map((runType, index) => `
-            <option value="${index}" ${index === 0 ? 'selected' : ''}>
-                ${Utils.sanitizeHtml(runType.type || 'Unknown Type')} - ${Utils.sanitizeHtml(runType.dsAlias || 'Default')}
-            </option>
-        `).join('');
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
 
-        this.runTypesContainer.innerHTML = ` // lgtm[js/xss]
-            <div class="form-group">
-                <label for="runTypeSelect" class="form-label">Select Run Type:</label>
-                <select id="runTypeSelect" class="form-select" onchange="window.pipelineClient.selectRunType(this.value)">
-                    ${runTypeOptions}
-                </select>
-            </div>
-        `;
+        const label = document.createElement('label');
+        label.setAttribute('for', 'runTypeSelect');
+        label.className = 'form-label';
+        label.textContent = 'Select Run Type:';
+        formGroup.appendChild(label);
+
+        const select = document.createElement('select');
+        select.id = 'runTypeSelect';
+        select.className = 'form-select';
+        select.addEventListener('change', () => window.pipelineClient.selectRunType(select.value));
+
+        runTypes.forEach((runType, index) => {
+            const option = document.createElement('option');
+            option.value = String(index);
+            if (index === 0) { option.selected = true; }
+            option.textContent = `${runType.type || 'Unknown Type'} - ${runType.dsAlias || 'Default'}`;
+            select.appendChild(option);
+        });
+
+        formGroup.appendChild(select);
+        this.runTypesContainer.textContent = '';
+        this.runTypesContainer.appendChild(formGroup);
 
         // Store selected run type (default to first one)
         this.selectedRunType = runTypes[0] || null;

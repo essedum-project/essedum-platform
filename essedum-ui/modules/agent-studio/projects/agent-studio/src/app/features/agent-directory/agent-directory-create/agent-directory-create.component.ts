@@ -15,9 +15,10 @@ import { Router } from '@angular/router';
 import { AgentDirectoryService } from '../agent-directory.service';
 
 @Component({
-  selector: 'app-agent-directory-create',
-  templateUrl: './agent-directory-create.component.html',
-  styleUrls: ['./agent-directory-create.component.scss'],
+    selector: 'app-agent-directory-create',
+    templateUrl: './agent-directory-create.component.html',
+    styleUrls: ['./agent-directory-create.component.scss'],
+    standalone: false
 })
 export class AgentDirectoryCreateComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();

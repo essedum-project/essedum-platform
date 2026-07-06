@@ -7,9 +7,10 @@ import { Services } from '@essedum/shared-lib';
 declare var Stomp: any;
 
 @Component({
-  selector: 'app-job-data-viewer',
-  templateUrl: './job-data-viewer.component.html',
-  styleUrls: ['./job-data-viewer.component.scss']
+    selector: 'app-job-data-viewer',
+    templateUrl: './job-data-viewer.component.html',
+    styleUrls: ['./job-data-viewer.component.scss'],
+    standalone: false
 })
 export class JobDataViewerComponent implements OnInit {
 

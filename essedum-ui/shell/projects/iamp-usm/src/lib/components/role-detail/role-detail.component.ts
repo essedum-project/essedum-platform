@@ -19,9 +19,10 @@ import { IampUsmService } from "../../iamp-usm.service";
 // import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
 @Component({
-  selector: 'lib-role-detail',
-  templateUrl: './role-detail.component.html',
-  styleUrl: './role-detail.component.css'
+    selector: 'lib-role-detail',
+    templateUrl: './role-detail.component.html',
+    styleUrl: './role-detail.component.css',
+    standalone: false
 })
 export class RoleDetailComponent implements OnInit {
   role: Role;

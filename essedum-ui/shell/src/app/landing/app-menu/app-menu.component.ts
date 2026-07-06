@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-menu-item',
-  templateUrl: './app-menu.component.html',
-  styleUrls: ['./app-menu.component.scss']
+    selector: 'app-menu-item',
+    templateUrl: './app-menu.component.html',
+    styleUrls: ['./app-menu.component.scss'],
+    standalone: false
 })
 export class AppMenuComponent implements OnInit, OnChanges {
 

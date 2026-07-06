@@ -2,9 +2,10 @@ import { ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnChan
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-pagination',
-  templateUrl: './pagination.component.html',
-  styleUrls: ['./pagination.component.scss']
+    selector: 'app-pagination',
+    templateUrl: './pagination.component.html',
+    styleUrls: ['./pagination.component.scss'],
+    standalone: false
 })
 export class PaginationComponent implements OnChanges ,OnInit {
 

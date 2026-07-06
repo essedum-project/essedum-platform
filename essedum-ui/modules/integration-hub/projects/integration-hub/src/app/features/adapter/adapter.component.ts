@@ -14,9 +14,10 @@ import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-adapter',
-  templateUrl: './adapter.component.html',
-  styleUrls: ['./adapter.component.scss'],
+    selector: 'app-adapter',
+    templateUrl: './adapter.component.html',
+    styleUrls: ['./adapter.component.scss'],
+    standalone: false
 })
 export class AdapterComponent implements OnInit {
   // Constants

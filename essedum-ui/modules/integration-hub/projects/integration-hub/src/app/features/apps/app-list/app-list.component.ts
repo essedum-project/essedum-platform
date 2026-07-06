@@ -17,18 +17,19 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { CreateAppComponent } from '../create-app/create-app.component';
 
 @Component({
-  selector: 'app-view-apps',
-  templateUrl: './app-list.component.html',
-  styleUrl: './app-list.component.scss',
-  animations: [
-    trigger('fadeInOut', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('200ms', style({ opacity: 1 })),
-      ]),
-      transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
-    ]),
-  ],
+    selector: 'app-view-apps',
+    templateUrl: './app-list.component.html',
+    styleUrl: './app-list.component.scss',
+    animations: [
+        trigger('fadeInOut', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('200ms', style({ opacity: 1 })),
+            ]),
+            transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
+        ]),
+    ],
+    standalone: false
 })
 export class AppListComponent implements OnInit {
   editable: boolean = false;

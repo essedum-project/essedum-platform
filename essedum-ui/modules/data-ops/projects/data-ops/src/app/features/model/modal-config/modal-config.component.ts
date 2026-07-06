@@ -9,9 +9,10 @@ import { takeUntil } from 'rxjs/operators';
 import { Location } from '@angular/common';
 import { OptionsDTO } from '@essedum/shared-lib';
 @Component({
-  selector: 'app-modal-config',
-  templateUrl: './modal-config.component.html',
-  styleUrls: ['./modal-config.component.scss']
+    selector: 'app-modal-config',
+    templateUrl: './modal-config.component.html',
+    styleUrls: ['./modal-config.component.scss'],
+    standalone: false
 })
 export class ModalConfigComponent implements OnInit, OnDestroy {
 

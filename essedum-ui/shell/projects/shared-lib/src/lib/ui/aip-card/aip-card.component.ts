@@ -37,18 +37,19 @@ const BACKGROUND_COLORS = [
 ];
 
 @Component({
-  selector: 'app-aip-card',
-  templateUrl: './aip-card.component.html',
-  styleUrls: ['./aip-card.component.scss'],
-  animations: [
-    trigger('fadeInOut', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('200ms', style({ opacity: 1 })),
-      ]),
-      transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
-    ]),
-  ],
+    selector: 'app-aip-card',
+    templateUrl: './aip-card.component.html',
+    styleUrls: ['./aip-card.component.scss'],
+    animations: [
+        trigger('fadeInOut', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('200ms', style({ opacity: 1 })),
+            ]),
+            transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
+        ]),
+    ],
+    standalone: false
 })
 export class AipCardComponent {
   // Input properties

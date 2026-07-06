@@ -49,9 +49,10 @@ interface FileFlatNode {
 }
 
 @Component({
-  selector: 'lib-dash-constant',
-  templateUrl: './dash-constant.component.html',
-  styleUrls: ['./dash-constant.component.css']
+    selector: 'lib-dash-constant',
+    templateUrl: './dash-constant.component.html',
+    styleUrls: ['./dash-constant.component.css'],
+    standalone: false
 })
 export class DashConstantComponent implements OnInit {
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();

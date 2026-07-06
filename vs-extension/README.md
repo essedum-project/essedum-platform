@@ -40,7 +40,7 @@ The extension acts as a client for the Essedum Platform.
     *   Listens on a local port for the callback code.
 3.  **API Client**:
     *   Communicates with the Essedum Backend (e.g., `https://aiplatform...`).
-    *   Attaches Bearer tokens to requests.
+    *   Attaches Bearer tokens to requests. 
 
 ### Authentication Flow
 

@@ -7,9 +7,10 @@ import { Services } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-create-spec-template',
-  templateUrl: './create-spec-template.component.html',
-  styleUrls: ['./create-spec-template.component.scss'],
+    selector: 'app-create-spec-template',
+    templateUrl: './create-spec-template.component.html',
+    styleUrls: ['./create-spec-template.component.scss'],
+    standalone: false
 })
 export class CreateSpecTemplateComponent implements OnInit {
   readonly CARD_TITLE = 'Spec';

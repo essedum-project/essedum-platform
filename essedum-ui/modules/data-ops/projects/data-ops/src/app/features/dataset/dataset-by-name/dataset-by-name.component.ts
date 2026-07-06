@@ -12,9 +12,10 @@ import { TagEventDTO } from '@essedum/shared-lib';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-dataset-by-name',
-  templateUrl: './dataset-by-name.component.html',
-  styleUrls: ['./dataset-by-name.component.scss']
+    selector: 'app-dataset-by-name',
+    templateUrl: './dataset-by-name.component.html',
+    styleUrls: ['./dataset-by-name.component.scss'],
+    standalone: false
 })
 export class DatasetByNameComponent {
 

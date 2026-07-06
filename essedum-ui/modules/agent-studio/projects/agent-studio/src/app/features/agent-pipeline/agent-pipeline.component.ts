@@ -79,9 +79,10 @@ interface AgentState {
 }
 
 @Component({
-  selector: 'app-agent-pipeline',
-  templateUrl: './agent-pipeline.component.html',
-  styleUrls: ['./agent-pipeline.component.scss'],
+    selector: 'app-agent-pipeline',
+    templateUrl: './agent-pipeline.component.html',
+    styleUrls: ['./agent-pipeline.component.scss'],
+    standalone: false
 })
 export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy {
   streamItem: StreamingServices;

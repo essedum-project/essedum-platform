@@ -18,9 +18,10 @@ import { IampUsmService } from "../../iamp-usm.service";
 import { RoleService } from "../../services/role.service";
 
 @Component({
-  selector: 'lib-project-detail',
-  templateUrl: './project-detail.component.html',
-  styleUrls: ['./project-detail.component.css']
+    selector: 'lib-project-detail',
+    templateUrl: './project-detail.component.html',
+    styleUrls: ['./project-detail.component.css'],
+    standalone: false
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput: ElementRef;

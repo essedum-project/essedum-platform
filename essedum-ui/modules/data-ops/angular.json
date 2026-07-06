@@ -6,9 +6,7 @@
     "data-ops": {
       "projectType": "application",
       "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
+        "@schematics/angular:component": { "style": "scss" }
       },
       "root": "projects/data-ops",
       "sourceRoot": "projects/data-ops/src",
@@ -17,6 +15,8 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
+            "extraWebpackConfig": "projects/data-ops/webpack.config.js",
+            "commonChunk": false,
             "outputPath": "dist/data-ops",
             "index": "projects/data-ops/src/index.html",
             "main": "projects/data-ops/src/main.ts",
@@ -29,12 +29,41 @@
             ],
             "styles": [],
             "scripts": [],
-            "extraWebpackConfig": "projects/data-ops/webpack.config.js",
-            "commonChunk": false,
-            "extractLicenses": false
+            "allowedCommonJsDependencies": [
+              "dayjs",
+              "dayjs/plugin/customParseFormat",
+              "lodash",
+              "lodash/get",
+              "lodash/isEmpty",
+              "lodash/some",
+              "lodash/startCase",
+              "lodash/merge",
+              "lodash/maxBy",
+              "ajv",
+              "quill-delta",
+              "jsoneditor",
+              "jszip",
+              "debug",
+              "event-source-polyfill",
+              "ace-builds",
+              "ace-builds/src-noconflict/ext-beautify",
+              "ace-builds/src-noconflict/ext-language_tools",
+              "ace-builds/src-noconflict/ext-searchbox",
+              "ace-builds/src-noconflict/mode-java",
+              "ace-builds/src-noconflict/mode-javascript",
+              "ace-builds/src-noconflict/mode-python",
+              "ace-builds/src-noconflict/mode-r",
+              "ace-builds/src-noconflict/theme-chrome",
+              "ace-builds/src-noconflict/theme-dracula",
+              "ace-builds/src-noconflict/theme-eclipse"
+            ]
           },
           "configurations": {
             "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "1mb", "maximumError": "5mb" }
+              ],
               "fileReplacements": [
                 {
                   "replace": "projects/data-ops/src/environments/environment.ts",
@@ -58,17 +87,13 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "configurations": {
-            "production": {
-              "browserTarget": "data-ops:build:production"
-            },
-            "development": {
-              "browserTarget": "data-ops:build:development"
-            }
+            "production": { "browserTarget": "data-ops:build:production" },
+            "development": { "browserTarget": "data-ops:build:development" }
           },
           "defaultConfiguration": "development",
           "options": {
             "port": 8087,
-            "publicHost": "http://localhost:8087",         
+            "publicHost": "http://localhost:8087",
             "extraWebpackConfig": "projects/data-ops/webpack.config.js"
           }
         },
@@ -82,7 +107,5 @@
       }
     }
   },
-  "cli": {
-    "analytics": false
-  }
+  "cli": { "analytics": false }
 }

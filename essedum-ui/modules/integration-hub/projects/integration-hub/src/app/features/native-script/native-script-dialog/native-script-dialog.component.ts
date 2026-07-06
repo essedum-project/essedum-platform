@@ -7,9 +7,10 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Services } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-native-script-dialog',
-  templateUrl: './native-script-dialog.component.html',
-  styleUrls: ['./native-script-dialog.component.scss']
+    selector: 'app-native-script-dialog',
+    templateUrl: './native-script-dialog.component.html',
+    styleUrls: ['./native-script-dialog.component.scss'],
+    standalone: false
 })
 export class NativeScriptDialogComponent implements OnInit, OnDestroy {
 

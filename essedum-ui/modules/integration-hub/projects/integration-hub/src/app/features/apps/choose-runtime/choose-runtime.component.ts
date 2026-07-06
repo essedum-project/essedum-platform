@@ -4,9 +4,10 @@ import { OptionsDTO } from '@essedum/shared-lib';
 import { Services } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-choose-runtime',
-  templateUrl: './choose-runtime.component.html',
-  styleUrls: ['./choose-runtime.component.scss'],
+    selector: 'app-choose-runtime',
+    templateUrl: './choose-runtime.component.html',
+    styleUrls: ['./choose-runtime.component.scss'],
+    standalone: false
 })
 export class ChooseRuntimeComponent implements OnInit {
   runTypes: OptionsDTO[] = [];

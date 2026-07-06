@@ -23,9 +23,10 @@ import { UsmRolePermissionsService } from "projects/iamp-usm/src/lib/services/us
 import { Subscription } from "rxjs";
 
 @Component({
-  selector: "lib-role-permission-add",
-  templateUrl: "./role-permission-add.component.html",
-  styleUrl: "./role-permission-add.component.css",
+    selector: "lib-role-permission-add",
+    templateUrl: "./role-permission-add.component.html",
+    styleUrl: "./role-permission-add.component.css",
+    standalone: false
 })
 
 export class RolePermissionAddComponent implements OnInit {

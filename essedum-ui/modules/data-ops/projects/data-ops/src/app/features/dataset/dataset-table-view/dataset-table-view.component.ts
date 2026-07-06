@@ -9,9 +9,10 @@ import { Project } from '@essedum/shared-lib';
 import { DatasetServices } from '../dataset-service';
 import { MatDialog } from '@angular/material/dialog';
 @Component({
-  selector: 'app-dataset-table-view',
-  templateUrl: './dataset-table-view.component.html',
-  styleUrls: ['./dataset-table-view.component.scss']
+    selector: 'app-dataset-table-view',
+    templateUrl: './dataset-table-view.component.html',
+    styleUrls: ['./dataset-table-view.component.scss'],
+    standalone: false
 })
 export class DatasetTableViewComponent implements OnInit {
   @Input('datasetname') inpdataset;
@@ -1175,7 +1176,10 @@ changePage(p: number) {
 
 }
 
-@Pipe({ name: 'highlight', pure: false })
+@Pipe({
+    name: 'highlight', pure: false,
+    standalone: false
+})
 export class HighlightSearch implements PipeTransform {
   transform(value: any, args: any): any {
     if (!args) { return value; }

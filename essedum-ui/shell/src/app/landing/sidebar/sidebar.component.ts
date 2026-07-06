@@ -4,9 +4,10 @@ import { ApisService } from "../../services/apis.service";
 //import { LeapTelemetryService } from "../../services/telemetry-util/telemetry.service";
 
 @Component({
-  selector: "app-sidebar",
-  templateUrl: "./sidebar.component.html",
-  styleUrls: ["./sidebar.component.css"],
+    selector: "app-sidebar",
+    templateUrl: "./sidebar.component.html",
+    styleUrls: ["./sidebar.component.css"],
+    standalone: false
 })
 export class SidebarComponent implements OnInit {
   @Input() alerts: number;

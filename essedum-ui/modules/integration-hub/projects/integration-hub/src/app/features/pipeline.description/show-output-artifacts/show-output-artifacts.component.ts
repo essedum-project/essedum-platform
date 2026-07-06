@@ -2,9 +2,10 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Services } from '@essedum/shared-lib';
 @Component({
-  selector: 'app-show-output-artifacts',
-  templateUrl: './show-output-artifacts.component.html',
-  styleUrls: ['./show-output-artifacts.component.scss']
+    selector: 'app-show-output-artifacts',
+    templateUrl: './show-output-artifacts.component.html',
+    styleUrls: ['./show-output-artifacts.component.scss'],
+    standalone: false
 })
 export class ShowOutputArtifactsComponent {
 
