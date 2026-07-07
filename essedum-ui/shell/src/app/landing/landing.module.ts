@@ -27,7 +27,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MessageService } from '../services/message.service';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AppNavigationComponent } from './app-navigation/app-navigation.component';
-import { InlineSVGModule } from 'ng-inline-svg';
+import { InlineSvgDirective } from './inline-svg.directive';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from "@angular/material/tooltip";
@@ -49,6 +49,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     MyProfileComponent,
     SidebarMenuTextComponent,
     DashboardComponent,
+    InlineSvgDirective,
   ],
   imports: [
     MatCardModule,
@@ -76,9 +77,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     MatTooltipModule,
     NgbModule,
     MatProgressBarModule,
-    InlineSVGModule.forRoot(),
     DialogModule,
-    InlineSVGModule.forRoot()
 
   ],
   providers: [
