@@ -26,7 +26,7 @@
     "@babel/runtime": "^7.27.6",
     "buffer": "^6.0.3",
     "@linuxfoundation/lfx-ui-core": "^0.0.15",
-    "@ng-bootstrap/ng-bootstrap": "^17.0.1",
+    "@ng-bootstrap/ng-bootstrap": "^20.0.0",
     "@popperjs/core": "^2.11.0",
     "ace-builds": "1.36.2",
     "angular-oauth2-oidc": "^13.0.1",

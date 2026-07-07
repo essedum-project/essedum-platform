@@ -23,7 +23,7 @@
     "@jsonforms/angular": "3.3.0",
     "@jsonforms/angular-material": "3.3.0",
     "@jsonforms/core": "3.3.0",
-    "@ng-bootstrap/ng-bootstrap": "^17.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^18.0.0",
     "@popperjs/core": "^2.11.8",
     "@stomp/stompjs": "^7.0.0",
     "ace-builds": "^1.36.2",
