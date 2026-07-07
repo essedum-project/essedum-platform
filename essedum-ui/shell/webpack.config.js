@@ -28,6 +28,9 @@ module.exports = {
   resolve: {
     alias: {
       ...sharedMappings.getAliases(),
+    },
+    fallback: {
+      "buffer": require.resolve("buffer/")
     }
   },
   experiments: {
