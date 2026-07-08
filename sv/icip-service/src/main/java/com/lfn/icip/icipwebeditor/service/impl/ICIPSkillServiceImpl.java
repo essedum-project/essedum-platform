@@ -45,11 +45,14 @@ public class ICIPSkillServiceImpl implements IICIPSkillService {
     // ── Constructor injection ─────────────────────────────────────────────────
     private final ICIPSkillRegistryRepository skillRepository;
     private final ICIPSkillAuditLogRepository auditLogRepository;
+    private final ICIPSkillAuditService auditService;
 
     public ICIPSkillServiceImpl(ICIPSkillRegistryRepository skillRepository,
-                                 ICIPSkillAuditLogRepository auditLogRepository) {
+                                 ICIPSkillAuditLogRepository auditLogRepository,
+                                 ICIPSkillAuditService auditService) {
         this.skillRepository    = skillRepository;
         this.auditLogRepository = auditLogRepository;
+        this.auditService       = auditService;
     }
 
     // ── CREATE ───────────────────────────────────────────────────────────────
@@ -296,7 +299,7 @@ public class ICIPSkillServiceImpl implements IICIPSkillService {
     }
 
     /**
-     * Saves an audit log entry.
+     * Saves an audit log entry in a REQUIRES_NEW transaction via ICIPSkillAuditService.
      * Failure is caught and logged — must NEVER propagate and break the main operation.
      */
     private void saveAuditLog(Long skillId, String skillName, String action,
@@ -315,7 +318,7 @@ public class ICIPSkillServiceImpl implements IICIPSkillService {
                     .organization(organization)
                     .remarks(remarks)
                     .build();
-            auditLogRepository.save(log);
+            auditService.save(log);
         } catch (Exception e) {
             logger.error("Audit log save failed — skill id: {} action: {} — {}", skillId, action, e.getMessage());
         }

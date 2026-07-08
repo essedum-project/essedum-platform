@@ -22,6 +22,8 @@ package com.lfn.icip.icipwebeditor.model;
 import java.io.Serializable;
 import java.time.Instant;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -52,6 +54,13 @@ import lombok.Setter;
     name = "icip_skill_registry",
     uniqueConstraints = @UniqueConstraint(columnNames = {"skill_name", "skill_version", "organization"})
 )
+// BaseDomain has alias/lastmodifiedby/lastmodifieddate which the table doesn't have as standalone columns;
+// redirect them to existing columns (read-only) so Hibernate never inserts into non-existent columns.
+@AttributeOverrides({
+    @AttributeOverride(name = "alias",           column = @Column(name = "skill_alias",  insertable = false, updatable = false)),
+    @AttributeOverride(name = "lastmodifiedby",  column = @Column(name = "created_by",   insertable = false, updatable = false)),
+    @AttributeOverride(name = "lastmodifieddate",column = @Column(name = "created_date", insertable = false, updatable = false)),
+})
 @Getter
 @Setter
 @NoArgsConstructor

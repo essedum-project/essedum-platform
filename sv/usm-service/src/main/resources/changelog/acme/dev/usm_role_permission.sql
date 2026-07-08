@@ -1815,3 +1815,41 @@ INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.
 INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-put-api-github-config' AND  p.module='cip' AND r.project_id IS NULL;
 INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'cip-get-api-github-config' AND  p.module='cip' AND r.project_id IS NULL;
 
+
+-- ============================================================
+-- Skills API permissions (icip-service /api/aip/skills/**)
+-- ============================================================
+-- Step 1: Register permission keys
+INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-list');
+INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-create');
+INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-getById');
+INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-update');
+INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-delete');
+
+-- Step 2: Map URL patterns + HTTP methods to permissions
+INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id) SELECT '/api/aip/skills', 'GET', 0, 'List skills - icip-skill-controller', id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-list' LIMIT 1;
+INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id) SELECT '/api/aip/skills/create', 'POST', 0, 'Create skill - icip-skill-controller', id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-create' LIMIT 1;
+INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id) SELECT '/api/aip/skills/[0-9]*', 'GET', 0, 'Get skill by id - icip-skill-controller', id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-getById' LIMIT 1;
+INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id) SELECT '/api/aip/skills/[0-9]*', 'PUT', 0, 'Update skill - icip-skill-controller', id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-update' LIMIT 1;
+INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id) SELECT '/api/aip/skills/[0-9]*', 'DELETE', 0, 'Delete skill - icip-skill-controller', id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-delete' LIMIT 1;
+
+-- Step 3: Grant permissions to IT Portfolio Manager role
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-list' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-create' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-getById' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-update' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-delete' AND p.module='cip' AND r.project_id IS NULL;
+
+-- Step 4: Grant permissions to Developer role
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission='cip-skills-list' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission='cip-skills-create' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission='cip-skills-getById' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission='cip-skills-update' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Developer' AND p.permission='cip-skills-delete' AND p.module='cip' AND r.project_id IS NULL;
+
+-- Step 5: Grant permissions to Admin role
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission='cip-skills-list' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission='cip-skills-create' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission='cip-skills-getById' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission='cip-skills-update' AND p.module='cip' AND r.project_id IS NULL;
+INSERT IGNORE INTO usm_role_permissions (permission, ROLE) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r WHERE r.name='Admin' AND p.permission='cip-skills-delete' AND p.module='cip' AND r.project_id IS NULL;

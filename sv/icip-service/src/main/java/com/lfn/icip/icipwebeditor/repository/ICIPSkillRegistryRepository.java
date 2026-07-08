@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.icip.icipwebeditor.model.ICIPSkillRegistry;
 
@@ -114,9 +115,10 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
     """)
     List<String> findDistinctSkillSubcategoriesByOrg(@Param("org") String organization);
 
-    // ── Soft delete ─────────────────��─────────────────────────────────────────
+    // ── Soft delete ─────────────────────────────────────────────────────────
 
     @Modifying
+    @Transactional
     @Query("""
         UPDATE ICIPSkillRegistry s
         SET s.deleted = true,
@@ -130,6 +132,7 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
     // ── Usage count increment ─────────────────────────────────────────────────
 
     @Modifying
+    @Transactional
     @Query("""
         UPDATE ICIPSkillRegistry s
         SET s.usageCount = s.usageCount + 1,
