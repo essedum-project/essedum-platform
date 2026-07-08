@@ -2257,6 +2257,10 @@ export class LandingComponent implements OnInit, AfterViewInit {
         if (sidebarMenutemp.length > 0) {
           this.sidebarMenu = sidebarMenutemp;
 
+          if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
+            this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
+          }
+
           // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
           this.sidebarMenu.forEach((item: any) => {
             if (item && item.label === 'Agent MCP Pipelines') {
