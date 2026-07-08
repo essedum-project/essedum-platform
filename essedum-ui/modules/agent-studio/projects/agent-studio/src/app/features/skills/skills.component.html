@@ -29,7 +29,7 @@
 
     <div class="skills-filter-content" *ngIf="isFilterExpanded">
 
-      <!-- TYPE filter -->
+      <!-- TYPE filter — options from hardcoded list (enum values with labels) -->
       <div class="skills-filter-group">
         <label class="skills-filter-label">{{ FILTERTYPELBL }}</label>
         <mat-form-field appearance="fill" class="skills-filter-field">
@@ -50,7 +50,7 @@
         </mat-chip-set>
       </div>
 
-      <!-- CATEGORY filter -->
+      <!-- CATEGORY filter — options from skillsResponse.availableCategories -->
       <div class="skills-filter-group">
         <label class="skills-filter-label">{{ FILTERCATEGORYLBL }}</label>
         <mat-form-field appearance="fill" class="skills-filter-field">
@@ -58,20 +58,23 @@
             [value]="selectedCategory"
             (selectionChange)="onCategoryChange($event.value)"
             placeholder="{{ FILTERALLOPT }}">
-            <mat-option *ngFor="let opt of categoryOptions" [value]="opt.value">
-              {{ opt.label }}
+            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
+            <mat-option
+              *ngFor="let cat of (skillsResponse?.availableCategories ?? [])"
+              [value]="cat">
+              {{ cat }}
             </mat-option>
           </mat-select>
         </mat-form-field>
         <mat-chip-set *ngIf="selectedCategory" class="skills-chip-set">
           <mat-chip removable (removed)="clearCategoryFilter()">
-            {{ getCategoryLabel(selectedCategory) }}
+            {{ selectedCategory }}
             <mat-icon matChipRemove>close</mat-icon>
           </mat-chip>
         </mat-chip-set>
       </div>
 
-      <!-- SUBCATEGORY filter -->
+      <!-- SUBCATEGORY filter — options from skillsResponse.availableSubcategories -->
       <div class="skills-filter-group">
         <label class="skills-filter-label">{{ FILTERSUBCATLBL }}</label>
         <mat-form-field appearance="fill" class="skills-filter-field">
@@ -79,8 +82,11 @@
             [value]="selectedSubcategory"
             (selectionChange)="onSubcategoryChange($event.value)"
             placeholder="{{ FILTERALLOPT }}">
-            <mat-option *ngFor="let opt of subcategoryOptions" [value]="opt.value">
-              {{ opt.label }}
+            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
+            <mat-option
+              *ngFor="let sub of (skillsResponse?.availableSubcategories ?? [])"
+              [value]="sub">
+              {{ sub }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -121,7 +127,7 @@
       <p>{{ EMPTYMESSAGE }}</p>
     </div>
 
-    <!-- Rows -->
+    <!-- Rows — all fields bound directly from the API response Skill object -->
     <div *ngFor="let skill of paginatedSkills" class="skills-row">
 
       <!-- Skill Name -->
@@ -129,7 +135,7 @@
         <div class="skills-icon">
           <mat-icon>psychology</mat-icon>
         </div>
-        <span class="skills-name-text" [matTooltip]="skill.name">{{ skill.name }}</span>
+        <span class="skills-name-text" [matTooltip]="skill.skillName">{{ skill.skillName }}</span>
       </div>
 
       <!-- Type -->
@@ -142,8 +148,8 @@
 
       <!-- Category -->
       <div class="col-sk-category">
-        <span class="skills-category-badge" [ngClass]="getCategoryBadgeClass(skill.category)">
-          {{ skill.category }}
+        <span class="skills-category-badge" [ngClass]="getCategoryBadgeClass(skill.skillCategory)">
+          {{ skill.skillCategory }}
         </span>
       </div>
 
@@ -154,7 +160,7 @@
 
       <!-- Date -->
       <div class="col-sk-date">
-        <span class="skills-date-text">{{ formatDate(skill.createdAt) }}</span>
+        <span class="skills-date-text">{{ formatDate(skill.createdDate) }}</span>
       </div>
 
       <!-- Created By -->
@@ -194,7 +200,7 @@
   </div>
 
   <!-- Pagination -->
-  <app-aip-pagination *ngIf="filteredSkills && filteredSkills.length>0" [pageNumber]="pageNumber"
+  <app-aip-pagination *ngIf="filteredSkills && filteredSkills.length > 0" [pageNumber]="pageNumber"
     [noOfPages]="noOfPages" [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex"
     [hoverStates]="hoverStates" (prevPage)="prevPage()" (nextPage)="nextPage()" (changePage)="changePage($event)">
   </app-aip-pagination>

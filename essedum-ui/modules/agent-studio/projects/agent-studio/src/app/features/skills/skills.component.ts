@@ -1,47 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
-
-export interface Skill {
-  id: string;
-  skillUid?: string;
-  name: string;
-  alias?: string;
-  version: string;
-  // Classification
-  skillType: string;
-  category: string;
-  subcategory?: string;
-  tags?: string;
-  triggerKeywords?: string;
-  // Description
-  description: string;
-  longDescription?: string;
-  // Technical Definition
-  language?: string;
-  framework?: string;
-  runtime?: string;
-  entrypoint?: string;
-  inputSchema?: string;
-  outputSchema?: string;
-  // Availability
-  pipelineScope: string;
-  status: string;
-  visibility: string;
-  // Multi-tenancy
-  organization: string;
-  projectId?: number;
-  // Usage Metrics
-  usageCount?: number;
-  lastUsedDate?: string;
-  // Audit
-  createdBy: string;
-  createdAt: string;
-  lastModifiedBy?: string;
-  lastModifiedDate?: string;
-}
+import { Services, ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
+import { Skill, SkillsListResponse, SkillsService, SkillsServiceMessages } from '../services/skills.service';
 
 @Component({
   selector: 'app-skills',
@@ -50,12 +11,19 @@ export interface Skill {
 })
 export class SkillsComponent implements OnInit {
   loading = false;
-  skills: Skill[] = [];
-  filteredSkills: Skill[] = [];
-  searchTerm = '';
   lastRefreshedTime: Date | null = null;
 
-  // ── Pagination state ────────────────────────────────────────────────────
+  // ── API response object — single source of truth ─────────────────────────
+  skillsResponse: SkillsListResponse | null = null;
+
+  // ── Derived display lists ─────────────────────────────────────────────────
+  filteredSkills: Skill[] = [];
+  paginatedSkills: Skill[] = [];
+
+  // ── Search ────────────────────────────────────────────────────────────────
+  searchTerm = '';
+
+  // ── Pagination state ──────────────────────────────────────────────────────
   pageNumber: number = 1;
   pageSize: number = 5;
   noOfPages: number = 0;
@@ -63,14 +31,14 @@ export class SkillsComponent implements OnInit {
   startIndex: number = 0;
   endIndex: number = 5;
   hoverStates: boolean[] = [];
-  paginatedSkills: Skill[] = [];
 
-  // ── Filter state ─────────────────────────────────────────────────────────
+  // ── Filter state ──────────────────────────────────────────────────────────
   isFilterExpanded = false;
   selectedType = '';
   selectedCategory = '';
   selectedSubcategory = '';
 
+  // Hardcoded type options kept for human-readable labels
   readonly skillTypeOptions = [
     { value: '',                label: 'All' },
     { value: 'CODE_GENERATION', label: 'Code Generation' },
@@ -85,30 +53,9 @@ export class SkillsComponent implements OnInit {
     { value: 'CUSTOM',          label: 'Custom' },
   ];
 
-  readonly categoryOptions = [
-    { value: '',         label: 'All' },
-    { value: 'Backend',  label: 'Backend' },
-    { value: 'Frontend', label: 'Frontend' },
-    { value: 'ML',       label: 'ML' },
-    { value: 'DevOps',   label: 'DevOps' },
-    { value: 'Data',     label: 'Data' },
-  ];
-
-  readonly subcategoryOptions = [
-    { value: '',           label: 'All' },
-    { value: 'SpringBoot', label: 'Spring Boot' },
-    { value: 'FastAPI',    label: 'FastAPI' },
-    { value: 'React',      label: 'React' },
-    { value: 'Angular',    label: 'Angular' },
-    { value: 'LangChain',  label: 'LangChain' },
-    { value: 'Docker',     label: 'Docker' },
-    { value: 'Kubernetes', label: 'Kubernetes' },
-  ];
-
   // ── Page labels ───────────────────────────────────────────────────────────
   readonly PAGETITLE         = 'Skills';
   readonly COLNAME           = 'Skill Name';
-  readonly COLVERSION        = 'Version';
   readonly COLTYPE           = 'Type';
   readonly COLCATEGORY       = 'Category';
   readonly COLDESC           = 'Description';
@@ -120,7 +67,6 @@ export class SkillsComponent implements OnInit {
   readonly EDITLABEL         = 'Edit';
   readonly DELETELABEL       = 'Delete';
   readonly DELETEDMSG        = 'Skill deleted successfully!';
-  // ── Filter / table labels ───────────────────────────────────────────
   readonly FILTERTITLE       = 'FILTER BY:';
   readonly FILTERTYPELBL     = 'TYPE';
   readonly FILTERCATEGORYLBL = 'CATEGORY';
@@ -131,9 +77,10 @@ export class SkillsComponent implements OnInit {
 
   constructor(
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private service: Services,
     private router: Router,
     private route: ActivatedRoute,
+    private skillsService: SkillsService,
   ) {}
 
   ngOnInit(): void {
@@ -143,182 +90,92 @@ export class SkillsComponent implements OnInit {
   loadSkills(): void {
     this.loading = true;
     this.lastRefreshedTime = new Date();
-    // Mock data — replace with real API call when backend is available
-    setTimeout(() => {
-      this.skills = [
-        {
-          id: '1',
-          skillUid: 'skill-uid-001',
-          name: 'Java REST Code Generator',
-          alias: 'java-rest-gen',
-          version: '1.2.0',
-          skillType: 'CODE_GENERATION',
-          category: 'Backend',
-          subcategory: 'SpringBoot',
-          tags: 'java,spring,rest',
-          triggerKeywords: 'generate class,create controller',
-          description: 'Generates Spring Boot REST controllers and service classes from natural language descriptions.',
-          language: 'java',
-          framework: 'SpringBoot',
-          runtime: 'jdk21',
-          pipelineScope: 'ALL',
-          status: 'ACTIVE',
-          visibility: 'PROJECT',
-          organization: 'essedum',
-          usageCount: 128,
-          createdBy: 'admin',
-          createdAt: '2026-05-01T09:00:00Z',
+    const org = sessionStorage.getItem('organization') || '';
+
+    // Backend doesn't filter by subcategory yet — fetch all records and paginate client-side
+    const clientPaging = !!this.selectedSubcategory;
+    const apiPage = clientPaging ? 0 : this.pageNumber - 1;
+    const apiSize = clientPaging ? 1000 : this.pageSize;
+
+    this.skillsService
+      .getSkills(
+        org,
+        apiPage,
+        apiSize,
+        this.selectedType        || undefined,
+        this.selectedCategory    || undefined,
+        this.selectedSubcategory || undefined,
+        this.searchTerm          || undefined,
+      )
+      .subscribe({
+        next: (response: SkillsListResponse) => {
+          this.skillsResponse = response;
+          if (!clientPaging) {
+            this.noOfPages = response.totalPages || 0;
+            this.pageArr = [...Array(this.noOfPages).keys()];
+            this.hoverStates = new Array(this.pageArr.length).fill(false);
+          }
+          this.applyFilter();
+          this.loading = false;
+          this.service.message(SkillsServiceMessages.FETCH_SUCCESS, 'success');
         },
-        {
-          id: '2',
-          skillUid: 'skill-uid-002',
-          name: 'JUnit Test Generator',
-          alias: 'junit-test-gen',
-          version: '1.0.0',
-          skillType: 'TEST_GENERATION',
-          category: 'Backend',
-          subcategory: 'SpringBoot',
-          tags: 'java,junit,testing',
-          description: 'Generates JUnit 5 test cases automatically from existing Java source code.',
-          language: 'java',
-          framework: 'SpringBoot',
-          runtime: 'jdk21',
-          pipelineScope: 'ALL',
-          status: 'ACTIVE',
-          visibility: 'ORG',
-          organization: 'essedum',
-          usageCount: 45,
-          createdBy: 'john.doe',
-          createdAt: '2026-05-15T14:00:00Z',
+        error: () => {
+          this.loading = false;
+          this.service.message(SkillsServiceMessages.FETCH_ERROR, 'error');
         },
-        {
-          id: '3',
-          skillUid: 'skill-uid-003',
-          name: 'Python FastAPI Scaffolding',
-          alias: 'fastapi-scaffold',
-          version: '2.0.0',
-          skillType: 'CODE_GENERATION',
-          category: 'Backend',
-          subcategory: 'FastAPI',
-          tags: 'python,fastapi,rest',
-          description: 'Scaffolds FastAPI endpoints and Pydantic models from OpenAPI specifications.',
-          language: 'python',
-          framework: 'FastAPI',
-          runtime: 'python3.11',
-          pipelineScope: 'ALL',
-          status: 'ACTIVE',
-          visibility: 'GLOBAL',
-          organization: 'essedum',
-          usageCount: 67,
-          createdBy: 'jane.smith',
-          createdAt: '2026-06-01T08:00:00Z',
-        },
-        {
-          id: '4',
-          skillUid: 'skill-uid-004',
-          name: 'React Component Builder',
-          alias: 'react-comp-builder',
-          version: '1.1.0',
-          skillType: 'CODE_GENERATION',
-          category: 'Frontend',
-          subcategory: 'React',
-          tags: 'react,typescript,components',
-          description: 'Generates React functional components with TypeScript and hooks from wireframe descriptions.',
-          language: 'typescript',
-          framework: 'React',
-          runtime: 'node18',
-          pipelineScope: 'SPECIFIC',
-          status: 'ACTIVE',
-          visibility: 'PROJECT',
-          organization: 'essedum',
-          usageCount: 38,
-          createdBy: 'alice.jones',
-          createdAt: '2026-06-10T11:30:00Z',
-        },
-        {
-          id: '5',
-          skillUid: 'skill-uid-005',
-          name: 'Security Vulnerability Scanner',
-          alias: 'sec-scan',
-          version: '1.0.0',
-          skillType: 'SECURITY_SCAN',
-          category: 'DevOps',
-          subcategory: 'Docker',
-          tags: 'security,owasp,vulnerabilities',
-          description: 'Scans code for OWASP Top 10 vulnerabilities and generates remediation suggestions.',
-          pipelineScope: 'ALL',
-          status: 'ACTIVE',
-          visibility: 'ORG',
-          organization: 'essedum',
-          usageCount: 22,
-          createdBy: 'admin',
-          createdAt: '2026-06-20T07:00:00Z',
-        },
-        {
-          id: '6',
-          skillUid: 'skill-uid-006',
-          name: 'LangChain Pipeline Builder',
-          alias: 'lc-pipeline',
-          version: '3.0.0',
-          skillType: 'DATA_PIPELINE',
-          category: 'ML',
-          subcategory: 'LangChain',
-          tags: 'langchain,llm,pipeline',
-          description: 'Generates LangChain pipeline definitions with agents, tools and memory components.',
-          language: 'python',
-          framework: 'LangChain',
-          runtime: 'python3.11',
-          pipelineScope: 'ALL',
-          status: 'INACTIVE',
-          visibility: 'PROJECT',
-          organization: 'essedum',
-          usageCount: 9,
-          createdBy: 'john.doe',
-          createdAt: '2026-07-01T13:00:00Z',
-        },
-      ];
-      this.applyFilter();
-      this.loading = false;
-    }, 400);
+      });
   }
 
   onRefresh(): void {
+    this.pageNumber = 1;
+    this.searchTerm = '';
+    this.selectedType = '';
+    this.selectedCategory = '';
+    this.selectedSubcategory = '';
+    this.isFilterExpanded = false;
     this.loadSkills();
   }
 
   onSearch(term: string): void {
     this.searchTerm = term;
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   onTypeChange(value: string): void {
     this.selectedType = value;
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   onCategoryChange(value: string): void {
     this.selectedCategory = value;
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   onSubcategoryChange(value: string): void {
     this.selectedSubcategory = value;
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   clearTypeFilter(): void {
     this.selectedType = '';
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   clearCategoryFilter(): void {
     this.selectedCategory = '';
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   clearSubcategoryFilter(): void {
     this.selectedSubcategory = '';
-    this.applyFilter();
+    this.pageNumber = 1;
+    this.loadSkills();
   }
 
   toggleFilter(): void {
@@ -326,67 +183,54 @@ export class SkillsComponent implements OnInit {
   }
 
   applyFilter(): void {
-    let result = [...this.skills];
-    if (this.selectedType) {
-      result = result.filter(s => s.skillType === this.selectedType);
-    }
-    if (this.selectedCategory) {
-      result = result.filter(s => s.category === this.selectedCategory);
-    }
+    const source: Skill[] = this.skillsResponse?.skills ?? [];
+
+    // search is server-side; subcategory is client-side until backend adds support
+    this.filteredSkills = this.selectedSubcategory
+      ? source.filter(s => (s.skillSubcategory ?? '') === this.selectedSubcategory)
+      : [...source];
+
     if (this.selectedSubcategory) {
-      result = result.filter(s => s.subcategory === this.selectedSubcategory);
+      // Recalculate pagination from the filtered set
+      this.noOfPages = Math.ceil(this.filteredSkills.length / this.pageSize);
+      this.pageArr = [...Array(this.noOfPages).keys()];
+      this.hoverStates = new Array(this.pageArr.length).fill(false);
+      const start = (this.pageNumber - 1) * this.pageSize;
+      this.paginatedSkills = this.filteredSkills.slice(start, start + this.pageSize);
+    } else {
+      this.paginatedSkills = [...this.filteredSkills];
     }
-    const term = this.searchTerm.toLowerCase().trim();
-    if (term) {
-      result = result.filter(
-        s =>
-          s.name.toLowerCase().includes(term) ||
-          s.description.toLowerCase().includes(term) ||
-          s.createdBy.toLowerCase().includes(term) ||
-          (s.category ?? '').toLowerCase().includes(term),
-      );
-    }
-    this.filteredSkills = result;
-
-    // Reset to first page and recalculate pagination
-    this.pageNumber = 1;
-    this.noOfPages = Math.ceil(this.filteredSkills.length / this.pageSize);
-    this.pageArr = [...Array(this.noOfPages).keys()];
-    this.hoverStates = new Array(this.pageArr.length).fill(false);
-    this.updatePaginatedSkills();
-  }
-
-  updatePaginatedSkills(): void {
-    const startIdx = (this.pageNumber - 1) * this.pageSize;
-    const endIdx = startIdx + this.pageSize;
-    this.paginatedSkills = this.filteredSkills.slice(startIdx, endIdx);
   }
 
   nextPage(): void {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
-      this.changePage();
+      this.selectedSubcategory ? this.applyFilter() : this.changePage();
     }
   }
 
   prevPage(): void {
     if (this.pageNumber - 1 >= 1) {
       this.pageNumber -= 1;
-      this.changePage();
+      this.selectedSubcategory ? this.applyFilter() : this.changePage();
     }
   }
 
   changePage(page?: number): void {
     if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-      if (this.pageNumber > 5) {
-        this.endIndex = this.pageNumber;
-        this.startIndex = this.endIndex - 5;
+      if (this.selectedSubcategory) {
+        this.applyFilter();
       } else {
-        this.startIndex = 0;
-        this.endIndex = 5;
+        if (this.pageNumber > 5) {
+          this.endIndex = this.pageNumber;
+          this.startIndex = this.endIndex - 5;
+        } else {
+          this.startIndex = 0;
+          this.endIndex = 5;
+        }
+        this.loadSkills();
       }
-      this.updatePaginatedSkills();
     }
   }
 
@@ -410,25 +254,19 @@ export class SkillsComponent implements OnInit {
 
   deleteSkill(skill: Skill): void {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Delete Skill',
-        message: `Are you sure you want to delete "${skill.name}"?`,
-        confirmLabel: 'Delete',
-      },
+      data: { entityName: skill.skillName },
     });
-    ref.afterClosed().subscribe((confirmed: boolean) => {
-      if (confirmed) {
-        this.skills = this.skills.filter(s => s.id !== skill.id);
-        
-        // Recalculate pagination after deletion
-        this.noOfPages = Math.ceil(this.filteredSkills.length / this.pageSize);
-        if (this.pageNumber > this.noOfPages && this.noOfPages > 0) {
-          this.pageNumber = this.noOfPages;
-        }
-        
-        this.applyFilter();
-        this.snackBar.open(this.DELETEDMSG, 'Close', { duration: 3000 });
+    ref.afterClosed().subscribe((result: string) => {
+      if (result === 'delete') {
+        this.skillsService.deleteSkill(skill.id).subscribe({
+          next: () => {
+            this.service.message(SkillsServiceMessages.DELETE_SUCCESS, 'success');
+            this.loadSkills();
+          },
+          error: () => {
+            this.service.message(SkillsServiceMessages.DELETE_ERROR, 'error');
+          },
+        });
       }
     });
   }
@@ -437,16 +275,12 @@ export class SkillsComponent implements OnInit {
     return this.skillTypeOptions.find(o => o.value === type)?.label ?? type;
   }
 
-  getCategoryLabel(cat: string): string {
-    return this.categoryOptions.find(o => o.value === cat)?.label ?? cat;
-  }
-
   getTypeBadgeClass(type: string): string {
     return 'type-' + type.toLowerCase().replace(/_/g, '-');
   }
 
   getCategoryBadgeClass(cat: string): string {
-    return 'cat-' + cat.toLowerCase();
+    return 'cat-' + (cat ?? '').toLowerCase();
   }
 
   formatDate(dateStr: string): string {

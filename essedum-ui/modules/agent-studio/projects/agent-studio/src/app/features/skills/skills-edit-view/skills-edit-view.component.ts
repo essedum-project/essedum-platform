@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { Skill } from '../skills.component';
+import { Services } from '@essedum/shared-lib';
+import { Skill, SkillUpdateRequest, SkillsService, SkillsServiceMessages } from '../../services/skills.service';
 
 @Component({
   selector: 'app-skills-edit-view',
@@ -10,11 +11,36 @@ import { Skill } from '../skills.component';
   styleUrls: ['./skills-edit-view.component.scss'],
 })
 export class SkillsEditViewComponent implements OnInit {
-  form!: FormGroup;
+  @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
+
+  skillModel: Partial<SkillUpdateRequest> = {
+    skillName: '',
+    skillAlias: '',
+    skillVersion: '1.0.0',
+    skillType: '',
+    skillCategory: '',
+    skillSubcategory: '',
+    tags: '',
+    triggerKeywords: '',
+    description: '',
+    language: '',
+    framework: '',
+    runtime: '',
+    entrypoint: '',
+    inputSchema: '',
+    outputSchema: '',
+    pipelineScope: 'ALL',
+    status: 'ACTIVE',
+    visibility: 'PROJECT',
+  };
+
   isView = false;
   isEdit = false;
   showError = false;
+  saving = false;
+  loadingSkill = false;
   skill: Skill | null = null;
+  touchedFields: Set<string> = new Set();
 
   // Section collapse states
   sectionStates: Record<string, boolean> = {
@@ -150,26 +176,40 @@ export class SkillsEditViewComponent implements OnInit {
   readonly ERRGLOBAL     = 'Please fill in all required fields.';
 
   constructor(
-    private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
+    private skillsService: SkillsService,
+    private service: Services,
   ) {}
 
   ngOnInit(): void {
-    // Detect mode from first URL segment (edit or view)
     const urlSegments = this.route.snapshot.url;
     const mode = urlSegments.length > 0 ? urlSegments[0].path : 'edit';
     this.isView = mode === 'view';
     this.isEdit = mode === 'edit';
 
-    // Retrieve skill passed via router navigation state
-    this.skill = (window.history.state as any)?.skill ?? null;
+    // Pre-fill with router state immediately for instant display
+    const stateSkill = (window.history.state as any)?.skill ?? null;
+    if (stateSkill) {
+      this.skill = stateSkill;
+      this.populateModel();
+    }
 
-    this.buildForm();
-
-    if (this.isView) {
-      this.form.disable();
+    // Always fetch fresh/complete data from API
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      this.loadingSkill = true;
+      this.skillsService.getSkillById(id).subscribe({
+        next: (skill: Skill) => {
+          this.skill = skill;
+          this.populateModel();
+          this.loadingSkill = false;
+        },
+        error: () => {
+          this.loadingSkill = false;
+        },
+      });
     }
   }
 
@@ -177,49 +217,121 @@ export class SkillsEditViewComponent implements OnInit {
     return this.isView ? 'View Skill' : 'Edit Skill';
   }
 
-  buildForm(): void {
-    const s = this.skill;
-    this.form = this.fb.group({
-      // Basic Information
-      name:            [s?.name             ?? '', [Validators.required, Validators.maxLength(256)]],
-      alias:           [s?.alias            ?? '', [Validators.maxLength(128)]],
-      version:         [s?.version          ?? '1.0.0', [Validators.required, Validators.maxLength(20)]],
-      skillType:       [s?.skillType        ?? '', [Validators.required]],
-      category:        [s?.category         ?? '', [Validators.required]],
-      subcategory:     [s?.subcategory      ?? ''],
-      description:     [s?.description      ?? '', [Validators.required, Validators.maxLength(512)]],
-      longDescription: [s?.longDescription  ?? ''],
-      // Technical Details
-      language:        [s?.language         ?? ''],
-      framework:       [s?.framework        ?? '', [Validators.maxLength(128)]],
-      runtime:         [s?.runtime          ?? ''],
-      entrypoint:      [s?.entrypoint       ?? '', [Validators.maxLength(512)]],
-      tags:            [s?.tags             ?? ''],
-      triggerKeywords: [s?.triggerKeywords  ?? ''],
-      inputSchema:     [s?.inputSchema      ?? ''],
-      outputSchema:    [s?.outputSchema     ?? ''],
-      // Availability & Access
-      pipelineScope:   [s?.pipelineScope    ?? 'ALL',     [Validators.required]],
-      status:          [s?.status           ?? 'ACTIVE',  [Validators.required]],
-      visibility:      [s?.visibility       ?? 'PROJECT', [Validators.required]],
-      organization:    [s?.organization     ?? '', [Validators.required, Validators.maxLength(256)]],
-      projectId:       [s?.projectId        ?? null],
-    });
+  private populateModel(): void {
+    if (!this.skill) return;
+    this.skillModel = {
+      skillName: this.skill.skillName,
+      skillAlias: this.skill.skillAlias || '',
+      skillVersion: this.skill.skillVersion,
+      skillType: this.skill.skillType,
+      skillCategory: this.skill.skillCategory,
+      skillSubcategory: this.skill.skillSubcategory || '',
+      tags: this.skill.tags || '',
+      triggerKeywords: this.skill.triggerKeywords || '',
+      description: this.skill.description,
+      language: this.skill.language || '',
+      framework: this.skill.framework || '',
+      runtime: this.skill.runtime || '',
+      entrypoint: this.skill.entrypoint || '',
+      inputSchema: this.skill.inputSchema || '',
+      outputSchema: this.skill.outputSchema || '',
+      pipelineScope: this.skill.pipelineScope,
+      status: this.skill.status,
+      visibility: this.skill.visibility,
+    };
   }
 
   toggleSection(key: string): void {
     this.sectionStates[key] = !this.sectionStates[key];
   }
 
+  markFieldTouched(fieldName: string): void {
+    this.touchedFields.add(fieldName);
+  }
+
+  isFieldInvalid(fieldName: string, control: any): boolean {
+    if (!this.touchedFields.has(fieldName)) return false;
+    return control?.invalid ?? false;
+  }
+
+  isFieldRequired(fieldName: string): boolean {
+    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+    return required.includes(fieldName);
+  }
+
+  validateField(fieldName: string, value: string): boolean {
+    if (this.isFieldRequired(fieldName) && !value?.trim()) return false;
+
+    const maxLengths: Record<string, number> = {
+      skillName: 256,
+      skillAlias: 128,
+      skillVersion: 20,
+      description: 512,
+      framework: 128,
+      entrypoint: 512,
+      organization: 256,
+    };
+
+    if (maxLengths[fieldName] && value?.length > maxLengths[fieldName]) return false;
+    return true;
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (!this.isFormValid()) {
       this.showError = true;
-      this.form.markAllAsTouched();
       return;
     }
     this.showError = false;
-    // TODO: call service to update the skill
-    this.goBack();
+    this.saving = true;
+
+    const body: SkillUpdateRequest = {
+      skillName: this.skillModel.skillName!,
+      skillVersion: this.skillModel.skillVersion!,
+      skillType: this.skillModel.skillType!,
+      skillCategory: this.skillModel.skillCategory!,
+      description: this.skillModel.description!,
+      pipelineScope: this.skillModel.pipelineScope!,
+      status: this.skillModel.status!,
+      visibility: this.skillModel.visibility!,
+      ...(this.skillModel.skillAlias && { skillAlias: this.skillModel.skillAlias }),
+      ...(this.skillModel.skillSubcategory && { skillSubcategory: this.skillModel.skillSubcategory }),
+      ...(this.skillModel.tags && { tags: this.skillModel.tags }),
+      ...(this.skillModel.triggerKeywords && { triggerKeywords: this.skillModel.triggerKeywords }),
+      ...(this.skillModel.language && { language: this.skillModel.language }),
+      ...(this.skillModel.framework && { framework: this.skillModel.framework }),
+      ...(this.skillModel.runtime && { runtime: this.skillModel.runtime }),
+      ...(this.skillModel.entrypoint && { entrypoint: this.skillModel.entrypoint }),
+      ...(this.skillModel.inputSchema && { inputSchema: this.skillModel.inputSchema }),
+      ...(this.skillModel.outputSchema && { outputSchema: this.skillModel.outputSchema }),
+    };
+
+    const id = this.skill?.id ?? Number(this.route.snapshot.paramMap.get('id'));
+    this.skillsService.updateSkill(id, body).subscribe({
+      next: (updated: Skill) => {
+        this.skill = updated;
+        this.saving = false;
+        this.service.message(SkillsServiceMessages.UPDATE_SUCCESS, 'success');
+        this.goBack();
+      },
+      error: () => {
+        this.saving = false;
+        this.service.message(SkillsServiceMessages.UPDATE_ERROR, 'error');
+      },
+    });
+  }
+
+  private isFormValid(): boolean {
+    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+    for (const field of required) {
+      const value = (this.skillModel as any)[field];
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        return false;
+      }
+      if (!this.validateField(field, value)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   goBack(): void {

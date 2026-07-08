@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Location } from '@angular/common';
+import { Services } from '@essedum/shared-lib';
+import { Skill, SkillCreateRequest, SkillCreateResponse, SkillsService, SkillsServiceMessages } from '../../services/skills.service';
 
 @Component({
   selector: 'app-skills-add',
@@ -8,8 +10,35 @@ import { Location } from '@angular/common';
   styleUrls: ['./skills-add.component.scss'],
 })
 export class SkillsAddComponent implements OnInit {
-  form!: FormGroup;
+  @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
+
+  skillModel: Partial<SkillCreateRequest> = {
+    skillName: '',
+    skillAlias: '',
+    skillVersion: '1.0.0',
+    skillType: '',
+    skillCategory: '',
+    skillSubcategory: '',
+    tags: '',
+    triggerKeywords: '',
+    description: '',
+    language: '',
+    framework: '',
+    runtime: '',
+    entrypoint: '',
+    inputSchema: '',
+    outputSchema: '',
+    pipelineScope: 'ALL',
+    status: 'ACTIVE',
+    visibility: 'PROJECT',
+  };
+
   showError = false;
+  saving = false;
+  touchedFields: Set<string> = new Set();
+
+  // Populated after a successful create call
+  createResponse: SkillCreateResponse | null = null;
 
   // Section collapse states
   sectionStates: Record<string, boolean> = {
@@ -117,8 +146,6 @@ export class SkillsAddComponent implements OnInit {
   readonly LBLPIPESCOPE    = 'Pipeline Scope';
   readonly LBLSTATUS       = 'Status';
   readonly LBLVISIBILITY   = 'Visibility';
-  readonly LBLORG          = 'Organization';
-  readonly LBLPROJECTID    = 'Project ID';
   // ── Placeholders ──────────────────────────────────────────────────────
   readonly PHNAME         = 'Java REST Code Generator';
   readonly PHALIAS        = 'java-rest-gen';
@@ -131,8 +158,6 @@ export class SkillsAddComponent implements OnInit {
   readonly PHTRIGKW       = 'Comma-separated: generate class, create endpoint';
   readonly PHINPUTSCHEMA  = '{"type":"object","properties":{...}}';
   readonly PHOUTPUTSCHEMA = '{"type":"object","properties":{...}}';
-  readonly PHORG          = 'essedum';
-  readonly PHPROJECTID    = '42';
   // ── Buttons ───────────────────────────────────────────────────────────
   readonly BTNCANCEL  = 'Cancel';
   readonly BTNSAVE    = 'Save';
@@ -142,56 +167,108 @@ export class SkillsAddComponent implements OnInit {
   readonly ERRMAXALIAS   = 'Max 128 characters';
   readonly ERRMAXVERSION = 'Max 20 characters';
   readonly ERRMAXDESC    = 'Max 512 characters';
-  readonly ERRMAXORG     = 'Max 256 characters';
   readonly ERRGLOBAL     = 'Please fill in all required fields.';
 
   constructor(
-    private fb: FormBuilder,
     private location: Location,
+    private skillsService: SkillsService,
+    private service: Services,
   ) {}
 
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      // Basic Information
-      name:            ['', [Validators.required, Validators.maxLength(256)]],
-      alias:           ['', [Validators.maxLength(128)]],
-      version:         ['1.0.0', [Validators.required, Validators.maxLength(20)]],
-      skillType:       ['', [Validators.required]],
-      category:        ['', [Validators.required]],
-      subcategory:     [''],
-      description:     ['', [Validators.required, Validators.maxLength(512)]],
-      longDescription: [''],
-      // Technical Details
-      language:        [''],
-      framework:       ['', [Validators.maxLength(128)]],
-      runtime:         [''],
-      entrypoint:      ['', [Validators.maxLength(512)]],
-      tags:            [''],
-      triggerKeywords: [''],
-      inputSchema:     [''],
-      outputSchema:    [''],
-      // Availability & Access
-      pipelineScope:   ['ALL',     [Validators.required]],
-      status:          ['ACTIVE',  [Validators.required]],
-      visibility:      ['PROJECT', [Validators.required]],
-      organization:    ['', [Validators.required, Validators.maxLength(256)]],
-      projectId:       [null],
-    });
-  }
+  ngOnInit(): void {}
 
   toggleSection(key: string): void {
     this.sectionStates[key] = !this.sectionStates[key];
   }
 
+  markFieldTouched(fieldName: string): void {
+    this.touchedFields.add(fieldName);
+  }
+
+  isFieldInvalid(fieldName: string, control: any): boolean {
+    if (!this.touchedFields.has(fieldName)) return false;
+    return control?.invalid ?? false;
+  }
+
+  isFieldRequired(fieldName: string): boolean {
+    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+    return required.includes(fieldName);
+  }
+
+  validateField(fieldName: string, value: string): boolean {
+    if (this.isFieldRequired(fieldName) && !value?.trim()) return false;
+
+    const maxLengths: Record<string, number> = {
+      skillName: 256,
+      skillAlias: 128,
+      skillVersion: 20,
+      description: 512,
+      framework: 128,
+      entrypoint: 512,
+    };
+
+    if (maxLengths[fieldName] && value?.length > maxLengths[fieldName]) return false;
+    return true;
+  }
+
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (!this.isFormValid()) {
       this.showError = true;
-      this.form.markAllAsTouched();
       return;
     }
     this.showError = false;
-    // TODO: call service to persist the new skill
-    this.goBack();
+    this.saving = true;
+
+    const org = sessionStorage.getItem('organization') || 'infosys';
+    const projectId = JSON.parse(sessionStorage.getItem('project') || '{}')?.id || 101;
+
+    const body: SkillCreateRequest = {
+      skillName: this.skillModel.skillName!,
+      skillVersion: this.skillModel.skillVersion!,
+      skillType: this.skillModel.skillType!,
+      skillCategory: this.skillModel.skillCategory!,
+      description: this.skillModel.description!,
+      pipelineScope: this.skillModel.pipelineScope!,
+      status: this.skillModel.status!,
+      visibility: this.skillModel.visibility!,
+      ...(this.skillModel.skillAlias && { skillAlias: this.skillModel.skillAlias }),
+      ...(this.skillModel.skillSubcategory && { skillSubcategory: this.skillModel.skillSubcategory }),
+      ...(this.skillModel.tags && { tags: this.skillModel.tags }),
+      ...(this.skillModel.triggerKeywords && { triggerKeywords: this.skillModel.triggerKeywords }),
+      ...(this.skillModel.language && { language: this.skillModel.language }),
+      ...(this.skillModel.framework && { framework: this.skillModel.framework }),
+      ...(this.skillModel.runtime && { runtime: this.skillModel.runtime }),
+      ...(this.skillModel.entrypoint && { entrypoint: this.skillModel.entrypoint }),
+      ...(this.skillModel.inputSchema && { inputSchema: this.skillModel.inputSchema }),
+      ...(this.skillModel.outputSchema && { outputSchema: this.skillModel.outputSchema }),
+    };
+
+    this.skillsService.createSkill(org, projectId, body).subscribe({
+      next: (response: SkillCreateResponse) => {
+        this.createResponse = response;
+        this.saving = false;
+        this.service.message(SkillsServiceMessages.CREATE_SUCCESS, 'success');
+        this.goBack();
+      },
+      error: () => {
+        this.saving = false;
+        this.service.message(SkillsServiceMessages.CREATE_ERROR, 'error');
+      },
+    });
+  }
+
+  private isFormValid(): boolean {
+    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+    for (const field of required) {
+      const value = (this.skillModel as any)[field];
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        return false;
+      }
+      if (!this.validateField(field, value)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   goBack(): void {

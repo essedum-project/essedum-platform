@@ -86,6 +86,7 @@ import { LangfuseComponent } from '../features/langfuse/langfuse.component';
 import { SkillsComponent } from '../features/skills/skills.component';
 import { SkillsAddComponent } from '../features/skills/skills-add/skills-add.component';
 import { SkillsEditViewComponent } from '../features/skills/skills-edit-view/skills-edit-view.component';
+import { SkillsService } from '../features/services/skills.service';
 
 // EnlCodeEditorComponent now lives in @essedum/shared-lib (2026-06-03 refactor).
 // It's declared by SharedLibUiModule which agent-studio already imports below.
@@ -229,6 +230,7 @@ import { environment } from '../../environments/environment';
     GitHubService,
     AgentPipelineService,
     AgentDirectoryService,
+    SkillsService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
