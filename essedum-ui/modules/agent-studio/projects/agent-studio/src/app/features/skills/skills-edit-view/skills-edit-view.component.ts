@@ -3,7 +3,18 @@ import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Services } from '@essedum/shared-lib';
-import { Skill, SkillUpdateRequest, SkillsService, SkillsServiceMessages } from '../../services/skills.service';
+import {
+  Skill,
+  SkillUpdateRequest,
+  SkillsService,
+  SkillsServiceMessages,
+  SkillFormModel,
+  SkillType,
+  SkillCategory,
+  SkillStatus,
+  SkillVisibility,
+  PipelineScope,
+} from '../../services/skills.service';
 
 @Component({
   selector: 'app-skills-edit-view',
@@ -13,26 +24,7 @@ import { Skill, SkillUpdateRequest, SkillsService, SkillsServiceMessages } from 
 export class SkillsEditViewComponent implements OnInit {
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
 
-  skillModel: Partial<SkillUpdateRequest> = {
-    skillName: '',
-    skillAlias: '',
-    skillVersion: '1.0.0',
-    skillType: '',
-    skillCategory: '',
-    skillSubcategory: '',
-    tags: '',
-    triggerKeywords: '',
-    description: '',
-    language: '',
-    framework: '',
-    runtime: '',
-    entrypoint: '',
-    inputSchema: '',
-    outputSchema: '',
-    pipelineScope: 'ALL',
-    status: 'ACTIVE',
-    visibility: 'PROJECT',
-  };
+  skillModel: SkillFormModel = this.initializeSkillModel();
 
   isView = false;
   isEdit = false;
@@ -42,12 +34,17 @@ export class SkillsEditViewComponent implements OnInit {
   skill: Skill | null = null;
   touchedFields: Set<string> = new Set();
 
-  // Section collapse states
   sectionStates: Record<string, boolean> = {
     basic:        true,
-    technical:    false,
+    technical:    true,
     availability: true,
   };
+
+  readonly SkillType = SkillType;
+  readonly SkillCategory = SkillCategory;
+  readonly SkillStatus = SkillStatus;
+  readonly SkillVisibility = SkillVisibility;
+  readonly PipelineScope = PipelineScope;
 
   readonly skillTypeOptions = [
     { value: 'CODE_GENERATION', label: 'Code Generation' },
@@ -122,11 +119,9 @@ export class SkillsEditViewComponent implements OnInit {
     { value: 'PRIVATE', label: 'Private' },
   ];
 
-  // ── Section headers ────────────────────────────────────────────────────
   readonly SECLBLBASIC   = 'Basic Information';
   readonly SECLBLTECH    = 'Technical Details';
   readonly SECLBLAVA     = 'Availability & Access';
-  // ── Field labels ──────────────────────────────────────────────────────
   readonly LBLNAME         = 'Skill Name';
   readonly LBLALIAS        = 'Alias';
   readonly LBLVERSION      = 'Version';
@@ -148,7 +143,6 @@ export class SkillsEditViewComponent implements OnInit {
   readonly LBLVISIBILITY   = 'Visibility';
   readonly LBLORG          = 'Organization';
   readonly LBLPROJECTID    = 'Project ID';
-  // ── Placeholders ──────────────────────────────────────────────────────
   readonly PHNAME         = 'Java REST Code Generator';
   readonly PHALIAS        = 'java-rest-gen';
   readonly PHVERSION      = '1.0.0';
@@ -162,11 +156,9 @@ export class SkillsEditViewComponent implements OnInit {
   readonly PHOUTPUTSCHEMA = '{"type":"object","properties":{...}}';
   readonly PHORG          = 'essedum';
   readonly PHPROJECTID    = '42';
-  // ── Buttons ───────────────────────────────────────────────────────────
   readonly BTNCANCEL  = 'Cancel';
   readonly BTNCLOSE   = 'Close';
   readonly BTNUPDATE  = 'Update';
-  // ── Errors ────────────────────────────────────────────────────────────
   readonly ERRREQ        = 'This field is required';
   readonly ERRMAXNAME    = 'Max 256 characters';
   readonly ERRMAXALIAS   = 'Max 128 characters';
@@ -189,14 +181,12 @@ export class SkillsEditViewComponent implements OnInit {
     this.isView = mode === 'view';
     this.isEdit = mode === 'edit';
 
-    // Pre-fill with router state immediately for instant display
     const stateSkill = (window.history.state as any)?.skill ?? null;
     if (stateSkill) {
       this.skill = stateSkill;
       this.populateModel();
     }
 
-    // Always fetch fresh/complete data from API
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
       this.loadingSkill = true;
@@ -311,6 +301,7 @@ export class SkillsEditViewComponent implements OnInit {
         this.skill = updated;
         this.saving = false;
         this.service.message(SkillsServiceMessages.UPDATE_SUCCESS, 'success');
+        this.skillsService.triggerListRefresh();
         this.goBack();
       },
       error: () => {
@@ -332,6 +323,29 @@ export class SkillsEditViewComponent implements OnInit {
       }
     }
     return true;
+  }
+
+  private initializeSkillModel(): SkillFormModel {
+    return {
+      skillName: '',
+      skillAlias: '',
+      skillVersion: '1.0.0',
+      skillType: '',
+      skillCategory: '',
+      skillSubcategory: '',
+      tags: '',
+      triggerKeywords: '',
+      description: '',
+      language: '',
+      framework: '',
+      runtime: '',
+      entrypoint: '',
+      inputSchema: '',
+      outputSchema: '',
+      pipelineScope: PipelineScope.ALL,
+      status: SkillStatus.ACTIVE,
+      visibility: SkillVisibility.PROJECT,
+    };
   }
 
   goBack(): void {

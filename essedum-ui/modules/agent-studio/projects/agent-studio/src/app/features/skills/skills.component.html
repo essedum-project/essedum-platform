@@ -12,94 +12,14 @@
     (add)="openAdd()">
   </app-aip-header>
 
-  <!-- Filter panel: collapsible -->
-  <div class="skills-filter-panel">
-    <div
-      class="skills-filter-header"
-      [class.expanded]="isFilterExpanded"
-      (click)="toggleFilter()">
-      <div class="skills-filter-header-left">
-        <mat-icon class="skills-filter-icon">filter_list</mat-icon>
-        <span class="skills-filter-title">{{ FILTERTITLE }}</span>
-      </div>
-      <mat-icon class="skills-filter-toggle" [class.rotated]="isFilterExpanded">
-        keyboard_arrow_up
-      </mat-icon>
-    </div>
-
-    <div class="skills-filter-content" *ngIf="isFilterExpanded">
-
-      <!-- TYPE filter — options from hardcoded list (enum values with labels) -->
-      <div class="skills-filter-group">
-        <label class="skills-filter-label">{{ FILTERTYPELBL }}</label>
-        <mat-form-field appearance="fill" class="skills-filter-field">
-          <mat-select
-            [value]="selectedType"
-            (selectionChange)="onTypeChange($event.value)"
-            placeholder="{{ FILTERALLOPT }}">
-            <mat-option *ngFor="let opt of skillTypeOptions" [value]="opt.value">
-              {{ opt.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-chip-set *ngIf="selectedType" class="skills-chip-set">
-          <mat-chip removable (removed)="clearTypeFilter()">
-            {{ getTypeLabel(selectedType) }}
-            <mat-icon matChipRemove>close</mat-icon>
-          </mat-chip>
-        </mat-chip-set>
-      </div>
-
-      <!-- CATEGORY filter — options from skillsResponse.availableCategories -->
-      <div class="skills-filter-group">
-        <label class="skills-filter-label">{{ FILTERCATEGORYLBL }}</label>
-        <mat-form-field appearance="fill" class="skills-filter-field">
-          <mat-select
-            [value]="selectedCategory"
-            (selectionChange)="onCategoryChange($event.value)"
-            placeholder="{{ FILTERALLOPT }}">
-            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
-            <mat-option
-              *ngFor="let cat of (skillsResponse?.availableCategories ?? [])"
-              [value]="cat">
-              {{ cat }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-chip-set *ngIf="selectedCategory" class="skills-chip-set">
-          <mat-chip removable (removed)="clearCategoryFilter()">
-            {{ selectedCategory }}
-            <mat-icon matChipRemove>close</mat-icon>
-          </mat-chip>
-        </mat-chip-set>
-      </div>
-
-      <!-- SUBCATEGORY filter — options from skillsResponse.availableSubcategories -->
-      <div class="skills-filter-group">
-        <label class="skills-filter-label">{{ FILTERSUBCATLBL }}</label>
-        <mat-form-field appearance="fill" class="skills-filter-field">
-          <mat-select
-            [value]="selectedSubcategory"
-            (selectionChange)="onSubcategoryChange($event.value)"
-            placeholder="{{ FILTERALLOPT }}">
-            <mat-option value="">{{ FILTERALLOPT }}</mat-option>
-            <mat-option
-              *ngFor="let sub of (skillsResponse?.availableSubcategories ?? [])"
-              [value]="sub">
-              {{ sub }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-chip-set *ngIf="selectedSubcategory" class="skills-chip-set">
-          <mat-chip removable (removed)="clearSubcategoryFilter()">
-            {{ selectedSubcategory }}
-            <mat-icon matChipRemove>close</mat-icon>
-          </mat-chip>
-        </mat-chip-set>
-      </div>
-
-    </div>
-  </div>
+  <!-- AIP Filter Component  -->
+  <app-aip-filter
+    [tagrefresh]="tagrefresh"
+    [servicev1]="servicev1"
+    [selectedConnectionTypeList]="{ selectedAdapterType: selectedSkillTypes }"
+    (tagSelected)="tagSelectedEvent($event)"
+    (filterStatusChange)="onFilterStatusChange($event)">
+  </app-aip-filter>
 
   <!-- Column Headers -->
   <div class="skills-table-header">
@@ -127,7 +47,6 @@
       <p>{{ EMPTYMESSAGE }}</p>
     </div>
 
-    <!-- Rows — all fields bound directly from the API response Skill object -->
     <div *ngFor="let skill of paginatedSkills" class="skills-row">
 
       <!-- Skill Name -->

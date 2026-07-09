@@ -2,7 +2,19 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Location } from '@angular/common';
 import { Services } from '@essedum/shared-lib';
-import { Skill, SkillCreateRequest, SkillCreateResponse, SkillsService, SkillsServiceMessages } from '../../services/skills.service';
+import {
+  Skill,
+  SkillCreateRequest,
+  SkillCreateResponse,
+  SkillsService,
+  SkillsServiceMessages,
+  SkillFormModel,
+  SkillType,
+  SkillCategory,
+  SkillStatus,
+  SkillVisibility,
+  PipelineScope,
+} from '../../services/skills.service';
 
 @Component({
   selector: 'app-skills-add',
@@ -12,40 +24,24 @@ import { Skill, SkillCreateRequest, SkillCreateResponse, SkillsService, SkillsSe
 export class SkillsAddComponent implements OnInit {
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
 
-  skillModel: Partial<SkillCreateRequest> = {
-    skillName: '',
-    skillAlias: '',
-    skillVersion: '1.0.0',
-    skillType: '',
-    skillCategory: '',
-    skillSubcategory: '',
-    tags: '',
-    triggerKeywords: '',
-    description: '',
-    language: '',
-    framework: '',
-    runtime: '',
-    entrypoint: '',
-    inputSchema: '',
-    outputSchema: '',
-    pipelineScope: 'ALL',
-    status: 'ACTIVE',
-    visibility: 'PROJECT',
-  };
-
+  skillModel: SkillFormModel = this.initializeSkillModel();
   showError = false;
   saving = false;
   touchedFields: Set<string> = new Set();
 
-  // Populated after a successful create call
   createResponse: SkillCreateResponse | null = null;
 
-  // Section collapse states
   sectionStates: Record<string, boolean> = {
     basic:        true,
-    technical:    false,
+    technical:    true,
     availability: true,
   };
+
+  readonly SkillType = SkillType;
+  readonly SkillCategory = SkillCategory;
+  readonly SkillStatus = SkillStatus;
+  readonly SkillVisibility = SkillVisibility;
+  readonly PipelineScope = PipelineScope;
 
   readonly skillTypeOptions = [
     { value: 'CODE_GENERATION', label: 'Code Generation' },
@@ -121,12 +117,9 @@ export class SkillsAddComponent implements OnInit {
   ];
 
   readonly PAGETITLE = 'Create Skill';
-
-  // ── Section headers ────────────────────────────────────────────────────
   readonly SECLBLBASIC   = 'Basic Information';
   readonly SECLBLTECH    = 'Technical Details';
   readonly SECLBLAVA     = 'Availability & Access';
-  // ── Field labels ──────────────────────────────────────────────────────
   readonly LBLNAME         = 'Skill Name';
   readonly LBLALIAS        = 'Alias';
   readonly LBLVERSION      = 'Version';
@@ -146,7 +139,6 @@ export class SkillsAddComponent implements OnInit {
   readonly LBLPIPESCOPE    = 'Pipeline Scope';
   readonly LBLSTATUS       = 'Status';
   readonly LBLVISIBILITY   = 'Visibility';
-  // ── Placeholders ──────────────────────────────────────────────────────
   readonly PHNAME         = 'Java REST Code Generator';
   readonly PHALIAS        = 'java-rest-gen';
   readonly PHVERSION      = '1.0.0';
@@ -158,10 +150,8 @@ export class SkillsAddComponent implements OnInit {
   readonly PHTRIGKW       = 'Comma-separated: generate class, create endpoint';
   readonly PHINPUTSCHEMA  = '{"type":"object","properties":{...}}';
   readonly PHOUTPUTSCHEMA = '{"type":"object","properties":{...}}';
-  // ── Buttons ───────────────────────────────────────────────────────────
   readonly BTNCANCEL  = 'Cancel';
   readonly BTNSAVE    = 'Save';
-  // ── Errors ────────────────────────────────────────────────────────────
   readonly ERRREQ        = 'This field is required';
   readonly ERRMAXNAME    = 'Max 256 characters';
   readonly ERRMAXALIAS   = 'Max 128 characters';
@@ -248,6 +238,7 @@ export class SkillsAddComponent implements OnInit {
         this.createResponse = response;
         this.saving = false;
         this.service.message(SkillsServiceMessages.CREATE_SUCCESS, 'success');
+        this.skillsService.triggerListRefresh();
         this.goBack();
       },
       error: () => {
@@ -269,6 +260,29 @@ export class SkillsAddComponent implements OnInit {
       }
     }
     return true;
+  }
+
+  private initializeSkillModel(): SkillFormModel {
+    return {
+      skillName: '',
+      skillAlias: '',
+      skillVersion: '1.0.0',
+      skillType: '',
+      skillCategory: '',
+      skillSubcategory: '',
+      tags: '',
+      triggerKeywords: '',
+      description: '',
+      language: '',
+      framework: '',
+      runtime: '',
+      entrypoint: '',
+      inputSchema: '',
+      outputSchema: '',
+      pipelineScope: PipelineScope.ALL,
+      status: SkillStatus.ACTIVE,
+      visibility: SkillVisibility.PROJECT,
+    };
   }
 
   goBack(): void {

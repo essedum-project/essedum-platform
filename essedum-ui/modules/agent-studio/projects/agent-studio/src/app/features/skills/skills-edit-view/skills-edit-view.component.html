@@ -124,7 +124,7 @@
         <div class="form-row">
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLLANGUAGE }}</mat-label>
-            <mat-select [(ngModel)]="skillModel.language" name="language" placeholder="Select language">
+            <mat-select [(ngModel)]="skillModel.language" name="language" [disabled]="isView" placeholder="Select language">
               <mat-option value="">— None —</mat-option>
               <mat-option *ngFor="let opt of languageOptions" [value]="opt.value">
                 {{ opt.label }}
@@ -133,7 +133,7 @@
           </mat-form-field>
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLRUNTIME }}</mat-label>
-            <mat-select [(ngModel)]="skillModel.runtime" name="runtime" placeholder="Select runtime">
+            <mat-select [(ngModel)]="skillModel.runtime" name="runtime" [disabled]="isView" placeholder="Select runtime">
               <mat-option value="">— None —</mat-option>
               <mat-option *ngFor="let opt of runtimeOptions" [value]="opt.value">
                 {{ opt.label }}
@@ -146,12 +146,12 @@
         <div class="form-row">
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLFRAMEWORK }}</mat-label>
-            <input matInput [(ngModel)]="skillModel.framework" name="framework" [placeholder]="PHFRAMEWORK" />
+            <input matInput [(ngModel)]="skillModel.framework" name="framework" [readonly]="isView" [placeholder]="PHFRAMEWORK" />
             <mat-error *ngIf="isFieldInvalid('framework', skillModel.framework) && skillModel.framework?.length! > 128">Max 128 chars</mat-error>
           </mat-form-field>
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLENTRYPOINT }}</mat-label>
-            <input matInput [(ngModel)]="skillModel.entrypoint" name="entrypoint" [placeholder]="PHENTRYPOINT" />
+            <input matInput [(ngModel)]="skillModel.entrypoint" name="entrypoint" [readonly]="isView" [placeholder]="PHENTRYPOINT" />
             <mat-error *ngIf="isFieldInvalid('entrypoint', skillModel.entrypoint) && skillModel.entrypoint?.length! > 512">Max 512 chars</mat-error>
           </mat-form-field>
         </div>
@@ -159,28 +159,28 @@
         <!-- Tags -->
         <mat-form-field appearance="fill" class="full-width" floatLabel="always">
           <mat-label>{{ LBLTAGS }}</mat-label>
-          <input matInput [(ngModel)]="skillModel.tags" name="tags" [placeholder]="PHTAGS" />
+          <input matInput [(ngModel)]="skillModel.tags" name="tags" [readonly]="isView" [placeholder]="PHTAGS" />
           <mat-hint>Comma-separated list of tags</mat-hint>
         </mat-form-field>
 
         <!-- Trigger Keywords -->
         <mat-form-field appearance="fill" class="full-width" floatLabel="always">
           <mat-label>{{ LBLTRIGKEYWORDS }}</mat-label>
-          <input matInput [(ngModel)]="skillModel.triggerKeywords" name="triggerKeywords" [placeholder]="PHTRIGKW" />
+          <input matInput [(ngModel)]="skillModel.triggerKeywords" name="triggerKeywords" [readonly]="isView" [placeholder]="PHTRIGKW" />
           <mat-hint>Comma-separated keywords that auto-match this skill</mat-hint>
         </mat-form-field>
 
         <!-- Input Schema -->
         <mat-form-field appearance="fill" class="full-width" floatLabel="always">
           <mat-label>{{ LBLINPUTSCHEMA }}</mat-label>
-          <textarea matInput [(ngModel)]="skillModel.inputSchema" name="inputSchema"
+          <textarea matInput [(ngModel)]="skillModel.inputSchema" name="inputSchema" [readonly]="isView"
             [placeholder]="PHINPUTSCHEMA" rows="3"></textarea>
         </mat-form-field>
 
         <!-- Output Schema -->
         <mat-form-field appearance="fill" class="full-width" floatLabel="always">
           <mat-label>{{ LBLOUTPUTSCHEMA }}</mat-label>
-          <textarea matInput [(ngModel)]="skillModel.outputSchema" name="outputSchema"
+          <textarea matInput [(ngModel)]="skillModel.outputSchema" name="outputSchema" [readonly]="isView"
             [placeholder]="PHOUTPUTSCHEMA" rows="3"></textarea>
         </mat-form-field>
 
@@ -205,7 +205,7 @@
         <div class="form-row">
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLPIPESCOPE }} <span class="req-star">*</span></mat-label>
-            <mat-select [(ngModel)]="skillModel.pipelineScope" name="pipelineScope">
+            <mat-select [(ngModel)]="skillModel.pipelineScope" name="pipelineScope" [disabled]="isView">
               <mat-option *ngFor="let opt of pipelineScopeOptions" [value]="opt.value">
                 {{ opt.label }}
               </mat-option>
@@ -214,7 +214,7 @@
           </mat-form-field>
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLSTATUS }} <span class="req-star">*</span></mat-label>
-            <mat-select [(ngModel)]="skillModel.status" name="status">
+            <mat-select [(ngModel)]="skillModel.status" name="status" [disabled]="isView">
               <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
                 {{ opt.label }}
               </mat-option>
@@ -227,7 +227,7 @@
         <div class="form-row">
           <mat-form-field appearance="fill" floatLabel="always">
             <mat-label>{{ LBLVISIBILITY }} <span class="req-star">*</span></mat-label>
-            <mat-select [(ngModel)]="skillModel.visibility" name="visibility">
+            <mat-select [(ngModel)]="skillModel.visibility" name="visibility" [disabled]="isView">
               <mat-option *ngFor="let opt of visibilityOptions" [value]="opt.value">
                 {{ opt.label }}
               </mat-option>

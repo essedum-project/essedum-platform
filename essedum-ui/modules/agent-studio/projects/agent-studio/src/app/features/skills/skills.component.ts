@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Services, ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
+import { Services, ConfirmDeleteDialogComponent, TagEventDTO } from '@essedum/shared-lib';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Skill, SkillsListResponse, SkillsService, SkillsServiceMessages } from '../services/skills.service';
 
 @Component({
@@ -9,90 +11,112 @@ import { Skill, SkillsListResponse, SkillsService, SkillsServiceMessages } from 
   templateUrl: './skills.component.html',
   styleUrls: ['./skills.component.scss'],
 })
-export class SkillsComponent implements OnInit {
+export class SkillsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private skipNextFetchMessage = false;
+  private isFirstLoad = true;
   loading = false;
   lastRefreshedTime: Date | null = null;
 
-  // ── API response object — single source of truth ─────────────────────────
+  // ── API response — single source of truth ─────────────────────────────────
   skillsResponse: SkillsListResponse | null = null;
 
-  // ── Derived display lists ─────────────────────────────────────────────────
-  filteredSkills: Skill[] = [];
+  // ── Derived display lists ──────────────────────────────────────────────────
+  filteredSkills:  Skill[] = [];
   paginatedSkills: Skill[] = [];
 
-  // ── Search ────────────────────────────────────────────────────────────────
+  // ── Search ─────────────────────────────────────────────────────────────────
   searchTerm = '';
 
-  // ── Pagination state ──────────────────────────────────────────────────────
-  pageNumber: number = 1;
-  pageSize: number = 5;
-  noOfPages: number = 0;
-  pageArr: number[] = [];
-  startIndex: number = 0;
-  endIndex: number = 5;
-  hoverStates: boolean[] = [];
-
-  // ── Filter state ──────────────────────────────────────────────────────────
-  isFilterExpanded = false;
-  selectedType = '';
-  selectedCategory = '';
+  // ── Filter state ───────────────────────────────────────────────────────────
+  // selectedSkillTypes mirrors TagEventDTO.selectedAdapterType at the boundary
+  selectedSkillTypes: string[] = [];
+  selectedType        = '';
+  selectedCategory    = '';
   selectedSubcategory = '';
 
-  // Hardcoded type options kept for human-readable labels
-  readonly skillTypeOptions = [
-    { value: '',                label: 'All' },
-    { value: 'CODE_GENERATION', label: 'Code Generation' },
-    { value: 'TEST_GENERATION', label: 'Test Generation' },
-    { value: 'DEBUGGING',       label: 'Debugging' },
-    { value: 'REFACTORING',     label: 'Refactoring' },
-    { value: 'DOCUMENTATION',   label: 'Documentation' },
-    { value: 'DEPLOYMENT',      label: 'Deployment' },
-    { value: 'CODE_REVIEW',     label: 'Code Review' },
-    { value: 'SECURITY_SCAN',   label: 'Security Scan' },
-    { value: 'DATA_PIPELINE',   label: 'Data Pipeline' },
-    { value: 'CUSTOM',          label: 'Custom' },
-  ];
+  // ── aip-filter inputs ──────────────────────────────────────────────────────
+  readonly servicev1 = 'skills';
+  tagrefresh = false;
+  hasFilters = false;
 
-  // ── Page labels ───────────────────────────────────────────────────────────
-  readonly PAGETITLE         = 'Skills';
-  readonly COLNAME           = 'Skill Name';
-  readonly COLTYPE           = 'Type';
-  readonly COLCATEGORY       = 'Category';
-  readonly COLDESC           = 'Description';
-  readonly COLDATE           = 'Date';
-  readonly COLCREATEDBY      = 'Created By';
-  readonly COLACTIONS        = 'Actions';
-  readonly EMPTYMESSAGE      = 'No skills found. Click "+" to create one.';
-  readonly VIEWLABEL         = 'View';
-  readonly EDITLABEL         = 'Edit';
-  readonly DELETELABEL       = 'Delete';
-  readonly DELETEDMSG        = 'Skill deleted successfully!';
-  readonly FILTERTITLE       = 'FILTER BY:';
-  readonly FILTERTYPELBL     = 'TYPE';
-  readonly FILTERCATEGORYLBL = 'CATEGORY';
-  readonly FILTERSUBCATLBL   = 'SUB-CATEGORY';
-  readonly FILTERALLOPT      = 'All';
-  readonly LOADINGMSG        = 'Loading skills…';
-  readonly OPTIONSTIP        = 'Options';
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  pageNumber = 1;
+  pageSize   = 5;
+  noOfPages  = 0;
+  pageArr:     number[]  = [];
+  startIndex   = 0;
+  endIndex     = 5;
+  hoverStates: boolean[] = [];
+
+  // ── Type-label lookup (display only) ──────────────────────────────────────
+  private readonly skillTypeMap: Record<string, string> = {
+    CODE_GENERATION: 'Code Generation',
+    TEST_GENERATION: 'Test Generation',
+    DEBUGGING:       'Debugging',
+    REFACTORING:     'Refactoring',
+    DOCUMENTATION:   'Documentation',
+    DEPLOYMENT:      'Deployment',
+    CODE_REVIEW:     'Code Review',
+    SECURITY_SCAN:   'Security Scan',
+    DATA_PIPELINE:   'Data Pipeline',
+    CUSTOM:          'Custom',
+  };
+
+  // ── Page labels ────────────────────────────────────────────────────────────
+  readonly PAGETITLE    = 'Skills';
+  readonly COLNAME      = 'Skill Name';
+  readonly COLTYPE      = 'Type';
+  readonly COLCATEGORY  = 'Category';
+  readonly COLDESC      = 'Description';
+  readonly COLDATE      = 'Date';
+  readonly COLCREATEDBY = 'Created By';
+  readonly COLACTIONS   = 'Actions';
+  readonly EMPTYMESSAGE = 'No skills found. Click "+" to create one.';
+  readonly VIEWLABEL    = 'View';
+  readonly EDITLABEL    = 'Edit';
+  readonly DELETELABEL  = 'Delete';
+  readonly LOADINGMSG   = 'Loading skills…';
+  readonly OPTIONSTIP   = 'Options';
 
   constructor(
-    private dialog: MatDialog,
-    private service: Services,
-    private router: Router,
-    private route: ActivatedRoute,
+    private dialog:       MatDialog,
+    private service:      Services,
+    private router:       Router,
+    private route:        ActivatedRoute,
     private skillsService: SkillsService,
   ) {}
 
   ngOnInit(): void {
-    this.loadSkills();
+    const needsDelayedRefresh = this.skillsService.needsRefreshWithDelay;
+    this.skillsService.needsRefreshWithDelay = false;
+
+    if (needsDelayedRefresh) {
+      this.loadSkills(true, 3000);
+    } else {
+      this.loadSkills();
+    }
+
+    this.skillsService.refreshList$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.pageNumber = 1;
+        this.skipNextFetchMessage = false;
+        this.loadSkills(true, 3000);
+      });
   }
 
-  loadSkills(): void {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadSkills(showFetchMessage: boolean = true, fetchMessageDelayMs: number = 0): void {
     this.loading = true;
     this.lastRefreshedTime = new Date();
     const org = sessionStorage.getItem('organization') || '';
 
-    // Backend doesn't filter by subcategory yet — fetch all records and paginate client-side
+    // subcategory filter is client-side; fetch all rows when active
     const clientPaging = !!this.selectedSubcategory;
     const apiPage = clientPaging ? 0 : this.pageNumber - 1;
     const apiSize = clientPaging ? 1000 : this.pageSize;
@@ -111,28 +135,48 @@ export class SkillsComponent implements OnInit {
         next: (response: SkillsListResponse) => {
           this.skillsResponse = response;
           if (!clientPaging) {
-            this.noOfPages = response.totalPages || 0;
-            this.pageArr = [...Array(this.noOfPages).keys()];
+            this.noOfPages  = response.totalPages || 0;
+            this.pageArr    = [...Array(this.noOfPages).keys()];
             this.hoverStates = new Array(this.pageArr.length).fill(false);
           }
           this.applyFilter();
           this.loading = false;
-          this.service.message(SkillsServiceMessages.FETCH_SUCCESS, 'success');
+          if (showFetchMessage && !this.skipNextFetchMessage && (this.isFirstLoad || fetchMessageDelayMs > 0)) {
+            if (fetchMessageDelayMs > 0) {
+              setTimeout(() => {
+                this.service.message(SkillsServiceMessages.FETCH_SUCCESS, 'success');
+              }, fetchMessageDelayMs);
+            } else if (this.isFirstLoad) {
+              this.service.message(SkillsServiceMessages.FETCH_SUCCESS, 'success');
+            }
+          }
+          this.isFirstLoad = false;
+          this.skipNextFetchMessage = false;
         },
         error: () => {
           this.loading = false;
-          this.service.message(SkillsServiceMessages.FETCH_ERROR, 'error');
+          if (!this.skipNextFetchMessage) {
+            if (fetchMessageDelayMs > 0) {
+              setTimeout(() => {
+                this.service.message(SkillsServiceMessages.FETCH_ERROR, 'error');
+              }, fetchMessageDelayMs);
+            } else {
+              this.service.message(SkillsServiceMessages.FETCH_ERROR, 'error');
+            }
+          }
+          this.skipNextFetchMessage = false;
         },
       });
   }
 
   onRefresh(): void {
-    this.pageNumber = 1;
-    this.searchTerm = '';
-    this.selectedType = '';
-    this.selectedCategory = '';
+    this.pageNumber         = 1;
+    this.searchTerm         = '';
+    this.selectedSkillTypes = [];
+    this.selectedType       = '';
+    this.selectedCategory   = '';
     this.selectedSubcategory = '';
-    this.isFilterExpanded = false;
+    this.tagrefresh = !this.tagrefresh;
     this.loadSkills();
   }
 
@@ -142,60 +186,41 @@ export class SkillsComponent implements OnInit {
     this.loadSkills();
   }
 
-  onTypeChange(value: string): void {
-    this.selectedType = value;
+  // ── aip-filter events ──────────────────────────────────────────────────────
+
+  /**
+   * aip-filter maps skill-specific arrays into TagEventDTO at emit time:
+   *   selectedAdapterType        → selectedSkillTypeFilter        → selectedType
+   *   selectedMlAdapterCategoryType → selectedSkillCategoryFilter → selectedCategory
+   *   selectedMlAdapterSpecType  → selectedSkillSubcategoryFilter → selectedSubcategory
+   */
+  tagSelectedEvent(event: TagEventDTO): void {
+    this.selectedSkillTypes  = event.selectedAdapterType               || [];
+    this.selectedType        = this.selectedSkillTypes[0]              || '';
+    this.selectedCategory    = (event.selectedMlAdapterCategoryType    || [])[0] || '';
+    this.selectedSubcategory = (event.selectedMlAdapterSpecType        || [])[0] || '';
     this.pageNumber = 1;
     this.loadSkills();
   }
 
-  onCategoryChange(value: string): void {
-    this.selectedCategory = value;
-    this.pageNumber = 1;
-    this.loadSkills();
+  onFilterStatusChange(hasFilters: boolean): void {
+    this.hasFilters = hasFilters;
   }
 
-  onSubcategoryChange(value: string): void {
-    this.selectedSubcategory = value;
-    this.pageNumber = 1;
-    this.loadSkills();
-  }
-
-  clearTypeFilter(): void {
-    this.selectedType = '';
-    this.pageNumber = 1;
-    this.loadSkills();
-  }
-
-  clearCategoryFilter(): void {
-    this.selectedCategory = '';
-    this.pageNumber = 1;
-    this.loadSkills();
-  }
-
-  clearSubcategoryFilter(): void {
-    this.selectedSubcategory = '';
-    this.pageNumber = 1;
-    this.loadSkills();
-  }
-
-  toggleFilter(): void {
-    this.isFilterExpanded = !this.isFilterExpanded;
-  }
+  // ── Filter / pagination helpers ────────────────────────────────────────────
 
   applyFilter(): void {
     const source: Skill[] = this.skillsResponse?.skills ?? [];
 
-    // search is server-side; subcategory is client-side until backend adds support
     this.filteredSkills = this.selectedSubcategory
       ? source.filter(s => (s.skillSubcategory ?? '') === this.selectedSubcategory)
       : [...source];
 
     if (this.selectedSubcategory) {
-      // Recalculate pagination from the filtered set
-      this.noOfPages = Math.ceil(this.filteredSkills.length / this.pageSize);
-      this.pageArr = [...Array(this.noOfPages).keys()];
+      this.noOfPages  = Math.ceil(this.filteredSkills.length / this.pageSize);
+      this.pageArr    = [...Array(this.noOfPages).keys()];
       this.hoverStates = new Array(this.pageArr.length).fill(false);
-      const start = (this.pageNumber - 1) * this.pageSize;
+      const start     = (this.pageNumber - 1) * this.pageSize;
       this.paginatedSkills = this.filteredSkills.slice(start, start + this.pageSize);
     } else {
       this.paginatedSkills = [...this.filteredSkills];
@@ -223,16 +248,18 @@ export class SkillsComponent implements OnInit {
         this.applyFilter();
       } else {
         if (this.pageNumber > 5) {
-          this.endIndex = this.pageNumber;
+          this.endIndex   = this.pageNumber;
           this.startIndex = this.endIndex - 5;
         } else {
           this.startIndex = 0;
-          this.endIndex = 5;
+          this.endIndex   = 5;
         }
         this.loadSkills();
       }
     }
   }
+
+  // ── CRUD navigation ────────────────────────────────────────────────────────
 
   openAdd(): void {
     this.router.navigate(['add'], { relativeTo: this.route.parent });
@@ -261,7 +288,8 @@ export class SkillsComponent implements OnInit {
         this.skillsService.deleteSkill(skill.id).subscribe({
           next: () => {
             this.service.message(SkillsServiceMessages.DELETE_SUCCESS, 'success');
-            this.loadSkills();
+            this.pageNumber = 1;
+            this.loadSkills(true, 3000);
           },
           error: () => {
             this.service.message(SkillsServiceMessages.DELETE_ERROR, 'error');
@@ -271,8 +299,10 @@ export class SkillsComponent implements OnInit {
     });
   }
 
+  // ── Display helpers ────────────────────────────────────────────────────────
+
   getTypeLabel(type: string): string {
-    return this.skillTypeOptions.find(o => o.value === type)?.label ?? type;
+    return this.skillTypeMap[type] ?? type;
   }
 
   getTypeBadgeClass(type: string): string {
@@ -286,9 +316,7 @@ export class SkillsComponent implements OnInit {
   formatDate(dateStr: string): string {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
+      year: 'numeric', month: 'short', day: '2-digit',
     });
   }
 }
