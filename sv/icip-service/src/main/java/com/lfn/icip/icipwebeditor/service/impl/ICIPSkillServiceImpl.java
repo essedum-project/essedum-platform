@@ -158,6 +158,7 @@ public class ICIPSkillServiceImpl implements IICIPSkillService {
 
         return ICIPSkillPageResponse.builder()
                 .skills(dtoList)
+                .count(dtoList.size())
                 .totalCount(resultPage.getTotalElements())
                 .page(resultPage.getNumber())
                 .size(resultPage.getSize())

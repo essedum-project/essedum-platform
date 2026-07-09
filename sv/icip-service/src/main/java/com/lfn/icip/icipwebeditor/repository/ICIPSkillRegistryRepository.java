@@ -54,19 +54,33 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
 
     // ── Paginated list with optional filters ─────────────────────────────────
 
-    @Query("""
-        SELECT s FROM ICIPSkillRegistry s
-        WHERE s.deleted = false
-          AND s.organization = :org
-          AND (:status IS NULL OR s.status = :status)
-          AND (:skillType IS NULL OR s.skillType = :skillType)
-          AND (:skillCategory IS NULL OR s.skillCategory = :skillCategory)
-          AND (:visibility IS NULL OR s.visibility = :visibility)
-          AND (:search IS NULL
-               OR LOWER(s.skillName) LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(s.description) LIKE LOWER(CONCAT('%', :search, '%')))
-        ORDER BY s.createdDate DESC
-    """)
+    @Query(
+        value = """
+            SELECT s FROM ICIPSkillRegistry s
+            WHERE s.deleted = false
+              AND s.organization = :org
+              AND (:status IS NULL OR s.status = :status)
+              AND (:skillType IS NULL OR s.skillType = :skillType)
+              AND (:skillCategory IS NULL OR s.skillCategory = :skillCategory)
+              AND (:visibility IS NULL OR s.visibility = :visibility)
+              AND (:search IS NULL
+                   OR LOWER(s.skillName) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(s.description) LIKE LOWER(CONCAT('%', :search, '%')))
+            ORDER BY s.createdDate DESC
+        """,
+        countQuery = """
+            SELECT COUNT(s) FROM ICIPSkillRegistry s
+            WHERE s.deleted = false
+              AND s.organization = :org
+              AND (:status IS NULL OR s.status = :status)
+              AND (:skillType IS NULL OR s.skillType = :skillType)
+              AND (:skillCategory IS NULL OR s.skillCategory = :skillCategory)
+              AND (:visibility IS NULL OR s.visibility = :visibility)
+              AND (:search IS NULL
+                   OR LOWER(s.skillName) LIKE LOWER(CONCAT('%', :search, '%'))
+                   OR LOWER(s.description) LIKE LOWER(CONCAT('%', :search, '%')))
+        """
+    )
     Page<ICIPSkillRegistry> findAllWithFilters(
             @Param("org")          String organization,
             @Param("status")       String status,
