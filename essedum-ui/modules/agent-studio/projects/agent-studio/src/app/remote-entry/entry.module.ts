@@ -61,6 +61,7 @@ import { GithubLoginComponent } from '../features/agent-pipeline/github-login/gi
 import { PlaygroundTabComponent } from '../features/agent-pipeline/playground-tab/playground-tab.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from '../features/agent-pipeline/deployment-form/deployment-form.component';
 import { AgentPipelineService } from '../features/agent-pipeline/agent-pipeline.service';
+import { AiChatCoderService } from '../features/agent-pipeline/ai-chat-coder.service';
 
 // Features: agent-directory
 import { AgentDirectoryComponent } from '../features/agent-directory/agent-directory.component';
@@ -220,6 +221,7 @@ import { environment } from '../../environments/environment';
     AipSnackbarCustomService,
     GitHubService,
     AgentPipelineService,
+    AiChatCoderService,
     AgentDirectoryService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: MatDialogRef, useValue: {} },

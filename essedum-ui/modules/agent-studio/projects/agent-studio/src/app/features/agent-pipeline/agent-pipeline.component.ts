@@ -21,6 +21,8 @@ import {
   AgentGenerationRequest,
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
+import { AiChatCoderService, AiChatFile } from './ai-chat-coder.service';
+import { Subscription } from 'rxjs';
 import { StreamingServices } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import {
@@ -79,10 +81,10 @@ interface AgentState {
 }
 
 // ─── AI Chat panel (VS Code Copilot-style) ────────────────────────────────
-// NOTE: Currently a mockup. Agent + model dropdowns are populated from the
-// real /service/v1/vibe-coding/config/providers endpoint (same one Vibe
-// Studio uses); the rest of the wiring (skills, message stream, send/reply)
-// is intentionally simulated for now — real API integration will follow.
+// Wired to the real Goose backend via AiChatCoderService — same endpoints as
+// Vibe Studio for /agent/start, /reply (SSE), /agent/list-apps, /agent/call-tool
+// and /sessions/{id}/push-to-github. The /sessions/{id}/preview call is NOT
+// invoked automatically; the user triggers it via the "Deploy" button.
 export interface AiChatSkill {
   value: string;
   label: string;
@@ -318,7 +320,23 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   aiChatStreaming: boolean = false;
   aiChatOpenMenu: 'skill' | 'model' | 'agent' | null = null;
   aiChatAttachedSkills: AiChatSkill[] = [];
+  /**
+   * Collapse toggle was removed — the AI chat panel is now always expanded so
+   * we keep the flag as a constant `false` to avoid touching every template
+   * binding at once. Do NOT reintroduce a setter for this.
+   */
+  aiChatCollapsed = false;
   private aiChatMockTimers: any[] = [];
+
+  // ─── AI Chat coder service wiring ─────────────────────────────────────────
+  /** Subscriptions to the AiChatCoderService streams — cleaned up in ngOnDestroy. */
+  private aiChatSubs: Subscription[] = [];
+  /** True once the current generation round has produced files → shows Deploy button. */
+  aiChatDeployAvailable = false;
+  /** Deployment lifecycle for the manual "Deploy" button. */
+  aiChatDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+  /** URL / result returned by /sessions/{id}/preview on success. */
+  aiChatDeployedUrl: string | null = null;
 
   /** Skill catalogue — mock data. Later this comes from an API. */
   readonly aiChatSkills: AiChatSkill[] = [
@@ -356,8 +374,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     { label: 'phi3:mini',      value: 'phi3:mini' },
     { label: 'claude-3.5-sonnet', value: 'claude-3-5-sonnet-20241022' },
   ];
-  aiChatSelectedAgent: string = 'azure_openai';
-  aiChatSelectedModel: string = 'gpt-4o-mini';
+  /**
+   * Default agent + model are driven by the page origin (see
+   * `applyOriginBasedDefaults()` — same logic as Vibe Studio). These initial
+   * values are just a safe fallback until that method runs in ngOnInit.
+   */
+  aiChatSelectedAgent: string = 'ollama';
+  aiChatSelectedModel: string = 'qwen3:4b';
 
   get aiChatSelectedAgentLabel(): string {
     return this.aiChatAgents.find(a => a.value === this.aiChatSelectedAgent)?.label
@@ -536,7 +559,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     private agentPipelineService: AgentPipelineService,
     private service: Services,
     private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private aiChatCoder: AiChatCoderService,
   ) {
     // Don't initialize mcpJsonConfig here - let it be set by API data loading
   }
@@ -620,9 +644,18 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     
     this.getPipelineByName();
 
+    // Pick default agent + model based on the page origin (localhost /
+    // essedum-lfn → ollama+qwen; aipatform / azure origins → azure_openai+gpt).
+    // Same logic Vibe Studio uses.
+    this.applyOriginBasedDefaults();
+
     // Hydrate the AI Chat panel dropdowns (agent + model) from the real API,
     // silently falling back to the hardcoded lists on failure.
     this.loadAiChatProviders();
+
+    // Bootstrap the AI chat coder service — subscribe to its streams so the
+    // panel updates as Goose streams the reply and generates files.
+    this.wireAiChatCoderService();
 
     // Add beforeunload protection for unsaved changes
     window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
@@ -3379,6 +3412,33 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   trackAiMsg = (_i: number, msg: AiChatMessage) => msg.id;
 
   /**
+   * Determines the default provider + model from the page origin (identical
+   * to Vibe Studio's rules):
+   *   • localhost / essedum-lfn.infosys.com → ollama + qwen3:4b
+   *   • Azure / aipatform (AKS) origins    → azure_openai + gpt-4o-mini
+   *   • anything else                      → ollama + qwen3:4b (safe fallback)
+   * Only used to seed the initial selection — the user can still switch
+   * via the pill dropdowns.
+   */
+  private applyOriginBasedDefaults(): void {
+    const origin = (typeof window !== 'undefined' && window.location.origin) || '';
+    if (origin.includes('aipatform') ||
+        origin.includes('essedum.az.ad.idemo-ppc.com') ||
+        origin.includes('azure')) {
+      this.aiChatSelectedAgent = 'azure_openai';
+      this.aiChatSelectedModel = 'gpt-4o-mini';
+    } else if (origin.includes('localhost') ||
+               origin.includes('essedum-lfn.infosys.com')) {
+      this.aiChatSelectedAgent = 'ollama';
+      this.aiChatSelectedModel = 'qwen3:4b';
+    } else {
+      // Safe fallback for any unrecognised origin.
+      this.aiChatSelectedAgent = 'ollama';
+      this.aiChatSelectedModel = 'qwen3:4b';
+    }
+  }
+
+  /**
    * Loads the real agent providers + models from the same endpoint Vibe Studio
    * uses. Silently keeps the hardcoded fallback on failure.
    */
@@ -3421,12 +3481,15 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (agents.length) {
       this.aiChatAgents = agents;
+      // Preserve the origin-based default when the API's list contains it —
+      // only fall back to agents[0] if our preferred value isn't available.
       if (!agents.find(a => a.value === this.aiChatSelectedAgent)) {
         this.aiChatSelectedAgent = agents[0].value;
       }
     }
     if (modelSet.size) {
       this.aiChatModels = Array.from(modelSet.entries()).map(([value, label]) => ({ value, label }));
+      // Same preservation rule for the model — keep the origin default if present.
       if (!this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)) {
         this.aiChatSelectedModel = this.aiChatModels[0].value;
       }
@@ -3486,120 +3549,125 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatAttachedSkills = [];
     this.aiChatInput = '';
     this.aiChatStreaming = false;
+    // Reset the underlying Goose session too so the next prompt starts fresh.
+    this.aiChatCoder.reset();
+    this.aiChatDeployAvailable = false;
+    this.aiChatDeployStatus = 'idle';
+    this.aiChatDeployedUrl = null;
   }
 
   /**
-   * Sends the message and simulates an event-stream response. Real API wiring
-   * will replace the setTimeout chain below.
+   * Wires the AI chat coder service to the panel — subscribes to message,
+   * status, files, and deployment streams and mirrors them into component
+   * state used by the template.
+   */
+  private wireAiChatCoderService(): void {
+    // Configure the service for the current pipeline card so persistence
+    // (folder/upload) targets the right cname + organisation.
+    if (this.currentCname) {
+      this.aiChatCoder.configureForPipeline(this.currentCname, this.getConsistentOrganization());
+    }
+
+    // Mirror service messages → panel messages (map role/timestamp).
+    this.aiChatSubs.push(
+      this.aiChatCoder.messages$.subscribe(msgs => {
+        // Mark the last assistant message as "streaming" while a reply is in
+        // flight so the typing-dot indicator shows for empty content.
+        const isGenerating = this.aiChatCoder.status$.value === 'generating';
+        this.aiChatMessages = msgs.map((m, idx) => ({
+          id: `svc-${idx}-${m.timestamp?.getTime?.() ?? idx}`,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp ?? new Date(),
+          streaming: isGenerating && idx === msgs.length - 1 && m.role === 'assistant',
+        }));
+        this.scrollAiChatToBottom();
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.status$.subscribe(status => {
+        this.aiChatStreaming = status === 'generating';
+        this.cdr.detectChanges();
+      })
+    );
+
+    // When files are ready and persisted, refresh the codespace file tree and
+    // enable the Deploy button.
+    this.aiChatSubs.push(
+      this.aiChatCoder.generationComplete$.subscribe(files => {
+        this.aiChatDeployAvailable = files.length > 0;
+        // Refresh the codespace file tree from the DB once the persistence call
+        // is done — files are saved every generation round.
+        this.aiChatSubs.push(
+          this.aiChatCoder.persistComplete$.subscribe(() => {
+            this.hasGeneratedAgent = true;
+            this.isJsonProcessed = true;
+            this.refreshFileStructure();
+          })
+        );
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.deploymentStatus$.subscribe(s => {
+        this.aiChatDeployStatus = s;
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.deploymentResult$.subscribe(r => {
+        this.aiChatDeployedUrl = typeof r === 'string' ? r : (r?.deployUrl ?? null);
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  /**
+   * Sends the prompt to the real Goose agent via AiChatCoderService.
+   * Reply streams back via SSE; when files are generated the service auto-
+   * saves them to the pipeline card DB and pushes to GitHub (but does NOT
+   * trigger the deployment preview — that's manual via deployNow()).
    */
   sendAiChatMessage(): void {
     const text = (this.aiChatInput || '').trim();
     if (!text || this.aiChatStreaming) return;
 
-    // 1) Push user message with attached skills
-    const attached = [...this.aiChatAttachedSkills];
-    this.aiChatMessages.push({
-      id: 'u-' + Date.now(),
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-      skills: attached.length ? attached : undefined,
-    });
+    // Make sure the coder service is bound to the current pipeline card. The
+    // cname may not have been available yet when the panel was first wired.
+    if (this.currentCname) {
+      this.aiChatCoder.configureForPipeline(this.currentCname, this.getConsistentOrganization());
+    }
 
-    // Reset input state
+    // Reset input state (attached skills / open menu). Attached skills are
+    // appended to the prompt as an inline hint so the agent knows what the
+    // user wants to work on.
+    const attached = [...this.aiChatAttachedSkills];
+    const skillHint = attached.length
+      ? `\n\n[User attached these skills: ${attached.map(a => a.label).join(', ')}]`
+      : '';
     this.aiChatInput = '';
     this.aiChatAttachedSkills = [];
     this.aiChatOpenMenu = null;
-    this.aiChatStreaming = true;
 
-    // 2) Push placeholder assistant message that we'll populate progressively
-    const assistantId = 'a-' + Date.now();
-    const assistant: AiChatMessage = {
-      id: assistantId,
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-      events: [],
-      streaming: true,
-    };
-    this.aiChatMessages.push(assistant);
-    this.scrollAiChatToBottom();
+    // A new generation round invalidates the previous deploy state.
+    this.aiChatDeployAvailable = false;
+    this.aiChatDeployStatus = 'idle';
+    this.aiChatDeployedUrl = null;
 
-    // 3) Simulate a Copilot-style event stream (tool calls, then final answer)
-    this.runAiChatMock(assistant, text, attached);
+    this.aiChatCoder.sendMessage(text + skillHint, this.aiChatSelectedAgent, this.aiChatSelectedModel);
   }
 
-  private runAiChatMock(assistant: AiChatMessage, prompt: string, attached: AiChatSkill[]): void {
-    const events: AiChatEvent[] = [];
-    if (attached.some(a => a.value === 'codebase')) {
-      events.push({ text: 'Searching codebase for relevant symbols…', pending: true });
-    }
-    if (attached.some(a => a.value === 'file') || this.selectedFileName) {
-      events.push({ text: `Reading ${this.selectedFileName || 'active file'}…`, pending: true });
-    }
-    events.push({ text: `Reasoning with ${this.aiChatSelectedModelLabel}…`, pending: true });
-
-    assistant.events = events;
-
-    // Reveal + resolve events one by one
-    let delay = 500;
-    events.forEach((ev, idx) => {
-      const t = setTimeout(() => {
-        ev.pending = false;
-        this.scrollAiChatToBottom();
-      }, delay + idx * 700);
-      this.aiChatMockTimers.push(t);
-    });
-
-    // Then stream the reply text
-    const reply = this.buildMockReply(prompt, attached);
-    const startTypingAt = delay + events.length * 700 + 300;
-    const t1 = setTimeout(() => this.streamText(assistant, reply), startTypingAt);
-    this.aiChatMockTimers.push(t1);
-  }
-
-  private buildMockReply(prompt: string, attached: AiChatSkill[]): string {
-    const skillNames = attached.map(a => a.label).join(', ');
-    const fileHint = this.selectedFileName ? ` in \`${this.selectedFileName}\`` : '';
-    const kind = this.pipelineMode === 'mcp' ? 'MCP server' : this.pipelineMode === 'app' ? 'app' : 'agent';
-
-    // A few canned answer templates picked by keyword
-    const p = prompt.toLowerCase();
-    if (p.includes('test')) {
-      return `Here's a test skeleton you can drop${fileHint}:\n\n\`\`\`\nimport pytest\n\ndef test_happy_path():\n    assert True  # TODO: replace with real assertion\n\ndef test_error_path():\n    with pytest.raises(ValueError):\n        raise ValueError("expected")\n\`\`\`\n\nWould you like me to also generate integration tests for your ${kind}?`;
-    }
-    if (p.includes('explain') || p.includes('what does')) {
-      return `This ${kind} orchestrates three main stages:\n\n1. **Ingest** — pulls records from the configured source (S3 / DB / stream).\n2. **Reason** — invokes the selected LLM (${this.aiChatSelectedModelLabel}) with the built prompt.\n3. **Emit** — returns the JSON response and optionally forwards it to downstream services.\n\nAsk me to dive into any function — I can show call sites and unit-test coverage.`;
-    }
-    if (p.includes('bug') || p.includes('debug') || p.includes('error')) {
-      return `I scanned${fileHint} and spotted **2 likely issues**:\n\n• Missing \`await\` on the async \`fetch_records()\` call — the coroutine is discarded.\n• The retry loop swallows the underlying exception, which will make production incidents hard to diagnose.\n\nWant me to open a diff with the fixes applied?`;
-    }
-    if (p.includes('doc') || p.includes('readme')) {
-      return `I've drafted a README section${fileHint}:\n\n\`\`\`\n## Overview\nThis module implements the ${kind}'s request / response cycle.\n\n## Usage\n\`\`\`python\nfrom app import handler\nresult = handler({"query": "hello"})\n\`\`\`\n\`\`\`\n\nSay the word and I'll write it directly to the repo.`;
-    }
-    if (skillNames) {
-      return `Working with **${skillNames}**${fileHint}, here's what I recommend:\n\n1. Confirm the input contract (schema + auth headers).\n2. Add a tracing span around the LLM call so latency is observable.\n3. Persist the raw provider response so replays are cheap.\n\nWant me to open a PR with any of these?`;
-    }
-    return `Sure — I can help with that${fileHint}. In the real integration this response will be streamed from the selected agent (**${this.aiChatSelectedAgentLabel}**) using **${this.aiChatSelectedModelLabel}**.\n\nTry attaching a skill (＋ button) to give me more context, or open a file on the left so I can reason about it directly.`;
-  }
-
-  /** Types out reply text one chunk at a time to mimic token streaming. */
-  private streamText(assistant: AiChatMessage, fullText: string): void {
-    const chunks = fullText.split(/(\s+)/); // keep whitespace
-    let i = 0;
-    const step = () => {
-      if (i >= chunks.length) {
-        assistant.streaming = false;
-        this.aiChatStreaming = false;
-        this.scrollAiChatToBottom();
-        return;
-      }
-      assistant.content += chunks[i++];
-      this.scrollAiChatToBottom();
-      const t = setTimeout(step, 25 + Math.random() * 40);
-      this.aiChatMockTimers.push(t);
-    };
-    step();
+  /**
+   * Manual Deploy trigger — hits /sessions/{id}/preview via the coder service.
+   * Bound to the "Deploy" button that shows after files have been generated.
+   */
+  deployAiChatFiles(): void {
+    if (!this.aiChatDeployAvailable || this.aiChatDeployStatus === 'deploying') return;
+    this.aiChatCoder.deployNow();
   }
 
   private cancelAiChatMockTimers(): void {
@@ -4156,6 +4224,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Cancel any AI chat streaming timers still pending.
     this.cancelAiChatMockTimers();
+
+    // Tear down AI chat coder service subscriptions & abort any in-flight stream.
+    for (const s of this.aiChatSubs) s.unsubscribe();
+    this.aiChatSubs = [];
+    this.aiChatCoder.cancelReply();
   }
 
   // ---------------------------------------------------------------------------

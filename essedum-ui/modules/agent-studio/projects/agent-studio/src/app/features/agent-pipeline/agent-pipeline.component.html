@@ -203,12 +203,14 @@
 
                         <!-- ═══════════════════════════════════════════════════════════
                              AI CHAT PANEL (VS Code Copilot-style)
-                             Always visible — 3rd column of .file-panel grid
-                             All wiring is mock for now; agent + model dropdowns are
-                             populated from the real /vibe-coding/config/providers API
-                             (same one Vibe Studio uses) with a hardcoded fallback.
+                             Always visible — 3rd column of .file-panel grid.
+                             Wired to the real Goose backend via AiChatCoderService
+                             (same endpoints Vibe Studio uses). Deployment is NOT
+                             triggered automatically — a "Deploy" banner appears
+                             once files are generated so the user can trigger it.
                              ═══════════════════════════════════════════════════════════ -->
-                        <div class="ai-chat-panel" (click)="onAiChatPanelClick($event)">
+                        <div class="ai-chat-panel"
+                             (click)="onAiChatPanelClick($event)">
                           <!-- Header -->
                           <div class="ai-chat-header">
                             <div class="ai-chat-title">
@@ -281,6 +283,58 @@
                                 </div>
                               </div>
                             </div>
+                          </div>
+
+                          <!-- ═══════════════════════════════════════════════════════════
+                               DEPLOY BANNER — shows after files have been generated.
+                               push-to-github runs automatically every round; the user
+                               explicitly clicks "Deploy" here to hit /sessions/{id}/preview.
+                               ═══════════════════════════════════════════════════════════ -->
+                          <div class="ai-chat-deploy-banner"
+                               *ngIf="aiChatDeployAvailable"
+                               [class.deploying]="aiChatDeployStatus === 'deploying'"
+                               [class.success]="aiChatDeployStatus === 'success'"
+                               [class.error]="aiChatDeployStatus === 'error'">
+                            <div class="deploy-banner-info">
+                              <mat-icon class="deploy-banner-icon">
+                                {{ aiChatDeployStatus === 'success' ? 'rocket_launch'
+                                   : (aiChatDeployStatus === 'error' ? 'error_outline'
+                                   : (aiChatDeployStatus === 'deploying' ? 'sync' : 'auto_awesome')) }}
+                              </mat-icon>
+                              <div class="deploy-banner-text">
+                                <ng-container [ngSwitch]="aiChatDeployStatus">
+                                  <ng-container *ngSwitchCase="'deploying'">
+                                    <strong>Deploying…</strong>
+                                    <span>Building your preview container. This may take a minute.</span>
+                                  </ng-container>
+                                  <ng-container *ngSwitchCase="'success'">
+                                    <strong>Deployed successfully.</strong>
+                                    <span *ngIf="aiChatDeployedUrl">
+                                      Preview: <a [href]="aiChatDeployedUrl" target="_blank" rel="noopener">{{ aiChatDeployedUrl }}</a>
+                                    </span>
+                                  </ng-container>
+                                  <ng-container *ngSwitchCase="'error'">
+                                    <strong>Deployment failed.</strong>
+                                    <span>Something went wrong. Check the pipeline logs and try again.</span>
+                                  </ng-container>
+                                  <ng-container *ngSwitchDefault>
+                                    <strong>Files generated &amp; saved.</strong>
+                                    <span>All files are stored and pushed to GitHub. Click Deploy when you're ready to launch a preview.</span>
+                                  </ng-container>
+                                </ng-container>
+                              </div>
+                            </div>
+                            <button type="button" class="deploy-banner-btn"
+                                    [disabled]="aiChatDeployStatus === 'deploying'"
+                                    (click)="deployAiChatFiles()">
+                              <mat-icon *ngIf="aiChatDeployStatus !== 'deploying'">rocket_launch</mat-icon>
+                              <mat-icon *ngIf="aiChatDeployStatus === 'deploying'" class="spin-icon">sync</mat-icon>
+                              <span>
+                                {{ aiChatDeployStatus === 'deploying' ? 'Deploying…'
+                                   : (aiChatDeployStatus === 'success' ? 'Redeploy'
+                                   : (aiChatDeployStatus === 'error' ? 'Retry Deploy' : 'Deploy')) }}
+                              </span>
+                            </button>
                           </div>
 
                           <!-- Attached skills preview above input -->

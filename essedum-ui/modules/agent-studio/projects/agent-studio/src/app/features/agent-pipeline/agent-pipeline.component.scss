@@ -1,5 +1,4 @@
 @use 'overlays';
-@use 'ai-chat-panel';
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -140,14 +139,19 @@
 // =============================================================================
 // FILE STRUCTURE (CODESPACE TAB) - VS Code Layout
 // =============================================================================
+// CRITICAL: lock the container to a viewport-relative height so opening a
+// large file cannot stretch the outer card. Each column (explorer / editor /
+// AI chat) then scrolls independently inside this fixed box.
 .file-structure-container {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
-  height: 100% !important;
+  height: calc(100vh - 220px) !important;
+  min-height: 480px !important;
+  max-height: calc(100vh - 180px) !important;
   min-width: 0 !important;
-  min-height: 0 !important;
   background: #0d1117;
+  overflow: hidden !important;
 }
 
 // CRITICAL: explorer + editor + ai-chat side-by-side. Using CSS grid so the
@@ -155,9 +159,11 @@
 // left column and the chat panel's fixed right column) rather than relying on
 // flex propagation, which the federated chunk doesn't get reliably from
 // Material's tab-body styles.
+// NOTE: the collapse toggle was removed — the AI chat panel is now always
+// visible at a fixed 380px width.
 .file-panel {
   display: grid !important;
-  grid-template-columns: 260px minmax(0, 1fr) 380px !important;
+  grid-template-columns: 260px minmax(0, 1fr) !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 100%;
@@ -496,9 +502,36 @@
       mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
     }
     .save-button {
-      color: #3fb950 !important;
-      &:hover { background: rgba(63,185,80,0.1) !important; }
-      &.save-disabled { color: #484f58 !important; }
+      // Default (disabled) state — dim so the enabled state stands out.
+      color: #484f58 !important;
+      opacity: 1 !important;
+      background: transparent !important;
+      transition: all 0.15s ease !important;
+
+      &:hover:not([disabled]) { background: rgba(63,185,80,0.15) !important; }
+
+      // Enabled state — prominent green pill so the user always spots the
+      // save action after making a change.
+      &.save-enabled,
+      &:not([disabled]) {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #238636, #2ea043) !important;
+        box-shadow: 0 2px 8px rgba(35,134,54,0.35) !important;
+        border: 1px solid rgba(63,185,80,0.35) !important;
+        mat-icon { color: #ffffff !important; }
+        &:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important; }
+      }
+
+      // Explicit disabled overrides Material's default half-opacity so the
+      // button is dim but not invisible.
+      &.save-disabled,
+      &[disabled] {
+        color: #484f58 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 1px solid transparent !important;
+        mat-icon { color: #484f58 !important; }
+      }
     }
     .delete-button {
       color: #8b949e !important;
@@ -1153,6 +1186,356 @@
   color: #8b949e;
   transition: color 0.15s;
   &:hover { color: #58a6ff; }
+}
+
+// =============================================================================
+// AI CHAT — DEPLOY BANNER
+// Appears in the AI chat panel once files are generated. push-to-github runs
+// automatically every round; deployment is manual via the Deploy button below.
+// =============================================================================
+.ai-chat-deploy-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 12px 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(124,58,237,0.10));
+  border: 1px solid rgba(88,166,255,0.28);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  animation: fadeUp 0.3s ease-out;
+
+  &.deploying {
+    border-color: rgba(210,153,34,0.45);
+    background: linear-gradient(135deg, rgba(210,153,34,0.10), rgba(88,166,255,0.06));
+  }
+  &.success {
+    border-color: rgba(63,185,80,0.45);
+    background: linear-gradient(135deg, rgba(63,185,80,0.10), rgba(88,166,255,0.06));
+  }
+  &.error {
+    border-color: rgba(248,81,73,0.45);
+    background: linear-gradient(135deg, rgba(248,81,73,0.10), rgba(248,81,73,0.04));
+  }
+
+  .deploy-banner-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .deploy-banner-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #58a6ff !important;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &.deploying .deploy-banner-icon {
+    color: #d29922 !important;
+    animation: spin 1.2s linear infinite;
+  }
+  &.success .deploy-banner-icon { color: #3fb950 !important; }
+  &.error .deploy-banner-icon { color: #f85149 !important; }
+
+  .deploy-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    strong {
+      font-size: 12px;
+      color: #e6edf3;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    span {
+      font-size: 11px;
+      color: #8b949e;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    a {
+      color: #58a6ff;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+
+  .deploy-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.35);
+    transition: transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 16px !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    &:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 20px rgba(79,70,229,0.55);
+    }
+    &[disabled] {
+      opacity: 0.65;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+// Light theme
+:host-context(body.header-light-theme) .ai-chat-deploy-banner {
+  background: linear-gradient(135deg, rgba(71,66,220,0.05), rgba(124,58,237,0.06));
+  border-color: rgba(71,66,220,0.25);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+
+  .deploy-banner-icon { color: #4742dc !important; }
+  .deploy-banner-text {
+    strong { color: #1f2328; }
+    span { color: #57606a; }
+    a { color: #4742dc; }
+  }
+}
+
+// =============================================================================
+// UNSAVED CHANGES + DELETE CONFIRMATION MODAL DIALOGS
+// These were previously unstyled (rendering inline at the bottom of the page).
+// Now they're proper centered modals with dark + light theme support.
+// =============================================================================
+.unsaved-changes-overlay,
+.delete-confirmation-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
+  animation: fadeUp 0.2s ease-out;
+}
+
+.unsaved-changes-popup,
+.delete-confirmation-popup {
+  background: #161b22 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 12px !important;
+  width: 460px;
+  max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6) !important;
+  overflow: hidden;
+  position: relative;
+  animation: floatIn 0.25s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #d29922, #f0883e, #d29922);
+    pointer-events: none;
+  }
+}
+
+.delete-confirmation-popup::before {
+  background: linear-gradient(90deg, #f85149, #da3633, #f85149) !important;
+}
+
+.unsaved-changes-header,
+.delete-confirmation-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px !important;
+  border-bottom: 1px solid #21262d !important;
+  background: #1c2129 !important;
+
+  h3 {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #e6edf3 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .close-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #8b949e !important;
+    transition: all 0.15s ease !important;
+
+    mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+    &:hover { color: #f85149 !important; background: rgba(248,81,73,0.08) !important; }
+  }
+}
+
+.unsaved-changes-content,
+.delete-confirmation-content {
+  padding: 20px 24px !important;
+  background: #161b22 !important;
+
+  p {
+    font-size: 13px;
+    color: #c9d1d9 !important;
+    margin: 0 0 10px !important;
+    line-height: 1.5;
+
+    strong { color: #e6edf3 !important; font-weight: 600; }
+    &:last-child { margin-bottom: 0 !important; }
+  }
+
+  .warning-text {
+    color: #d29922 !important;
+    font-size: 12px !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.delete-confirmation-content .warning-text {
+  color: #f85149 !important;
+}
+
+.unsaved-changes-footer,
+.delete-confirmation-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 14px 20px !important;
+  border-top: 1px solid #21262d !important;
+  background: #1c2129 !important;
+
+  button {
+    height: 34px !important;
+    padding: 0 16px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+  }
+
+  .cancel-btn {
+    background: transparent !important;
+    color: #8b949e !important;
+    border: 1px solid #30363d !important;
+    &:hover { border-color: #58a6ff !important; color: #e6edf3 !important; background: rgba(88,166,255,0.06) !important; }
+  }
+
+  .discard-btn {
+    background: transparent !important;
+    color: #f85149 !important;
+    border: 1px solid rgba(248,81,73,0.4) !important;
+    &:hover { background: rgba(248,81,73,0.1) !important; border-color: #f85149 !important; }
+  }
+
+  .save-btn {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.35) !important;
+    &:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(79,70,229,0.55) !important; }
+  }
+
+  .delete-btn {
+    background: linear-gradient(135deg, #da3633, #f85149) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 3px 12px rgba(248,81,73,0.35) !important;
+    &:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(248,81,73,0.55) !important; }
+  }
+}
+
+// Light theme
+:host-context(body.header-light-theme) {
+  .unsaved-changes-overlay,
+  .delete-confirmation-overlay {
+    background: rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .unsaved-changes-popup,
+  .delete-confirmation-popup {
+    background: #ffffff !important;
+    border-color: #e1e4e8 !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .unsaved-changes-header,
+  .delete-confirmation-header {
+    background: #f6f8fa !important;
+    border-bottom-color: #e1e4e8 !important;
+
+    h3 { color: #1f2328 !important; }
+    .close-button { color: #656d76 !important; &:hover { color: #cf222e !important; background: rgba(207,34,46,0.08) !important; } }
+  }
+
+  .unsaved-changes-content,
+  .delete-confirmation-content {
+    background: #ffffff !important;
+    p {
+      color: #24292f !important;
+      strong { color: #1f2328 !important; }
+    }
+    .warning-text { color: #bf8700 !important; }
+  }
+
+  .delete-confirmation-content .warning-text { color: #cf222e !important; }
+
+  .unsaved-changes-footer,
+  .delete-confirmation-footer {
+    background: #f6f8fa !important;
+    border-top-color: #e1e4e8 !important;
+
+    .cancel-btn {
+      color: #656d76 !important;
+      border-color: #d0d7de !important;
+      &:hover { border-color: #4742dc !important; color: #1f2328 !important; background: rgba(71,66,220,0.06) !important; }
+    }
+    .discard-btn {
+      color: #cf222e !important;
+      border-color: rgba(207,34,46,0.4) !important;
+      &:hover { background: rgba(207,34,46,0.08) !important; border-color: #cf222e !important; }
+    }
+    .save-btn {
+      background: linear-gradient(135deg, #4742dc, #7c3aed) !important;
+    }
+  }
 }
 
 // =============================================================================
