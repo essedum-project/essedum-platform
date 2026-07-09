@@ -170,6 +170,98 @@
   height: 100%;
   flex: 1;
   overflow: hidden;
+
+  // When the user has closed the AI chat panel (via the X button in the
+  // header) the 3rd column collapses; explorer + editor split the row.
+  &.chat-hidden {
+    grid-template-columns: 260px minmax(0, 1fr) !important;
+  }
+}
+
+// =============================================================================
+// TOP CODESPACE TOOLBAR — Deploy banner + reopen chat pill above the grid.
+// Keep bg IDENTICAL to .file-panel so there's no visible seam between the
+// toolbar strip and the codespace row below it.
+// =============================================================================
+.codespace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  flex-shrink: 0;
+  min-height: 0;
+  background: #0d1117 !important;
+
+  .ai-chat-deploy-banner.codespace-toolbar-banner {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .reopen-chat-btn {
+    // Right-aligned pill next to the (now hidden) close X. Compact height +
+    // slim padding so it doesn't add visual weight when the deploy banner
+    // isn't present.
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    height: 28px;
+    background: linear-gradient(135deg, #4480f5, #7c3aed);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(68,128,245,0.32);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 14px !important;
+      width: 14px !important;
+      height: 14px !important;
+      color: #ffffff !important;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(68,128,245,0.5);
+    }
+  }
+}
+
+// Light-theme toolbar bg should match the light .file-panel color.
+:host-context(body.header-light-theme) .codespace-toolbar {
+  background: #ffffff !important;
+
+  .reopen-chat-btn {
+    background: linear-gradient(135deg, #4742dc, #7c3aed);
+    box-shadow: 0 2px 10px rgba(71,66,220,0.28);
+    &:hover { box-shadow: 0 4px 16px rgba(71,66,220,0.48); }
+  }
+}
+
+// AI chat header — close (X) button. Uses red hover to differentiate from
+// the "new chat" / "clear history" buttons next to it.
+:host ::ng-deep .ai-chat-header-actions .chat-close-btn {
+  color: #8b949e !important;
+  transition: all 0.15s ease !important;
+
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+
+  &:hover {
+    color: #f85149 !important;
+    background: rgba(248,81,73,0.10) !important;
+  }
+}
+:host-context(body.header-light-theme) ::ng-deep .ai-chat-header-actions .chat-close-btn {
+  color: #656d76 !important;
+  &:hover { color: #cf222e !important; background: rgba(207,34,46,0.08) !important; }
 }
 
 // RIGHT SIDE - FILE EDITOR (1fr column in the grid above)
@@ -558,7 +650,12 @@
 .text-editor-container {
   display: flex;
   flex: 1;
-  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+  // The textarea inside handles its own scroll (both axes) via wrap="off" +
+  // white-space: pre. Keeping overflow: hidden here prevents a competing outer
+  // scrollbar and guarantees horizontal scroll shows up on the textarea itself.
+  overflow: hidden;
   background: #0d1117;
 }
 

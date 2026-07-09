@@ -39,7 +39,70 @@
 
                     <!-- File Structure -->
                     <div class="file-structure-container">
-                      <div class="file-panel">
+
+                      <!-- ════════════════════════════════════════════════════════════════════
+                           TOP TOOLBAR — Deploy banner + reopen chat pill.
+                           Sits above the 3-column grid (explorer / editor / chat).
+                           ═══════════════════════════════════════════════════════════════════ -->
+                      <div class="codespace-toolbar"
+                           *ngIf="aiChatDeployAvailable || !aiChatVisible">
+                        <div class="ai-chat-deploy-banner codespace-toolbar-banner"
+                             *ngIf="aiChatDeployAvailable"
+                             [class.deploying]="aiChatDeployStatus === 'deploying'"
+                             [class.success]="aiChatDeployStatus === 'success'"
+                             [class.error]="aiChatDeployStatus === 'error'">
+                          <div class="deploy-banner-info">
+                            <mat-icon class="deploy-banner-icon">
+                              {{ aiChatDeployStatus === 'success' ? 'rocket_launch'
+                                 : (aiChatDeployStatus === 'error' ? 'error_outline'
+                                 : (aiChatDeployStatus === 'deploying' ? 'sync' : 'auto_awesome')) }}
+                            </mat-icon>
+                            <div class="deploy-banner-text">
+                              <ng-container [ngSwitch]="aiChatDeployStatus">
+                                <ng-container *ngSwitchCase="'deploying'">
+                                  <strong>Deploying…</strong>
+                                  <span>Building your preview container. This may take a minute.</span>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'success'">
+                                  <strong>Deployed successfully.</strong>
+                                  <span *ngIf="aiChatDeployedUrl">
+                                    Preview: <a [href]="aiChatDeployedUrl" target="_blank" rel="noopener">{{ aiChatDeployedUrl }}</a>
+                                  </span>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'error'">
+                                  <strong>Deployment failed.</strong>
+                                  <span>Something went wrong. Check the pipeline logs and try again.</span>
+                                </ng-container>
+                                <ng-container *ngSwitchDefault>
+                                  <strong>Files generated &amp; saved.</strong>
+                                  <span>All files are stored and pushed to GitHub. Click Deploy when you're ready to launch a preview.</span>
+                                </ng-container>
+                              </ng-container>
+                            </div>
+                          </div>
+                          <button type="button" class="deploy-banner-btn"
+                                  [disabled]="aiChatDeployStatus === 'deploying'"
+                                  (click)="deployAiChatFiles()">
+                            <mat-icon *ngIf="aiChatDeployStatus !== 'deploying'">rocket_launch</mat-icon>
+                            <mat-icon *ngIf="aiChatDeployStatus === 'deploying'" class="spin-icon">sync</mat-icon>
+                            <span>
+                              {{ aiChatDeployStatus === 'deploying' ? 'Deploying…'
+                                 : (aiChatDeployStatus === 'success' ? 'Redeploy'
+                                 : (aiChatDeployStatus === 'error' ? 'Retry Deploy' : 'Deploy')) }}
+                            </span>
+                          </button>
+                        </div>
+                        <button type="button"
+                                *ngIf="!aiChatVisible"
+                                class="reopen-chat-btn"
+                                (click)="showAiChatPanel()"
+                                matTooltip="Open AI Chat" matTooltipPosition="below">
+                          <mat-icon>auto_awesome</mat-icon>
+                          <span>Open AI Chat</span>
+                        </button>
+                      </div>
+
+                      <div class="file-panel" [class.chat-hidden]="!aiChatVisible">
                         <div class="file-explorer">
                           <div class="explorer-header">
                             <div class="header-left">
@@ -153,28 +216,28 @@
                                 </div>
                                 <div class="text-editor-column">
                                   <ng-container *ngIf="fileExtension === 'json'">
-                                    <textarea class="file-content-editor json-editor"
+                                    <textarea class="file-content-editor json-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="JSON content..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'java'">
-                                    <textarea class="file-content-editor java-editor"
+                                    <textarea class="file-content-editor java-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Java code..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'xml'">
-                                    <textarea class="file-content-editor xml-editor"
+                                    <textarea class="file-content-editor xml-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="XML content..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'properties'">
-                                    <textarea class="file-content-editor properties-editor"
+                                    <textarea class="file-content-editor properties-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Properties content..." spellcheck="false"
@@ -182,7 +245,7 @@
                                   </ng-container>
                                   <ng-container
                                     *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
-                                    <textarea class="file-content-editor" [class.editor-modified]="isFileModified"
+                                    <textarea class="file-content-editor" wrap="off" [class.editor-modified]="isFileModified"
                                       [(ngModel)]="selectedFileContent" (ngModelChange)="onTextContentChange($event)"
                                       (scroll)="onTextareaScroll($event)" placeholder="File content..."
                                       spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
@@ -210,6 +273,7 @@
                              once files are generated so the user can trigger it.
                              ═══════════════════════════════════════════════════════════ -->
                         <div class="ai-chat-panel"
+                             *ngIf="aiChatVisible"
                              (click)="onAiChatPanelClick($event)">
                           <!-- Header -->
                           <div class="ai-chat-header">
@@ -228,6 +292,9 @@
                               </button>
                               <button type="button" (click)="clearAiChat()" matTooltip="Clear history" matTooltipPosition="above">
                                 <mat-icon>delete_sweep</mat-icon>
+                              </button>
+                              <button type="button" class="chat-close-btn" (click)="hideAiChatPanel()" matTooltip="Close panel" matTooltipPosition="above">
+                                <mat-icon>close</mat-icon>
                               </button>
                             </div>
                           </div>
@@ -285,57 +352,7 @@
                             </div>
                           </div>
 
-                          <!-- ═══════════════════════════════════════════════════════════
-                               DEPLOY BANNER — shows after files have been generated.
-                               push-to-github runs automatically every round; the user
-                               explicitly clicks "Deploy" here to hit /sessions/{id}/preview.
-                               ═══════════════════════════════════════════════════════════ -->
-                          <div class="ai-chat-deploy-banner"
-                               *ngIf="aiChatDeployAvailable"
-                               [class.deploying]="aiChatDeployStatus === 'deploying'"
-                               [class.success]="aiChatDeployStatus === 'success'"
-                               [class.error]="aiChatDeployStatus === 'error'">
-                            <div class="deploy-banner-info">
-                              <mat-icon class="deploy-banner-icon">
-                                {{ aiChatDeployStatus === 'success' ? 'rocket_launch'
-                                   : (aiChatDeployStatus === 'error' ? 'error_outline'
-                                   : (aiChatDeployStatus === 'deploying' ? 'sync' : 'auto_awesome')) }}
-                              </mat-icon>
-                              <div class="deploy-banner-text">
-                                <ng-container [ngSwitch]="aiChatDeployStatus">
-                                  <ng-container *ngSwitchCase="'deploying'">
-                                    <strong>Deploying…</strong>
-                                    <span>Building your preview container. This may take a minute.</span>
-                                  </ng-container>
-                                  <ng-container *ngSwitchCase="'success'">
-                                    <strong>Deployed successfully.</strong>
-                                    <span *ngIf="aiChatDeployedUrl">
-                                      Preview: <a [href]="aiChatDeployedUrl" target="_blank" rel="noopener">{{ aiChatDeployedUrl }}</a>
-                                    </span>
-                                  </ng-container>
-                                  <ng-container *ngSwitchCase="'error'">
-                                    <strong>Deployment failed.</strong>
-                                    <span>Something went wrong. Check the pipeline logs and try again.</span>
-                                  </ng-container>
-                                  <ng-container *ngSwitchDefault>
-                                    <strong>Files generated &amp; saved.</strong>
-                                    <span>All files are stored and pushed to GitHub. Click Deploy when you're ready to launch a preview.</span>
-                                  </ng-container>
-                                </ng-container>
-                              </div>
-                            </div>
-                            <button type="button" class="deploy-banner-btn"
-                                    [disabled]="aiChatDeployStatus === 'deploying'"
-                                    (click)="deployAiChatFiles()">
-                              <mat-icon *ngIf="aiChatDeployStatus !== 'deploying'">rocket_launch</mat-icon>
-                              <mat-icon *ngIf="aiChatDeployStatus === 'deploying'" class="spin-icon">sync</mat-icon>
-                              <span>
-                                {{ aiChatDeployStatus === 'deploying' ? 'Deploying…'
-                                   : (aiChatDeployStatus === 'success' ? 'Redeploy'
-                                   : (aiChatDeployStatus === 'error' ? 'Retry Deploy' : 'Deploy')) }}
-                              </span>
-                            </button>
-                          </div>
+                          <!-- Deploy banner moved to the top codespace toolbar. -->
 
                           <!-- Attached skills preview above input -->
                           <div class="ai-chat-attached" *ngIf="aiChatAttachedSkills.length > 0">

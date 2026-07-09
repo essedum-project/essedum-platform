@@ -338,6 +338,16 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   /** URL / result returned by /sessions/{id}/preview on success. */
   aiChatDeployedUrl: string | null = null;
 
+  /**
+   * Controls visibility of the entire AI chat panel (3rd grid column).
+   * User can close it via the X button in the panel header; a "Open AI Chat"
+   * pill appears above the codespace row to bring it back.
+   * Persisted per browser so a closed panel stays closed across reloads.
+   */
+  aiChatVisible: boolean = (() => {
+    try { return localStorage.getItem('essedum.aiChat.visible') !== '0'; } catch { return true; }
+  })();
+
   /** Skill catalogue — mock data. Later this comes from an API. */
   readonly aiChatSkills: AiChatSkill[] = [
     { value: 'codebase',      label: 'Analyze codebase',   icon: 'account_tree',    description: 'Search & understand the project' },
@@ -3840,6 +3850,19 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   deployAiChatFiles(): void {
     if (!this.aiChatDeployAvailable || this.aiChatDeployStatus === 'deploying') return;
     this.aiChatCoder.deployNow();
+  }
+
+  /** Close the AI chat panel — user can reopen via the "Open AI Chat" pill above the codespace. */
+  hideAiChatPanel(): void {
+    this.aiChatVisible = false;
+    this.aiChatOpenMenu = null;
+    try { localStorage.setItem('essedum.aiChat.visible', '0'); } catch { /* ignore */ }
+  }
+
+  /** Re-open the AI chat panel from the "Open AI Chat" pill in the codespace toolbar. */
+  showAiChatPanel(): void {
+    this.aiChatVisible = true;
+    try { localStorage.setItem('essedum.aiChat.visible', '1'); } catch { /* ignore */ }
   }
 
   private cancelAiChatMockTimers(): void {
