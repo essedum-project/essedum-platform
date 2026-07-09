@@ -40,6 +40,9 @@ import lombok.NoArgsConstructor;
 public class ICIPSkillPageResponse {
 
     private List<ICIPSkillRegistryDTO> skills;
+    /** Number of skills returned in this page (= skills.size()). */
+    private int count;
+    /** Total number of matching skills across all pages. */
     private long totalCount;
     private int page;
     private int size;
