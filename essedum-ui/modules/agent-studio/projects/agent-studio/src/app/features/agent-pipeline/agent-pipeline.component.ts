@@ -3631,6 +3631,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Reply streams back via SSE; when files are generated the service auto-
    * saves them to the pipeline card DB and pushes to GitHub (but does NOT
    * trigger the deployment preview — that's manual via deployNow()).
+   *
+   * Every prompt is enriched with a CODEBASE CONTEXT block that lists all
+   * files in the pipeline card and inlines the currently-open file's contents
+   * so the agent always has full awareness of what the user is looking at —
+   * regardless of what they typed.
    */
   sendAiChatMessage(): void {
     const text = (this.aiChatInput || '').trim();
@@ -3658,7 +3663,81 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatDeployStatus = 'idle';
     this.aiChatDeployedUrl = null;
 
-    this.aiChatCoder.sendMessage(text + skillHint, this.aiChatSelectedAgent, this.aiChatSelectedModel);
+    // Build the codebase context block — ALWAYS included so the agent knows
+    // which pipeline / files it's working on before answering.
+    const contextBlock = this.buildCodebaseContext();
+    const finalPrompt = contextBlock
+      ? `${contextBlock}\n\n---\nUser question:\n${text}${skillHint}`
+      : `${text}${skillHint}`;
+
+    this.aiChatCoder.sendMessage(finalPrompt, this.aiChatSelectedAgent, this.aiChatSelectedModel);
+  }
+
+  /**
+   * Assembles a compact CODEBASE CONTEXT block covering the current pipeline
+   * card. Included in every prompt sent from the AI chat panel:
+   *   • Pipeline metadata (cname, alias, mode)
+   *   • Full file list (flattened from the file explorer tree)
+   *   • Currently open file path + full content (if any)
+   * Truncates the open-file content at ~40k chars to keep the payload sane.
+   */
+  private buildCodebaseContext(): string {
+    const lines: string[] = [];
+    lines.push('[CODEBASE CONTEXT]');
+    lines.push(`Pipeline: ${this.pipelineAlias || this.currentCname || '(unknown)'} (cname: ${this.currentCname || 'n/a'}, mode: ${this.pipelineMode})`);
+
+    // Flatten the file tree into "path/to/file.ext" entries.
+    const paths = this.flattenFilePaths(this.fileSystemData);
+    if (paths.length) {
+      lines.push('');
+      lines.push(`Project files (${paths.length}):`);
+      // Cap the list at 200 entries so the context stays bounded on very large projects.
+      const shown = paths.length > 200 ? paths.slice(0, 200) : paths;
+      for (const p of shown) lines.push(`  - ${p}`);
+      if (paths.length > shown.length) {
+        lines.push(`  ... and ${paths.length - shown.length} more file(s)`);
+      }
+    } else {
+      lines.push('');
+      lines.push('Project files: (none yet — this is a fresh pipeline)');
+    }
+
+    // Inline the currently open file's content so the agent can reason about it.
+    if (this.selectedFileName && this.selectedFileContent != null) {
+      const path = this.selectedFilePath || this.selectedFileName;
+      const raw = this.selectedFileContent || '';
+      const MAX = 40000;
+      const truncated = raw.length > MAX
+        ? raw.slice(0, MAX) + `\n... [truncated ${raw.length - MAX} chars]`
+        : raw;
+      const modified = this.isFileModified ? ' (unsaved changes)' : '';
+      lines.push('');
+      lines.push(`Currently open file: ${path}${modified}`);
+      lines.push('```' + (this.fileExtension || ''));
+      lines.push(truncated);
+      lines.push('```');
+    }
+
+    lines.push('[END CODEBASE CONTEXT]');
+    return lines.join('\n');
+  }
+
+  /**
+   * Walks the file tree and returns a flat array of file paths (folders are
+   * used only for the path prefix — not included as separate entries).
+   */
+  private flattenFilePaths(nodes: FileNode[] | undefined, prefix: string = ''): string[] {
+    if (!nodes || !nodes.length) return [];
+    const out: string[] = [];
+    for (const n of nodes) {
+      const fullPath = prefix ? `${prefix}/${n.name}` : n.name;
+      if (n.type === 'file') {
+        out.push(fullPath);
+      } else if (n.type === 'folder' && n.children?.length) {
+        out.push(...this.flattenFilePaths(n.children, fullPath));
+      }
+    }
+    return out;
   }
 
   /**
