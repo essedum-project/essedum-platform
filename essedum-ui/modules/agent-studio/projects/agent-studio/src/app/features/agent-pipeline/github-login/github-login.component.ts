@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-github-login',
+    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,

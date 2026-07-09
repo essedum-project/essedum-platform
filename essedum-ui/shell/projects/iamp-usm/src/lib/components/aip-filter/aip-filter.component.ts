@@ -49,6 +49,7 @@ enum FilterType {
 
 @Component({
     selector: "app-aip-filter",
+    standalone: true,
     templateUrl: "./aip-filter.component.html",
     styleUrls: ["./aip-filter.component.scss"],
     animations: [

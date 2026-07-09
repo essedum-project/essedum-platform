@@ -10,6 +10,7 @@ import { MessageService } from "../../../services/message.service";
 
 @Component({
     selector: "lib-secret-add",
+    standalone: true,
     imports: [SharedMaterialModule],
     templateUrl: "./secret-add.component.html",
     styleUrl: "./secret-add.component.css"
