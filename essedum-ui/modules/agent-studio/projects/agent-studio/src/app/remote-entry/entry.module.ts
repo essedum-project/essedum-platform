@@ -98,6 +98,7 @@ import { TagsComponent } from '@essedum/shared-lib';
 // AipCard, AipPagination, AipHeader, AipEmptyState, AipSnackbarCustom, AipLoading,
 // AipDeleteConfirmation now come from @essedum/shared-lib (SharedLibUiModule).
 import { AipFilterComponent } from '../features/sharedModule/aip-filter/aip-filter.component';
+import { AipGridComponent } from '../features/sharedModule/aip-grid/aip-grid.component';
 import { GitHubPushComponent } from '../features/sharedModule/github-push/github-push.component';
 
 // Services
@@ -150,6 +151,7 @@ import { environment } from '../../environments/environment';
     GitHubPushComponent,
     // sharedModule aip-* — remaining MFE-private (rest moved to SharedLibUiModule)
     AipFilterComponent,
+    AipGridComponent,
   ],
   imports: [
     CommonModule,

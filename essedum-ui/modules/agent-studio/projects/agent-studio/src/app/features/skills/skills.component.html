@@ -12,7 +12,7 @@
     (add)="openAdd()">
   </app-aip-header>
 
-  <!-- AIP Filter Component  -->
+  <!-- AIP Filter Component -->
   <app-aip-filter
     [tagrefresh]="tagrefresh"
     [servicev1]="servicev1"
@@ -21,107 +21,30 @@
     (filterStatusChange)="onFilterStatusChange($event)">
   </app-aip-filter>
 
-  <!-- Column Headers -->
-  <div class="skills-table-header">
-    <span class="col-sk-name">{{ COLNAME }}</span>
-    <span class="col-sk-type">{{ COLTYPE }}</span>
-    <span class="col-sk-category">{{ COLCATEGORY }}</span>
-    <span class="col-sk-desc">{{ COLDESC }}</span>
-    <span class="col-sk-date">{{ COLDATE }}</span>
-    <span class="col-sk-createdby">{{ COLCREATEDBY }}</span>
-    <span class="col-sk-actions">{{ COLACTIONS }}</span>
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="skills-loading">
-    <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
-    <span>{{ LOADINGMSG }}</span>
-  </div>
-
-  <!-- Skills list -->
-  <div *ngIf="!loading" class="skills-list">
-
-    <!-- Empty State -->
-    <div *ngIf="filteredSkills.length === 0" class="skills-empty">
-      <mat-icon>psychology</mat-icon>
-      <p>{{ EMPTYMESSAGE }}</p>
-    </div>
-
-    <div *ngFor="let skill of paginatedSkills" class="skills-row">
-
-      <!-- Skill Name -->
-      <div class="col-sk-name skills-name-info">
-        <div class="skills-icon">
-          <mat-icon>psychology</mat-icon>
-        </div>
-        <span class="skills-name-text" [matTooltip]="skill.skillName">{{ skill.skillName }}</span>
-      </div>
-
-      <!-- Type -->
-      <div class="col-sk-type">
-        <span class="skills-type-badge" [ngClass]="getTypeBadgeClass(skill.skillType)"
-          [matTooltip]="getTypeLabel(skill.skillType)">
-          {{ getTypeLabel(skill.skillType) }}
-        </span>
-      </div>
-
-      <!-- Category -->
-      <div class="col-sk-category">
-        <span class="skills-category-badge" [ngClass]="getCategoryBadgeClass(skill.skillCategory)">
-          {{ skill.skillCategory }}
-        </span>
-      </div>
-
-      <!-- Description -->
-      <div class="col-sk-desc">
-        <span class="skills-desc-text" [matTooltip]="skill.description">{{ skill.description }}</span>
-      </div>
-
-      <!-- Date -->
-      <div class="col-sk-date">
-        <span class="skills-date-text">{{ formatDate(skill.createdDate) }}</span>
-      </div>
-
-      <!-- Created By -->
-      <div class="col-sk-createdby">
-        <span class="skills-createdby-badge">
-          <mat-icon class="skills-user-icon">person</mat-icon>
-          {{ skill.createdBy }}
-        </span>
-      </div>
-
-      <!-- Actions (dot menu) -->
-      <div class="col-sk-actions">
-        <button
-          mat-icon-button
-          class="skills-action-dot-btn"
-          [matMenuTriggerFor]="actionsMenu"
-          [matTooltip]="OPTIONSTIP">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #actionsMenu="matMenu" class="skills-actions-menu" xPosition="before">
-          <button mat-menu-item (click)="openView(skill)">
-            <mat-icon>visibility</mat-icon>
-            <span>{{ VIEWLABEL }}</span>
-          </button>
-          <button mat-menu-item (click)="openEdit(skill)">
-            <mat-icon>edit</mat-icon>
-            <span>{{ EDITLABEL }}</span>
-          </button>
-          <button mat-menu-item class="skills-menu-delete" (click)="deleteSkill(skill)">
-            <mat-icon>delete</mat-icon>
-            <span>{{ DELETELABEL }}</span>
-          </button>
-        </mat-menu>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Pagination -->
-  <app-aip-pagination *ngIf="filteredSkills && filteredSkills.length > 0" [pageNumber]="pageNumber"
-    [noOfPages]="noOfPages" [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex"
-    [hoverStates]="hoverStates" (prevPage)="prevPage()" (nextPage)="nextPage()" (changePage)="changePage($event)">
-  </app-aip-pagination>
-
+  <!-- Grid — all layout, loading, empty, actions and pagination bound here -->
+  <app-aip-grid
+    [columns]="gridColumns"
+    [rows]="paginatedSkills"
+    [loading]="loading"
+    [loadingMessage]="LOADINGMSG"
+    [emptyIcon]="'psychology'"
+    [emptyMessage]="EMPTYMESSAGE"
+    [gridTemplateColumns]="GRID_TEMPLATE"
+    [headerPadding]="'10px 0'"
+    [headerMarginTop]="'12px'"
+    [rowPadding]="'11px 0'"
+    [actions]="gridActions"
+    [actionsLabel]="COLACTIONS"
+    [actionMenuCssClass]="'skills-actions-menu'"
+    [pageNumber]="pageNumber"
+    [noOfPages]="noOfPages"
+    [pageArr]="pageArr"
+    [startIndex]="startIndex"
+    [endIndex]="endIndex"
+    [hoverStates]="hoverStates"
+    (actionClick)="onGridAction($event)"
+    (prevPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (changePage)="changePage($event)">
+  </app-aip-grid>
 </div>

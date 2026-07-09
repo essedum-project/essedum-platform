@@ -197,6 +197,14 @@ export class SkillsService {
     this.refreshListSubject.next();
   }
 
+  private getUserHeaders(): HttpHeaders {
+    const userId = JSON.parse(sessionStorage.getItem('user') || '{}')?.id ?? '';
+    return new HttpHeaders({
+      'Content-Type': 'application/json; charset=utf-8',
+      'userId': String(userId),
+    });
+  }
+
   private handleError(error: any) {
     console.error(error);
     return throwError(() => error);
@@ -253,7 +261,7 @@ export class SkillsService {
     return this.http
       .post<SkillCreateResponse>('/api/aip/skills/create', body, {
         params,
-        headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+        headers: this.getUserHeaders(),
         observe: 'response',
       })
       .pipe(
@@ -265,7 +273,7 @@ export class SkillsService {
   updateSkill(id: number, body: SkillUpdateRequest): Observable<SkillUpdateResponse> {
     return this.http
       .put<SkillUpdateResponse>(`/api/aip/skills/${id}`, body, {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+        headers: this.getUserHeaders(),
         observe: 'response',
       })
       .pipe(
@@ -277,7 +285,7 @@ export class SkillsService {
   deleteSkill(id: number): Observable<DeleteSkillResponse> {
     return this.http
       .delete<DeleteSkillResponse>(`/api/aip/skills/${id}`, {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+        headers: this.getUserHeaders(),
         observe: 'response',
       })
       .pipe(

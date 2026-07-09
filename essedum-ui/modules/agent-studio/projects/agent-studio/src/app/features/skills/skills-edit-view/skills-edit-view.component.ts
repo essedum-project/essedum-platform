@@ -1,7 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Services } from '@essedum/shared-lib';
 import {
   Skill,
@@ -21,7 +23,8 @@ import {
   templateUrl: './skills-edit-view.component.html',
   styleUrls: ['./skills-edit-view.component.scss'],
 })
-export class SkillsEditViewComponent implements OnInit {
+export class SkillsEditViewComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
 
   skillModel: SkillFormModel = this.initializeSkillModel();
@@ -141,8 +144,6 @@ export class SkillsEditViewComponent implements OnInit {
   readonly LBLPIPESCOPE    = 'Pipeline Scope';
   readonly LBLSTATUS       = 'Status';
   readonly LBLVISIBILITY   = 'Visibility';
-  readonly LBLORG          = 'Organization';
-  readonly LBLPROJECTID    = 'Project ID';
   readonly PHNAME         = 'Java REST Code Generator';
   readonly PHALIAS        = 'java-rest-gen';
   readonly PHVERSION      = '1.0.0';
@@ -154,8 +155,6 @@ export class SkillsEditViewComponent implements OnInit {
   readonly PHTRIGKW       = 'Comma-separated: generate class, create endpoint';
   readonly PHINPUTSCHEMA  = '{"type":"object","properties":{...}}';
   readonly PHOUTPUTSCHEMA = '{"type":"object","properties":{...}}';
-  readonly PHORG          = 'essedum';
-  readonly PHPROJECTID    = '42';
   readonly BTNCANCEL  = 'Cancel';
   readonly BTNCLOSE   = 'Close';
   readonly BTNUPDATE  = 'Update';
@@ -164,7 +163,6 @@ export class SkillsEditViewComponent implements OnInit {
   readonly ERRMAXALIAS   = 'Max 128 characters';
   readonly ERRMAXVERSION = 'Max 20 characters';
   readonly ERRMAXDESC    = 'Max 512 characters';
-  readonly ERRMAXORG     = 'Max 256 characters';
   readonly ERRGLOBAL     = 'Please fill in all required fields.';
 
   constructor(
@@ -188,9 +186,9 @@ export class SkillsEditViewComponent implements OnInit {
     }
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
+    if (id && !stateSkill) {
       this.loadingSkill = true;
-      this.skillsService.getSkillById(id).subscribe({
+      this.skillsService.getSkillById(id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (skill: Skill) => {
           this.skill = skill;
           this.populateModel();
@@ -201,6 +199,11 @@ export class SkillsEditViewComponent implements OnInit {
         },
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get pageTitle(): string {
@@ -244,9 +247,10 @@ export class SkillsEditViewComponent implements OnInit {
     return control?.invalid ?? false;
   }
 
+  private readonly REQUIRED_FIELDS = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+
   isFieldRequired(fieldName: string): boolean {
-    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
-    return required.includes(fieldName);
+    return this.REQUIRED_FIELDS.includes(fieldName);
   }
 
   validateField(fieldName: string, value: string): boolean {
@@ -259,7 +263,6 @@ export class SkillsEditViewComponent implements OnInit {
       description: 512,
       framework: 128,
       entrypoint: 512,
-      organization: 256,
     };
 
     if (maxLengths[fieldName] && value?.length > maxLengths[fieldName]) return false;
@@ -296,7 +299,7 @@ export class SkillsEditViewComponent implements OnInit {
     };
 
     const id = this.skill?.id ?? Number(this.route.snapshot.paramMap.get('id'));
-    this.skillsService.updateSkill(id, body).subscribe({
+    this.skillsService.updateSkill(id, body).pipe(takeUntil(this.destroy$)).subscribe({
       next: (updated: Skill) => {
         this.skill = updated;
         this.saving = false;
@@ -312,8 +315,7 @@ export class SkillsEditViewComponent implements OnInit {
   }
 
   private isFormValid(): boolean {
-    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
-    for (const field of required) {
+    for (const field of this.REQUIRED_FIELDS) {
       const value = (this.skillModel as any)[field];
       if (!value || (typeof value === 'string' && !value.trim())) {
         return false;

@@ -5,6 +5,7 @@ import { Services, ConfirmDeleteDialogComponent, TagEventDTO } from '@essedum/sh
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Skill, SkillsListResponse, SkillsService, SkillsServiceMessages } from '../services/skills.service';
+import { AipGridColumn, AipGridAction } from '../sharedModule/aip-grid/aip-grid.component';
 
 @Component({
   selector: 'app-skills',
@@ -65,19 +66,61 @@ export class SkillsComponent implements OnInit, OnDestroy {
 
   // ── Page labels ────────────────────────────────────────────────────────────
   readonly PAGETITLE    = 'Skills';
-  readonly COLNAME      = 'Skill Name';
-  readonly COLTYPE      = 'Type';
-  readonly COLCATEGORY  = 'Category';
-  readonly COLDESC      = 'Description';
-  readonly COLDATE      = 'Date';
-  readonly COLCREATEDBY = 'Created By';
   readonly COLACTIONS   = 'Actions';
   readonly EMPTYMESSAGE = 'No skills found. Click "+" to create one.';
-  readonly VIEWLABEL    = 'View';
-  readonly EDITLABEL    = 'Edit';
-  readonly DELETELABEL  = 'Delete';
+  readonly VIEWLABEL    = 'View Skill';
+  readonly EDITLABEL    = 'Edit Skill';
+  readonly DELETELABEL  = 'Delete Skill';
   readonly LOADINGMSG   = 'Loading skills…';
   readonly OPTIONSTIP   = 'Options';
+
+  // ── aip-grid configuration ─────────────────────────────────────────────────
+  readonly GRID_TEMPLATE = '20% 15% 10% 25% 10% 10% 10%';
+
+  readonly gridColumns: AipGridColumn[] = [
+    {
+      key: 'name', label: 'Skill Name', field: 'skillName', cssClass: 'col-sk-name',
+      type: 'icon-text', icon: 'psychology',
+    },
+    {
+      key: 'type', label: 'Type', field: 'skillType', cssClass: 'col-sk-type',
+      type: 'badge',
+      badgeCssFn:   (v) => `skills-type-badge ${this.getTypeBadgeClass(v)}`,
+      badgeLabelFn: (v) => this.getTypeLabel(v),
+    },
+    {
+      key: 'category', label: 'Category', field: 'skillCategory', cssClass: 'col-sk-category',
+      type: 'badge',
+      badgeCssFn: (v) => `skills-category-badge ${this.getCategoryBadgeClass(v)}`,
+    },
+    {
+      key: 'desc', label: 'Description', field: 'description', cssClass: 'col-sk-desc',
+      type: 'text', textCssClass: 'skills-desc-text',
+    },
+    {
+      key: 'date', label: 'Date', field: 'createdDate', cssClass: 'col-sk-date',
+      type: 'date', textCssClass: 'skills-date-text',
+      dateFn: (v) => this.formatDate(v),
+    },
+    {
+      key: 'createdby', label: 'Created By', field: 'createdBy', cssClass: 'col-sk-createdby',
+      type: 'user',
+    },
+  ];
+
+  readonly gridActions: AipGridAction[] = [
+    { key: 'view',   label: this.VIEWLABEL,   icon: 'visibility', iconCssClass: 'skills-icon-view' },
+    { key: 'edit',   label: this.EDITLABEL,   icon: 'edit',       iconCssClass: 'skills-icon-edit' },
+    { key: 'delete', label: this.DELETELABEL, icon: 'delete',     iconCssClass: 'skills-icon-delete', cssClass: 'skills-menu-delete' },
+  ];
+
+  onGridAction(event: { key: string; row: Skill }): void {
+    switch (event.key) {
+      case 'view':   this.openView(event.row);    break;
+      case 'edit':   this.openEdit(event.row);    break;
+      case 'delete': this.deleteSkill(event.row); break;
+    }
+  }
 
   constructor(
     private dialog:       MatDialog,
@@ -131,6 +174,7 @@ export class SkillsComponent implements OnInit, OnDestroy {
         this.selectedSubcategory || undefined,
         this.searchTerm          || undefined,
       )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: SkillsListResponse) => {
           this.skillsResponse = response;
@@ -283,7 +327,7 @@ export class SkillsComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: { entityName: skill.skillName },
     });
-    ref.afterClosed().subscribe((result: string) => {
+    ref.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: string) => {
       if (result === 'delete') {
         this.skillsService.deleteSkill(skill.id).subscribe({
           next: () => {

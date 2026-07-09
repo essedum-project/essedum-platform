@@ -1,11 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Location } from '@angular/common';
 import { Services } from '@essedum/shared-lib';
 import {
-  Skill,
   SkillCreateRequest,
-  SkillCreateResponse,
   SkillsService,
   SkillsServiceMessages,
   SkillFormModel,
@@ -21,15 +19,13 @@ import {
   templateUrl: './skills-add.component.html',
   styleUrls: ['./skills-add.component.scss'],
 })
-export class SkillsAddComponent implements OnInit {
+export class SkillsAddComponent {
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
 
   skillModel: SkillFormModel = this.initializeSkillModel();
   showError = false;
   saving = false;
   touchedFields: Set<string> = new Set();
-
-  createResponse: SkillCreateResponse | null = null;
 
   sectionStates: Record<string, boolean> = {
     basic:        true,
@@ -165,8 +161,6 @@ export class SkillsAddComponent implements OnInit {
     private service: Services,
   ) {}
 
-  ngOnInit(): void {}
-
   toggleSection(key: string): void {
     this.sectionStates[key] = !this.sectionStates[key];
   }
@@ -180,9 +174,10 @@ export class SkillsAddComponent implements OnInit {
     return control?.invalid ?? false;
   }
 
+  private readonly REQUIRED_FIELDS = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+
   isFieldRequired(fieldName: string): boolean {
-    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
-    return required.includes(fieldName);
+    return this.REQUIRED_FIELDS.includes(fieldName);
   }
 
   validateField(fieldName: string, value: string): boolean {
@@ -234,8 +229,7 @@ export class SkillsAddComponent implements OnInit {
     };
 
     this.skillsService.createSkill(org, projectId, body).subscribe({
-      next: (response: SkillCreateResponse) => {
-        this.createResponse = response;
+      next: () => {
         this.saving = false;
         this.service.message(SkillsServiceMessages.CREATE_SUCCESS, 'success');
         this.skillsService.triggerListRefresh();
@@ -249,8 +243,7 @@ export class SkillsAddComponent implements OnInit {
   }
 
   private isFormValid(): boolean {
-    const required = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
-    for (const field of required) {
+    for (const field of this.REQUIRED_FIELDS) {
       const value = (this.skillModel as any)[field];
       if (!value || (typeof value === 'string' && !value.trim())) {
         return false;

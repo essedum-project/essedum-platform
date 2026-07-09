@@ -1,4 +1,4 @@
-:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+:host { display: block !important; width: max-content !important; min-width: 0; max-width: min(90vw, 720px); box-sizing: border-box; }
 
 .custom-snackbar {
   display: flex !important;
