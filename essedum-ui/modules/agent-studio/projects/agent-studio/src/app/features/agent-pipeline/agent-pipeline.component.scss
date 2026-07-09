@@ -1,4 +1,5 @@
 @use 'overlays';
+@use 'ai-chat-panel';
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -163,7 +164,7 @@
 // visible at a fixed 380px width.
 .file-panel {
   display: grid !important;
-  grid-template-columns: 260px minmax(0, 1fr) !important;
+  grid-template-columns: 260px minmax(0, 1fr) 380px !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 100%;
