@@ -21,7 +21,7 @@ import {
   AgentGenerationRequest,
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
-import { AiChatCoderService, AiChatFile } from './ai-chat-coder.service';
+import { AiChatCoderService, AiChatFile, AiChatPushState } from './ai-chat-coder.service';
 import { Subscription } from 'rxjs';
 import { StreamingServices } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
@@ -347,6 +347,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   aiChatVisible: boolean = (() => {
     try { return localStorage.getItem('essedum.aiChat.visible') !== '0'; } catch { return true; }
   })();
+
+  // ─── GitHub push status (toast + expandable details panel) ────────────────
+  /** Mirrors AiChatCoderService.pushStatus$ so the template can bind directly. */
+  pushStatus: AiChatPushState = { phase: 'idle' };
+  /** True when the user has expanded the details / edit-URL panel. */
+  pushStatusPanelOpen = false;
+  /** Working copy of the repo URL edited via the panel form. */
+  pushStatusRepoUrlDraft = '';
 
   /** Skill catalogue — mock data. Later this comes from an API. */
   readonly aiChatSkills: AiChatSkill[] = [
@@ -3603,20 +3611,25 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       })
     );
 
-    // When files are ready and persisted, refresh the codespace file tree and
-    // enable the Deploy button.
+    // When files are ready, enable the Deploy button. UI refresh happens on
+    // persistComplete$ (see next subscription) so it fires once per round.
     this.aiChatSubs.push(
       this.aiChatCoder.generationComplete$.subscribe(files => {
         this.aiChatDeployAvailable = files.length > 0;
-        // Refresh the codespace file tree from the DB once the persistence call
-        // is done — files are saved every generation round.
-        this.aiChatSubs.push(
-          this.aiChatCoder.persistComplete$.subscribe(() => {
-            this.hasGeneratedAgent = true;
-            this.isJsonProcessed = true;
-            this.refreshFileStructure();
-          })
-        );
+        this.hasGeneratedAgent = files.length > 0;
+        this.isJsonProcessed = files.length > 0;
+        this.cdr.detectChanges();
+      })
+    );
+
+    // Persist-complete fires ONCE per round (in both success + error paths)
+    // — this is the safe point to reload the codespace tree from the DB.
+    // Subscribed exactly once so we don't leak subscriptions across rounds.
+    this.aiChatSubs.push(
+      this.aiChatCoder.persistComplete$.subscribe(() => {
+        this.hasGeneratedAgent = true;
+        this.isJsonProcessed = true;
+        this.refreshFileStructure();
         this.cdr.detectChanges();
       })
     );
@@ -3631,6 +3644,19 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatSubs.push(
       this.aiChatCoder.deploymentResult$.subscribe(r => {
         this.aiChatDeployedUrl = typeof r === 'string' ? r : (r?.deployUrl ?? null);
+        this.cdr.detectChanges();
+      })
+    );
+
+    // GitHub push lifecycle — toast + expandable details panel.
+    this.aiChatSubs.push(
+      this.aiChatCoder.pushStatus$.subscribe(s => {
+        this.pushStatus = s;
+        // Keep the draft URL synced with the latest known value when the panel
+        // isn't open (so editing starts from a clean slate).
+        if (!this.pushStatusPanelOpen) {
+          this.pushStatusRepoUrlDraft = s.repoUrl ?? '';
+        }
         this.cdr.detectChanges();
       })
     );
@@ -3863,6 +3889,47 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   showAiChatPanel(): void {
     this.aiChatVisible = true;
     try { localStorage.setItem('essedum.aiChat.visible', '1'); } catch { /* ignore */ }
+  }
+
+  // ─── GitHub push status controls ──────────────────────────────────────────
+
+  /** Open the expandable details panel; seed the URL draft with the latest value. */
+  openPushStatusPanel(): void {
+    this.pushStatusPanelOpen = true;
+    this.pushStatusRepoUrlDraft = this.pushStatus.repoUrl ?? '';
+  }
+
+  /** Close the details panel without applying any URL change. */
+  closePushStatusPanel(): void {
+    this.pushStatusPanelOpen = false;
+  }
+
+  /** Dismiss the entire push toast (does not cancel an in-flight push). */
+  dismissPushStatus(): void {
+    this.pushStatusPanelOpen = false;
+    this.aiChatCoder.dismissPushStatus();
+  }
+
+  /** Manually refresh the push status via GET /github-status. */
+  refreshPushStatus(): void {
+    this.aiChatCoder.refreshPushStatus();
+  }
+
+  /** Persist the edited repo URL and retry the push. */
+  saveRepoUrlAndRetry(): void {
+    const trimmed = (this.pushStatusRepoUrlDraft || '').trim();
+    if (trimmed) this.aiChatCoder.updateRepoUrl(trimmed);
+    this.aiChatCoder.retryPushToGitHub();
+  }
+
+  /** Retry the push using the existing (or newly-set) URL. */
+  retryPushToGitHub(): void {
+    this.aiChatCoder.retryPushToGitHub();
+  }
+
+  /** Convenience getter — is the status toast visible right now? */
+  get pushStatusVisible(): boolean {
+    return this.pushStatus.phase !== 'idle';
   }
 
   private cancelAiChatMockTimers(): void {

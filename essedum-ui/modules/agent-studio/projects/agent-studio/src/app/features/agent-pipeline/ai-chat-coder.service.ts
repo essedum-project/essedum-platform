@@ -27,6 +27,29 @@ export interface AiChatChatMessage {
 
 export type AiChatStatus = 'idle' | 'generating' | 'error';
 export type AiChatDeployStatus = 'idle' | 'deploying' | 'success' | 'error';
+export type AiChatPushPhase = 'idle' | 'pushing' | 'success' | 'failed';
+
+export interface AiChatPushState {
+  phase: AiChatPushPhase;
+  /** Session id used for the push. */
+  sessionId?: string;
+  /** Full repo URL (may be edited by the user via updateRepoUrl). */
+  repoUrl?: string;
+  /** Branch that the push targeted. */
+  branch?: string;
+  /** SHA of the commit produced on success. */
+  commitSha?: string;
+  /** Organisation (backend parameter). */
+  org?: string;
+  /** Backend push-record id (uuid/primary key), when available. */
+  configId?: string | number;
+  /** Human-readable status message from the backend. */
+  message?: string;
+  /** Populated when phase='failed'. */
+  errorMessage?: string;
+  /** ISO timestamp of the last status update. */
+  updatedAt?: string;
+}
 
 function generateRequestId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 10);
@@ -74,6 +97,14 @@ export class AiChatCoderService implements OnDestroy {
   readonly deploymentResult$  = new BehaviorSubject<any>(null);
   /** Emits once the current file list has been persisted to the pipeline card. */
   readonly persistComplete$    = new Subject<void>();
+  /** GitHub push lifecycle — updated after every auto push and when the user
+   *  manually retries. UI shows a toast + expandable details panel. */
+  readonly pushStatus$         = new BehaviorSubject<AiChatPushState>({ phase: 'idle' });
+
+  /** Handle for the active status-polling interval so we can cancel it. */
+  private pushPollingTimer: any = null;
+  /** User-overridable repo URL (falls back to the default derived from files). */
+  private customRepoUrl: string | null = null;
 
   constructor(
     private http: HttpClient,
@@ -82,6 +113,7 @@ export class AiChatCoderService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.cancelReply();
+    this.stopPushPolling();
   }
 
   // ─── Public API ────────────────────────────────────────────────────────────
@@ -117,6 +149,12 @@ export class AiChatCoderService implements OnDestroy {
     this.status$.next('generating');
     this.pushInFlight = false;
     this.cancelReply();
+
+    // Reset the tracked file list at the start of each turn so list-apps
+    // becomes fully authoritative for this round. Prevents stale entries
+    // (deleted files, obsolete content) from carrying across generations.
+    this.files = [];
+    this.files$.next([]);
 
     this.ensureAgentStarted(provider, model)
       .then((sid) => this.openReplyStream(sid, trimmed + ' - send all code files generated here'))
@@ -577,11 +615,16 @@ export class AiChatCoderService implements OnDestroy {
       await new Promise<void>((resolve) => {
         this.http.post(url, formData, { headers: this.getHeaders() as any }).subscribe({
           next: () => { this.persistComplete$.next(); resolve(); },
-          error: () => resolve(),
+          // Always emit persistComplete$ so the UI can refresh from the DB
+          // even if this particular save round failed — the DB still holds
+          // the last known good state and the codespace tree shouldn't stall.
+          error: () => { this.persistComplete$.next(); resolve(); },
         });
       });
     } catch {
-      // non-fatal — user can still see files in the panel, DB save just failed.
+      // Non-fatal — user can still see files in the panel, DB save just failed.
+      // Still notify listeners so the UI reload logic runs.
+      this.persistComplete$.next();
     }
   }
 
@@ -603,16 +646,186 @@ export class AiChatCoderService implements OnDestroy {
     const filePaths = appFiles.map(f => f.path);
 
     const branchSuffix = appDir && appDir !== sid ? `${appDir}-${sid}` : sid;
+    const branch = `studio/${branchSuffix}`;
+    const org = project?.name || this.organisation || 'leo1311';
 
     const body: any = {
-      org: project?.name || this.organisation || 'leo1311',
-      branch: `studio/${branchSuffix}`,
+      org,
+      branch,
       push_dir: appDir ?? sid,
       exclude_dirs: ['vibesession'],
       files: filePaths,
     };
+    // If the user has overridden the repo URL via the status panel, forward it.
+    if (this.customRepoUrl) body.repoUrl = this.customRepoUrl;
+
+    // Kick off the "pushing" phase so the toast appears immediately.
+    this.pushStatus$.next({
+      phase: 'pushing',
+      sessionId: sid,
+      branch,
+      org,
+      repoUrl: this.customRepoUrl ?? undefined,
+      message: 'Push to GitHub initiated…',
+      updatedAt: new Date().toISOString(),
+    });
+
     this.http.post<any>(url, body, { headers: this.getHeaders() as any })
-      .subscribe({ next: () => {}, error: () => {} });
+      .subscribe({
+        next: (resp) => {
+          this.pushStatus$.next({
+            ...this.pushStatus$.value,
+            phase: 'pushing',
+            branch: resp?.branchName || branch,
+            message: resp?.message || 'Push in progress…',
+            updatedAt: new Date().toISOString(),
+          });
+          // Backend runs async; poll the status endpoint until SUCCESS/FAILED.
+          this.startPushPolling(sid, org);
+        },
+        error: (err) => {
+          this.pushInFlight = false;
+          this.pushStatus$.next({
+            ...this.pushStatus$.value,
+            phase: 'failed',
+            message: 'Failed to submit push request.',
+            errorMessage: this.readableError(err),
+            updatedAt: new Date().toISOString(),
+          });
+        },
+      });
+  }
+
+  /** Poll GET /sessions/{id}/github-status?org=... until SUCCESS/FAILED. */
+  private startPushPolling(sid: string, org: string): void {
+    this.stopPushPolling();
+    let attempts = 0;
+    const MAX_ATTEMPTS = 60; // ~3 min at 3s interval
+    const poll = () => {
+      attempts++;
+      const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${sid}/github-status`;
+      this.http.get<any>(url, { params: { org }, headers: this.getHeaders() as any })
+        .subscribe({
+          next: (cfg) => {
+            const status = String(cfg?.status || '').toUpperCase();
+            const repoUrl = cfg?.repoUrl || this.pushStatus$.value.repoUrl;
+            const branch = cfg?.branchName || this.pushStatus$.value.branch;
+            const commitSha = cfg?.commitSha;
+            const configId = cfg?.id;
+
+            if (status === 'SUCCESS') {
+              this.stopPushPolling();
+              this.pushInFlight = false;
+              this.pushStatus$.next({
+                phase: 'success',
+                sessionId: sid,
+                org,
+                repoUrl,
+                branch,
+                commitSha,
+                configId,
+                message: 'Code pushed to GitHub successfully.',
+                updatedAt: new Date().toISOString(),
+              });
+            } else if (status === 'FAILED' || status === 'FAILURE' || status === 'ERROR') {
+              this.stopPushPolling();
+              this.pushInFlight = false;
+              this.pushStatus$.next({
+                phase: 'failed',
+                sessionId: sid,
+                org,
+                repoUrl,
+                branch,
+                configId,
+                message: 'Push to GitHub failed.',
+                errorMessage: cfg?.errorMessage || 'The push operation reported a failure.',
+                updatedAt: new Date().toISOString(),
+              });
+            } else if (attempts >= MAX_ATTEMPTS) {
+              this.stopPushPolling();
+              this.pushInFlight = false;
+              this.pushStatus$.next({
+                ...this.pushStatus$.value,
+                phase: 'failed',
+                message: 'Push status timed out.',
+                errorMessage: 'The status endpoint did not report success/failure within the polling window.',
+                updatedAt: new Date().toISOString(),
+              });
+            }
+            // else still IN_PROGRESS — keep polling
+          },
+          error: (err) => {
+            // Transient errors don't abort polling; only give up at MAX_ATTEMPTS.
+            if (attempts >= MAX_ATTEMPTS) {
+              this.stopPushPolling();
+              this.pushInFlight = false;
+              this.pushStatus$.next({
+                ...this.pushStatus$.value,
+                phase: 'failed',
+                message: 'Could not check push status.',
+                errorMessage: this.readableError(err),
+                updatedAt: new Date().toISOString(),
+              });
+            }
+          },
+        });
+    };
+    // Poll immediately, then every 3s.
+    poll();
+    this.pushPollingTimer = setInterval(poll, 3000);
+  }
+
+  private stopPushPolling(): void {
+    if (this.pushPollingTimer) {
+      clearInterval(this.pushPollingTimer);
+      this.pushPollingTimer = null;
+    }
+  }
+
+  private readableError(err: any): string {
+    if (!err) return 'Unknown error.';
+    if (typeof err === 'string') return err;
+    return err?.error?.error
+        || err?.error?.message
+        || err?.message
+        || `HTTP ${err?.status ?? '?'}`;
+  }
+
+  /**
+   * User-triggered retry — resets the "in-flight" guard and reruns the push.
+   * Uses the latest customRepoUrl (may have been changed via updateRepoUrl).
+   */
+  retryPushToGitHub(): void {
+    if (!this.sessionId) return;
+    this.stopPushPolling();
+    this.pushInFlight = false;
+    this.triggerPushToGitHub(this.sessionId);
+  }
+
+  /**
+   * Override the repo URL for subsequent push attempts. Persists on the
+   * service instance so all future auto/manual pushes use it.
+   */
+  updateRepoUrl(newUrl: string): void {
+    const trimmed = (newUrl || '').trim();
+    this.customRepoUrl = trimmed || null;
+    this.pushStatus$.next({
+      ...this.pushStatus$.value,
+      repoUrl: this.customRepoUrl ?? undefined,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  /** Manually refresh push status (bound to a "Check status" button in the UI). */
+  refreshPushStatus(): void {
+    const s = this.pushStatus$.value;
+    if (!s.sessionId || !s.org) return;
+    this.startPushPolling(s.sessionId, s.org);
+  }
+
+  /** Dismiss the push toast/panel (does not cancel any in-flight push). */
+  dismissPushStatus(): void {
+    this.pushStatus$.next({ phase: 'idle' });
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

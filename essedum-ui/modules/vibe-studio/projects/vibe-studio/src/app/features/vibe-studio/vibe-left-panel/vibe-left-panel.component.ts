@@ -50,9 +50,41 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
   }
 
   renderMarkdown(text: string): SafeHtml {
-    const result = marked.parse(text);
-    const html = typeof result === 'string' ? result : '';
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    // IMPORTANT: escape raw HTML in the agent's response before rendering.
+    // Without this, tokens like `<link rel="stylesheet" href="style.css">` or
+    // `<img src="foo.png">` inside the reply become live DOM elements — the
+    // browser then fires resource requests against the app origin (e.g. a
+    // 404 storm on `/style.css`) every time the message re-renders.
+    // `marked` no longer sanitises since v5, so we strip dangerous tags with
+    // a defensive pass after parsing.
+    const parsed = marked.parse(text || '', { async: false });
+    const raw = typeof parsed === 'string' ? parsed : '';
+    const safe = this.stripDangerousTags(raw);
+    return this.sanitizer.bypassSecurityTrustHtml(safe);
+  }
+
+  /**
+   * Removes tags that trigger network requests when injected via innerHTML:
+   * <link>, <script>, <iframe>, <object>, <embed>, <base>, <meta>. Also
+   * strips `src`/`href` attributes on <img>/<audio>/<video>/<source>/<track>
+   * so those don't fetch either.
+   */
+  private stripDangerousTags(html: string): string {
+    if (!html) return '';
+    return html
+      // Drop the whole element (opening + content + closing) for tags that
+      // execute or fetch on parse.
+      .replace(/<(link|script|iframe|object|embed|base|meta|form)\b[\s\S]*?<\/\1\s*>/gi, '')
+      // Self-closing / void variants of the same set.
+      .replace(/<(link|script|iframe|object|embed|base|meta|form)\b[^>]*\/?>/gi, '')
+      // Neutralise resource-fetching attributes on media tags.
+      .replace(/<(img|audio|video|source|track)([^>]*)>/gi, (_, tag, attrs) => {
+        const cleaned = String(attrs)
+          .replace(/\s(src|href|srcset|poster|data)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+        return `<${tag}${cleaned}>`;
+      })
+      // Drop inline event handlers (onclick, onerror, onload, …).
+      .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
   }
 
   sendPrompt(): void {

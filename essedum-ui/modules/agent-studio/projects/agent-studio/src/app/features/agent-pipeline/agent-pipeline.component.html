@@ -41,6 +41,121 @@
                     <div class="file-structure-container">
 
                       <!-- ════════════════════════════════════════════════════════════════════
+                           GITHUB PUSH STATUS — floating toast in the top-right corner.
+                           Appears when a push-to-github round starts (auto after every
+                           generation) and stays until the user dismisses it. Clicking the
+                           card expands an inline details panel (repo URL / branch / commit
+                           SHA / error message / editable URL for retry).
+                           ═══════════════════════════════════════════════════════════════════ -->
+                      <div class="gh-push-toast"
+                           *ngIf="pushStatusVisible"
+                           [class.pushing]="pushStatus.phase === 'pushing'"
+                           [class.success]="pushStatus.phase === 'success'"
+                           [class.failed]="pushStatus.phase === 'failed'"
+                           [class.expanded]="pushStatusPanelOpen">
+                        <!-- Compact header row -->
+                        <div class="gh-push-header" (click)="pushStatusPanelOpen ? closePushStatusPanel() : openPushStatusPanel()">
+                          <span class="gh-push-icon-wrap">
+                            <mat-icon *ngIf="pushStatus.phase === 'pushing'" class="spin-icon">sync</mat-icon>
+                            <mat-icon *ngIf="pushStatus.phase === 'success'">check_circle</mat-icon>
+                            <mat-icon *ngIf="pushStatus.phase === 'failed'">error</mat-icon>
+                          </span>
+                          <div class="gh-push-title-text">
+                            <strong>
+                              {{ pushStatus.phase === 'pushing' ? 'Pushing to GitHub…'
+                                 : (pushStatus.phase === 'success' ? 'Pushed to GitHub'
+                                 : 'GitHub push failed') }}
+                            </strong>
+                            <span *ngIf="pushStatus.branch">Branch: <code>{{ pushStatus.branch }}</code></span>
+                            <span *ngIf="!pushStatus.branch && pushStatus.message">{{ pushStatus.message }}</span>
+                          </div>
+                          <div class="gh-push-header-actions">
+                            <mat-icon class="gh-push-toggle-icon">{{ pushStatusPanelOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+                          </div>
+                        </div>
+
+                        <!-- Expandable details panel -->
+                        <div class="gh-push-details" *ngIf="pushStatusPanelOpen">
+                          <!-- Status + metadata -->
+                          <dl class="gh-push-meta">
+                            <div class="gh-meta-row">
+                              <dt>Status</dt>
+                              <dd>
+                                <span class="gh-status-chip"
+                                      [class.pushing]="pushStatus.phase === 'pushing'"
+                                      [class.success]="pushStatus.phase === 'success'"
+                                      [class.failed]="pushStatus.phase === 'failed'">
+                                  {{ pushStatus.phase | titlecase }}
+                                </span>
+                              </dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.sessionId">
+                              <dt>Session</dt>
+                              <dd><code>{{ pushStatus.sessionId }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.configId">
+                              <dt>Push ID</dt>
+                              <dd><code>{{ pushStatus.configId }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.branch">
+                              <dt>Branch</dt>
+                              <dd><code>{{ pushStatus.branch }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.commitSha">
+                              <dt>Commit</dt>
+                              <dd><code>{{ pushStatus.commitSha }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.org">
+                              <dt>Org</dt>
+                              <dd>{{ pushStatus.org }}</dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.updatedAt">
+                              <dt>Updated</dt>
+                              <dd>{{ pushStatus.updatedAt | date:'shortTime' }}</dd>
+                            </div>
+                          </dl>
+
+                          <!-- Error details on failure -->
+                          <div class="gh-push-error" *ngIf="pushStatus.phase === 'failed' && pushStatus.errorMessage">
+                            <mat-icon>report_problem</mat-icon>
+                            <div class="gh-error-text">
+                              <strong>Error details</strong>
+                              <pre>{{ pushStatus.errorMessage }}</pre>
+                            </div>
+                          </div>
+
+                          <!-- Editable repo URL -->
+                          <label class="gh-repo-field">
+                            <span>Repository URL</span>
+                            <input type="text"
+                                   [(ngModel)]="pushStatusRepoUrlDraft"
+                                   placeholder="https://github.com/org/repo.git"
+                                   spellcheck="false" />
+                            <small>Override the target repo, then click <em>Save &amp; Retry</em> to push again.</small>
+                          </label>
+
+                          <!-- Actions -->
+                          <div class="gh-push-actions">
+                            <button type="button"
+                                    class="gh-btn gh-btn-secondary"
+                                    (click)="refreshPushStatus()"
+                                    [disabled]="pushStatus.phase === 'pushing'"
+                                    matTooltip="Poll the /github-status endpoint">
+                              <mat-icon>refresh</mat-icon>
+                              <span>Check status</span>
+                            </button>
+                            <button type="button"
+                                    class="gh-btn gh-btn-primary"
+                                    (click)="saveRepoUrlAndRetry()"
+                                    [disabled]="pushStatus.phase === 'pushing'">
+                              <mat-icon>rocket_launch</mat-icon>
+                              <span>Save &amp; Retry</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- ════════════════════════════════════════════════════════════════════
                            TOP TOOLBAR — Deploy banner + reopen chat pill.
                            Sits above the 3-column grid (explorer / editor / chat).
                            ═══════════════════════════════════════════════════════════════════ -->
