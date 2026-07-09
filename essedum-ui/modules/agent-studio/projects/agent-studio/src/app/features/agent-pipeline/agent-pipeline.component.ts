@@ -3664,13 +3664,23 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatDeployedUrl = null;
 
     // Build the codebase context block — ALWAYS included so the agent knows
-    // which pipeline / files it's working on before answering.
+    // which pipeline / files it's working on before answering. The block is
+    // sent to the agent but NOT shown in the chat bubble (see displayText arg).
     const contextBlock = this.buildCodebaseContext();
     const finalPrompt = contextBlock
       ? `${contextBlock}\n\n---\nUser question:\n${text}${skillHint}`
       : `${text}${skillHint}`;
 
-    this.aiChatCoder.sendMessage(finalPrompt, this.aiChatSelectedAgent, this.aiChatSelectedModel);
+    // displayText = what the user actually typed (+ optional skill hint) so
+    // the chat bubble stays clean; finalPrompt = full context + question that
+    // goes to the agent.
+    const bubbleText = `${text}${skillHint}`;
+    this.aiChatCoder.sendMessage(
+      finalPrompt,
+      this.aiChatSelectedAgent,
+      this.aiChatSelectedModel,
+      bubbleText,
+    );
   }
 
   /**
@@ -3678,44 +3688,83 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * card. Included in every prompt sent from the AI chat panel:
    *   • Pipeline metadata (cname, alias, mode)
    *   • Full file list (flattened from the file explorer tree)
-   *   • Currently open file path + full content (if any)
-   * Truncates the open-file content at ~40k chars to keep the payload sane.
+   *   • FULL CONTENTS of every file in the pipeline so the agent always sees
+   *     the latest state (fresh generations + user edits + saves)
+   *   • The currently-open file uses `selectedFileContent` (live in-memory)
+   *     so any unsaved textarea edits are also included
+   * Caps:
+   *   • per-file content:  20,000 chars
+   *   • total content sum: 150,000 chars (older files skipped once cap hit)
    */
   private buildCodebaseContext(): string {
     const lines: string[] = [];
     lines.push('[CODEBASE CONTEXT]');
     lines.push(`Pipeline: ${this.pipelineAlias || this.currentCname || '(unknown)'} (cname: ${this.currentCname || 'n/a'}, mode: ${this.pipelineMode})`);
 
-    // Flatten the file tree into "path/to/file.ext" entries.
-    const paths = this.flattenFilePaths(this.fileSystemData);
-    if (paths.length) {
+    // Flatten the file tree into { path, content } pairs.
+    const files = this.flattenFilesWithContent(this.fileSystemData);
+
+    // Overlay the currently-open file with its live (possibly unsaved) content
+    // so the agent sees exactly what the user is looking at in the editor.
+    if (this.selectedFileName && this.selectedFileContent != null) {
+      const openPath = this.selectedFilePath || this.selectedFileName;
+      const idx = files.findIndex(f => f.path === openPath);
+      const liveContent = this.selectedFileContent;
+      const modified = this.isFileModified;
+      if (idx >= 0) {
+        files[idx] = { path: openPath, content: liveContent, modified };
+      } else {
+        files.unshift({ path: openPath, content: liveContent, modified });
+      }
+    }
+
+    if (files.length) {
       lines.push('');
-      lines.push(`Project files (${paths.length}):`);
-      // Cap the list at 200 entries so the context stays bounded on very large projects.
-      const shown = paths.length > 200 ? paths.slice(0, 200) : paths;
-      for (const p of shown) lines.push(`  - ${p}`);
-      if (paths.length > shown.length) {
-        lines.push(`  ... and ${paths.length - shown.length} more file(s)`);
+      lines.push(`Project files (${files.length}):`);
+      const shownList = files.length > 200 ? files.slice(0, 200) : files;
+      for (const f of shownList) {
+        lines.push(`  - ${f.path}${f.modified ? '  (unsaved changes)' : ''}`);
+      }
+      if (files.length > shownList.length) {
+        lines.push(`  ... and ${files.length - shownList.length} more file(s)`);
+      }
+
+      // Inline every file's content so the agent sees the full latest codebase.
+      const PER_FILE_MAX = 20000;
+      const TOTAL_MAX = 150000;
+      let totalBytes = 0;
+      const skipped: string[] = [];
+
+      lines.push('');
+      lines.push('File contents:');
+      for (const f of files) {
+        const raw = f.content ?? '';
+        if (!raw) continue;
+        if (totalBytes >= TOTAL_MAX) {
+          skipped.push(f.path);
+          continue;
+        }
+        const clipped = raw.length > PER_FILE_MAX
+          ? raw.slice(0, PER_FILE_MAX) + `\n... [truncated ${raw.length - PER_FILE_MAX} chars]`
+          : raw;
+        const lang = this.langHintForPath(f.path);
+        const header = f.modified
+          ? `--- ${f.path}  (unsaved changes) ---`
+          : `--- ${f.path} ---`;
+        lines.push('');
+        lines.push(header);
+        lines.push('```' + lang);
+        lines.push(clipped);
+        lines.push('```');
+        totalBytes += clipped.length;
+      }
+      if (skipped.length) {
+        lines.push('');
+        lines.push(`(${skipped.length} file(s) omitted from context to stay within size limit: ${skipped.slice(0, 10).join(', ')}${skipped.length > 10 ? ', ...' : ''})`);
       }
     } else {
       lines.push('');
       lines.push('Project files: (none yet — this is a fresh pipeline)');
-    }
-
-    // Inline the currently open file's content so the agent can reason about it.
-    if (this.selectedFileName && this.selectedFileContent != null) {
-      const path = this.selectedFilePath || this.selectedFileName;
-      const raw = this.selectedFileContent || '';
-      const MAX = 40000;
-      const truncated = raw.length > MAX
-        ? raw.slice(0, MAX) + `\n... [truncated ${raw.length - MAX} chars]`
-        : raw;
-      const modified = this.isFileModified ? ' (unsaved changes)' : '';
-      lines.push('');
-      lines.push(`Currently open file: ${path}${modified}`);
-      lines.push('```' + (this.fileExtension || ''));
-      lines.push(truncated);
-      lines.push('```');
     }
 
     lines.push('[END CODEBASE CONTEXT]');
@@ -3723,8 +3772,52 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /**
+   * Walks the file tree and returns { path, content, modified } for every file.
+   * Uses the eager `content` loaded by buildFileTreeFromApiResponse so no
+   * extra network round-trip is needed.
+   */
+  private flattenFilesWithContent(
+    nodes: FileNode[] | undefined,
+    prefix: string = '',
+  ): Array<{ path: string; content: string; modified?: boolean }> {
+    if (!nodes || !nodes.length) return [];
+    const out: Array<{ path: string; content: string; modified?: boolean }> = [];
+    for (const n of nodes) {
+      const fullPath = prefix ? `${prefix}/${n.name}` : n.name;
+      if (n.type === 'file') {
+        out.push({ path: fullPath, content: n.content ?? '' });
+      } else if (n.type === 'folder' && n.children?.length) {
+        out.push(...this.flattenFilesWithContent(n.children, fullPath));
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Maps a filename to a markdown fence language hint (best-effort — falls
+   * back to the raw extension when unknown).
+   */
+  private langHintForPath(path: string): string {
+    const ext = (path.split('.').pop() ?? '').toLowerCase();
+    const map: Record<string, string> = {
+      ts: 'ts', tsx: 'tsx', js: 'javascript', jsx: 'jsx', mjs: 'javascript', cjs: 'javascript',
+      py: 'python', java: 'java', kt: 'kotlin', go: 'go', rs: 'rust', rb: 'ruby',
+      html: 'html', htm: 'html', css: 'css', scss: 'scss', sass: 'sass', less: 'less',
+      json: 'json', yaml: 'yaml', yml: 'yaml', toml: 'toml', xml: 'xml',
+      md: 'markdown', markdown: 'markdown',
+      sh: 'bash', bash: 'bash', zsh: 'bash', ps1: 'powershell',
+      sql: 'sql', dockerfile: 'dockerfile',
+      properties: 'properties',
+    };
+    if (path.toLowerCase().endsWith('dockerfile')) return 'dockerfile';
+    return map[ext] || ext;
+  }
+
+  /**
    * Walks the file tree and returns a flat array of file paths (folders are
    * used only for the path prefix — not included as separate entries).
+   * Kept for callers that only need the list (currently unused after the
+   * refactor to flattenFilesWithContent).
    */
   private flattenFilePaths(nodes: FileNode[] | undefined, prefix: string = ''): string[] {
     if (!nodes || !nodes.length) return [];

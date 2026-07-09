@@ -99,12 +99,20 @@ export class AiChatCoderService implements OnDestroy {
   /**
    * Sends a user prompt and streams the Goose reply back via SSE.
    * Lazily starts a session on first call.
+   *
+   * @param prompt      The FULL prompt sent to the agent (may include codebase
+   *                    context, instructions, attached-skill hints, etc.).
+   * @param provider    Agent provider (ollama, azure_openai, ...).
+   * @param model       Model id (qwen3:4b, gpt-4o-mini, ...).
+   * @param displayText Optional shorter text to show in the user's chat bubble.
+   *                    When provided, keeps the injected context out of the UI.
    */
-  sendMessage(prompt: string, provider: string, model: string): void {
+  sendMessage(prompt: string, provider: string, model: string, displayText?: string): void {
     const trimmed = (prompt || '').trim();
     if (!trimmed) return;
 
-    this.messages.push({ role: 'user', content: trimmed, timestamp: new Date() });
+    const bubble = (displayText ?? trimmed).trim();
+    this.messages.push({ role: 'user', content: bubble, timestamp: new Date() });
     this.messages$.next([...this.messages]);
     this.status$.next('generating');
     this.pushInFlight = false;
