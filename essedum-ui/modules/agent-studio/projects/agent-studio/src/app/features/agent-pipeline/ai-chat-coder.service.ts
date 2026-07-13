@@ -150,14 +150,48 @@ export class AiChatCoderService implements OnDestroy {
     this.pushInFlight = false;
     this.cancelReply();
 
-    // Reset the tracked file list at the start of each turn so list-apps
-    // becomes fully authoritative for this round. Prevents stale entries
-    // (deleted files, obsolete content) from carrying across generations.
-    this.files = [];
-    this.files$.next([]);
+    // NOTE: do NOT reset this.files here. When the agent only regenerates a
+    // subset of files (e.g. user says "add error logs to script.js", agent
+    // only returns script.js), the untouched files must remain — otherwise
+    // they'd disappear from the codespace tree and the ZIP upload would wipe
+    // them in the DB. New/modified files are merged via upsertFile().
 
     this.ensureAgentStarted(provider, model)
-      .then((sid) => this.openReplyStream(sid, trimmed + ' - send all code files generated here'))
+      .then((sid) => {
+        // Small models (ollama/qwen3:4b) tend to just describe changes in
+        // prose ("All files updated ✅") without actually emitting write_file
+        // tool calls or fenced code blocks — which means Goose's filesystem
+        // never sees the new content and list-apps/call-tool returns the
+        // pre-turn files.  This suffix is deliberately forceful and gives the
+        // agent a concrete emit-shape it MUST follow.
+        const promptSuffix = [
+          '',
+          '---',
+          'MANDATORY OUTPUT PROTOCOL — read carefully.',
+          '',
+          'For your response to be usable, you MUST literally output every file',
+          'in the codebase using ONE of the following two forms. A prose summary',
+          'alone (e.g. "All files updated") is REJECTED — nothing gets saved.',
+          '',
+          '1) PREFERRED — invoke a tool call for each file:',
+          '   • write_file with { "path": "<file path>", "content": "<full file text>" }',
+          '   • or text_editor with { "command": "write", "path": "<file path>", "file_text": "<full file text>" }',
+          '',
+          '2) FALLBACK — a fenced code block preceded by the exact filename:',
+          '   **script.js**',
+          '   ```javascript',
+          '   // full file contents here — every line, not a snippet',
+          '   ```',
+          '',
+          'RULES:',
+          '• Output ALL files (modified AND unchanged) so the codespace stays in sync.',
+          '• Preserve exact file paths from the codebase context above.',
+          '• Never truncate, elide, or use placeholders like "// ...same as before".',
+          '• Never say "the code is updated" without also outputting the code.',
+          '• A short prose summary AT THE END (after the code) is fine.',
+        ].join('\n');
+        return this.openReplyStream(sid, trimmed + promptSuffix);
+      })
       .catch(() => {
         this.messages.push({
           role: 'assistant',
@@ -444,20 +478,46 @@ export class AiChatCoderService implements OnDestroy {
   private extractFilesFromMarkdown(text: string): void {
     if (!text) return;
     const FILE_PAT = '[\\w][\\w./\\-]*\\.\\w{1,10}';
-    const prefixPattern = '(?:\\*{1,2}|[`]|#{1,4}\\s+)(' + FILE_PAT + ')(?:\\*{1,2}|[`])?\\s*(?::|\\s*\\n)';
-    const prefixRe = new RegExp(prefixPattern, 'gm');
+    // Recognise filename headers in several shapes preceding a fenced block:
+    //   **script.js**            ← bold
+    //   `script.js`              ← backtick
+    //   ### script.js            ← heading
+    //   **script.js** (updated)  ← bold + trailing note on same line
+    //   File: script.js          ← plain "File:" prefix
+    // Anything on the same line after the filename is ignored, as long as the
+    // line ends before the next code fence.
+    const prefixPatterns = [
+      '(?:\\*{1,2}|[`])(' + FILE_PAT + ')(?:\\*{1,2}|[`])?[^\\n]*\\n',
+      '#{1,4}\\s+(' + FILE_PAT + ')[^\\n]*\\n',
+      '(?:^|\\n)[Ff]ile\\s*[:\\-]\\s*[`\\*]?(' + FILE_PAT + ')[`\\*]?[^\\n]*\\n',
+    ];
     const prefixes: Array<{ offset: number; name: string }> = [];
-    let pm: RegExpExecArray | null;
-    while ((pm = prefixRe.exec(text)) !== null) prefixes.push({ offset: pm.index, name: pm[1] });
+    for (const pat of prefixPatterns) {
+      const re = new RegExp(pat, 'gm');
+      let pm: RegExpExecArray | null;
+      while ((pm = re.exec(text)) !== null) {
+        prefixes.push({ offset: pm.index, name: pm[1] });
+      }
+    }
+    // Sort by offset so the nearest-preceding-header lookup for each fence
+    // works predictably even if the same file was mentioned multiple times.
+    prefixes.sort((a, b) => a.offset - b.offset);
+
     const blockRe = /```(?:\w+)?\n([\s\S]*?)```/g;
     let bm: RegExpExecArray | null;
     while ((bm = blockRe.exec(text)) !== null) {
       const blockStart = bm.index;
       const blockContent = bm[1];
-      const nearby = prefixes.find(p => blockStart - p.offset >= 0 && blockStart - p.offset <= 120);
+      // Nearest preceding header within 200 chars wins.
+      let nearby: { offset: number; name: string } | undefined;
+      for (const p of prefixes) {
+        const dist = blockStart - p.offset;
+        if (dist >= 0 && dist <= 200) nearby = p; else if (dist < 0) break;
+      }
       if (nearby) { this.upsertFile(nearby.name, blockContent); continue; }
+      // Also try: first line of the block is a comment naming the file.
       const firstLine = blockContent.split('\n')[0].trim();
-      const commentMatch = firstLine.match(/^(?:\/\/|#)\s*([\w][\w./\-]*\.\w{1,10})\s*$/);
+      const commentMatch = firstLine.match(/^(?:\/\/|#|<!--)\s*([\w][\w./\-]*\.\w{1,10})\s*(?:-->)?\s*$/);
       if (commentMatch) {
         const contentWithoutComment = blockContent.slice(firstLine.length).replace(/^\n/, '');
         this.upsertFile(commentMatch[1], contentWithoutComment);
@@ -477,7 +537,10 @@ export class AiChatCoderService implements OnDestroy {
 
   private finaliseAssistantMessage(text: string): void {
     this.replyAbortController = null;
-    this.extractFilesFromMarkdown(text);
+    // Commit the streamed assistant text as a chat message first — do NOT
+    // extract files from markdown yet. We fetch server state first, then
+    // apply markdown-extracted content on TOP of it so any file the agent
+    // actually wrote in the reply overrides stale Goose-filesystem content.
     if (this.streamingAssistantIndex !== null) {
       if (text) this.messages[this.streamingAssistantIndex].content = text;
       else this.messages.splice(this.streamingAssistantIndex, 1);
@@ -488,6 +551,14 @@ export class AiChatCoderService implements OnDestroy {
     if (this.sessionId) {
       const sid = this.sessionId;
       this.listAppsAndFetchFiles(sid, () => {
+        // CRITICAL: extract file contents from the agent's markdown response
+        // AFTER pulling server state. Small models (ollama/qwen) frequently
+        // emit new file contents as fenced code blocks WITHOUT invoking real
+        // write_file / text_editor tool calls, so Goose's filesystem still
+        // holds the pre-turn content. Running the markdown extraction last
+        // means those code-block contents win over stale server content.
+        this.extractFilesFromMarkdown(text);
+
         if (this.files.length) {
           this.generationComplete$.next([...this.files]);
           // Save generated files to pipeline card DB and push to GitHub.
@@ -496,6 +567,12 @@ export class AiChatCoderService implements OnDestroy {
         this.status$.next('idle');
       });
       return;
+    }
+    // No session — still try markdown extraction so a chat-only response
+    // never loses files the agent embedded in prose.
+    this.extractFilesFromMarkdown(text);
+    if (this.files.length) {
+      this.generationComplete$.next([...this.files]);
     }
     this.status$.next('idle');
   }
@@ -556,18 +633,44 @@ export class AiChatCoderService implements OnDestroy {
     const next = (i: number) => {
       if (i >= paths.length) { done(); return; }
       const path = paths[i];
-      const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
-      const body = { session_id: sid, tool_name: 'developer__text_editor', input: { command: 'view', path } };
-      this.http.post<any>(url, body, { headers: this.getHeaders() }).subscribe({
-        next: (resp) => {
-          const content = this.extractContentFromToolResponse(resp);
-          if (content && content.trim() !== '') this.upsertFile(path, content);
+      // Try the qualified path first (e.g. "myapp/index.html"). If that comes
+      // back empty, retry with just the basename (Goose sometimes accepts one
+      // form or the other depending on how the app was created).
+      this.fetchOnePath(sid, path, (content) => {
+        if (content) {
+          this.upsertFile(path, content);
           next(i + 1);
-        },
-        error: () => next(i + 1),
+          return;
+        }
+        const basename = path.split('/').pop();
+        if (basename && basename !== path) {
+          this.fetchOnePath(sid, basename, (fallbackContent) => {
+            if (fallbackContent) this.upsertFile(path, fallbackContent);
+            else console.warn(`[AiChatCoder] Could not fetch content for "${path}" — file will keep prior content if any.`);
+            next(i + 1);
+          });
+        } else {
+          console.warn(`[AiChatCoder] Empty response for "${path}"`);
+          next(i + 1);
+        }
       });
     };
     next(0);
+  }
+
+  private fetchOnePath(sid: string, path: string, cb: (content: string | null) => void): void {
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
+    const body = { session_id: sid, tool_name: 'developer__text_editor', input: { command: 'view', path } };
+    this.http.post<any>(url, body, { headers: this.getHeaders() }).subscribe({
+      next: (resp) => {
+        const content = this.extractContentFromToolResponse(resp);
+        cb(content && content.trim() !== '' ? content : null);
+      },
+      error: (err) => {
+        console.warn(`[AiChatCoder] call-tool failed for "${path}":`, err?.status ?? err);
+        cb(null);
+      },
+    });
   }
 
   private extractContentFromToolResponse(resp: any): string | null {

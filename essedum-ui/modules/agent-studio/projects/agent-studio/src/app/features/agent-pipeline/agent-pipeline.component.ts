@@ -356,17 +356,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   /** Working copy of the repo URL edited via the panel form. */
   pushStatusRepoUrlDraft = '';
 
-  /** Skill catalogue — mock data. Later this comes from an API. */
-  readonly aiChatSkills: AiChatSkill[] = [
-    { value: 'codebase',      label: 'Analyze codebase',   icon: 'account_tree',    description: 'Search & understand the project' },
-    { value: 'file',          label: 'This file',          icon: 'description',     description: 'Attach the currently open file' },
-    { value: 'generate-tests',label: 'Generate tests',     icon: 'science',         description: 'Draft unit / integration tests' },
-    { value: 'docs',          label: 'Write docs',         icon: 'menu_book',       description: 'Generate docstrings & README' },
-    { value: 'refactor',      label: 'Refactor',           icon: 'auto_fix_high',   description: 'Improve readability & structure' },
-    { value: 'debug',         label: 'Debug error',        icon: 'bug_report',      description: 'Analyze stack traces & fix bugs' },
-    { value: 'security',      label: 'Security review',    icon: 'shield',          description: 'Scan for common vulnerabilities' },
-    { value: 'perf',          label: 'Optimize performance', icon: 'speed',         description: 'Suggest performance improvements' },
-  ];
+  /**
+   * Skill catalogue — hydrated on init from `/api/aip/skills?org=X&page=0&size=5`.
+   * Starts empty; if the API returns nothing (or fails) the "Attach a skill"
+   * menu shows "No skills available".
+   */
+  aiChatSkills: AiChatSkill[] = [];
+  /** True while the skills API request is in flight. */
+  aiChatSkillsLoading = false;
 
   /** Suggestion chips shown on the empty state. */
   readonly aiChatSuggestions: AiChatSkill[] = [
@@ -670,6 +667,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Hydrate the AI Chat panel dropdowns (agent + model) from the real API,
     // silently falling back to the hardcoded lists on failure.
     this.loadAiChatProviders();
+
+    // Load the skills catalogue from the platform skills API.
+    this.loadAiChatSkills();
 
     // Bootstrap the AI chat coder service — subscribe to its streams so the
     // panel updates as Goose streams the reply and generates files.
@@ -3467,6 +3467,62 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       next: (res) => this.applyProvidersResponse(res),
       error: () => { /* keep hardcoded fallback silently */ },
     });
+  }
+
+  /**
+   * Fetches the skills catalogue from /api/aip/skills for the current org.
+   * Maps each row into the {value,label,icon,description} shape the "Attach
+   * a skill" dropdown expects. Falls back to an empty list (which the menu
+   * renders as "No skills available") on error / empty response.
+   */
+  private loadAiChatSkills(): void {
+    const org = this.getConsistentOrganization();
+    // /api/aip is the shared-lib base for agent-pipeline APIs; hard-code the
+    // path since this endpoint isn't wrapped by a service yet.
+    const url = `/api/aip/skills`;
+    this.aiChatSkillsLoading = true;
+    this.http.get<any>(url, { params: { org, page: '0', size: '50' } }).subscribe({
+      next: (res) => {
+        const skills = Array.isArray(res) ? res
+                     : (res?.skills || res?.content || res?.data || []);
+        this.aiChatSkills = Array.isArray(skills)
+          ? skills.map((s: any) => this.toChatSkill(s)).filter(Boolean) as AiChatSkill[]
+          : [];
+        this.aiChatSkillsLoading = false;
+        this.cdr.markForCheck?.();
+      },
+      error: () => {
+        this.aiChatSkills = [];
+        this.aiChatSkillsLoading = false;
+        this.cdr.markForCheck?.();
+      },
+    });
+  }
+
+  /**
+   * Maps one skill row from the /skills API into the AiChatSkill shape.
+   * Picks a Material icon based on skillType so the dropdown stays visually
+   * consistent with the previous hardcoded set.
+   */
+  private toChatSkill(s: any): AiChatSkill | null {
+    if (!s || (typeof s !== 'object')) return null;
+    const value = String(s.skillUid ?? s.id ?? s.skillAlias ?? s.skillName ?? '').trim();
+    if (!value) return null;
+    const label = String(s.skillName ?? s.skillAlias ?? s.name ?? value).trim();
+    const description = String(s.description ?? s.skillCategory ?? '').trim();
+    const type = String(s.skillType ?? '').toUpperCase();
+    const iconMap: Record<string, string> = {
+      CODE_GENERATION: 'auto_awesome',
+      TEST_GENERATION: 'science',
+      DOCUMENTATION:   'menu_book',
+      REFACTOR:        'auto_fix_high',
+      DEBUG:           'bug_report',
+      SECURITY:        'shield',
+      PERFORMANCE:     'speed',
+      ANALYSIS:        'account_tree',
+    };
+    const icon = iconMap[type] || 'extension';
+    return { value, label, icon, description };
   }
 
   /**

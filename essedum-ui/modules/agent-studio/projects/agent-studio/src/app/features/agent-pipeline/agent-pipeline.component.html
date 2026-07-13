@@ -502,6 +502,10 @@
                                     </button>
                                     <div class="ai-menu-popover" *ngIf="aiChatOpenMenu === 'skill'">
                                       <div class="menu-heading">Attach a skill</div>
+                                      <div class="menu-empty" *ngIf="aiChatSkillsLoading">Loading skills…</div>
+                                      <div class="menu-empty" *ngIf="!aiChatSkillsLoading && aiChatSkills.length === 0">
+                                        No skills available
+                                      </div>
                                       <div class="menu-item" *ngFor="let s of aiChatSkills"
                                            [class.selected]="isSkillAttached(s)"
                                            (click)="toggleAttachSkill(s)">

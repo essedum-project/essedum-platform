@@ -545,25 +545,34 @@
 }
 
 .editor-controls-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  background: #1c2129;
+  // Grid guarantees the actions column always renders, no matter how narrow
+  // the middle editor column gets (AI chat open, split view, etc.). The
+  // file-info column (1fr with minmax(0)) truncates its breadcrumb instead
+  // of pushing the actions off-screen.
+  // NOTE: aip-app-legacy.scss globally sets `.editor-controls-bar { display: flex }`
+  //       and `.editor-actions { gap: 6px }` — we force overrides with !important.
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  padding: 0 12px !important;
+  background: #1c2129 !important;
   border-bottom: none !important;
-  height: 38px;
-  min-height: 38px;
-  gap: 8px;
+  height: 38px !important;
+  min-height: 38px !important;
+  min-width: 0 !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
 
   .file-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow: hidden;
-    flex: 1;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
 
     .file-type-icon {
-      font-size: 15px; width: 15px; height: 15px; color: #8b949e;
+      font-size: 15px; width: 15px; height: 15px; color: #8b949e; flex-shrink: 0;
     }
     .file-name {
       font-size: 13px;
@@ -573,15 +582,31 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex-shrink: 0;
+      max-width: 60%;
       &.modified { color: #d29922; font-style: italic; }
     }
-    .file-path-breadcrumb { font-size: 11px; color: #484f58; margin-left: 8px; }
-    .modified-indicator { color: #d29922; font-size: 18px; line-height: 1; margin-left: 4px; }
+    .file-path-breadcrumb {
+      font-size: 11px;
+      color: #484f58;
+      margin-left: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .modified-indicator { color: #d29922; font-size: 18px; line-height: 1; margin-left: 4px; flex-shrink: 0; }
   }
 
   .editor-actions {
-    display: flex;
-    gap: 4px;
+    display: flex !important;
+    gap: 4px !important;
+    // Grid auto-sized column — always visible regardless of file-info width.
+    justify-self: end !important;
+    flex-shrink: 0 !important;
+    // Force a minimum footprint so all 3 buttons always have space.
+    min-width: 100px !important;
 
     button, .action-button {
       width: 30px !important; height: 30px !important; min-width: 30px !important;
@@ -648,14 +673,16 @@
 }
 
 .text-editor-container {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
+  display: flex !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   // The textarea inside handles its own scroll (both axes) via wrap="off" +
   // white-space: pre. Keeping overflow: hidden here prevents a competing outer
   // scrollbar and guarantees horizontal scroll shows up on the textarea itself.
-  overflow: hidden;
+  // aip-app-legacy.scss sets `.file-editor-container { overflow: auto }` — this
+  // container is a sibling not a parent, but we still force `hidden` explicitly.
+  overflow: hidden !important;
   background: #0d1117;
 }
 
@@ -734,26 +761,45 @@
   }
 }
 
-.text-editor-column { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.text-editor-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  // Never clip horizontal overflow here — the textarea inside handles the
+  // scroll and we don't want a phantom outer clip hiding its scrollbar.
+  overflow: visible;
+}
 
 // The actual code textarea
+// IMPORTANT: aip-app-legacy.scss defines a competing `.file-content-editor`
+// without `overflow` / `white-space` rules — every critical scroll-related
+// property here MUST use `!important` so the textarea gets its own horizontal
+// + vertical scrollbars when the middle editor column is narrow.
 .file-content-editor {
-  flex: 1;
-  resize: none;
-  border: none;
-  outline: none;
+  flex: 1 !important;
+  resize: none !important;
+  border: none !important;
+  outline: none !important;
   background: #0d1117 !important;
   color: #e6edf3 !important;
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace !important;
   font-size: 13px !important;
-  line-height: 20px;
-  padding: 10px 16px;
-  tab-size: 4;
-  white-space: pre;
-  overflow-wrap: normal;
-  overflow: auto;
-  caret-color: #58a6ff;
-  width: 100%;
+  line-height: 20px !important;
+  padding: 10px 16px !important;
+  tab-size: 4 !important;
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  // Explicitly enable BOTH axes — some browsers otherwise skip the horizontal
+  // scrollbar when the parent is a flex item with min-width: 0.
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  caret-color: #58a6ff !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
 
   &::placeholder { color: #484f58; font-style: italic; }
   &:focus { background: #0d1117 !important; }
@@ -1417,31 +1463,50 @@
 
 // =============================================================================
 // GITHUB PUSH TOAST + DETAILS PANEL
-// Floating card in the bottom-right of the viewport. Compact by default,
-// expands inline to show metadata (branch / commit / push ID / error) and
-// an editable Repository URL field for retry.
+// Floats in the top-right of the viewport — below the top nav / tabs and
+// above the codespace grid, so it never fights the code editor, the AI chat
+// input, the deploy banner, or the LFN footer. Compact by default, expands
+// inline to show metadata (branch / commit / push ID / error) and an editable
+// Repository URL field for retry.
 // =============================================================================
+@keyframes gh-toast-slide-in {
+  from { opacity: 0; transform: translateX(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateX(0)    scale(1); }
+}
+
 .gh-push-toast {
   position: fixed;
-  // Sit above the LFN Networking footer strip (~55px tall) so nothing gets
-  // clipped along the bottom edge on any viewport size.
-  bottom: 80px;
-  right: 20px;
+  // Anchor ABOVE the codespace tab bar ("Essedum Codespace / Playground /
+  // Deployment / Environment") — the toast sits high-right so it never
+  // overlaps the tab strip, deploy banner, code editor, chat panel, or LFN
+  // footer. Only the top nav (~55px) stays above it.
+  top: 110px;
+  // Shifted in from the viewport edge so the toast aligns with the right
+  // edge of the codespace card (where the Deploy / Open AI Chat buttons sit)
+  // instead of hugging the browser scrollbar.
+  right: 80px;
   z-index: 9500;
-  width: 380px;
-  max-width: calc(100vw - 40px);
-  // CRITICAL: cap total height so the expanded panel never gets clipped by
-  // the viewport. Header stays put, details scroll inside.
-  max-height: calc(100vh - 120px);
+  width: 400px;
+  max-width: calc(100vw - 48px);
+  // Cap total height so the expanded panel never overflows the viewport.
+  // Header stays put, details scroll inside if the payload is big.
+  max-height: calc(100vh - 150px);
   display: flex;
   flex-direction: column;
-  background: #161b22;
+  background: rgba(22, 27, 34, 0.92);
+  // Subtle backdrop blur for a modern glass-morphism feel. Disabled on
+  // reduced-motion devices via the media query below.
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #e6edf3;
   border: 1px solid #30363d;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(88,166,255,0.06) inset;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.55),
+    0 2px 8px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.03) inset;
   overflow: hidden;
-  animation: fadeUp 0.25s ease-out;
+  animation: gh-toast-slide-in 0.32s cubic-bezier(0.34, 1.4, 0.42, 1);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   // 2px accent strip that changes color by phase
@@ -1458,7 +1523,7 @@
   &.failed::before  { background: linear-gradient(90deg, #da3633, #f85149, #da3633); }
 
   &.expanded {
-    width: 440px;
+    width: 460px;
   }
 
   .gh-push-header {
@@ -1732,10 +1797,13 @@
 
 // Light theme
 :host-context(body.header-light-theme) .gh-push-toast {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.94);
   color: #1f2328;
-  border-color: #d0d7de;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.14), 0 1px 0 rgba(0,0,0,0.02) inset;
+  border-color: rgba(208, 215, 222, 0.9);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.16),
+    0 2px 8px rgba(0,0,0,0.08),
+    0 0 0 1px rgba(0,0,0,0.02) inset;
 
   .gh-push-icon-wrap { background: rgba(0,0,0,0.04); }
   &.pushing .gh-push-icon-wrap { background: rgba(210,153,34,0.10); }
