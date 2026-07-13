@@ -4,6 +4,18 @@
 
 Essedum is a modular, microservices-based framework designed to simplify the development, training, and deployment of AI-powered applications. It enables seamless connectivity between systems via REST APIs, Azure OpenAI, and AWS Bedrock, and supports data ingestion from sources like PostgreSQL, MySQL, S3, and Azure Blob Storage. Users can build and execute training and inference pipelines using Python-based services, manage models across platforms like SageMaker, Azure ML, and GCP Vertex AI, and deploy them as endpoints.
 
+## Documentation
+
+| Document | Description |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Full platform architecture with Mermaid diagrams — components, data flow, deployment topology |
+| [SCOPE.md](SCOPE.md) | Business objectives, functional requirements, and non-functional requirements |
+| [MICROSERVICES_DECOMPOSITION.md](MICROSERVICES_DECOMPOSITION.md) | Microservices decomposition strategy, migration plan, and service boundaries |
+| [USER_GUIDE.md](USER_GUIDE.md) | Step-by-step guide to building AI applications on the platform |
+| [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes per version |
+
+---
+
 ## 2. Platform Components
 
 The Essedum platform is composed of four main components that work together to provide a comprehensive AI development and deployment solution.
