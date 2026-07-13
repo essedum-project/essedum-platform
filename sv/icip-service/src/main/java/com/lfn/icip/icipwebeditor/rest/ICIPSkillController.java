@@ -54,7 +54,7 @@ public class ICIPSkillController {
             @Valid @RequestBody ICIPSkillRequest request,
             @RequestParam(name = "org") String organization,
             @RequestParam(name = "projectId", required = false) Integer projectId,
-            @RequestHeader(value = "X-User-Login", required = false) String userLogin) {
+            @RequestHeader(value = "Userid", required = false) String userLogin) {
         String createdBy = resolveUser(userLogin);
         logger.info("POST /skills/create — name: {} org: {}", request.getSkillName(), organization);
         ICIPSkillRegistryDTO created = skillService.createSkill(request, organization, projectId, createdBy);
@@ -64,7 +64,7 @@ public class ICIPSkillController {
     public ResponseEntity<ICIPSkillRegistryDTO> updateSkill(
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody ICIPSkillRequest request,
-            @RequestHeader(value = "X-User-Login", required = false) String userLogin) {
+            @RequestHeader(value = "Userid", required = false) String userLogin) {
         String updatedBy = resolveUser(userLogin);
         logger.info("PUT /skills/{} by: {}", id, updatedBy);
         ICIPSkillRegistryDTO updated = skillService.updateSkill(id, request, updatedBy);
@@ -80,23 +80,24 @@ public class ICIPSkillController {
     @GetMapping
     public ResponseEntity<ICIPSkillPageResponse> getAllSkills(
             @RequestParam(name = "org") String organization,
-            @RequestParam(name = "status",        required = false) String status,
-            @RequestParam(name = "skillType",     required = false) String skillType,
-            @RequestParam(name = "skillCategory", required = false) String skillCategory,
-            @RequestParam(name = "visibility",    required = false) String visibility,
-            @RequestParam(name = "search",        required = false) String search,
+            @RequestParam(name = "status",           required = false) String status,
+            @RequestParam(name = "skillType",        required = false) String skillType,
+            @RequestParam(name = "skillCategory",    required = false) String skillCategory,
+            @RequestParam(name = "skillSubcategory", required = false) String skillSubcategory,
+            @RequestParam(name = "visibility",       required = false) String visibility,
+            @RequestParam(name = "search",           required = false) String search,
             @RequestParam(name = "page", defaultValue = "0")  int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         logger.debug("GET /skills org: {} page: {} size: {}", organization, page, size);
         ICIPSkillPageResponse response = skillService.getAllSkills(
                 organization, status, skillType, skillCategory,
-                visibility, search, page, size);
+                skillSubcategory, visibility, search, page, size);
         return new ResponseEntity<>(response, new HttpHeaders(), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSkill(
             @PathVariable(name = "id") Long id,
-            @RequestHeader(value = "X-User-Login", required = false) String userLogin) {
+            @RequestHeader(value = "Userid", required = false) String userLogin) {
         String deletedBy = resolveUser(userLogin);
         logger.info("DELETE /skills/{} by: {}", id, deletedBy);
         skillService.deleteSkill(id, deletedBy);

@@ -62,6 +62,7 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
               AND (:status IS NULL OR s.status = :status)
               AND (:skillType IS NULL OR s.skillType = :skillType)
               AND (:skillCategory IS NULL OR s.skillCategory = :skillCategory)
+              AND (:skillSubcategory IS NULL OR s.skillSubcategory = :skillSubcategory)
               AND (:visibility IS NULL OR s.visibility = :visibility)
               AND (:search IS NULL
                    OR LOWER(s.skillName) LIKE LOWER(CONCAT('%', :search, '%'))
@@ -75,6 +76,7 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
               AND (:status IS NULL OR s.status = :status)
               AND (:skillType IS NULL OR s.skillType = :skillType)
               AND (:skillCategory IS NULL OR s.skillCategory = :skillCategory)
+              AND (:skillSubcategory IS NULL OR s.skillSubcategory = :skillSubcategory)
               AND (:visibility IS NULL OR s.visibility = :visibility)
               AND (:search IS NULL
                    OR LOWER(s.skillName) LIKE LOWER(CONCAT('%', :search, '%'))
@@ -82,12 +84,13 @@ public interface ICIPSkillRegistryRepository extends JpaRepository<ICIPSkillRegi
         """
     )
     Page<ICIPSkillRegistry> findAllWithFilters(
-            @Param("org")          String organization,
-            @Param("status")       String status,
-            @Param("skillType")    String skillType,
-            @Param("skillCategory") String skillCategory,
-            @Param("visibility")   String visibility,
-            @Param("search")       String search,
+            @Param("org")              String organization,
+            @Param("status")           String status,
+            @Param("skillType")        String skillType,
+            @Param("skillCategory")    String skillCategory,
+            @Param("skillSubcategory") String skillSubcategory,
+            @Param("visibility")       String visibility,
+            @Param("search")           String search,
             Pageable pageable);
 
     // ── Copilot Tab — all active skills for org (used for prompt matching) ────

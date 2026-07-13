@@ -26,8 +26,8 @@ public interface IICIPSkillService {
 
     ICIPSkillPageResponse getAllSkills(
             String organization, String status, String skillType,
-            String skillCategory, String visibility, String search,
-            int page, int size);
+            String skillCategory, String skillSubcategory, String visibility,
+            String search, int page, int size);
 
     void deleteSkill(Long id, String deletedBy);
 }
