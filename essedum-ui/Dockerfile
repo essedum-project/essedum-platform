@@ -50,7 +50,7 @@ RUN apk add --no-cache openssl && \
       -out /etc/nginx/ssl/server.crt \
       -subj "/CN=localhost"
 
-COPY essedum-ui/nginx_ui_multi.conf /etc/nginx/nginx.conf
+COPY essedum-ui/nginx_ui_multi.conf /etc/nginx/nginx.conf.template
 
 WORKDIR /app
 RUN mkdir -p /app/ui/shell \
