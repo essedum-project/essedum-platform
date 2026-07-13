@@ -23,6 +23,7 @@ import { SharedMaterialModule } from "../../../shared-modules/material/material.
 
 @Component({
     selector: "portfolio-add",
+    standalone: true,
     templateUrl: "./portfolio-add.component.html",
     styleUrls: ["./portfolio-add.component.scss"],
     imports: [SharedMaterialModule]

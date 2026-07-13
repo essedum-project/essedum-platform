@@ -21,6 +21,8 @@ import {
   AgentGenerationRequest,
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
+import { AiChatCoderService, AiChatFile, AiChatPushState } from './ai-chat-coder.service';
+import { Subscription } from 'rxjs';
 import { StreamingServices } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import {
@@ -76,6 +78,35 @@ interface AgentState {
   selectedFilePath?: string;
   fileExtension?: string;
   originalFileContent?: string;
+}
+
+// ─── AI Chat panel (VS Code Copilot-style) ────────────────────────────────
+// Wired to the real Goose backend via AiChatCoderService — same endpoints as
+// Vibe Studio for /agent/start, /reply (SSE), /agent/list-apps, /agent/call-tool
+// and /sessions/{id}/push-to-github. The /sessions/{id}/preview call is NOT
+// invoked automatically; the user triggers it via the "Deploy" button.
+export interface AiChatSkill {
+  value: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+export interface AiChatOption {
+  value: string;
+  label: string;
+}
+export interface AiChatEvent {
+  text: string;
+  pending?: boolean;
+}
+export interface AiChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  skills?: AiChatSkill[];
+  events?: AiChatEvent[];
+  streaming?: boolean;
 }
 
 @Component({
@@ -279,6 +310,101 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   // App Pipeline embedded viewer
   showAppViewer = false;
   appUrl = '';
+
+  // ─── AI Chat Panel state (mockup) ────────────────────────────────────────
+  @ViewChild('aiChatMessagesEl') aiChatMessagesEl?: ElementRef<HTMLDivElement>;
+  @ViewChild('aiChatTextarea') aiChatTextareaEl?: ElementRef<HTMLTextAreaElement>;
+
+  aiChatMessages: AiChatMessage[] = [];
+  aiChatInput: string = '';
+  aiChatStreaming: boolean = false;
+  aiChatOpenMenu: 'skill' | 'model' | 'agent' | null = null;
+  aiChatAttachedSkills: AiChatSkill[] = [];
+  /**
+   * Collapse toggle was removed — the AI chat panel is now always expanded so
+   * we keep the flag as a constant `false` to avoid touching every template
+   * binding at once. Do NOT reintroduce a setter for this.
+   */
+  aiChatCollapsed = false;
+  private aiChatMockTimers: any[] = [];
+
+  // ─── AI Chat coder service wiring ─────────────────────────────────────────
+  /** Subscriptions to the AiChatCoderService streams — cleaned up in ngOnDestroy. */
+  private aiChatSubs: Subscription[] = [];
+  /** True once the current generation round has produced files → shows Deploy button. */
+  aiChatDeployAvailable = false;
+  /** Deployment lifecycle for the manual "Deploy" button. */
+  aiChatDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+  /** URL / result returned by /sessions/{id}/preview on success. */
+  aiChatDeployedUrl: string | null = null;
+
+  /**
+   * Controls visibility of the entire AI chat panel (3rd grid column).
+   * User can close it via the X button in the panel header; a "Open AI Chat"
+   * pill appears above the codespace row to bring it back.
+   * Persisted per browser so a closed panel stays closed across reloads.
+   */
+  aiChatVisible: boolean = (() => {
+    try { return localStorage.getItem('essedum.aiChat.visible') !== '0'; } catch { return true; }
+  })();
+
+  // ─── GitHub push status (toast + expandable details panel) ────────────────
+  /** Mirrors AiChatCoderService.pushStatus$ so the template can bind directly. */
+  pushStatus: AiChatPushState = { phase: 'idle' };
+  /** True when the user has expanded the details / edit-URL panel. */
+  pushStatusPanelOpen = false;
+  /** Working copy of the repo URL edited via the panel form. */
+  pushStatusRepoUrlDraft = '';
+
+  /**
+   * Skill catalogue — hydrated on init from `/api/aip/skills?org=X&page=0&size=5`.
+   * Starts empty; if the API returns nothing (or fails) the "Attach a skill"
+   * menu shows "No skills available".
+   */
+  aiChatSkills: AiChatSkill[] = [];
+  /** True while the skills API request is in flight. */
+  aiChatSkillsLoading = false;
+
+  /** Suggestion chips shown on the empty state. */
+  readonly aiChatSuggestions: AiChatSkill[] = [
+    { value: 'explain',   label: 'Explain this file',      icon: 'lightbulb',    description: '' },
+    { value: 'gen-tests', label: 'Generate tests',         icon: 'science',      description: '' },
+    { value: 'find-bugs', label: 'Find potential bugs',    icon: 'bug_report',   description: '' },
+    { value: 'add-docs',  label: 'Add documentation',      icon: 'menu_book',    description: '' },
+  ];
+
+  /** Agent + model dropdowns — hydrated from the real API on init with a hardcoded fallback. */
+  aiChatAgents: AiChatOption[] = [
+    { label: 'Ollama',        value: 'ollama' },
+    { label: 'Azure OpenAI',  value: 'azure_openai' },
+    { label: 'Anthropic',     value: 'anthropic' },
+  ];
+  aiChatModels: AiChatOption[] = [
+    { label: 'gpt-4o-mini',    value: 'gpt-4o-mini' },
+    { label: 'gpt-4o',         value: 'gpt-4o' },
+    { label: 'qwen3:4b',       value: 'qwen3:4b' },
+    { label: 'qwen3.6:27b',    value: 'qwen3.6:27b' },
+    { label: 'llama3:latest',  value: 'llama3:latest' },
+    { label: 'gemma3:latest',  value: 'gemma3:latest' },
+    { label: 'phi3:mini',      value: 'phi3:mini' },
+    { label: 'claude-3.5-sonnet', value: 'claude-3-5-sonnet-20241022' },
+  ];
+  /**
+   * Default agent + model are driven by the page origin (see
+   * `applyOriginBasedDefaults()` — same logic as Vibe Studio). These initial
+   * values are just a safe fallback until that method runs in ngOnInit.
+   */
+  aiChatSelectedAgent: string = 'ollama';
+  aiChatSelectedModel: string = 'qwen3:4b';
+
+  get aiChatSelectedAgentLabel(): string {
+    return this.aiChatAgents.find(a => a.value === this.aiChatSelectedAgent)?.label
+      ?? this.aiChatSelectedAgent ?? 'Select agent';
+  }
+  get aiChatSelectedModelLabel(): string {
+    return this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)?.label
+      ?? this.aiChatSelectedModel ?? 'Select model';
+  }
   appPort = ''; // Store app port from deployment
 
   // GitHub Push functionality
@@ -448,7 +574,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     private agentPipelineService: AgentPipelineService,
     private service: Services,
     private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private aiChatCoder: AiChatCoderService,
   ) {
     // Don't initialize mcpJsonConfig here - let it be set by API data loading
   }
@@ -531,7 +658,23 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
     
     this.getPipelineByName();
-    
+
+    // Pick default agent + model based on the page origin (localhost /
+    // essedum-lfn → ollama+qwen; aipatform / azure origins → azure_openai+gpt).
+    // Same logic Vibe Studio uses.
+    this.applyOriginBasedDefaults();
+
+    // Hydrate the AI Chat panel dropdowns (agent + model) from the real API,
+    // silently falling back to the hardcoded lists on failure.
+    this.loadAiChatProviders();
+
+    // Load the skills catalogue from the platform skills API.
+    this.loadAiChatSkills();
+
+    // Bootstrap the AI chat coder service — subscribe to its streams so the
+    // panel updates as Goose streams the reply and generates files.
+    this.wireAiChatCoderService();
+
     // Add beforeunload protection for unsaved changes
     window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
   }
@@ -3279,6 +3422,586 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  // ═════════════════════════════════════════════════════════════════════════
+  //  AI CHAT PANEL METHODS (mockup — replace with real API integration later)
+  // ═════════════════════════════════════════════════════════════════════════
+
+  /** trackBy for the message *ngFor to avoid re-rendering the whole list */
+  trackAiMsg = (_i: number, msg: AiChatMessage) => msg.id;
+
+  /**
+   * Determines the default provider + model from the page origin (identical
+   * to Vibe Studio's rules):
+   *   • localhost / essedum-lfn.infosys.com → ollama + qwen3:4b
+   *   • Azure / aipatform (AKS) origins    → azure_openai + gpt-4o-mini
+   *   • anything else                      → ollama + qwen3:4b (safe fallback)
+   * Only used to seed the initial selection — the user can still switch
+   * via the pill dropdowns.
+   */
+  private applyOriginBasedDefaults(): void {
+    const origin = (typeof window !== 'undefined' && window.location.origin) || '';
+    if (origin.includes('aipatform') ||
+        origin.includes('essedum.az.ad.idemo-ppc.com') ||
+        origin.includes('azure')) {
+      this.aiChatSelectedAgent = 'azure_openai';
+      this.aiChatSelectedModel = 'gpt-4o-mini';
+    } else if (origin.includes('localhost') ||
+               origin.includes('essedum-lfn.infosys.com')) {
+      this.aiChatSelectedAgent = 'ollama';
+      this.aiChatSelectedModel = 'qwen3:4b';
+    } else {
+      // Safe fallback for any unrecognised origin.
+      this.aiChatSelectedAgent = 'ollama';
+      this.aiChatSelectedModel = 'qwen3:4b';
+    }
+  }
+
+  /**
+   * Loads the real agent providers + models from the same endpoint Vibe Studio
+   * uses. Silently keeps the hardcoded fallback on failure.
+   */
+  private loadAiChatProviders(): void {
+    const base = (this.baseUrl && this.baseUrl.trim()) ? this.baseUrl : window.location.origin;
+    const url = `${base}/service/v1/vibe-coding/config/providers`;
+    this.http.get<any>(url).subscribe({
+      next: (res) => this.applyProvidersResponse(res),
+      error: () => { /* keep hardcoded fallback silently */ },
+    });
+  }
+
+  /**
+   * Fetches the skills catalogue from /api/aip/skills for the current org.
+   * Maps each row into the {value,label,icon,description} shape the "Attach
+   * a skill" dropdown expects. Falls back to an empty list (which the menu
+   * renders as "No skills available") on error / empty response.
+   */
+  private loadAiChatSkills(): void {
+    const org = this.getConsistentOrganization();
+    // /api/aip is the shared-lib base for agent-pipeline APIs; hard-code the
+    // path since this endpoint isn't wrapped by a service yet.
+    const url = `/api/aip/skills`;
+    this.aiChatSkillsLoading = true;
+    this.http.get<any>(url, { params: { org, page: '0', size: '50' } }).subscribe({
+      next: (res) => {
+        const skills = Array.isArray(res) ? res
+                     : (res?.skills || res?.content || res?.data || []);
+        this.aiChatSkills = Array.isArray(skills)
+          ? skills.map((s: any) => this.toChatSkill(s)).filter(Boolean) as AiChatSkill[]
+          : [];
+        this.aiChatSkillsLoading = false;
+        this.cdr.markForCheck?.();
+      },
+      error: () => {
+        this.aiChatSkills = [];
+        this.aiChatSkillsLoading = false;
+        this.cdr.markForCheck?.();
+      },
+    });
+  }
+
+  /**
+   * Maps one skill row from the /skills API into the AiChatSkill shape.
+   * Picks a Material icon based on skillType so the dropdown stays visually
+   * consistent with the previous hardcoded set.
+   */
+  private toChatSkill(s: any): AiChatSkill | null {
+    if (!s || (typeof s !== 'object')) return null;
+    const value = String(s.skillUid ?? s.id ?? s.skillAlias ?? s.skillName ?? '').trim();
+    if (!value) return null;
+    const label = String(s.skillName ?? s.skillAlias ?? s.name ?? value).trim();
+    const description = String(s.description ?? s.skillCategory ?? '').trim();
+    const type = String(s.skillType ?? '').toUpperCase();
+    const iconMap: Record<string, string> = {
+      CODE_GENERATION: 'auto_awesome',
+      TEST_GENERATION: 'science',
+      DOCUMENTATION:   'menu_book',
+      REFACTOR:        'auto_fix_high',
+      DEBUG:           'bug_report',
+      SECURITY:        'shield',
+      PERFORMANCE:     'speed',
+      ANALYSIS:        'account_tree',
+    };
+    const icon = iconMap[type] || 'extension';
+    return { value, label, icon, description };
+  }
+
+  /**
+   * Normalises the /config/providers response into the flat pill-dropdown
+   * shapes used by the AI chat panel. The backend response has been observed
+   * in a few shapes across environments — this method is deliberately forgiving.
+   */
+  private applyProvidersResponse(res: any): void {
+    if (!res) return;
+    const list = Array.isArray(res) ? res : (res.providers || res.data || res.items);
+    if (!Array.isArray(list) || list.length === 0) return;
+
+    const agents: AiChatOption[] = [];
+    const modelSet = new Map<string, string>();
+
+    for (const p of list) {
+      const value = p?.value ?? p?.id ?? p?.name ?? p?.provider;
+      const label = p?.label ?? p?.displayName ?? p?.name ?? value;
+      if (value) agents.push({ value, label });
+
+      const models = p?.models ?? p?.availableModels ?? p?.supportedModels ?? [];
+      if (Array.isArray(models)) {
+        for (const m of models) {
+          const mv = typeof m === 'string' ? m : (m?.value ?? m?.id ?? m?.name);
+          const ml = typeof m === 'string' ? m : (m?.label ?? m?.displayName ?? m?.name ?? mv);
+          if (mv && !modelSet.has(mv)) modelSet.set(mv, ml);
+        }
+      }
+    }
+
+    if (agents.length) {
+      this.aiChatAgents = agents;
+      // Preserve the origin-based default when the API's list contains it —
+      // only fall back to agents[0] if our preferred value isn't available.
+      if (!agents.find(a => a.value === this.aiChatSelectedAgent)) {
+        this.aiChatSelectedAgent = agents[0].value;
+      }
+    }
+    if (modelSet.size) {
+      this.aiChatModels = Array.from(modelSet.entries()).map(([value, label]) => ({ value, label }));
+      // Same preservation rule for the model — keep the origin default if present.
+      if (!this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)) {
+        this.aiChatSelectedModel = this.aiChatModels[0].value;
+      }
+    }
+    this.cdr.markForCheck?.();
+  }
+
+  /** Close menus when clicking anywhere in the chat panel background. */
+  onAiChatPanelClick(ev: MouseEvent): void {
+    const target = ev.target as HTMLElement;
+    if (target?.closest('.ai-pill-dropdown') || target?.closest('.ai-menu-popover')) return;
+    this.aiChatOpenMenu = null;
+  }
+
+  toggleAiChatMenu(menu: 'skill' | 'model' | 'agent', ev?: MouseEvent): void {
+    ev?.stopPropagation();
+    this.aiChatOpenMenu = this.aiChatOpenMenu === menu ? null : menu;
+  }
+
+  isSkillAttached(s: AiChatSkill): boolean {
+    return this.aiChatAttachedSkills.some(a => a.value === s.value);
+  }
+  toggleAttachSkill(s: AiChatSkill): void {
+    const i = this.aiChatAttachedSkills.findIndex(a => a.value === s.value);
+    if (i >= 0) this.aiChatAttachedSkills.splice(i, 1);
+    else this.aiChatAttachedSkills.push(s);
+  }
+  removeAttachedSkill(i: number): void {
+    this.aiChatAttachedSkills.splice(i, 1);
+  }
+
+  selectAiChatAgent(a: AiChatOption): void {
+    this.aiChatSelectedAgent = a.value;
+    this.aiChatOpenMenu = null;
+  }
+  selectAiChatModel(m: AiChatOption): void {
+    this.aiChatSelectedModel = m.value;
+    this.aiChatOpenMenu = null;
+  }
+
+  useAiChatSuggestion(s: AiChatSkill): void {
+    this.aiChatInput = s.label;
+    // Focus the textarea after Angular renders
+    setTimeout(() => this.aiChatTextareaEl?.nativeElement?.focus(), 0);
+  }
+
+  onAiChatKeydown(ev: KeyboardEvent): void {
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      if (this.aiChatInput.trim() && !this.aiChatStreaming) this.sendAiChatMessage();
+    }
+  }
+
+  clearAiChat(): void {
+    this.cancelAiChatMockTimers();
+    this.aiChatMessages = [];
+    this.aiChatAttachedSkills = [];
+    this.aiChatInput = '';
+    this.aiChatStreaming = false;
+    // Reset the underlying Goose session too so the next prompt starts fresh.
+    this.aiChatCoder.reset();
+    this.aiChatDeployAvailable = false;
+    this.aiChatDeployStatus = 'idle';
+    this.aiChatDeployedUrl = null;
+  }
+
+  /**
+   * Wires the AI chat coder service to the panel — subscribes to message,
+   * status, files, and deployment streams and mirrors them into component
+   * state used by the template.
+   */
+  private wireAiChatCoderService(): void {
+    // Configure the service for the current pipeline card so persistence
+    // (folder/upload) targets the right cname + organisation.
+    if (this.currentCname) {
+      this.aiChatCoder.configureForPipeline(this.currentCname, this.getConsistentOrganization());
+    }
+
+    // Mirror service messages → panel messages (map role/timestamp).
+    this.aiChatSubs.push(
+      this.aiChatCoder.messages$.subscribe(msgs => {
+        // Mark the last assistant message as "streaming" while a reply is in
+        // flight so the typing-dot indicator shows for empty content.
+        const isGenerating = this.aiChatCoder.status$.value === 'generating';
+        this.aiChatMessages = msgs.map((m, idx) => ({
+          id: `svc-${idx}-${m.timestamp?.getTime?.() ?? idx}`,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp ?? new Date(),
+          streaming: isGenerating && idx === msgs.length - 1 && m.role === 'assistant',
+        }));
+        this.scrollAiChatToBottom();
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.status$.subscribe(status => {
+        this.aiChatStreaming = status === 'generating';
+        this.cdr.detectChanges();
+      })
+    );
+
+    // When files are ready, enable the Deploy button. UI refresh happens on
+    // persistComplete$ (see next subscription) so it fires once per round.
+    this.aiChatSubs.push(
+      this.aiChatCoder.generationComplete$.subscribe(files => {
+        this.aiChatDeployAvailable = files.length > 0;
+        this.hasGeneratedAgent = files.length > 0;
+        this.isJsonProcessed = files.length > 0;
+        this.cdr.detectChanges();
+      })
+    );
+
+    // Persist-complete fires ONCE per round (in both success + error paths)
+    // — this is the safe point to reload the codespace tree from the DB.
+    // Subscribed exactly once so we don't leak subscriptions across rounds.
+    this.aiChatSubs.push(
+      this.aiChatCoder.persistComplete$.subscribe(() => {
+        this.hasGeneratedAgent = true;
+        this.isJsonProcessed = true;
+        this.refreshFileStructure();
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.deploymentStatus$.subscribe(s => {
+        this.aiChatDeployStatus = s;
+        this.cdr.detectChanges();
+      })
+    );
+
+    this.aiChatSubs.push(
+      this.aiChatCoder.deploymentResult$.subscribe(r => {
+        this.aiChatDeployedUrl = typeof r === 'string' ? r : (r?.deployUrl ?? null);
+        this.cdr.detectChanges();
+      })
+    );
+
+    // GitHub push lifecycle — toast + expandable details panel.
+    this.aiChatSubs.push(
+      this.aiChatCoder.pushStatus$.subscribe(s => {
+        this.pushStatus = s;
+        // Keep the draft URL synced with the latest known value when the panel
+        // isn't open (so editing starts from a clean slate).
+        if (!this.pushStatusPanelOpen) {
+          this.pushStatusRepoUrlDraft = s.repoUrl ?? '';
+        }
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  /**
+   * Sends the prompt to the real Goose agent via AiChatCoderService.
+   * Reply streams back via SSE; when files are generated the service auto-
+   * saves them to the pipeline card DB and pushes to GitHub (but does NOT
+   * trigger the deployment preview — that's manual via deployNow()).
+   *
+   * Every prompt is enriched with a CODEBASE CONTEXT block that lists all
+   * files in the pipeline card and inlines the currently-open file's contents
+   * so the agent always has full awareness of what the user is looking at —
+   * regardless of what they typed.
+   */
+  sendAiChatMessage(): void {
+    const text = (this.aiChatInput || '').trim();
+    if (!text || this.aiChatStreaming) return;
+
+    // Make sure the coder service is bound to the current pipeline card. The
+    // cname may not have been available yet when the panel was first wired.
+    if (this.currentCname) {
+      this.aiChatCoder.configureForPipeline(this.currentCname, this.getConsistentOrganization());
+    }
+
+    // Reset input state (attached skills / open menu). Attached skills are
+    // appended to the prompt as an inline hint so the agent knows what the
+    // user wants to work on.
+    const attached = [...this.aiChatAttachedSkills];
+    const skillHint = attached.length
+      ? `\n\n[User attached these skills: ${attached.map(a => a.label).join(', ')}]`
+      : '';
+    this.aiChatInput = '';
+    this.aiChatAttachedSkills = [];
+    this.aiChatOpenMenu = null;
+
+    // A new generation round invalidates the previous deploy state.
+    this.aiChatDeployAvailable = false;
+    this.aiChatDeployStatus = 'idle';
+    this.aiChatDeployedUrl = null;
+
+    // Build the codebase context block — ALWAYS included so the agent knows
+    // which pipeline / files it's working on before answering. The block is
+    // sent to the agent but NOT shown in the chat bubble (see displayText arg).
+    const contextBlock = this.buildCodebaseContext();
+    const finalPrompt = contextBlock
+      ? `${contextBlock}\n\n---\nUser question:\n${text}${skillHint}`
+      : `${text}${skillHint}`;
+
+    // displayText = what the user actually typed (+ optional skill hint) so
+    // the chat bubble stays clean; finalPrompt = full context + question that
+    // goes to the agent.
+    const bubbleText = `${text}${skillHint}`;
+    this.aiChatCoder.sendMessage(
+      finalPrompt,
+      this.aiChatSelectedAgent,
+      this.aiChatSelectedModel,
+      bubbleText,
+    );
+  }
+
+  /**
+   * Assembles a compact CODEBASE CONTEXT block covering the current pipeline
+   * card. Included in every prompt sent from the AI chat panel:
+   *   • Pipeline metadata (cname, alias, mode)
+   *   • Full file list (flattened from the file explorer tree)
+   *   • FULL CONTENTS of every file in the pipeline so the agent always sees
+   *     the latest state (fresh generations + user edits + saves)
+   *   • The currently-open file uses `selectedFileContent` (live in-memory)
+   *     so any unsaved textarea edits are also included
+   * Caps:
+   *   • per-file content:  20,000 chars
+   *   • total content sum: 150,000 chars (older files skipped once cap hit)
+   */
+  private buildCodebaseContext(): string {
+    const lines: string[] = [];
+    lines.push('[CODEBASE CONTEXT]');
+    lines.push(`Pipeline: ${this.pipelineAlias || this.currentCname || '(unknown)'} (cname: ${this.currentCname || 'n/a'}, mode: ${this.pipelineMode})`);
+
+    // Flatten the file tree into { path, content } pairs.
+    const files = this.flattenFilesWithContent(this.fileSystemData);
+
+    // Overlay the currently-open file with its live (possibly unsaved) content
+    // so the agent sees exactly what the user is looking at in the editor.
+    if (this.selectedFileName && this.selectedFileContent != null) {
+      const openPath = this.selectedFilePath || this.selectedFileName;
+      const idx = files.findIndex(f => f.path === openPath);
+      const liveContent = this.selectedFileContent;
+      const modified = this.isFileModified;
+      if (idx >= 0) {
+        files[idx] = { path: openPath, content: liveContent, modified };
+      } else {
+        files.unshift({ path: openPath, content: liveContent, modified });
+      }
+    }
+
+    if (files.length) {
+      lines.push('');
+      lines.push(`Project files (${files.length}):`);
+      const shownList = files.length > 200 ? files.slice(0, 200) : files;
+      for (const f of shownList) {
+        lines.push(`  - ${f.path}${f.modified ? '  (unsaved changes)' : ''}`);
+      }
+      if (files.length > shownList.length) {
+        lines.push(`  ... and ${files.length - shownList.length} more file(s)`);
+      }
+
+      // Inline every file's content so the agent sees the full latest codebase.
+      const PER_FILE_MAX = 20000;
+      const TOTAL_MAX = 150000;
+      let totalBytes = 0;
+      const skipped: string[] = [];
+
+      lines.push('');
+      lines.push('File contents:');
+      for (const f of files) {
+        const raw = f.content ?? '';
+        if (!raw) continue;
+        if (totalBytes >= TOTAL_MAX) {
+          skipped.push(f.path);
+          continue;
+        }
+        const clipped = raw.length > PER_FILE_MAX
+          ? raw.slice(0, PER_FILE_MAX) + `\n... [truncated ${raw.length - PER_FILE_MAX} chars]`
+          : raw;
+        const lang = this.langHintForPath(f.path);
+        const header = f.modified
+          ? `--- ${f.path}  (unsaved changes) ---`
+          : `--- ${f.path} ---`;
+        lines.push('');
+        lines.push(header);
+        lines.push('```' + lang);
+        lines.push(clipped);
+        lines.push('```');
+        totalBytes += clipped.length;
+      }
+      if (skipped.length) {
+        lines.push('');
+        lines.push(`(${skipped.length} file(s) omitted from context to stay within size limit: ${skipped.slice(0, 10).join(', ')}${skipped.length > 10 ? ', ...' : ''})`);
+      }
+    } else {
+      lines.push('');
+      lines.push('Project files: (none yet — this is a fresh pipeline)');
+    }
+
+    lines.push('[END CODEBASE CONTEXT]');
+    return lines.join('\n');
+  }
+
+  /**
+   * Walks the file tree and returns { path, content, modified } for every file.
+   * Uses the eager `content` loaded by buildFileTreeFromApiResponse so no
+   * extra network round-trip is needed.
+   */
+  private flattenFilesWithContent(
+    nodes: FileNode[] | undefined,
+    prefix: string = '',
+  ): Array<{ path: string; content: string; modified?: boolean }> {
+    if (!nodes || !nodes.length) return [];
+    const out: Array<{ path: string; content: string; modified?: boolean }> = [];
+    for (const n of nodes) {
+      const fullPath = prefix ? `${prefix}/${n.name}` : n.name;
+      if (n.type === 'file') {
+        out.push({ path: fullPath, content: n.content ?? '' });
+      } else if (n.type === 'folder' && n.children?.length) {
+        out.push(...this.flattenFilesWithContent(n.children, fullPath));
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Maps a filename to a markdown fence language hint (best-effort — falls
+   * back to the raw extension when unknown).
+   */
+  private langHintForPath(path: string): string {
+    const ext = (path.split('.').pop() ?? '').toLowerCase();
+    const map: Record<string, string> = {
+      ts: 'ts', tsx: 'tsx', js: 'javascript', jsx: 'jsx', mjs: 'javascript', cjs: 'javascript',
+      py: 'python', java: 'java', kt: 'kotlin', go: 'go', rs: 'rust', rb: 'ruby',
+      html: 'html', htm: 'html', css: 'css', scss: 'scss', sass: 'sass', less: 'less',
+      json: 'json', yaml: 'yaml', yml: 'yaml', toml: 'toml', xml: 'xml',
+      md: 'markdown', markdown: 'markdown',
+      sh: 'bash', bash: 'bash', zsh: 'bash', ps1: 'powershell',
+      sql: 'sql', dockerfile: 'dockerfile',
+      properties: 'properties',
+    };
+    if (path.toLowerCase().endsWith('dockerfile')) return 'dockerfile';
+    return map[ext] || ext;
+  }
+
+  /**
+   * Walks the file tree and returns a flat array of file paths (folders are
+   * used only for the path prefix — not included as separate entries).
+   * Kept for callers that only need the list (currently unused after the
+   * refactor to flattenFilesWithContent).
+   */
+  private flattenFilePaths(nodes: FileNode[] | undefined, prefix: string = ''): string[] {
+    if (!nodes || !nodes.length) return [];
+    const out: string[] = [];
+    for (const n of nodes) {
+      const fullPath = prefix ? `${prefix}/${n.name}` : n.name;
+      if (n.type === 'file') {
+        out.push(fullPath);
+      } else if (n.type === 'folder' && n.children?.length) {
+        out.push(...this.flattenFilePaths(n.children, fullPath));
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Manual Deploy trigger — hits /sessions/{id}/preview via the coder service.
+   * Bound to the "Deploy" button that shows after files have been generated.
+   */
+  deployAiChatFiles(): void {
+    if (!this.aiChatDeployAvailable || this.aiChatDeployStatus === 'deploying') return;
+    this.aiChatCoder.deployNow();
+  }
+
+  /** Close the AI chat panel — user can reopen via the "Open AI Chat" pill above the codespace. */
+  hideAiChatPanel(): void {
+    this.aiChatVisible = false;
+    this.aiChatOpenMenu = null;
+    try { localStorage.setItem('essedum.aiChat.visible', '0'); } catch { /* ignore */ }
+  }
+
+  /** Re-open the AI chat panel from the "Open AI Chat" pill in the codespace toolbar. */
+  showAiChatPanel(): void {
+    this.aiChatVisible = true;
+    try { localStorage.setItem('essedum.aiChat.visible', '1'); } catch { /* ignore */ }
+  }
+
+  // ─── GitHub push status controls ──────────────────────────────────────────
+
+  /** Open the expandable details panel; seed the URL draft with the latest value. */
+  openPushStatusPanel(): void {
+    this.pushStatusPanelOpen = true;
+    this.pushStatusRepoUrlDraft = this.pushStatus.repoUrl ?? '';
+  }
+
+  /** Close the details panel without applying any URL change. */
+  closePushStatusPanel(): void {
+    this.pushStatusPanelOpen = false;
+  }
+
+  /** Dismiss the entire push toast (does not cancel an in-flight push). */
+  dismissPushStatus(): void {
+    this.pushStatusPanelOpen = false;
+    this.aiChatCoder.dismissPushStatus();
+  }
+
+  /** Manually refresh the push status via GET /github-status. */
+  refreshPushStatus(): void {
+    this.aiChatCoder.refreshPushStatus();
+  }
+
+  /** Persist the edited repo URL and retry the push. */
+  saveRepoUrlAndRetry(): void {
+    const trimmed = (this.pushStatusRepoUrlDraft || '').trim();
+    if (trimmed) this.aiChatCoder.updateRepoUrl(trimmed);
+    this.aiChatCoder.retryPushToGitHub();
+  }
+
+  /** Retry the push using the existing (or newly-set) URL. */
+  retryPushToGitHub(): void {
+    this.aiChatCoder.retryPushToGitHub();
+  }
+
+  /** Convenience getter — is the status toast visible right now? */
+  get pushStatusVisible(): boolean {
+    return this.pushStatus.phase !== 'idle';
+  }
+
+  private cancelAiChatMockTimers(): void {
+    for (const t of this.aiChatMockTimers) clearTimeout(t);
+    this.aiChatMockTimers = [];
+  }
+
+  private scrollAiChatToBottom(): void {
+    const el = this.aiChatMessagesEl?.nativeElement;
+    if (!el) return;
+    // Use rAF to wait for DOM render
+    requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+
   // GitHub Push methods
   private isGitHubAuthenticated(): boolean {
     // Check if user has GitHub authentication token
@@ -3816,6 +4539,14 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Tear down the Material tab-body width forcer.
     this.tabSizeObserver?.disconnect();
     this.tabSizeObserver = null;
+
+    // Cancel any AI chat streaming timers still pending.
+    this.cancelAiChatMockTimers();
+
+    // Tear down AI chat coder service subscriptions & abort any in-flight stream.
+    for (const s of this.aiChatSubs) s.unsubscribe();
+    this.aiChatSubs = [];
+    this.aiChatCoder.cancelReply();
   }
 
   // ---------------------------------------------------------------------------
