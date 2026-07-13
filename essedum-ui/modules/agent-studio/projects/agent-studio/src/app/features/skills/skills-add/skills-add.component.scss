@@ -40,7 +40,7 @@
 :host ::ng-deep mat-select .mat-mdc-select-value-text { color: #e2e8f0 !important; font-size: 14px !important; }
 :host ::ng-deep .mat-mdc-select-placeholder { color: #5a7899 !important; }
 :host ::ng-deep .mat-mdc-select-arrow { color: #7eb8ff !important; }
-:host ::ng-deep mat-error { color: #f87171 !important; font-size: 11px !important; }
+:host ::ng-deep mat-error { color: #f87171 !important; font-size: 11px !important; margin-left: -15px;}
 
 // ── Disabled field styling ──────────────────────────────────────────────────
 :host ::ng-deep .mat-mdc-text-field--filled.mdc-text-field--disabled {
@@ -160,6 +160,35 @@ mat-card::before {
 .half-width { width: 50% !important; }
 
 .global-error { color: #f87171; font-size: 11px; display: block; margin-top: 4px; margin-bottom: 8px; }
+
+.global-error-summary {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border: 1px solid #f87171;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.08);
+
+  .global-error-title {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f87171;
+    margin-bottom: 6px;
+  }
+
+  .global-error-list {
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+
+    li {
+      font-size: 12px;
+      color: #f87171;
+      line-height: 1.6;
+    }
+  }
+}
 
 // ── Form Sections ───────────────────────────────────────────────────────────
 .form-section {
@@ -309,6 +338,11 @@ mat-card::before {
   .section-toggle { color: #94a3b8; }
   .req-star { color: #dc2626; }
   .global-error { color: #dc2626; }
+  .global-error-summary {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.06);
+    .global-error-title, .global-error-list li { color: #dc2626; }
+  }
 
   // Material overrides – scoped through .skill-page-body so specificity
   // (body.header-light-theme [_nghost] .skill-page-body .selector = 0-4-1)

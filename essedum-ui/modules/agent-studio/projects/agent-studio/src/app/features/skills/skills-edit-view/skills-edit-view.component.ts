@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, OnInit, OnDestroy, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -26,6 +26,7 @@ import {
 export class SkillsEditViewComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
+  @ViewChildren(NgModel) ngModels!: QueryList<NgModel>;
 
   skillModel: SkillFormModel = this.initializeSkillModel();
 
@@ -33,6 +34,7 @@ export class SkillsEditViewComponent implements OnInit, OnDestroy {
   isEdit = false;
   showError = false;
   saving = false;
+  missingFields: string[] = [];
   loadingSkill = false;
   skill: Skill | null = null;
   touchedFields: Set<string> = new Set();
@@ -242,12 +244,22 @@ export class SkillsEditViewComponent implements OnInit, OnDestroy {
     this.touchedFields.add(fieldName);
   }
 
-  isFieldInvalid(fieldName: string, control: any): boolean {
-    if (!this.touchedFields.has(fieldName)) return false;
-    return control?.invalid ?? false;
+  isFieldInvalid(fieldName: string): boolean {
+    return this.touchedFields.has(fieldName);
   }
 
   private readonly REQUIRED_FIELDS = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+
+  private readonly FIELD_LABELS: Record<string, string> = {
+    skillName:     'Skill Name',
+    skillVersion:  'Version',
+    skillType:     'Skill Type',
+    skillCategory: 'Category',
+    description:   'Description',
+    pipelineScope: 'Pipeline Scope',
+    status:        'Status',
+    visibility:    'Visibility',
+  };
 
   isFieldRequired(fieldName: string): boolean {
     return this.REQUIRED_FIELDS.includes(fieldName);
@@ -272,6 +284,8 @@ export class SkillsEditViewComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (!this.isFormValid()) {
       this.showError = true;
+      this.REQUIRED_FIELDS.forEach(f => this.touchedFields.add(f));
+      this.ngModels?.forEach(m => m.control.markAsTouched());
       return;
     }
     this.showError = false;
@@ -315,16 +329,15 @@ export class SkillsEditViewComponent implements OnInit, OnDestroy {
   }
 
   private isFormValid(): boolean {
+    this.missingFields = [];
     for (const field of this.REQUIRED_FIELDS) {
       const value = (this.skillModel as any)[field];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        return false;
-      }
-      if (!this.validateField(field, value)) {
-        return false;
+      const isEmpty = !value || (typeof value === 'string' && !value.trim());
+      if (isEmpty || !this.validateField(field, value)) {
+        this.missingFields.push(this.FIELD_LABELS[field] ?? field);
       }
     }
-    return true;
+    return this.missingFields.length === 0;
   }
 
   private initializeSkillModel(): SkillFormModel {

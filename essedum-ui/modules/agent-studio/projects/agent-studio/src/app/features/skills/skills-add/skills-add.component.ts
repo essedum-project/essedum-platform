@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { NgForm, NgModel } from '@angular/forms';
 import { Location } from '@angular/common';
 import { Services } from '@essedum/shared-lib';
 import {
@@ -21,10 +21,12 @@ import {
 })
 export class SkillsAddComponent {
   @ViewChild('skillForm', { static: false }) skillForm!: NgForm;
+  @ViewChildren(NgModel) ngModels!: QueryList<NgModel>;
 
   skillModel: SkillFormModel = this.initializeSkillModel();
   showError = false;
   saving = false;
+  missingFields: string[] = [];
   touchedFields: Set<string> = new Set();
 
   sectionStates: Record<string, boolean> = {
@@ -116,7 +118,7 @@ export class SkillsAddComponent {
   readonly SECLBLBASIC   = 'Basic Information';
   readonly SECLBLTECH    = 'Technical Details';
   readonly SECLBLAVA     = 'Availability & Access';
-  readonly LBLNAME         = 'Skill Name';
+  readonly LBLNAME         = 'Skill Name....';
   readonly LBLALIAS        = 'Alias';
   readonly LBLVERSION      = 'Version';
   readonly LBLTYPE         = 'Skill Type';
@@ -169,12 +171,22 @@ export class SkillsAddComponent {
     this.touchedFields.add(fieldName);
   }
 
-  isFieldInvalid(fieldName: string, control: any): boolean {
-    if (!this.touchedFields.has(fieldName)) return false;
-    return control?.invalid ?? false;
+  isFieldInvalid(fieldName: string): boolean {
+    return this.touchedFields.has(fieldName);
   }
 
   private readonly REQUIRED_FIELDS = ['skillName', 'skillVersion', 'skillType', 'skillCategory', 'description', 'pipelineScope', 'status', 'visibility'];
+
+  private readonly FIELD_LABELS: Record<string, string> = {
+    skillName:     'Skill Name',
+    skillVersion:  'Version',
+    skillType:     'Skill Type',
+    skillCategory: 'Category',
+    description:   'Description',
+    pipelineScope: 'Pipeline Scope',
+    status:        'Status',
+    visibility:    'Visibility',
+  };
 
   isFieldRequired(fieldName: string): boolean {
     return this.REQUIRED_FIELDS.includes(fieldName);
@@ -199,6 +211,8 @@ export class SkillsAddComponent {
   onSubmit(): void {
     if (!this.isFormValid()) {
       this.showError = true;
+      this.REQUIRED_FIELDS.forEach(f => this.touchedFields.add(f));
+      this.ngModels?.forEach(m => m.control.markAsTouched());
       return;
     }
     this.showError = false;
@@ -243,16 +257,15 @@ export class SkillsAddComponent {
   }
 
   private isFormValid(): boolean {
+    this.missingFields = [];
     for (const field of this.REQUIRED_FIELDS) {
       const value = (this.skillModel as any)[field];
-      if (!value || (typeof value === 'string' && !value.trim())) {
-        return false;
-      }
-      if (!this.validateField(field, value)) {
-        return false;
+      const isEmpty = !value || (typeof value === 'string' && !value.trim());
+      if (isEmpty || !this.validateField(field, value)) {
+        this.missingFields.push(this.FIELD_LABELS[field] ?? field);
       }
     }
-    return true;
+    return this.missingFields.length === 0;
   }
 
   private initializeSkillModel(): SkillFormModel {
