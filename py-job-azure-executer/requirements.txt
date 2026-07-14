@@ -1,12 +1,8 @@
 flask
-boto3
-sagemaker
-minio
 flask_swagger_ui
 dateutils
 gitpython
 psutil
-gradio
 pandas
 sqlalchemy
 pymysql
