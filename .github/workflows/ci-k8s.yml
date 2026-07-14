@@ -527,12 +527,10 @@ jobs:
         if: steps.needs_build.outputs.skip != 'true'
         run: |
           mkdir -p /tmp/buildkitd-configs
-          cat > "/tmp/buildkitd-configs/${{ matrix.service }}.toml" <<EOF
-          [registry."${DOCKER_REGISTRY}"]
-            http = true
-            insecure = true
-          EOF
-          echo "✓ BuildKit config written for ${DOCKER_REGISTRY}"
+          TOML_FILE="/tmp/buildkitd-configs/${{ matrix.service }}.toml"
+          printf '[registry."%s"]\n  http = true\n  insecure = true\n' "${DOCKER_REGISTRY}" > "${TOML_FILE}"
+          echo "✓ BuildKit config written for ${DOCKER_REGISTRY}:"
+          cat "${TOML_FILE}"
 
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
