@@ -16,7 +16,7 @@ spec:
       serviceAccountName: pod-watcher-sa
       containers:
         - name: vibe-pod-watcher
-          image: 192.168.28.36:5000/vibe-pod-watcher:latest
+          image: ${DOCKER_REGISTRY}/vibe-pod-watcher:${IMAGE_TAG}
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

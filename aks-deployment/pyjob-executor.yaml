@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: essedum-1
       containers:
       - name: pyjob-executor-container
-        image: 10.200.111.51:5001/pyjob-excecutor:lfn-v15
+        image: ${DOCKER_REGISTRY}/py-job-executer:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 5000 # Flask app listens on port 5000

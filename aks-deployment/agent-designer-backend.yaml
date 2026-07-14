@@ -128,7 +128,7 @@ spec:
         kubernetes.io/hostname: essedum-1
       containers:
       - name: agent-designer-backend
-        image: 10.200.111.51:5001/agent-designer-backend:lfn-v15
+        image: ${DOCKER_REGISTRY}/agent-designer-backend:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8180
