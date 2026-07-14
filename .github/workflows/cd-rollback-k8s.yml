@@ -96,22 +96,32 @@ jobs:
           
           # Build custom images in sequence
           services=(
-            "leap-app-backend:sv/Dockerfile_dbjwt"
-            "frontend:essedum-ui/Dockerfile"
-            "py-job-executer:py-job-executer/Dockerfile"
-            "py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile"
-            "py-job-vertex-executer:py-job-vertex-executer/Dockerfile"
-            "py-job-azure-executer:py-job-azure-executer/Dockerfile"
-            "proxy-service:proxy-service/Dockerfile"
-            "adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile"
+            "essedum-api-gateway:sv:sv/api-gateway/Dockerfile_oauth2"
+            "essedum-usm-service:sv:sv/usm-service/Dockerfile_oauth2"
+            "essedum-icip-service:sv:sv/icip-service/Dockerfile_oauth2"
+            "essedum-data-service:sv:sv/data-service/Dockerfile_oauth2"
+            "essedum-vibe-service:sv:sv/vibe-service/Dockerfile_oauth2"
+            "essedum-frontend-shell:.:essedum-ui/Dockerfile.shell"
+            "essedum-frontend-agent:.:essedum-ui/Dockerfile.agent"
+            "essedum-frontend-data-ops:.:essedum-ui/Dockerfile.data-ops"
+            "essedum-frontend-integration:.:essedum-ui/Dockerfile.integration"
+            "essedum-frontend-vibe-studio:.:essedum-ui/Dockerfile.vibe-studio"
+            "essedum-frontend-agent-designer:essedum-ui/agent-designer-frontend:essedum-ui/agent-designer-frontend/Dockerfile"
+            "agent-designer-backend:agent-designer-backend:agent-designer-backend/Dockerfile"
+            "py-job-executer:py-job-executer:py-job-executer/Dockerfile"
+            "py-job-sagemaker-executer:py-job-sagemaker-executer:py-job-sagemaker-executer/Dockerfile"
+            "py-job-vertex-executer:py-job-vertex-executer:py-job-vertex-executer/Dockerfile"
+            "py-job-azure-executer:py-job-azure-executer:py-job-azure-executer/Dockerfile"
+            "proxy-service:proxy-service:proxy-service/Dockerfile"
+            "adk-code-builder-deployer:adk-code-builder-deployer:adk-code-builder-deployer/Dockerfile"
+            "vibe-code-builder-deployer:vibe-code-builder-deployer:vibe-code-builder-deployer/Dockerfile"
           )
           
           for svc_info in "${services[@]}"; do
-            IFS=':' read -r service dockerfile <<< "$svc_info"
-            context=$(dirname "$dockerfile")
+            IFS=':' read -r service context dockerfile <<< "$svc_info"
             echo "Building $service..."
-            docker build -t "${REGISTRY}/essedum/${service}:rollback-${ROLLBACK_REF}" \
-              -t "${REGISTRY}/essedum/${service}:latest" \
+            docker build -t "${REGISTRY}/${service}:rollback-${ROLLBACK_REF}" \
+              -t "${REGISTRY}/${service}:latest" \
               -f "$dockerfile" "$context" 2>&1 | tail -20 || {
               echo "::warning::Build for $service had warnings"
             }
@@ -132,14 +142,14 @@ jobs:
             exit 1
           }
           
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer")
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer")
           
           for svc in "${services[@]}"; do
-            docker push "${REGISTRY}/essedum/${svc}:rollback-${ROLLBACK_REF}" || {
+            docker push "${REGISTRY}/${svc}:rollback-${ROLLBACK_REF}" || {
               echo "::error::Failed to push image ${svc}"
               exit 1
             }
-            docker push "${REGISTRY}/essedum/${svc}:latest" || true
+            docker push "${REGISTRY}/${svc}:latest" || true
           done
 
       - name: Apply Kubernetes manifests

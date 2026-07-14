@@ -1,11 +1,9 @@
 name: CD – Deploy (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers:
-#   workflow_call – called directly by CI (ci-k8s.yml call-cd job)
-#     after ci-summary passes on the source-branch branch.
-#     Only the 4 secrets this workflow actually uses are forwarded
-#     (public repo: never use secrets: inherit).
+    # Triggers — called by CI (ci-k8s.yml) after build passes on essedum-lfn-v15.0-actions.
+    # Only the 4 secrets this workflow actually uses are forwarded
+    # (public repo: never use secrets: inherit).
 #   workflow_dispatch – emergency manual deploy; requires repo
 #     write-access to trigger from the GitHub UI.
 # ──────────────────────────────────────────────────────────────
@@ -24,6 +22,10 @@ on:
         type: string
         default: 'false'
       changed_frontend:
+        required: false
+        type: string
+        default: 'false'
+      changed_agent_designer_backend:
         required: false
         type: string
         default: 'false'
@@ -52,18 +54,6 @@ on:
         type: string
         default: 'false'
       changed_vibe:
-        required: false
-        type: string
-        default: 'false'
-      changed_langflow:
-        required: false
-        type: string
-        default: 'false'
-      changed_litellm:
-        required: false
-        type: string
-        default: 'false'
-      changed_langfuse:
         required: false
         type: string
         default: 'false'
@@ -110,7 +100,7 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: source-branch
+          ref: essedum-lfn-v15.0-actions
           fetch-depth: 1
 
       - name: Verify kubeconfig
@@ -163,15 +153,15 @@ jobs:
           # reuse if the runner is compromised between workflow runs.
           docker logout "$REGISTRY" || true
 
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "goose-ui" "goosed")
 
           # Remove images built for this specific SHA from the daemon.
           # No time filter — the build just completed so these images are minutes old
           # and a --filter "until=1h" would silently skip them.
           for svc in "${services[@]}"; do
-            docker rmi "${REGISTRY}/essedum/${svc}:${{ github.sha }}" 2>/dev/null || true
+            docker rmi "${REGISTRY}/${svc}:${{ github.sha }}" 2>/dev/null || true
             # Also remove any localhost:5001 daemon copy from this SHA
-            docker rmi "localhost:5001/essedum/${svc}:${{ github.sha }}" 2>/dev/null || true
+            docker rmi "localhost:5001/${svc}:${{ github.sha }}" 2>/dev/null || true
           done
 
           # Remove all remaining untagged (dangling) layers.
@@ -208,8 +198,18 @@ jobs:
 
           # Map service name → changed flag from CI
           declare -A svc_changed
-          svc_changed["leap-app-backend"]="${{ inputs.changed_backend }}"
-          svc_changed["frontend"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-api-gateway"]="${{ inputs.changed_backend }}"
+          svc_changed["essedum-usm-service"]="${{ inputs.changed_backend }}"
+          svc_changed["essedum-icip-service"]="${{ inputs.changed_backend }}"
+          svc_changed["essedum-data-service"]="${{ inputs.changed_backend }}"
+          svc_changed["essedum-vibe-service"]="${{ inputs.changed_backend }}"
+          svc_changed["essedum-frontend-shell"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-frontend-data-ops"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-frontend-integration"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-frontend-vibe-studio"]="${{ inputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent-designer"]="${{ inputs.changed_frontend }}"
+          svc_changed["agent-designer-backend"]="${{ inputs.changed_agent_designer_backend }}"
           svc_changed["py-job-executer"]="${{ inputs.changed_py_executer }}"
           svc_changed["py-job-sagemaker-executer"]="${{ inputs.changed_py_sagemaker }}"
           svc_changed["py-job-vertex-executer"]="${{ inputs.changed_py_vertex }}"
@@ -217,10 +217,6 @@ jobs:
           svc_changed["proxy-service"]="${{ inputs.changed_proxy }}"
           svc_changed["adk-code-builder-deployer"]="${{ inputs.changed_adk }}"
           svc_changed["vibe-code-builder-deployer"]="${{ inputs.changed_vibe }}"
-          svc_changed["langflow"]="${{ inputs.changed_langflow }}"
-          svc_changed["litellm"]="${{ inputs.changed_litellm }}"
-          svc_changed["langfuse-web"]="${{ inputs.changed_langfuse }}"
-          svc_changed["langfuse-worker"]="${{ inputs.changed_langfuse }}"
           svc_changed["goose-ui"]="true"
           svc_changed["goosed"]="true"
 
@@ -232,7 +228,7 @@ jobs:
           fi
 
           missing_images=0
-          services=("leap-app-backend" "frontend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "langflow" "litellm" "langfuse-web" "langfuse-worker" "goose-ui" "goosed")
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "goose-ui" "goosed")
           for svc in "${services[@]}"; do
             changed="${svc_changed[$svc]}"
             if [ "$changed" != "true" ]; then
@@ -242,12 +238,12 @@ jobs:
             echo -n "  Checking ${svc}... "
             http_status=$(curl -sI -o /dev/null -w "%{http_code}" \
               -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-              "${REG_PROTO}://${REGISTRY}/v2/essedum/${svc}/manifests/${IMAGE_TAG}" 2>/dev/null \
+              "${REG_PROTO}://${REGISTRY}/v2/${svc}/manifests/${IMAGE_TAG}" 2>/dev/null \
               || echo "000")
             if [ "$http_status" = "200" ]; then
               echo "✓ Found in registry"
             else
-              echo "✗ NOT FOUND (registry returned HTTP ${http_status}): ${REGISTRY}/essedum/${svc}:${IMAGE_TAG}"
+              echo "✗ NOT FOUND (registry returned HTTP ${http_status}): ${REGISTRY}/${svc}:${IMAGE_TAG}"
               missing_images=$((missing_images + 1))
             fi
           done
@@ -332,12 +328,6 @@ jobs:
           # so the step does not fail while still applying all other resources normally.
           echo "=== Applying Manifests with PVC Data Preservation ==="
           PVC_FILES=(
-            "aks-deployment/clickhouse-deployment.yaml"
-            "aks-deployment/litellm-deployment.yaml"
-            "aks-deployment/litellm-postgres-deployment.yaml"
-            "aks-deployment/langfuse-postgres-deployment.yaml"
-            "aks-deployment/langfuse-minio-deployment.yaml"
-            "aks-deployment/langflow_file_pv.yaml"
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
             "aks-deployment/qdrant_deployment.yaml"
@@ -393,11 +383,6 @@ jobs:
           SKIP_FILES=(
             "aks-deployment/ingress-nginx-deploy.yaml"
             "aks-deployment/metallib-config.yaml"
-            "aks-deployment/clickhouse-deployment.yaml"
-            "aks-deployment/litellm-postgres-deployment.yaml"
-            "aks-deployment/langfuse-postgres-deployment.yaml"
-            "aks-deployment/langfuse-minio-deployment.yaml"
-            "aks-deployment/langflow_file_pv.yaml"
             "aks-deployment/mysql_file_pv.yaml"
             "aks-deployment/qdrantfilepv.yaml"
             "aks-deployment/qdrant_deployment.yaml"
@@ -405,7 +390,6 @@ jobs:
             "aks-deployment/github-runner-rbac.yml"
             "aks-deployment/mysql_deployment_v3.yaml"
             "aks-deployment/keycloak_deployment.yaml"
-            "aks-deployment/litellm-deployment.yaml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ ! -f "$manifest" ]; then continue; fi
@@ -480,8 +464,18 @@ jobs:
           echo "- **Deployed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Services deployed**:" >> $GITHUB_STEP_SUMMARY
-          echo "- leap-app-backend" >> $GITHUB_STEP_SUMMARY
-          echo "- frontend" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-api-gateway" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-usm-service" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-icip-service" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-data-service" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-vibe-service" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-shell" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-agent" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-data-ops" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-integration" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-vibe-studio" >> $GITHUB_STEP_SUMMARY
+          echo "- essedum-frontend-agent-designer" >> $GITHUB_STEP_SUMMARY
+          echo "- agent-designer-backend" >> $GITHUB_STEP_SUMMARY
           echo "- py-job-executer" >> $GITHUB_STEP_SUMMARY
           echo "- py-job-sagemaker-executer" >> $GITHUB_STEP_SUMMARY
           echo "- py-job-vertex-executer" >> $GITHUB_STEP_SUMMARY
@@ -489,10 +483,6 @@ jobs:
           echo "- proxy-service" >> $GITHUB_STEP_SUMMARY
           echo "- adk-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
           echo "- vibe-code-builder-deployer" >> $GITHUB_STEP_SUMMARY
-          echo "- langflow" >> $GITHUB_STEP_SUMMARY
-          echo "- litellm" >> $GITHUB_STEP_SUMMARY
-          echo "- langfuse-web" >> $GITHUB_STEP_SUMMARY
-          echo "- langfuse-worker" >> $GITHUB_STEP_SUMMARY
           echo "- goose-ui (Vibe Studio)" >> $GITHUB_STEP_SUMMARY
           echo "- goosed (Vibe Studio agent server)" >> $GITHUB_STEP_SUMMARY
 

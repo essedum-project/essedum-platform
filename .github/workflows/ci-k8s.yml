@@ -1,19 +1,12 @@
 name: CI – Build & Test (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers — push to source-branch branch and PRs to pr-branch
+# Triggers — push to essedum-lfn-v15.0-actions branch only
+# No PR trigger — automation tested on this branch exclusively
 # ──────────────────────────────────────────────────────────────
 on:
   push:
-    branches: ["source-branch"]
-    paths-ignore:
-      - "**.md"
-      - ".gitignore"
-      - "LICENSE"
-      - "docker/**"
-  pull_request:
-    branches: ["pr-branch"]
-    types: [opened, synchronize, reopened]
+    branches: ["essedum-lfn-v15.0-actions"]
     paths-ignore:
       - "**.md"
       - ".gitignore"
@@ -40,24 +33,22 @@ jobs:
   detect-changes:
     name: "Detect Changed Services"
     runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push'
     timeout-minutes: 5
     outputs:
-      backend:    ${{ steps.filter.outputs.backend }}
-      frontend:   ${{ steps.filter.outputs.frontend }}
-      py_executer:  ${{ steps.filter.outputs.py_executer }}
-      py_sagemaker: ${{ steps.filter.outputs.py_sagemaker }}
-      py_vertex:    ${{ steps.filter.outputs.py_vertex }}
-      py_azure:     ${{ steps.filter.outputs.py_azure }}
-      proxy:      ${{ steps.filter.outputs.proxy }}
-      adk:        ${{ steps.filter.outputs.adk }}
-      vibe:       ${{ steps.filter.outputs.vibe }}
-      langflow:   ${{ steps.filter.outputs.langflow }}
-      litellm:    ${{ steps.filter.outputs.litellm }}
-      langfuse:   ${{ steps.filter.outputs.langfuse }}
-      k8s:        ${{ steps.filter.outputs.k8s }}
-      workflows:  ${{ steps.filter.outputs.workflows }}
-      has_any_change: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.py_executer == 'true' || steps.filter.outputs.py_sagemaker == 'true' || steps.filter.outputs.py_vertex == 'true' || steps.filter.outputs.py_azure == 'true' || steps.filter.outputs.proxy == 'true' || steps.filter.outputs.adk == 'true' || steps.filter.outputs.vibe == 'true' || steps.filter.outputs.langflow == 'true' || steps.filter.outputs.litellm == 'true' || steps.filter.outputs.langfuse == 'true' }}
+      backend:                 ${{ steps.filter.outputs.backend }}
+      frontend:                ${{ steps.filter.outputs.frontend }}
+      agent_designer_backend:  ${{ steps.filter.outputs.agent_designer_backend }}
+      py_executer:             ${{ steps.filter.outputs.py_executer }}
+      py_sagemaker:            ${{ steps.filter.outputs.py_sagemaker }}
+      py_vertex:               ${{ steps.filter.outputs.py_vertex }}
+      py_azure:                ${{ steps.filter.outputs.py_azure }}
+      proxy:                   ${{ steps.filter.outputs.proxy }}
+      adk:                     ${{ steps.filter.outputs.adk }}
+      vibe:                    ${{ steps.filter.outputs.vibe }}
+      k8s:                     ${{ steps.filter.outputs.k8s }}
+      workflows:               ${{ steps.filter.outputs.workflows }}
+      has_any_change: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.agent_designer_backend == 'true' || steps.filter.outputs.py_executer == 'true' || steps.filter.outputs.py_sagemaker == 'true' || steps.filter.outputs.py_vertex == 'true' || steps.filter.outputs.py_azure == 'true' || steps.filter.outputs.proxy == 'true' || steps.filter.outputs.adk == 'true' || steps.filter.outputs.vibe == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -73,6 +64,8 @@ jobs:
               - 'sv/**'
             frontend:
               - 'essedum-ui/**'
+            agent_designer_backend:
+              - 'agent-designer-backend/**'
             py_executer:
               - 'py-job-executer/**'
             py_sagemaker:
@@ -87,12 +80,6 @@ jobs:
               - 'adk-code-builder-deployer/**'
             vibe:
               - 'vibe-code-builder-deployer/**'
-            langflow:
-              - 'langflow/**'
-            litellm:
-              - 'lite-llm/**'
-            langfuse:
-              - 'langfuse/**'
             k8s:
               - 'aks-deployment/**'
             workflows:
@@ -112,9 +99,6 @@ jobs:
           echo "| proxy-service | ${{ steps.filter.outputs.proxy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| adk-code-builder | ${{ steps.filter.outputs.adk }} |" >> $GITHUB_STEP_SUMMARY
           echo "| vibe-code-builder | ${{ steps.filter.outputs.vibe }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| langflow | ${{ steps.filter.outputs.langflow }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| litellm | ${{ steps.filter.outputs.litellm }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| langfuse | ${{ steps.filter.outputs.langfuse }} |" >> $GITHUB_STEP_SUMMARY
           echo "| k8s manifests | ${{ steps.filter.outputs.k8s }} |" >> $GITHUB_STEP_SUMMARY
           echo "| workflows | ${{ steps.filter.outputs.workflows }} |" >> $GITHUB_STEP_SUMMARY
 
@@ -144,7 +128,7 @@ jobs:
     needs: [detect-changes]
     # Run if: k8s manifests changed
     if: |
-      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'push' &&
       needs.detect-changes.outputs.k8s == 'true'
     timeout-minutes: 10
 
@@ -209,25 +193,79 @@ jobs:
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
     # Job runs only when at least one service source file changed.
-    # This prevents 15 matrix jobs from spinning up on YAML-only or workflow-only commits.
+    # This prevents matrix jobs from spinning up on YAML-only or workflow-only commits.
     if: |
-      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'push' &&
       needs.detect-changes.outputs.has_any_change == 'true'
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          - service: leap-app-backend
-            context: .
-            dockerfile: sv/Dockerfile_oauth2
+          # ── Backend microservices (5 services, all from sv/) ──
+          - service: essedum-api-gateway
+            context: sv
+            dockerfile: sv/api-gateway/Dockerfile_oauth2
             changes_output: backend
 
-          - service: frontend
+          - service: essedum-usm-service
+            context: sv
+            dockerfile: sv/usm-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-icip-service
+            context: sv
+            dockerfile: sv/icip-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-data-service
+            context: sv
+            dockerfile: sv/data-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-vibe-service
+            context: sv
+            dockerfile: sv/vibe-service/Dockerfile_oauth2
+            changes_output: backend
+
+          # ── Frontend MFE microservices (6 modules, all from essedum-ui/) ──
+          - service: essedum-frontend-shell
             context: .
-            dockerfile: essedum-ui/Dockerfile
+            dockerfile: essedum-ui/Dockerfile.shell
             changes_output: frontend
 
+          - service: essedum-frontend-agent
+            context: .
+            dockerfile: essedum-ui/Dockerfile.agent
+            changes_output: frontend
+
+          - service: essedum-frontend-data-ops
+            context: .
+            dockerfile: essedum-ui/Dockerfile.data-ops
+            changes_output: frontend
+
+          - service: essedum-frontend-integration
+            context: .
+            dockerfile: essedum-ui/Dockerfile.integration
+            changes_output: frontend
+
+          - service: essedum-frontend-vibe-studio
+            context: .
+            dockerfile: essedum-ui/Dockerfile.vibe-studio
+            changes_output: frontend
+
+          - service: essedum-frontend-agent-designer
+            context: essedum-ui/agent-designer-frontend
+            dockerfile: essedum-ui/agent-designer-frontend/Dockerfile
+            changes_output: frontend
+
+          # ── Agent Designer Backend ──
+          - service: agent-designer-backend
+            context: agent-designer-backend
+            dockerfile: agent-designer-backend/Dockerfile
+            changes_output: agent_designer_backend
+
+          # ── Python job executors ──
           - service: py-job-executer
             context: py-job-executer
             dockerfile: py-job-executer/Dockerfile
@@ -248,6 +286,7 @@ jobs:
             dockerfile: py-job-azure-executer/Dockerfile
             changes_output: py_azure
 
+          # ── Supporting services ──
           - service: proxy-service
             context: proxy-service
             dockerfile: proxy-service/Dockerfile
@@ -262,29 +301,6 @@ jobs:
             context: vibe-code-builder-deployer
             dockerfile: vibe-code-builder-deployer/Dockerfile
             changes_output: vibe
-
-          # ── Langflow (custom image wrapping langflowai/langflow:latest) ──
-          - service: langflow
-            context: langflow
-            dockerfile: langflow/Dockerfile
-            changes_output: langflow
-
-          # ── LiteLLM (custom image, context=repo root for COPY lite-llm/...) ──
-          - service: litellm
-            context: .
-            dockerfile: lite-llm/Dockerfile
-            changes_output: litellm
-
-          # ── Langfuse web + worker (custom wrappers pinning version) ──
-          - service: langfuse-web
-            context: langfuse
-            dockerfile: langfuse/Dockerfile.web
-            changes_output: langfuse
-
-          - service: langfuse-worker
-            context: langfuse
-            dockerfile: langfuse/Dockerfile.worker
-            changes_output: langfuse
 
           # ── Goose Vibe Studio Agent (code lives outside repo — always rebuild) ──
           - service: goose-ui
@@ -502,7 +518,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
+          tags: ${{ secrets.CONTAINER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
           # SECURITY: Disable provenance attestations and SBOM generation.
           # build-push-action v6 defaults provenance:true which uploads a
           # *.dockerbuild attestation file as a GitHub Actions artifact, making
@@ -591,7 +607,7 @@ jobs:
           else
             echo "- Status: **built and pushed**" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Docker build failure report
         if: failure()
@@ -611,26 +627,24 @@ jobs:
     # touching the self-hosted runner even in the summary/gate step.
     # Jobs that were skipped (no changes) report result 'skipped', not 'failure'.
     # NOTE: backend and frontend CI validation removed — Docker builds handle all compilation.
-    if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    if: always() && github.event_name == 'push'
     timeout-minutes: 5
     # Expose detect-changes outputs so call-cd can forward them to CD.
     # CD uses these to skip manifests/rollouts for unchanged services.
     outputs:
-      image_tag:            ${{ github.sha }}
-      has_any_change:       ${{ needs.detect-changes.outputs.has_any_change }}
-      changed_backend:      ${{ needs.detect-changes.outputs.backend }}
-      changed_frontend:     ${{ needs.detect-changes.outputs.frontend }}
-      changed_py_executer:  ${{ needs.detect-changes.outputs.py_executer }}
-      changed_py_sagemaker: ${{ needs.detect-changes.outputs.py_sagemaker }}
-      changed_py_vertex:    ${{ needs.detect-changes.outputs.py_vertex }}
-      changed_py_azure:     ${{ needs.detect-changes.outputs.py_azure }}
-      changed_proxy:        ${{ needs.detect-changes.outputs.proxy }}
-      changed_adk:          ${{ needs.detect-changes.outputs.adk }}
-      changed_vibe:         ${{ needs.detect-changes.outputs.vibe }}
-      changed_langflow:     ${{ needs.detect-changes.outputs.langflow }}
-      changed_litellm:      ${{ needs.detect-changes.outputs.litellm }}
-      changed_langfuse:     ${{ needs.detect-changes.outputs.langfuse }}
-      changed_workflows:    ${{ needs.detect-changes.outputs.workflows }}
+      image_tag:                        ${{ github.sha }}
+      has_any_change:                   ${{ needs.detect-changes.outputs.has_any_change }}
+      changed_backend:                  ${{ needs.detect-changes.outputs.backend }}
+      changed_frontend:                 ${{ needs.detect-changes.outputs.frontend }}
+      changed_agent_designer_backend:   ${{ needs.detect-changes.outputs.agent_designer_backend }}
+      changed_py_executer:              ${{ needs.detect-changes.outputs.py_executer }}
+      changed_py_sagemaker:             ${{ needs.detect-changes.outputs.py_sagemaker }}
+      changed_py_vertex:                ${{ needs.detect-changes.outputs.py_vertex }}
+      changed_py_azure:                 ${{ needs.detect-changes.outputs.py_azure }}
+      changed_proxy:                    ${{ needs.detect-changes.outputs.proxy }}
+      changed_adk:                      ${{ needs.detect-changes.outputs.adk }}
+      changed_vibe:                     ${{ needs.detect-changes.outputs.vibe }}
+      changed_workflows:                ${{ needs.detect-changes.outputs.workflows }}
 
     steps:
       - name: Determine CI status
@@ -722,28 +736,26 @@ jobs:
     needs: [ci-summary]
     if: |
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/source-branch' &&
+      github.ref == 'refs/heads/essedum-lfn-v15.0-actions' &&
       needs.ci-summary.result == 'success' &&
       needs.ci-summary.outputs.has_any_change == 'true'
     uses: ./.github/workflows/cd-deploy-k8s.yml
     with:
       # Forward the exact SHA that CI built and pushed — CD deploys this tag directly.
       # No second docker build in CD; images are already in the registry.
-      image_tag:            ${{ needs.ci-summary.outputs.image_tag }}
+      image_tag:                        ${{ needs.ci-summary.outputs.image_tag }}
       # Forward which services changed so CD can skip manifests/rollouts for unchanged ones.
-      changed_backend:      ${{ needs.ci-summary.outputs.changed_backend }}
-      changed_frontend:     ${{ needs.ci-summary.outputs.changed_frontend }}
-      changed_py_executer:  ${{ needs.ci-summary.outputs.changed_py_executer }}
-      changed_py_sagemaker: ${{ needs.ci-summary.outputs.changed_py_sagemaker }}
-      changed_py_vertex:    ${{ needs.ci-summary.outputs.changed_py_vertex }}
-      changed_py_azure:     ${{ needs.ci-summary.outputs.changed_py_azure }}
-      changed_proxy:        ${{ needs.ci-summary.outputs.changed_proxy }}
-      changed_adk:          ${{ needs.ci-summary.outputs.changed_adk }}
-      changed_vibe:         ${{ needs.ci-summary.outputs.changed_vibe }}
-      changed_langflow:     ${{ needs.ci-summary.outputs.changed_langflow }}
-      changed_litellm:      ${{ needs.ci-summary.outputs.changed_litellm }}
-      changed_langfuse:     ${{ needs.ci-summary.outputs.changed_langfuse }}
-      changed_workflows:    ${{ needs.ci-summary.outputs.changed_workflows }}
+      changed_backend:                  ${{ needs.ci-summary.outputs.changed_backend }}
+      changed_frontend:                 ${{ needs.ci-summary.outputs.changed_frontend }}
+      changed_agent_designer_backend:   ${{ needs.ci-summary.outputs.changed_agent_designer_backend }}
+      changed_py_executer:              ${{ needs.ci-summary.outputs.changed_py_executer }}
+      changed_py_sagemaker:             ${{ needs.ci-summary.outputs.changed_py_sagemaker }}
+      changed_py_vertex:                ${{ needs.ci-summary.outputs.changed_py_vertex }}
+      changed_py_azure:                 ${{ needs.ci-summary.outputs.changed_py_azure }}
+      changed_proxy:                    ${{ needs.ci-summary.outputs.changed_proxy }}
+      changed_adk:                      ${{ needs.ci-summary.outputs.changed_adk }}
+      changed_vibe:                     ${{ needs.ci-summary.outputs.changed_vibe }}
+      changed_workflows:                ${{ needs.ci-summary.outputs.changed_workflows }}
     secrets:
       CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
       REGISTRY_USERNAME:  ${{ secrets.REGISTRY_USERNAME }}
