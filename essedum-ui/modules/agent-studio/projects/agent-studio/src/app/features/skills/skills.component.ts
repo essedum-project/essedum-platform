@@ -8,6 +8,7 @@ import { Skill, SkillsListResponse, SkillsService, SkillsServiceMessages } from 
 import { AipGridColumn, AipGridAction } from '../sharedModule/aip-grid/aip-grid.component';
 
 @Component({
+  standalone: false,
   selector: 'app-skills',
   templateUrl: './skills.component.html',
   styleUrls: ['./skills.component.scss'],

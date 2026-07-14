@@ -19,6 +19,7 @@ import {
 } from '../../services/skills.service';
 
 @Component({
+  standalone: false,
   selector: 'app-skills-edit-view',
   templateUrl: './skills-edit-view.component.html',
   styleUrls: ['./skills-edit-view.component.scss'],

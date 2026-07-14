@@ -15,6 +15,7 @@ import {
 } from '../../services/skills.service';
 
 @Component({
+  standalone: false,
   selector: 'app-skills-add',
   templateUrl: './skills-add.component.html',
   styleUrls: ['./skills-add.component.scss'],

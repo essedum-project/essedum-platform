@@ -37,6 +37,7 @@ export interface AipGridAction {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-aip-grid',
   templateUrl: './aip-grid.component.html',
   styleUrls: ['./aip-grid.component.scss'],
