@@ -1,0 +1,180 @@
+# =============================================================================
+# Agent Designer Backend – Kubernetes Deployment
+# Includes: PostgreSQL, Redis, API server, Celery worker
+# =============================================================================
+
+# --- PostgreSQL for Agent Designer ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-postgres
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-postgres
+  template:
+    metadata:
+      labels:
+        app: agent-designer-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "agentflow"
+        - name: POSTGRES_USER
+          value: "agentflow"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: agent-designer-secrets
+              key: POSTGRES_PASSWORD
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "agentflow"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-postgres
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+  type: ClusterIP
+---
+
+# --- Redis for Agent Designer ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-redis
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-redis
+  template:
+    metadata:
+      labels:
+        app: agent-designer-redis
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-redis
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+  type: ClusterIP
+---
+
+# --- Agent Designer Backend API ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-backend
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-backend
+  template:
+    metadata:
+      labels:
+        app: agent-designer-backend
+    spec:
+      containers:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: agent-designer-backend
+        image: 10.200.111.51:5001/agent-designer-backend:lfn-v15
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8180
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+asyncpg://agentflow:agentflow@agent-designer-postgres:5432/agentflow"
+        - name: REDIS_URL
+          value: "redis://agent-designer-redis:6379"
+        - name: QDRANT_HOST
+          value: "qdrant"
+        - name: QDRANT_PORT
+          value: "6333"
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 30
+          periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-backend-service
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-backend
+  ports:
+  - protocol: TCP
+    port: 8180
+    targetPort: 8180
+  type: ClusterIP
+---
+
+# --- Secret (create this first or replace with your actual values) ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agent-designer-secrets
+  namespace: aipns
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "agentflow"

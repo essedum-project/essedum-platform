@@ -5,11 +5,6 @@ FROM node:20-alpine AS build
 ARG NPM_REGISTRY_URL
 ARG NPM_AUTH_TOKEN
 
-# Inject corporate CA so npm can reach registries through Zscaler proxy
-COPY docker/certs/corp-ca.crt /usr/local/share/ca-certificates/corp-ca.crt
-RUN cat /usr/local/share/ca-certificates/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/corp-ca.crt
-
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell

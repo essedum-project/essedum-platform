@@ -10,7 +10,11 @@
 .env.*.local
 docker/.env
 docker/.env.local
-
+# ── Kubernetes secret manifests (credentials must stay on runner only) ──
+aks-deployment/*-secret.yaml
+aks-deployment/*-secrets.yaml
+k8s/secret.yaml
+k8s/*-secret.yaml
 # ── TLS / private keys ────────────────────────────────────────────────
 *.pem
 *.key

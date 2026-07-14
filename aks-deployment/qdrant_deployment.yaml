@@ -29,8 +29,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: qdrant
   namespace: aipns
 spec:

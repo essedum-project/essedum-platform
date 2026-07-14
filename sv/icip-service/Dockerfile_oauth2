@@ -69,6 +69,5 @@ CMD ["/bin/bash", "-c", "\
     -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8082 \
-    -cp conf/*:icip-service-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.icip.IcipServiceApplication"]
+    -jar $(ls /app/icip-service*.jar | head -1)"]
 

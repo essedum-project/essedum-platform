@@ -11,13 +11,17 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+      add_header Pragma "no-cache" always;
 spec:
   tls:
   - hosts:
-    - essedum.az.ad.idemo-ppc.com
-    secretName: essedum-az-tls
+    - ${INGRESS_HOST}
+    secretName: essedum-secret
   rules:
-  - host: essedum.az.ad.idemo-ppc.com
+  - host: ${INGRESS_HOST}
     http:
       paths:
       - path: /

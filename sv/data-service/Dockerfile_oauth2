@@ -69,6 +69,5 @@ CMD ["/bin/bash", "-c", "\
     -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8083 \
-    -cp conf/*:data-service-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.data.DataServiceApplication"]
+    -jar $(ls /app/data-service*.jar | head -1)"]
 

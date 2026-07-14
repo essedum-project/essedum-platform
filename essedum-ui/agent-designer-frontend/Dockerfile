@@ -3,7 +3,11 @@ FROM node:23-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json .npmrc ./
+ARG NPM_REGISTRY_URL
+
+COPY package.json ./
+
+RUN if [ -n "$NPM_REGISTRY_URL" ]; then npm config set registry "$NPM_REGISTRY_URL"; fi
 
 RUN npm install
 

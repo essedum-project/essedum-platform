@@ -13,21 +13,18 @@ spec:
       labels:
         app: essedum-backend-icip
     spec:
-      imagePullSecrets:
-      - name: regcred
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: essedum-1
+      hostAliases:
+      - ip: "192.168.28.41"
+        hostnames:
+        - "keycloak.essedum.local"
       containers:
       - name: essedum-backend-icip
-        image: localhost:5000/essedum-icip-service:v17
+        image: ${DOCKER_REGISTRY}/essedum-icip-service:${IMAGE_TAG}
         imagePullPolicy: Always
-        command: ["/bin/bash", "-c"]
-        args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/icip-service*.jar | head -1)"]
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "mysql,oauth2,dbconstants"
-        - name: OAUTH2_ISSUER_URI
-          value: "https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM"
-        - name: OAUTH2_JWK_URI
-          value: "http://keycloak:8180/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
@@ -43,18 +40,10 @@ spec:
             secretKeyRef:
               name: essedum-db-secret
               key: MYSQL_PASSWORD
-        - name: ENCRYPTION_KEY
-          valueFrom:
-            secretKeyRef:
-              name: essedum-encryption-secret
-              key: ENCRYPTION_KEY
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "512Mi"
-          limits:
-            cpu: "1"
-            memory: "768Mi"
+        - name: OAUTH2_JWK_URI
+          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
+        - name: OAUTH2_ISSUER_URI
+          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
         ports:
         - containerPort: 8082
 ---

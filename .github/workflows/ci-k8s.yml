@@ -320,19 +320,23 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Load runner-local env (docker/.env.sample)
-        # Sources registry address and credentials from the machine-local file.
+        # Parses KEY=VALUE lines from env.sample line-by-line.
+        # Skips comments, blank lines, and YAML-style "KEY: VALUE" lines
+        # (exit 127 guard against stale runner files with YAML format).
         # NEVER uses GitHub secrets for registry credentials — public repo.
-        # ::add-mask:: hides the password value from all log output.
         run: |
           ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
           if [ ! -f "$ENV_FILE" ]; then
             echo "::error::docker/.env.sample not found at $ENV_FILE"
             exit 1
           fi
-          set -a
-          # shellcheck disable=SC1090
-          source "$ENV_FILE"
-          set +a
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            [[ -z "${line//[[:space:]]/}" ]] && continue
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+              export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+            fi
+          done < "$ENV_FILE"
           # Mask password immediately so it never appears in any log line
           if [ -n "${DOCKER_PASSWORD:-}" ]; then
             echo "::add-mask::${DOCKER_PASSWORD}"
@@ -787,7 +791,9 @@ jobs:
           fetch-depth: 1
 
       - name: Load runner-local env (docker/.env.sample)
-        # Sources registry address and credentials from the machine-local file.
+        # Parses KEY=VALUE lines from env.sample line-by-line.
+        # Skips comments, blank lines, and YAML-style "KEY: VALUE" lines
+        # (exit 127 guard against stale runner files with YAML format).
         # NEVER uses GitHub secrets for registry credentials — public repo.
         run: |
           ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
@@ -795,10 +801,13 @@ jobs:
             echo "::error::docker/.env.sample not found at $ENV_FILE"
             exit 1
           fi
-          set -a
-          # shellcheck disable=SC1090
-          source "$ENV_FILE"
-          set +a
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            [[ -z "${line//[[:space:]]/}" ]] && continue
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+              export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+            fi
+          done < "$ENV_FILE"
           if [ -n "${DOCKER_PASSWORD:-}" ]; then
             echo "::add-mask::${DOCKER_PASSWORD}"
           fi
@@ -851,6 +860,30 @@ jobs:
           done
           docker image prune -f || true
           echo "✓ Docker logout complete and images cleaned up"
+
+      - name: Apply cluster secrets from env
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+          # essedum-minio-secret: used by data-service and other consumers
+          kubectl create secret generic essedum-minio-secret \
+            --from-literal=endpoint="${MINIO_ENDPOINT:-http://minio-service:9000}" \
+            --from-literal=access-key="${MINIO_ACCESS_KEY}" \
+            --from-literal=secret-key="${MINIO_SECRET_KEY}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ essedum-minio-secret applied"
+
+          # essedum-db-secret: used by backend microservices for MySQL
+          kubectl create secret generic essedum-db-secret \
+            --from-literal=MYSQL_DATASOURCE_URL="${MYSQL_DATASOURCE_URL}" \
+            --from-literal=MYSQL_USER="${MYSQL_DATASOURCE_USER}" \
+            --from-literal=MYSQL_PASSWORD="${MYSQL_DATASOURCE_PASSWORD}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ essedum-db-secret applied"
 
       - name: Apply Kubernetes manifests
         env:

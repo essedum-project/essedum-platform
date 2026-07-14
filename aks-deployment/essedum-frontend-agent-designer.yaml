@@ -1,38 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: essedum-frontend-integration
+  name: essedum-frontend-agent-designer
   namespace: aipns
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: essedum-frontend-integration
+      app: essedum-frontend-agent-designer
   template:
     metadata:
       labels:
-        app: essedum-frontend-integration
+        app: essedum-frontend-agent-designer
     spec:
       nodeSelector:
         kubernetes.io/arch: amd64
         kubernetes.io/hostname: essedum-1
       containers:
-      - name: essedum-frontend-integration
-        image: ${DOCKER_REGISTRY}/essedum-frontend-integration:${IMAGE_TAG}
+      - name: essedum-frontend-agent-designer
+        image: ${DOCKER_REGISTRY}/essedum-frontend-agent-designer:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 3030
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: essedum-frontend-integration-service
+  name: essedum-frontend-agent-designer-service
   namespace: aipns
 spec:
   selector:
-    app: essedum-frontend-integration
+    app: essedum-frontend-agent-designer
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
+    port: 3030
+    targetPort: 3030
   type: ClusterIP

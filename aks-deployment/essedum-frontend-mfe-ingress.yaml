@@ -14,12 +14,19 @@ metadata:
 spec:
   tls:
   - hosts:
-    - essedum.az.ad.idemo-ppc.com
-    secretName: essedum-az-tls
+    - ${INGRESS_HOST}
+    secretName: essedum-secret
   rules:
-  - host: essedum.az.ad.idemo-ppc.com
+  - host: ${INGRESS_HOST}
     http:
       paths:
+      - path: /mfe/agent-designer(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: essedum-frontend-agent-designer-service
+            port:
+              number: 3030
       - path: /mfe/agent(/|$)(.*)
         pathType: ImplementationSpecific
         backend:

@@ -69,6 +69,5 @@ CMD ["/bin/bash", "-c", "\
     -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8084 \
-    -cp conf/*:vibe-service-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.vibe.VibeServiceApplication"]
+    -jar $(ls /app/vibe-service*.jar | head -1)"]
 

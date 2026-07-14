@@ -65,7 +65,9 @@ jobs:
           fetch-depth: 1
 
       - name: Load runner-local env (docker/.env.sample)
-        # Sources registry address and credentials from the machine-local file.
+        # Parses KEY=VALUE lines from env.sample line-by-line.
+        # Skips comments, blank lines, and YAML-style "KEY: VALUE" lines
+        # (exit 127 guard against stale runner files with YAML format).
         # NEVER uses GitHub secrets for registry credentials — public repo.
         run: |
           ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
@@ -73,10 +75,13 @@ jobs:
             echo "::error::docker/.env.sample not found at $ENV_FILE"
             exit 1
           fi
-          set -a
-          # shellcheck disable=SC1090
-          source "$ENV_FILE"
-          set +a
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            [[ -z "${line//[[:space:]]/}" ]] && continue
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+              export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+            fi
+          done < "$ENV_FILE"
           if [ -n "${DOCKER_PASSWORD:-}" ]; then
             echo "::add-mask::${DOCKER_PASSWORD}"
           fi

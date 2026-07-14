@@ -15,9 +15,11 @@ spec:
       labels:
         app: proxy-service
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
       containers:
       - name: proxy
-        image: localhost:5000/proxy-service:v15
+        image: ${DOCKER_REGISTRY}/proxy-service:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -40,8 +42,6 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
-      imagePullSecrets:
-      - name: regcred   # if your cluster needs ACR pull creds; remove if not required
 
 ---
 

@@ -13,6 +13,8 @@ spec:
       labels:
         app: mysql
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
       containers:
       - image: mysql:8.0
         name: mysql

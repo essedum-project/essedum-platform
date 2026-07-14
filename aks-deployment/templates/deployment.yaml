@@ -1,0 +1,125 @@
+# =============================================================================
+# Generic Microservice Deployment Template
+# All ${VAR} placeholders are substituted by envsubst from docker/.env.
+#
+# Per-service variables to export before rendering:
+#   SERVICE_NAME     – deployment/pod name (e.g. essedum-backend-api-gateway)
+#   SERVICE_IMAGE    – image name WITHOUT registry prefix or tag
+#                      (e.g. essedum-api-gateway)
+#   CONTAINER_PORT   – port the container listens on
+#   REPLICAS         – desired replica count
+#   CPU_REQUEST      – e.g. 500m
+#   CPU_LIMIT        – e.g. 2000m
+#   MEM_REQUEST      – e.g. 512Mi
+#   MEM_LIMIT        – e.g. 4Gi
+#   PROBE_PATH       – health-check path (e.g. /actuator/health/readiness)
+#
+# Global variables sourced automatically from docker/.env:
+#   DOCKER_REGISTRY, IMAGE_TAG, KUBE_NAMESPACE, ENVIRONMENT,
+#   DB_HOST, MYSQL_PORT, DB_NAME, EXTERNAL_ISSUER_URI,
+#   BACKEND_PORT, MINIO_ENDPOINT, MINIO_BUCKET
+#
+# Usage (ad-hoc):
+#   export SERVICE_NAME=essedum-backend-api-gateway \
+#          SERVICE_IMAGE=essedum-api-gateway \
+#          CONTAINER_PORT=8080 REPLICAS=1 \
+#          CPU_REQUEST=500m CPU_LIMIT=2000m \
+#          MEM_REQUEST=512Mi MEM_LIMIT=4Gi \
+#          PROBE_PATH=/actuator/health/readiness
+#   envsubst < templates/deployment.yaml | kubectl apply -f -
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${SERVICE_NAME}
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: ${SERVICE_NAME}
+    environment: ${ENVIRONMENT}
+    version: ${IMAGE_TAG}
+spec:
+  replicas: ${REPLICAS}
+  selector:
+    matchLabels:
+      app: ${SERVICE_NAME}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ${SERVICE_NAME}
+        environment: ${ENVIRONMENT}
+        version: ${IMAGE_TAG}
+    spec:
+      containers:
+        - name: ${SERVICE_NAME}
+          image: ${DOCKER_REGISTRY}/${SERVICE_IMAGE}:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: ${CONTAINER_PORT}
+              protocol: TCP
+          envFrom:
+            # Non-secret config (URLs, ports, realm names) from ConfigMap
+            - configMapRef:
+                name: essedum-platform-config
+          env:
+            # Secrets injected individually from Kubernetes Secrets
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-db-secret
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-db-secret
+                  key: password
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-minio-secret
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-minio-secret
+                  key: secret-key
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-app-secret
+                  key: encryption-key
+            - name: LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-app-secret
+                  key: license
+          resources:
+            requests:
+              cpu: "${CPU_REQUEST}"
+              memory: "${MEM_REQUEST}"
+            limits:
+              cpu: "${CPU_LIMIT}"
+              memory: "${MEM_LIMIT}"
+          readinessProbe:
+            httpGet:
+              path: ${PROBE_PATH}
+              port: ${CONTAINER_PORT}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: ${PROBE_PATH}
+              port: ${CONTAINER_PORT}
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
