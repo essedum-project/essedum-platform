@@ -521,17 +521,6 @@ jobs:
             echo "No existing BuildKit cache — nothing to clear"
           fi
 
-      - name: Write BuildKit registry config
-        # Writes a dynamic toml so BuildKit uses the registry from .env.sample
-        # (replaces the old hardcoded localhost:5001 config-inline).
-        if: steps.needs_build.outputs.skip != 'true'
-        run: |
-          mkdir -p /tmp/buildkitd-configs
-          TOML_FILE="/tmp/buildkitd-configs/${{ matrix.service }}.toml"
-          printf '[registry."%s"]\n  http = true\n  insecure = true\n' "${DOCKER_REGISTRY}" > "${TOML_FILE}"
-          echo "✓ BuildKit config written for ${DOCKER_REGISTRY}:"
-          cat "${TOML_FILE}"
-
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
         run: |
@@ -543,19 +532,20 @@ jobs:
           fi
 
       - name: Set up Docker Buildx
-        # IMPORTANT: the docker-container BuildKit driver runs inside an isolated
-        # container. Without --network=host that container cannot reach the local
-        # registry on localhost:5001 (its own loopback ≠ host loopback), causing
-        # "dial tcp [::1]:5001: connect: connection refused" on push.
-        # --driver-opt network=host shares the host network with the builder
-        # container so localhost resolves correctly.
-        # config-inline marks localhost:5001 as an insecure (plain-HTTP) registry
-        # so BuildKit does not attempt TLS when pushing layers.
+        # --driver-opt network=host lets the docker-container BuildKit builder
+        # reach the local registry (its loopback ≠ host loopback without this).
+        # buildkitd-config-inline marks the registry as http/insecure so BuildKit
+        # does not attempt TLS.  Using buildkitd-config-inline (not deprecated
+        # 'config') so the action generates the temp TOML itself — avoids the
+        # (4,4) parse error caused by the deprecated config: file-copy path.
         if: steps.needs_build.outputs.skip != 'true'
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         with:
           driver-opts: network=host
-          config: /tmp/buildkitd-configs/${{ matrix.service }}.toml
+          buildkitd-config-inline: |
+            [registry."${{ env.DOCKER_REGISTRY }}"]
+              http = true
+              insecure = true
 
       - name: Build and push Docker image
         # Build once in CI and push immediately to the registry.
