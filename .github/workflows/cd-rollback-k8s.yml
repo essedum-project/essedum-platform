@@ -69,9 +69,12 @@ jobs:
         # expansion of values (safe for keys containing $, #, = etc).
         # NEVER uses GitHub secrets for registry credentials — public repo.
         run: |
-          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          # docker/.env.sample is NOT committed to git (contains credentials).
+          # Use the stable runner working copy — never overwritten by git checkout.
+          ENV_FILE="${HOME}/devops/actions/essedum-platform/docker/.env.sample"
           if [ ! -f "$ENV_FILE" ]; then
             echo "::error::docker/.env.sample not found at $ENV_FILE"
+            echo "::error::Expected at: ${HOME}/devops/actions/essedum-platform/docker/.env.sample"
             exit 1
           fi
           DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
