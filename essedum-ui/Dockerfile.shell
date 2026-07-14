@@ -1,15 +1,9 @@
 # Build context: essedum-platform/ (repo root)
 FROM node:20-alpine AS build
 
-ARG NPM_REGISTRY_URL
-ARG NPM_AUTH_TOKEN
-ARG ARTIFACTORY_REPO_USER
-ARG ARTIFACTORY_REPO_PASS
-
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 RUN npm run build-prod || (echo "=== Angular error log ===" && cat /tmp/ng-*/angular-errors.log 2>/dev/null && exit 1)

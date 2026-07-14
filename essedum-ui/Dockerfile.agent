@@ -2,22 +2,16 @@
 # Shell sources needed for @essedum/shared-lib TypeScript path alias in tsconfig.
 FROM node:20-alpine AS build
 
-ARG NPM_REGISTRY_URL
-ARG NPM_AUTH_TOKEN
-
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc && \
-    npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY essedum-ui/modules/agent-studio/ /workspace/modules/agent-studio/
 WORKDIR /workspace/modules/agent-studio
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 # Explicitly install dayjs — required by @jsonforms/angular-material as a peer dep.
-# Artifactory npm-remote may not cache it on first fetch; this ensures it is present.
 RUN node -e "require('dayjs')" 2>/dev/null || npm install dayjs --save --legacy-peer-deps
 RUN npm run build-prod
 
