@@ -532,51 +532,56 @@ jobs:
           fi
 
       - name: Set up Docker Buildx
-        # --driver-opt network=host lets the docker-container BuildKit builder
-        # reach the local registry (its loopback ≠ host loopback without this).
-        # buildkitd-config-inline marks the registry as http/insecure so BuildKit
-        # does not attempt TLS.  Using buildkitd-config-inline (not deprecated
-        # 'config') so the action generates the temp TOML itself — avoids the
-        # (4,4) parse error caused by the deprecated config: file-copy path.
+        # Uses docker/setup-buildx-action is intentionally avoided here.
+        # Both config: and buildkitd-config-inline inputs cause the action to
+        # write a temp TOML file internally and pass it via --config to
+        # docker buildx create — that internal write consistently fails with
+        # "(4,4): invalid table array key" on this runner.
+        # Instead: write the TOML via Python (no shell quoting/indent issues)
+        # and call docker buildx create directly — zero action involvement.
         if: steps.needs_build.outputs.skip != 'true'
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-        with:
-          driver-opts: network=host
-          buildkitd-config-inline: |
-            [registry."${{ env.DOCKER_REGISTRY }}"]
-              http = true
-              insecure = true
+        run: |
+          BUILDER="essedum-${{ matrix.service }}"
+          TOML="/tmp/bkd-${BUILDER}.toml"
+          # Use python3 to write TOML — avoids all shell quoting/indentation issues.
+          # chr(34) is a double-quote; avoids any embedded quote escaping in this YAML.
+          python3 -c "import os; q=chr(34); reg=os.environ.get('DOCKER_REGISTRY',''); open('${TOML}','w').write('[registry.'+q+reg+q+']\nhttp = true\ninsecure = true\n'); print('TOML written for: '+reg)"
+          echo "--- TOML content ---"
+          cat "${TOML}"
+          echo "--------------------"
+          # Remove stale builder from any previous run
+          docker buildx rm "${BUILDER}" 2>/dev/null || true
+          # Create builder directly — no action temp-file processing involved
+          docker buildx create \
+            --name "${BUILDER}" \
+            --driver docker-container \
+            --driver-opt network=host \
+            --buildkitd-flags '--allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host' \
+            --config "${TOML}"
+          docker buildx inspect "${BUILDER}" --bootstrap
+          echo "✓ Builder ${BUILDER} ready"
 
       - name: Build and push Docker image
-        # Build once in CI and push immediately to the registry.
-        # CD reuses this image directly — no second build in the deploy job.
         if: steps.needs_build.outputs.skip != 'true'
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: ${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
-          # SECURITY: Disable provenance attestations and SBOM generation.
-          # build-push-action v6 defaults provenance:true which uploads a
-          # *.dockerbuild attestation file as a GitHub Actions artifact, making
-          # it publicly visible in the GitHub UI on a public repo.
-          # Artifacts MUST stay on the runner only — never uploaded to GitHub.
-          provenance: false
-          sbom: false
-          # SECURITY: Do NOT use type=gha cache on a public repo.
-          # GHA cache is accessible to any workflow run including fork PRs,
-          # which would allow reading image layers containing compiled code,
-          # internal paths, and baked-in configuration.
-          # Use a local registry cache scoped to this runner only.
-          cache-from: type=local,src=/tmp/buildkit-cache/${{ matrix.service }}
-          # mode=max caches all intermediate layers (best hit-rate).
-          # max-size caps the on-disk footprint per service at 2 GB so the
-          # /tmp/buildkit-cache directory cannot grow unboundedly on the runner.
-          cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max,max-size=2g
-          # Do NOT load into Docker daemon (outputs: type=docker) —
-          # loading builds up /var/lib/docker indefinitely with stale images.
-          # CI pushes directly to the registry; no daemon load needed.
+        run: |
+          BUILDER="essedum-${{ matrix.service }}"
+          SVC="${{ matrix.service }}"
+          CACHE_DIR="/tmp/buildkit-cache/${SVC}"
+          IMAGE="${{ env.DOCKER_REGISTRY }}/${SVC}:${{ github.sha }}"
+          mkdir -p "${CACHE_DIR}"
+          docker buildx build \
+            --builder "${BUILDER}" \
+            --cache-from "type=local,src=${CACHE_DIR}" \
+            --cache-to "type=local,dest=${CACHE_DIR},mode=max" \
+            --push \
+            --provenance=false \
+            --sbom=false \
+            -t "${IMAGE}" \
+            -f "${{ matrix.dockerfile }}" \
+            "${{ matrix.context }}"
+          echo "✓ Built and pushed ${IMAGE}"
+          # Remove builder container to free resources after build
+          docker buildx rm "${BUILDER}" 2>/dev/null || true
 
       - name: Verify image is readable in registry
         # registry:2 can return HTTP 201 for a manifest PUT but silently skip writing
