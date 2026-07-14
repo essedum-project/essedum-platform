@@ -61,10 +61,31 @@ jobs:
       - name: Checkout specified ref
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          # SECURITY: ref is a workflow_dispatch input; actions/checkout validates
-          # it as a git ref — safe to pass here (not a run: shell expansion).
           ref: ${{ github.event.inputs.ref }}
           fetch-depth: 1
+
+      - name: Load runner-local env (docker/.env.sample)
+        # Sources registry address and credentials from the machine-local file.
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        run: |
+          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1090
+          source "$ENV_FILE"
+          set +a
+          if [ -n "${DOCKER_PASSWORD:-}" ]; then
+            echo "::add-mask::${DOCKER_PASSWORD}"
+          fi
+          echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=${DOCKER_USERNAME:-}" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=${DOCKER_PASSWORD:-}" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "✓ Registry: ${DOCKER_REGISTRY}"
+          echo "✓ Auth: $([ -n "${DOCKER_USERNAME:-}" ] && echo 'yes' || echo 'anonymous')"
 
       - name: Verify kubeconfig
         run: |
@@ -83,14 +104,11 @@ jobs:
 
       - name: Build and push container images
         env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-          # SECURITY: user input passed via env var, not inline in shell script.
           ROLLBACK_REF: ${{ github.event.inputs.ref }}
         run: |
           set -e
-          NAMESPACE=${K8S_NAMESPACE:-essedum}
+          REGISTRY="$DOCKER_REGISTRY"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
           echo "Rolling back to ref: ${ROLLBACK_REF}"
           echo "Building images for rollback..."
           
@@ -129,18 +147,19 @@ jobs:
 
       - name: Push images to registry
         env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
           ROLLBACK_REF: ${{ github.event.inputs.ref }}
         run: |
           set -e
-          # SECURITY: secrets passed via env vars; removed 2>&1 so auth output
-          # never merges into stdout log.
-          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY" || {
-            echo "::error::Failed to authenticate with container registry"
-            exit 1
-          }
+          REGISTRY="$DOCKER_REGISTRY"
+          # Login using runner-machine credentials loaded from docker/.env.sample
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$REGISTRY" || {
+              echo "::error::Failed to authenticate with container registry"
+              exit 1
+            }
+          else
+            echo "No DOCKER_USERNAME — using unauthenticated local registry"
+          fi
           
           services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer")
           
@@ -154,13 +173,11 @@ jobs:
 
       - name: Apply Kubernetes manifests
         env:
-          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
           IMAGE_TAG: ${{ github.event.inputs.ref }}
-          # SECURITY: REGISTRY via env, never inline in shell.
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          NAMESPACE="${K8S_NAMESPACE}"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          REGISTRY="$DOCKER_REGISTRY"
           echo "Rolling back to namespace: $NAMESPACE"
           
           # Ensure namespace exists
@@ -179,11 +196,9 @@ jobs:
           done
 
       - name: Wait for rollout
-        env:
-          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          NAMESPACE="${K8S_NAMESPACE}"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
           echo "Waiting for rollout to complete..."
           
           deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
@@ -200,7 +215,7 @@ jobs:
           ROLLBACK_REF: ${{ github.event.inputs.ref }}
           ACTOR: ${{ github.actor }}
         run: |
-          NAMESPACE="${K8S_NAMESPACE:-essedum}"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"  # from .env.sample
           echo "## ✓ Rollback Successful" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Rolled back to**: \`${ROLLBACK_REF}\`" >> $GITHUB_STEP_SUMMARY

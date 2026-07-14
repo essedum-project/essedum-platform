@@ -319,6 +319,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Load runner-local env (docker/.env.sample)
+        # Sources registry address and credentials from the machine-local file.
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        # ::add-mask:: hides the password value from all log output.
+        run: |
+          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1090
+          source "$ENV_FILE"
+          set +a
+          # Mask password immediately so it never appears in any log line
+          if [ -n "${DOCKER_PASSWORD:-}" ]; then
+            echo "::add-mask::${DOCKER_PASSWORD}"
+          fi
+          # Export to GITHUB_ENV so all subsequent steps in this job can use them
+          echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=${DOCKER_USERNAME:-}" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=${DOCKER_PASSWORD:-}" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "✓ Registry: ${DOCKER_REGISTRY}"
+          echo "✓ Auth: $([ -n "${DOCKER_USERNAME:-}" ] && echo 'yes' || echo 'anonymous')"
+
       - name: Check if rebuild needed
         id: needs_build
         run: |
@@ -348,11 +374,10 @@ jobs:
             CACHE_FILE="$CACHE_DIR/${{ matrix.service }}"
             if [ -f "$CACHE_FILE" ]; then
               LAST_SHA=$(cat "$CACHE_FILE")
-              REGISTRY="${{ secrets.CONTAINER_REGISTRY }}"
               # Verify the cached image actually exists before trusting the cache
               HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                "http://localhost:5001/v2/essedum/${{ matrix.service }}/manifests/${LAST_SHA}" 2>/dev/null || echo "000")
+                "http://${DOCKER_REGISTRY}/v2/${{ matrix.service }}/manifests/${LAST_SHA}" 2>/dev/null || echo "000")
               if [ "$HTTP_STATUS" = "200" ]; then
                 echo "skip=true" >> $GITHUB_OUTPUT
                 echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
@@ -420,22 +445,20 @@ jobs:
         # registry config to be initialised — a step that only runs on the build
         # path. Pure curl works for both localhost (plain HTTP) and remote registries.
         if: steps.needs_build.outputs.skip == 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           set -e
           LAST_SHA="${{ steps.needs_build.outputs.last_sha }}"
           SVC="${{ matrix.service }}"
           NEW_SHA="${{ github.sha }}"
 
-          # Detect protocol: http for localhost/loopback, https for remote
-          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+          # Detect protocol: http for loopback/private ranges, https for remote
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
           fi
 
-          BASE_URL="${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}"
+          BASE_URL="${REG_PROTO}://${DOCKER_REGISTRY}/v2/${SVC}"
 
           # Fetch the manifest bytes and content-type from the source tag
           MANIFEST=$(curl -sf \
@@ -481,15 +504,41 @@ jobs:
             exit 1
           fi
 
+      - name: Clear stale BuildKit cache
+        # Removes stale cache snapshot that may reference files no longer present
+        # (e.g. docker/certs/corp-ca.crt), which causes the BuildKit checksum error.
+        if: steps.needs_build.outputs.skip != 'true'
+        run: |
+          CACHE_DIR="/tmp/buildkit-cache/${{ matrix.service }}"
+          if [ -d "$CACHE_DIR" ]; then
+            rm -rf "$CACHE_DIR"
+            echo "✓ Cleared stale BuildKit cache for ${{ matrix.service }}"
+          else
+            echo "No existing BuildKit cache — nothing to clear"
+          fi
+
+      - name: Write BuildKit registry config
+        # Writes a dynamic toml so BuildKit uses the registry from .env.sample
+        # (replaces the old hardcoded localhost:5001 config-inline).
+        if: steps.needs_build.outputs.skip != 'true'
+        run: |
+          mkdir -p /tmp/buildkitd-configs
+          cat > "/tmp/buildkitd-configs/${{ matrix.service }}.toml" <<EOF
+          [registry."${DOCKER_REGISTRY}"]
+            http = true
+            insecure = true
+          EOF
+          echo "✓ BuildKit config written for ${DOCKER_REGISTRY}"
+
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          # SECURITY: password via env var piped to stdin — never echoed to log.
-          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
+          # Credentials from docker/.env.sample on the runner — no GitHub secrets.
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$DOCKER_REGISTRY"
+          else
+            echo "No DOCKER_USERNAME set — using unauthenticated local registry"
+          fi
 
       - name: Set up Docker Buildx
         # IMPORTANT: the docker-container BuildKit driver runs inside an isolated
@@ -504,10 +553,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         with:
           driver-opts: network=host
-          config-inline: |
-            [registry."localhost:5001"]
-              http = true
-              insecure = true
+          config: /tmp/buildkitd-configs/${{ matrix.service }}.toml
 
       - name: Build and push Docker image
         # Build once in CI and push immediately to the registry.
@@ -518,7 +564,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ secrets.CONTAINER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
+          tags: ${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}
           # SECURITY: Disable provenance attestations and SBOM generation.
           # build-push-action v6 defaults provenance:true which uploads a
           # *.dockerbuild attestation file as a GitHub Actions artifact, making
@@ -546,25 +592,22 @@ jobs:
         # immediately after the push confirms the blob was actually written on disk.
         # Failing here prevents CD from deploying a ghost image that returns 404 at pull time.
         if: steps.needs_build.outputs.skip != 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           SVC="${{ matrix.service }}"
           SHA="${{ github.sha }}"
-          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
           fi
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            "${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}/manifests/${SHA}")
+            "${REG_PROTO}://${DOCKER_REGISTRY}/v2/${SVC}/manifests/${SHA}")
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "✓ ${SVC}:${SHA} verified readable in registry (HTTP 200)"
           else
-            echo "::error::Push silently failed for ${SVC}: manifest GET returned HTTP ${HTTP_STATUS} after a 201 PUT."
+            echo "::error::Push silently failed for ${SVC}: manifest GET returned HTTP ${HTTP_STATUS}"
             echo "::error::Cause: stale revision link in registry storage for this digest."
-            echo "::error::Fix: docker exec local-reg sh -c 'rm -rf /var/lib/registry/docker/registry/v2/repositories/essedum/${SVC}/_manifests/revisions/sha256/<digest>/link'"
             exit 1
           fi
 
@@ -592,7 +635,7 @@ jobs:
           # the registry and does not load the image into the local daemon, so
           # there is no named image to remove here.
           # Logout from registry (login was done in a prior step).
-          docker logout "${{ secrets.CONTAINER_REGISTRY }}" 2>/dev/null || true
+          docker logout "$DOCKER_REGISTRY" 2>/dev/null || true
           # Remove any untagged (dangling) layers accumulated during the build.
           docker image prune -f || true
           # Trim BuildKit local cache entries older than 72 h.
@@ -607,7 +650,7 @@ jobs:
           else
             echo "- Status: **built and pushed**" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${DOCKER_REGISTRY}/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Docker build failure report
         if: failure()
@@ -756,9 +799,5 @@ jobs:
       changed_adk:                      ${{ needs.ci-summary.outputs.changed_adk }}
       changed_vibe:                     ${{ needs.ci-summary.outputs.changed_vibe }}
       changed_workflows:                ${{ needs.ci-summary.outputs.changed_workflows }}
-    secrets:
-      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-      REGISTRY_USERNAME:  ${{ secrets.REGISTRY_USERNAME }}
-      REGISTRY_PASSWORD:  ${{ secrets.REGISTRY_PASSWORD }}
-      K8S_NAMESPACE:      ${{ secrets.K8S_NAMESPACE }}
+    # No secrets forwarded — CD job loads docker/.env.sample from runner machine directly
 

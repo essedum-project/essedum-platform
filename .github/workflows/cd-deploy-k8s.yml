@@ -62,14 +62,10 @@ on:
         type: string
         default: 'false'
     secrets:
-      CONTAINER_REGISTRY:
-        required: true
-      REGISTRY_USERNAME:
-        required: true
-      REGISTRY_PASSWORD:
-        required: true
-      K8S_NAMESPACE:
-        required: false
+      # No credential secrets — registry credentials are loaded from
+      # docker/.env.sample on the self-hosted runner machine.
+      # CONTAINER_REGISTRY (address only, not a credential) kept for the
+      # environment gate name only — not used in run: steps.
   workflow_dispatch: {}
 
 # Only one deployment at a time
@@ -103,6 +99,30 @@ jobs:
           ref: essedum-lfn-v15.0-actions
           fetch-depth: 1
 
+      - name: Load runner-local env (docker/.env.sample)
+        # Sources registry address and credentials from the machine-local file.
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        # ::add-mask:: hides the password value from all log output.
+        run: |
+          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1090
+          source "$ENV_FILE"
+          set +a
+          if [ -n "${DOCKER_PASSWORD:-}" ]; then
+            echo "::add-mask::${DOCKER_PASSWORD}"
+          fi
+          echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=${DOCKER_USERNAME:-}" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=${DOCKER_PASSWORD:-}" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "✓ Registry: ${DOCKER_REGISTRY}"
+          echo "✓ Auth: $([ -n "${DOCKER_USERNAME:-}" ] && echo 'yes' || echo 'anonymous')"
+
       - name: Verify kubeconfig
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
@@ -127,31 +147,27 @@ jobs:
           fi
 
       - name: Create registry pull secret in cluster
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          NAMESPACE="${K8S_NAMESPACE:-essedum}"
-          # Create/update the registry-credentials secret used by all app manifests
-          kubectl create secret docker-registry registry-credentials \
-            --docker-server="$REGISTRY" \
-            --docker-username="$REGISTRY_USERNAME" \
-            --docker-password="$REGISTRY_PASSWORD" \
-            --namespace="$NAMESPACE" \
-            --dry-run=client -o yaml | kubectl apply -f -
-          echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            kubectl create secret docker-registry registry-credentials \
+              --docker-server="$DOCKER_REGISTRY" \
+              --docker-username="$DOCKER_USERNAME" \
+              --docker-password="$DOCKER_PASSWORD" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
+          else
+            echo "No DOCKER_USERNAME — skipping registry-credentials (anonymous/local registry)"
+          fi
 
       - name: Docker logout and image cleanup
         if: always()
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           # SECURITY: Always logout to remove stored registry credentials from
-          # ~/.docker/config.json on the runner VM. This prevents credential
-          # reuse if the runner is compromised between workflow runs.
-          docker logout "$REGISTRY" || true
+          # ~/.docker/config.json on the runner VM.
+          docker logout "$DOCKER_REGISTRY" || true
 
           services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "goose-ui" "goosed")
 
@@ -159,8 +175,8 @@ jobs:
           # No time filter — the build just completed so these images are minutes old
           # and a --filter "until=1h" would silently skip them.
           for svc in "${services[@]}"; do
-            docker rmi "${REGISTRY}/${svc}:${{ github.sha }}" 2>/dev/null || true
-            # Also remove any localhost:5001 daemon copy from this SHA
+            docker rmi "${DOCKER_REGISTRY}/${svc}:${{ github.sha }}" 2>/dev/null || true
+            # Also remove any localhost copy from this SHA
             docker rmi "localhost:5001/${svc}:${{ github.sha }}" 2>/dev/null || true
           done
 
@@ -170,19 +186,12 @@ jobs:
 
       - name: Apply Kubernetes manifests
         env:
-          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
-          # Use the SHA that CI built and pushed. Falls back to github.sha when
-          # triggered manually via workflow_dispatch (inputs.image_tag is empty).
           IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
-          # SECURITY: REGISTRY passed via env so it is never inline-expanded
-          # inside run: shell script text (prevents script injection).
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          NAMESPACE="${K8S_NAMESPACE}"
-          echo "Deploying to namespace: $NAMESPACE"
-
-          # Ensure app namespace exists
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          REGISTRY="$DOCKER_REGISTRY"
+          echo "Deploying to namespace: $NAMESPACE (registry: $REGISTRY)"
           kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
           # Create required system namespaces
@@ -408,11 +417,9 @@ jobs:
           done
 
       - name: Wait for rollout
-        env:
-          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE || 'essedum' }}
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          NAMESPACE="${K8S_NAMESPACE}"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
           # Per-deployment timeouts — default 10m, override per service if needed.
           declare -A ROLLOUT_TIMEOUT
 
@@ -456,7 +463,7 @@ jobs:
       - name: Deployment summary
         if: success()
         run: |
-          NAMESPACE="${{ secrets.K8S_NAMESPACE || 'essedum' }}"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
           echo "## ✓ Deployment Successful" >> $GITHUB_STEP_SUMMARY
           echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
