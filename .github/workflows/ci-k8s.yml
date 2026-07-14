@@ -326,10 +326,9 @@ jobs:
         run: |
           # docker/.env.sample is NOT committed to git (contains credentials).
           # Use the stable runner working copy — never overwritten by git checkout.
-          ENV_FILE="${HOME}/devops/actions/essedum-platform/docker/.env.sample"
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env.sample"
           if [ ! -f "$ENV_FILE" ]; then
             echo "::error::docker/.env.sample not found at $ENV_FILE"
-            echo "::error::Expected at: ${HOME}/devops/actions/essedum-platform/docker/.env.sample"
             exit 1
           fi
           DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
@@ -741,10 +740,9 @@ jobs:
         run: |
           # docker/.env.sample is NOT committed to git (contains credentials).
           # Use the stable runner working copy — never overwritten by git checkout.
-          ENV_FILE="${HOME}/devops/actions/essedum-platform/docker/.env.sample"
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env.sample"
           if [ ! -f "$ENV_FILE" ]; then
             echo "::error::docker/.env.sample not found at $ENV_FILE"
-            echo "::error::Expected at: ${HOME}/devops/actions/essedum-platform/docker/.env.sample"
             exit 1
           fi
           DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
