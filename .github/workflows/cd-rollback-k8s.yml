@@ -65,9 +65,8 @@ jobs:
           fetch-depth: 1
 
       - name: Load runner-local env (docker/.env.sample)
-        # Parses KEY=VALUE lines from env.sample line-by-line.
-        # Skips comments, blank lines, and YAML-style "KEY: VALUE" lines
-        # (exit 127 guard against stale runner files with YAML format).
+        # Uses grep+cut to extract only the 4 needed variables — no shell
+        # expansion of values (safe for keys containing $, #, = etc).
         # NEVER uses GitHub secrets for registry credentials — public repo.
         run: |
           ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
@@ -75,22 +74,23 @@ jobs:
             echo "::error::docker/.env.sample not found at $ENV_FILE"
             exit 1
           fi
-          while IFS= read -r line || [[ -n "$line" ]]; do
-            [[ -z "${line//[[:space:]]/}" ]] && continue
-            [[ "$line" =~ ^[[:space:]]*# ]] && continue
-            if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
-              export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
-            fi
-          done < "$ENV_FILE"
-          if [ -n "${DOCKER_PASSWORD:-}" ]; then
-            echo "::add-mask::${DOCKER_PASSWORD}"
+          DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_USERNAME=$(grep -m1 '^DOCKER_USERNAME=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_PASSWORD=$(grep -m1 '^DOCKER_PASSWORD=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          KUBE_NAMESPACE=$(grep -m1 '^KUBE_NAMESPACE=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          if [ -z "$DOCKER_REGISTRY" ]; then
+            echo "::error::DOCKER_REGISTRY not found in $ENV_FILE"
+            exit 1
           fi
-          echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" >> "$GITHUB_ENV"
-          echo "DOCKER_USERNAME=${DOCKER_USERNAME:-}" >> "$GITHUB_ENV"
-          echo "DOCKER_PASSWORD=${DOCKER_PASSWORD:-}" >> "$GITHUB_ENV"
+          if [ -n "$DOCKER_PASSWORD" ]; then
+            echo "::add-mask::$DOCKER_PASSWORD"
+          fi
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> "$GITHUB_ENV"
           echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
-          echo "✓ Registry: ${DOCKER_REGISTRY}"
-          echo "✓ Auth: $([ -n "${DOCKER_USERNAME:-}" ] && echo 'yes' || echo 'anonymous')"
+          echo "✓ Registry: $DOCKER_REGISTRY"
+          echo "✓ Auth: $([ -n "$DOCKER_USERNAME" ] && echo 'yes' || echo 'anonymous')"
 
       - name: Verify kubeconfig
         run: |
