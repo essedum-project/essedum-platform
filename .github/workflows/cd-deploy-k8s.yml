@@ -1,71 +1,12 @@
 name: CD – Deploy (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-    # Triggers — called by CI (ci-k8s.yml) after build passes on essedum-lfn-v15.0-actions.
-    # Only the 4 secrets this workflow actually uses are forwarded
-    # (public repo: never use secrets: inherit).
-#   workflow_dispatch – emergency manual deploy; requires repo
-#     write-access to trigger from the GitHub UI.
+# REFERENCE FILE — not triggered automatically.
+# Deploy logic is inlined into ci-k8s.yml so CI + CD appear as a
+# single entry in the Actions tab.
+# This file is kept for manual emergency deploys only.
 # ──────────────────────────────────────────────────────────────
 on:
-  workflow_call:
-    # image_tag and changed_* are forwarded from CI's call-cd job.
-    # CD uses image_tag to deploy the exact SHA built by CI (no second build).
-    # changed_* flags let CD skip manifest apply / rollout for unchanged services.
-    inputs:
-      image_tag:
-        description: "Commit SHA of the images built and pushed by CI"
-        required: true
-        type: string
-      changed_backend:
-        required: false
-        type: string
-        default: 'false'
-      changed_frontend:
-        required: false
-        type: string
-        default: 'false'
-      changed_agent_designer_backend:
-        required: false
-        type: string
-        default: 'false'
-      changed_py_executer:
-        required: false
-        type: string
-        default: 'false'
-      changed_py_sagemaker:
-        required: false
-        type: string
-        default: 'false'
-      changed_py_vertex:
-        required: false
-        type: string
-        default: 'false'
-      changed_py_azure:
-        required: false
-        type: string
-        default: 'false'
-      changed_proxy:
-        required: false
-        type: string
-        default: 'false'
-      changed_adk:
-        required: false
-        type: string
-        default: 'false'
-      changed_vibe:
-        required: false
-        type: string
-        default: 'false'
-      changed_workflows:
-        required: false
-        type: string
-        default: 'false'
-    secrets:
-      # No credential secrets — registry credentials are loaded from
-      # docker/.env.sample on the self-hosted runner machine.
-      # CONTAINER_REGISTRY (address only, not a credential) kept for the
-      # environment gate name only — not used in run: steps.
   workflow_dispatch: {}
 
 # Only one deployment at a time

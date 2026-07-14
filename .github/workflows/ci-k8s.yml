@@ -764,40 +764,274 @@ jobs:
           echo "✓ Registry GC complete"
 
   # ────────────────────────────────────────────────────────────
-  # JOB FINAL – Trigger CD after CI passes on source-branch branch
-  # SECURITY:
-  #   – if: requires event==push AND ref==source-branch. PRs (same-repo
-  #     or fork) trigger pull_request, never push – so CD is
-  #     unreachable from any PR path, even if pr-gate is bypassed.
-  #   – Only 4 explicitly named secrets are forwarded (no
-  #     secrets: inherit – public repo, least-privilege).
-  #   – No runs-on: reusable workflow call jobs don’t hold a runner
-  #     while queued, so there is no single-runner deadlock.
+  # JOB FINAL – Deploy (inlined so CI + CD = single Actions tab entry)
+  # Runs only after ci-summary passes on essedum-lfn-v15.0-actions.
+  # cd-deploy-k8s.yml is kept for reference / manual emergency only.
   # ────────────────────────────────────────────────────────────
-  call-cd:
-    name: "Trigger CD – Deploy"
+  deploy:
+    name: "CD – Deploy to Kubernetes"
+    runs-on: [self-hosted, essedum-runner]
     needs: [ci-summary]
     if: |
       github.event_name == 'push' &&
       github.ref == 'refs/heads/essedum-lfn-v15.0-actions' &&
       needs.ci-summary.result == 'success' &&
       needs.ci-summary.outputs.has_any_change == 'true'
-    uses: ./.github/workflows/cd-deploy-k8s.yml
-    with:
-      # Forward the exact SHA that CI built and pushed — CD deploys this tag directly.
-      # No second docker build in CD; images are already in the registry.
-      image_tag:                        ${{ needs.ci-summary.outputs.image_tag }}
-      # Forward which services changed so CD can skip manifests/rollouts for unchanged ones.
-      changed_backend:                  ${{ needs.ci-summary.outputs.changed_backend }}
-      changed_frontend:                 ${{ needs.ci-summary.outputs.changed_frontend }}
-      changed_agent_designer_backend:   ${{ needs.ci-summary.outputs.changed_agent_designer_backend }}
-      changed_py_executer:              ${{ needs.ci-summary.outputs.changed_py_executer }}
-      changed_py_sagemaker:             ${{ needs.ci-summary.outputs.changed_py_sagemaker }}
-      changed_py_vertex:                ${{ needs.ci-summary.outputs.changed_py_vertex }}
-      changed_py_azure:                 ${{ needs.ci-summary.outputs.changed_py_azure }}
-      changed_proxy:                    ${{ needs.ci-summary.outputs.changed_proxy }}
-      changed_adk:                      ${{ needs.ci-summary.outputs.changed_adk }}
-      changed_vibe:                     ${{ needs.ci-summary.outputs.changed_vibe }}
-      changed_workflows:                ${{ needs.ci-summary.outputs.changed_workflows }}
-    # No secrets forwarded — CD job loads docker/.env.sample from runner machine directly
+    timeout-minutes: 90
 
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: essedum-lfn-v15.0-actions
+          fetch-depth: 1
+
+      - name: Load runner-local env (docker/.env.sample)
+        # Sources registry address and credentials from the machine-local file.
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        run: |
+          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          set -a
+          # shellcheck disable=SC1090
+          source "$ENV_FILE"
+          set +a
+          if [ -n "${DOCKER_PASSWORD:-}" ]; then
+            echo "::add-mask::${DOCKER_PASSWORD}"
+          fi
+          echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=${DOCKER_USERNAME:-}" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=${DOCKER_PASSWORD:-}" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "✓ Registry: ${DOCKER_REGISTRY}"
+          echo "✓ Auth: $([ -n "${DOCKER_USERNAME:-}" ] && echo 'yes' || echo 'anonymous')"
+
+      - name: Verify kubeconfig
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo "::error::KUBECONFIG not found at $KUBECONFIG"
+            exit 1
+          fi
+          kubectl cluster-info
+
+      - name: Get cluster context
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          echo "Cluster: $(kubectl config current-context)"
+          echo "Namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
+
+      - name: Create registry pull secret in cluster
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            kubectl create secret docker-registry registry-credentials \
+              --docker-server="$DOCKER_REGISTRY" \
+              --docker-username="$DOCKER_USERNAME" \
+              --docker-password="$DOCKER_PASSWORD" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
+          else
+            echo "No DOCKER_USERNAME — skipping registry-credentials (anonymous/local registry)"
+          fi
+
+      - name: Docker logout and image cleanup
+        if: always()
+        run: |
+          docker logout "$DOCKER_REGISTRY" || true
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "goose-ui" "goosed")
+          for svc in "${services[@]}"; do
+            docker rmi "${DOCKER_REGISTRY}/${svc}:${{ github.sha }}" 2>/dev/null || true
+            docker rmi "localhost:5001/${svc}:${{ github.sha }}" 2>/dev/null || true
+          done
+          docker image prune -f || true
+          echo "✓ Docker logout complete and images cleaned up"
+
+      - name: Apply Kubernetes manifests
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          REGISTRY="$DOCKER_REGISTRY"
+          echo "Deploying to namespace: $NAMESPACE (registry: $REGISTRY)"
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
+
+          echo "=== Verifying container images in registry ==="
+          declare -A svc_changed
+          svc_changed["essedum-api-gateway"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-usm-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-icip-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-data-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-vibe-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-frontend-shell"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-data-ops"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-integration"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-vibe-studio"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent-designer"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["agent-designer-backend"]="${{ needs.ci-summary.outputs.changed_agent_designer_backend }}"
+          svc_changed["py-job-executer"]="${{ needs.ci-summary.outputs.changed_py_executer }}"
+          svc_changed["py-job-sagemaker-executer"]="${{ needs.ci-summary.outputs.changed_py_sagemaker }}"
+          svc_changed["py-job-vertex-executer"]="${{ needs.ci-summary.outputs.changed_py_vertex }}"
+          svc_changed["py-job-azure-executer"]="${{ needs.ci-summary.outputs.changed_py_azure }}"
+          svc_changed["proxy-service"]="${{ needs.ci-summary.outputs.changed_proxy }}"
+          svc_changed["adk-code-builder-deployer"]="${{ needs.ci-summary.outputs.changed_adk }}"
+          svc_changed["vibe-code-builder-deployer"]="${{ needs.ci-summary.outputs.changed_vibe }}"
+          svc_changed["goose-ui"]="true"
+          svc_changed["goosed"]="true"
+
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]] || [[ "$REGISTRY" == 192.168.* ]]; then
+            REG_PROTO="http"
+          else
+            REG_PROTO="https"
+          fi
+
+          missing_images=0
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "goose-ui" "goosed")
+          for svc in "${services[@]}"; do
+            changed="${svc_changed[$svc]}"
+            if [ "$changed" != "true" ]; then
+              echo "  Skipping ${svc} (unchanged – existing deployment untouched)"
+              continue
+            fi
+            echo -n "  Checking ${svc}... "
+            http_status=$(curl -sI -o /dev/null -w "%{http_code}" \
+              -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              "${REG_PROTO}://${REGISTRY}/v2/${svc}/manifests/${IMAGE_TAG}" 2>/dev/null || echo "000")
+            if [ "$http_status" = "200" ]; then
+              echo "✓ Found in registry"
+            else
+              echo "✗ NOT FOUND (HTTP ${http_status}): ${REGISTRY}/${svc}:${IMAGE_TAG}"
+              missing_images=$((missing_images + 1))
+            fi
+          done
+          if [ "$missing_images" -gt 0 ]; then
+            echo "::error::${missing_images} image(s) not found in registry — aborting deployment"
+            exit 1
+          fi
+          echo "✓ All changed-service images verified in registry"
+
+          # ── ingress-nginx (immutable selector: delete + recreate) ──
+          if [ -f "aks-deployment/ingress-nginx-deploy.yaml" ]; then
+            kubectl delete deployment ingress-nginx-controller -n ingress-nginx --ignore-not-found || true
+            sleep 2
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "aks-deployment/ingress-nginx-deploy.yaml" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | kubectl apply -f - || true
+          fi
+
+          # ── MetalLB ──
+          if [ -f "aks-deployment/metallib-config.yaml" ]; then
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "aks-deployment/metallib-config.yaml" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | kubectl apply -f - || true
+          fi
+
+          kubectl delete validatingwebhookconfiguration ingress-nginx-admission --ignore-not-found || true
+
+          echo "Patching ProgressDeadlineSeconds..."
+          for deployment in $(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            kubectl patch deployment "$deployment" -n "$NAMESPACE" --type merge \
+              -p '{"spec":{"progressDeadlineSeconds":900}}' 2>/dev/null || true
+          done
+
+          # ── MySQL first (Keycloak dependency) ──
+          if [ -f "aks-deployment/mysql_deployment_v3.yaml" ]; then
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "aks-deployment/mysql_deployment_v3.yaml" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | kubectl apply -n "$NAMESPACE" -f - || true
+            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=3m || \
+              echo "::warning::MySQL rollout timed out – Keycloak will retry via initContainer"
+          fi
+
+          # ── Keycloak ──
+          if [ -f "aks-deployment/keycloak_deployment.yaml" ]; then
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "aks-deployment/keycloak_deployment.yaml" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | kubectl apply -n "$NAMESPACE" -f - || true
+          fi
+
+          # ── PVC-containing files (data preservation) ──
+          for manifest in "aks-deployment/mysql_file_pv.yaml" "aks-deployment/qdrantfilepv.yaml" "aks-deployment/qdrant_deployment.yaml"; do
+            [ -f "$manifest" ] || continue
+            KUBECTL_ERR=$(mktemp /tmp/kubectl_err.XXXXXX)
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "$manifest" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | \
+              kubectl apply -n "$NAMESPACE" -f - 2>"$KUBECTL_ERR" && APPLY_RC=0 || APPLY_RC=$?
+            if [ "$APPLY_RC" -ne 0 ]; then
+              CLIENT_ERRORS=$(grep -E "^error:" "$KUBECTL_ERR" || true)
+              if [ -n "$CLIENT_ERRORS" ]; then
+                echo "::error::Unexpected error in $manifest:"; cat "$KUBECTL_ERR"; rm -f "$KUBECTL_ERR"; exit 1
+              else
+                echo "  (PV/PVC skipped – already exists, data preserved)"
+              fi
+            fi
+            rm -f "$KUBECTL_ERR"
+          done
+
+          # ── Pre-scale backend for clean restart ──
+          kubectl scale deployment essedum-backend -n "$NAMESPACE" --replicas=0 2>/dev/null || true
+          kubectl wait pods -n "$NAMESPACE" -l app=essedum-backend \
+            --for=delete --timeout=60s 2>/dev/null || true
+
+          # ── Apply all remaining app manifests ──
+          SKIP_FILES=(
+            "aks-deployment/ingress-nginx-deploy.yaml"
+            "aks-deployment/metallib-config.yaml"
+            "aks-deployment/mysql_file_pv.yaml"
+            "aks-deployment/qdrantfilepv.yaml"
+            "aks-deployment/qdrant_deployment.yaml"
+            "aks-deployment/builder-rbac.yml"
+            "aks-deployment/github-runner-rbac.yml"
+            "aks-deployment/mysql_deployment_v3.yaml"
+            "aks-deployment/keycloak_deployment.yaml"
+          )
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            [ -f "$manifest" ] || continue
+            skip=false
+            for sf in "${SKIP_FILES[@]}"; do [ "$manifest" = "$sf" ] && skip=true && break; done
+            $skip && continue
+            echo "Applying: $manifest"
+            sed 's|\${IMAGE_TAG}|'"\${IMAGE_TAG}"'|g' "$manifest" | \
+              sed 's|\${REGISTRY}|'"\${REGISTRY}"'|g' | \
+              kubectl apply -n "$NAMESPACE" -f - || echo "::warning::Failed to apply $manifest, continuing..."
+          done
+
+      - name: Wait for rollout
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          SKIP_ROLLOUT=("github-runner" "builder-service" "buildkitd")
+          deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
+          for deployment in $deployments; do
+            skip=false
+            for sn in "${SKIP_ROLLOUT[@]}"; do [ "$deployment" = "$sn" ] && skip=true && break; done
+            $skip && echo ">>> Skipping $deployment (not CD-managed)" && continue
+            echo ">>> Monitoring $deployment (timeout: 10m)..."
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=10m || \
+              echo "::warning::Rollout timed out for $deployment"
+          done
+          echo "=== Final deployment status ==="
+          kubectl get deployments -n "$NAMESPACE" -o wide
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          echo "## ✓ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
