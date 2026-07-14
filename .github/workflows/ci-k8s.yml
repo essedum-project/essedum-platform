@@ -456,7 +456,7 @@ jobs:
           NEW_SHA="${{ github.sha }}"
 
           # Detect protocol: http for loopback/private ranges, https for remote
-          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]]; then
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]] || [[ "$DOCKER_REGISTRY" == 10.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
@@ -518,6 +518,24 @@ jobs:
             echo "No DOCKER_USERNAME set — using unauthenticated local registry"
           fi
 
+      - name: Prepare backend build context (local-only files)
+        # .crt cert files are NOT committed to git (removed from tracking).
+        # They exist on disk in devopsuser's working copy. Copy them into the
+        # GITHUB_WORKSPACE checkout so docker build can COPY them.
+        if: steps.needs_build.outputs.skip != 'true' && matrix.context == 'sv'
+        run: |
+          DEVOPS_SV="/home/devopsuser/devops/actions/essedum-platform/sv"
+          for svc in usm-service icip-service data-service vibe-service; do
+            src="$DEVOPS_SV/$svc/lfn-keycloak2.crt"
+            dst="$GITHUB_WORKSPACE/sv/$svc/lfn-keycloak2.crt"
+            if [ -f "$src" ]; then
+              cp "$src" "$dst"
+              echo "✓ Copied $svc/lfn-keycloak2.crt"
+            else
+              echo "::warning::$src not found — keytool import will fail for $svc"
+            fi
+          done
+
       - name: Build and push Docker image
         # Plain docker build + docker push — same as local build-and-push.sh.
         # No buildx, no TOML config, no docker-container driver.
@@ -547,7 +565,7 @@ jobs:
         run: |
           SVC="${{ matrix.service }}"
           SHA="${{ github.sha }}"
-          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]]; then
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]] || [[ "$DOCKER_REGISTRY" == 10.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
@@ -866,7 +884,7 @@ jobs:
           svc_changed["goose-ui"]="true"
           svc_changed["goosed"]="true"
 
-          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]] || [[ "$REGISTRY" == 192.168.* ]]; then
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]] || [[ "$REGISTRY" == 192.168.* ]] || [[ "$REGISTRY" == 10.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"

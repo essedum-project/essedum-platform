@@ -9,13 +9,9 @@ WORKDIR /sv
 # Copy project files
 COPY . .
 
-# Copy Maven settings and project settings
-COPY .m2/settings.xml /root/.m2/settings.xml
-COPY .settings /sv/.settings
-
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B -s /root/.m2/settings.xml clean install -pl vibe-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+    mvn -B clean install -pl vibe-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
 RUN mkdir -p /app/conf /app/lib /app/log && \
