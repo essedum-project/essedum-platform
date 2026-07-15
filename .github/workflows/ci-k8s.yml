@@ -781,15 +781,35 @@ jobs:
             echo "::error::DOCKER_REGISTRY not found in $ENV_FILE"
             exit 1
           fi
+          MINIO_ACCESS_KEY=$(grep -m1 '^MINIO_ACCESS_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MINIO_SECRET_KEY=$(grep -m1 '^MINIO_SECRET_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MINIO_ENDPOINT=$(grep -m1 '^MINIO_ENDPOINT=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_URL=$(grep -m1 '^MYSQL_DATASOURCE_URL=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_USER=$(grep -m1 '^MYSQL_DATASOURCE_USER=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_PASSWORD=$(grep -m1 '^MYSQL_DATASOURCE_PASSWORD=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
           if [ -n "$DOCKER_PASSWORD" ]; then
             echo "::add-mask::$DOCKER_PASSWORD"
+          fi
+          if [ -n "$MINIO_SECRET_KEY" ]; then
+            echo "::add-mask::$MINIO_SECRET_KEY"
+          fi
+          if [ -n "$MYSQL_DATASOURCE_PASSWORD" ]; then
+            echo "::add-mask::$MYSQL_DATASOURCE_PASSWORD"
           fi
           echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> "$GITHUB_ENV"
           echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> "$GITHUB_ENV"
           echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> "$GITHUB_ENV"
           echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY" >> "$GITHUB_ENV"
+          echo "MINIO_SECRET_KEY=$MINIO_SECRET_KEY" >> "$GITHUB_ENV"
+          echo "MINIO_ENDPOINT=$MINIO_ENDPOINT" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_URL=$MYSQL_DATASOURCE_URL" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_USER=$MYSQL_DATASOURCE_USER" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_PASSWORD=$MYSQL_DATASOURCE_PASSWORD" >> "$GITHUB_ENV"
           echo "✓ Registry: $DOCKER_REGISTRY"
           echo "✓ Auth: $([ -n "$DOCKER_USERNAME" ] && echo 'yes' || echo 'anonymous')"
+          echo "✓ MinIO endpoint: $MINIO_ENDPOINT"
+          echo "✓ MySQL URL: $MYSQL_DATASOURCE_URL"
 
       - name: Verify kubeconfig
         run: |
@@ -1003,6 +1023,18 @@ jobs:
             "aks-deployment/keycloak_deployment.yaml"
             "aks-deployment/langflow-deployment-with-tls.yaml"
             "aks-deployment/langflow_file_pv.yaml"
+            # Monolithic manifests — do NOT apply in microservices deployment
+            "aks-deployment/essedum-backend.yaml"
+            "aks-deployment/essedum-ui.yaml"
+            "aks-deployment/essedum-ui-service.yaml"
+            "aks-deployment/essedum-ui-hpa.yaml"
+            # Replaced by merged essedum-frontend-ingress.yaml + essedum-frontend-shell-ingress.yaml
+            "aks-deployment/essedum-api-ingress.yaml"
+            "aks-deployment/essedum-frontend-mfe-ingress.yaml"
+            # Secret managed by workflow step, not static YAML
+            "aks-deployment/essedum-minio-secret.yaml"
+            # Old ingress (replaced)
+            "aks-deployment/ingress.yaml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             [ -f "$manifest" ] || continue

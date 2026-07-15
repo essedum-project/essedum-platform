@@ -19,7 +19,7 @@ spec:
         kubernetes.io/hostname: essedum-1
       containers:
         - name: vibe-code-builder
-          image: 10.200.111.51:5001/vibe-code-builder-service:lfn-v15
+          image: ${DOCKER_REGISTRY}/vibe-code-builder-deployer:${IMAGE_TAG}
           imagePullPolicy: Always
           ports:
             - containerPort: 5000

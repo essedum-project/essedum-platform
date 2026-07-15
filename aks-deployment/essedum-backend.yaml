@@ -17,7 +17,7 @@ spec:
       # login.essedum-lfn.infosys.com has no external DNS record; without this
       # the backend cannot fetch the JWK set and JWT validation fails (401).
       hostAliases:
-      - ip: "192.168.28.41"
+      - ip: "10.200.111.51"
         hostnames:
         - "keycloak.essedum.local"
       containers:
@@ -51,7 +51,7 @@ spec:
         - name: VIBE_SERVICE_URL
           value: "http://essedum-backend-vibe-service:8084"
         - name: OAUTH2_JWK_URI
-          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
+          value: "http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: OAUTH2_ISSUER_URI
           value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
 ---

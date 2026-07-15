@@ -26,7 +26,7 @@ spec:
         operator: "Exists"
         effect: "NoSchedule"
       hostAliases:
-      - ip: "192.168.28.41"
+      - ip: "10.200.111.51"
         hostnames:
         - "keycloak.essedum.local"
       containers:
@@ -72,7 +72,7 @@ spec:
         - name: GOOSE_URL
           value: "http://goosed-service:3005"
         - name: OAUTH2_JWK_URI
-          value: "http://keycloak.essedum.svc.cluster.local:8080/realms/ESSEDUM/protocol/openid-connect/certs"
+          value: "http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: OAUTH2_ISSUER_URI
           value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
         ports:
