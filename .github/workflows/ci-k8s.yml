@@ -806,10 +806,14 @@ jobs:
           echo "MYSQL_DATASOURCE_URL=$MYSQL_DATASOURCE_URL" >> "$GITHUB_ENV"
           echo "MYSQL_DATASOURCE_USER=$MYSQL_DATASOURCE_USER" >> "$GITHUB_ENV"
           echo "MYSQL_DATASOURCE_PASSWORD=$MYSQL_DATASOURCE_PASSWORD" >> "$GITHUB_ENV"
+          INGRESS_HOST=$(grep -m1 '^INGRESS_HOST=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          INGRESS_HOST=${INGRESS_HOST:-essedum.local}
+          echo "INGRESS_HOST=$INGRESS_HOST" >> "$GITHUB_ENV"
           echo "✓ Registry: $DOCKER_REGISTRY"
           echo "✓ Auth: $([ -n "$DOCKER_USERNAME" ] && echo 'yes' || echo 'anonymous')"
           echo "✓ MinIO endpoint: $MINIO_ENDPOINT"
           echo "✓ MySQL URL: $MYSQL_DATASOURCE_URL"
+          echo "✓ Ingress host: $INGRESS_HOST"
 
       - name: Verify kubeconfig
         run: |
@@ -1035,6 +1039,11 @@ jobs:
             "aks-deployment/essedum-minio-secret.yaml"
             # Old ingress (replaced)
             "aks-deployment/ingress.yaml"
+            # Cross-namespace resources — must be applied with their own namespace, not aipns
+            "aks-deployment/vibe-agents-rbac.yaml"
+            "aks-deployment/vibe-apps-rbac.yaml"
+            "aks-deployment/vibe-mcp-rbac.yaml"
+            "aks-deployment/builder-deployment.yml"
           )
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             [ -f "$manifest" ] || continue
@@ -1044,6 +1053,7 @@ jobs:
             echo "Applying: $manifest"
             sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
                 -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                -e 's|\${INGRESS_HOST}|'"${INGRESS_HOST}"'|g' \
                 "$manifest" | \
               kubectl apply -n "$NAMESPACE" -f - || echo "::warning::Failed to apply $manifest, continuing..."
           done

@@ -504,6 +504,7 @@ spec:
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
+        kubernetes.io/hostname: essedum-1
       serviceAccountName: ingress-nginx
       terminationGracePeriodSeconds: 300
       volumes:
