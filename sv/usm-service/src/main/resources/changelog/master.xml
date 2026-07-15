@@ -98,6 +98,7 @@
 
 	<include file="changelog/telemetry.xml" context="fresh" />
 	<include file="changelog/vibe/vibe_github_config.xml" context="fresh" />
+	<include file="changelog/icip/icip_skill_registry.xml" context="fresh" />
 	<include file="changelog/aip/icip_skill_registry_permissions.xml" context="fresh" />
 
 </databaseChangeLog>
