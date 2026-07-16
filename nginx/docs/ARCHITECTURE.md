@@ -44,9 +44,25 @@ graph LR
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Spring Boot backend | Upstream (HTTP/WS) | Receives all `/api/**` traffic and WebSocket connections |
+```mermaid
+graph LR
+    NGX["Nginx :8084"]
+
+    subgraph Upstream
+        BE["Spring Boot Backend\n:8080"]
+    end
+
+    subgraph LocalFiles
+        DIST["Angular dist/ folders"]
+        TLS_CERT["TLS Certificates"]
+    end
+
+    NGX -->|proxy /api/**| BE
+    NGX -->|serve static files| DIST
+    NGX -->|terminate TLS| TLS_CERT
+```
+
+ Receives all `/api/**` traffic and WebSocket connections |
 | Angular `dist/` folders | Local filesystem | Source of all static files served to browsers |
 | TLS certificates | Local filesystem | Certificate + key files for HTTPS termination |
 

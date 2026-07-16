@@ -49,9 +49,27 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| MySQL (`essedum_vibe`) | Internal DB | Sessions, recipes, schedules, system config, GitHub OAuth token references |
+```mermaid
+graph LR
+    VIBE["Vibe Service"]
+
+    subgraph Databases
+        DB[("MySQL\nessedum_vibe")]
+    end
+
+    subgraph External
+        GOOSE["Goose AI Engine\nHTTP / SSE stream"]
+        GH["GitHub API\npush · PR · branch"]
+        VAULT["Vault / Azure KV\nOAuth token storage"]
+    end
+
+    VIBE --> DB
+    VIBE -->|relay prompts| GOOSE
+    VIBE -->|push code / PR| GH
+    VIBE -->|store / fetch tokens| VAULT
+```
+
+ Sessions, recipes, schedules, system config, GitHub OAuth token references |
 | Goose AI Engine | External (HTTP/Stream) | Receives coding prompts; streams back generated code and explanations |
 | GitHub API | External (HTTP) | Push code, create branches, open pull requests, list repos |
 | Vault / Azure Key Vault | External (HTTP) | Store and retrieve GitHub OAuth access tokens |

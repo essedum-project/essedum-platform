@@ -39,9 +39,25 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Kubernetes API (`kubernetes` SDK) | Internal (in-cluster) | List/get/delete pods and deployments, stream pod logs |
+```mermaid
+graph LR
+    VPW["Vibe Pod Watcher"]
+
+    subgraph K8sAPI
+        K8S["Kubernetes API\nCoreV1Api · AppsV1Api"]
+    end
+
+    subgraph Namespaces
+        VA["vibe-apps"]
+        VM["vibe-mcp"]
+        VG["vibe-agents"]
+    end
+
+    VPW -->|list / delete / stream logs| K8S
+    K8S --- VA & VM & VG
+```
+
+ List/get/delete pods and deployments, stream pod logs |
 | Kubernetes namespaces (`vibe-apps`, `vibe-mcp`, `vibe-agents`) | Internal | Target namespaces for all K8s operations |
 
 No external services or databases. All state is read from the Kubernetes API.

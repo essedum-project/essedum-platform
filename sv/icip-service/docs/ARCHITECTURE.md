@@ -69,9 +69,43 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| MySQL (`essedum_core`) | Internal DB | Pipelines, jobs, events, agents, plugins, execution history |
+```mermaid
+graph LR
+    ICIP["ICIP Service"]
+
+    subgraph Databases
+        DB1[("MySQL\nessedum_core")]
+        DB2[("MySQL\nQuartz DB")]
+        DB3[("MySQL\nModel DB")]
+    end
+
+    subgraph Executors
+        PY["Python Executors"]
+    end
+
+    subgraph CloudML
+        SM["AWS SageMaker"]
+        VX["GCP Vertex AI"]
+        AZ["Azure ML"]
+    end
+
+    subgraph LLM
+        LLM_API["LLM APIs\nOpenAI · Bedrock · Gemini"]
+    end
+
+    subgraph Messaging
+        KAFKA["Kafka"]
+        RABBIT["RabbitMQ"]
+    end
+
+    ICIP --> DB1 & DB2 & DB3
+    ICIP -->|submit jobs| PY
+    PY --> SM & VX & AZ
+    ICIP -->|code gen| LLM_API
+    ICIP -->|publish / consume| KAFKA & RABBIT
+```
+
+ Pipelines, jobs, events, agents, plugins, execution history |
 | MySQL (Quartz DB) | Internal DB | Quartz job scheduler state — triggers, misfire records |
 | MySQL (Model DB) | Internal DB | Model registry, model versions, deployed endpoints |
 | Python Executors | Internal services | Run the actual Python pipeline code in isolated processes |

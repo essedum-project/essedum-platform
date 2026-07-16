@@ -39,6 +39,29 @@ graph TB
 
 ## 2. Dependency Map
 
+```mermaid
+graph LR
+    VCB["Vibe Code Builder"]
+
+    subgraph K8s
+        K8S_API["Kubernetes API"]
+        REG["In-Cluster Registry\nClusterIP :5000"]
+    end
+
+    subgraph Build
+        BK["BuildKit daemon\ntcp://buildkitd:1234"]
+    end
+
+    subgraph Storage
+        S3_MINIO["AWS S3 / MinIO\nSource archives"]
+    end
+
+    VCB -->|deploy| K8S_API
+    VCB -->|build image| BK
+    BK -->|push image| REG
+    VCB -->|download source| S3_MINIO
+```
+
 | Dependency | Type | Purpose |
 |---|---|---|
 | Kubernetes API | Internal (in-cluster) | Create/delete Deployments, Services, Secrets |

@@ -50,9 +50,32 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Essedum Backend | External (HTTPS) | Pipeline list, job submission, execution status and logs |
+```mermaid
+graph LR
+    EXT["VS Code Extension"]
+
+    subgraph Remote
+        BE["Essedum Backend\nREST API :8080"]
+        KC["Keycloak\nOIDC / OAuth2"]
+    end
+
+    subgraph VSCodeAPIs
+        SECRET["VS Code SecretStorage\nToken persistence"]
+        WV["VS Code WebviewProvider\nSidebar UI"]
+    end
+
+    subgraph Local
+        CALLBACK["Local HTTP Server\nlocalhost:8085\nOAuth callback"]
+    end
+
+    EXT -->|pipeline API calls| BE
+    EXT -->|PKCE auth flow| KC
+    KC -->|redirect with code| CALLBACK
+    EXT -->|store tokens| SECRET
+    EXT -->|render UI| WV
+```
+
+ Pipeline list, job submission, execution status and logs |
 | Keycloak | External (HTTPS) | OAuth 2.0 authorization endpoint and token endpoint |
 | VS Code `SecretStorage` | VS Code API | Secure token persistence — survives VS Code restarts |
 | VS Code `WebviewProvider` | VS Code API | Sidebar UI rendering |

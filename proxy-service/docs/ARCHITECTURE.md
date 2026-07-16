@@ -33,9 +33,20 @@ graph LR
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Kubernetes cluster DNS | Internal (DNS) | Resolve `{service}.{namespace}.svc.cluster.local` to pod IP |
+```mermaid
+graph LR
+    PROXY["Proxy Service :8000"]
+
+    subgraph K8sCluster
+        DNS["Cluster DNS\n{service}.{ns}.svc.cluster.local"]
+        PODS["Target Pod Services\nHTTP / WebSocket"]
+    end
+
+    PROXY -->|resolve| DNS
+    PROXY -->|proxy requests| PODS
+```
+
+ Resolve `{service}.{namespace}.svc.cluster.local` to pod IP |
 | Target pod services | Internal (HTTP/WS) | Upstream endpoints for proxied requests |
 
 The service has **no database, no authentication module, and no external dependencies** beyond the Kubernetes cluster network.

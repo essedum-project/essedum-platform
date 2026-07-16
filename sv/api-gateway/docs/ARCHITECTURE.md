@@ -46,9 +46,31 @@ graph LR
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Keycloak | External (HTTP) | JWK Set URI — fetch public keys to verify JWT signatures |
+```mermaid
+graph LR
+    GW["API Gateway"]
+
+    subgraph Auth
+        KC["Keycloak\nJWK Set URI"]
+    end
+
+    subgraph Discovery
+        EUR["Eureka\nService Registry"]
+    end
+
+    subgraph Downstream
+        USM["USM Service\n/api/usm/** /api/authenticate"]
+        ICIP["ICIP Service\n/api/aip/** /api/event/**"]
+        DATA["Data Service\n/api/data/** /api/file/**"]
+        VIBE["Vibe Service\n/api/vibe/** /api/goose/**"]
+    end
+
+    GW -->|validate tokens| KC
+    GW <-->|register / discover| EUR
+    GW -->|route| USM & ICIP & DATA & VIBE
+```
+
+ — fetch public keys to verify JWT signatures |
 | Eureka | Internal (HTTP) | Resolve current IP:port for each downstream service |
 | USM Service | Downstream | Receives `/api/usm/**` and `/api/authenticate` traffic |
 | ICIP Service | Downstream | Receives `/api/icip/**`, `/api/aip/**`, `/api/event/**` traffic |

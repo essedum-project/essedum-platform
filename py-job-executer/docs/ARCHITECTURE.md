@@ -62,9 +62,32 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| SQLite (`/data/app.db`) | Local file | Job state persistence — status, timestamps, PID, log path |
+```mermaid
+graph LR
+    PY["Python Executor"]
+
+    subgraph Local
+        DB[("SQLite\n/data/app.db")]
+        FS["Local Filesystem"]
+        CFG["conf/conf.ini"]
+    end
+
+    subgraph Storage
+        MINIO["MinIO"]
+        S3["AWS S3"]
+    end
+
+    subgraph Optional
+        TR["Task Retriever\nmodule (optional)"]
+    end
+
+    PY --> DB & FS & CFG
+    PY -->|minio jobs| MINIO
+    PY -->|s3 jobs| S3
+    PY -.->|if enabled| TR
+```
+
+ Job state persistence — status, timestamps, PID, log path |
 | Local filesystem | Local | Pipeline script execution, log files, output artifacts for `storage=local` jobs |
 | MinIO | External (HTTP) | Input artifact download and output artifact upload for `storage=minio` jobs |
 | AWS S3 | External (HTTPS/SDK) | Input artifact download and output artifact upload for `storage=s3` jobs |
