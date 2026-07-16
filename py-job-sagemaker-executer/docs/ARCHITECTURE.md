@@ -39,9 +39,25 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| AWS SageMaker SDK (`sagemaker`) | External (HTTPS/SDK) | Training jobs, AutoML, endpoints, model registry, inference |
+```mermaid
+graph LR
+    SM_EXEC["SageMaker Executor"]
+
+    subgraph AWS
+        SM["AWS SageMaker\nTraining · AutoML · Endpoints"]
+        S3["AWS S3\nDatasets · Artifacts"]
+    end
+
+    subgraph Local
+        DB[("SQLite\n/data/app.db")]
+        CFG["conf/conf.ini"]
+    end
+
+    SM_EXEC --> SM & S3
+    SM_EXEC --> DB & CFG
+```
+
+ Training jobs, AutoML, endpoints, model registry, inference |
 | AWS S3 (`boto3`) | External (HTTPS/SDK) | Dataset storage, artifact upload/download |
 | SQLite (`/data/app.db`) | Local file | Job state persistence |
 | `conf/conf.ini` | Local file | Thread count, working directory |

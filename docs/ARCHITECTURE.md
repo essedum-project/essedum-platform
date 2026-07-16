@@ -12,7 +12,7 @@
 3. [Backend Microservices Architecture](#3-backend-microservices-architecture)
 4. [Authentication & Authorization Flow](#4-authentication--authorization-flow)
 5. [AI/ML Infrastructure](#5-aiml-infrastructure)
-6. [Python Job Executor Layer](#6-python-job-executor-layer)
+6. [Python Job Executor Layer](#6-python-job-executor-layer) — see [JOB-EXECUTOR-ARCHITECTURE.md](JOB-EXECUTOR-ARCHITECTURE.md)
 7. [Data & Storage Layer](#7-data--storage-layer)
 8. [Developer Tooling & Code Build Pipeline](#8-developer-tooling--code-build-pipeline)
 9. [Deployment Topology (Docker Compose)](#9-deployment-topology-docker-compose)
@@ -403,6 +403,8 @@ graph LR
 ---
 
 ## 6. Python Job Executor Layer
+
+> Full cross-cutting architecture for the executor layer — functional role, common design pattern, executor variants, selection logic, artifact flow, and deployment: **[JOB-EXECUTOR-ARCHITECTURE.md](JOB-EXECUTOR-ARCHITECTURE.md)**.
 
 ```mermaid
 graph TB
@@ -1046,7 +1048,15 @@ Detailed architecture for each service — internal component diagrams, dependen
 |---|---|
 | Agent Designer Backend | [agent-designer-backend/docs/ARCHITECTURE.md](../agent-designer-backend/docs/ARCHITECTURE.md) |
 
+### Frontend
+
+| Service | Architecture Doc |
+|---|---|
+| Essedum UI (Angular MFE Shell) | [essedum-ui/docs/ARCHITECTURE.md](../essedum-ui/docs/ARCHITECTURE.md) |
+
 ### Python Job Executors
+
+> Cross-cutting architecture covering the executor layer as a whole, executor selection logic, artifact flow, and deployment: **[JOB-EXECUTOR-ARCHITECTURE.md](JOB-EXECUTOR-ARCHITECTURE.md)**
 
 | Service | Architecture Doc |
 |---|---|

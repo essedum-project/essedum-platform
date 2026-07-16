@@ -60,9 +60,33 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Azure ML (`azureml-core`, `azure-ai-ml`) | External (HTTP/SDK) | Submit training experiments, manage datasets and models, deploy batch endpoints |
+```mermaid
+graph LR
+    AZ_EXEC["Azure ML Executor"]
+
+    subgraph Azure
+        AML["Azure ML\nTraining · Endpoints"]
+        AAD["Azure AD\nOAuth2 tokens"]
+    end
+
+    subgraph Local
+        DB[("SQLite\n/data/app.db")]
+        FS["Local Filesystem\n/temp/Jobs/"]
+        CFG["conf/conf.ini"]
+    end
+
+    subgraph PerJobDatabases
+        MYSQL_EXT["MySQL (per-job)"]
+        PG_EXT["PostgreSQL (per-job)"]
+    end
+
+    AZ_EXEC --> AML
+    AZ_EXEC -->|get token| AAD
+    AZ_EXEC --> DB & FS & CFG
+    AZ_EXEC -->|datasource| MYSQL_EXT & PG_EXT
+```
+
+ Submit training experiments, manage datasets and models, deploy batch endpoints |
 | Azure AD | External (HTTPS) | OAuth2 client-credentials token exchange for Azure ML API authentication |
 | SQLite (`/data/app.db`) | Local file | Job state persistence — status, timestamps, PID, log path |
 | MySQL (external, per-job) | External (TCP) | Pipeline input data, sourced from job payload credentials |

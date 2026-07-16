@@ -39,9 +39,25 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| GCP Vertex AI SDK (`google-cloud-aiplatform`) | External (HTTPS/SDK) | Training jobs, AutoML, endpoints, model registry |
+```mermaid
+graph LR
+    VX_EXEC["Vertex AI Executor"]
+
+    subgraph GCP
+        VX["GCP Vertex AI\nTraining · AutoML · Endpoints"]
+        GCS["Google Cloud Storage\nDatasets · Artifacts"]
+    end
+
+    subgraph Local
+        DB[("SQLite\n/data/app.db")]
+        CFG["conf/conf.ini"]
+    end
+
+    VX_EXEC --> VX & GCS
+    VX_EXEC --> DB & CFG
+```
+
+ Training jobs, AutoML, endpoints, model registry |
 | Google Cloud Storage | External (HTTPS/SDK) | Dataset and artifact storage |
 | SQLite (`/data/app.db`) | Local file | Base job state persistence |
 | `conf/conf.ini` | Local file | Thread count, working directory |

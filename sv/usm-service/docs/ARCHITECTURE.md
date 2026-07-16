@@ -44,9 +44,34 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| MySQL (`essedum_usm`) | Internal DB | Stores users, roles, permissions, organisations, projects, notifications |
+```mermaid
+graph LR
+    USM["USM Service"]
+
+    subgraph Databases
+        DB[("MySQL\nessedum_usm")]
+    end
+
+    subgraph External
+        KC["Keycloak\nOAuth2 / OIDC"]
+        VAULT["Vault / Azure KV\nSecrets"]
+        EMAIL["SMTP\nEmail Provider"]
+    end
+
+    subgraph Libraries
+        LIB1["comm-lib-util"]
+        LIB2["comm-lib-secrets"]
+        LIB3["common-lib-rest"]
+    end
+
+    USM --> DB
+    USM --> KC
+    USM --> VAULT
+    USM --> EMAIL
+    USM -.->|uses| LIB1 & LIB2 & LIB3
+```
+
+ Stores users, roles, permissions, organisations, projects, notifications |
 | Keycloak | External (HTTP) | OAuth2 / OIDC token exchange; federates external IdPs (LDAP, SAML) |
 | HashiCorp Vault / Azure KV | External (HTTP) | Read and write secrets (API keys, cloud credentials) |
 | Email Provider (SMTP) | External | Send password-reset and account-invite emails |

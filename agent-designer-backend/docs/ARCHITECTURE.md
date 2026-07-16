@@ -81,9 +81,38 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| PostgreSQL | External DB | Production relational store for flows, executions, logs, knowledge bases, documents, memory |
+```mermaid
+graph LR
+    ADB["Agent Designer Backend"]
+
+    subgraph Databases
+        PG[("PostgreSQL\nproduction")]
+        SQ[("SQLite\nlocal dev")]
+    end
+
+    subgraph VectorStore
+        QD["Qdrant\nRAG embeddings"]
+    end
+
+    subgraph LLMProviders
+        OAI["Azure OpenAI"]
+        BEDROCK["AWS Bedrock"]
+        VERTEX["GCP Vertex AI"]
+        OLLAMA["Ollama\nlocal"]
+    end
+
+    subgraph Tools
+        MCP["MCP Servers\nHTTP / SSE"]
+    end
+
+    ADB --> PG
+    ADB -.->|dev only| SQ
+    ADB -->|embed / retrieve| QD
+    ADB -->|chat / embed| OAI & BEDROCK & VERTEX & OLLAMA
+    ADB -->|tool discovery| MCP
+```
+
+ Production relational store for flows, executions, logs, knowledge bases, documents, memory |
 | SQLite (`aiosqlite`) | Local file | Default DB for local development — same schema, no external service required |
 | Qdrant | External (HTTP/gRPC) | Vector store for document embeddings and RAG retrieval |
 | Azure OpenAI | External (HTTPS) | LLM chat and embedding via Azure-hosted OpenAI models |

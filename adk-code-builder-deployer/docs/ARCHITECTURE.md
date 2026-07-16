@@ -44,6 +44,34 @@ graph TB
 
 ## 2. Dependency Map
 
+```mermaid
+graph LR
+    ADK["ADK Code Builder"]
+
+    subgraph K8s
+        K8S_API["Kubernetes API"]
+        REG["In-Cluster Registry"]
+    end
+
+    subgraph Build
+        BK["BuildKit daemon\ntcp://buildkitd:1234"]
+    end
+
+    subgraph Storage
+        S3_MINIO["AWS S3 / MinIO\nSource archives"]
+    end
+
+    subgraph Docker
+        DOCK["Docker API\nDocker mode only"]
+    end
+
+    ADK -->|deploy| K8S_API
+    ADK -->|build image| BK
+    BK -->|push image| REG
+    ADK -->|download source| S3_MINIO
+    ADK -.->|Docker mode| DOCK
+```
+
 | Dependency | Type | Purpose |
 |---|---|---|
 | Kubernetes API | Internal (in-cluster) | Create/delete Deployments, Services, Secrets |

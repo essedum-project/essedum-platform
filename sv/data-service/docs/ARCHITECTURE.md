@@ -73,9 +73,39 @@ graph TB
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| MySQL (`essedum_data`) | Internal DB | File metadata, dataset definitions, datasource configs, schema registry |
+```mermaid
+graph LR
+    DATA["Data Service"]
+
+    subgraph Databases
+        DB[("MySQL\nessedum_data")]
+    end
+
+    subgraph Storage
+        FS["Local Filesystem"]
+        S3["AWS S3 / MinIO"]
+        AZURE_BLOB["Azure Blob Storage"]
+    end
+
+    subgraph AdapterTargets
+        MYSQL_EXT["MySQL (external)"]
+        PG_EXT["PostgreSQL (external)"]
+        REST_EXT["REST APIs"]
+        GCS["GCP Cloud Storage"]
+        ML_CLOUD["SageMaker / Vertex AI"]
+    end
+
+    subgraph Messaging
+        MQ["Kafka / RabbitMQ"]
+    end
+
+    DATA --> DB
+    DATA -->|file storage| FS & S3 & AZURE_BLOB
+    DATA -->|adapters| MYSQL_EXT & PG_EXT & REST_EXT & GCS & ML_CLOUD
+    DATA -->|stream| MQ
+```
+
+ File metadata, dataset definitions, datasource configs, schema registry |
 | Local Filesystem | Storage | Binary file storage in single-node / Docker deployments |
 | AWS S3 / MinIO | Storage | Object storage for cloud / Kubernetes deployments |
 | Azure Blob Storage | Storage | Object storage for Azure-hosted deployments |

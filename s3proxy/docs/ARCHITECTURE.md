@@ -37,9 +37,27 @@ graph LR
 
 ## 2. Dependency Map
 
-| Dependency | Type | Purpose |
-|---|---|---|
-| Local filesystem | Local | Object storage backend for local/Docker deployments |
+```mermaid
+graph LR
+    S3P["S3Proxy"]
+
+    subgraph Backends
+        FS["Local Filesystem"]
+        AZURE["Azure Blob Storage"]
+        GCS["GCP Cloud Storage"]
+    end
+
+    subgraph Config
+        CONF["s3proxy.conf"]
+    end
+
+    S3P -->|local / Docker| FS
+    S3P -->|Azure deployment| AZURE
+    S3P -->|GCP deployment| GCS
+    S3P -.->|reads| CONF
+```
+
+ Object storage backend for local/Docker deployments |
 | Azure Blob Storage | External (HTTPS) | Object storage backend for Azure deployments |
 | GCP Cloud Storage | External (HTTPS) | Object storage backend for GCP deployments |
 | `s3proxy.conf` | Local file | All configuration: endpoint, auth mode, backend type, credentials |
