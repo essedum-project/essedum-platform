@@ -8,8 +8,8 @@ Essedum is a modular, microservices-based framework designed to simplify the dev
 
 | Document | Description |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Full platform architecture with Mermaid diagrams — components, data flow, deployment topology |
-| [SCOPE.md](SCOPE.md) | Business objectives, functional requirements, and non-functional requirements |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full platform architecture with Mermaid diagrams — components, data flow, deployment topology |
+| [SCOPE.md](docs/SCOPE.md) | Business objectives, functional requirements, and non-functional requirements |
 | [MICROSERVICES_DECOMPOSITION.md](MICROSERVICES_DECOMPOSITION.md) | Microservices decomposition strategy, migration plan, and service boundaries |
 | [USER_GUIDE.md](USER_GUIDE.md) | Step-by-step guide to building AI applications on the platform |
 | [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes per version |
