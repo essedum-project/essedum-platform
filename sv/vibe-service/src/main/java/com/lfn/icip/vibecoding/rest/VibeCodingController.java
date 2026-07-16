@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,6 +21,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.lfn.icip.vibecoding.service.SalusService;
+import com.lfn.icip.vibecoding.service.SalusService.SalusResult;
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
 /**
@@ -38,6 +41,7 @@ public class VibeCodingController {
     private static final Logger logger = LoggerFactory.getLogger(VibeCodingController.class);
 
     private final VibeCodingService vibeCodingService;
+    private final SalusService salusService;
 
     @Value("${vibe.azure.openai.endpoint}")
     private String azureOpenAiEndpoint;
@@ -51,8 +55,9 @@ public class VibeCodingController {
     @Value("${vibe.azure.openai.api-key}")
     private String azureOpenAiApiKey;
 
-    public VibeCodingController(VibeCodingService vibeCodingService) {
+    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService) {
         this.vibeCodingService = vibeCodingService;
+        this.salusService = salusService;
     }
 
     // =========================================================================
@@ -239,17 +244,36 @@ public class VibeCodingController {
 
     /**
      * Send a message to the Goose agent and receive an SSE stream of MessageEvents.
+     * Input is screened by Salus before being forwarded to Goose.
      */
     @PostMapping(value = "/reply",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter reply(@RequestBody Map<String, Object> request) {
         logger.info("Reply SSE request, session_id={}", request.get("session_id"));
+
+        String userText = salusService.extractUserText(request);
+        SalusResult inputResult = salusService.checkInput(userText);
+        if (inputResult.blocked()) {
+            logger.warn("Salus blocked SSE reply — reason: {}", inputResult.reason());
+            SseEmitter blocked = new SseEmitter(10_000L);
+            try {
+                String json = "{\"type\":\"error\",\"message\":\"Your message was blocked by the responsible AI policy.\","
+                        + "\"reason\":" + jsonString(inputResult.reason()) + "}";
+                blocked.send(SseEmitter.event().data(json, MediaType.APPLICATION_JSON));
+                blocked.complete();
+            } catch (Exception ex) {
+                blocked.completeWithError(ex);
+            }
+            return blocked;
+        }
+
         return vibeCodingService.ssePost("/reply", request);
     }
 
     /**
      * Queue a reply request in a session (async, non-streaming).
+     * Both input and output are screened by Salus.
      */
     @PostMapping(value = "/sessions/{sessionId}/reply",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -258,7 +282,29 @@ public class VibeCodingController {
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Session reply request, session={}", sessionId);
-        return vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
+
+        String userText = salusService.extractUserText(request);
+        SalusResult inputResult = salusService.checkInput(userText);
+        if (inputResult.blocked()) {
+            logger.warn("Salus blocked session reply input — session={} reason={}", sessionId, inputResult.reason());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"Content blocked by responsible AI policy\","
+                            + "\"reason\":" + jsonString(inputResult.reason()) + "}");
+        }
+
+        ResponseEntity<String> response = vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
+
+        SalusResult outputResult = salusService.checkOutput(response.getBody());
+        if (outputResult.blocked()) {
+            logger.warn("Salus blocked session reply output — session={} reason={}", sessionId, outputResult.reason());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"Response blocked by responsible AI policy\","
+                            + "\"reason\":" + jsonString(outputResult.reason()) + "}");
+        }
+
+        return response;
     }
 
     /**
@@ -282,5 +328,11 @@ public class VibeCodingController {
     public SseEmitter sessionEvents(@PathVariable(value = "sessionId") String sessionId) {
         logger.info("Session events SSE request, session={}", sessionId);
         return vibeCodingService.sseGet("/sessions/" + sessionId + "/events");
+    }
+
+    /** Escapes a string for embedding as a JSON string value. */
+    private static String jsonString(String s) {
+        if (s == null) return "null";
+        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 }
