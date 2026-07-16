@@ -1,6 +1,6 @@
 # AKS Deployment — Architecture & Reference
 
-> **Full deployment architecture details** (namespace topology, ingress routing, HPA, persistent volumes, secrets, registry): [docs/K8DEPLOYMENT.md](../docs/K8DEPLOYMENT.md)
+> **Full deployment architecture details** (namespace topology, ingress routing, HPA, persistent volumes, secrets, registry): [K8DEPLOYMENT.md](K8DEPLOYMENT.md)
 
 This file serves as a quick reference for the manifest files in this directory.
 
