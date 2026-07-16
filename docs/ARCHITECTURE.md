@@ -668,7 +668,8 @@ sequenceDiagram
     GW->>USM: Forward + user claims in headers
     USM->>USM: Resolve permissions for user roles
     USM-->>GW: 200 OK [users]
-    GW-->>NGX-->>B: 200 OK [users]
+    GW-->>NGX: 200 OK [users]
+    NGX-->>B: 200 OK [users]
 ```
 
 ---
@@ -696,7 +697,8 @@ sequenceDiagram
     EXEC-->>ICIP: 200 OK {task_id}
     EXEC->>DATA: GET /api/data/files/{inputArtifactId} (download input)
     DATA->>MINIO: Fetch object
-    MINIO-->>DATA-->>EXEC: Input file bytes
+    MINIO-->>DATA: Input file bytes
+    DATA-->>EXEC: Input file bytes
     EXEC->>EXEC: Run pipeline subprocess
     EXEC->>MINIO: Upload output artifacts
     EXEC->>ICIP: Status poll response: COMPLETED
@@ -758,7 +760,7 @@ sequenceDiagram
     participant LITELLM as LiteLLM
     participant LLM as LLM Provider
 
-    Note over UI,LLM: Part 1 — Document Ingestion
+    Note over UI,LLM: Part 1 - Document Ingestion
     UI->>GW: POST /api/data/knowledge-bases/{kb}/documents (file upload)
     GW->>DATA: Forward
     DATA->>DATA: Chunk document (background task)
@@ -769,7 +771,7 @@ sequenceDiagram
     DATA->>QDRANT: Upsert vectors (collection=kb_id)
     DATA-->>UI: 202 Accepted
 
-    Note over UI,LLM: Part 2 — RAG Query at Pipeline Execution
+    Note over UI,LLM: Part 2 - RAG Query at Pipeline Execution
     ICIP->>ICIP: Execute RAG node in pipeline
     ICIP->>DATA: POST /api/data/rag/query {kb_id, query, top_k}
     DATA->>LITELLM: POST /embeddings {query_text}
@@ -780,7 +782,8 @@ sequenceDiagram
     DATA-->>ICIP: {chunks, sources}
     ICIP->>LITELLM: POST /chat/completions {prompt + chunks as context}
     LITELLM->>LLM: Chat completion
-    LLM-->>LITELLM-->>ICIP: LLM response
+    LLM-->>LITELLM: LLM response
+    LITELLM-->>ICIP: LLM response
     ICIP-->>UI: Pipeline output with RAG-grounded answer
 ```
 
