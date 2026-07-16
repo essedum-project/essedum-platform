@@ -760,7 +760,7 @@ sequenceDiagram
     KC-->>B: Redirect with auth code
     B->>KC: Exchange code for tokens
     KC-->>B: access_token + refresh_token
-    Note over B: Angular stores token; all subsequent calls carry Bearer header
+    Note over B: Angular stores token, all subsequent calls carry Bearer header
     B->>NGX: GET /api/usm/users (Bearer token)
     NGX->>GW: Forward
     GW->>KC: Validate token (JWK Set URI — cached)
