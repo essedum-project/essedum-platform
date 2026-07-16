@@ -10,6 +10,9 @@ Essedum is a modular, microservices-based framework designed to simplify the dev
 |---|---|
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full platform architecture with Mermaid diagrams — components, data flow, deployment topology |
 | [SCOPE.md](docs/SCOPE.md) | Business objectives, functional requirements, and non-functional requirements |
+| [K8DEPLOYMENT.md](docs/K8DEPLOYMENT.md) | Kubernetes / AKS deployment — namespaces, ingress, HPA, PVs, secrets |
+| [aks-deployment/DEPLOYMENT.md](aks-deployment/DEPLOYMENT.md) | AKS manifest inventory and startup order |
+| [docker/DEPLOYMENT.md](docker/DEPLOYMENT.md) | Docker Compose deployment architecture — all services, ports, volumes, networks |
 | [MICROSERVICES_DECOMPOSITION.md](MICROSERVICES_DECOMPOSITION.md) | Microservices decomposition strategy, migration plan, and service boundaries |
 | [USER_GUIDE.md](USER_GUIDE.md) | Step-by-step guide to building AI applications on the platform |
 | [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes per version |
