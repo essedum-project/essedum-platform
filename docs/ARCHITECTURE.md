@@ -154,151 +154,36 @@ graph TB
 
 ## 2. Frontend Architecture — Micro-Frontend Shell
 
-```mermaid
-graph TB
-    subgraph Browser["Browser"]
-        USER["User"]
-    end
+> Full frontend architecture — MFE composition, Module Federation, OIDC auth, component diagram, and key flows — is documented in **[essedum-ui/docs/ARCHITECTURE.md](../essedum-ui/docs/ARCHITECTURE.md)**.
 
-    subgraph NginxFE["Nginx :8084 — Reverse Proxy"]
-        direction TB
-        SHELL_ROUTE["Shell App\n/  →  /app/ui/shell"]
-        API_PROXY["API Proxy\n/api/**  →  Backend :8080"]
-        KC_PROXY["Auth Proxy\n/realms/**  →  Keycloak :8180"]
-    end
+The frontend is an Angular 18 **Module Federation shell** hosting four independently deployed MFE remotes, one embedded React/Vite application, and three iframed external UIs. Nginx serves all artefacts on port 8084 and proxies API traffic to the backend.
 
-    subgraph ShellApp["Angular Shell App  (essedum-ui/shell)"]
-        SHELL["Shell App\nHost / Router\nModule Federation"]
-        AUTH_SVC["Auth Service\nOIDC / JWT\nangular-oauth2-oidc"]
-        APIS_SVC["Apis Service\nHTTP calls to /api/**"]
-        INIT_SVC["App Init Service\nGET /api/getConfigDetails"]
-    end
-
-    subgraph MFEModules["Micro-Frontend Modules  (essedum-ui/modules/)"]
-        AGENT_STUDIO["Agent Studio MFE\nagent-studio/"]
-        DATA_OPS["Data Ops MFE\ndata-ops/"]
-        INTEGRATION["Integration Hub MFE\nintegration-hub/"]
-        VIBE_STUDIO["Vibe Studio MFE\nvibe-studio/"]
-    end
-
-    subgraph AgentFE["Agent Designer Frontend\n(agent-designer-frontend/)"]
-        AGENT_DESIGNER["LangGraph Agent\nDesigner UI"]
-    end
-
-    subgraph EmbeddedIframes["Embedded UIs  (iframed via Nginx routes)"]
-        LANGFLOW_UI["Langflow UI\n(Visual Pipeline Builder)"]
-        LANGFUSE_UI["LangFuse UI\n(LLM Observability)"]
-        LITELLM_UI["LiteLLM UI\n(LLM Proxy Dashboard)"]
-    end
-
-    USER --> NginxFE
-    NginxFE --> SHELL
-    SHELL --> AUTH_SVC
-    SHELL --> APIS_SVC & INIT_SVC
-    SHELL -->|"lazy load\nModule Federation"| AGENT_STUDIO & DATA_OPS & INTEGRATION & VIBE_STUDIO
-    SHELL -->|embed| AGENT_DESIGNER
-    SHELL -->|iframe| LANGFLOW_UI & LANGFUSE_UI & LITELLM_UI
-
-    classDef shell  fill:#457b9d,stroke:#1d3557,color:#fff
-    classDef mfe    fill:#2a9d8f,stroke:#264653,color:#fff
-    classDef embed  fill:#a8dadc,stroke:#457b9d,color:#000
-    classDef nginx  fill:#e9c46a,stroke:#f4a261,color:#000
-
-    class SHELL,AUTH_SVC,APIS_SVC,INIT_SVC shell
-    class AGENT_STUDIO,DATA_OPS,INTEGRATION,VIBE_STUDIO,AGENT_DESIGNER mfe
-    class LANGFLOW_UI,LANGFUSE_UI,LITELLM_UI embed
-    class SHELL_ROUTE,API_PROXY,KC_PROXY nginx
-```
+| Application | Technology | Purpose |
+|---|---|---|
+| Shell (`shell/`) | Angular 18 · Module Federation host | Main layout, routing, OIDC auth, HTTP interceptor |
+| Agent Studio MFE | Angular 18 · MFE remote | AI pipelines, agent directory, dataset, LangFuse/LiteLLM integration |
+| Data Ops MFE | Angular 18 · MFE remote | Dataset, datasource, model, and schema management |
+| Integration Hub MFE | Angular 18 · MFE remote | Pipeline design & execution, job monitoring, adapters |
+| Vibe Studio MFE | Angular 18 · MFE remote | Vibe AI coding interface |
+| Agent Designer (`agent-designer-frontend/`) | React 18 · Vite | LangGraph visual agent design canvas |
+| Langflow / LangFuse / LiteLLM | iframed | Third-party platform UIs embedded within the shell |
 
 ---
 
 ## 3. Backend Microservices Architecture
 
-```mermaid
-graph TB
-    subgraph GatewayLayer["Gateway Layer"]
-        GW["API Gateway :8080\nSpring Cloud Gateway\nJWT validation · Rate limiting · CORS"]
-        EUR["Eureka Discovery :8761\nService Registry"]
-    end
+> Full backend architecture — service internals, dependency maps, architectural decisions, and sequence diagrams for each service — is documented in **[sv/docs/ARCHITECTURE.md](../sv/docs/ARCHITECTURE.md)**.
 
-    subgraph USMSvc["USM Service :8081 — User & Security Management"]
-        USM_AUTH["Authentication\nPOST /api/authenticate\nGET /api/userInfo"]
-        USM_USERS["User Management\n/api/userss/**"]
-        USM_ROLES["Roles & Permissions\n/api/roles/**\n/api/usm-role-permissionss/**"]
-        USM_ORG["Organizations & Projects\n/api/usm-portfolios/**\n/api/user-project-roles/**"]
-        USM_NOTIF["Notifications\n/api/usm-notificationss/**"]
-        LIB_USM["📦 iamp-lib-usm"]
-    end
+The backend is a Java 21 / Spring Boot 3.x microservices system. All external traffic enters through a single API Gateway on port 8080 and is routed to one of four domain services via path prefix.
 
-    subgraph ICIPSvc["ICIP Service :8082 — AI/ML Pipelines & Jobs"]
-        ICIP_JOBS["Job Scheduling & Execution\n/api/aip/jobs/**\nQuartz Scheduler"]
-        ICIP_PIPE["Pipeline Management\n/api/aip/pipelines/**"]
-        ICIP_EVT["Event Management\n/api/event/**\n/api/webhook/**"]
-        ICIP_MOD["Model Management\n/api/modelservice/**"]
-        ICIP_MLOPS["MLOps API\n/api/exp/**"]
-        ICIP_WS["WebSocket / SSE\nReal-time streaming"]
-        LIB_ICIP["📦 icip-lib-iai · icip-lib-jobs\nicip-lib-evt · icip-lib-mod · icip-lib-mlops"]
-    end
-
-    subgraph DATASvc["Data Service :8083 — Files & Data Adapters"]
-        DATA_FILE["File Server\n/api/file/**\nLocal · MinIO · S3 · Azure Blob"]
-        DATA_DS["Dataset Management\n/api/datasets/**"]
-        DATA_ADP["Data Adapters\n/api/adapters/**\nREST·MySQL·PG·S3·Azure·SageMaker·Vertex"]
-        DATA_SEARCH["Search\nLucene / Elasticsearch"]
-        LIB_DATA["📦 icip-lib-fsvr · icip-lib-adp\nicip-lib-search · icip-adp-*"]
-    end
-
-    subgraph VIBESvc["Vibe Service :8084 — AI-Assisted Coding"]
-        VIBE_SESS["Coding Sessions\n/api/vibe/**"]
-        VIBE_GOOSE["Goose AI Relay\n/api/goose/**"]
-        VIBE_GH["GitHub Integration\n/api/github/**\npush · pull · PR"]
-        VIBE_SSE["SSE Streaming"]
-        LIB_VIBE["📦 icip-lib-vibe\ncommon-app (GitHub controllers)"]
-    end
-
-    subgraph SharedLibs["Shared Libraries"]
-        COMMON_APP["common-app\nJWT · OAuth2 · CORS · Exception Handlers"]
-        COMM_UTIL["comm-lib-util · comm-lib-secrets\ncommon-lib-rest"]
-    end
-
-    subgraph Databases["Databases"]
-        DB_USM[("essedum_usm\npool: 20")]
-        DB_CORE[("essedum_coredb\npool: 30")]
-        DB_QUARTZ[("essedum_quartzdb\npool: 8")]
-        DB_MODEL[("model DB\npool: 8")]
-        DB_DATA[("essedum_data\npool: 20")]
-        DB_VIBE[("essedum_vibe\npool: 15")]
-    end
-
-    GW <-->|"register\ndiscover"| EUR
-    GW -->|"/api/users/** /api/roles/**\n/api/authenticate /api/usm-*"| USMSvc
-    GW -->|"/api/aip/** /api/event/**\n/api/webhook/** /api/modelservice/**"| ICIPSvc
-    GW -->|"/api/file/** /api/datasets/**\n/api/adapters/**"| DATASvc
-    GW -->|"/api/vibe/** /api/goose/**\n/api/github/**"| VIBESvc
-
-    USMSvc --- DB_USM
-    ICIPSvc --- DB_CORE & DB_QUARTZ & DB_MODEL
-    DATASvc --- DB_DATA
-    VIBESvc --- DB_VIBE
-
-    USMSvc & ICIPSvc & DATASvc & VIBESvc --> COMMON_APP
-    USMSvc & ICIPSvc & DATASvc & VIBESvc --> COMM_UTIL
-
-    classDef gw   fill:#f4a261,stroke:#e76f51,color:#000,font-weight:bold
-    classDef svc  fill:#457b9d,stroke:#1d3557,color:#fff
-    classDef lib  fill:#2a9d8f,stroke:#264653,color:#fff
-    classDef db   fill:#e9c46a,stroke:#f4a261,color:#000
-    classDef shared fill:#a8dadc,stroke:#457b9d,color:#000
-
-    class GW,EUR gw
-    class USM_AUTH,USM_USERS,USM_ROLES,USM_ORG,USM_NOTIF svc
-    class ICIP_JOBS,ICIP_PIPE,ICIP_EVT,ICIP_MOD,ICIP_MLOPS,ICIP_WS svc
-    class DATA_FILE,DATA_DS,DATA_ADP,DATA_SEARCH svc
-    class VIBE_SESS,VIBE_GOOSE,VIBE_GH,VIBE_SSE svc
-    class LIB_USM,LIB_ICIP,LIB_DATA,LIB_VIBE lib
-    class DB_USM,DB_CORE,DB_QUARTZ,DB_MODEL,DB_DATA,DB_VIBE db
-    class COMMON_APP,COMM_UTIL shared
-```
+| Service | Port | Domain | Architecture Doc |
+|---|---|---|---|
+| API Gateway | 8080 | Routing · JWT validation · Rate limiting | [api-gateway](../sv/api-gateway/docs/ARCHITECTURE.md) |
+| USM Service | 8081 | Users · Roles · Organisations | [usm-service](../sv/usm-service/docs/ARCHITECTURE.md) |
+| ICIP Service | 8082 | AI/ML Pipelines · Jobs · Models | [icip-service](../sv/icip-service/docs/ARCHITECTURE.md) |
+| Data Service | 8083 | Files · Datasets · Adapters · Search | [data-service](../sv/data-service/docs/ARCHITECTURE.md) |
+| Vibe Service | 8084 | AI-Assisted Coding · GitHub Sync | [vibe-service](../sv/vibe-service/docs/ARCHITECTURE.md) |
+| Eureka | 8761 | Service discovery | — |
 
 ---
 
