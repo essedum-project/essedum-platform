@@ -119,7 +119,7 @@ export class SkillsAddComponent {
   readonly SECLBLBASIC   = 'Basic Information';
   readonly SECLBLTECH    = 'Technical Details';
   readonly SECLBLAVA     = 'Availability & Access';
-  readonly LBLNAME         = 'Skill Name....';
+  readonly LBLNAME         = 'Skill Name';
   readonly LBLALIAS        = 'Alias';
   readonly LBLVERSION      = 'Version';
   readonly LBLTYPE         = 'Skill Type';
