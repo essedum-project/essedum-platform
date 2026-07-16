@@ -7,7 +7,7 @@
 
 ## Table of Contents
 
-1. [Platform Overview](#1-platform-overview)
+1. [Platform Overview — Functional Blocks + Detailed Diagram](#1-platform-overview)
 2. [Frontend Architecture — Micro-Frontend Shell](#2-frontend-architecture--micro-frontend-shell)
 3. [Backend Microservices Architecture](#3-backend-microservices-architecture)
 4. [Authentication & Authorization Flow](#4-authentication--authorization-flow)
@@ -25,16 +25,105 @@
 
 ## 1. Platform Overview
 
+### 1.1 Functional Architecture
+
+The platform is organised into eight functional blocks. Understanding these before diving into individual services is the fastest way to grasp the system.
+
+```mermaid
+graph TB
+    subgraph Clients["Clients"]
+        C1["Browser\nAngular MFE Shell"]
+        C2["VS Code Extension\nPipeline submit + monitoring"]
+        C3["REST / External APIs"]
+    end
+
+    subgraph Presentation["Presentation Layer\nAngular 18 · React · Nginx"]
+        P1["Pipeline Studio\nBuild & run ML pipelines"]
+        P2["Data Ops\nDatasets · Datasources · Models"]
+        P3["Agent Studio\nAI agent authoring · LangFuse · LiteLLM views"]
+        P4["Vibe Studio\nAI coding interface"]
+        P5["Agent Designer UI\nVisual LangGraph canvas (React)"]
+        P6["Embedded Tools\nLangflow · LangFuse · LiteLLM (iframes)"]
+    end
+
+    subgraph APIGateway["API Gateway & Auth\nSingle entry point"]
+        G1["API Gateway\nJWT validation · routing · rate limiting"]
+        G2["Keycloak\nOIDC/OAuth2 identity provider"]
+    end
+
+    subgraph CoreServices["Core Platform Services\nJava Spring Boot microservices"]
+        S1["User & Access Management\nUsers · Roles · Orgs · RBAC"]
+        S2["AI/ML Pipeline Engine\nJobs · Pipelines · Model Registry · Events"]
+        S3["Data & Storage Service\nFiles · Datasets · Adapters · Search"]
+        S4["AI Coding Service\nVibe sessions · Goose AI relay · GitHub sync"]
+    end
+
+    subgraph AgentPlatform["Agent & Code Build Platform"]
+        A1["Agent Designer Backend\nLangGraph execution · RAG · MCP tools · Memory"]
+        A2["Vibe Code Builder\nBuild container image → deploy to K8s (Vibe sessions)"]
+        A3["ADK Code Builder\nBuild container image → deploy to K8s (ADK agents)"]
+        A4["Vibe Pod Watcher\nMonitor · stream logs · manage K8s pods"]
+        A5["Proxy Service\nRoute HTTP & WebSocket to dynamic K8s pods"]
+    end
+
+    subgraph LLMInfra["LLM Infrastructure"]
+        L1["LiteLLM Proxy\nUnified API to 100+ LLM providers"]
+        L2["LangFuse\nLLM tracing · cost · evaluation"]
+        L3["Langflow\nVisual agent pipeline builder"]
+        L4["Ollama\nLocal open-source LLM runner"]
+    end
+
+    subgraph CloudExec["Cloud ML Execution\nPython executor microservices"]
+        E1["General Python Executor\nLocal scripts · MinIO storage"]
+        E2["AWS SageMaker Executor\nTraining · inference · endpoints"]
+        E3["GCP Vertex AI Executor\nTraining · inference · endpoints"]
+        E4["Azure ML Executor\nTraining · inference · endpoints"]
+    end
+
+    subgraph DataLayer["Data Layer"]
+        D1[("MySQL\nRelational state")]
+        D2[("Qdrant\nVector embeddings")]
+        D3[("MinIO / S3 / Azure Blob\nObject storage")]
+        D4[("PostgreSQL\nLangFuse · Langflow · LiteLLM")]
+        D5[("ClickHouse + Redis\nAnalytics + cache")]
+    end
+
+    Clients --> Presentation
+    Presentation --> APIGateway
+    APIGateway --> CoreServices
+    CoreServices --> AgentPlatform
+    CoreServices --> LLMInfra
+    CoreServices --> CloudExec
+    CoreServices & AgentPlatform & LLMInfra & CloudExec --> DataLayer
+```
+
+### Functional Block Descriptions
+
+| Block | What it does |
+|---|---|
+| **Clients** | Three entry points: browser (Angular MFE shell), VS Code extension (pipeline submit + job monitoring), and direct REST API clients. |
+| **Presentation Layer** | Angular 18 micro-frontend shell loading five feature modules. The Agent Designer is a separate React/Vite app. Langflow, LangFuse, and LiteLLM UIs are embedded as iframes. |
+| **API Gateway & Auth** | All external traffic enters through a single API Gateway. Keycloak handles OIDC identity; the gateway validates tokens before forwarding to any service. |
+| **Core Platform Services** | Four Spring Boot microservices covering the platform's core domains: identity/access, AI/ML pipeline execution, data management, and AI-assisted coding. |
+| **Agent & Code Build Platform** | Services that design, build, and operate AI agents and coding sessions: the Agent Designer Backend runs LangGraph flows; the Vibe and ADK Code Builders compile source into container images and deploy them to Kubernetes; the Pod Watcher monitors those pods; the Proxy Service routes HTTP/WebSocket traffic to them. |
+| **LLM Infrastructure** | LiteLLM provides a unified API to all LLM providers. LangFuse traces every LLM call. Langflow provides a visual drag-and-drop agent builder. Ollama runs open-source models locally. |
+| **Cloud ML Execution** | Four Python executor services — each specialised for a target platform (local, SageMaker, Vertex AI, Azure ML). The Core Pipeline Engine submits jobs to them over HTTP. |
+| **Data Layer** | MySQL for relational state, Qdrant for vector search, MinIO/S3/Azure Blob for object storage, PostgreSQL for LLM tooling metadata, ClickHouse + Redis for LangFuse analytics. |
+
+---
+
+### 1.2 Detailed Component Diagram
+
 ```mermaid
 graph TB
     subgraph Users["👤 Users / Clients"]
         BROWSER["Browser\nAngular Shell UI"]
-        VSCODE["VS Code\nExtension"]
+        VSCODE["VS Code Extension\n· authenticate\n· browse pipelines\n· submit & monitor jobs"]
         EXTAPI["External REST\nClients / APIs"]
     end
 
     subgraph FrontendLayer["🖥️ Frontend Layer  (Nginx :8084)"]
-        NGINX_FE["Nginx Reverse Proxy\n· Shell App\n· MFE Modules\n· Route /api → Backend\n· Route /realms → Keycloak"]
+        NGINX_FE["Nginx Reverse Proxy\n· Shell App + MFE Modules\n· Agent Designer UI (React)\n· Route /api → Backend\n· Route /realms → Keycloak"]
     end
 
     subgraph BackendLayer["⚙️ Backend Layer"]
@@ -50,6 +139,15 @@ graph TB
         KC["Keycloak :8180\nOIDC Identity Provider\nRealm: ESSEDUM"]
     end
 
+    subgraph AgentPlatformLayer["🤖 Agent & Code Build Platform"]
+        AGENTBE["Agent Designer Backend\nFastAPI + LangGraph\nRAG · MCP tools · Memory"]
+        VIBE_CB["Vibe Code Builder\n· Download source from MinIO\n· Build image via BuildKit\n· Deploy to vibe-apps K8s namespace"]
+        ADK_CB["ADK Code Builder :5003\n· Build image via BuildKit\n· Deploy to vibe-agents K8s namespace"]
+        VPW["Vibe Pod Watcher\n· Monitor vibe-apps / vibe-agents pods\n· Stream logs via Socket.IO\n· Delete deployments"]
+        PROXY_SVC["Proxy Service :8000\n· HTTP + WebSocket proxy\n· Routes to K8s pod services\n· DNS-label SSRF protection"]
+        BUILDKIT["BuildKit :1234\nOCI image build daemon"]
+    end
+
     subgraph PyJobLayer["🐍 Python Job Executors"]
         PYJOB["py-job-executer :5000\nGeneral Python Jobs"]
         PYSM["py-job-sagemaker :5002\nAWS SageMaker Jobs"]
@@ -57,12 +155,11 @@ graph TB
         PYAZURE["py-job-azure\nAzure ML Jobs"]
     end
 
-    subgraph AIInfra["🤖 AI / LLM Infrastructure"]
+    subgraph AIInfra["🧠 LLM Infrastructure"]
         LITELLM["LiteLLM :4000\nUnified LLM Proxy"]
         LANGFLOW["Langflow\nVisual AI Pipeline Builder"]
         LANGFUSE["LangFuse\nLLM Observability"]
         OLLAMA["Ollama :11434\nLocal LLM Runner"]
-        AGENTBE["Agent Designer Backend\nLangGraph / FastAPI"]
     end
 
     subgraph DataLayer["🗄️ Data Layer"]
@@ -82,17 +179,17 @@ graph TB
         GOOSE["Goose AI\nCoding Agent"]
     end
 
-    subgraph DevTools["🛠️ Dev & Build Tools"]
-        BUILDKIT["BuildKit :1234\nImage Builder Daemon"]
-        ADK["ADK Code Builder\nDeployer :5003"]
-        PROXY_SVC["Proxy Service :8000\nK8s Service Proxy"]
-        VIBE_POD["Vibe Pod Watcher\nK8s Pod Lifecycle"]
+    subgraph K8sPods["☸️ Dynamic Kubernetes Pods"]
+        VIBE_PODS["vibe-apps namespace\nVibe coding session pods"]
+        AGENT_PODS["vibe-agents namespace\nADK / LangGraph agent pods"]
+        MCP_PODS["vibe-mcp namespace\nMCP server pods"]
     end
 
     BROWSER & VSCODE & EXTAPI --> NGINX_FE
 
-    NGINX_FE -->|"/api/** /services/**"| GW
-    NGINX_FE -->|"/realms/ /resources/"| KC
+    NGINX_FE -->|"/api/**"| GW
+    NGINX_FE -->|"/realms/**"| KC
+    VSCODE -->|"REST API (Bearer token)"| GW
 
     GW -->|"/api/users/** /api/authenticate"| USM
     GW -->|"/api/aip/** /api/event/** /api/modelservice/**"| ICIP
@@ -100,53 +197,56 @@ graph TB
     GW -->|"/api/vibe/** /api/goose/** /api/github/**"| VIBE
     GW <-->|register/discover| EUR
     USM & ICIP & DATA & VIBE <-->|register/discover| EUR
-
     USM & ICIP & DATA & VIBE --> KC
     USM & ICIP & DATA & VIBE --- MYSQL
 
-    ICIP -->|submit jobs| PYJOB & PYSM & PYVERTEX & PYAZURE
+    ICIP -->|"POST /execute"| PYJOB & PYSM & PYVERTEX & PYAZURE
     PYSM --> AWS_SM
     PYVERTEX --> GCP_V
     PYAZURE --> AZ_ML
 
     DATA --> MINIO
     ICIP --> MINIO
-
     ICIP --> QDRANT
-
     VIBE --> GOOSE & GITHUB
+
+    VIBE_CB --> BUILDKIT --> VIBE_PODS
+    ADK_CB --> BUILDKIT --> AGENT_PODS
+    VIBE_CB & ADK_CB --> MINIO
+
+    VPW -->|watch · log stream · delete| VIBE_PODS & AGENT_PODS & MCP_PODS
+    PROXY_SVC -->|HTTP/WS proxy| VIBE_PODS & AGENT_PODS & MCP_PODS
+
+    AGENTBE --> QDRANT & MINIO
 
     LITELLM --> OLLAMA
     LITELLM --> AWS_SM & GCP_V & AZ_ML
     LITELLM --> LANGFUSE
-
     LANGFLOW --- POSTGRES_LF
     LANGFUSE --- POSTGRES_LF & CLICKHOUSE & REDIS
     LITELLM --- POSTGRES_LF
-
-    ADK --> BUILDKIT
-    ADK --> MINIO
-
     KC --- MYSQL
 
-    classDef fe     fill:#457b9d,stroke:#1d3557,color:#fff
-    classDef be     fill:#2a9d8f,stroke:#264653,color:#fff
-    classDef auth   fill:#e76f51,stroke:#c14b2a,color:#fff,font-weight:bold
-    classDef py     fill:#8ecae6,stroke:#457b9d,color:#000
-    classDef ai     fill:#a8dadc,stroke:#457b9d,color:#000
-    classDef db     fill:#e9c46a,stroke:#f4a261,color:#000
-    classDef cloud  fill:#d4e09b,stroke:#7db87a,color:#000
-    classDef dev    fill:#f1faee,stroke:#999,color:#000
-    classDef user   fill:#e8e8e8,stroke:#888,color:#000
+    classDef fe       fill:#457b9d,stroke:#1d3557,color:#fff
+    classDef be       fill:#2a9d8f,stroke:#264653,color:#fff
+    classDef auth     fill:#e76f51,stroke:#c14b2a,color:#fff,font-weight:bold
+    classDef agent    fill:#6a4c93,stroke:#4a2c73,color:#fff
+    classDef py       fill:#8ecae6,stroke:#457b9d,color:#000
+    classDef ai       fill:#a8dadc,stroke:#457b9d,color:#000
+    classDef db       fill:#e9c46a,stroke:#f4a261,color:#000
+    classDef cloud    fill:#d4e09b,stroke:#7db87a,color:#000
+    classDef k8s      fill:#f1faee,stroke:#2a9d8f,color:#000
+    classDef user     fill:#e8e8e8,stroke:#888,color:#000
 
     class NGINX_FE fe
     class GW,USM,ICIP,DATA,VIBE,EUR be
     class KC auth
+    class AGENTBE,VIBE_CB,ADK_CB,VPW,PROXY_SVC,BUILDKIT agent
     class PYJOB,PYSM,PYVERTEX,PYAZURE py
-    class LITELLM,LANGFLOW,LANGFUSE,OLLAMA,AGENTBE ai
+    class LITELLM,LANGFLOW,LANGFUSE,OLLAMA ai
     class MYSQL,QDRANT,MINIO,POSTGRES_LF,CLICKHOUSE,REDIS db
     class AWS_SM,GCP_V,AZ_ML,GITHUB,GOOSE cloud
-    class BUILDKIT,ADK,PROXY_SVC,VIBE_POD dev
+    class VIBE_PODS,AGENT_PODS,MCP_PODS k8s
     class BROWSER,VSCODE,EXTAPI user
 ```
 
