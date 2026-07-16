@@ -18,6 +18,8 @@
 9. [Deployment Topology (Docker Compose)](#9-deployment-topology-docker-compose)
 10. [Kubernetes / AKS Deployment](#10-kubernetes--aks-deployment)
 11. [End-to-End Request Flow](#11-end-to-end-request-flow)
+12. [Cross-Service Interaction Flows](#12-cross-service-interaction-flows)
+13. [Service Architecture Index](#service-architecture-index)
 
 ---
 
@@ -808,6 +810,260 @@ flowchart TD
 
 ---
 
+## 12. Cross-Service Interaction Flows
+
+These flows document how services collaborate to deliver the platform's key capabilities. Each service's internal steps are intentionally abbreviated here — refer to the [Service Architecture Index](#service-architecture-index) for what happens inside each service.
+
+---
+
+### Flow 1 — User Login and First Authenticated API Call
+
+Covers: Browser → Nginx → Keycloak → Gateway → USM
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant NGX as Nginx
+    participant KC as Keycloak
+    participant GW as API Gateway
+    participant USM as USM Service
+
+    B->>NGX: Navigate to app (unauthenticated)
+    NGX->>B: Serve Angular shell (index.html)
+    B->>NGX: GET /realms/ESSEDUM/.well-known/openid-configuration
+    NGX->>KC: Forward (KC proxy route)
+    KC-->>B: OIDC discovery document
+    B->>KC: PKCE auth request → login page
+    KC-->>B: Redirect with auth code
+    B->>KC: Exchange code for tokens
+    KC-->>B: access_token + refresh_token
+    Note over B: Angular stores token; all subsequent calls carry Bearer header
+    B->>NGX: GET /api/usm/users (Bearer token)
+    NGX->>GW: Forward
+    GW->>KC: Validate token (JWK Set URI — cached)
+    KC-->>GW: Token valid + claims
+    GW->>USM: Forward + user claims in headers
+    USM->>USM: Resolve permissions for user roles
+    USM-->>GW: 200 OK [users]
+    GW-->>NGX-->>B: 200 OK [users]
+```
+
+---
+
+### Flow 2 — Pipeline Execution End-to-End
+
+Covers: ICIP → Python Executor → Data Service → MinIO → ICIP (completion)
+
+```mermaid
+sequenceDiagram
+    participant UI as Browser (UI)
+    participant GW as API Gateway
+    participant ICIP as ICIP Service
+    participant EXEC as Python Executor
+    participant DATA as Data Service
+    participant MINIO as MinIO
+
+    UI->>GW: POST /api/aip/jobs/run {pipelineId, executionContainerId}
+    GW->>ICIP: Forward
+    ICIP->>ICIP: Resolve execution container (cloud target + credentials)
+    ICIP->>ICIP: Create Job record (QUEUED)
+    ICIP-->>UI: 202 Accepted {jobId}
+    Note over UI: Subscribes to WebSocket /api/aip/ws/{jobId}
+    ICIP->>EXEC: POST /execute {command, bucket, credentials, storage}
+    EXEC-->>ICIP: 200 OK {task_id}
+    EXEC->>DATA: GET /api/data/files/{inputArtifactId} (download input)
+    DATA->>MINIO: Fetch object
+    MINIO-->>DATA-->>EXEC: Input file bytes
+    EXEC->>EXEC: Run pipeline subprocess
+    EXEC->>MINIO: Upload output artifacts
+    EXEC->>ICIP: Status poll response: COMPLETED
+    ICIP->>DATA: Register output artifact (POST /api/data/files)
+    ICIP->>ICIP: Update Job record (COMPLETED)
+    ICIP->>UI: WebSocket push: {status: COMPLETED, outputArtifacts}
+```
+
+---
+
+### Flow 3 — Agent Design to Kubernetes Deployment
+
+Covers: Agent Designer Backend → Vibe Code Builder Deployer → BuildKit → Kubernetes → Proxy Service + Vibe Pod Watcher
+
+```mermaid
+sequenceDiagram
+    participant UI as Browser (UI)
+    participant ADB as Agent Designer Backend
+    participant DATA as Data Service
+    participant VCB as Vibe Code Builder Deployer
+    participant BK as BuildKit
+    participant K8S as Kubernetes API
+    participant PROXY as Proxy Service
+    participant VPW as Vibe Pod Watcher
+
+    UI->>ADB: POST /api/v1/flows/{id}/run (execute agent flow)
+    ADB->>ADB: Compile flow → LangGraph graph
+    ADB-->>UI: WebSocket: execution events
+    UI->>GW: POST /api/vibe/build-deploy {agentCode, config}
+    GW->>VCB: Socket.IO start_pipeline
+    VCB->>DATA: GET source archive from MinIO
+    DATA->>VCB: Archive bytes
+    VCB->>BK: buildctl build (Dockerfile + source)
+    BK->>VCB: Build logs (streamed)
+    VCB->>UI: pipeline_update events
+    BK->>K8S: Push image to in-cluster registry
+    VCB->>K8S: Create Deployment + Service + Secret
+    K8S-->>VCB: Resources created
+    VCB->>UI: pipeline_update {status: done}
+    Note over VPW: Detects new pod via K8s watch
+    VPW->>UI: Socket.IO pod_ready event
+    UI->>PROXY: HTTP /apps/{agent-service}/* (interact with deployed agent)
+    PROXY->>K8S: Route to agent-service.aipns.svc.cluster.local
+```
+
+---
+
+### Flow 4 — RAG Pipeline (Document Ingestion → Query)
+
+Covers: Data Service → Qdrant → ICIP → LiteLLM → LLM provider
+
+```mermaid
+sequenceDiagram
+    participant UI as Browser (UI)
+    participant GW as API Gateway
+    participant DATA as Data Service
+    participant QDRANT as Qdrant
+    participant ICIP as ICIP Service
+    participant LITELLM as LiteLLM
+    participant LLM as LLM Provider
+
+    Note over UI,LLM: Part 1 — Document Ingestion
+    UI->>GW: POST /api/data/knowledge-bases/{kb}/documents (file upload)
+    GW->>DATA: Forward
+    DATA->>DATA: Chunk document (background task)
+    DATA->>LITELLM: POST /embeddings {chunks}
+    LITELLM->>LLM: Embedding request
+    LLM-->>LITELLM: Embedding vectors
+    LITELLM-->>DATA: Vectors
+    DATA->>QDRANT: Upsert vectors (collection=kb_id)
+    DATA-->>UI: 202 Accepted
+
+    Note over UI,LLM: Part 2 — RAG Query at Pipeline Execution
+    ICIP->>ICIP: Execute RAG node in pipeline
+    ICIP->>DATA: POST /api/data/rag/query {kb_id, query, top_k}
+    DATA->>LITELLM: POST /embeddings {query_text}
+    LITELLM->>LLM: Embedding request
+    LLM-->>DATA: Query vector
+    DATA->>QDRANT: Search(collection=kb_id, vector, top_k)
+    QDRANT-->>DATA: Top-k chunks + scores
+    DATA-->>ICIP: {chunks, sources}
+    ICIP->>LITELLM: POST /chat/completions {prompt + chunks as context}
+    LITELLM->>LLM: Chat completion
+    LLM-->>LITELLM-->>ICIP: LLM response
+    ICIP-->>UI: Pipeline output with RAG-grounded answer
+```
+
+---
+
+### Flow 5 — Vibe AI Coding Session (Code Generation → GitHub Push)
+
+Covers: Vibe Service → Goose AI → Vibe Service → GitHub
+
+```mermaid
+sequenceDiagram
+    participant UI as Browser / VS Code Ext
+    participant GW as API Gateway
+    participant VIBE as Vibe Service
+    participant GOOSE as Goose AI Engine
+    participant GH as GitHub API
+
+    UI->>GW: POST /api/vibe/coding/run {sessionId, prompt}
+    GW->>VIBE: Forward
+    VIBE->>VIBE: Load session + recipe context
+    VIBE->>GOOSE: POST /run {prompt + context} (streaming)
+    GOOSE-->>VIBE: Token stream
+    VIBE-->>UI: SSE event stream (token by token)
+    GOOSE-->>VIBE: [stream complete]
+    VIBE->>VIBE: Persist full response to session history
+    VIBE-->>UI: SSE done
+
+    Note over UI,GH: User reviews code, clicks Push to GitHub
+    UI->>GW: POST /api/vibe/github/push {sessionId, repo, branch}
+    GW->>VIBE: Forward
+    VIBE->>VIBE: Fetch GitHub OAuth token from Vault
+    VIBE->>GH: PUT /repos/{owner}/{repo}/contents/{path} {content, sha?}
+    GH-->>VIBE: 201 Created {commitUrl}
+    VIBE-->>UI: 200 OK {commitUrl}
+```
+
+---
+
+### Flow 6 — LLM Call with Observability (LiteLLM → LangFuse)
+
+Covers: Any service → LiteLLM → LLM provider → LangFuse trace
+
+```mermaid
+sequenceDiagram
+    participant SVC as Platform Service\n(ICIP / Data / Agent Designer)
+    participant LITELLM as LiteLLM Proxy
+    participant LLM as LLM Provider\n(OpenAI / Bedrock / Gemini)
+    participant LF as LangFuse
+    participant CH as ClickHouse
+
+    SVC->>LITELLM: POST /chat/completions {model, messages, ...}
+    LITELLM->>LITELLM: Route to configured provider
+    LITELLM->>LLM: Provider-specific API call
+    LLM-->>LITELLM: Response tokens
+    LITELLM-->>SVC: 200 OK {choices}
+    LITELLM->>LF: Async trace event {model, tokens, latency, cost}
+    LF->>LF: Enrich trace (user, session, tags)
+    LF->>CH: Persist trace to ClickHouse (analytics)
+    Note over LF: Trace visible in LangFuse UI\n— token count, cost, latency, prompt
+```
+
+---
+
+### Flow 7 — Model Training to Endpoint Deployment
+
+Covers: ICIP → SageMaker Executor → AWS SageMaker → ICIP model registry → endpoint
+
+```mermaid
+sequenceDiagram
+    participant UI as Browser (UI)
+    participant GW as API Gateway
+    participant ICIP as ICIP Service
+    participant PYSM as SageMaker Executor
+    participant SM as AWS SageMaker
+    participant DATA as Data Service
+    participant MINIO as MinIO
+
+    UI->>GW: POST /api/aip/jobs/run {pipelineId, type: training}
+    GW->>ICIP: Forward
+    ICIP->>PYSM: POST /api/service/v1/pipelines/training/train {dataset, config}
+    PYSM->>SM: CreateTrainingJob (SDK)
+    SM-->>PYSM: Job ARN
+    PYSM-->>ICIP: {job_id}
+    loop Poll until terminal
+        PYSM->>SM: DescribeTrainingJob
+        SM-->>PYSM: Status
+        PYSM->>ICIP: Status update
+        ICIP->>UI: WebSocket push
+    end
+    SM->>MINIO: Upload trained model artifact (via S3 adapter)
+    ICIP->>PYSM: POST /api/service/v1/models/register {s3_uri, metadata}
+    PYSM->>SM: RegisterModel
+    SM-->>PYSM: Model ARN
+    ICIP->>ICIP: Register model in model registry (DB)
+    ICIP->>UI: WebSocket: {status: COMPLETED, modelId}
+    Note over UI,SM: User deploys model from UI
+    UI->>GW: POST /api/modelservice/endpoints/{id}/deploy {modelId, instanceType}
+    GW->>ICIP: Forward
+    ICIP->>PYSM: POST /api/service/v1/endpoints/{id}/deploy_model
+    PYSM->>SM: CreateEndpoint
+    SM-->>PYSM: Endpoint ARN (Creating)
+    ICIP-->>UI: 202 Accepted — endpoint deploying
+```
+
+---
+
 ## Component Port Reference
 
 | Component | Port | Technology | Purpose |
@@ -840,3 +1096,47 @@ flowchart TD
 ---
 
 *Document auto-generated from codebase analysis — 2026-07-13*
+
+---
+
+## Service Architecture Index
+
+Detailed architecture for each service — internal component diagrams, dependency maps, architectural decisions, and significant flows.
+
+### Java Backend
+
+| Service | Architecture Doc |
+|---|---|
+| Backend Overview | [sv/docs/ARCHITECTURE.md](../sv/docs/ARCHITECTURE.md) |
+| API Gateway | [sv/api-gateway/docs/ARCHITECTURE.md](../sv/api-gateway/docs/ARCHITECTURE.md) |
+| USM Service | [sv/usm-service/docs/ARCHITECTURE.md](../sv/usm-service/docs/ARCHITECTURE.md) |
+| ICIP Service | [sv/icip-service/docs/ARCHITECTURE.md](../sv/icip-service/docs/ARCHITECTURE.md) |
+| Data Service | [sv/data-service/docs/ARCHITECTURE.md](../sv/data-service/docs/ARCHITECTURE.md) · [OpenAPI Spec](../sv/data-service/docs/openapi.yaml) |
+| Vibe Service | [sv/vibe-service/docs/ARCHITECTURE.md](../sv/vibe-service/docs/ARCHITECTURE.md) |
+
+### AI / Agent Backend
+
+| Service | Architecture Doc |
+|---|---|
+| Agent Designer Backend | [agent-designer-backend/docs/ARCHITECTURE.md](../agent-designer-backend/docs/ARCHITECTURE.md) |
+
+### Python Job Executors
+
+| Service | Architecture Doc |
+|---|---|
+| General Python Executor | [py-job-executer/docs/ARCHITECTURE.md](../py-job-executer/docs/ARCHITECTURE.md) |
+| SageMaker Executor | [py-job-sagemaker-executer/docs/ARCHITECTURE.md](../py-job-sagemaker-executer/docs/ARCHITECTURE.md) |
+| Vertex AI Executor | [py-job-vertex-executer/docs/ARCHITECTURE.md](../py-job-vertex-executer/docs/ARCHITECTURE.md) |
+| Azure ML Executor | [py-job-azure-executer/docs/ARCHITECTURE.md](../py-job-azure-executer/docs/ARCHITECTURE.md) |
+
+### Infrastructure & Developer Tools
+
+| Service | Architecture Doc |
+|---|---|
+| Nginx | [nginx/docs/ARCHITECTURE.md](../nginx/docs/ARCHITECTURE.md) |
+| Proxy Service | [proxy-service/docs/ARCHITECTURE.md](../proxy-service/docs/ARCHITECTURE.md) |
+| S3Proxy | [s3proxy/docs/ARCHITECTURE.md](../s3proxy/docs/ARCHITECTURE.md) |
+| Vibe Pod Watcher | [vibe-pod-watcher/docs/ARCHITECTURE.md](../vibe-pod-watcher/docs/ARCHITECTURE.md) |
+| Vibe Code Builder Deployer | [vibe-code-builder-deployer/docs/ARCHITECTURE.md](../vibe-code-builder-deployer/docs/ARCHITECTURE.md) |
+| ADK Code Builder Deployer | [adk-code-builder-deployer/docs/ARCHITECTURE.md](../adk-code-builder-deployer/docs/ARCHITECTURE.md) |
+| VS Code Extension | [vs-extension/docs/ARCHITECTURE.md](../vs-extension/docs/ARCHITECTURE.md) |

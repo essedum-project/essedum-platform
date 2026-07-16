@@ -13,6 +13,7 @@
 3. [Functional Requirements](#3-functional-requirements)
 4. [Non-Functional Requirements](#4-non-functional-requirements)
 5. [Out of Scope](#5-out-of-scope)
+6. [Service Documentation Index](#service-documentation-index)
 
 ---
 
@@ -267,3 +268,47 @@ The following items are explicitly **not** covered in the current version:
 
 *Document Owner: Architecture Team*  
 *Review Cycle: Per major release*
+
+---
+
+## Service Documentation Index
+
+Each service maintains its own SCOPE.md with detailed functional and non-functional requirements. These are the authoritative source for service-level requirements — this document covers platform-wide concerns only.
+
+### Java Backend
+
+| Service | Scope | Architecture |
+|---|---|---|
+| Backend Overview | [sv/docs/SCOPE.md](../sv/docs/SCOPE.md) | [sv/docs/ARCHITECTURE.md](../sv/docs/ARCHITECTURE.md) |
+| API Gateway | [api-gateway/docs/SCOPE.md](../sv/api-gateway/docs/SCOPE.md) | [api-gateway/docs/ARCHITECTURE.md](../sv/api-gateway/docs/ARCHITECTURE.md) |
+| USM Service | [usm-service/docs/SCOPE.md](../sv/usm-service/docs/SCOPE.md) | [usm-service/docs/ARCHITECTURE.md](../sv/usm-service/docs/ARCHITECTURE.md) |
+| ICIP Service | [icip-service/docs/SCOPE.md](../sv/icip-service/docs/SCOPE.md) | [icip-service/docs/ARCHITECTURE.md](../sv/icip-service/docs/ARCHITECTURE.md) |
+| Data Service | [data-service/docs/SCOPE.md](../sv/data-service/docs/SCOPE.md) | [data-service/docs/ARCHITECTURE.md](../sv/data-service/docs/ARCHITECTURE.md) |
+| Vibe Service | [vibe-service/docs/SCOPE.md](../sv/vibe-service/docs/SCOPE.md) | [vibe-service/docs/ARCHITECTURE.md](../sv/vibe-service/docs/ARCHITECTURE.md) |
+
+### AI / Agent Backend
+
+| Service | Scope | Architecture |
+|---|---|---|
+| Agent Designer Backend | [agent-designer-backend/docs/SCOPE.md](../agent-designer-backend/docs/SCOPE.md) | [agent-designer-backend/docs/ARCHITECTURE.md](../agent-designer-backend/docs/ARCHITECTURE.md) |
+
+### Python Job Executors
+
+| Service | Scope | Architecture |
+|---|---|---|
+| General Python Executor | [py-job-executer/docs/SCOPE.md](../py-job-executer/docs/SCOPE.md) | [py-job-executer/docs/ARCHITECTURE.md](../py-job-executer/docs/ARCHITECTURE.md) |
+| SageMaker Executor | [py-job-sagemaker-executer/docs/SCOPE.md](../py-job-sagemaker-executer/docs/SCOPE.md) | [py-job-sagemaker-executer/docs/ARCHITECTURE.md](../py-job-sagemaker-executer/docs/ARCHITECTURE.md) |
+| Vertex AI Executor | [py-job-vertex-executer/docs/SCOPE.md](../py-job-vertex-executer/docs/SCOPE.md) | [py-job-vertex-executer/docs/ARCHITECTURE.md](../py-job-vertex-executer/docs/ARCHITECTURE.md) |
+| Azure ML Executor | [py-job-azure-executer/docs/SCOPE.md](../py-job-azure-executer/docs/SCOPE.md) | [py-job-azure-executer/docs/ARCHITECTURE.md](../py-job-azure-executer/docs/ARCHITECTURE.md) |
+
+### Infrastructure & Developer Tools
+
+| Service | Scope | Architecture |
+|---|---|---|
+| Nginx | [nginx/docs/SCOPE.md](../nginx/docs/SCOPE.md) | [nginx/docs/ARCHITECTURE.md](../nginx/docs/ARCHITECTURE.md) |
+| Proxy Service | [proxy-service/docs/SCOPE.md](../proxy-service/docs/SCOPE.md) | [proxy-service/docs/ARCHITECTURE.md](../proxy-service/docs/ARCHITECTURE.md) |
+| S3Proxy | [s3proxy/docs/SCOPE.md](../s3proxy/docs/SCOPE.md) | [s3proxy/docs/ARCHITECTURE.md](../s3proxy/docs/ARCHITECTURE.md) |
+| Vibe Pod Watcher | [vibe-pod-watcher/docs/SCOPE.md](../vibe-pod-watcher/docs/SCOPE.md) | [vibe-pod-watcher/docs/ARCHITECTURE.md](../vibe-pod-watcher/docs/ARCHITECTURE.md) |
+| Vibe Code Builder Deployer | [vibe-code-builder-deployer/docs/SCOPE.md](../vibe-code-builder-deployer/docs/SCOPE.md) | [vibe-code-builder-deployer/docs/ARCHITECTURE.md](../vibe-code-builder-deployer/docs/ARCHITECTURE.md) |
+| ADK Code Builder Deployer | [adk-code-builder-deployer/docs/SCOPE.md](../adk-code-builder-deployer/docs/SCOPE.md) | [adk-code-builder-deployer/docs/ARCHITECTURE.md](../adk-code-builder-deployer/docs/ARCHITECTURE.md) |
+| VS Code Extension | [vs-extension/docs/SCOPE.md](../vs-extension/docs/SCOPE.md) | [vs-extension/docs/ARCHITECTURE.md](../vs-extension/docs/ARCHITECTURE.md) |

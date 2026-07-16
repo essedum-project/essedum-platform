@@ -328,8 +328,6 @@ Docker Compose starts services in the correct order using health-check dependenc
 | `GET` | `/api/aip/service/v1/vibe-coding/config/providers` | List AI providers |
 | `GET` | `/api/aip/service/v1/vibe-coding/recipes/list` | List recipes |
 
-> **Full API reference with cURL examples →** [`API_TESTING_GUIDE.md`](./API_TESTING_GUIDE.md)
-
 ---
 
 ## Health Checks
@@ -421,8 +419,6 @@ TOKEN="<paste id_token here>"
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/userss
 ```
 
-> **Full cURL reference →** [`API_TESTING_GUIDE.md`](./API_TESTING_GUIDE.md)
-
 ---
 
 ## Troubleshooting
@@ -460,4 +456,3 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/userss
 
 - [Microservices Architecture Details](./MICROSERVICES_README.md)
 - [Decomposition Strategy & Rationale](./MICROSERVICES_DECOMPOSITION.md)
-- [Full API Testing Guide](./API_TESTING_GUIDE.md)
