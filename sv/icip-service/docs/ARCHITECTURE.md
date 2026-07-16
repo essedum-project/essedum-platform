@@ -1,5 +1,7 @@
 # ICIP Service — Architecture
 
+> **OpenAPI Spec:** [`docs/openapi.yaml`](openapi.yaml) — generate by running `curl http://<host>:8082/v3/api-docs.yaml -o sv/icip-service/docs/openapi.yaml` against a running instance, then commit. Swagger UI available at `/swagger-ui/index.html`.
+
 ---
 
 ## 1. Service Architecture
