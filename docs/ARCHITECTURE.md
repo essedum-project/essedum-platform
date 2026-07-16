@@ -597,6 +597,8 @@ graph LR
 
 ## 9. Deployment Topology (Docker Compose)
 
+> Full Docker Compose deployment details — all services, images, ports, volumes, networks, startup order, and access URLs — are documented in **[DOCKERDEPLOYMENT.md](DOCKERDEPLOYMENT.md)**.
+
 ```mermaid
 graph TB
     subgraph DockerCompose["docker-compose.yml  (docker/)"]
@@ -687,6 +689,7 @@ graph TB
 ## 10. Kubernetes / AKS Deployment
 
 > Full deployment details — namespace topology, ingress routing, HPA config, persistent volumes, secrets, and container registry — are documented in **[K8DEPLOYMENT.md](K8DEPLOYMENT.md)**.
+> AKS manifest inventory and startup order: **[AKSDEPLOYMENT.md](AKSDEPLOYMENT.md)**.
 
 The platform runs in a single AKS cluster across 6 namespaces:
 
