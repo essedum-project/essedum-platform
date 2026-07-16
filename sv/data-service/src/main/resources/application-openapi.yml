@@ -40,7 +40,6 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.cloud.vault.config.VaultAutoConfiguration
-      - org.springframework.cloud.vault.config.VaultBootstrapPropertySourceConfiguration
       - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
 
@@ -102,6 +101,12 @@ encryption:
 
 license: placeholder
 publickey: placeholder
+
+# ── Logging override ─────────────────────────────────────────────────────
+# Redirect logs to /tmp so the app starts without the /app/log directory
+logging:
+  file:
+    path: /tmp
 
 # ── Springdoc ────────────────────────────────────────────────────────────
 springdoc:

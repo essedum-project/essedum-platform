@@ -1,27 +1,26 @@
-name: "Generate OpenAPI Spec – Data Service"
+name: "Generate OpenAPI Spec - Data Service"
 
-# ─────────────────────────────────────────────────────────────────────────
-# Regenerates sv/data-service/docs/openapi.yaml whenever the data-service
-# source changes on the main branch, or on-demand via workflow_dispatch.
+# Fetches sv/data-service/docs/openapi.yaml from a RUNNING data-service
+# instance using curl and commits the result.
 #
-# How it works:
-#   1. Build the data-service JAR (with shared library dependencies).
-#   2. Start the service using the 'openapi' Spring profile (H2 in-memory —
-#      no MySQL, Kafka, or Vault required).
-#   3. springdoc-openapi-maven-plugin calls /v3/api-docs.yaml and writes
-#      the spec to sv/data-service/docs/openapi.yaml.
-#   4. If the generated file differs from the committed version, the
-#      workflow commits and pushes the update automatically.
-# ─────────────────────────────────────────────────────────────────────────
+# The data-service has deep bootstrap dependencies (dbconstants profile,
+# DB-backed config, Vault) that prevent it starting with an in-memory DB.
+# The reliable approach is to fetch the spec from an already-running
+# dev or staging instance.
+#
+# Local generation (no CI needed):
+#   curl http://localhost:8083/v3/api-docs.yaml \
+#        -o sv/data-service/docs/openapi.yaml
+#   git add sv/data-service/docs/openapi.yaml
+#   git commit -m "docs: update data-service openapi.yaml"
 
 on:
-  push:
-    branches: ["source-branch"]
-    paths:
-      - "sv/data-service/src/**"
-      - "sv/**/pom.xml"
   workflow_dispatch:
     inputs:
+      data_service_url:
+        description: "Data-service base URL (must be reachable from the runner)"
+        required: false
+        default: "http://localhost:8083"
       reason:
         description: "Reason for manual run"
         required: false
@@ -32,82 +31,39 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write   # needed to commit the generated spec back to the branch
+  contents: write
 
 jobs:
   generate-spec:
-    name: "Generate & Commit openapi.yaml"
+    name: "Fetch & Commit openapi.yaml"
     runs-on: [self-hosted, essedum-runner]
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
-      # ── 1. Checkout ────────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0        # full history needed for git push
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 2. Java 21 ─────────────────────────────────────────────────────
-      - name: Set up Java 21
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
-
-      # ── 3. Build shared libraries + data-service JAR ───────────────────
-      # -am  : also build modules the data-service depends on
-      # -T 2 : parallel build (2 threads) to reduce wall-clock time
-      - name: Build data-service and dependencies
-        working-directory: sv
+      - name: Fetch OpenAPI spec from running service
         run: |
-          mvn package \
-            -pl data-service -am \
-            -T 2 \
-            -Dmaven.test.skip=true \
-            -q
+          URL="${{ github.event.inputs.data_service_url }}"
+          URL="${URL:-http://localhost:8083}"
+          echo "Fetching spec from ${URL}/v3/api-docs.yaml ..."
+          mkdir -p sv/data-service/docs
+          curl -f -s "${URL}/v3/api-docs.yaml" -o sv/data-service/docs/openapi.yaml
+          echo "Spec size: $(wc -c < sv/data-service/docs/openapi.yaml) bytes"
+          echo "### OpenAPI spec fetched from ${URL}" >> $GITHUB_STEP_SUMMARY
 
-      # ── 4. Generate OpenAPI spec ───────────────────────────────────────
-      # The generate-openapi Maven profile:
-      #   • Adds spring-boot:start (pre-integration-test, profile=dbjwt,openapi)
-      #   • Adds springdoc-openapi-maven-plugin:generate (integration-test)
-      #   • Adds spring-boot:stop  (post-integration-test)
-      # Output: sv/data-service/docs/openapi.yaml
-      - name: Generate OpenAPI spec
-        working-directory: sv
-        run: |
-          mvn verify \
-            -pl data-service \
-            -P generate-openapi \
-            -Dmaven.test.skip=true \
-            -q
-
-      # ── 5. Validate the generated file exists ─────────────────────────
-      - name: Verify spec was generated
-        run: |
-          if [ ! -f sv/data-service/docs/openapi.yaml ]; then
-            echo "::error::openapi.yaml was not generated"
-            exit 1
-          fi
-          echo "Generated spec size: $(wc -c < sv/data-service/docs/openapi.yaml) bytes"
-          echo "### OpenAPI spec generated" >> $GITHUB_STEP_SUMMARY
-          echo "File: \`sv/data-service/docs/openapi.yaml\`" >> $GITHUB_STEP_SUMMARY
-          echo "Size: $(wc -c < sv/data-service/docs/openapi.yaml) bytes" >> $GITHUB_STEP_SUMMARY
-
-      # ── 6. Commit if changed ──────────────────────────────────────────
       - name: Commit updated spec
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git add sv/data-service/docs/openapi.yaml
-
           if git diff --cached --quiet; then
-            echo "No changes to openapi.yaml — skipping commit"
-            echo "**No spec changes detected.**" >> $GITHUB_STEP_SUMMARY
+            echo "No changes to openapi.yaml - skipping commit"
           else
-            git commit -m "docs: regenerate data-service openapi.yaml [skip ci]"
+            git commit -m "docs: update data-service openapi.yaml [skip ci]"
             git push
-            echo "**Spec updated and committed.**" >> $GITHUB_STEP_SUMMARY
           fi
