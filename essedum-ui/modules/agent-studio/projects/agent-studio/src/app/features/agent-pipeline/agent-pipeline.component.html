@@ -71,6 +71,14 @@
                           </div>
                           <div class="gh-push-header-actions">
                             <mat-icon class="gh-push-toggle-icon">{{ pushStatusPanelOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+                            <button type="button"
+                                    class="gh-push-dismiss-btn"
+                                    (click)="dismissPushStatus($event)"
+                                    matTooltip="Dismiss"
+                                    matTooltipPosition="above"
+                                    aria-label="Dismiss push status">
+                              <mat-icon>close</mat-icon>
+                            </button>
                           </div>
                         </div>
 
