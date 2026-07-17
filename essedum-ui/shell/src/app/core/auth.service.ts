@@ -54,10 +54,8 @@ export class AppOAuthService {
     this.oauthService.configure(this.authConfig);
     // Useful for debugging:
     this.oauthService.events.subscribe((event) => {
-      if (event instanceof OAuthErrorEvent) {
-        console.error("OAuthErrorEvent Object:", event);
-      } else {
-        console.warn("OAuthEvent Object:", event);
+       if (event instanceof OAuthErrorEvent) {
+        console.error("OAuth Error:", event);
       }
     });
 

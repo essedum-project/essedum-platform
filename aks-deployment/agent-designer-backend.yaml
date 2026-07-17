@@ -1,0 +1,4 @@
+# =============================================================================
+# Agent Designer Backend – Kubernetes Deployment
+# Includes: PostgreSQL, Redis, API server, Celery worker
+# =============================================================================
