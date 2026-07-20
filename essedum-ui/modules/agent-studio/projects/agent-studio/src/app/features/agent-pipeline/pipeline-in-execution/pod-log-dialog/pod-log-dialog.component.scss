@@ -56,9 +56,11 @@
 }
 
 .pod-log-action-btn {
+  --mdc-icon-button-state-layer-size: 30px;
   color: #6e9abb;
-  width: 30px;
-  height: 30px;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
 
   mat-icon { font-size: 18px; }
 
@@ -180,4 +182,64 @@
   &::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 3px; }
   &::-webkit-scrollbar-thumb { background: rgba(68, 128, 245, 0.55); border-radius: 3px; }
   &::-webkit-scrollbar-thumb:hover { background: rgba(68, 128, 245, 0.85); }
+}
+
+/* ── Light theme overrides ── */
+:host-context(body.header-light-theme) {
+  .pod-log-dialog {
+    background: #f8fafc;
+    color: #1e293b;
+  }
+
+  .pod-log-toolbar {
+    background: #f8fafc;
+    border-bottom-color: rgba(71, 66, 220, 0.12);
+  }
+
+  .pod-log-title {
+    color: #1e293b;
+  }
+
+  .pod-log-title-icon { color: #4742dc; }
+
+  .pod-log-action-btn {
+    color: #64748b;
+    &:hover { color: #1e293b; background: rgba(71, 66, 220, 0.06); }
+  }
+
+  .pod-log-body {
+    &::-webkit-scrollbar-thumb { background: rgba(71, 66, 220, 0.3); }
+  }
+
+  .pod-log-expansion {
+    border-color: rgba(71, 66, 220, 0.2) !important;
+
+    ::ng-deep {
+      .mat-expansion-panel-body { background: rgba(71, 66, 220, 0.03); }
+      .mat-expansion-indicator::after { color: #fff; }
+    }
+  }
+
+  .meta-label { color: #4742dc; }
+  .meta-value { color: #334155; }
+
+  .pod-log-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .pod-log-card-header { color: #334155; }
+
+  .pod-log-loading { color: #64748b; }
+
+  .pod-log-content {
+    color: #334155;
+    &::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
+    &::-webkit-scrollbar-thumb { background: rgba(71, 66, 220, 0.35); }
+    &::-webkit-scrollbar-thumb:hover { background: rgba(71, 66, 220, 0.6); }
+  }
+
+  ::ng-deep .pod-log-dialog-panel {
+    .mat-mdc-dialog-surface { background: #f8fafc !important; }
+  }
 }

@@ -2130,18 +2130,55 @@ body.header-light-theme {
   .mdc-snackbar__surface { background: transparent !important; border-radius: 12px !important; padding: 12px 18px !important; }
   .mdc-snackbar__label { color: #e2e8f0 !important; font-size: 13px !important; font-weight: 500 !important; padding: 0 !important; height: auto !important; }
   .mat-mdc-button.mat-mdc-snack-bar-action { color: #7eb8ff !important; font-weight: 600 !important; }
+}
 
-  // Custom component snackbars — container is fully transparent; the inner
-  // .custom-snackbar div owns all visual chrome to avoid double-background split.
-  &.snackbar-success, &.snackbar-error, &.snackbar-warning, &.snackbar-info {
-    --mdc-snackbar-container-color: transparent !important;
+// ── Custom-component snackbars (snackbar-success/error/warning/info) ──────────
+// The .custom-snackbar div owns ALL visual chrome.
+// Strip every background, border, shadow, padding, and min-width from the
+// container, its inner .mdc-snackbar wrapper, and the surface so that ONLY
+// the .custom-snackbar background is visible (no bleed on either side).
+.mat-mdc-snack-bar-container.snackbar-success,
+.mat-mdc-snack-bar-container.snackbar-error,
+.mat-mdc-snack-bar-container.snackbar-warning,
+.mat-mdc-snack-bar-container.snackbar-info {
+  --mdc-snackbar-container-color: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+  min-width: unset !important;
+  width: max-content !important;
+
+  .mdc-snackbar {
     background: transparent !important;
-    border: none !important;
+    background-color: transparent !important;
+    min-width: unset !important;
+    width: max-content !important;
+  }
+
+  .mdc-snackbar__surface {
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    min-width: unset !important;
+    width: max-content !important;
     box-shadow: none !important;
-    backdrop-filter: none !important;
-    .mdc-snackbar__surface { background: transparent !important; padding: 0 !important; border-radius: 12px !important; }
   }
 }
+
+// ── Snackbar light theme — custom-snackbar visual overrides ──────────────────
+body.header-light-theme .custom-snackbar {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(35, 79, 153, 0.2) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  backdrop-filter: blur(8px) !important;
+}
+body.header-light-theme .custom-snackbar .snackbar-message { color: #0f172a !important; }
+body.header-light-theme .custom-snackbar .snackbar-close-btn { color: #64748b !important; }
+body.header-light-theme .custom-snackbar .snackbar-action-btn { color: #234f99 !important; }
 
 // Card action bar at bottom
 .lfx-c-card__action-ul { list-style: none; margin: 0; padding: 0; }

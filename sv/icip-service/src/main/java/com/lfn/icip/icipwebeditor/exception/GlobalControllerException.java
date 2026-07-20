@@ -1,11 +1,15 @@
 package com.lfn.icip.icipwebeditor.exception;
 
 import com.lfn.icip.icipwebeditor.model.dto.ErrorResponse;
+import com.lfn.icip.icipwebeditor.rest.exception.SkillRegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -14,7 +18,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalControllerException {
@@ -55,6 +61,80 @@ public class GlobalControllerException {
 	public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
 		logger.error("NullPointerException: {}", ex.getMessage(), ex);
 		return new ResponseEntity<>(Map.of("Error Message", "An internal error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	// ── Skill Registry exceptions ─────────────────────────────────────────────
+
+	/**
+	 * Handle SkillRegistryException — business rule violations (duplicate, not found, etc.)
+	 * Returns 400 Bad Request or 404 Not Found based on the error code.
+	 */
+	@ExceptionHandler(SkillRegistryException.class)
+	public ResponseEntity<ErrorResponse> handleSkillRegistryException(SkillRegistryException ex, WebRequest request) {
+		logger.warn("SkillRegistryException [{}]: {}", ex.getErrorCode(), ex.getMessage());
+
+		boolean isNotFound = ex.getErrorCode() != null &&
+				(ex.getErrorCode().endsWith("_NOT_FOUND") || ex.getErrorCode().contains("NOT_FOUND"));
+
+		HttpStatus status = isNotFound ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+
+		ErrorResponse errorResponse = new ErrorResponse(
+				status.value(),
+				ex.getErrorCode(),
+				ex.getMessage(),
+				null,
+				request.getDescription(false).replace("uri=", "")
+		);
+		errorResponse.setException(ex.getClass().getSimpleName());
+		return new ResponseEntity<>(errorResponse, status);
+	}
+
+	/**
+	 * Handle @Valid bean validation failures — missing or invalid request body fields.
+	 * Returns 400 Bad Request with a list of all field-level validation errors.
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException ex, WebRequest request) {
+		logger.warn("Validation failed: {}", ex.getMessage());
+
+		List<String> fieldErrors = ex.getBindingResult().getFieldErrors()
+				.stream()
+				.map(FieldError::getDefaultMessage)
+				.collect(Collectors.toList());
+
+		ErrorResponse errorResponse = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				"Validation Failed",
+				"Request body validation failed. Please fix the errors and retry.",
+				null,
+				request.getDescription(false).replace("uri=", "")
+		);
+		errorResponse.setErrors(fieldErrors);
+		errorResponse.setException(ex.getClass().getSimpleName());
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * Handle missing required query parameters (e.g. ?org= is mandatory).
+	 * Returns 400 Bad Request with the name of the missing parameter.
+	 */
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
+			MissingServletRequestParameterException ex, WebRequest request) {
+		logger.warn("Missing request parameter: {}", ex.getParameterName());
+
+		ErrorResponse errorResponse = new ErrorResponse(
+				HttpStatus.BAD_REQUEST.value(),
+				"Missing Required Parameter",
+				String.format("Required request parameter '%s' is missing", ex.getParameterName()),
+				String.format("Parameter type: %s", ex.getParameterType()),
+				request.getDescription(false).replace("uri=", "")
+		);
+		errorResponse.setException(ex.getClass().getSimpleName());
+		errorResponse.setSuggestedAction(
+				String.format("Add the required query parameter '%s' to your request.", ex.getParameterName()));
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
 	/**

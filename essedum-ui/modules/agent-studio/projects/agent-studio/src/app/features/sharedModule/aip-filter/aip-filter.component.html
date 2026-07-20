@@ -489,7 +489,7 @@
               </div>
               <ng-template #elseBlockDefault>
                 <div class="mb-4"
-                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS) || (servicev1 === ServiceType.MODEL) || (servicev1 === ServiceType.AGENT_DIRECTORY))">
+                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS) || (servicev1 === ServiceType.MODEL) || (servicev1 === ServiceType.AGENT_DIRECTORY) || (servicev1 === ServiceType.SKILLS))">
                   <div class="filter-options">
 
                     <!-- Type -->
@@ -810,7 +810,7 @@
                   </div> -->
                   
                   <!-- Creation Date Filter -->
-                   <div class="filter-group">
+                  <div class="filter-group">
                     <div class="filter-control">
                       <label class="filter-label">Creation Date</label>
                       <div class="date-range-container">
@@ -843,6 +843,108 @@
                   </div>
                 </div>
               </div>
+
+                <!-- Skills Filters -->
+                <div class="mb-4" *ngIf="servicev1 === ServiceType.SKILLS">
+                  <div class="filter-options">
+
+                    <!-- Skill Type Filter -->
+                    <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Skill Type</label>
+                          <mat-select [id]="'skill-type-select-skills'"
+                            data-select-type="skill-type" placeholder="All">
+                            <mat-option *ngIf="selectedSkillTypeFilter?.length > 0" value=""
+                              (click)="clearAllFilters(FilterType.SKILL_TYPE)">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of skillTypeList">
+                              <mat-option *ngIf="!option.selected" [value]="option"
+                                (onSelectionChange)="skillTypeSelected(option)">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <!-- No *ngIf on container — let *ngFor manage chips; avoids conflict when last chip removed -->
+                      <div class="selected-items">
+                        <mat-chip-set id="skill-type-chip-set-skills" aria-label="Selected Skill Types">
+                          <mat-chip *ngFor="let type of selectedSkillTypeFilter"
+                            [removable]="true" (removed)="removeSkillType(type)">
+                            {{ getSkillTypeLabel(type) }}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+
+                    <!-- Skill Category Filter -->
+                    <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Category</label>
+                          <mat-select [id]="'skill-category-select-skills'"
+                            data-select-type="skill-category" placeholder="All">
+                            <mat-option *ngIf="selectedSkillCategoryFilter?.length > 0" value=""
+                              (click)="clearAllFilters(FilterType.SKILL_CATEGORY)">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of skillCategoryList">
+                              <mat-option *ngIf="!option.selected" [value]="option"
+                                (onSelectionChange)="skillCategorySelected(option)">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="selected-items">
+                        <mat-chip-set id="skill-category-chip-set-skills" aria-label="Selected Skill Categories">
+                          <mat-chip *ngFor="let cat of selectedSkillCategoryFilter"
+                            [removable]="true" (removed)="removeSkillCategory(cat)">
+                            {{ cat }}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+
+                    <!-- Skill Sub-Category Filter -->
+                    <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Sub-Category</label>
+                          <mat-select [id]="'skill-subcategory-select-skills'"
+                            data-select-type="skill-subcategory" placeholder="All">
+                            <mat-option *ngIf="selectedSkillSubcategoryFilter?.length > 0" value=""
+                              (click)="clearAllFilters(FilterType.SKILL_SUBCATEGORY)">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of skillSubcategoryList">
+                              <mat-option *ngIf="!option.selected" [value]="option"
+                                (onSelectionChange)="skillSubcategorySelected(option)">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="selected-items">
+                        <mat-chip-set id="skill-subcategory-chip-set-skills" aria-label="Selected Skill Sub-Categories">
+                          <mat-chip *ngFor="let sub of selectedSkillSubcategoryFilter"
+                            [removable]="true" (removed)="removeSkillSubcategory(sub)">
+                            {{ getSkillSubcategoryLabel(sub) }}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
               </ng-template>
             </ng-template>
           </ng-template>

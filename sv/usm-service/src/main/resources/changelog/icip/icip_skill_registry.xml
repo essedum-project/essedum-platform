@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<!-- ================================================================
+	     ESSEDUM Copilot Skill Registry Tables
+	     Author  : Essedum (generated)
+	     Date    : 2026-07-06
+	     Tables  : icip_skill_registry
+	                icip_skill_audit_log
+	                icip_skill_usage_log
+	     ================================================================ -->
+
+	<!-- ================================================================
+	     TABLE 1: icip_skill_registry
+	     Core skill definitions for the Copilot tab on all pipelines.
+	     ================================================================ -->
+	<changeSet author="Essedum (generated)" id="2026070601-icip-skill-registry">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icip_skill_registry"/>
+			</not>
+		</preConditions>
+		<createTable tableName="icip_skill_registry">
+
+			<!-- IDENTITY -->
+			<column autoIncrement="true" name="id" type="BIGINT">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="skill_uid" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="skill_name" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="skill_alias" type="VARCHAR(128)"/>
+			<column name="skill_version" type="VARCHAR(20)" defaultValue="1.0.0">
+				<constraints nullable="false"/>
+			</column>
+
+			<!-- CLASSIFICATION -->
+			<column name="skill_type" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="skill_category" type="VARCHAR(128)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="skill_subcategory" type="VARCHAR(128)"/>
+			<column name="tags" type="TEXT"/>
+			<column name="trigger_keywords" type="TEXT"/>
+
+			<!-- DESCRIPTION -->
+			<column name="description" type="VARCHAR(512)">
+				<constraints nullable="false"/>
+			</column>
+
+			<!-- TECHNICAL DEFINITION -->
+			<column name="language" type="VARCHAR(64)"/>
+			<column name="framework" type="VARCHAR(128)"/>
+			<column name="runtime" type="VARCHAR(128)"/>
+			<column name="entrypoint" type="VARCHAR(512)"/>
+			<column name="input_schema" type="TEXT"/>
+			<column name="output_schema" type="TEXT"/>
+
+			<!-- AVAILABILITY -->
+			<column name="pipeline_scope" type="VARCHAR(16)" defaultValue="ALL">
+				<constraints nullable="false"/>
+			</column>
+			<column name="status" type="VARCHAR(16)" defaultValue="ACTIVE">
+				<constraints nullable="false"/>
+			</column>
+			<column name="visibility" type="VARCHAR(16)" defaultValue="PROJECT">
+				<constraints nullable="false"/>
+			</column>
+
+			<!-- MULTI-TENANCY -->
+			<column name="organization" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="project_id" type="INT"/>
+
+			<!-- USAGE METRICS -->
+			<column name="usage_count" type="BIGINT" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="last_used_date" type="DATETIME"/>
+
+			<!-- AUDIT (also set by AuditListener via BaseDomain) -->
+			<column name="created_by" type="VARCHAR(100)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="created_date" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+			<column name="last_modified_by" type="VARCHAR(100)"/>
+			<column name="last_modified_date" type="DATETIME"/>
+
+			<!-- SOFT DELETE -->
+			<column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="deleted_by" type="VARCHAR(100)"/>
+			<column name="deleted_date" type="DATETIME"/>
+
+		</createTable>
+	</changeSet>
+
+	<!-- Unique constraint: skill_name + skill_version + organization -->
+	<changeSet author="Essedum (generated)" id="2026070602-icip-skill-registry-unique">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists indexName="uk_skill_name_version_org"/>
+			</not>
+		</preConditions>
+		<addUniqueConstraint
+			tableName="icip_skill_registry"
+			columnNames="skill_name, skill_version, organization"
+			constraintName="uk_skill_name_version_org"/>
+	</changeSet>
+
+	<!-- ================================================================
+	     Soft-delete safe re-create: drop the naive unique constraint and
+	     replace with a partial uniqueness approach.
+	     MySQL does not support partial indexes natively, so we use a
+	     generated virtual column trick:
+	       active_key = CASE WHEN deleted = 0 THEN id ELSE NULL END
+	     The unique constraint on (skill_name, skill_version, organization, active_key)
+	     allows multiple deleted rows with the same name+version+org but only
+	     one active (non-deleted) row.
+	     Split into 2 changeSets:
+	       2026070608a — drop old index (MySQL 5.7 compatible via Liquibase dropIndex)
+	       2026070608b — add virtual column + new unique constraint
+	     ================================================================ -->
+
+	<!-- Step 1: Drop old unique constraint only if it exists -->
+	<changeSet author="Essedum (generated)" id="2026070608a-icip-skill-registry-drop-old-unique">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<indexExists tableName="icip_skill_registry" indexName="uk_skill_name_version_org"/>
+		</preConditions>
+		<dropIndex tableName="icip_skill_registry" indexName="uk_skill_name_version_org"/>
+	</changeSet>
+
+	<!-- Step 2: Add virtual column + soft-delete-safe unique constraint -->
+	<changeSet author="Essedum (generated)" id="2026070608b-icip-skill-registry-soft-delete-unique">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="icip_skill_registry" columnName="active_key"/>
+			</not>
+		</preConditions>
+		<sql splitStatements="true" stripComments="true">
+			ALTER TABLE icip_skill_registry ADD COLUMN active_key VARCHAR(64) AS (CASE WHEN deleted = 0 THEN skill_uid ELSE NULL END) VIRTUAL;
+			ALTER TABLE icip_skill_registry ADD CONSTRAINT uk_skill_name_version_org_active UNIQUE (skill_name, skill_version, organization, active_key);
+		</sql>
+	</changeSet>
+
+	<!-- Indexes on icip_skill_registry -->
+	<changeSet author="Essedum (generated)" id="2026070603-icip-skill-registry-indexes">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists indexName="idx_skill_reg_organization"/>
+			</not>
+		</preConditions>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_organization">
+			<column name="organization"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_status">
+			<column name="status"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_type">
+			<column name="skill_type"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_category">
+			<column name="skill_category"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_created_by">
+			<column name="created_by"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_registry" indexName="idx_skill_reg_deleted">
+			<column name="deleted"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- ================================================================
+	     TABLE 2: icip_skill_audit_log
+	     Immutable change history — one row per field change event.
+	     Written by ICIPSkillServiceImpl on CREATE / UPDATE / DELETE.
+	     ================================================================ -->
+	<changeSet author="Essedum (generated)" id="2026070604-icip-skill-audit-log">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icip_skill_audit_log"/>
+			</not>
+		</preConditions>
+		<createTable tableName="icip_skill_audit_log">
+
+			<column autoIncrement="true" name="id" type="BIGINT">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="skill_id" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="skill_name" type="VARCHAR(256)"/>
+			<!-- CREATE / UPDATE / DELETE / RESTORE -->
+			<column name="action" type="VARCHAR(20)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_field" type="VARCHAR(128)"/>
+			<column name="old_value" type="TEXT"/>
+			<column name="new_value" type="TEXT"/>
+			<column name="changed_by" type="VARCHAR(100)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_date" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+			<column name="organization" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="remarks" type="VARCHAR(512)"/>
+
+		</createTable>
+	</changeSet>
+
+	<!-- Indexes on icip_skill_audit_log -->
+	<changeSet author="Essedum (generated)" id="2026070605-icip-skill-audit-log-indexes">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists indexName="idx_audit_skill_id"/>
+			</not>
+		</preConditions>
+		<createIndex tableName="icip_skill_audit_log" indexName="idx_audit_skill_id">
+			<column name="skill_id"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_audit_log" indexName="idx_audit_changed_by">
+			<column name="changed_by"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_audit_log" indexName="idx_audit_changed_date">
+			<column name="changed_date"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_audit_log" indexName="idx_audit_organization">
+			<column name="organization"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- ================================================================
+	     TABLE 3: icip_skill_usage_log
+	     One row per skill trigger event from any pipeline Copilot tab.
+	     Written by ICIPSkillServiceImpl.identifySkillFromPrompt().
+	     Used for analytics: which skill, which pipeline, how often.
+	     ================================================================ -->
+	<changeSet author="Essedum (generated)" id="2026070606-icip-skill-usage-log">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icip_skill_usage_log"/>
+			</not>
+		</preConditions>
+		<createTable tableName="icip_skill_usage_log">
+
+			<column autoIncrement="true" name="id" type="BIGINT">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="skill_id" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="skill_name" type="VARCHAR(256)"/>
+			<column name="pipeline_id" type="INT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="pipeline_name" type="VARCHAR(256)"/>
+			<column name="triggered_by" type="VARCHAR(100)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="triggered_date" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+			<!-- SLASH_COMMAND / KEYWORD_MATCH / LLM_MATCH / MANUAL_SELECT -->
+			<column name="trigger_source" type="VARCHAR(32)" defaultValue="MANUAL_SELECT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="user_prompt" type="TEXT"/>
+			<column name="organization" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="project_id" type="INT"/>
+
+		</createTable>
+	</changeSet>
+
+	<!-- Indexes on icip_skill_usage_log -->
+	<changeSet author="Essedum (generated)" id="2026070607-icip-skill-usage-log-indexes">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists indexName="idx_usage_skill_id"/>
+			</not>
+		</preConditions>
+		<createIndex tableName="icip_skill_usage_log" indexName="idx_usage_skill_id">
+			<column name="skill_id"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_usage_log" indexName="idx_usage_pipeline_id">
+			<column name="pipeline_id"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_usage_log" indexName="idx_usage_triggered_by">
+			<column name="triggered_by"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_usage_log" indexName="idx_usage_triggered_date">
+			<column name="triggered_date"/>
+		</createIndex>
+		<createIndex tableName="icip_skill_usage_log" indexName="idx_usage_organization">
+			<column name="organization"/>
+		</createIndex>
+	</changeSet>
+
+</databaseChangeLog>
+

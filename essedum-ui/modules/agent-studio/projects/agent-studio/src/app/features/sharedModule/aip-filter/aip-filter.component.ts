@@ -42,7 +42,8 @@ enum ServiceType {
   INSTANCES = 'instances',
   WORKER_TOOLS = 'worker-tools',
   MODEL='model',
-  AGENT_DIRECTORY='agent-directory'
+  AGENT_DIRECTORY='agent-directory',
+  SKILLS = 'skills',
 }
 
 // Enum for filter types
@@ -68,7 +69,10 @@ enum FilterType {
   AGENT_LOCATOR_TYPES = 'agentLocatorTypes',
   AGENT_MODULES = 'agentModules',
   AGENT_ALL_TYPES = 'agentAllTypes',
-  AGENT_CREATION_DATE = 'agentCreationDate'
+  AGENT_CREATION_DATE = 'agentCreationDate',
+  SKILL_TYPE = 'skillType',
+  SKILL_CATEGORY = 'skillCategory',
+  SKILL_SUBCATEGORY = 'skillSubcategory',
 }
 
 @Component({
@@ -204,6 +208,14 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedMlIncType: string[] = [];
   appsTypeList = [];
   modelDataSourceList: FilterItem[] = [];
+
+  // Skills-specific filter lists and selected state (no adapter naming)
+  skillTypeList:              FilterItem[] = [];
+  skillCategoryList:          FilterItem[] = [];
+  skillSubcategoryList:       FilterItem[] = [];
+  selectedSkillTypeFilter:    string[]     = [];
+  selectedSkillCategoryFilter: string[]   = [];
+  selectedSkillSubcategoryFilter: string[] = [];
 
   // Agent Directory specific filters
   agentSkillsList: FilterItem[] = [];
@@ -417,6 +429,9 @@ export class AipFilterComponent implements OnInit, OnChanges {
       case ServiceType.AGENT_DIRECTORY:
         this.getAgentDirectoryFilters();
         break;
+      case ServiceType.SKILLS:
+        this.initializeSkillFilters();
+        break;
       default:
         this.getTags();
         this.fetchAdaptersTypes();
@@ -541,6 +556,125 @@ export class AipFilterComponent implements OnInit, OnChanges {
     //             'Locators:', this.agentLocatorTypesList.length,
     //             'Modules:', this.agentModulesList.length,
     //             'Types:', this.agentAllTypesList.length);
+  }
+
+  /**
+   * Initialises hardcoded skill-specific filter lists (no API call needed).
+   *
+   * Mapping to TagEventDTO (fixed contract — skills component reads these):
+   *   selectedSkillTypeFilter        → TagEventDTO.selectedAdapterType
+   *   selectedSkillCategoryFilter    → TagEventDTO.selectedMlAdapterCategoryType
+   *   selectedSkillSubcategoryFilter → TagEventDTO.selectedMlAdapterSpecType
+   */
+  initializeSkillFilters(): void {
+    this.skillTypeList = [
+      { category: 'Skill Type', value: 'CODE_GENERATION', label: 'Code Generation', selected: false },
+      { category: 'Skill Type', value: 'TEST_GENERATION', label: 'Test Generation', selected: false },
+      { category: 'Skill Type', value: 'DEBUGGING',       label: 'Debugging',       selected: false },
+      { category: 'Skill Type', value: 'REFACTORING',     label: 'Refactoring',     selected: false },
+      { category: 'Skill Type', value: 'DOCUMENTATION',   label: 'Documentation',   selected: false },
+      { category: 'Skill Type', value: 'DEPLOYMENT',      label: 'Deployment',      selected: false },
+      { category: 'Skill Type', value: 'CODE_REVIEW',     label: 'Code Review',     selected: false },
+      { category: 'Skill Type', value: 'SECURITY_SCAN',   label: 'Security Scan',   selected: false },
+      { category: 'Skill Type', value: 'DATA_PIPELINE',   label: 'Data Pipeline',   selected: false },
+      { category: 'Skill Type', value: 'CUSTOM',          label: 'Custom',          selected: false },
+    ];
+
+    this.skillCategoryList = [
+      { category: 'Skill Category', value: 'Backend',  label: 'Backend',  selected: false },
+      { category: 'Skill Category', value: 'Frontend', label: 'Frontend', selected: false },
+      { category: 'Skill Category', value: 'ML',       label: 'ML',       selected: false },
+      { category: 'Skill Category', value: 'DevOps',   label: 'DevOps',   selected: false },
+      { category: 'Skill Category', value: 'Data',     label: 'Data',     selected: false },
+    ];
+
+    this.skillSubcategoryList = [
+      { category: 'Skill Sub-Category', value: 'SpringBoot', label: 'Spring Boot', selected: false },
+      { category: 'Skill Sub-Category', value: 'FastAPI',    label: 'FastAPI',     selected: false },
+      { category: 'Skill Sub-Category', value: 'React',      label: 'React',       selected: false },
+      { category: 'Skill Sub-Category', value: 'Angular',    label: 'Angular',     selected: false },
+      { category: 'Skill Sub-Category', value: 'LangChain',  label: 'LangChain',   selected: false },
+      { category: 'Skill Sub-Category', value: 'Docker',     label: 'Docker',      selected: false },
+      { category: 'Skill Sub-Category', value: 'Kubernetes', label: 'Kubernetes',  selected: false },
+      { category: 'Skill Sub-Category', value: 'Node',       label: 'Node.js',     selected: false },
+      { category: 'Skill Sub-Category', value: 'NextJS',     label: 'Next.js',     selected: false },
+      { category: 'Skill Sub-Category', value: 'Vue',        label: 'Vue',         selected: false },
+    ];
+
+    // Restore pre-selected values from URL params / input
+    this.type.forEach(t => {
+      const item = this.skillTypeList.find(s => s.value === t);
+      if (item) item.selected = true;
+      if (!this.selectedSkillTypeFilter.includes(t)) this.selectedSkillTypeFilter.push(t);
+    });
+  }
+
+  // ── Skill Type ────────────────────────────────────────────────────────────
+
+  skillTypeSelected(item: FilterItem): void {
+    item.selected = true;
+    if (!this.selectedSkillTypeFilter.includes(item.value)) {
+      this.selectedSkillTypeFilter = [...this.selectedSkillTypeFilter, item.value];
+    }
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
+  }
+
+  removeSkillType(value: string): void {
+    const item = this.skillTypeList.find(i => i.value === value);
+    if (item) item.selected = false;
+    // New array reference so Angular *ngFor re-renders immediately
+    this.selectedSkillTypeFilter = this.selectedSkillTypeFilter.filter(v => v !== value);
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+  }
+
+  // ── Skill Category ────────────────────────────────────────────────────────
+
+  skillCategorySelected(item: FilterItem): void {
+    item.selected = true;
+    if (!this.selectedSkillCategoryFilter.includes(item.value)) {
+      this.selectedSkillCategoryFilter = [...this.selectedSkillCategoryFilter, item.value];
+    }
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
+  }
+
+  removeSkillCategory(value: string): void {
+    const item = this.skillCategoryList.find(i => i.value === value);
+    if (item) item.selected = false;
+    this.selectedSkillCategoryFilter = this.selectedSkillCategoryFilter.filter(v => v !== value);
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+  }
+
+  // ── Skill Sub-Category ────────────────────────────────────────────────────
+
+  skillSubcategorySelected(item: FilterItem): void {
+    item.selected = true;
+    if (!this.selectedSkillSubcategoryFilter.includes(item.value)) {
+      this.selectedSkillSubcategoryFilter = [...this.selectedSkillSubcategoryFilter, item.value];
+    }
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
+  }
+
+  removeSkillSubcategory(value: string): void {
+    const item = this.skillSubcategoryList.find(i => i.value === value);
+    if (item) item.selected = false;
+    this.selectedSkillSubcategoryFilter = this.selectedSkillSubcategoryFilter.filter(v => v !== value);
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+  }
+
+  // ── Skill label helper ────────────────────────────────────────────────────
+
+  getSkillTypeLabel(value: string): string {
+    return this.skillTypeList.find(i => i.value === value)?.label ?? value;
+  }
+
+  getSkillSubcategoryLabel(value: string): string {
+    return this.skillSubcategoryList.find(i => i.value === value)?.label ?? value;
   }
 
   /**
@@ -1879,6 +2013,14 @@ export class AipFilterComponent implements OnInit, OnChanges {
     // Reset model datasource filters
     this.selectedModelDatasource = [];
     this.modelDataSourceList.forEach(item => item.selected = false);
+
+    // Reset skills filters
+    this.selectedSkillTypeFilter        = [];
+    this.selectedSkillCategoryFilter    = [];
+    this.selectedSkillSubcategoryFilter = [];
+    this.skillTypeList.forEach(item        => item.selected = false);
+    this.skillCategoryList.forEach(item    => item.selected = false);
+    this.skillSubcategoryList.forEach(item => item.selected = false);
   }
 
   /**
@@ -2120,6 +2262,18 @@ export class AipFilterComponent implements OnInit, OnChanges {
         this.agentCreationDateFrom = null;
         this.agentCreationDateTo = null;
         break;
+      case FilterType.SKILL_TYPE:
+        this.selectedSkillTypeFilter = [];
+        this.skillTypeList.forEach(i => i.selected = false);
+        break;
+      case FilterType.SKILL_CATEGORY:
+        this.selectedSkillCategoryFilter = [];
+        this.skillCategoryList.forEach(i => i.selected = false);
+        break;
+      case FilterType.SKILL_SUBCATEGORY:
+        this.selectedSkillSubcategoryFilter = [];
+        this.skillSubcategoryList.forEach(i => i.selected = false);
+        break;
     }
 
     // Emit changes
@@ -2164,13 +2318,20 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Creates a tag event DTO
    */
   geteventtagsdto(): TagEventDTO {
+    // For the SKILLS service, skill-specific arrays are mapped to TagEventDTO fields
+    // that the skills component reads on the other side:
+    //   selectedSkillTypeFilter        → selectedAdapterType
+    //   selectedSkillCategoryFilter    → selectedMlAdapterCategoryType
+    //   selectedSkillSubcategoryFilter → selectedMlAdapterSpecType
+    const isSkills = this.servicev1 === ServiceType.SKILLS;
+
     return new TagEventDTO(
       this.selectedTagList,
-      this.selectedAdapterType,
+      isSkills ? this.selectedSkillTypeFilter        : this.selectedAdapterType,
       this.selectedAdapterInstance,
       this.selectedMlAdapterConnectionType,
-      this.selectedMlAdapterCategoryType,
-      this.selectedMlAdapterSpecType,
+      isSkills ? this.selectedSkillCategoryFilter    : this.selectedMlAdapterCategoryType,
+      isSkills ? this.selectedSkillSubcategoryFilter : this.selectedMlAdapterSpecType,
       this.selectedMlSpecTemplateCapabilityType,
       this.selectedMlInstancesAdapterType,
       this.selectedMlInstancesConnectionType,
@@ -2235,6 +2396,14 @@ export class AipFilterComponent implements OnInit, OnChanges {
         this.selectedAgentAllTypes?.length > 0 ||
         this.agentCreationDateFrom !== null ||
         this.agentCreationDateTo !== null
+      );
+    }
+
+    if (this.servicev1 === ServiceType.SKILLS) {
+      return (
+        this.selectedSkillTypeFilter?.length > 0 ||
+        this.selectedSkillCategoryFilter?.length > 0 ||
+        this.selectedSkillSubcategoryFilter?.length > 0
       );
     }
 
@@ -2350,6 +2519,17 @@ export class AipFilterComponent implements OnInit, OnChanges {
         }
         if (this.agentCreationDateFrom !== null || this.agentCreationDateTo !== null) {
           activeFilters.push('Date Range');
+        }
+        break;
+      case ServiceType.SKILLS:
+        if (this.selectedSkillTypeFilter?.length > 0) {
+          activeFilters.push('Skill Type');
+        }
+        if (this.selectedSkillCategoryFilter?.length > 0) {
+          activeFilters.push('Category');
+        }
+        if (this.selectedSkillSubcategoryFilter?.length > 0) {
+          activeFilters.push('Sub-Category');
         }
         break;
       default:

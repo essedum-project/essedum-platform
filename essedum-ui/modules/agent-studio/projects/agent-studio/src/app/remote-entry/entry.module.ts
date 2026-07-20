@@ -83,6 +83,12 @@ import { GitLinkStepLocalComponent } from '../features/agent-pipeline/wizard/sha
 import { LitellmComponent } from '../features/litellm/litellm.component';
 import { LangfuseComponent } from '../features/langfuse/langfuse.component';
 
+// Features: skills
+import { SkillsComponent } from '../features/skills/skills.component';
+import { SkillsAddComponent } from '../features/skills/skills-add/skills-add.component';
+import { SkillsEditViewComponent } from '../features/skills/skills-edit-view/skills-edit-view.component';
+import { SkillsService } from '../features/services/skills.service';
+
 // EnlCodeEditorComponent now lives in @essedum/shared-lib (2026-06-03 refactor).
 // It's declared by SharedLibUiModule which agent-studio already imports below.
 
@@ -93,6 +99,7 @@ import { TagsComponent } from '@essedum/shared-lib';
 // AipCard, AipPagination, AipHeader, AipEmptyState, AipSnackbarCustom, AipLoading,
 // AipDeleteConfirmation now come from @essedum/shared-lib (SharedLibUiModule).
 import { AipFilterComponent } from '../features/sharedModule/aip-filter/aip-filter.component';
+import { AipGridComponent } from '../features/sharedModule/aip-grid/aip-grid.component';
 import { GitHubPushComponent } from '../features/sharedModule/github-push/github-push.component';
 
 // Services
@@ -139,9 +146,13 @@ import { environment } from '../../environments/environment';
     // migrated from legacy aip-app-ui
     LitellmComponent,
     LangfuseComponent,
+    SkillsComponent,
+    SkillsAddComponent,
+    SkillsEditViewComponent,
     GitHubPushComponent,
     // sharedModule aip-* — remaining MFE-private (rest moved to SharedLibUiModule)
     AipFilterComponent,
+    AipGridComponent,
   ],
   imports: [
     CommonModule,
@@ -223,6 +234,7 @@ import { environment } from '../../environments/environment';
     AgentPipelineService,
     AiChatCoderService,
     AgentDirectoryService,
+    SkillsService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
