@@ -545,16 +545,15 @@
 }
 
 .editor-controls-bar {
-  // Grid guarantees the actions column always renders, no matter how narrow
-  // the middle editor column gets (AI chat open, split view, etc.). The
-  // file-info column (1fr with minmax(0)) truncates its breadcrumb instead
-  // of pushing the actions off-screen.
+  // Position-relative container so the `.editor-actions` group can be pinned
+  // absolutely to the top-right — that guarantees the Save / Delete / Close
+  // buttons stay visible regardless of column width or global CSS conflicts.
   // NOTE: aip-app-legacy.scss globally sets `.editor-controls-bar { display: flex }`
   //       and `.editor-actions { gap: 6px }` — we force overrides with !important.
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
+  position: relative !important;
+  display: flex !important;
   align-items: center !important;
-  padding: 0 12px !important;
+  padding: 0 120px 0 12px !important;   // reserve 120px on right for actions
   background: #1c2129 !important;
   border-bottom: none !important;
   height: 38px !important;
@@ -570,6 +569,7 @@
     gap: 6px !important;
     overflow: hidden !important;
     min-width: 0 !important;
+    flex: 1 1 auto !important;
 
     .file-type-icon {
       font-size: 15px; width: 15px; height: 15px; color: #8b949e; flex-shrink: 0;
@@ -600,13 +600,19 @@
   }
 
   .editor-actions {
+    // Pinned to the top-right of the toolbar. Because the parent has 120px
+    // right-padding reserved for us, the buttons never overlap the file-info.
+    position: absolute !important;
+    top: 50% !important;
+    right: 8px !important;
+    transform: translateY(-50%) !important;
     display: flex !important;
+    align-items: center !important;
     gap: 4px !important;
-    // Grid auto-sized column — always visible regardless of file-info width.
-    justify-self: end !important;
+    z-index: 3 !important;
     flex-shrink: 0 !important;
-    // Force a minimum footprint so all 3 buttons always have space.
-    min-width: 100px !important;
+    background: #1c2129 !important;
+    padding-left: 4px !important;
 
     button, .action-button {
       width: 30px !important; height: 30px !important; min-width: 30px !important;
@@ -1608,6 +1614,40 @@
       height: 20px !important;
       color: #8b949e !important;
       transition: color 0.15s ease;
+    }
+
+    // Dismiss (×) button — hidden until the toast is hovered so it doesn't
+    // compete visually with the phase icon. Red hover mirrors the AI chat
+    // panel's close button.
+    .gh-push-dismiss-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      margin-left: 2px;
+      border: none;
+      background: transparent;
+      color: #8b949e;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+
+      mat-icon {
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      &:hover {
+        color: #f85149;
+        background: rgba(248, 81, 73, 0.10);
+      }
+      &:focus-visible {
+        outline: 2px solid rgba(88, 166, 255, 0.55);
+        outline-offset: 1px;
+      }
     }
   }
 

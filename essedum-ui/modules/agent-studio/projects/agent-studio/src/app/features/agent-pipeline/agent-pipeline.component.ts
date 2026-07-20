@@ -3636,6 +3636,21 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * state used by the template.
    */
   private wireAiChatCoderService(): void {
+    // The AiChatCoderService is a module-scoped singleton — its messages/files
+    // survive across component instances. When the user navigates away and
+    // comes back (or opens a different pipeline card), we must fully reset
+    // the service so the panel starts fresh instead of showing stale chat.
+    this.aiChatCoder.reset();
+    // Also clear any locally-mirrored state.
+    this.aiChatMessages = [];
+    this.aiChatInput = '';
+    this.aiChatAttachedSkills = [];
+    this.aiChatStreaming = false;
+    this.aiChatDeployAvailable = false;
+    this.aiChatDeployStatus = 'idle';
+    this.aiChatDeployedUrl = null;
+    this.pushStatus = { phase: 'idle' } as AiChatPushState;
+
     // Configure the service for the current pipeline card so persistence
     // (folder/upload) targets the right cname + organisation.
     if (this.currentCname) {
@@ -3707,11 +3722,19 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // GitHub push lifecycle — toast + expandable details panel.
     this.aiChatSubs.push(
       this.aiChatCoder.pushStatus$.subscribe(s => {
-        this.pushStatus = s;
+        // Guard against cross-card leaks: the service is a module-scoped
+        // singleton, so a push kicked off from a different pipeline card
+        // could still be emitting here. If the status is tagged with a
+        // pipelineCname that doesn't match the card we're currently viewing,
+        // treat it as idle so the toast doesn't appear on the wrong card.
+        const belongsToOtherCard = !!s.pipelineCname
+          && !!this.currentCname
+          && s.pipelineCname !== this.currentCname;
+        this.pushStatus = belongsToOtherCard ? { phase: 'idle' } as AiChatPushState : s;
         // Keep the draft URL synced with the latest known value when the panel
         // isn't open (so editing starts from a clean slate).
         if (!this.pushStatusPanelOpen) {
-          this.pushStatusRepoUrlDraft = s.repoUrl ?? '';
+          this.pushStatusRepoUrlDraft = this.pushStatus.repoUrl ?? '';
         }
         this.cdr.detectChanges();
       })
@@ -3961,7 +3984,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   /** Dismiss the entire push toast (does not cancel an in-flight push). */
-  dismissPushStatus(): void {
+  dismissPushStatus(ev?: MouseEvent): void {
+    // The dismiss button lives inside the toast header which also toggles the
+    // expandable details panel on click — stop bubbling so we don't do both.
+    ev?.stopPropagation();
     this.pushStatusPanelOpen = false;
     this.aiChatCoder.dismissPushStatus();
   }

@@ -33,6 +33,9 @@ export interface AiChatPushState {
   phase: AiChatPushPhase;
   /** Session id used for the push. */
   sessionId?: string;
+  /** cname of the pipeline card this push belongs to — used by the UI to
+   *  suppress a toast that leaked in from a different card. */
+  pipelineCname?: string;
   /** Full repo URL (may be edited by the user via updateRepoUrl). */
   repoUrl?: string;
   /** Branch that the push targeted. */
@@ -118,10 +121,27 @@ export class AiChatCoderService implements OnDestroy {
 
   // ─── Public API ────────────────────────────────────────────────────────────
 
-  /** Bind this service instance to a specific pipeline card. */
+  /** Bind this service instance to a specific pipeline card. If the caller
+   *  is switching to a different card than the last one bound, we hard-reset
+   *  the GitHub push status + polling so a toast from the previous card
+   *  doesn't leak into the new one. */
   configureForPipeline(cname: string, organisation: string): void {
+    const switchingCard = this.pipelineCname && this.pipelineCname !== cname;
     this.pipelineCname = cname;
     this.organisation = organisation || 'leo1311';
+    if (switchingCard) {
+      this.clearPushState();
+    }
+  }
+
+  /** Wipe every trace of GitHub-push state — used on navigation / card switch
+   *  and on reset(). Stops polling, drops any in-flight flag, and emits an
+   *  'idle' status so subscribers hide their toast immediately. */
+  private clearPushState(): void {
+    this.stopPushPolling();
+    this.pushInFlight = false;
+    this.customRepoUrl = null;
+    this.pushStatus$.next({ phase: 'idle' });
   }
 
   getSessionId(): string | null { return this.sessionId; }
@@ -216,6 +236,9 @@ export class AiChatCoderService implements OnDestroy {
     this.status$.next('idle');
     this.deploymentStatus$.next('idle');
     this.deploymentResult$.next(null);
+    // Also clear GitHub push state so a stale toast (e.g. "Pushed to GitHub")
+    // does not survive across navigations back into a pipeline card.
+    this.clearPushState();
   }
 
   /** Cancel any in-flight streaming reply. */
@@ -560,9 +583,23 @@ export class AiChatCoderService implements OnDestroy {
         this.extractFilesFromMarkdown(text);
 
         if (this.files.length) {
+          // Normalize + dedupe paths BEFORE persisting. Small models re-emit
+          // modified files by bare filename (e.g. "script.js") even after we
+          // previously stored them under an appDir (e.g. "app-<sid>/script.js"),
+          // which would otherwise cause both entries to be uploaded to the DB
+          // and show up as duplicates (6 files instead of 3) in the codespace
+          // tree after refresh.
+          this.normalizeFilesUnderAppDir(sid);
           this.generationComplete$.next([...this.files]);
-          // Save generated files to pipeline card DB and push to GitHub.
-          this.persistFilesToPipeline().then(() => this.triggerPushToGitHub(sid));
+          // Save generated files to pipeline card DB, materialize them into
+          // Goose's session filesystem (so list_apps + export_app find them),
+          // then push to GitHub. Without the sync-to-Goose step the backend
+          // push fails with "No apps found for session <id>" whenever the LLM
+          // wrote files via markdown fences instead of real write_file tool
+          // calls (common with small models like qwen3:4b).
+          this.persistFilesToPipeline()
+            .then(() => this.syncFilesToGoose(sid))
+            .then(() => this.triggerPushToGitHub(sid));
         }
         this.status$.next('idle');
       });
@@ -698,6 +735,80 @@ export class AiChatCoderService implements OnDestroy {
   // ─── Persist to pipeline DB (folder/upload) ───────────────────────────────
 
   /**
+   * Writes every file in `this.files` into the Goose session filesystem via
+   * the same call-tool endpoint we use for reads. This is the critical step
+   * that fixes the "No apps found for session <id>" push-to-github failure:
+   * the backend push code (VibeGitHubService.fetchSessionFiles) resolves the
+   * file list from Goose's `list_apps` + `export_app`, so if the LLM only
+   * emitted markdown fences (no real write_file tool calls) Goose's session
+   * is empty and the push aborts.
+   *
+   * We prefix flat file paths with a synthetic app directory (`app-<sid>`)
+   * because Goose's `list_apps` only surfaces top-level directories.
+   * Multi-segment paths (e.g. "myapp/index.html") keep their existing prefix
+   * — Goose registers "myapp" as the app in that case. In-place file mutations
+   * on `this.files` also mean the subsequent `triggerPushToGitHub` payload
+   * (which derives `push_dir` from the first path segment) stays consistent.
+   */
+  /**
+   * Collapses every file in `this.files` under a single app directory and
+   * removes duplicates. This is called BEFORE persist/sync/push so that:
+   *   • The ZIP uploaded to /folder/upload contains one copy of each file.
+   *   • Bare-filename re-emissions (e.g. agent returns "script.js" on turn 2)
+   *     replace the previously-saved "app-<sid>/script.js" instead of being
+   *     appended alongside it — otherwise the codespace tree ends up showing
+   *     duplicated files (a flat one + one inside the app folder).
+   *
+   * If any existing entry already has a multi-segment path, that segment's
+   * first directory is reused as the appDir; otherwise a stable per-session
+   * name (`app-<sid>`) is synthesised so `list_apps` returns something.
+   */
+  private normalizeFilesUnderAppDir(sid: string): void {
+    if (!this.files.length) return;
+    const hasMultiSegment = this.files.some(f => f.path.includes('/'));
+    const appDir = hasMultiSegment
+      ? this.files.find(f => f.path.includes('/'))!.path.split('/')[0]
+      : `app-${sid}`;
+
+    const merged: AiChatFile[] = [];
+    const indexByPath = new Map<string, number>();
+    for (const f of this.files) {
+      const newPath = f.path.includes('/') ? f.path : `${appDir}/${f.path}`;
+      const existing = indexByPath.get(newPath);
+      if (existing !== undefined) {
+        // Later entry wins — the agent's latest content is authoritative.
+        merged[existing] = { path: newPath, content: f.content };
+      } else {
+        indexByPath.set(newPath, merged.length);
+        merged.push({ path: newPath, content: f.content });
+      }
+    }
+    this.files = merged;
+    this.files$.next([...this.files]);
+  }
+
+  private async syncFilesToGoose(sid: string): Promise<void> {
+    if (!this.files.length) return;
+    // Files are already normalised by normalizeFilesUnderAppDir() before
+    // persist; just write the current state to Goose.
+    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
+    for (const f of this.files) {
+      const body = {
+        session_id: sid,
+        tool_name: 'developer__text_editor',
+        input: { command: 'write', path: f.path, file_text: f.content ?? '' },
+      };
+      try {
+        await this.http.post(url, body, { headers: this.getHeaders() as any }).toPromise();
+      } catch (err) {
+        // Non-fatal: log and continue — a partial sync still lets the push
+        // proceed with whatever landed successfully.
+        console.warn(`[AiChatCoder] Failed to sync "${f.path}" to Goose:`, err);
+      }
+    }
+  }
+
+  /**
    * Bundles generated files into a ZIP and uploads them to the pipeline card
    * via /folder/upload/{cname}/{org}?zipFile=null&type=App so the codespace
    * tab sees the new files after the next refresh.
@@ -766,6 +877,7 @@ export class AiChatCoderService implements OnDestroy {
     this.pushStatus$.next({
       phase: 'pushing',
       sessionId: sid,
+      pipelineCname: this.pipelineCname ?? undefined,
       branch,
       org,
       repoUrl: this.customRepoUrl ?? undefined,
@@ -822,6 +934,7 @@ export class AiChatCoderService implements OnDestroy {
               this.pushStatus$.next({
                 phase: 'success',
                 sessionId: sid,
+                pipelineCname: this.pushStatus$.value.pipelineCname,
                 org,
                 repoUrl,
                 branch,
@@ -836,6 +949,7 @@ export class AiChatCoderService implements OnDestroy {
               this.pushStatus$.next({
                 phase: 'failed',
                 sessionId: sid,
+                pipelineCname: this.pushStatus$.value.pipelineCname,
                 org,
                 repoUrl,
                 branch,
@@ -928,7 +1042,7 @@ export class AiChatCoderService implements OnDestroy {
 
   /** Dismiss the push toast/panel (does not cancel any in-flight push). */
   dismissPushStatus(): void {
-    this.pushStatus$.next({ phase: 'idle' });
+    this.clearPushState();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
