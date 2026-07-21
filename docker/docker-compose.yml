@@ -1,10 +1,11 @@
 services:
   leap-app-backend-service:
+    profiles: ["app"]
     build:
       context: ../sv
-      dockerfile: Dockerfile_oauth2
+      dockerfile: api-gateway/Dockerfile_oauth2
     ports:
-      - "${BACKEND_PORT:-8082}:8082"
+      - "${BACKEND_PORT:-8082}:8080"
     env_file:
       - .env
     environment:
@@ -23,15 +24,147 @@ services:
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
       - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+      - USM_SERVICE_URL=http://usm-service:8081
+      - ICIP_SERVICE_URL=http://icip-service:8082
+      - DATA_SERVICE_URL=http://data-service:8083
+      - VIBE_SERVICE_URL=http://vibe-service:8084
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
       qdrant:
         condition: service_started
+        required: false
       keycloak:
         condition: service_started
+        required: false
+
+  usm-service:
+    profiles: ["app"]
+    build:
+      context: ../sv
+      dockerfile: usm-service/Dockerfile_oauth2
+    expose:
+      - "8081"
+    env_file:
+      - .env
+    environment:
+      - LEAP_HOME=/app
+      - spring.config.location=/app/conf/
+      - encryption.key=${ENCRYPTION_KEY}
+      - encryption.salt=${ENCRYPTION_SALT}
+      - LOG_PATH=/app/log
+      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_CONTEXTS=fresh
+      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
+      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
+      keycloak:
+        condition: service_started
+        required: false
+
+  icip-service:
+    profiles: ["app"]
+    build:
+      context: ../sv
+      dockerfile: icip-service/Dockerfile_oauth2
+    expose:
+      - "8082"
+    env_file:
+      - .env
+    environment:
+      - LEAP_HOME=/app
+      - spring.config.location=/app/conf/
+      - encryption.key=${ENCRYPTION_KEY}
+      - encryption.salt=${ENCRYPTION_SALT}
+      - LOG_PATH=/app/log
+      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_CONTEXTS=fresh
+      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
+      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
+      keycloak:
+        condition: service_started
+        required: false
+
+  data-service:
+    profiles: ["app"]
+    build:
+      context: ../sv
+      dockerfile: data-service/Dockerfile_oauth2
+    expose:
+      - "8083"
+    env_file:
+      - .env
+    environment:
+      - LEAP_HOME=/app
+      - spring.config.location=/app/conf/
+      - encryption.key=${ENCRYPTION_KEY}
+      - encryption.salt=${ENCRYPTION_SALT}
+      - LOG_PATH=/app/log
+      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_CONTEXTS=fresh
+      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
+      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
+      keycloak:
+        condition: service_started
+        required: false
+
+  vibe-service:
+    profiles: ["app"]
+    build:
+      context: ../sv
+      dockerfile: vibe-service/Dockerfile_oauth2
+    expose:
+      - "8084"
+    env_file:
+      - .env
+    environment:
+      - LEAP_HOME=/app
+      - spring.config.location=/app/conf/
+      - encryption.key=${ENCRYPTION_KEY}
+      - encryption.salt=${ENCRYPTION_SALT}
+      - LOG_PATH=/app/log
+      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_CONTEXTS=fresh
+      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
+      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
+      keycloak:
+        condition: service_started
+        required: false
 
   frontend:
+    profiles: ["app"]
     build:
       context: ..
       dockerfile: essedum-ui/Dockerfile
@@ -59,6 +192,7 @@ services:
       - leap-app-backend-service
 
   py-job-executor:
+    profiles: ["app"]
     build:
       context: ../py-job-executer
       dockerfile: Dockerfile
@@ -67,8 +201,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
 
   py-job-sagemaker-executer:
+    profiles: ["app"]
     build:
       context: ../py-job-sagemaker-executer
       dockerfile: Dockerfile
@@ -77,6 +213,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -91,6 +228,7 @@ services:
       - .env
 
   py-job-vertex-executer:
+    profiles: ["app"]
     build:
       context: ../py-job-vertex-executer
       dockerfile: Dockerfile
@@ -99,6 +237,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
@@ -112,6 +251,7 @@ services:
       - .env
 
   mysql:
+    profiles: ["infra"]
     image: mysql:8.0
     env_file:
       - .env
@@ -121,7 +261,7 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
       - mysql-data:/var/lib/mysql
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${MYSQL_PORT:-3307}:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
@@ -130,6 +270,7 @@ services:
       start_period: 30s
 
   qdrant:
+    profiles: ["infra"]
     image: qdrant/qdrant:latest
     ports:
       - "${QDRANT_PORT:-6333}:6333"
@@ -137,6 +278,7 @@ services:
       - qdrant-data:/qdrant/storage
 
   keycloak:
+    profiles: ["infra"]
     image: quay.io/keycloak/keycloak:25.0.1
     env_file:
       - .env
@@ -159,6 +301,7 @@ services:
       - "start-dev"
 
   proxy-service:
+    profiles: ["app"]
     build:
       context: ../proxy-service
       dockerfile: Dockerfile
@@ -169,9 +312,11 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
 
  # BuildKit daemon — required by adk-code-builder-deployer to build and push images
   buildkitd:
+    profiles: ["infra"]
     image: moby/buildkit:v0.18.2
     privileged: true
     ports:
@@ -182,6 +327,7 @@ services:
     restart: unless-stopped
 
   adk-code-builder-deployer:
+    profiles: ["app"]
     build:
       context: ../adk-code-builder-deployer
       dockerfile: Dockerfile
@@ -201,13 +347,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      - buildkitd
+      buildkitd:
+        condition: service_started
+        required: false
     networks:
       - default
       - essedum-net
     restart: unless-stopped
 
   minio:
+    profiles: ["infra"]
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
     command: server /data --console-address :9001
@@ -233,18 +382,8 @@ services:
       - .env
 
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_MODELS=/root/.ollama
-    volumes:
-      - ../lite-llm/data/ollama:/root/.ollama
-
   litellm-postgres:
+    profiles: ["infra"]
     image: postgres:16
     container_name: litellm-postgres
     restart: unless-stopped
@@ -261,6 +400,7 @@ services:
       retries: 10
 
   litellm:
+    profiles: ["infra"]
     image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm
     restart: unless-stopped
@@ -269,10 +409,8 @@ services:
     depends_on:
       litellm-postgres:
         condition: service_healthy
-      ollama:
-        condition: service_started
     environment:
-      - OLLAMA_HOST=${OLLAMA_HOST:-ollama}
+      - OLLAMA_HOST=${OLLAMA_HOST:-192.168.10.9}
       - OLLAMA_PORT=${OLLAMA_PORT:-11434}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
       - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
@@ -293,6 +431,7 @@ services:
 
 
   langflow-stable-postgres:
+    profiles: ["infra"]
     image: postgres:16
     container_name: langflow-stable-postgres
     restart: unless-stopped
@@ -313,6 +452,7 @@ services:
       retries: 5
 
   langflow-stable:
+    profiles: ["infra"]
     image: langflowai/langflow:latest
     container_name: langflow-stable
     restart: unless-stopped
@@ -334,6 +474,7 @@ services:
       - LANGFLOW_CONFIG_DIR=${LANGFLOW_CONFIG_DIR}
 
   langfuse-postgres:
+    profiles: ["infra"]
     image: postgres:15-alpine
     container_name: langfuse-postgres
     restart: unless-stopped
@@ -353,6 +494,7 @@ services:
       - "127.0.0.1:${LANGFUSE_POSTGRES_PORT:-5434}:5432"
 
   clickhouse:
+    profiles: ["infra"]
     image: clickhouse/clickhouse-server:24.9
     container_name: langfuse-clickhouse
     restart: unless-stopped
@@ -374,6 +516,7 @@ services:
       - "127.0.0.1:${CLICKHOUSE_NATIVE_PORT}:9000"
 
   redis:
+    profiles: ["infra"]
     image: redis:7-alpine
     container_name: langfuse-redis
     command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"]
@@ -387,6 +530,7 @@ services:
       - "127.0.0.1:${REDIS_HOST_PORT}:6379"
 
   langfuse-minio:
+    profiles: ["infra"]
     image: minio/minio:latest
     container_name: langfuse-minio
     command: ["server", "/data", "--console-address", ":9001"]
@@ -407,6 +551,7 @@ services:
       - "127.0.0.1:${LANGFUSE_MINIO_CONSOLE_PORT:-9101}:9001"
 
   minio-setup:
+    profiles: ["infra"]
     image: minio/mc:latest
     container_name: langfuse-minio-setup
     depends_on:
@@ -421,6 +566,7 @@ services:
     restart: "no"
 
   langfuse-worker:
+    profiles: ["infra"]
     image: langfuse/langfuse-worker:3
     container_name: langfuse-worker
     depends_on:
@@ -475,6 +621,7 @@ services:
       - "127.0.0.1:${WORKER_HOST_PORT}:3030"
 
   langfuse-web:
+    profiles: ["infra"]
     image: langfuse/langfuse:3
     container_name: langfuse-web
     depends_on:
