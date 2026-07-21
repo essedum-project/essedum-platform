@@ -99,8 +99,8 @@
               (blur)="markFieldTouched('description')" [placeholder]="PHDESC" rows="5"></textarea>
             <mat-hint align="end">{{ (skillModel.description?.length || 0) }}/16000</mat-hint>
             <mat-error *ngIf="!skillModel.description?.trim()">{{ ERRREQ }}</mat-error>
-            <mat-error *ngIf="isFieldInvalid('description') && skillModel.description?.length! > 16000">{{ ERRMAXDESC }}</mat-error>
           </mat-form-field>
+          <mat-error style="margin-left:0" *ngIf="skillModel.description?.length! > 16000">{{ ERRMAXDESC }}</mat-error>
 
         </div>
       </div>
