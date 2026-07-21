@@ -1,6 +1,7 @@
 package com.lfn.icip.vibecoding.rest;
 
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,24 +139,59 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
-
-        // Push Azure OpenAI configuration into the Goose config store so that
-        // the provider's from_env() call picks them up on the next update.
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
-
-        // Override provider/model to use Azure OpenAI
-        request.put("provider", originalProvider);
-        request.put("model", originalModel);
         logger.info("Agent update provider request — original provider/model: {}/{} — updated to azure_openai/{}",
                 originalProvider, originalModel, azureOpenAiDeploymentName);
-        return vibeCodingService.post("/agent/update_provider", request);
+
+        // ── Step 1: call update_provider IMMEDIATELY (before upserts) ──────
+        // Calling right after agent/start wins the session-creation lock race,
+        // so goosed returns in <100 ms instead of blocking ~61 s waiting for the
+        // background extension-loading task.  The Azure config keys are already
+        // persisted in goosed's config.yaml from the first session; the upserts
+        // below keep them fresh but are not required for the provider call.
+        request.put("provider", originalProvider);
+        request.put("model", originalModel);
+
+        int maxAttempts = 36;           // 36 × 5 s = 3 min ceiling (safety net)
+        int delayMs    = 5_000;
+        ResponseEntity<String> lastResponse = null;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            lastResponse = vibeCodingService.post("/agent/update_provider", request);
+            if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
+                logger.info("update_provider succeeded on attempt {}/{}", attempt, maxAttempts);
+                break;
+            }
+            int status = lastResponse != null ? lastResponse.getStatusCode().value() : -1;
+            logger.warn("update_provider attempt {}/{} returned {} — retrying in {} ms",
+                    attempt, maxAttempts, status, delayMs);
+            if (attempt < maxAttempts) {
+                try { Thread.sleep(delayMs); } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        // ── Step 2: refresh Azure OpenAI config in goosed config store ──────
+        // Done after update_provider so it never adds latency to the lock race.
+        if ("azure_openai".equals(originalProvider) && azureOpenAiEndpoint != null) {
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
+        }
+
+        if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
+            return lastResponse;
+        }
+        logger.error("update_provider failed after {} attempts — last status: {}",
+                maxAttempts, lastResponse != null ? lastResponse.getStatusCode().value() : "null");
+        return lastResponse != null ? lastResponse
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("{\"error\":\"update_provider exhausted all retries\"}");
     }
 
     @PostMapping(value = "/agent/update-session",

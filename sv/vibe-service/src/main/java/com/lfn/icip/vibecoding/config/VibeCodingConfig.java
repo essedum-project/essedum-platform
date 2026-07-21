@@ -38,6 +38,8 @@ public class VibeCodingConfig {
     @Value("${vibe.goose.service.secret-key:sk-1234}")
     private String gooseSecretKey;
 
+    private static final String DEFAULT_SECRET_KEY = "sk-1234";
+
     @PostConstruct
     void validateGooseServiceUrl() {
         if (gooseServiceUrl == null || gooseServiceUrl.isBlank()) {
@@ -51,6 +53,14 @@ public class VibeCodingConfig {
             throw new IllegalStateException(
                     "Property 'vibe.goose.service.url' contains an invalid URL: "
                     + gooseServiceUrl, ex);
+        }
+        // Spring ${VAR:default} only substitutes the default when the env-var is absent,
+        // not when it is set to an empty string. Guard here so a blank GOOSE_SECRET_KEY
+        // (e.g. from an empty K8s secret) never sends an empty X-Secret-Key header.
+        if (gooseSecretKey == null || gooseSecretKey.isBlank()) {
+            logger.warn("GOOSE_SECRET_KEY is blank; falling back to default secret key. "
+                    + "Set GOOSE_SECRET_KEY to a non-empty value in the deployment.");
+            gooseSecretKey = DEFAULT_SECRET_KEY;
         }
         logger.info("Goose service URL configured: {}", gooseServiceUrl);
     }

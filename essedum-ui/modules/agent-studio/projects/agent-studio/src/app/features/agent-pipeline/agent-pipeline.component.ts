@@ -2607,7 +2607,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               organization: organization,
               type: apiParams.type,
               interface: apiParams.interface,
-              namespace: this.getTargetNamespace()
+              namespace: this.getTargetNamespace(),
+              env_vars: this.dynamicEnvArray || [],
+              secrets: this.dynamicSecretsArray || []
             };
            
             this.addToConsole(`Starting ${this.getPipelineTypeName()} pipeline with deployment: ${deploymentAlias}`);
@@ -2635,7 +2637,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               organization: organization,
               type: apiParams.type,
               interface: apiParams.interface,
-              namespace: this.getTargetNamespace()
+              namespace: this.getTargetNamespace(),
+              env_vars: this.dynamicEnvArray || [],
+              secrets: this.dynamicSecretsArray || []
             };
             
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);

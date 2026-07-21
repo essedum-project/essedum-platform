@@ -324,6 +324,9 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy, OnChanges {
       this.dynamicSecretsArray = attrs?.usedSecrets || [];
       if (this.dynamicSecretsArray.length) { this.secretsCollapsed = false; }
       this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
+      // Keep service state in sync so deploy picks up loaded values
+      this.vibeService.setEnvVars(this.dynamicEnvArray);
+      this.vibeService.setSecrets(this.dynamicSecretsArray);
     } catch (e) {
       this.dynamicEnvArray = [];
       this.dynamicSecretsArray = [];
@@ -413,6 +416,9 @@ export class VibeRightPanelComponent implements OnInit, OnDestroy, OnChanges {
       current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
       this.streamItem.json_content = JSON.stringify(current);
       this.services.update(this.streamItem).subscribe();
+      // Push latest values into service so deploy always has fresh data
+      this.vibeService.setEnvVars(this.dynamicEnvArray || []);
+      this.vibeService.setSecrets(this.dynamicSecretsArray || []);
     } catch (e) {
       console.error('saveEnvAndSecrets error:', e);
     }

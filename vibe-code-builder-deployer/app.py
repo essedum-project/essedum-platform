@@ -1,3 +1,7 @@
+import eventlet
+eventlet.monkey_patch()
+import eventlet.tpool
+
 import os
 import boto3
 import subprocess
@@ -418,30 +422,20 @@ def handle_pipeline_trigger(data):
 
         # Replace any external registry with the cluster-internal registry
         original_tag = data["target_image_tag"]
-        base_repo = original_tag.rsplit(":", 1)[0]  # e.g., localhost:5000/test-adk-app
-        
+        base_repo = original_tag.rsplit(":", 1)[0]  # e.g., acrreq0762935.azurecr.io/test-adk-app
+
         log_to_client(f"Original image tag: {original_tag}", step="PREP")
-        
-        # Normalize all registry references to use the configured internal registry
-        base_repo = base_repo.replace("localhost:5000", REGISTRY_URL)
-        base_repo = base_repo.replace("192.168.28.41:32000", REGISTRY_URL)
-        base_repo = base_repo.replace("10.104.220.183:5000", REGISTRY_URL)
-        base_repo = base_repo.replace("acrreq0762935.azurecr.io", REGISTRY_URL)
-        
-        # Fix: Ensure proper format with slash after registry:port
-        # Handle cases where image name might be directly concatenated with port
-        # Pattern: registry:port followed by non-slash character (image name)
-        base_repo = re.sub(r'(\d+):(\d+)([a-zA-Z0-9])', r'\1:\2/\3', base_repo)
-        
-        # Also handle the specific case where port and image are concatenated
-        if ':5000' in base_repo and ':5000/' not in base_repo:
-            # Find the position after :5000 and ensure there's a /
-            base_repo = base_repo.replace(':5000', ':5000/', 1)
-        
+
+        # Normalize all registry references to ACR (credentials mounted via regcred secret)
+        base_repo = base_repo.replace("localhost:5000", "acrreq0762935.azurecr.io")
+        base_repo = base_repo.replace("192.168.28.41:32000", "acrreq0762935.azurecr.io")
+        base_repo = base_repo.replace("10.104.220.183:5000", "acrreq0762935.azurecr.io")
+        # Keep acrreq0762935.azurecr.io as-is
+
         uniq_tag  = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
-        image_tag = f"{base_repo}:v1-{uniq_tag}"            # e.g., registry.container-registry.svc.cluster.local:5000/test-adk-app:v1-20251217-1905
-        
-        log_to_client(f"Transformed to local registry: {image_tag}", step="PREP")
+        image_tag = f"{base_repo}:v1-{uniq_tag}"
+
+        log_to_client(f"Target image: {image_tag}", step="PREP")
 
 
         # 3) UNZIP
@@ -570,22 +564,27 @@ def handle_pipeline_trigger(data):
             "--local",
             f"dockerfile={build_context_path}",
             "--output",
-            f"type=image,name={image_tag},push=true,registry.insecure=true",
+            f"type=image,name={image_tag},push=true",
             "--no-cache",
         ]
         
         log_to_client(f"BuildKit command: {' '.join(cmd)}", step="BUILD")
 
         process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0
         )
 
-        for line in iter(process.stdout.readline, ""):
-            if line:
-                socketio.emit("build_log", {"log": line.rstrip()})
+        while True:
+            line = eventlet.tpool.execute(process.stdout.readline)
+            if not line:  # EOF
+                break
+            decoded = line.decode("utf-8", errors="replace").rstrip()
+            if decoded:
+                socketio.emit("build_log", {"log": decoded})
+            eventlet.sleep(0)  # yield to eventlet so pings are processed
 
         process.stdout.close()
-        return_code = process.wait()
+        return_code = eventlet.tpool.execute(process.wait)
 
         if return_code != 0:
             raise Exception("Buildctl failed. Check build logs.")
@@ -792,6 +791,7 @@ def create_deployment_object(name, image, namespace, secret_name=None, container
         metadata=client.V1ObjectMeta(labels={"app": name}),
         spec=client.V1PodSpec(
             containers=[container],
+            image_pull_secrets=[client.V1LocalObjectReference(name="regcred")],
         ),
     )
 
@@ -830,43 +830,40 @@ def create_env_secret(secret_name, namespace, env_file_path=None, extra_vars: di
     """Reads a .env file and/or a dict of extra vars and creates a Kubernetes Secret"""
     data = {}
 
-    if not os.path.exists(env_file_path):
-        return None
+    if env_file_path and not os.path.exists(env_file_path):
+        pass  # no file; extra_vars will be checked below
+    elif env_file_path:
+        with open(env_file_path, "r", encoding="utf-8") as f:
+            for raw in f:
+                line = raw.strip()
 
-    with open(env_file_path, "r", encoding="utf-8") as f:
-        for raw in f:
-            line = raw.strip()
+                # Skip empty or commented lines
+                if not line or line.startswith("#"):
+                    continue
 
-            # Skip empty or commented lines
-            if not line or line.startswith("#"):
-                continue
+                # Optional 'export ' prefix
+                if line.lower().startswith("export "):
+                    line = line[7:].lstrip()
 
-            # Optional 'export ' prefix
-            if line.lower().startswith("export "):
-                line = line[7:].lstrip()
+                # Must contain '='
+                if "=" not in line:
+                    # Safely ignore malformed lines instead of crashing
+                    continue
 
-            # Must contain '='
-            if "=" not in line:
-                # Safely ignore malformed lines instead of crashing
-                continue
+                key, value = line.split("=", 1)
 
-            key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip()
 
-            key = key.strip()
-            value = value.strip()
+                # Trim surrounding quotes if present
+                if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
+                    value = value[1:-1]
 
-            # Trim surrounding quotes if present
-            if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
-                value = value[1:-1]
+                # Skip if key is empty
+                if not key:
+                    continue
 
-            # Skip if key is empty
-            if not key:
-                continue
-
-            data[key] = value
-
-    if not data:
-        return None
+                data[key] = value
 
     # extra_vars (from pipeline payload) override .env file values
     if extra_vars:
@@ -894,7 +891,7 @@ def wait_for_deployment_ready(api, name, namespace, timeout_seconds=120):
         ready   = dep.status.ready_replicas or 0
         if desired > 0 and ready == desired:
             return True
-        time.sleep(2)
+        eventlet.sleep(2)
     return False
 
 
