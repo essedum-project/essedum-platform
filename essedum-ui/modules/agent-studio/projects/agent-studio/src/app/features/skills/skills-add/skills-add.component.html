@@ -96,9 +96,10 @@
           <mat-form-field appearance="fill" class="full-width" floatLabel="always">
             <mat-label>{{ LBLDESC }} <span class="req-star">*</span></mat-label>
             <textarea matInput [(ngModel)]="skillModel.description" name="description" required
-              (blur)="markFieldTouched('description')" [placeholder]="PHDESC" rows="3"></textarea>
+              (blur)="markFieldTouched('description')" [placeholder]="PHDESC" rows="5"></textarea>
+            <mat-hint align="end">{{ (skillModel.description?.length || 0) }}/16000</mat-hint>
             <mat-error *ngIf="!skillModel.description?.trim()">{{ ERRREQ }}</mat-error>
-            <mat-error *ngIf="isFieldInvalid('description') && skillModel.description?.length! > 512">{{ ERRMAXDESC }}</mat-error>
+            <mat-error *ngIf="isFieldInvalid('description') && skillModel.description?.length! > 16000">{{ ERRMAXDESC }}</mat-error>
           </mat-form-field>
 
         </div>
