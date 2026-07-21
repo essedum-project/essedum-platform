@@ -94,6 +94,13 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ];
 
   readonly gridActions: AipGridAction[] = [
+     {
+      key: 'view',
+      label: this.VIEWPIPELINE,
+      icon: 'visibility',
+      iconCssClass: 'menu-icon-view',
+      visibleFn: (row) => ['running','pending','succeeded','failed'].includes((row.pod_phase || '').toLowerCase()),
+    },
     {
       key: 'logs',
       label: this.VIEWPODLOGS,
@@ -122,6 +129,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   onGridAction(event: { key: string; row: ExecutionPipeline }): void {
     switch (event.key) {
+      case 'view':            this.viewPipeline(event.row);               break;
       case 'logs':             this.checkPodLog(event.row);               break;
       case 'delete-pod':       this.deletePipelinePod(event.row);         break;
       case 'delete-container': this.deletePipelineAsContainer(event.row); break;
@@ -337,9 +345,21 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   viewPipeline(pipeline: ExecutionPipeline): void {
-    const name = pipeline.container_name;
-    this.service.getStreamingServicesByName(name).subscribe((res: any) => {
-      const navigationExtras: NavigationExtras = {
+   // const name = pipeline.container_name;
+    const pipelineName = '';
+
+    const cardTitle =
+      pipeline.pipelineMode === 'mcp' ? 'MCP Pipelines' :
+      pipeline.pipelineMode === 'app' ? 'App Pipelines' :
+      'Agent Pipelines';
+
+    const cardForState = {
+      ...pipeline,
+      name:  pipelineName,  
+    };
+
+    const navigate = (streamItem: any) => {
+      const extras: NavigationExtras = {
         queryParams: {
           page: 1,
           search: '',
@@ -349,28 +369,43 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: pipeline.pipelineMode === 'mcp'
-            ? 'MCP Pipelines'
-            : pipeline.pipelineMode === 'app'
-            ? 'App Pipelines'
-            : 'Pipeline Agent',
-          pipelineAlias: res?.alias || pipeline.container_name,
-          streamItem: res,
-          card: pipeline,
+          cardTitle,
+          pipelineAlias: streamItem?.alias || pipeline.container_name,
+          streamItem,
+          card: cardForState,
           pipelineMode: pipeline.pipelineMode,
+          source: 'pipeline-in-execution',
         },
         relativeTo: this.route,
       };
+      this.router.navigate([`../view/${pipelineName}`], extras);
+    };
 
-      if (res?.type === 'AIAgent' ||
+    this.service.getStreamingServicesByName(pipelineName).subscribe({
+      next: (res: any) => {
+        const typeOk =
+          res?.type === 'AIAgent' ||
           res?.type === 'mcpServer' ||
           res?.type === 'appPipeline' ||
-          res?.type === 'NativeScript' ||
+          res?.type === 'NativeScript';
+        const modeOk =
           pipeline.pipelineMode === 'mcp' ||
           pipeline.pipelineMode === 'app' ||
-          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent')) {
-        this.router.navigate([`../view/${name}`], navigationExtras);
-      }
+          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent');
+
+        if (typeOk || modeOk) {
+          navigate(res);
+        } else {
+          navigate(res);
+        }
+      },
+      error: () => {
+        this.service.message(
+          `Could not load pipeline details for "${name}". Opening with limited data.`,
+          'warning'
+        );
+        navigate(null);
+      },
     });
   }
 

@@ -1035,6 +1035,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Reset all state first
     this.resetToDashboardState();
     
+    // If we came from pipeline-in-execution, go back to it via browser history
+    const historyState = history.state;
+    if (historyState?.source === 'pipeline-in-execution') {
+      this.location.back();
+      return;
+    }
+    
     // Get current route parameters to preserve org and roleId
     const org = localStorage.getItem('organisation') || 'leo1311';
     const roleId = localStorage.getItem('roleId') || '1';
