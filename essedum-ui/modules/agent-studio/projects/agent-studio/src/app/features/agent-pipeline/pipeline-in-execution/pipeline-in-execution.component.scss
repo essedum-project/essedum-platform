@@ -230,6 +230,7 @@
 
 /* ── Menu icon colours (::ng-deep: rendered by aip-grid in CDK overlay) ── */
 ::ng-deep .material-icons       { font-size: 18px; }
+::ng-deep .menu-icon-view       { color: #4480f5 !important; }
 ::ng-deep .menu-icon-log        { color: #06b6d4 !important; }
 ::ng-deep .menu-icon-delete     { color: #f87171 !important; }
 ::ng-deep .menu-icon-delete-pod { color: #f87171 !important; }
