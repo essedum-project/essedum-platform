@@ -113,7 +113,7 @@ public class ICIPSkillRegistry extends BaseDomain implements Serializable {
     private String triggerKeywords;
 
     // ── DESCRIPTION ────────────────────────────────────────────��────────────
-    @Column(name = "description", nullable = false, length = 512)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     // ── TECHNICAL DEFINITION ─────────────────────────────────────────────────

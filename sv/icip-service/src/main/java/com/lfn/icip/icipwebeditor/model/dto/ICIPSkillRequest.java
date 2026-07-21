@@ -62,7 +62,7 @@ public class ICIPSkillRequest {
 
     // ── DESCRIPTION ─────────────────────────────────────────────────��───────
     @NotBlank(message = "Description is required")
-    @Size(max = 512, message = "Description must not exceed 512 characters")
+    @Size(max = 16000, message = "Description must not exceed 16000 characters")
     private String description;
 
     // ── TECHNICAL DEFINITION ─────────────────────────────────────────────────
