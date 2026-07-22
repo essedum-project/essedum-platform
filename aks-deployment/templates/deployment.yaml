@@ -58,6 +58,10 @@ spec:
         - name: ${SERVICE_NAME}
           image: ${DOCKER_REGISTRY}/${SERVICE_IMAGE}:${IMAGE_TAG}
           imagePullPolicy: Always
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
           ports:
             - name: http
               containerPort: ${CONTAINER_PORT}
@@ -121,5 +125,11 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 5
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
       terminationGracePeriodSeconds: 30
       restartPolicy: Always
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}

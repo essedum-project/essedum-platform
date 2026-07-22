@@ -122,9 +122,11 @@ wait_for() {
   local name="$1"
   local ns="${2:-${KUBE_NAMESPACE}}"
   info "Waiting for deployment/${name} in ns/${ns} ..."
-  kubectl rollout status "deployment/${name}" -n "${ns}" --timeout=180s \
-    && success "  deployment/${name} ready." \
-    || warn "  deployment/${name} timed out — check manually: kubectl describe pod -l app=${name} -n ${ns}"
+  if kubectl rollout status "deployment/${name}" -n "${ns}" --timeout=180s; then
+    success "  deployment/${name} ready."
+  else
+    warn "  deployment/${name} timed out — check manually: kubectl describe pod -l app=${name} -n ${ns}"
+  fi
 }
 
 # ─── Pre-flight checks ────────────────────────────────────────────────────────

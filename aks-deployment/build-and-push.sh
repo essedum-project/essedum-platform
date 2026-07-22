@@ -76,10 +76,12 @@ validate_env() {
 registry_login() {
   if [[ -n "${DOCKER_USERNAME:-}" && -n "${DOCKER_PASSWORD:-}" ]]; then
     info "Logging in to registry: ${DOCKER_REGISTRY}"
-    echo "${DOCKER_PASSWORD}" | docker login "${DOCKER_REGISTRY}" \
-      -u "${DOCKER_USERNAME}" --password-stdin \
-      && success "Registry login OK." \
-      || error "Registry login failed. Check DOCKER_USERNAME / DOCKER_PASSWORD."
+    if echo "${DOCKER_PASSWORD}" | docker login "${DOCKER_REGISTRY}" \
+      -u "${DOCKER_USERNAME}" --password-stdin; then
+      success "Registry login OK."
+    else
+      error "Registry login failed. Check DOCKER_USERNAME / DOCKER_PASSWORD."
+    fi
   else
     warn "DOCKER_USERNAME or DOCKER_PASSWORD not set — skipping registry login."
     warn "Ensure the registry is reachable without auth, or login manually first."
@@ -99,9 +101,11 @@ clean_npm_lockfiles() {
   done < <(find "${REPO_ROOT}/essedum-ui" \
     \( -name "package-lock.json" -o -name "yarn.lock" \) \
     -not -path "*/node_modules/*" -print0 2>/dev/null)
-  [[ ${removed} -gt 0 ]] \
-    && success "Removed ${removed} lock file(s)." \
-    || info "No lock files found — nothing to clean."
+  if [[ ${removed} -gt 0 ]]; then
+    success "Removed ${removed} lock file(s)."
+  else
+    info "No lock files found — nothing to clean."
+  fi
 }
 
 # ─── npm registry config ──────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ configure_npm() {
       warn "npm config set failed — npm may not be installed on this host (OK for Docker-only builds)."
     if [[ -n "${NPM_AUTH_TOKEN:-}" ]]; then
       local reg_host
-      reg_host="$(echo "${NPM_REGISTRY_URL}" | sed 's|https\?:||')"
+      reg_host="${NPM_REGISTRY_URL#http*:}"
       npm config set "${reg_host}:_authToken" "${NPM_AUTH_TOKEN}" 2>/dev/null || true
       success "npm auth token configured for ${reg_host}."
     fi

@@ -24,6 +24,10 @@ spec:
       containers:
       - name: postgres
         image: postgres:16-alpine
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: 5432
         env:
@@ -44,8 +48,16 @@ spec:
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
+        - name: postgres-tmp
+          mountPath: /tmp
+        - name: postgres-run
+          mountPath: /run/postgresql
       volumes:
       - name: postgres-data
+        emptyDir: {}
+      - name: postgres-tmp
+        emptyDir: {}
+      - name: postgres-run
         emptyDir: {}
 ---
 apiVersion: v1
@@ -84,6 +96,10 @@ spec:
       containers:
       - name: redis
         image: redis:7-alpine
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: 6379
         readinessProbe:
@@ -91,6 +107,12 @@ spec:
             command: ["redis-cli", "ping"]
           initialDelaySeconds: 5
           periodSeconds: 10
+        volumeMounts:
+        - name: redis-tmp
+          mountPath: /tmp
+      volumes:
+      - name: redis-tmp
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -123,13 +145,16 @@ spec:
       labels:
         app: agent-designer-backend
     spec:
-      containers:
       nodeSelector:
         kubernetes.io/hostname: essedum-1
       containers:
       - name: agent-designer-backend
         image: ${DOCKER_REGISTRY}/agent-designer-backend:${IMAGE_TAG}
         imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: 8180
         env:
@@ -153,6 +178,12 @@ spec:
             port: 8180
           initialDelaySeconds: 30
           periodSeconds: 15
+        volumeMounts:
+        - name: backend-tmp
+          mountPath: /tmp
+      volumes:
+      - name: backend-tmp
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -177,4 +208,9 @@ metadata:
   namespace: aipns
 type: Opaque
 stringData:
-  POSTGRES_PASSWORD: "agentflow"
+  # IMPORTANT: Replace this placeholder before applying to any cluster.
+  # Set the real password via:
+  #   kubectl create secret generic agent-designer-secrets -n aipns \
+  #     --from-literal=POSTGRES_PASSWORD='<real-password>' \
+  #     --dry-run=client -o yaml | kubectl apply -f -
+  POSTGRES_PASSWORD: "<CHANGEME>"

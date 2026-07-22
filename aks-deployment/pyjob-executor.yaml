@@ -19,8 +19,18 @@ spec:
       - name: pyjob-executor-container
         image: ${DOCKER_REGISTRY}/py-job-executer:${IMAGE_TAG}
         imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+      volumes:
+      - name: tmp-dir
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
