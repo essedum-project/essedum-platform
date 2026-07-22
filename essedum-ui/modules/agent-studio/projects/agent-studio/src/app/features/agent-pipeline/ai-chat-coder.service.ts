@@ -591,14 +591,12 @@ export class AiChatCoderService implements OnDestroy {
           // tree after refresh.
           this.normalizeFilesUnderAppDir(sid);
           this.generationComplete$.next([...this.files]);
-          // Save generated files to pipeline card DB, materialize them into
-          // Goose's session filesystem (so list_apps + export_app find them),
-          // then push to GitHub. Without the sync-to-Goose step the backend
-          // push fails with "No apps found for session <id>" whenever the LLM
-          // wrote files via markdown fences instead of real write_file tool
-          // calls (common with small models like qwen3:4b).
+          // Save generated files to pipeline card DB, then push to GitHub.
+          // The per-file /agent/call-tool sync step has been removed by
+          // request — file contents now come exclusively from /list-apps
+          // inline payloads and markdown extraction, and the backend push
+          // works off the DB-persisted files.
           this.persistFilesToPipeline()
-            .then(() => this.syncFilesToGoose(sid))
             .then(() => this.triggerPushToGitHub(sid));
         }
         this.status$.next('idle');
@@ -619,9 +617,12 @@ export class AiChatCoderService implements OnDestroy {
     this.http.get<any>(url, { params: { session_id: sid }, headers: this.getHeaders() as any })
       .subscribe({
         next: (resp) => {
-          const paths = this.extractFilePathsFromListApps(resp);
-          if (paths.length) this.fetchFilesFromServer(sid, paths, done);
-          else done();
+          // Only use inline file contents returned by list-apps. The prior
+          // per-file /agent/call-tool fetch has been removed by request —
+          // any file whose content is not inline is left to the markdown
+          // extractor to fill in from the assistant's reply.
+          this.extractFilePathsFromListApps(resp);
+          done();
         },
         error: () => done(),
       });
@@ -666,90 +667,13 @@ export class AiChatCoderService implements OnDestroy {
     return paths;
   }
 
-  private fetchFilesFromServer(sid: string, paths: string[], done: () => void): void {
-    const next = (i: number) => {
-      if (i >= paths.length) { done(); return; }
-      const path = paths[i];
-      // Try the qualified path first (e.g. "myapp/index.html"). If that comes
-      // back empty, retry with just the basename (Goose sometimes accepts one
-      // form or the other depending on how the app was created).
-      this.fetchOnePath(sid, path, (content) => {
-        if (content) {
-          this.upsertFile(path, content);
-          next(i + 1);
-          return;
-        }
-        const basename = path.split('/').pop();
-        if (basename && basename !== path) {
-          this.fetchOnePath(sid, basename, (fallbackContent) => {
-            if (fallbackContent) this.upsertFile(path, fallbackContent);
-            else console.warn(`[AiChatCoder] Could not fetch content for "${path}" — file will keep prior content if any.`);
-            next(i + 1);
-          });
-        } else {
-          console.warn(`[AiChatCoder] Empty response for "${path}"`);
-          next(i + 1);
-        }
-      });
-    };
-    next(0);
-  }
-
-  private fetchOnePath(sid: string, path: string, cb: (content: string | null) => void): void {
-    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
-    const body = { session_id: sid, tool_name: 'developer__text_editor', input: { command: 'view', path } };
-    this.http.post<any>(url, body, { headers: this.getHeaders() }).subscribe({
-      next: (resp) => {
-        const content = this.extractContentFromToolResponse(resp);
-        cb(content && content.trim() !== '' ? content : null);
-      },
-      error: (err) => {
-        console.warn(`[AiChatCoder] call-tool failed for "${path}":`, err?.status ?? err);
-        cb(null);
-      },
-    });
-  }
-
-  private extractContentFromToolResponse(resp: any): string | null {
-    if (!resp) return null;
-    if (typeof resp === 'string') return resp;
-    if (typeof resp.output === 'string') return resp.output;
-    if (typeof resp.content === 'string') return resp.content;
-    if (typeof resp.result === 'string') return resp.result;
-    if (typeof resp.text === 'string') return resp.text;
-    if (resp.result && typeof resp.result === 'object') {
-      if (typeof resp.result.content === 'string') return resp.result.content;
-      if (typeof resp.result.output === 'string') return resp.result.output;
-      if (typeof resp.result.text === 'string') return resp.result.text;
-    }
-    if (resp.toolResult) {
-      if (typeof resp.toolResult.content === 'string') return resp.toolResult.content;
-      if (Array.isArray(resp.toolResult.content)) {
-        const parts = resp.toolResult.content.map((c: any) => c?.text ?? c?.content ?? '').filter(Boolean);
-        if (parts.length) return parts.join('\n');
-      }
-    }
-    return null;
-  }
+  // NOTE: The per-file /agent/call-tool fetch flow (fetchFilesFromServer,
+  // fetchOnePath, extractContentFromToolResponse) was removed by request.
+  // File contents now come exclusively from /agent/list-apps inline payloads
+  // and from markdown code-block extraction in the assistant reply.
 
   // ─── Persist to pipeline DB (folder/upload) ───────────────────────────────
 
-  /**
-   * Writes every file in `this.files` into the Goose session filesystem via
-   * the same call-tool endpoint we use for reads. This is the critical step
-   * that fixes the "No apps found for session <id>" push-to-github failure:
-   * the backend push code (VibeGitHubService.fetchSessionFiles) resolves the
-   * file list from Goose's `list_apps` + `export_app`, so if the LLM only
-   * emitted markdown fences (no real write_file tool calls) Goose's session
-   * is empty and the push aborts.
-   *
-   * We prefix flat file paths with a synthetic app directory (`app-<sid>`)
-   * because Goose's `list_apps` only surfaces top-level directories.
-   * Multi-segment paths (e.g. "myapp/index.html") keep their existing prefix
-   * — Goose registers "myapp" as the app in that case. In-place file mutations
-   * on `this.files` also mean the subsequent `triggerPushToGitHub` payload
-   * (which derives `push_dir` from the first path segment) stays consistent.
-   */
   /**
    * Collapses every file in `this.files` under a single app directory and
    * removes duplicates. This is called BEFORE persist/sync/push so that:
@@ -785,27 +709,6 @@ export class AiChatCoderService implements OnDestroy {
     }
     this.files = merged;
     this.files$.next([...this.files]);
-  }
-
-  private async syncFilesToGoose(sid: string): Promise<void> {
-    if (!this.files.length) return;
-    // Files are already normalised by normalizeFilesUnderAppDir() before
-    // persist; just write the current state to Goose.
-    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
-    for (const f of this.files) {
-      const body = {
-        session_id: sid,
-        tool_name: 'developer__text_editor',
-        input: { command: 'write', path: f.path, file_text: f.content ?? '' },
-      };
-      try {
-        await this.http.post(url, body, { headers: this.getHeaders() as any }).toPromise();
-      } catch (err) {
-        // Non-fatal: log and continue — a partial sync still lets the push
-        // proceed with whatever landed successfully.
-        console.warn(`[AiChatCoder] Failed to sync "${f.path}" to Goose:`, err);
-      }
-    }
   }
 
   /**

@@ -2607,7 +2607,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               organization: organization,
               type: apiParams.type,
               interface: apiParams.interface,
-              namespace: this.getTargetNamespace()
+              namespace: this.getTargetNamespace(),
+              env_vars: this.dynamicEnvArray || [],
+              secrets: this.dynamicSecretsArray || []
             };
            
             this.addToConsole(`Starting ${this.getPipelineTypeName()} pipeline with deployment: ${deploymentAlias}`);
@@ -2635,7 +2637,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               organization: organization,
               type: apiParams.type,
               interface: apiParams.interface,
-              namespace: this.getTargetNamespace()
+              namespace: this.getTargetNamespace(),
+              env_vars: this.dynamicEnvArray || [],
+              secrets: this.dynamicSecretsArray || []
             };
             
             this.addToConsole(`Using fallback deployment name: ${fallbackDeploymentName}`);
@@ -3509,7 +3513,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const value = String(s.skillUid ?? s.id ?? s.skillAlias ?? s.skillName ?? '').trim();
     if (!value) return null;
     const label = String(s.skillName ?? s.skillAlias ?? s.name ?? value).trim();
-    const description = String(s.description ?? s.skillCategory ?? '').trim();
+    // Description intentionally omitted — the skill dropdown shows label only.
+    const description = '';
     const type = String(s.skillType ?? '').toUpperCase();
     const iconMap: Record<string, string> = {
       CODE_GENERATION: 'auto_awesome',
