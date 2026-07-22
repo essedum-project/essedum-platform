@@ -140,27 +140,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Verify kubeconfig available
+      - name: Install kubeconform (offline manifest validator)
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          if [ ! -f "$KUBECONFIG" ]; then
-            echo "::warning::KUBECONFIG not available in CI environment"
-            echo "Dry-run validation will be performed locally"
-          fi
+          KUBECONFORM_VERSION="v0.6.7"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz kubeconform
+          install -m 0755 kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
 
       - name: Validate Kubernetes manifests syntax
         run: |
           export PATH="/snap/bin:/usr/local/bin:$PATH"
-          echo "Validating aks-deployment manifests..."
+          echo "Validating aks-deployment manifests (offline)..."
+          found_manifests=false
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ -f "$manifest" ]; then
+              found_manifests=true
               echo "Validating: $manifest"
-              kubectl apply -f "$manifest" --dry-run=client --validate=false > /dev/null || {
-                echo "::error::Invalid manifest: $manifest"
+              kubeconform -strict -summary "$manifest" > /dev/null || {
+                echo "::error::Manifest schema/syntax validation failed: $manifest"
                 exit 1
               }
             fi
           done
+
+          if [ "$found_manifests" = false ]; then
+            echo "No manifests found under aks-deployment"
+          fi
 
       - name: Check for required fields in deployments
         run: |
