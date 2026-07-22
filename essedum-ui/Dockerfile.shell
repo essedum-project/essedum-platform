@@ -7,16 +7,19 @@ WORKDIR /workspace/shell
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 RUN npm run build-prod || (echo "=== Angular error log ===" && cat /tmp/ng-*/angular-errors.log 2>/dev/null && exit 1)
-
-FROM nginx:alpine
-RUN mkdir -p /etc/nginx/ssl
-# Generate a self-signed cert so runtime TLS works without external cert files.
+# Generate self-signed cert in the build stage (network available here).
 RUN apk add --no-cache openssl && \
 		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 			-subj "/CN=localhost" \
-			-keyout /etc/nginx/ssl/server.key \
-			-out /etc/nginx/ssl/server.crt && \
+			-keyout /tmp/server.key \
+			-out /tmp/server.crt && \
 		apk del openssl
+
+FROM nginx:alpine
+RUN mkdir -p /etc/nginx/ssl
+# Copy pre-generated cert from the build stage (no apk needed at runtime).
+COPY --from=build /tmp/server.key /etc/nginx/ssl/server.key
+COPY --from=build /tmp/server.crt /etc/nginx/ssl/server.crt
 
 COPY essedum-ui/nginx_shell.conf /etc/nginx/nginx.conf
 WORKDIR /app

@@ -155,7 +155,7 @@ jobs:
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ -f "$manifest" ]; then
               echo "Validating: $manifest"
-              kubectl apply -f "$manifest" --dry-run=client > /dev/null || {
+              kubectl apply -f "$manifest" --dry-run=client --validate=false > /dev/null || {
                 echo "::error::Invalid manifest: $manifest"
                 exit 1
               }

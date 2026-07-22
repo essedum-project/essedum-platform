@@ -1,9 +1,8 @@
 # -------------------------------------------------------
 # Stage 1: Build with Maven
 # -------------------------------------------------------
-FROM eclipse-temurin:21-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files
