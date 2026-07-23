@@ -142,16 +142,18 @@ jobs:
 
       - name: Install kubeconform (offline manifest validator)
         run: |
-          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          export PATH="/snap/bin:$PATH"
           KUBECONFORM_VERSION="v0.6.7"
+          mkdir -p "$HOME/.local/bin"
           curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
             | tar -xz kubeconform
-          install -m 0755 kubeconform /usr/local/bin/kubeconform
-          kubeconform -v
+          install -m 0755 kubeconform "$HOME/.local/bin/kubeconform"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/kubeconform" -v
 
       - name: Validate Kubernetes manifests syntax
         run: |
-          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          export PATH="/snap/bin:$HOME/.local/bin:$PATH"
           echo "Validating aks-deployment manifests (offline)..."
           found_manifests=false
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
@@ -541,6 +543,7 @@ jobs:
         if: steps.needs_build.outputs.skip != 'true' && matrix.context == 'sv'
         run: |
           DEVOPS_SV="/home/devopsuser/devops/actions/essedum-platform/sv"
+          missing=0
           for svc in usm-service icip-service data-service vibe-service; do
             src="$DEVOPS_SV/$svc/lfn-keycloak2.crt"
             dst="$GITHUB_WORKSPACE/sv/$svc/lfn-keycloak2.crt"
@@ -548,9 +551,47 @@ jobs:
               cp "$src" "$dst"
               echo "✓ Copied $svc/lfn-keycloak2.crt"
             else
-              echo "::warning::$src not found — keytool import will fail for $svc"
+              echo "::error::Missing required certificate file: $src"
+              missing=1
             fi
           done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Backend build context is incomplete: required .crt files are missing on runner"
+            exit 1
+          fi
+
+      - name: Backend build preflight
+        if: steps.needs_build.outputs.skip != 'true' && matrix.context == 'sv'
+        run: |
+          echo "Service: ${{ matrix.service }}"
+          echo "Dockerfile: ${{ matrix.dockerfile }}"
+          echo "Context: ${{ matrix.context }}"
+
+          case "${{ matrix.service }}" in
+            essedum-api-gateway|essedum-usm-service)
+              required_cert="$GITHUB_WORKSPACE/sv/usm-service/lfn-keycloak2.crt"
+              ;;
+            essedum-icip-service)
+              required_cert="$GITHUB_WORKSPACE/sv/icip-service/lfn-keycloak2.crt"
+              ;;
+            essedum-data-service)
+              required_cert="$GITHUB_WORKSPACE/sv/data-service/lfn-keycloak2.crt"
+              ;;
+            essedum-vibe-service)
+              required_cert="$GITHUB_WORKSPACE/sv/vibe-service/lfn-keycloak2.crt"
+              ;;
+            *)
+              required_cert=""
+              ;;
+          esac
+
+          if [ -n "$required_cert" ] && [ ! -f "$required_cert" ]; then
+            echo "::error::Missing certificate for ${{ matrix.service }}: $required_cert"
+            exit 1
+          fi
+
+          echo "✓ Backend preflight passed"
 
       - name: Build and push Docker image
         # Plain docker build + docker push — same as local build-and-push.sh.
@@ -560,8 +601,14 @@ jobs:
         if: steps.needs_build.outputs.skip != 'true'
         run: |
           IMAGE="${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}"
+          CACHE_FLAG=""
+          if [ "${{ matrix.context }}" = "sv" ]; then
+            CACHE_FLAG="--no-cache"
+            echo "Backend service detected: forcing clean docker build to avoid stale runner cache"
+          fi
           echo "Building: ${IMAGE}"
           DOCKER_BUILDKIT=1 docker build \
+            ${CACHE_FLAG} \
             --progress=plain \
             --build-arg DOCKER_REGISTRY="${{ env.DOCKER_REGISTRY }}" \
             --build-arg IMAGE_TAG="${{ github.sha }}" \
