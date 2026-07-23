@@ -264,6 +264,13 @@ jobs:
             "pyjob-executor"
           )
 
+          if kubectl get secret registry-credentials -n "$NAMESPACE" >/dev/null 2>&1; then
+            HAS_REGISTRY_SECRET=true
+          else
+            HAS_REGISTRY_SECRET=false
+            echo "::warning::registry-credentials secret not found in $NAMESPACE; imagePullSecrets will be removed from target deployments"
+          fi
+
           failures=0
           for deployment in "${TARGET_DEPLOYMENTS[@]}"; do
             if ! kubectl get deployment "$deployment" -n "$NAMESPACE" >/dev/null 2>&1; then
@@ -271,21 +278,35 @@ jobs:
               continue
             fi
 
-            echo "Patching $deployment (runAsNonRoot=false, imagePullSecrets=registry-credentials)"
+            container_name=$(kubectl get deployment "$deployment" -n "$NAMESPACE" -o jsonpath='{.spec.template.spec.containers[0].name}' 2>/dev/null || true)
+            if [ -z "$container_name" ]; then
+              echo "::error::Unable to detect container name for $deployment"
+              failures=$((failures + 1))
+              continue
+            fi
 
-            if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='merge' \
-              -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"registry-credentials"}]}}}}' >/dev/null; then
-              echo "::error::Failed to patch imagePullSecrets for $deployment"
+            echo "Patching $deployment (pod/container runAsNonRoot=false, container=$container_name)"
+
+            if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='strategic' \
+              -p "{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"runAsNonRoot\":false},\"containers\":[{\"name\":\"$container_name\",\"securityContext\":{\"runAsNonRoot\":false}}]}}}}" >/dev/null; then
+              echo "::error::Failed to patch runAsNonRoot for $deployment"
               failures=$((failures + 1))
             fi
 
-            if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
-              -p='[{"op":"replace","path":"/spec/template/spec/containers/0/securityContext/runAsNonRoot","value":false}]' >/dev/null; then
-              if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
-                -p='[{"op":"add","path":"/spec/template/spec/containers/0/securityContext","value":{"runAsNonRoot":false}}]' >/dev/null; then
-                echo "::error::Failed to patch runAsNonRoot for $deployment"
+            if [ "$HAS_REGISTRY_SECRET" = true ]; then
+              if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='merge' \
+                -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"registry-credentials"}]}}}}' >/dev/null; then
+                echo "::error::Failed to patch imagePullSecrets for $deployment"
                 failures=$((failures + 1))
               fi
+            else
+              kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
+                -p='[{"op":"remove","path":"/spec/template/spec/imagePullSecrets"}]' >/dev/null 2>&1 || true
+            fi
+
+            if ! kubectl rollout restart deployment "$deployment" -n "$NAMESPACE" >/dev/null; then
+              echo "::error::Failed to rollout restart $deployment after remediation patch"
+              failures=$((failures + 1))
             fi
           done
 
@@ -338,7 +359,8 @@ jobs:
               done
             fi
 
-            if kubectl describe deploy "$deployment" -n "$NAMESPACE" | grep -qi 'runAsNonRoot and image will run as root'; then
+            effective_non_root=$(kubectl get deploy "$deployment" -n "$NAMESPACE" -o jsonpath='{.spec.template.spec.containers[0].securityContext.runAsNonRoot}' 2>/dev/null || true)
+            if [ "$effective_non_root" = "true" ]; then
               echo "::error::Detected securityContext mismatch for $deployment (runAsNonRoot=true but image runs as root)"
             fi
 
