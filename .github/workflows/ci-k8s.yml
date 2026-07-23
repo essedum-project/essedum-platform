@@ -601,20 +601,61 @@ jobs:
         if: steps.needs_build.outputs.skip != 'true'
         run: |
           IMAGE="${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}"
-          CACHE_FLAG=""
+
+          IS_BACKEND=false
+          MAX_ATTEMPTS=1
           if [ "${{ matrix.context }}" = "sv" ]; then
-            CACHE_FLAG="--no-cache"
-            echo "Backend service detected: forcing clean docker build to avoid stale runner cache"
+            IS_BACKEND=true
+            MAX_ATTEMPTS=3
           fi
+
+          BUILD_LOG="${RUNNER_TEMP}/docker-build-${{ matrix.service }}.log"
+          BUILD_RC=1
+
           echo "Building: ${IMAGE}"
-          DOCKER_BUILDKIT=1 docker build \
-            ${CACHE_FLAG} \
-            --progress=plain \
-            --build-arg DOCKER_REGISTRY="${{ env.DOCKER_REGISTRY }}" \
-            --build-arg IMAGE_TAG="${{ github.sha }}" \
-            -t "${IMAGE}" \
-            -f "${{ matrix.dockerfile }}" \
-            "${{ matrix.context }}"
+
+          for ATTEMPT in $(seq 1 "$MAX_ATTEMPTS"); do
+            echo "Docker build attempt ${ATTEMPT}/${MAX_ATTEMPTS} for ${{ matrix.service }}"
+            set +e
+            DOCKER_BUILDKIT=1 docker build \
+              --progress=plain \
+              --build-arg DOCKER_REGISTRY="${{ env.DOCKER_REGISTRY }}" \
+              --build-arg IMAGE_TAG="${{ github.sha }}" \
+              -t "${IMAGE}" \
+              -f "${{ matrix.dockerfile }}" \
+              "${{ matrix.context }}" 2>&1 | tee "$BUILD_LOG"
+            BUILD_RC=${PIPESTATUS[0]}
+            set -e
+
+            if [ "$BUILD_RC" -eq 0 ]; then
+              break
+            fi
+
+            if [ "$IS_BACKEND" = true ] && [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
+              echo "Backend build failed (attempt ${ATTEMPT}). Retrying in 15s..."
+              sleep 15
+            fi
+          done
+
+          if [ "$BUILD_RC" -ne 0 ]; then
+            if [ "$IS_BACKEND" = true ]; then
+              echo "::group::Backend Maven diagnostic extract"
+              grep -Ei "unknown host|temporary failure|could not transfer artifact|failed to read artifact descriptor|plugin .* could not be resolved|dependency .* could not be resolved|PKIX|SSL|TLS|Connection reset|Read timed out|BUILD FAILURE|\[ERROR\]" "$BUILD_LOG" | tail -n 80 || true
+              echo "::endgroup::"
+
+              {
+                echo "### Backend Maven Diagnostics (${{ matrix.service }})"
+                echo ""
+                echo "Build attempts: ${MAX_ATTEMPTS}"
+                echo ""
+                echo "Top matching error lines:"
+                grep -Ei "unknown host|temporary failure|could not transfer artifact|failed to read artifact descriptor|plugin .* could not be resolved|dependency .* could not be resolved|PKIX|SSL|TLS|Connection reset|Read timed out|BUILD FAILURE|\[ERROR\]" "$BUILD_LOG" | tail -n 40 || true
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::error::Docker build failed for ${{ matrix.service }} after ${MAX_ATTEMPTS} attempt(s)"
+            exit "$BUILD_RC"
+          fi
+
           echo "Pushing: ${IMAGE}"
           docker push "${IMAGE}"
           echo "✓ Built and pushed ${IMAGE}"
