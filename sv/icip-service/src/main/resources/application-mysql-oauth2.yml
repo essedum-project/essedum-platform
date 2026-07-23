@@ -207,6 +207,7 @@ security:
   clientId: ${OAUTH2_CLIENT_ID:essedum-45}
   scope: ${OAUTH2_SCOPE:openid profile email}
   claim: ${OAUTH2_USER_CLAIM:email}
+  display-claim: ${OAUTH2_DISPLAY_CLAIM:preferred_username}
   createUserIfNotExist: ${OAUTH2_CREATE_USER_IF_NOT_EXIST:true}
   silentRefreshTimeoutFactor: 0.85
 
