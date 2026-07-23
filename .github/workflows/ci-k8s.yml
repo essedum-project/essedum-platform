@@ -593,6 +593,24 @@ jobs:
 
           echo "✓ Backend preflight passed"
 
+      - name: Network/DNS preflight for external repositories
+        if: steps.needs_build.outputs.skip != 'true'
+        run: |
+          set -e
+          hosts=("repo.maven.apache.org" "dl-cdn.alpinelinux.org")
+          for host in "${hosts[@]}"; do
+            if ! getent hosts "$host" >/dev/null 2>&1; then
+              echo "::error::DNS resolution failed for $host"
+              exit 1
+            fi
+            echo "✓ DNS resolved: $host"
+          done
+
+          curl --connect-timeout 10 --max-time 20 -fsI "https://repo.maven.apache.org/maven2/" >/dev/null
+          echo "✓ Reachable: repo.maven.apache.org"
+          curl --connect-timeout 10 --max-time 20 -fsI "https://dl-cdn.alpinelinux.org/alpine/" >/dev/null
+          echo "✓ Reachable: dl-cdn.alpinelinux.org"
+
       - name: Build and push Docker image
         # Plain docker build + docker push — same as local build-and-push.sh.
         # No buildx, no TOML config, no docker-container driver.
@@ -603,10 +621,21 @@ jobs:
           IMAGE="${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}"
 
           IS_BACKEND=false
+          IS_FRONTEND_DNS_SENSITIVE=false
           MAX_ATTEMPTS=1
           if [ "${{ matrix.context }}" = "sv" ]; then
             IS_BACKEND=true
             MAX_ATTEMPTS=3
+          fi
+          if [ "${{ matrix.service }}" = "essedum-frontend-shell" ]; then
+            IS_FRONTEND_DNS_SENSITIVE=true
+            MAX_ATTEMPTS=3
+          fi
+
+          NETWORK_FLAG=""
+          if [ "$IS_BACKEND" = true ] || [ "$IS_FRONTEND_DNS_SENSITIVE" = true ]; then
+            NETWORK_FLAG="--network=host"
+            echo "Using host network for docker build to improve DNS reliability"
           fi
 
           BUILD_LOG="${RUNNER_TEMP}/docker-build-${{ matrix.service }}.log"
@@ -618,6 +647,7 @@ jobs:
             echo "Docker build attempt ${ATTEMPT}/${MAX_ATTEMPTS} for ${{ matrix.service }}"
             set +e
             DOCKER_BUILDKIT=1 docker build \
+              ${NETWORK_FLAG} \
               --progress=plain \
               --build-arg DOCKER_REGISTRY="${{ env.DOCKER_REGISTRY }}" \
               --build-arg IMAGE_TAG="${{ github.sha }}" \
@@ -631,8 +661,8 @@ jobs:
               break
             fi
 
-            if [ "$IS_BACKEND" = true ] && [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
-              echo "Backend build failed (attempt ${ATTEMPT}). Retrying in 15s..."
+            if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
+              echo "Build failed (attempt ${ATTEMPT}). Retrying in 15s..."
               sleep 15
             fi
           done
@@ -651,6 +681,11 @@ jobs:
                 echo "Top matching error lines:"
                 grep -Ei "unknown host|temporary failure|could not transfer artifact|failed to read artifact descriptor|plugin .* could not be resolved|dependency .* could not be resolved|PKIX|SSL|TLS|Connection reset|Read timed out|BUILD FAILURE|\[ERROR\]" "$BUILD_LOG" | tail -n 40 || true
               } >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if [ "$IS_FRONTEND_DNS_SENSITIVE" = true ]; then
+              echo "::group::Frontend DNS/APK diagnostic extract"
+              grep -Ei "DNS: transient error|unable to select packages|no such package|apk add|ERROR:" "$BUILD_LOG" | tail -n 80 || true
+              echo "::endgroup::"
             fi
             echo "::error::Docker build failed for ${{ matrix.service }} after ${MAX_ATTEMPTS} attempt(s)"
             exit "$BUILD_RC"

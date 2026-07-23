@@ -18,7 +18,7 @@ COPY . .
 
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B clean install -pl api-gateway -am \
+    mvn -U -B clean install -pl api-gateway -am \
         -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure

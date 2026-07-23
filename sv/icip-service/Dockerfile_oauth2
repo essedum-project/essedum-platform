@@ -10,7 +10,7 @@ COPY . .
 
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B clean install -pl icip-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+    mvn -U -B clean install -pl icip-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
 RUN mkdir -p /app/conf /app/lib /app/log && \
