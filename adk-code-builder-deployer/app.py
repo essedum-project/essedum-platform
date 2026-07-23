@@ -15,6 +15,7 @@ import json, base64, requests
 
 DEPLOY_MODE = os.getenv("DEPLOY_MODE", "kubernetes")  # "kubernetes" or "docker"
 DOCKER_NETWORK = os.getenv("DOCKER_NETWORK", "docker_default")
+ACR_REGISTRY = os.getenv("ACR_REGISTRY", "")  # e.g. myregistry.azurecr.io
 
 if DEPLOY_MODE == "kubernetes":
     from kubernetes import client, config
@@ -493,7 +494,7 @@ def handle_pipeline_trigger(data):
     {
       "minio_endpoint": "...", "access_key": "...", "secret_key": "...",
       "bucket_name": "...", "file_path": "...",
-      "target_image_tag": "acrreq0762935.azurecr.io/app:v1",
+      "target_image_tag": "<ACR_REGISTRY>/app:v1",
       "deployment_name": "runner-service",
       "namespace": "aipns"   # optional
     }
@@ -558,12 +559,17 @@ def handle_pipeline_trigger(data):
             # In Docker mode, no registry needed — use local image name
             image_tag = f"{deploy_name}:v1-{uniq_tag}"
         else:
-            base_repo = data["target_image_tag"].rsplit(":", 1)[0]  # e.g., acrreq0762935.azurecr.io/test-adk-app
-            # Normalize any local/NodePort registry references to ACR
-            base_repo = base_repo.replace("localhost:5000", "acrreq0762935.azurecr.io")
-            base_repo = base_repo.replace("192.168.28.41:32000", "acrreq0762935.azurecr.io")
-            base_repo = base_repo.replace("registry.container-registry.svc.cluster.local:5000", "acrreq0762935.azurecr.io")
-            base_repo = base_repo.replace("10.104.220.183:5000", "acrreq0762935.azurecr.io")
+            base_repo = data["target_image_tag"].rsplit(":", 1)[0]
+            # Normalize any local/NodePort registry references to the configured ACR registry
+            if ACR_REGISTRY:
+                local_registries = [
+                    "localhost:5000",
+                    "192.168.28.41:32000",
+                    "registry.container-registry.svc.cluster.local:5000",
+                    "10.104.220.183:5000",
+                ]
+                for local_reg in local_registries:
+                    base_repo = base_repo.replace(local_reg, ACR_REGISTRY)
             # Use the already-sanitized deploy_name as the image name to avoid invalid reference format
             # (e.g. if target_image_tag contains a leading dash from an unsanitized alias)
             registry = base_repo.rsplit("/", 1)[0]  # e.g., 10.104.220.183:5000
