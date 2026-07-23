@@ -255,26 +255,32 @@ jobs:
             --namespace="$NAMESPACE" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-          if [ -z "${KEYCLOAK_ADMIN_USER:-}" ] || [ -z "${KEYCLOAK_ADMIN_PASSWORD:-}" ]; then
-            echo "::error::KEYCLOAK_ADMIN_USER and KEYCLOAK_ADMIN_PASSWORD must be set"
+          if [ -n "${KEYCLOAK_ADMIN_USER:-}" ] && [ -n "${KEYCLOAK_ADMIN_PASSWORD:-}" ]; then
+            kubectl create secret generic keycloak-admin-secret \
+              --from-literal=username="${KEYCLOAK_ADMIN_USER}" \
+              --from-literal=password="${KEYCLOAK_ADMIN_PASSWORD}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          elif kubectl get secret keycloak-admin-secret -n "$NAMESPACE" >/dev/null 2>&1; then
+            echo "keycloak-admin-secret already exists — skipping update"
+          else
+            echo "::error::keycloak-admin-secret not found in cluster. Set KEYCLOAK_ADMIN_USER and KEYCLOAK_ADMIN_PASSWORD to create it."
             exit 1
           fi
-          kubectl create secret generic keycloak-admin-secret \
-            --from-literal=username="${KEYCLOAK_ADMIN_USER}" \
-            --from-literal=password="${KEYCLOAK_ADMIN_PASSWORD}" \
-            --namespace="$NAMESPACE" \
-            --dry-run=client -o yaml | kubectl apply -f -
 
-          if [ -z "${AGENT_DESIGNER_POSTGRES_PASSWORD:-}" ]; then
-            echo "::error::AGENT_DESIGNER_POSTGRES_PASSWORD must be set"
+          if [ -n "${AGENT_DESIGNER_POSTGRES_PASSWORD:-}" ]; then
+            AGENT_DESIGNER_DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL:-postgresql+asyncpg://agentflow:${AGENT_DESIGNER_POSTGRES_PASSWORD}@agent-designer-postgres:5432/agentflow}"
+            kubectl create secret generic agent-designer-secrets \
+              --from-literal=POSTGRES_PASSWORD="${AGENT_DESIGNER_POSTGRES_PASSWORD}" \
+              --from-literal=DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          elif kubectl get secret agent-designer-secrets -n "$NAMESPACE" >/dev/null 2>&1; then
+            echo "agent-designer-secrets already exists — skipping update"
+          else
+            echo "::error::agent-designer-secrets not found in cluster. Set AGENT_DESIGNER_POSTGRES_PASSWORD to create it."
             exit 1
           fi
-          AGENT_DESIGNER_DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL:-postgresql+asyncpg://agentflow:${AGENT_DESIGNER_POSTGRES_PASSWORD}@agent-designer-postgres:5432/agentflow}"
-          kubectl create secret generic agent-designer-secrets \
-            --from-literal=POSTGRES_PASSWORD="${AGENT_DESIGNER_POSTGRES_PASSWORD}" \
-            --from-literal=DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL}" \
-            --namespace="$NAMESPACE" \
-            --dry-run=client -o yaml | kubectl apply -f -
 
           if [ -n "${VIBE_AZURE_OPENAI_ENDPOINT:-}" ] && [ -n "${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_VERSION:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_KEY:-}" ]; then
             kubectl create secret generic essedum-vibe-secret \
