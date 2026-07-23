@@ -34,8 +34,8 @@ socketio = SocketIO(
 DOWNLOAD_DIR = "/tmp/downloads"
 EXTRACT_DIR = "/tmp/source_code"
 BUILDKIT_ADDR = os.getenv("BUILDKIT_ADDR", "tcp://buildkitd:1234")
-# Use ClusterIP for kubelet compatibility (containerd is configured for this IP)
-REGISTRY_URL = os.getenv("REGISTRY_URL", "10.104.220.183:5000")
+REGISTRY_URL = os.getenv("REGISTRY_URL", "")
+ACR_REGISTRY = os.getenv("ACR_REGISTRY", "")  # e.g. myregistry.azurecr.io
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
@@ -375,7 +375,7 @@ def handle_pipeline_trigger(data):
     {
       "minio_endpoint": "...", "access_key": "...", "secret_key": "...",
       "bucket_name": "...", "file_path": "...",
-      "target_image_tag": "acrreq0762935.azurecr.io/app:v1",
+      "target_image_tag": "<ACR_REGISTRY>/app:v1",
       "deployment_name": "runner-service",
       "namespace": "aipns"   # optional
     }
@@ -422,15 +422,20 @@ def handle_pipeline_trigger(data):
 
         # Replace any external registry with the cluster-internal registry
         original_tag = data["target_image_tag"]
-        base_repo = original_tag.rsplit(":", 1)[0]  # e.g., acrreq0762935.azurecr.io/test-adk-app
+        base_repo = original_tag.rsplit(":", 1)[0]
 
         log_to_client(f"Original image tag: {original_tag}", step="PREP")
 
-        # Normalize all registry references to ACR (credentials mounted via regcred secret)
-        base_repo = base_repo.replace("localhost:5000", "acrreq0762935.azurecr.io")
-        base_repo = base_repo.replace("192.168.28.41:32000", "acrreq0762935.azurecr.io")
-        base_repo = base_repo.replace("10.104.220.183:5000", "acrreq0762935.azurecr.io")
-        # Keep acrreq0762935.azurecr.io as-is
+        # Normalize any local/NodePort registry references to the configured ACR registry
+        if ACR_REGISTRY:
+            local_registries = [
+                "localhost:5000",
+                "192.168.28.41:32000",
+                "registry.container-registry.svc.cluster.local:5000",
+                "10.104.220.183:5000",
+            ]
+            for local_reg in local_registries:
+                base_repo = base_repo.replace(local_reg, ACR_REGISTRY)
 
         uniq_tag  = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
         image_tag = f"{base_repo}:v1-{uniq_tag}"
