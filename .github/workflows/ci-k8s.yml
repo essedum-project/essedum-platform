@@ -969,9 +969,28 @@ jobs:
           fi
 
           if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
-            echo "::error::Kubernetes API endpoint is unreachable using current kubeconfig: ${SERVER}"
-            echo "::error::Update runner kubeconfig to the active control-plane endpoint and restart runner service"
-            exit 1
+            echo "::warning::Kubernetes API endpoint unreachable using current kubeconfig: ${SERVER}"
+            echo "::warning::Attempting kubeconfig recovery from local microk8s..."
+
+            if ! command -v microk8s >/dev/null 2>&1; then
+              echo "::error::microk8s command not found; cannot auto-recover kubeconfig"
+              exit 1
+            fi
+
+            TMP_CFG="${RUNNER_TEMP}/kubeconfig-recovered.yaml"
+            microk8s config > "$TMP_CFG"
+            cp "$TMP_CFG" "$KUBECONFIG"
+            rm -f "$TMP_CFG"
+
+            CTX=$(kubectl config current-context 2>/dev/null || true)
+            SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true)
+            echo "Recovered kube context: ${CTX:-<unset>}"
+            echo "Recovered kube server: ${SERVER:-<unset>}"
+
+            if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+              echo "::error::Kubernetes API endpoint is unreachable after kubeconfig recovery: ${SERVER}"
+              exit 1
+            fi
           fi
 
       - name: Get cluster context
