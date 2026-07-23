@@ -125,15 +125,20 @@ public class ICIPSkillController {
      */
     private String resolveUser(String userIdHeader) {
         // 1. Try JWT token from SecurityContextHolder (set by CustomAuthFilter)
+        logger.debug("Resolving user from JWT claim config");
         String jwtUser = ICIPUtils.getUser(userClaim);
+
         if (jwtUser != null && !jwtUser.isBlank() && !"Anonymous".equals(jwtUser)) {
+            logger.debug("User resolved from JWT claim successfully");
             return jwtUser;
         }
         // 2. Fall back to Userid header
         if (userIdHeader != null && !userIdHeader.isBlank()) {
+            logger.debug("JWT user unavailable - using Userid header");
             return userIdHeader;
         }
         // 3. Final fallback
+        logger.warn("No JWT user or Userid header found - using 'system' fallback");
         return "system";
     }
 }
