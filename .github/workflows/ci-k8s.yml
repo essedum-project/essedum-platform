@@ -970,26 +970,37 @@ jobs:
 
           if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
             echo "::warning::Kubernetes API endpoint unreachable using current kubeconfig: ${SERVER}"
-            echo "::warning::Attempting kubeconfig recovery from local microk8s..."
+            echo "::warning::Attempting kubeconfig TLS fallback..."
 
-            if ! command -v microk8s >/dev/null 2>&1; then
-              echo "::error::microk8s command not found; cannot auto-recover kubeconfig"
-              exit 1
+            CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null || true)
+            if [ -n "$CLUSTER_NAME" ]; then
+              kubectl config set-cluster "$CLUSTER_NAME" --server="$SERVER" --insecure-skip-tls-verify=true >/dev/null 2>&1 || true
             fi
 
-            TMP_CFG="${RUNNER_TEMP}/kubeconfig-recovered.yaml"
-            microk8s config > "$TMP_CFG"
-            cp "$TMP_CFG" "$KUBECONFIG"
-            rm -f "$TMP_CFG"
+            if kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+              echo "::warning::Connected using kubeconfig TLS fallback (insecure-skip-tls-verify=true)"
+            else
+              echo "::warning::TLS fallback failed; attempting kubeconfig recovery from local microk8s..."
 
-            CTX=$(kubectl config current-context 2>/dev/null || true)
-            SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true)
-            echo "Recovered kube context: ${CTX:-<unset>}"
-            echo "Recovered kube server: ${SERVER:-<unset>}"
+              if ! command -v microk8s >/dev/null 2>&1; then
+                echo "::error::microk8s command not found; cannot auto-recover kubeconfig"
+                exit 1
+              fi
 
-            if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
-              echo "::error::Kubernetes API endpoint is unreachable after kubeconfig recovery: ${SERVER}"
-              exit 1
+              TMP_CFG="${RUNNER_TEMP}/kubeconfig-recovered.yaml"
+              microk8s config > "$TMP_CFG"
+              cp "$TMP_CFG" "$KUBECONFIG"
+              rm -f "$TMP_CFG"
+
+              CTX=$(kubectl config current-context 2>/dev/null || true)
+              SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true)
+              echo "Recovered kube context: ${CTX:-<unset>}"
+              echo "Recovered kube server: ${SERVER:-<unset>}"
+
+              if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+                echo "::error::Kubernetes API endpoint is unreachable after kubeconfig recovery: ${SERVER}"
+                exit 1
+              fi
             fi
           fi
 
