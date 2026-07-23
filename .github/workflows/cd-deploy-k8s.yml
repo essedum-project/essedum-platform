@@ -414,7 +414,44 @@ jobs:
           # Per-deployment timeouts — default 10m, override per service if needed.
           declare -A ROLLOUT_TIMEOUT
 
+          diagnose_rollout_failure() {
+            local deployment="$1"
+            echo "=== Diagnostics for $deployment ==="
+            kubectl get deploy "$deployment" -n "$NAMESPACE" -o wide || true
+            kubectl describe deploy "$deployment" -n "$NAMESPACE" || true
+
+            local pods
+            pods=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            if [ -z "$pods" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l app="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            fi
+
+            if [ -z "$pods" ]; then
+              echo "No pods found for standard selectors app.kubernetes.io/name=$deployment or app=$deployment"
+            else
+              for pod in $pods; do
+                echo "--- Pod: $pod ---"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o wide || true
+                echo "container waiting states:"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o jsonpath='{range .status.containerStatuses[*]}{.name}{": "}{.state.waiting.reason}{" | "}{.state.waiting.message}{"\n"}{end}' || true
+                echo "init waiting states:"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o jsonpath='{range .status.initContainerStatuses[*]}{.name}{": "}{.state.waiting.reason}{" | "}{.state.waiting.message}{"\n"}{end}' || true
+                kubectl describe pod "$pod" -n "$NAMESPACE" | sed -n '/Events:/,$p' || true
+              done
+            fi
+
+            if kubectl describe deploy "$deployment" -n "$NAMESPACE" | grep -qi 'runAsNonRoot and image will run as root'; then
+              echo "::error::Detected securityContext mismatch for $deployment (runAsNonRoot=true but image runs as root)"
+            fi
+
+            if kubectl get events -n "$NAMESPACE" --sort-by=.lastTimestamp | grep -qi 'FailedToRetrieveImagePullSecret'; then
+              echo "::error::Detected missing/unreadable imagePullSecret in namespace $NAMESPACE"
+              kubectl get sa default -n "$NAMESPACE" -o yaml || true
+            fi
+          }
+
           echo "Waiting for deployments to stabilize..."
+          failed_rollouts=()
 
           # Deployments not managed by this CD pipeline — skip rollout check
           SKIP_ROLLOUT=(
@@ -440,12 +477,15 @@ jobs:
             echo ">>> Monitoring $deployment (timeout: $TIMEOUT)..."
             kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=$TIMEOUT || {
               echo "::warning::Rollout status check timed out for $deployment"
-              echo "Pod status for $deployment:"
-              kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=$deployment -o wide 2>/dev/null || \
-              kubectl get pods -n "$NAMESPACE" -l app=$deployment -o wide 2>/dev/null || \
-              echo "No matching pods found with standard selectors"
+              failed_rollouts+=("$deployment")
+              diagnose_rollout_failure "$deployment"
             }
           done
+
+          if [ ${#failed_rollouts[@]} -gt 0 ]; then
+            echo "::error::Rollout failed for: ${failed_rollouts[*]}"
+            exit 1
+          fi
           
           echo ""
           echo "=== Final deployment status ==="
