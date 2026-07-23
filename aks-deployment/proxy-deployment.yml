@@ -33,8 +33,10 @@ spec:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 3
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
           periodSeconds: 10
+          failureThreshold: 6
         resources:
           requests:
             cpu: "100m"

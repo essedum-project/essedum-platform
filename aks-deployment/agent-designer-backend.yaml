@@ -25,9 +25,16 @@ spec:
       - name: postgres
         image: postgres:16-alpine
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "768Mi"
         ports:
         - containerPort: 5432
         env:
@@ -97,9 +104,16 @@ spec:
       - name: redis
         image: redis:7-alpine
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         ports:
         - containerPort: 6379
         readinessProbe:
@@ -152,32 +166,54 @@ spec:
         image: ${DOCKER_REGISTRY}/agent-designer-backend:${IMAGE_TAG}
         imagePullPolicy: Always
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1536Mi"
         ports:
         - containerPort: 8180
         env:
         - name: DATABASE_URL
-          value: "postgresql+asyncpg://agentflow:agentflow@agent-designer-postgres:5432/agentflow"
+          valueFrom:
+            secretKeyRef:
+              name: agent-designer-secrets
+              key: DATABASE_URL
         - name: REDIS_URL
           value: "redis://agent-designer-redis:6379"
         - name: QDRANT_HOST
           value: "qdrant"
         - name: QDRANT_PORT
           value: "6333"
+        startupProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 20
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 18
         readinessProbe:
           httpGet:
             path: /docs
             port: 8180
-          initialDelaySeconds: 15
+          initialDelaySeconds: 25
+          timeoutSeconds: 3
           periodSeconds: 10
+          failureThreshold: 6
         livenessProbe:
           httpGet:
             path: /docs
             port: 8180
-          initialDelaySeconds: 30
-          periodSeconds: 15
+          initialDelaySeconds: 45
+          timeoutSeconds: 3
+          periodSeconds: 20
+          failureThreshold: 6
         volumeMounts:
         - name: backend-tmp
           mountPath: /tmp
@@ -208,9 +244,11 @@ metadata:
   namespace: aipns
 type: Opaque
 stringData:
-  # IMPORTANT: Replace this placeholder before applying to any cluster.
-  # Set the real password via:
+  # IMPORTANT: Replace these placeholders before applying to any cluster.
+  # Set real values via:
   #   kubectl create secret generic agent-designer-secrets -n aipns \
   #     --from-literal=POSTGRES_PASSWORD='<real-password>' \
+  #     --from-literal=DATABASE_URL='postgresql+asyncpg://agentflow:<real-password>@agent-designer-postgres:5432/agentflow' \
   #     --dry-run=client -o yaml | kubectl apply -f -
   POSTGRES_PASSWORD: "<CHANGEME>"
+  DATABASE_URL: "<CHANGEME>"

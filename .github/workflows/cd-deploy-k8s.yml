@@ -185,6 +185,54 @@ jobs:
           echo "Deploying to namespace: $NAMESPACE (registry: $REGISTRY)"
           kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
+          # Ensure required runtime secrets exist before workloads roll out.
+          kubectl create secret generic essedum-minio-secret \
+            --from-literal=endpoint="${MINIO_ENDPOINT:-http://minio-service:9000}" \
+            --from-literal=access-key="${MINIO_ACCESS_KEY}" \
+            --from-literal=secret-key="${MINIO_SECRET_KEY}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl create secret generic essedum-db-secret \
+            --from-literal=MYSQL_DATASOURCE_URL="${MYSQL_DATASOURCE_URL}" \
+            --from-literal=MYSQL_USER="${MYSQL_DATASOURCE_USER}" \
+            --from-literal=MYSQL_PASSWORD="${MYSQL_DATASOURCE_PASSWORD}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          if [ -z "${KEYCLOAK_ADMIN_USER:-}" ] || [ -z "${KEYCLOAK_ADMIN_PASSWORD:-}" ]; then
+            echo "::error::KEYCLOAK_ADMIN_USER and KEYCLOAK_ADMIN_PASSWORD must be set"
+            exit 1
+          fi
+          kubectl create secret generic keycloak-admin-secret \
+            --from-literal=username="${KEYCLOAK_ADMIN_USER}" \
+            --from-literal=password="${KEYCLOAK_ADMIN_PASSWORD}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          if [ -z "${AGENT_DESIGNER_POSTGRES_PASSWORD:-}" ]; then
+            echo "::error::AGENT_DESIGNER_POSTGRES_PASSWORD must be set"
+            exit 1
+          fi
+          AGENT_DESIGNER_DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL:-postgresql+asyncpg://agentflow:${AGENT_DESIGNER_POSTGRES_PASSWORD}@agent-designer-postgres:5432/agentflow}"
+          kubectl create secret generic agent-designer-secrets \
+            --from-literal=POSTGRES_PASSWORD="${AGENT_DESIGNER_POSTGRES_PASSWORD}" \
+            --from-literal=DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          if [ -n "${VIBE_AZURE_OPENAI_ENDPOINT:-}" ] && [ -n "${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_VERSION:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_KEY:-}" ]; then
+            kubectl create secret generic essedum-vibe-secret \
+              --from-literal=VIBE_AZURE_OPENAI_ENDPOINT="${VIBE_AZURE_OPENAI_ENDPOINT}" \
+              --from-literal=VIBE_AZURE_OPENAI_DEPLOYMENT_NAME="${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_VERSION="${VIBE_AZURE_OPENAI_API_VERSION}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_KEY="${VIBE_AZURE_OPENAI_API_KEY}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          else
+            echo "::warning::essedum-vibe-secret not updated because one or more VIBE_AZURE_OPENAI_* variables are missing"
+          fi
+
           # Create required system namespaces
           kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
           kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
@@ -417,6 +465,13 @@ jobs:
             "agent-designer-redis"
             "essedum-frontend-agent-designer"
             "pyjob-executor"
+            "keycloak"
+            "essedum-backend-data"
+            "essedum-backend-icip"
+            "essedum-backend-usm"
+            "essedum-backend-vibe"
+            "vibe-pod-watcher"
+            "proxy-service"
           )
 
           if kubectl get secret registry-credentials -n "$NAMESPACE" >/dev/null 2>&1; then
@@ -467,6 +522,13 @@ jobs:
               echo "::error::Failed to rollout restart $deployment after remediation patch"
               failures=$((failures + 1))
             fi
+
+            case "$deployment" in
+              keycloak|essedum-backend-data|essedum-backend-icip|essedum-backend-usm|essedum-backend-vibe)
+                kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
+                  -p='[{"op":"remove","path":"/spec/template/spec/initContainers"}]' >/dev/null 2>&1 || true
+                ;;
+            esac
           done
 
           echo "=== Effective rollout patch state ==="

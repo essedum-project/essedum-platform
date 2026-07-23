@@ -19,13 +19,26 @@ spec:
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.2.3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1536Mi"
           args:
             - "start-dev"
           env:
             - name: KEYCLOAK_ADMIN
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-secret
+                  key: username
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: admin
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-secret
+                  key: password
             - name: KC_HTTP_PORT
               value: "8180"
             - name: KC_HTTPS_PORT
@@ -47,14 +60,43 @@ spec:
             - name: KC_DB
               value: mysql
             - name: KC_DB_URL
-              value: "jdbc:mysql://mysql:3306/keycloak"
+              value: "jdbc:mysql://mysql.aipns.svc.cluster.local:3306/keycloak"
             - name: KC_DB_USERNAME
-              value: "root"
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-db-secret
+                  key: MYSQL_USER
             - name: KC_DB_PASSWORD
-              value: "password"
+              valueFrom:
+                secretKeyRef:
+                  name: essedum-db-secret
+                  key: MYSQL_PASSWORD
           ports:
             - containerPort: 8443
               protocol: TCP
+            - containerPort: 8180
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: 8180
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 24
+          readinessProbe:
+            tcpSocket:
+              port: 8180
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: 8180
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 6
 
           volumeMounts:
             - name: tls-cert

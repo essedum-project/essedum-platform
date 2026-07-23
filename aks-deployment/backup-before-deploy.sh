@@ -67,7 +67,7 @@ backup_mysql_dump() {
 
   info "Creating MySQL dump from pod: ${mysql_pod}"
   kubectl exec -n "${KUBE_NAMESPACE}" "${mysql_pod}" -- \
-    sh -lc 'mysqldump -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --all-databases' \
+    mysqldump -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --all-databases \
     > "${out_dir}/mysql.sql"
   success "MySQL dump captured."
 }

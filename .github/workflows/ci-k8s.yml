@@ -1062,6 +1062,45 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           echo "✓ essedum-db-secret applied"
 
+          # keycloak-admin-secret: remove hardcoded admin credentials from manifests
+          if [ -z "${KEYCLOAK_ADMIN_USER:-}" ] || [ -z "${KEYCLOAK_ADMIN_PASSWORD:-}" ]; then
+            echo "::error::KEYCLOAK_ADMIN_USER and KEYCLOAK_ADMIN_PASSWORD must be set"
+            exit 1
+          fi
+          kubectl create secret generic keycloak-admin-secret \
+            --from-literal=username="${KEYCLOAK_ADMIN_USER}" \
+            --from-literal=password="${KEYCLOAK_ADMIN_PASSWORD}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ keycloak-admin-secret applied"
+
+          # agent-designer-secrets: used by agent-designer-postgres and backend API
+          if [ -z "${AGENT_DESIGNER_POSTGRES_PASSWORD:-}" ]; then
+            echo "::error::AGENT_DESIGNER_POSTGRES_PASSWORD must be set"
+            exit 1
+          fi
+          AGENT_DESIGNER_DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL:-postgresql+asyncpg://agentflow:${AGENT_DESIGNER_POSTGRES_PASSWORD}@agent-designer-postgres:5432/agentflow}"
+          kubectl create secret generic agent-designer-secrets \
+            --from-literal=POSTGRES_PASSWORD="${AGENT_DESIGNER_POSTGRES_PASSWORD}" \
+            --from-literal=DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ agent-designer-secrets applied"
+
+          # essedum-vibe-secret: required by vibe backend for Azure OpenAI settings
+          if [ -n "${VIBE_AZURE_OPENAI_ENDPOINT:-}" ] && [ -n "${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_VERSION:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_KEY:-}" ]; then
+            kubectl create secret generic essedum-vibe-secret \
+              --from-literal=VIBE_AZURE_OPENAI_ENDPOINT="${VIBE_AZURE_OPENAI_ENDPOINT}" \
+              --from-literal=VIBE_AZURE_OPENAI_DEPLOYMENT_NAME="${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_VERSION="${VIBE_AZURE_OPENAI_API_VERSION}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_KEY="${VIBE_AZURE_OPENAI_API_KEY}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ essedum-vibe-secret applied"
+          else
+            echo "::warning::essedum-vibe-secret not updated because one or more VIBE_AZURE_OPENAI_* variables are missing"
+          fi
+
       - name: Apply Kubernetes manifests
         env:
           IMAGE_TAG: ${{ github.sha }}
@@ -1248,6 +1287,13 @@ jobs:
             "agent-designer-redis"
             "essedum-frontend-agent-designer"
             "pyjob-executor"
+            "keycloak"
+            "essedum-backend-data"
+            "essedum-backend-icip"
+            "essedum-backend-usm"
+            "essedum-backend-vibe"
+            "vibe-pod-watcher"
+            "proxy-service"
           )
 
           if kubectl get secret registry-credentials -n "$NAMESPACE" >/dev/null 2>&1; then
@@ -1298,6 +1344,13 @@ jobs:
               echo "::error::Failed to rollout restart $deployment after remediation patch"
               failures=$((failures + 1))
             fi
+
+            case "$deployment" in
+              keycloak|essedum-backend-data|essedum-backend-icip|essedum-backend-usm|essedum-backend-vibe)
+                kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
+                  -p='[{"op":"remove","path":"/spec/template/spec/initContainers"}]' >/dev/null 2>&1 || true
+                ;;
+            esac
           done
 
           echo "=== Effective rollout patch state ==="

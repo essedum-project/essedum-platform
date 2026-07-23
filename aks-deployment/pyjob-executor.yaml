@@ -20,11 +20,39 @@ spec:
         image: ${DOCKER_REGISTRY}/py-job-executer:${IMAGE_TAG}
         imagePullPolicy: Always
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "768Mi"
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
+        startupProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 18
+        readinessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 45
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 5
         volumeMounts:
         - name: tmp-dir
           mountPath: /tmp

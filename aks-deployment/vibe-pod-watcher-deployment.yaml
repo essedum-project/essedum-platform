@@ -18,20 +18,39 @@ spec:
         - name: vibe-pod-watcher
           image: ${DOCKER_REGISTRY}/vibe-pod-watcher:${IMAGE_TAG}
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           ports:
             - containerPort: 5000
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 20
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 18
           livenessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 45
+            timeoutSeconds: 3
             periodSeconds: 30
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
+            timeoutSeconds: 3
             periodSeconds: 10
+            failureThreshold: 6
 ---
 apiVersion: v1
 kind: Service
