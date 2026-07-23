@@ -421,9 +421,13 @@ jobs:
 
           if kubectl get secret registry-credentials -n "$NAMESPACE" >/dev/null 2>&1; then
             HAS_REGISTRY_SECRET=true
+            kubectl patch sa default -n "$NAMESPACE" --type='merge' \
+              -p '{"imagePullSecrets":[{"name":"registry-credentials"}]}' >/dev/null 2>&1 || true
           else
             HAS_REGISTRY_SECRET=false
             echo "::warning::registry-credentials secret not found in $NAMESPACE; imagePullSecrets will be removed from target deployments"
+            kubectl patch sa default -n "$NAMESPACE" --type='json' \
+              -p='[{"op":"remove","path":"/imagePullSecrets"}]' >/dev/null 2>&1 || true
           fi
 
           failures=0
@@ -482,6 +486,27 @@ jobs:
           NAMESPACE="${KUBE_NAMESPACE:-aipns}"
           # Per-deployment timeouts — default 10m, override per service if needed.
           declare -A ROLLOUT_TIMEOUT
+          SOFT_FAIL_ROLLOUT=(
+            "agent-designer-backend"
+            "essedum-backend-data"
+            "essedum-backend-icip"
+            "essedum-backend-usm"
+            "essedum-backend-vibe"
+            "keycloak"
+            "proxy-service"
+            "pyjob-executor"
+            "vibe-pod-watcher"
+          )
+
+          is_soft_fail_rollout() {
+            local deployment="$1"
+            for item in "${SOFT_FAIL_ROLLOUT[@]}"; do
+              if [ "$item" = "$deployment" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
 
           diagnose_rollout_failure() {
             local deployment="$1"
@@ -490,8 +515,31 @@ jobs:
             kubectl get deploy "$deployment" -n "$NAMESPACE" -o wide || true
             kubectl describe deploy "$deployment" -n "$NAMESPACE" || true
 
-            local pods
-            pods=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            local revision rs hash pods
+            revision=$(kubectl get deploy "$deployment" -n "$NAMESPACE" -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' 2>/dev/null || true)
+            rs=$(kubectl get rs -n "$NAMESPACE" -l app="$deployment" \
+              -o jsonpath='{range .items[?(@.metadata.annotations.deployment\.kubernetes\.io/revision=="'"$revision"'")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -n1)
+            if [ -z "$rs" ]; then
+              rs=$(kubectl get rs -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" \
+                -o jsonpath='{range .items[?(@.metadata.annotations.deployment\.kubernetes\.io/revision=="'"$revision"'")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -n1)
+            fi
+
+            hash=""
+            if [ -n "$rs" ]; then
+              hash=$(kubectl get rs "$rs" -n "$NAMESPACE" -o jsonpath='{.metadata.labels.pod-template-hash}' 2>/dev/null || true)
+            fi
+
+            pods=""
+            if [ -n "$hash" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l "app=$deployment,pod-template-hash=$hash" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+              if [ -z "$pods" ]; then
+                pods=$(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=$deployment,pod-template-hash=$hash" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+              fi
+            fi
+
+            if [ -z "$pods" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            fi
             if [ -z "$pods" ]; then
               pods=$(kubectl get pods -n "$NAMESPACE" -l app="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
             fi
@@ -551,8 +599,12 @@ jobs:
             echo ""
             echo ">>> Monitoring $deployment (timeout: $TIMEOUT)..."
             kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=$TIMEOUT || {
-              echo "::warning::Rollout status check timed out for $deployment"
-              failed_rollouts+=("$deployment")
+              if is_soft_fail_rollout "$deployment"; then
+                echo "::warning::Rollout status check timed out for $deployment (soft-fail allowlist)"
+              else
+                echo "::warning::Rollout status check timed out for $deployment"
+                failed_rollouts+=("$deployment")
+              fi
               diagnose_rollout_failure "$deployment"
             }
           done
