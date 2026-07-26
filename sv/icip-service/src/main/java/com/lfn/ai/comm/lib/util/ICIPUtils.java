@@ -88,19 +88,40 @@ public class ICIPUtils {
 	public static String getUser(String claim) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (claim != null && authentication!=null && authentication.getCredentials() instanceof Jwt) {
+			Jwt jwt = (Jwt) authentication.getCredentials();
+
 			String[] claimArr = claim.split("\\|\\|");
-			String user = (String) ((Jwt) (authentication.getCredentials())).getClaim(claimArr[0]);
+			String claimName = claimArr[0];
+
+			// Validate only the specific claim we're trying to resolve (not all claims)
+			logger.debug("Resolving user from JWT claim '{}' (fallback: {})",
+			            claimName, claimArr.length > 1 ? claimArr[1] : "none");
+			logger.debug("JWT claim '{}' present: {}", claimName, jwt.hasClaim(claimName));
+
+			String user = (String) jwt.getClaim(claimName);
+
+			// Log success/failure without exposing PII
+			if (user != null && !user.isBlank()) {
+				logger.debug("JWT claim '{}' resolved successfully", claimName);
+			} else {
+				logger.debug("JWT claim '{}' is null or empty", claimName);
+			}
+
 			/*
 			 * When using client credential flow, there will be no user credentials, we must
 			 * use the service-account
 			 */
-			if (user == null && claimArr.length > 1)
+			if (user == null && claimArr.length > 1) {
 				user = claimArr[1];
+				logger.debug("Using fallback value for claim '{}'", claimName);
+			}
 			return user;
 		}
 		if (authentication != null && authentication.getName() != null) {
+			logger.debug("No JWT credentials - using Spring Security authentication.getName()");
 			return authentication.getName();
 		} else {
+			logger.warn("No authentication context found - returning 'Anonymous'");
 			return "Anonymous";
 		}
 	}
