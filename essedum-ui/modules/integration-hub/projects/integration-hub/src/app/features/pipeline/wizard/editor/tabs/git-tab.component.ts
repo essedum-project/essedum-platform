@@ -5,8 +5,8 @@ import { GitLinkValue } from '../../shared/pipeline-options.constants';
 import { WizardPipelineModel } from '../pipeline-editor.component';
 
 @Component({
-  selector: 'app-git-tab',
-  template: `
+    selector: 'app-git-tab',
+    template: `
     <div class="git-tab">
       <header class="git-head">
         <mat-icon>cloud_sync</mat-icon>
@@ -49,7 +49,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .git-tab { padding: 24px; max-width: 920px; margin: 0 auto; }
     .git-head { display:flex; align-items:center; gap:14px; padding:16px; background:#fff;
                 border:1px solid #e5e7eb; border-radius:10px; margin-bottom:14px;
@@ -70,6 +70,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .hist-table th, .hist-table td { padding:6px 8px; border-bottom: 1px solid #f1f5f9; text-align:left; }
     .ellip { max-width: 320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   `],
+    standalone: false
 })
 export class GitTabComponent implements OnInit {
   @Input() model: WizardPipelineModel;

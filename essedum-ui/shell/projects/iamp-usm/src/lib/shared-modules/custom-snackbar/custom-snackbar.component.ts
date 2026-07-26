@@ -12,11 +12,11 @@ export interface SnackbarData {
 }
 
 @Component({
-  selector: 'app-custom-snackbar',
-  templateUrl: './custom-snackbar.component.html',
-  styleUrls: ['./custom-snackbar.component.scss'],
-  standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule]
+    selector: 'app-custom-snackbar',
+    standalone: true,
+    templateUrl: './custom-snackbar.component.html',
+    styleUrls: ['./custom-snackbar.component.scss'],
+    imports: [CommonModule, MatIconModule, MatButtonModule]
 })
 export class CustomSnackbarComponent {
   

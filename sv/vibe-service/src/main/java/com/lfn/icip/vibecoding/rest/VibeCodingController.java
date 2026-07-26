@@ -1,9 +1,11 @@
 package com.lfn.icip.vibecoding.rest;
 
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,6 +22,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.lfn.icip.vibecoding.service.SalusService;
+import com.lfn.icip.vibecoding.service.SalusService.SalusResult;
 import com.lfn.icip.vibecoding.service.VibeCodingService;
 
 /**
@@ -38,6 +42,7 @@ public class VibeCodingController {
     private static final Logger logger = LoggerFactory.getLogger(VibeCodingController.class);
 
     private final VibeCodingService vibeCodingService;
+    private final SalusService salusService;
 
     @Value("${vibe.azure.openai.endpoint}")
     private String azureOpenAiEndpoint;
@@ -51,8 +56,9 @@ public class VibeCodingController {
     @Value("${vibe.azure.openai.api-key}")
     private String azureOpenAiApiKey;
 
-    public VibeCodingController(VibeCodingService vibeCodingService) {
+    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService) {
         this.vibeCodingService = vibeCodingService;
+        this.salusService = salusService;
     }
 
     // =========================================================================
@@ -133,24 +139,59 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
-
-        // Push Azure OpenAI configuration into the Goose config store so that
-        // the provider's from_env() call picks them up on the next update.
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
-        vibeCodingService.post("/config/upsert",
-                Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
-
-        // Override provider/model to use Azure OpenAI
-        request.put("provider", originalProvider);
-        request.put("model", originalModel);
         logger.info("Agent update provider request — original provider/model: {}/{} — updated to azure_openai/{}",
                 originalProvider, originalModel, azureOpenAiDeploymentName);
-        return vibeCodingService.post("/agent/update_provider", request);
+
+        // ── Step 1: call update_provider IMMEDIATELY (before upserts) ──────
+        // Calling right after agent/start wins the session-creation lock race,
+        // so goosed returns in <100 ms instead of blocking ~61 s waiting for the
+        // background extension-loading task.  The Azure config keys are already
+        // persisted in goosed's config.yaml from the first session; the upserts
+        // below keep them fresh but are not required for the provider call.
+        request.put("provider", originalProvider);
+        request.put("model", originalModel);
+
+        int maxAttempts = 36;           // 36 × 5 s = 3 min ceiling (safety net)
+        int delayMs    = 5_000;
+        ResponseEntity<String> lastResponse = null;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            lastResponse = vibeCodingService.post("/agent/update_provider", request);
+            if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
+                logger.info("update_provider succeeded on attempt {}/{}", attempt, maxAttempts);
+                break;
+            }
+            int status = lastResponse != null ? lastResponse.getStatusCode().value() : -1;
+            logger.warn("update_provider attempt {}/{} returned {} — retrying in {} ms",
+                    attempt, maxAttempts, status, delayMs);
+            if (attempt < maxAttempts) {
+                try { Thread.sleep(delayMs); } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        // ── Step 2: refresh Azure OpenAI config in goosed config store ──────
+        // Done after update_provider so it never adds latency to the lock race.
+        if ("azure_openai".equals(originalProvider) && azureOpenAiEndpoint != null) {
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
+        }
+
+        if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
+            return lastResponse;
+        }
+        logger.error("update_provider failed after {} attempts — last status: {}",
+                maxAttempts, lastResponse != null ? lastResponse.getStatusCode().value() : "null");
+        return lastResponse != null ? lastResponse
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("{\"error\":\"update_provider exhausted all retries\"}");
     }
 
     @PostMapping(value = "/agent/update-session",
@@ -239,17 +280,36 @@ public class VibeCodingController {
 
     /**
      * Send a message to the Goose agent and receive an SSE stream of MessageEvents.
+     * Input is screened by Salus before being forwarded to Goose.
      */
     @PostMapping(value = "/reply",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter reply(@RequestBody Map<String, Object> request) {
         logger.info("Reply SSE request, session_id={}", request.get("session_id"));
+
+        String userText = salusService.extractUserText(request);
+        SalusResult inputResult = salusService.checkInput(userText);
+        if (inputResult.blocked()) {
+            logger.warn("Salus blocked SSE reply — reason: {}", inputResult.reason());
+            SseEmitter blocked = new SseEmitter(10_000L);
+            try {
+                String json = "{\"type\":\"error\",\"message\":\"Your message was blocked by the responsible AI policy.\","
+                        + "\"reason\":" + jsonString(inputResult.reason()) + "}";
+                blocked.send(SseEmitter.event().data(json, MediaType.APPLICATION_JSON));
+                blocked.complete();
+            } catch (Exception ex) {
+                blocked.completeWithError(ex);
+            }
+            return blocked;
+        }
+
         return vibeCodingService.ssePost("/reply", request);
     }
 
     /**
      * Queue a reply request in a session (async, non-streaming).
+     * Both input and output are screened by Salus.
      */
     @PostMapping(value = "/sessions/{sessionId}/reply",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -258,7 +318,29 @@ public class VibeCodingController {
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Session reply request, session={}", sessionId);
-        return vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
+
+        String userText = salusService.extractUserText(request);
+        SalusResult inputResult = salusService.checkInput(userText);
+        if (inputResult.blocked()) {
+            logger.warn("Salus blocked session reply input — session={} reason={}", sessionId, inputResult.reason());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"Content blocked by responsible AI policy\","
+                            + "\"reason\":" + jsonString(inputResult.reason()) + "}");
+        }
+
+        ResponseEntity<String> response = vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
+
+        SalusResult outputResult = salusService.checkOutput(response.getBody());
+        if (outputResult.blocked()) {
+            logger.warn("Salus blocked session reply output — session={} reason={}", sessionId, outputResult.reason());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"Response blocked by responsible AI policy\","
+                            + "\"reason\":" + jsonString(outputResult.reason()) + "}");
+        }
+
+        return response;
     }
 
     /**
@@ -282,5 +364,11 @@ public class VibeCodingController {
     public SseEmitter sessionEvents(@PathVariable(value = "sessionId") String sessionId) {
         logger.info("Session events SSE request, session={}", sessionId);
         return vibeCodingService.sseGet("/sessions/" + sessionId + "/events");
+    }
+
+    /** Escapes a string for embedding as a JSON string value. */
+    private static String jsonString(String s) {
+        if (s == null) return "null";
+        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 }

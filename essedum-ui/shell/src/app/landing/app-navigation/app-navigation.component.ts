@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-app-navigation',
-  templateUrl: './app-navigation.component.html',
-  styleUrls: ['./app-navigation.component.scss']
+    selector: 'app-app-navigation',
+    templateUrl: './app-navigation.component.html',
+    styleUrls: ['./app-navigation.component.scss'],
+    standalone: false
 })
 export class AppNavigationComponent implements OnInit {
 

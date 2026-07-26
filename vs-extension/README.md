@@ -19,17 +19,44 @@ Integrates VS Code with the Essedum AI Platform: OAuth 2.0/PKCE authentication, 
 
 ## Installation
 
-Install via VS Code Extensions Marketplace or from the `.vsix` package.
+1. Install the extension via VS Code Extensions Marketplace
+2. Reload VS Code
+3. The Essedum icon will appear in the Activity Bar
 
-## Configuration
 
-| Setting | Default | Purpose |
-|---|---|---|
-| `essedum.serverUrl` | — | Essedum backend URL |
-| `essedum.oauthPort` | `8085` | Local OAuth callback port |
+## Design and Architecture
 
-## Usage
+The extension acts as a client for the Essedum Platform.
 
-1. Open the Command Palette (`Ctrl+Shift+P`) → **Essedum: Login**
-2. Complete authentication in the browser
-3. Browse pipelines in the Essedum sidebar panel
+### Architecture Overview
+
+1.  **Extension Host**: Runs in the VS Code process.
+    *   **Sidebar Provider**: Renders the UI for managing platform resources.
+    *   **Command Palette**: Exposes commands for quick access.
+2.  **Authentication Module**:
+    *   Implements PKCE (Proof Key for Code Exchange) flow.
+    *   Launches system browser for login.
+    *   Listens on a local port for the callback code.
+3.  **API Client**:
+    *   Communicates with the Essedum Backend (e.g., `https://aiplatform...`).
+    *   Attaches Bearer tokens to requests. 
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant VSCode as VS Code Ext
+    participant Browser
+    participant Keycloak
+
+    User->>VSCode: Click Login
+    VSCode->>VSCode: Generate PKCE Challenge
+    VSCode->>Browser: Open Keycloak Login URL
+    Browser->>Keycloak: User Authenticates
+    Keycloak->>Browser: Redirect to localhost:8085 with Code
+    Browser->>VSCode: Send Code (Callback)
+    VSCode->>Keycloak: Exchange Code for Token
+    Keycloak-->>VSCode: Access Token + Refresh Token
+    VSCode->>VSCode: Store Token
+```

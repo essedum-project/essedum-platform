@@ -254,6 +254,10 @@ export class VibeStudioService implements OnDestroy {
   readonly deploymentStatus$  = new BehaviorSubject<'idle' | 'deploying' | 'success' | 'error'>('idle');
   /** Raw response from /sessions/{id}/preview on success. */
   readonly deploymentResult$  = new BehaviorSubject<any>(null);
+  /** Environment variables defined in the Vibe Studio Environment tab. */
+  readonly envVars$    = new BehaviorSubject<Array<{ name: string; value: string }>>([]);
+  /** User secrets defined in the Vibe Studio Environment tab. */
+  readonly secrets$    = new BehaviorSubject<Array<{ name: string; value: string }>>([]);
 
   constructor(
     private http: HttpClient,
@@ -277,6 +281,16 @@ export class VibeStudioService implements OnDestroy {
   setAppType(appType: AppType): void {
     this.session.appType = appType;
     this.status$.next('selecting');
+  }
+
+  /** Update environment variables from the right-panel Environment tab. */
+  setEnvVars(vars: Array<{ name: string; value: string }>): void {
+    this.envVars$.next(vars || []);
+  }
+
+  /** Update user secrets from the right-panel Environment tab. */
+  setSecrets(secrets: Array<{ name: string; value: string }>): void {
+    this.secrets$.next(secrets || []);
   }
 
   /** Change LLM model (and optionally the agent provider name). If a Goose session is already running, propagates immediately. */
@@ -1086,6 +1100,29 @@ export class VibeStudioService implements OnDestroy {
       for (const file of files) {
         zip.file(file.path, file.content);
       }
+
+      // Inject user-defined env vars and secrets as a .env file at the project root.
+      // vibe-code-builder-deployer reads this file and creates a K8s Secret automatically.
+      const envVars  = this.envVars$.value;
+      const secrets  = this.secrets$.value;
+      const allVars  = [...envVars, ...secrets];
+      if (allVars.length) {
+        const envFileContent = allVars
+          .filter(v => v.name)
+          .map(v => `${v.name}=${v.value}`)
+          .join('\n') + '\n';
+        // Place .env in every top-level app directory found in the file tree
+        const topDirs = [...new Set(files.map(f => f.path.split('/')[0]).filter(d => d && !d.includes('.')))];
+        if (topDirs.length) {
+          for (const dir of topDirs) {
+            zip.file(`${dir}/.env`, envFileContent);
+          }
+        } else {
+          // Root-level files — place .env at root
+          zip.file('.env', envFileContent);
+        }
+      }
+
       const blob = await zip.generateAsync({ type: 'blob' });
 
       // Resolve org — same priority order as the rest of the platform
@@ -1168,11 +1205,19 @@ export class VibeStudioService implements OnDestroy {
   /**
    * Calls POST /sessions/{sessionId}/preview immediately after the ZIP upload.
    * Emits deployment progress via deploymentStatus$ and the raw result via deploymentResult$.
+   * env_vars and secrets from the Environment tab are forwarded so the backend can
+   * pass them to the container build pipeline.
    */
   private triggerPreview(sessionId: string): void {
     this.deploymentStatus$.next('deploying');
     const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${sessionId}/preview`;
-    const body = { working_dir: '/home/engne2/essedum/goose' };
+    const body: any = { working_dir: '/home/engne2/essedum/goose' };
+
+    const envVars = this.envVars$.value;
+    const secrets = this.secrets$.value;
+    if (envVars.length) { body['env_vars'] = envVars; }
+    if (secrets.length) { body['secrets']  = secrets; }
+
     this.http.post<any>(url, body, { headers: this.getHttpHeaders() as any })
       .subscribe({
         next: (result) => {

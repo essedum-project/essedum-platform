@@ -48,9 +48,10 @@ import { RolePermissionAddComponent } from "./role-permission-add/role-permissio
 import { TagEventDTO } from "../../models/tagEventDTO.model";
 
 @Component({
-  templateUrl: "./usm-role-permission.component.html",
-  styleUrl: "./usm-role-permission.component.css",
-  selector: "lib-usm-role-permission",
+    templateUrl: "./usm-role-permission.component.html",
+    styleUrl: "./usm-role-permission.component.css",
+    selector: "lib-usm-role-permission",
+    standalone: false
 })
 export class UsmRolePermissionComponent implements OnInit, OnDestroy {
   @Input() header = "UsmRolePermissions...";

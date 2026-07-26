@@ -7,9 +7,10 @@ import { Services } from '@essedum/shared-lib';
 import { Project } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-dataset-power-mode-view',
-  templateUrl: './dataset-power-mode-view.component.html',
-  styleUrls: ['./dataset-power-mode-view.component.scss']
+    selector: 'app-dataset-power-mode-view',
+    templateUrl: './dataset-power-mode-view.component.html',
+    styleUrls: ['./dataset-power-mode-view.component.scss'],
+    standalone: false
 })
 export class DatasetPowerModeViewComponent implements OnInit {
 

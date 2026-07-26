@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: 'app-sidebar-menu-text',
-  templateUrl: './sidebarmenutext.component.html',
-  styleUrls: ['./sidebarmenutext.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-sidebar-menu-text',
+    templateUrl: './sidebarmenutext.component.html',
+    styleUrls: ['./sidebarmenutext.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class SidebarMenuTextComponent {
   @Input() showSidebarMenuList: boolean = false;

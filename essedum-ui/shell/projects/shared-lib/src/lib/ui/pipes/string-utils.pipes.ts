@@ -1,13 +1,19 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'toJSON' })
+@Pipe({
+    name: 'toJSON',
+    standalone: false
+})
 export class StringToJSON implements PipeTransform {
   transform(value: string): any {
     return JSON.parse(value);
   }
 }
 
-@Pipe({ name: 'filter' })
+@Pipe({
+    name: 'filter',
+    standalone: false
+})
 export class FilterPipe implements PipeTransform {
   transform(items: any[], searchText: string): any[] {
     if (!items) return [];

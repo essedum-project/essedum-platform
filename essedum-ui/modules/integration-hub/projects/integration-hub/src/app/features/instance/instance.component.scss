@@ -18,7 +18,7 @@
 :host #containerDivForScroll,
 :host .aip-card-container {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 320px)) !important;
   gap: 14px !important;
   width: 100% !important;
   max-width: 100% !important;

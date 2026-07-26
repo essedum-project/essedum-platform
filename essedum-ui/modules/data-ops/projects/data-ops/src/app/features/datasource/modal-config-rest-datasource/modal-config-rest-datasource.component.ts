@@ -12,9 +12,10 @@ import { FormControl } from '@angular/forms';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Services } from '@essedum/shared-lib';
 @Component({
-  selector: 'modal-config-rest-datasource',
-  templateUrl: './modal-config-rest-datasource.component.html',
-  styleUrls: ['./modal-config-rest-datasource.component.scss'],
+    selector: 'modal-config-rest-datasource',
+    templateUrl: './modal-config-rest-datasource.component.html',
+    styleUrls: ['./modal-config-rest-datasource.component.scss'],
+    standalone: false
 })
 export class ModalConfigRestDatasourceComponent
   implements OnInit, OnChanges, DoCheck

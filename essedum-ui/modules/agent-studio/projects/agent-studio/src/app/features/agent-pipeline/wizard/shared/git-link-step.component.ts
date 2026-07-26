@@ -109,6 +109,7 @@ export interface GitLinkValue {
       .git-logout-btn { color:#64748b !important; }
     }
   `],
+  standalone: false
 })
 export class GitLinkStepLocalComponent implements OnInit {
   @Input() initialValue: GitLinkValue;

@@ -25,9 +25,10 @@ import { start } from "repl";
 import { RoleDetailComponent } from "../role-detail/role-detail.component";
 // import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
-  templateUrl: "role-list.component.html",
-  selector: "role-list",
-  styleUrls: ["./role-list.component.css"],
+    templateUrl: "role-list.component.html",
+    selector: "role-list",
+    styleUrls: ["./role-list.component.css"],
+    standalone: false
 })
 export class RoleListComponent implements OnInit, OnDestroy {
   lazyload = { first: 0, rows: 1000, sortField: null, sortOrder: null };

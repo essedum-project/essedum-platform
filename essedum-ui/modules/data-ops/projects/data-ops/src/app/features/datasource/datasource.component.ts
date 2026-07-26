@@ -17,9 +17,10 @@ import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-datasource',
-  templateUrl: './datasource.component.html',
-  styleUrls: ['./datasource.component.scss'],
+    selector: 'app-datasource',
+    templateUrl: './datasource.component.html',
+    styleUrls: ['./datasource.component.scss'],
+    standalone: false
 })
 export class DatasourceComponent implements OnInit, OnChanges {
   cardTitle: String = 'Connections';

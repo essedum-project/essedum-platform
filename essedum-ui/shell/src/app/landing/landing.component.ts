@@ -32,9 +32,10 @@ import { AppConfigService } from "../services/app-config.service";
 import { MyProfileComponent } from "./my-profile/my-profile.component";
 
 @Component({
-  selector: "app-landing",
-  templateUrl: "./landing.component.html",
-  styleUrls: ["./landing.component.scss"],
+    selector: "app-landing",
+    templateUrl: "./landing.component.html",
+    styleUrls: ["./landing.component.scss"],
+    standalone: false
 })
 export class LandingComponent implements OnInit, AfterViewInit {
   @ViewChild("drawerLeft", { static: true }) drawerLeft: any;
@@ -2255,6 +2256,10 @@ export class LandingComponent implements OnInit, AfterViewInit {
         // Set sidebar menu if we have collected configurations
         if (sidebarMenutemp.length > 0) {
           this.sidebarMenu = sidebarMenutemp;
+
+          if (!this.sidebarMenu.some((it: any) => it && it.label === 'Dashboard')) {
+            this.sidebarMenu.unshift({ label: 'Dashboard', icon: 'tachometer', url: './dashboard' });
+          }
 
           // Remap legacy "Agent MCP Pipelines" label to "Pipelines"
           this.sidebarMenu.forEach((item: any) => {

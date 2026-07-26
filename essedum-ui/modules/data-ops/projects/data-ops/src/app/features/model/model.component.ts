@@ -15,9 +15,10 @@ import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-model',
-  templateUrl: './model.component.html',
-  styleUrls: ['./model.component.scss'],
+    selector: 'app-model',
+    templateUrl: './model.component.html',
+    styleUrls: ['./model.component.scss'],
+    standalone: false
 })
 export class ModelComponent implements OnInit, OnChanges {
   hoverStates: boolean[] = [];

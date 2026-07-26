@@ -1,0 +1,50 @@
+<div class="skills-page">
+
+  <!-- Header -->
+  <app-aip-header
+    [cardTitle]="PAGETITLE"
+    [lastRefreshedTime]="lastRefreshedTime"
+    [showAddButton]="true"
+    [showRefreshButton]="true"
+    [showLastRefreshed]="true"
+    (search)="onSearch($event)"
+    (refresh)="onRefresh()"
+    (add)="openAdd()">
+  </app-aip-header>
+
+  <!-- AIP Filter Component -->
+  <app-aip-filter
+    [tagrefresh]="tagrefresh"
+    [servicev1]="servicev1"
+    [selectedConnectionTypeList]="{ selectedAdapterType: selectedSkillTypes }"
+    (tagSelected)="tagSelectedEvent($event)"
+    (filterStatusChange)="onFilterStatusChange($event)">
+  </app-aip-filter>
+
+  <!-- Grid — all layout, loading, empty, actions and pagination bound here -->
+  <app-aip-grid
+    [columns]="gridColumns"
+    [rows]="paginatedSkills"
+    [loading]="loading"
+    [loadingMessage]="LOADINGMSG"
+    [emptyIcon]="'psychology'"
+    [emptyMessage]="EMPTYMESSAGE"
+    [gridTemplateColumns]="GRID_TEMPLATE"
+    [headerPadding]="'10px 0'"
+    [headerMarginTop]="'12px'"
+    [rowPadding]="'11px 0'"
+    [actions]="gridActions"
+    [actionsLabel]="COLACTIONS"
+    [actionMenuCssClass]="'skills-actions-menu'"
+    [pageNumber]="pageNumber"
+    [noOfPages]="noOfPages"
+    [pageArr]="pageArr"
+    [startIndex]="startIndex"
+    [endIndex]="endIndex"
+    [hoverStates]="hoverStates"
+    (actionClick)="onGridAction($event)"
+    (prevPage)="prevPage()"
+    (nextPage)="nextPage()"
+    (changePage)="changePage($event)">
+  </app-aip-grid>
+</div>

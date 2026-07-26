@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { WizardPipelineModel } from '../pipeline-editor.component';
 
 @Component({
-  selector: 'app-metrics-tab',
-  template: `
+    selector: 'app-metrics-tab',
+    template: `
     <div class="m-tab">
       <header><h3><mat-icon>analytics</mat-icon>&nbsp;Training Metrics</h3></header>
 
@@ -18,7 +18,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
 
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display:block; overflow-y:auto; height:100%; }
     .m-tab {
       padding: 24px;
@@ -86,6 +86,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       --mt-border:  #30363d;
     }
   `],
+    standalone: false
 })
 export class MetricsTabComponent implements OnInit {
   @Input() model: WizardPipelineModel;

@@ -18,9 +18,10 @@ import { Location } from '@angular/common';
 import { AgentDirectoryCreateComponent } from './agent-directory-create/agent-directory-create.component';
 import { AgentDirectoryService } from './agent-directory.service';
 @Component({
-  selector: 'app-agent-directory',
-  templateUrl: './agent-directory.component.html',
-  styleUrls: ['./agent-directory.component.scss'],
+    selector: 'app-agent-directory',
+    templateUrl: './agent-directory.component.html',
+    styleUrls: ['./agent-directory.component.scss'],
+    standalone: false
 })
 export class AgentDirectoryComponent implements OnInit, OnChanges {
   cardTitle: String = 'Agent Directory';

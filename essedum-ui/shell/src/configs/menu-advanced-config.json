@@ -6,6 +6,10 @@
       "description": "Design AI agent workflows"
     },
     {
+      "label": "Apps",
+      "description": "Browse & launch applications"
+    },
+    {
       "label": "Lite LLM",
       "description": "Manage LLM proxy & routing"
     },
@@ -16,10 +20,6 @@
     {
       "label": "Salus",
       "description": "Security & compliance hub"
-    },
-    {
-      "label": "Apps",
-      "description": "Browse & launch applications"
     },
     {
       "label": "App List",

@@ -18,10 +18,6 @@ import { IampUsmRouteModule } from "./iamp-usm.route";
 import { IampUsmComponent } from "./iamp-usm.component";
 import { FieldsetModule } from "primeng/fieldset";
 import { CommonModule } from "@angular/common";
-import {
-  NgxMatDatetimePickerModule,
-  NgxMatTimepickerModule,
-} from "@angular-material-components/datetime-picker";
 import { QuillModule } from "ngx-quill";
 import { MatDialogModule } from "@angular/material/dialog";
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
@@ -87,8 +83,6 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
     IampUsmRouteModule,
     MatDialogModule,
     FieldsetModule,
-    NgxMatDatetimePickerModule,
-    NgxMatTimepickerModule,
     NgxMatSelectSearchModule,
     QuillModule.forRoot(),
     HttpClientModule,

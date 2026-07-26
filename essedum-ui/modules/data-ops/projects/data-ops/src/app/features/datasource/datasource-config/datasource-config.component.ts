@@ -8,10 +8,11 @@ import { RaiservicesService } from '../../services/raiservices.service';
 
 
 @Component({
-  selector: 'app-datasource-config',
-  templateUrl: './datasource-config.component.html',
-  styleUrls: ['./datasource-config.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-datasource-config',
+    templateUrl: './datasource-config.component.html',
+    styleUrls: ['./datasource-config.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class DatasourceConfigComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();

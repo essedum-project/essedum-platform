@@ -28,6 +28,9 @@ module.exports = {
   resolve: {
     alias: {
       ...sharedMappings.getAliases(),
+    },
+    fallback: {
+      "buffer": require.resolve("buffer/")
     }
   },
   experiments: {
@@ -42,11 +45,11 @@ module.exports = {
       remotes: {},
 
       shared: share({
-        "@angular/core":        { singleton: true, strictVersion: true, requiredVersion: 'auto' },
-        "@angular/common":      { singleton: true, strictVersion: true, requiredVersion: 'auto' },
-        "@angular/common/http": { singleton: true, strictVersion: true, requiredVersion: 'auto' },
-        "@angular/router":      { singleton: true, strictVersion: true, requiredVersion: 'auto' },
-        "@angular/forms":       { singleton: true, strictVersion: true, requiredVersion: 'auto' },
+        "@angular/core":        { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+        "@angular/common":      { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+        "@angular/common/http": { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+        "@angular/router":      { singleton: true, strictVersion: false, requiredVersion: 'auto' },
+        "@angular/forms":       { singleton: true, strictVersion: false, requiredVersion: 'auto' },
         "@angular/material":    { singleton: true, strictVersion: false, requiredVersion: 'auto' },
         "@angular/cdk":         { singleton: true, strictVersion: false, requiredVersion: 'auto' },
         "primeng":              { singleton: true, strictVersion: false, requiredVersion: 'auto' },

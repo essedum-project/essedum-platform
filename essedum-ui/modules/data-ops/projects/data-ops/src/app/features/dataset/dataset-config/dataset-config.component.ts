@@ -18,9 +18,10 @@ export class NameAndAlias {
   alias: string
 }
 @Component({
-  selector: 'app-dataset-config',
-  templateUrl: './dataset-config.component.html',
-  styleUrls: ['./dataset-config.component.scss']
+    selector: 'app-dataset-config',
+    templateUrl: './dataset-config.component.html',
+    styleUrls: ['./dataset-config.component.scss'],
+    standalone: false
 })
 export class DatasetConfigComponent implements OnInit, OnDestroy {
 

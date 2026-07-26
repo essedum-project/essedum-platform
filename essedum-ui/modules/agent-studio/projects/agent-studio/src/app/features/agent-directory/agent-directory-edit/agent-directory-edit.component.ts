@@ -6,9 +6,10 @@ import { AgentDirectoryService } from '../agent-directory.service';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-agent-directory-edit',
-  templateUrl: './agent-directory-edit.component.html',
-  styleUrls: ['./agent-directory-edit.component.scss'],
+    selector: 'app-agent-directory-edit',
+    templateUrl: './agent-directory-edit.component.html',
+    styleUrls: ['./agent-directory-edit.component.scss'],
+    standalone: false
 })
 export class AgentDirectoryEditComponent implements OnInit {
   addView: boolean = false;

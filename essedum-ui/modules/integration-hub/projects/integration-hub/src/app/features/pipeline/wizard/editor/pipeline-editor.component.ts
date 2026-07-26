@@ -21,9 +21,10 @@ export interface WizardPipelineModel {
 }
 
 @Component({
-  selector: 'app-pipeline-editor',
-  templateUrl: './pipeline-editor.component.html',
-  styleUrls: ['./pipeline-editor.component.scss'],
+    selector: 'app-pipeline-editor',
+    templateUrl: './pipeline-editor.component.html',
+    styleUrls: ['./pipeline-editor.component.scss'],
+    standalone: false
 })
 export class PipelineEditorComponent implements OnInit, OnDestroy {
   model: WizardPipelineModel | null = null;
