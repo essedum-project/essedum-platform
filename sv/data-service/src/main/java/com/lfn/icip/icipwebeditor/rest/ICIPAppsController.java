@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.HtmlUtils;
 
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
@@ -151,7 +152,7 @@ public class ICIPAppsController {
 			@RequestParam(name = "org", required = true) String org) {
 		try {
 			String response = appService.uploadToActiveServer(objectKey, uploadFile, org);
-			return ResponseEntity.status(200).body(response);
+			return ResponseEntity.status(200).body(HtmlUtils.htmlEscape(response));
 		} catch (Exception e) {
 			return ResponseEntity.status(500).body("{\"error\": \"An internal error occurred. Please try again later.\"}");
 		}

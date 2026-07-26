@@ -6,19 +6,26 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: goose-ui
   template:
     metadata:
       labels:
         app: goose-ui
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: goose-ui
-        image: localhost:5000/goose-ui:latest
+        image: localhost:5000/goose-ui:v15
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         env:
         - name: GOOSE_URL
           value: "http://goosed-service.aipns.svc.cluster.local:3005"
@@ -33,6 +40,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: goose-ui-service
   namespace: aipns
 spec:

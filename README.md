@@ -1,65 +1,76 @@
 # ESSEDUM
 
-## 1. Project Description
+Essedum is an enterprise-grade, cloud-native platform for building, training, deploying, and monitoring AI-powered applications. It provides a unified workspace for connecting data sources, designing pipelines, executing ML jobs on cloud platforms, deploying models as endpoints, and building LLM-powered agents.
 
-Essedum is a modular, microservices-based framework designed to simplify the development, training, and deployment of AI-powered applications. It enables seamless connectivity between systems via REST APIs, Azure OpenAI, and AWS Bedrock, and supports data ingestion from sources like PostgreSQL, MySQL, S3, and Azure Blob Storage. Users can build and execute training and inference pipelines using Python-based services, manage models across platforms like SageMaker, Azure ML, and GCP Vertex AI, and deploy them as endpoints.
+## Documentation
 
-## 2. Platform Components
+| Document | Description |
+|---|---|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Platform architecture — functional blocks, component diagrams, cross-service flows |
+| [SCOPE.md](docs/SCOPE.md) | Business objectives, functional and non-functional requirements |
+| [K8DEPLOYMENT.md](docs/K8DEPLOYMENT.md) | Kubernetes / AKS deployment — namespaces, ingress, HPA, PVs, secrets |
+| [AKSDEPLOYMENT.md](docs/AKSDEPLOYMENT.md) | AKS manifest inventory and startup order |
+| [DOCKERDEPLOYMENT.md](docs/DOCKERDEPLOYMENT.md) | Docker Compose deployment — all services, ports, volumes, networks |
+| [JOB-EXECUTOR-ARCHITECTURE.md](docs/JOB-EXECUTOR-ARCHITECTURE.md) | Python job executor layer — all four executors, selection logic, artifact flow |
+| [MICROSERVICES_DECOMPOSITION.md](MICROSERVICES_DECOMPOSITION.md) | Microservices decomposition strategy and service boundaries |
+| [USER_GUIDE.md](USER_GUIDE.md) | Step-by-step guide to building AI applications on the platform |
+| [CHANGELOG.md](CHANGELOG.md) | Release history and notable changes per version |
 
-The Essedum platform is composed of four main components that work together to provide a comprehensive AI development and deployment solution.
+---
 
-### 2.1. Backend (`sv/`)
+## Platform Components
 
-The backend is a Java Spring Boot application that forms the core of the Essedum platform. It provides RESTful APIs for the frontend, manages business logic, and handles data persistence. It is a multi-module Maven project located in the `sv/` directory. For more details, see the [backend documentation](sv/README.md).
+| Component | Directory | README | Architecture |
+|---|---|---|---|
+| Backend (Java) | `sv/` | [sv/README.md](sv/README.md) | [sv/docs/ARCHITECTURE.md](sv/docs/ARCHITECTURE.md) |
+| Frontend (Angular MFE) | `essedum-ui/` | [essedum-ui/README.md](essedum-ui/README.md) | [essedum-ui/docs/ARCHITECTURE.md](essedum-ui/docs/ARCHITECTURE.md) |
+| Agent Designer Backend | `agent-designer-backend/` | [README.md](agent-designer-backend/README.md) | [docs/ARCHITECTURE.md](agent-designer-backend/docs/ARCHITECTURE.md) |
+| Nginx | `nginx/` | [nginx/README.md](nginx/README.md) | [nginx/docs/ARCHITECTURE.md](nginx/docs/ARCHITECTURE.md) |
+| Python Job Executor | `py-job-executer/` | [README.md](py-job-executer/README.md) | [docs/ARCHITECTURE.md](py-job-executer/docs/ARCHITECTURE.md) |
+| SageMaker Executor | `py-job-sagemaker-executer/` | — | [docs/ARCHITECTURE.md](py-job-sagemaker-executer/docs/ARCHITECTURE.md) |
+| Vertex AI Executor | `py-job-vertex-executer/` | — | [docs/ARCHITECTURE.md](py-job-vertex-executer/docs/ARCHITECTURE.md) |
+| Azure ML Executor | `py-job-azure-executer/` | [README.md](py-job-azure-executer/README.md) | [docs/ARCHITECTURE.md](py-job-azure-executer/docs/ARCHITECTURE.md) |
+| Proxy Service | `proxy-service/` | — | [docs/ARCHITECTURE.md](proxy-service/docs/ARCHITECTURE.md) |
+| Vibe Code Builder | `vibe-code-builder-deployer/` | — | [docs/ARCHITECTURE.md](vibe-code-builder-deployer/docs/ARCHITECTURE.md) |
+| ADK Code Builder | `adk-code-builder-deployer/` | — | [docs/ARCHITECTURE.md](adk-code-builder-deployer/docs/ARCHITECTURE.md) |
+| Vibe Pod Watcher | `vibe-pod-watcher/` | — | [docs/ARCHITECTURE.md](vibe-pod-watcher/docs/ARCHITECTURE.md) |
+| S3Proxy | `s3proxy/` | — | [docs/ARCHITECTURE.md](s3proxy/docs/ARCHITECTURE.md) |
+| VS Code Extension | `vs-extension/` | [README.md](vs-extension/README.md) | [docs/ARCHITECTURE.md](vs-extension/docs/ARCHITECTURE.md) |
 
-### 2.2. Frontend (`essedum-ui/`)
+---
 
-The frontend is an Angular-based single-page application that provides the user interface for the Essedum platform. It allows users to interact with the platform's features, such as creating pipelines, managing datasets, and deploying models. The frontend code is located in the `essedum-ui/` directory.
+## Getting Started
 
-### 2.3. Nginx (`nginx/`)
+### Docker Compose (recommended for local deployment)
 
-Nginx is used as a reverse proxy to serve the frontend application and route API requests to the backend services. This decouples the frontend from the backend and simplifies deployment. The Nginx configuration is located in the `nginx/` directory. For more details, see the [Nginx documentation](nginx/README.md).
+```bash
+cd docker
+cp .env.sample .env   # configure credentials
+docker compose up --build
+```
 
-### 2.4. Python Job Executor (`py-job-executer/`)
+See [docker/README.md](docker/README.md) and [docker/SETUP_GUIDE.md](docker/SETUP_GUIDE.md) for full setup instructions.
 
-The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
+### Kubernetes (AKS)
 
-### 2.5. Visual Studio Extension (`vs-extension/`)
+```bash
+cd aks-deployment
+./deploy.sh
+```
 
-The ESSEDUM Visual Studio Extension allows developers to code, access, and execute pipeline jobs directly from VS Code. It provides features like automatic OAuth 2.0 authentication, pipeline execution monitoring, and token management. The code for this extension is in the `vs-extension/` directory. For more details, see the [VS Extension documentation](vs-extension/README.md).
+See [aks-deployment/README.md](aks-deployment/README.md) and [docs/AKSDEPLOYMENT.md](docs/AKSDEPLOYMENT.md).
 
-### 2.6. Langflow Integration
+### Developer Setup (manual)
 
-Essedum integrates with Langflow, a UI-based Agent Designer, allowing users to design AI agents and run them in an integrated playground.
+See the component READMEs and docs linked in the table above.
 
-## 3. Supported Integrations
+---
 
-### Data Containers
-- **Currently Supported & Tested:**
-  - MinIO
-  - Azure Storage Containers
-  - AWS S3
-  - Google Cloud Storage (GCS)
+## License
 
-### Execution Containers
-- **Currently Supported:**
-  - GCP Vertex AI
-  - AWS SageMaker
-- **Planned / Pending Validation:**
-  - Azure AI Studio
+MIT License — see [LICENSE](LICENSE).
 
-### Libraries and Utilities
-- **Machine Learning Libraries:**
-  - scikit-learn (classification and regression)
-- **Vector Database:**
-  - Qdrant (via vector DB library)
-- **Agent Frameworks & LLM Integration:**
-  - Langflow (UI-based Agent Designer)
-  - Langchain
-  - Azure OpenAI SDK (for LLM calls)
-- **Embedded Web UI for AI applications:**
-  - Streamlit
-  - Gradio
+## Changelog
 
 ## 4. Installation
 

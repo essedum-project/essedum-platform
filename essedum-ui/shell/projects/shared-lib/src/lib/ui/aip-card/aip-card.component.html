@@ -56,10 +56,25 @@
             </span>
 
             <span *ngIf="servicev1 === 'pipeline'" class="card-type-badge badge-pipeline">
-                <mat-icon class="badge-icon">account_tree</mat-icon>Pipeline
+                <mat-icon class="badge-icon">account_tree</mat-icon>Native Pipeline
             </span>
 
-            <span *ngIf="servicev1 === 'pipelineagent'" class="card-type-badge badge-pipeline">
+            <span *ngIf="servicev1 === 'pipelineagent' && (card?.type === 'mcpServer' || card?.interfacetype === 'mcp-pipeline')" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">dns</mat-icon>MCP Server
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && (card?.type === 'appPipeline' || card?.interfacetype === 'app-pipeline') && card?.type !== 'mcpServer' && card?.interfacetype !== 'mcp-pipeline'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">apps</mat-icon>App Pipeline
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type === 'DataPipeline'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">auto_awesome</mat-icon>Data Pipeline
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type === 'TrainingPipeline'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">model_training</mat-icon>Training Pipeline
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type === 'NativeScript'" class="card-type-badge badge-pipeline">
+                <mat-icon class="badge-icon">code</mat-icon>Pipeline
+            </span>
+            <span *ngIf="servicev1 === 'pipelineagent' && card?.type !== 'mcpServer' && card?.interfacetype !== 'mcp-pipeline' && card?.type !== 'appPipeline' && card?.interfacetype !== 'app-pipeline' && card?.type !== 'DataPipeline' && card?.type !== 'TrainingPipeline' && card?.type !== 'NativeScript'" class="card-type-badge badge-pipeline">
                 <mat-icon class="badge-icon">smart_toy</mat-icon>Agent Pipeline
             </span>
 

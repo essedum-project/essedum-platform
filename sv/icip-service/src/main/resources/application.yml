@@ -14,3 +14,19 @@ spring:
 server:
   port: 8082
 
+pipeline:
+  metadata:
+    validation:
+      application:
+        allowed-frameworks:
+          - reactjs
+          - streamlit
+      agent:
+        allowed-frameworks:
+          - langgraph
+          - google-adk
+      mcp:
+        required-server-framework: fastapi
+        required-protocols:
+          - http-stream
+          - sse

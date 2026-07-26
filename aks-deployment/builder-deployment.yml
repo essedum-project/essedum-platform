@@ -15,12 +15,21 @@ spec:
         app: builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: builder
-          image:  localhost:5000/builder-service:latest
+          image: localhost:5000/builder-service:v15
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
           env:
             - name: BUILDKIT_ADDR
               value: "tcp://buildkitd:1234"   # Points to your buildkitd Service

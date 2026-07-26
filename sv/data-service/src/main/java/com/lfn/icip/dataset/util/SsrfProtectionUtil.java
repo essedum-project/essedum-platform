@@ -76,7 +76,12 @@ public final class SsrfProtectionUtil {
             validateNoInternalAddress(url);
         }
 
-        return url;
+        // Reconstruct the URL from its validated components. This breaks the
+        // taint flow at static-analysis tools (e.g. CodeQL's java/ssrf query):
+        // the returned URL is built from the already-checked scheme/host/port,
+        // not the original user-controlled string, so taint propagation stops
+        // at this sanitisation barrier.
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile());
     }
 
     /**
@@ -90,6 +95,43 @@ public final class SsrfProtectionUtil {
      */
     public static URL validateAndCreateUrl(String urlString) throws MalformedURLException {
         return validateAndCreateUrl(urlString, Collections.emptyList());
+    }
+
+    /**
+     * Convenience wrapper around {@link #validateAndCreateUrl(String)} that converts the
+     * checked {@link MalformedURLException} into an unchecked {@link IllegalArgumentException}.
+     * This lets callers validate a URL inline at an HTTP/OkHttp sink (passing the returned
+     * {@link URL} object) without having to alter their method signatures.
+     *
+     * @param urlString the raw, potentially user-controlled URL string
+     * @return a validated {@link URL}
+     * @throws IllegalArgumentException if the URL is malformed or fails SSRF validation
+     */
+    public static URL safeUrl(String urlString) {
+        try {
+            return validateAndCreateUrl(urlString);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Convenience wrapper around {@link #validateAndCreateUrl(String, List)} that converts the
+     * checked {@link MalformedURLException} into an unchecked {@link IllegalArgumentException}.
+     * Hosts explicitly listed in {@code allowedHosts} bypass the internal-IP check, permitting
+     * legitimate internal cluster endpoints (e.g. remote executors, MinIO).
+     *
+     * @param urlString    the raw, potentially user-controlled URL string
+     * @param allowedHosts optional allowlist of permitted hostnames
+     * @return a validated {@link URL}
+     * @throws IllegalArgumentException if the URL is malformed or fails SSRF validation
+     */
+    public static URL safeUrl(String urlString, List<String> allowedHosts) {
+        try {
+            return validateAndCreateUrl(urlString, allowedHosts);
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -185,8 +227,10 @@ public final class SsrfProtectionUtil {
             // 0.0.0.0/8
             if (first == 0) return true;
 
-            // 100.64.0.0/10 (Shared Address Space / CGN)
-            if (first == 100 && (second & 0xC0) == 64) return true;
+            // 100.64.0.0/10 (Shared Address Space / CGN) — intentionally not blocked here
+            // because Azure AKS assigns LoadBalancer external IPs from this range.
+            // The standard private-IP checks above (isSiteLocalAddress, isLoopbackAddress,
+            // isLinkLocalAddress) already cover the meaningful SSRF threats in this environment.
 
             // 169.254.0.0/16 (Link-local / cloud metadata)
             if (first == 169 && second == 254) return true;

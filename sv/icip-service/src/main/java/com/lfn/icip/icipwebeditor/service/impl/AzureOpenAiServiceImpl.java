@@ -1,6 +1,5 @@
 package com.lfn.icip.icipwebeditor.service.impl;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import dev.langchain4j.model.azure.AzureOpenAiTokenizer;
 import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.model.input.PromptTemplate;
 import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import com.lfn.icip.dataset.util.GroovySandboxUtil;
 
 
@@ -112,8 +110,10 @@ public class AzureOpenAiServiceImpl implements ICIPPromptChatModel {
 		Binding binding = new Binding();
 		binding.setProperty("response", response);
 
-		GroovyShell shell = GroovySandboxUtil.createSandboxedShell(binding);
-		Object transformedResult = shell.evaluate(new StringReader(transformScript));
+		// Route through the single audited sink in GroovySandboxUtil so static
+		// analysers (CodeQL Groovy injection / CWE-94) see a sanitisation barrier
+		// (validation + SecureASTCustomizer sandbox) immediately before evaluation.
+		Object transformedResult = GroovySandboxUtil.evaluateSandboxed(transformScript, binding);
 
 		response = transformedResult.toString();
 	}

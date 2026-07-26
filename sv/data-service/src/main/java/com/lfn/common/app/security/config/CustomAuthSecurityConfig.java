@@ -26,29 +26,24 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.XXssConfig;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.common.app.security.jwt.CustomAuthFilter;
-import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,11 +62,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 class CustomAuthSecurityConfig {
 	private static final Logger log = LoggerFactory.getLogger(CustomAuthSecurityConfig.class);
 
-	private PasswordEncoder passwordEncoder;
-
-	/** The token provider. */
-	@Autowired
-	private CustomJWTTokenProvider tokenProvider;
+	private final PasswordEncoder passwordEncoder;
 
 	/** The active profile */
 	@Value("${spring.profiles.active}")
@@ -81,20 +72,24 @@ class CustomAuthSecurityConfig {
 	@Value("${csrf.ignore.urls}")
 	private String ignoreCsrfUrls;
 
-	@Autowired
-	private CustomUserDetailsService userDetailsServiceCommon;
+	private final CustomUserDetailsService userDetailsServiceCommon;
 
-	private final static String DBJWT = "dbjwt";
-	private final static String OAUTH2 = "oauth2";
+	private final CustomAuthorizationManager customAuthorizationManager;
 
-	public CustomAuthSecurityConfig(PasswordEncoder passwordEncoder) {
-		super();
+	private static final String DBJWT = "dbjwt";
+	private static final String OAUTH2 = "oauth2";
+	private static final String ACTUATOR_PATTERN = "/actuator/**";
+	private static final String API_PATTERN = "/api/**";
+	private static final String LANGFLOW_AGENT_EXPORT = "/api/aip/langflow/langflow_agent_export";
+
+	/** Shared builder for path-pattern based request matchers. */
+	private static final PathPatternRequestMatcher.Builder PATH_MATCHERS = PathPatternRequestMatcher.withDefaults();
+
+	public CustomAuthSecurityConfig(PasswordEncoder passwordEncoder,
+			CustomUserDetailsService userDetailsServiceCommon, CustomAuthorizationManager customAuthorizationManager) {
 		this.passwordEncoder = passwordEncoder;
-	}
-
-	@Bean
-	MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
-		return new MvcRequestMatcher.Builder(introspector);
+		this.userDetailsServiceCommon = userDetailsServiceCommon;
+		this.customAuthorizationManager = customAuthorizationManager;
 	}
 
 	/**
@@ -111,44 +106,40 @@ class CustomAuthSecurityConfig {
 	}
 
 	@Bean
-	public AuthorizationManager<RequestAuthorizationContext> customAuthorizationManager() {
-		return new CustomAuthorizationManager();
-	}
-
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector)
+	public SecurityFilterChain securityFilterChain(HttpSecurity http)
 			throws Exception {
 		if (activeProfile.contains(DBJWT))
-			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
-				authorizationManagerRequestMatcherRegistry
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
-                        .anyRequest().authenticated();
-
-            });
+			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
+					.requestMatchers(PATH_MATCHERS.matcher(ACTUATOR_PATTERN)).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/error/**")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui/**")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui.html")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/v3/api-docs/**")).permitAll()
+					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher(LANGFLOW_AGENT_EXPORT)).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/file/create/**")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/service/v1/streamingServices/update")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher(API_PATTERN)).access(customAuthorizationManager)
+					.requestMatchers(PATH_MATCHERS.matcher("/camunda/**")).access(customAuthorizationManager)
+					.anyRequest().authenticated());
 		else if (activeProfile.contains(OAUTH2))
 			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
 				authorizationManagerRequestMatcherRegistry
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/actuator/**")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/error/**")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher(ACTUATOR_PATTERN)).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/error/**")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui/**")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui.html")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/v3/api-docs/**")).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_agent_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/file/create/**")).permitAll()
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher("/api/aip/service/v1/streamingServices/update")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).access(customAuthorizationManager())
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/camunda/**")).access(customAuthorizationManager())
+                        .requestMatchers(PATH_MATCHERS.matcher(LANGFLOW_AGENT_EXPORT)).permitAll()
+                        .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
+                        .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/langflow_export_file_details")).permitAll()
+                        .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_file")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher(API_PATTERN)).access(customAuthorizationManager)
+						.requestMatchers(PATH_MATCHERS.matcher("/camunda/**")).access(customAuthorizationManager)
                         .anyRequest().authenticated();
                 try {
 					http.oauth2ResourceServer(
@@ -160,7 +151,7 @@ class CustomAuthSecurityConfig {
 		else
 			throw new EssedumException("The active profile must contain either dbjwt or oauth2");
 		
-		http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()));
+		http.headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
 
 		// Enable CSRF protection with cookie-based token repository
 		CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
@@ -171,8 +162,8 @@ class CustomAuthSecurityConfig {
 			csrf.ignoringRequestMatchers(antMatchers(ignoreCsrfUrls));
 			// Ignore CSRF for actuator and WebSocket endpoints
 			csrf.ignoringRequestMatchers(
-					AntPathRequestMatcher.antMatcher("/actuator/**"),
-					AntPathRequestMatcher.antMatcher("/ws/**")
+					PATH_MATCHERS.matcher(ACTUATOR_PATTERN),
+					PATH_MATCHERS.matcher("/ws/**")
 			);
 		});
 		FilterChainProxy filterChainProxy = new FilterChainProxy(new SecurityFilterChain() {
@@ -180,15 +171,15 @@ class CustomAuthSecurityConfig {
 			@Override
 			public boolean matches(HttpServletRequest request) {
 				// Exclude the langflow_agent_export, file/create, and streamingServices/update endpoints from authentication filter
-				if (request.getRequestURI().contains("/api/aip/langflow/langflow_agent_export") || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update")) {
+				if (request.getRequestURI().contains(LANGFLOW_AGENT_EXPORT) || request.getRequestURI().contains("/api/aip/file/create") || request.getRequestURI().contains("/api/aip/service/v1/streamingServices/update")) {
 					return false;
 				}
-				return AntPathRequestMatcher.antMatcher("/api/**").matches(request);
+				return PATH_MATCHERS.matcher(API_PATTERN).matches(request);
 			}
 
 			@Override
 			public List<Filter> getFilters() {
-				List<Filter> filters = new ArrayList<Filter>();
+				List<Filter> filters = new ArrayList<>();
 				ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 				CustomAuthFilter jwtFilter = context.getBean(CustomAuthFilter.class);
 				filters.add(jwtFilter);				
@@ -199,53 +190,11 @@ class CustomAuthSecurityConfig {
 		
 		// already handled in nginx
 		
-		http.headers(headers -> headers.xssProtection(xss -> xss.disable()))
+		http.headers(headers -> headers.xssProtection(XXssConfig::disable))
 		.headers(headers -> headers.cacheControl(cache -> cache.disable()))
 		.headers(headers -> headers.frameOptions(frameoption ->frameoption.sameOrigin().disable()));
 
-		DefaultSecurityFilterChain out = http.build();
-		return out;
-
-	}
-
-	/**
-	 * Security configurer adapter.
-	 *
-	 * @return the JWT configurer
-	 */
-
-	private JWTConfigurer securityConfigurerAdapter() {
-		return new JWTConfigurer(tokenProvider);
-	}
-
-	class JWTConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
-
-		/** The Constant AUTHORIZATION_HEADER. */
-		public static final String AUTHORIZATION_HEADER = "Authorization";
-
-		/** The token provider. */
-		private CustomJWTTokenProvider tokenProvider;
-
-		/**
-		 * Instantiates a new JWT configurer.
-		 *
-		 * @param tokenProvider the token provider
-		 */
-		public JWTConfigurer(CustomJWTTokenProvider tokenProvider) {
-			this.tokenProvider = tokenProvider;
-		}
-
-		/**
-		 * Configure.
-		 *
-		 * @param http the http
-		 * @throws Exception the exception
-		 */
-		@Override
-		public void configure(HttpSecurity http) throws Exception {
-			CustomAuthFilter customFilter = new CustomAuthFilter();
-			http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
-		}
+		return http.build();
 	}
 
 	@Bean
@@ -260,9 +209,10 @@ class CustomAuthSecurityConfig {
 	
 	static RequestMatcher[] antMatchers(final String ignoreCsrfUrls) {
 
-		final RequestMatcher[] matchers = new RequestMatcher[ignoreCsrfUrls.split(",").length];
-		for (int index = 0; index < ignoreCsrfUrls.split(",").length; index++) {
-			matchers[index] = new AntPathRequestMatcher(ignoreCsrfUrls.split(",")[index]);
+		final String[] urls = ignoreCsrfUrls.split(",");
+		final RequestMatcher[] matchers = new RequestMatcher[urls.length];
+		for (int index = 0; index < urls.length; index++) {
+			matchers[index] = PATH_MATCHERS.matcher(urls[index]);
 		}
 		return matchers;
 	}

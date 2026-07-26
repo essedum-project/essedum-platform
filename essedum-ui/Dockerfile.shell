@@ -1,23 +1,35 @@
 # Build context: essedum-platform/ (repo root)
-FROM node:22-alpine AS build
+FROM node:20-alpine AS build
+
+ARG NPM_REGISTRY_URL
+ARG NPM_AUTH_TOKEN
+ARG ARTIFACTORY_REPO_USER
+ARG ARTIFACTORY_REPO_PASS
+
+# Inject corporate CA so npm can reach registries through Zscaler proxy
+COPY docker/certs/corp-ca.crt /usr/local/share/ca-certificates/corp-ca.crt
+RUN cat /usr/local/share/ca-certificates/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/corp-ca.crt
 
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
+RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
-RUN npm install --legacy-peer-deps --force
-RUN npm run build-prod
+RUN npm install --legacy-peer-deps
+RUN npm run build-prod || (echo "=== Angular error log ===" && cat /tmp/ng-*/angular-errors.log 2>/dev/null && exit 1)
 
 FROM nginx:alpine
-RUN apk add --no-cache openssl && \
-    mkdir -p /etc/nginx/ssl && \
-    openssl req -x509 -nodes -days 3650 \
-      -newkey rsa:2048 \
-      -keyout /etc/nginx/ssl/server.key \
-      -out /etc/nginx/ssl/server.crt \
-      -subj "/CN=localhost"
+# Inject corporate CA so apk can reach Alpine CDN through Zscaler proxy
+COPY docker/certs/corp-ca.crt /etc/ssl/certs/corp-ca.crt
+RUN cat /etc/ssl/certs/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
 
-COPY essedum-ui/nginx_shell.conf /etc/nginx/nginx.conf
+RUN mkdir -p /etc/nginx/ssl
+# Use pre-generated self-signed cert (avoids apk add openssl in container)
+COPY docker/ssl/server.key /etc/nginx/ssl/server.key
+COPY docker/ssl/server.crt /etc/nginx/ssl/server.crt
+
+COPY essedum-ui/nginx_shell.conf /etc/nginx/nginx.conf.template
 WORKDIR /app
 RUN mkdir -p /app/ui/shell
 COPY --from=build /workspace/shell/dist/shell /app/ui/shell/

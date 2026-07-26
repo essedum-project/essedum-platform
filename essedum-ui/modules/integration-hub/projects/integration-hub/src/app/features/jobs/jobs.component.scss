@@ -116,6 +116,18 @@ button[mat-icon-button] {
   }
 }
 
+// ── Action column layout ────────────────────────────────────────────────────
+.cancel-div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  flex-wrap: nowrap !important;
+}
+.cancel-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
 // ── Action icons in table ─────────────────────────────────────────────────────
 mat-icon, .mat-icon {
   color: #8b949e !important;
@@ -130,7 +142,7 @@ mat-icon, .mat-icon {
   th { color: #64748b !important; border-bottom: none !important; background: rgba(71,66,220,0.03) !important; }
   td { color: #334155 !important; border-bottom: none !important; }
   tr:hover td { background: rgba(71,66,220,0.03) !important; }
-  span[style*="color"], .total-jobs { color: #4742dc !important; }
+  span[style*="color"], .total-jobs, .title-jobs { color: #4742dc !important; }
 
   button[mat-icon-button] { color: #94a3b8 !important; &:hover { color: #4742dc !important; background: rgba(71,66,220,0.06) !important; } }
 

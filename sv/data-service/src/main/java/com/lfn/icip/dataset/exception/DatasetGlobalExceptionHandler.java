@@ -66,7 +66,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Proxy Operation Failed",
-                ex.getMessage(),
+                "Proxy operation failed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -86,7 +86,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "Rating Not Found",
-                ex.getMessage(),
+                "Rating not found",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -106,7 +106,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "Tag Not Found",
-                ex.getMessage(),
+                "Tag not found",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -126,7 +126,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid JSON Format",
-                ex.getMessage(),
+                "Invalid JSON format",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -146,7 +146,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Database Operation Failed",
-                ex.getMessage(),
+                "Database operation failed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -166,7 +166,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "I/O Operation Failed",
-                ex.getMessage(),
+                "I/O operation failed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -186,7 +186,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Invalid URI Format",
-                ex.getMessage(),
+                "Invalid URI format",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -217,7 +217,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Cryptographic Operation Failed",
-                ex.getMessage(),
+                "Cryptographic operation failed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -237,7 +237,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Missing Required Parameter",
-                ex.getMessage(),
+                "A required request parameter is missing",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -343,7 +343,7 @@ public class DatasetGlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.METHOD_NOT_ALLOWED.value(),
                 "Method Not Allowed",
-                ex.getMessage(),
+                "HTTP method not allowed",
                 getCauseMessage(ex),
                 request.getDescription(false).replace("uri=", "")
         );
@@ -377,11 +377,7 @@ public class DatasetGlobalExceptionHandler {
      * Extract the root cause message from an exception.
      */
     private String getCauseMessage(Throwable ex) {
-        Throwable cause = ex;
-        while (cause.getCause() != null && cause.getCause() != cause) {
-            cause = cause.getCause();
-        }
-        return cause.getMessage();
+        return null;
     }
 }
 

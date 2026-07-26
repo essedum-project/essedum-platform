@@ -24,29 +24,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.RestClientUtil;
-import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
+import com.lfn.ai.comm.lib.util.service.configkeys.support.ConfigurationKeysService;
+import com.lfn.iamp.usm.repository.DashConstantRepository;
+import com.lfn.iamp.usm.repository.DashConstantRepository2;
 
 /**
  * Service Implementation for managing DashConstant.
- */
-/**
+ *
  * @author essedum
  */
 @Profile("restconstants")
 @Service
 @Transactional
-public class ConstantsServiceImplREST  extends ConstantsServiceImplAbstract implements ConstantsService {
+public class ConstantsServiceImplREST  extends ConstantsServiceImplAbstract {
 
 	/** The log. */
 	private final Logger log = LoggerFactory.getLogger(ConstantsServiceImplREST.class);
 
 	@Value("${commonAppUrl}")
 	private String commonAppUrl;
-	
+
+	public ConstantsServiceImplREST(ConfigurationKeysService configurationKeysService,
+			DashConstantRepository dashConstantRepository, DashConstantRepository2 dashConstantRepository2,
+			Environment environment) {
+		super(configurationKeysService, dashConstantRepository, dashConstantRepository2, environment);
+	}
+
 	@Override
 	public String findByKeys(String key, String project) {
 		log.debug("Request to get dash-constants for essedumPropertyCache");
@@ -62,7 +70,7 @@ public class ConstantsServiceImplREST  extends ConstantsServiceImplAbstract impl
 	
 	@Override
 	public List<String> findByKeyArray(String key, String project) {
-		List<String> result=new ArrayList<String>();
+		List<String> result=new ArrayList<>();
 		try {
 			result = Arrays.asList(RestClientUtil.getApiCall(commonAppUrl + "api/get-startup-constants/array/" + key+"/Core",""));
 		} catch (Exception ex) {

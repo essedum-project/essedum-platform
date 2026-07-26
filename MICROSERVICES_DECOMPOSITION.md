@@ -56,30 +56,96 @@ essedum-platform/sv/
 
 ### Service Decomposition
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              API GATEWAY                                     │
-│                         (Spring Cloud Gateway)                               │
-└─────────────────────────┬───────────────────────────────────────────────────┘
-                          │
-          ┌───────────────┼───────────────┬───────────────┐
-          ▼               ▼               ▼               ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│   USM SERVICE   │ │  ICIP SERVICE   │ │  DATA SERVICE   │ │  VIBE SERVICE   │
-│  (User/Auth)    │ │  (AI/ML Jobs)   │ │  (Files/Data)   │ │  (AI Coding)    │
-├─────────────────┤ ├─────────────────┤ ├─────────────────┤ ├─────────────────┤
-│ • Authentication│ │ • Job Execution │ │ • File Storage  │ │ • Goose API     │
-│ • Authorization │ │ • Pipelines     │ │ • Data Adapters │ │ • Sessions      │
-│ • User Mgmt     │ │ • Events        │ │ • Dataset Mgmt  │ │ • GitHub Sync   │
-│ • Roles/Perms   │ │ • Models        │ │ • Search        │ │ • Code Gen      │
-│ • Organizations │ │ • MLOps         │ │                 │ │                 │
-└────────┬────────┘ └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
-         │                   │                   │                   │
-         ▼                   ▼                   ▼                   ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│   USM Database  │ │  ICIP Database  │ │  DATA Database  │ │  VIBE Database  │
-│   (essedum_usm) │ │ (essedum_core)  │ │ (essedum_data)  │ │ (essedum_vibe)  │
-└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
+```mermaid
+graph TB
+    subgraph Clients["Clients"]
+        UI["Angular Shell UI"]
+        EXT["External REST Clients"]
+    end
+
+    subgraph Infra["Infrastructure Layer"]
+        GW["API Gateway :8080\nSpring Cloud Gateway"]
+        EUR["Eureka Discovery\n:8761"]
+    end
+
+    subgraph Services["Microservices Layer"]
+        USM["USM Service :8081\nUser & Security Mgmt\n─────────────────\n• Authentication\n• Authorization\n• User Management\n• Roles & Permissions\n• Organizations"]
+        ICIP["ICIP Service :8082\nAI/ML Pipelines & Jobs\n─────────────────\n• Job Execution\n• Pipelines\n• Events\n• Models\n• MLOps"]
+        DATA["Data Service :8083\nFiles & Data Adapters\n─────────────────\n• File Storage\n• Data Adapters\n• Dataset Mgmt\n• Search"]
+        VIBE["Vibe Service :8084\nAI-Assisted Coding\n─────────────────\n• Goose API\n• Sessions\n• GitHub Sync\n• Code Gen"]
+    end
+
+    subgraph Databases["Database Layer"]
+        DB_USM[("essedum_usm\nusers · roles · orgs\nprojects · permissions")]
+        DB_ICIP[("essedum_coredb\nicip_jobs · pipelines\nevents · models")]
+        DB_QUARTZ[("essedum_quartzdb\nqrtz_* tables")]
+        DB_DATA[("essedum_data\nfiles · datasets\nadapters · search_index")]
+        DB_VIBE[("essedum_vibe\nvibe_sessions · prompts\ngoose_configs · recipes")]
+    end
+
+    subgraph Messaging["Messaging"]
+        KAFKA["Apache Kafka\n:9092"]
+        RABBIT["RabbitMQ"]
+    end
+
+    subgraph ExternalStorage["External Storage"]
+        S3["AWS S3 / MinIO"]
+        AZURE["Azure Blob Storage"]
+        LOCAL["Local Filesystem"]
+    end
+
+    subgraph ExternalAPIs["External APIs"]
+        GOOSE["Goose AI\n:30132"]
+        GITHUB["GitHub API"]
+        SAGEMAKER["AWS SageMaker"]
+        VERTEX["GCP Vertex AI"]
+        AZUREML["Azure ML"]
+    end
+
+    UI & EXT -->|HTTP / WebSocket| GW
+
+    GW -->|"/api/users/**\n/api/roles/**\n/api/authenticate/**\n/api/organisations/**"| USM
+    GW -->|"/api/aip/**\n/api/event/**\n/api/webhook/**\n/api/modelservice/**"| ICIP
+    GW -->|"/api/file/**\n/api/datasets/**\n/api/adapters/**"| DATA
+    GW -->|"/api/vibe/**\n/api/goose/**\n/api/github/**"| VIBE
+
+    GW <-->|register/discover| EUR
+    USM <-->|register/discover| EUR
+    ICIP <-->|register/discover| EUR
+    DATA <-->|register/discover| EUR
+    VIBE <-->|register/discover| EUR
+
+    USM --- DB_USM
+    ICIP --- DB_ICIP
+    ICIP --- DB_QUARTZ
+    DATA --- DB_DATA
+    VIBE --- DB_VIBE
+
+    ICIP -->|publish events| KAFKA
+    ICIP -->|publish events| RABBIT
+
+    DATA --> S3 & AZURE & LOCAL
+
+    ICIP --> SAGEMAKER & VERTEX & AZUREML
+
+    VIBE -->|AI code relay| GOOSE
+    VIBE -->|push/pull/PR| GITHUB
+
+    classDef gateway  fill:#f4a261,stroke:#e76f51,color:#000,font-weight:bold
+    classDef service  fill:#457b9d,stroke:#1d3557,color:#fff
+    classDef infra    fill:#2a9d8f,stroke:#264653,color:#fff,font-weight:bold
+    classDef db       fill:#e9c46a,stroke:#f4a261,color:#000
+    classDef external fill:#a8dadc,stroke:#457b9d,color:#000
+    classDef client   fill:#e8e8e8,stroke:#888,color:#000
+    classDef msg      fill:#d4a5a5,stroke:#c77d7d,color:#000
+
+    class GW gateway
+    class USM,ICIP,DATA,VIBE service
+    class EUR infra
+    class DB_USM,DB_ICIP,DB_QUARTZ,DB_DATA,DB_VIBE db
+    class S3,AZURE,LOCAL,GOOSE,GITHUB,SAGEMAKER,VERTEX,AZUREML external
+    class UI,EXT client
+    class KAFKA,RABBIT msg
 ```
 
 ---
@@ -507,6 +573,38 @@ common-lib-rest/        # REST utilities (keep shared)
 
 ## Migration Strategy
 
+```mermaid
+gantt
+    title Microservices Migration Timeline
+    dateFormat  YYYY-MM-DD
+    section Phase 1 · Preparation
+    Eureka + API Gateway setup     :p1a, 2026-06-01, 7d
+    DB schema per service          :p1b, after p1a, 7d
+    CI/CD pipelines                :p1c, after p1a, 14d
+    section Phase 2 · USM Service
+    Standalone Spring Boot app     :p2a, after p1b, 7d
+    Migrate user/role tables       :p2b, after p2a, 7d
+    JWT validation & inter-svc     :p2c, after p2b, 7d
+    Test auth flows                :p2d, after p2c, 7d
+    section Phase 3 · Data Service
+    Standalone Spring Boot app     :p3a, after p2b, 7d
+    Migrate file server            :p3b, after p3a, 7d
+    Migrate data adapters          :p3c, after p3b, 7d
+    Test file flows                :p3d, after p3c, 7d
+    section Phase 4 · ICIP Service
+    Standalone Spring Boot app     :p4a, after p3b, 7d
+    Migrate job execution engine   :p4b, after p4a, 7d
+    Kafka/RabbitMQ integration     :p4c, after p4b, 7d
+    Test job execution             :p4d, after p4c, 14d
+    section Phase 5 · Vibe Service
+    Standalone Spring Boot app     :p5a, after p4b, 7d
+    Migrate Goose integration      :p5b, after p5a, 7d
+    Migrate GitHub integration     :p5c, after p5b, 7d
+    section Phase 6 · Decommission
+    Route all traffic via gateway  :p6a, after p4d, 7d
+    Monitor & validate             :p6b, after p6a, 7d
+```
+
 ### Phase 1: Preparation (2-3 weeks)
 1. Set up service discovery (Eureka)
 2. Set up API Gateway (Spring Cloud Gateway)
@@ -547,6 +645,15 @@ common-lib-rest/        # REST utilities (keep shared)
 ---
 
 ## Database Connection Distribution
+
+```mermaid
+xychart-beta
+    title "DB Connections: Monolith vs Microservices"
+    x-axis ["Main", "ICIP", "SJS", "Model", "Quartz", "Exp", "USM Svc", "ICIP Svc", "Data Svc", "Vibe Svc"]
+    y-axis "Max Connections" 0 --> 320
+    bar [100, 300, 200, 8, 8, 8, 0, 0, 0, 0]
+    bar [0, 0, 0, 0, 0, 0, 20, 30, 20, 15]
+```
 
 ### Before (Monolith)
 | Datasource | Max Connections |

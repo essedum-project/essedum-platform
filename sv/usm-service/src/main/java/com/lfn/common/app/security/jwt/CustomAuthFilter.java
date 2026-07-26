@@ -77,13 +77,16 @@ public class CustomAuthFilter extends GenericFilterBean {
 			throws IOException, ServletException {
 		HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 		String bearerToken = httpServletRequest.getHeader(AUTHORIZATION_HEADER);
+		boolean jwtAuthenticated = false;
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
 			String jwt = bearerToken.substring(7, bearerToken.length());
 			if (StringUtils.hasText(jwt) && this.customJWTTokenProvider.validateToken(jwt)) {
 				Authentication authentication = this.customJWTTokenProvider.getAuthentication(jwt);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
+				jwtAuthenticated = true;
 			}
-		} else {
+		}
+		if (!jwtAuthenticated) {
 			String accessToken = httpServletRequest.getHeader(ACCESS_TOKEN_HEADER);
 			if (StringUtils.hasText(accessToken) && this.customAccessTokenProvider.validateToken(accessToken)) {
 				Authentication authentication = this.customAccessTokenProvider.getAuthentication(accessToken);

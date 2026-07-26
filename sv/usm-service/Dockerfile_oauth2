@@ -10,12 +10,9 @@ WORKDIR /sv
 COPY . .
 
 # Copy Maven settings and project settings
-COPY .m2/settings.xml /root/.m2/settings.xml
-COPY .settings /sv/.settings
-
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B -s /root/.m2/settings.xml clean install -pl usm-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+    mvn -B clean install -pl usm-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
 RUN mkdir -p /app/conf /app/lib /app/log && \
@@ -69,6 +66,5 @@ CMD ["/bin/bash", "-c", "\
     -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8081 \
-    -cp conf/*:usm-service-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.usm.UsmServiceApplication"]
+    -jar usm-service-3.3-SNAPSHOT.jar"]
 

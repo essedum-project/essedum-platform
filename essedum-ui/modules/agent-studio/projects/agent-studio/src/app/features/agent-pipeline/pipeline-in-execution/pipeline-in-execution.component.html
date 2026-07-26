@@ -1,0 +1,169 @@
+<div class="exec-page">
+
+  <!-- Page Header -->
+  <div class="exec-page-header">
+    <div class="exec-page-header-left">
+      <span style="cursor: pointer;">
+        <mat-icon class="aip-led-icons" (click)="goBack()"
+          [ngStyle]="{'color': isBackHovered ? '#0094ff' : 'inherit'}"
+          matTooltip="Back" matTooltipPosition="above"
+          (mouseenter)="isBackHovered = true"
+          (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+      </span>
+      <span class="exec-header-title">{{ PAGETITLE }}</span>
+      <span class="exec-count-badge">{{ totalPods }}</span>
+    </div>
+    <button mat-icon-button class="exec-refresh-btn" (click)="loadAllPipelines()" matTooltip="Refresh">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="exec-filter-bar">
+    <div class="exec-filter-row">
+
+      <!-- Type dropdown -->
+      <div class="exec-filter-group">
+        <span class="exec-filter-label">{{ FILTERTYPELABEL }}</span>
+        <button class="exec-type-btn" type="button" [matMenuTriggerFor]="typeMenu">
+          <mat-icon class="exec-type-btn-icon">{{ selectedTypeIcon }}</mat-icon>
+          {{ selectedTypeLabel }}
+          <mat-icon class="exec-type-btn-arrow">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #typeMenu="matMenu" class="exec-type-menu" xPosition="after">
+          <div class="exec-menu-header">{{ FILTERTYPELABEL }}</div>
+          <button mat-menu-item class="exec-type-item" *ngFor="let opt of typeOptions"
+            (click)="onTypeChange(opt.value)">
+            <mat-icon class="exec-ti-icon" [ngClass]="'ti-' + opt.value">{{ opt.icon }}</mat-icon>
+            <div class="exec-ti-body">
+              <span class="exec-ti-label" [ngClass]="'ti-label-' + opt.value">{{ opt.label }}</span>
+            </div>
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- Status chips (dynamic) -->
+      <div class="exec-filter-group exec-filter-group--status">
+        <span class="exec-filter-label">{{ FILTERSTATUSLABEL }}</span>
+        <div class="exec-type-chips">
+          <button *ngFor="let opt of statusOptions"
+            class="exec-chip" [ngClass]="opt.cssClass"
+            [class.active]="selectedStatus === opt.value"
+            (click)="onStatusChange(opt.value)">
+            <mat-icon *ngIf="opt.icon && opt.value !== 'all'" class="chip-icon">{{ opt.icon }}</mat-icon>
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Column Headers -->
+  <div class="exec-table-header">
+    <span class="col-name">{{ COLPIPELINE }}</span>
+    <span class="col-pod-name">{{ COLPODNAME }}</span>
+    <span class="col-type">{{ COLTYPE }}</span>
+    <span class="col-status">{{ COLSTATUS }}</span>
+    <span class="col-actions">{{ COLACTIONS }}</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="exec-loading">
+    <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+    <span>{{ LOADINGMESSAGE }}</span>
+  </div>
+
+  <!-- Pipeline List -->
+  <div *ngIf="!loading" class="exec-list">
+
+    <!-- Empty State -->
+    <div *ngIf="filteredPipelines.length === 0" class="exec-empty">
+      <mat-icon>inbox</mat-icon>
+      <p>{{ EMPTYMESSAGE }}</p>
+      <button *ngIf="hasActiveFilters" mat-stroked-button class="exec-clear-link" (click)="clearFilters()">
+        {{ CLEARFILTERSLABEL }}
+      </button>
+    </div>
+
+    <!-- Rows -->
+    <div *ngFor="let pipeline of paginatedPipelines" class="exec-row">
+
+      <!-- Name + icon -->
+      <div class="col-name exec-pipeline-info">
+        <div class="exec-type-icon" [ngClass]="'mode-' + pipeline.type.toLowerCase()">
+          <mat-icon>{{ getTypeIcon(pipeline.type.toLowerCase()) }}</mat-icon>
+        </div>
+        <div class="exec-name-block">
+          <span class="exec-alias" [matTooltip]="pipeline.container_name">{{ pipeline.container_name }}</span>
+          <span class="exec-name-sub">{{ pipeline.deployment_name }}</span>
+        </div>
+      </div>
+
+      <!-- Pod Name -->
+      <div class="col-pod-name">
+        <span class="exec-pod-name" [matTooltip]="pipeline.pod_name">{{ pipeline.pod_name }}</span>
+      </div>
+
+      <!-- Type Badge -->
+      <div class="col-type">
+        <span class="exec-type-badge type-{{ pipeline.type.toLowerCase() }}">
+          {{ pipeline.type }}
+        </span>
+      </div>
+
+      <!-- Status -->
+      <div class="col-status">
+        <span class="exec-status-badge status-{{ pipeline.pod_phase.toLowerCase() }}">
+          <mat-icon class="status-icon">{{ getStatusIcon(pipeline.pod_phase) }}</mat-icon>
+          {{ getStatusLabel(pipeline.pod_phase) }}
+        </span>
+      </div>
+
+      <!-- Actions (3-dot) -->
+      <div class="col-actions">
+        <button mat-icon-button [matMenuTriggerFor]="rowMenu" class="exec-action-btn"
+                *ngIf="pipeline.pod_phase.toLowerCase() !== 'inactive'">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #rowMenu="matMenu" xPosition="before">
+          <!-- <button mat-menu-item (click)="viewPipeline(pipeline)">
+            <mat-icon class="menu-icon-view">visibility</mat-icon>
+            <span>{{ VIEWPIPELINE }}</span>
+          </button> -->
+          <button mat-menu-item (click)="checkPodLog(pipeline)"
+                  *ngIf="['running','pending','succeeded','failed'].includes(pipeline.pod_phase.toLowerCase())">
+            <mat-icon class="menu-icon-log">description</mat-icon>
+            <span>{{ VIEWPODLOGS }}</span>
+          </button>
+          <button mat-menu-item (click)="deletePipelinePod(pipeline)"
+                  *ngIf="['running','pending','failed'].includes(pipeline.pod_phase.toLowerCase())">
+            <mat-icon class="menu-icon-delete-pod">delete_sweep</mat-icon>
+            <span>{{ DELETEPOD }}</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item class="exec-delete-item" (click)="deletePipelineAsContainer(pipeline)">
+            <mat-icon class="menu-icon-delete">delete_outline</mat-icon>
+            <span>{{ DELETECONTAINER }}</span>
+          </button>
+        </mat-menu>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <app-aip-pagination
+    *ngIf="!loading && noOfPages > 1"
+    [pageNumber]="pageNumber"
+    [noOfPages]="noOfPages"
+    [pageArr]="pageArr"
+    [startIndex]="startIndex"
+    [endIndex]="endIndex"
+    [hoverStates]="hoverStates"
+    (prevPage)="onPrevPage()"
+    (nextPage)="onNextPage()"
+    (changePage)="onChangePage($event)">
+  </app-aip-pagination>
+
+</div>

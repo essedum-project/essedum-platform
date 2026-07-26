@@ -48,4 +48,9 @@
 body.header-light-theme {
   .code-editor-wrapper { background: #f8fafc; border-color: rgba(79,70,229,0.15); }
   .code-editor-content { color: #1e293b; }
+  .code-editor-toolbar {
+    background: rgba(79,70,229,0.04);
+    border-bottom-color: rgba(79,70,229,0.1);
+    .language-badge { color: #475569; }
+  }
 }

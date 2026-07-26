@@ -197,6 +197,10 @@ spring:
           uri: ${ICIP_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/aip/service/v1/search/**,/api/aip/service/v1/useCase/**
+        - id: data-models-upload
+          uri: ${DATA_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/aip/service/v1/models/upload
         - id: icip-mlops-v1
           uri: ${ICIP_SERVICE_URL:http://localhost:8082}
           predicates:

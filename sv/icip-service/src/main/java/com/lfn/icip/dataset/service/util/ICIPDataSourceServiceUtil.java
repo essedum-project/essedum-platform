@@ -154,6 +154,16 @@ public abstract class ICIPDataSourceServiceUtil implements IICIPDataSourceServic
 	@Override
 	public String getDocs(String pluginType) throws FileNotFoundException, IOException {
 
+		// Sanitize user-supplied pluginType to prevent path traversal /
+		// CodeQL java/path-injection. Only allow a conservative whitelist of
+		// characters (letters, digits, dash, underscore, dot) and reject any
+		// traversal sequences before building the resource path.
+		if (pluginType == null || pluginType.isEmpty()
+				|| !pluginType.matches("[A-Za-z0-9_.-]+")
+				|| pluginType.contains("..")) {
+			throw new FileNotFoundException("incorrect documentaion file path");
+		}
+
 		String path = "/docs/" + pluginType + ".html";
 		InputStream in = getClass().getResourceAsStream(path);
 

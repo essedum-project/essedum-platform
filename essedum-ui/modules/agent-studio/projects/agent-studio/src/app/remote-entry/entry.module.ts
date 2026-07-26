@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatStepperModule } from '@angular/material/stepper';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -54,6 +55,8 @@ import { AgentComponent } from '../features/agent/agent.component';
 // Features: agent-pipeline
 import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipeline.component';
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
+import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
+import { PodLogDialogComponent } from '../features/agent-pipeline/pipeline-in-execution/pod-log-dialog/pod-log-dialog.component';
 import { GithubLoginComponent } from '../features/agent-pipeline/github-login/github-login.component';
 import { PlaygroundTabComponent } from '../features/agent-pipeline/playground-tab/playground-tab.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from '../features/agent-pipeline/deployment-form/deployment-form.component';
@@ -69,6 +72,11 @@ import { AgentDirectoryService } from '../features/agent-directory/agent-directo
 
 // Cross-MFE-domain stubs copied for compile-time satisfaction (pipeline-create is integration domain)
 import { PipelineCreateComponent } from '../features/pipeline/pipeline-create/pipeline-create.component';
+
+// Local wizard components (lightweight versions of integration-hub wizards)
+import { DataPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/data-pipeline-wizard/data-pipeline-wizard.component';
+import { TrainingPipelineWizardLocalComponent } from '../features/agent-pipeline/wizard/training-pipeline-wizard/training-pipeline-wizard.component';
+import { GitLinkStepLocalComponent } from '../features/agent-pipeline/wizard/shared/git-link-step.component';
 
 // Migrated from legacy aip-app-ui (2026-05-25): LLM ops + observability iframe wrappers
 import { LitellmComponent } from '../features/litellm/litellm.component';
@@ -112,6 +120,8 @@ import { environment } from '../../environments/environment';
     AgentComponent,
     AgentPipelineComponent,
     AgentPipelineDashboardComponent,
+    PipelineInExecutionComponent,
+    PodLogDialogComponent,
     PlaygroundTabComponent,
     DeploymentFormComponent,
     BranchSelectionDialogComponent,
@@ -121,6 +131,10 @@ import { environment } from '../../environments/environment';
     AgentDirectoryEditComponent,
     GeneralComponent,
     PipelineCreateComponent,
+    // Local wizard components
+    DataPipelineWizardLocalComponent,
+    TrainingPipelineWizardLocalComponent,
+    GitLinkStepLocalComponent,
     // migrated from legacy aip-app-ui
     LitellmComponent,
     LangfuseComponent,
@@ -141,6 +155,7 @@ import { environment } from '../../environments/environment';
     MatToolbarModule,
     MatGridListModule,
     MatChipsModule,
+    MatStepperModule,
     MatTooltipModule,
     MatSelectModule,
     MatError,

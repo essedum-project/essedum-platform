@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: essedum-auth-config
+  namespace: aipns
+data:
+  auth-config.json: |
+    {
+      "auth": {
+        "authRequired": true,
+        "authInIframe": false,
+        "iframeHtmlPath": "assets/login-iframe.html",
+        "issuer": "https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM",
+        "clientId": "essedum-45",
+        "responseType": "code",
+        "scope": "openid profile email",
+        "showDebugInformation": false,
+        "timeoutFactor": 0.5,
+        "strictDiscoveryDocumentValidation": false
+      }
+    }

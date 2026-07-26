@@ -62,6 +62,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.ai.comm.lib.util.SqlStatementValidator;
 //import com.ibm.icu.math.BigDecimal;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 //import com.lfn.iamp.usm.annotation.EssedumProperty;
@@ -90,6 +91,10 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilMySQL.class);
+
+	// Linear-time substring parsing is used in parseQuery() instead of a regex
+	// to guarantee O(n) behaviour and avoid CodeQL java/polynomial-redos.
+	private static final int MAX_QUERY_STR_LENGTH = 10_000;
 
 	/** The Constant QUERY. */
 	private static final String QUERY = "query";
@@ -452,7 +457,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(obj)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					// logic to extract schema
 					ResultSetMetaData metadata = res.getMetaData();
@@ -557,7 +562,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getTemplatedQuery(attributes, query);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				ResultSet res = null;
 				try {
 					res = stmt.executeQuery();
@@ -615,7 +620,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			query = getFilterQuery(attributes);
 		}
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					res.last();
 					return Long.parseLong(String.valueOf(res.getRow()));
@@ -666,12 +671,26 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 * @return the string[]
 	 */
 	private String[] parseQuery(String qrystr) {
+		if (qrystr == null || qrystr.length() > MAX_QUERY_STR_LENGTH) {
+			return new String[0];
+		}
+		// Manual O(n) scan for {...} tokens (no regex engine, no backtracking).
 		List<String> allMatches = new ArrayList<>();
-		Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(qrystr);
-		while (m.find()) {
-			for (int i = 0; i < m.groupCount(); i++) {
-				allMatches.add(m.group(i));
+		int len = qrystr.length();
+		int i = 0;
+		while (i < len) {
+			int open = qrystr.indexOf('{', i);
+			if (open < 0) {
+				break;
 			}
+			int close = qrystr.indexOf('}', open + 1);
+			if (close < 0) {
+				break;
+			}
+			// Original code iterated 0..groupCount()-1 with groupCount()==1,
+			// so only group(0) (the full "{...}" token) was returned.
+			allMatches.add(qrystr.substring(open, close + 1));
+			i = close + 1;
 		}
 		return allMatches.toArray(new String[allMatches.size()]);
 	}
@@ -837,7 +856,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 				}
 				if (sqlCreate != null) {
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 							stmt.execute();
 						}
 					}
@@ -856,7 +875,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 							+ "user VARCHAR(255)," + uniqueIdentifier
 							+ " VARCHAR(255),row_data TEXT,primary key (id,entry_timestamp));";
 					try (Connection conn = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt = conn.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt.execute();
 						}
 					}
@@ -866,7 +885,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 							+ "duration INT(30),due_date DATETIME,sla_met BOOLEAN,extra_time VARCHAR(50),assignee VARCHAR(255),"
 							+ "status VARCHAR(50));";
 					try (Connection conn1 = getDbConnection(connectionDetails)) {
-						try (PreparedStatement stmt1 = conn1.prepareStatement(sqlCreateAudit)) {
+						try (PreparedStatement stmt1 = conn1.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreateAudit))) {
 							stmt1.execute();
 						}
 					}
@@ -922,7 +941,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			String sqlCreate = "CREATE TABLE IF NOT EXISTS " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME)) + "("
 					+ getcolumnMappingsForCsv(schema) + ");";
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}
@@ -941,7 +960,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		if (attributes.getString(TNAME) != null && attributes.getString(TNAME) != "") {
 			String sqlCreate = "DELETE FROM " + SqlSanitizationUtil.validateIdentifier(attributes.getString(TNAME));
 			try (Connection conn = getDbConnection(connectionDetails)) {
-				try (PreparedStatement stmt = conn.prepareStatement(sqlCreate)) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(sqlCreate))) {
 					stmt.execute();
 				}
 			}
@@ -1045,7 +1064,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1054,7 +1073,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 					stmt.executeBatch();
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU))) {
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)))) {
 					stmt.execute();
 				}
 			}
@@ -1088,7 +1107,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 						try {
 							if (query == null || query.isEmpty())
 								return;
-							stmt.addBatch(query);
+							stmt.addBatch(SqlStatementValidator.validateSingleStatement(query));
 						} catch (SQLException e) {
 							logger.error(e.getMessage(), e);
 							joblogger.error(marker, e.getMessage(), e);
@@ -1098,7 +1117,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 					return ICIPUtils.getGeneratedKey(stmt);
 				}
 			} else {
-				try (PreparedStatement stmt = conn.prepareStatement(attributes.getString(QU),
+				try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(attributes.getString(QU)),
 						Statement.RETURN_GENERATED_KEYS)) {
 					stmt.executeUpdate();
 					return ICIPUtils.getGeneratedKey(stmt);
@@ -1264,7 +1283,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 */
 	protected String getJSONHeaderDataset(String query, JSONObject connectionDetails) throws SQLException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractWithHeaderRowsData(res);
 				}
@@ -1285,7 +1304,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private String getDatasetDataAsString(JSONObject connectionDetails, String query, boolean isGraphData)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					if (isGraphData) {
 						return extractDataWithGraphs(res);
@@ -1300,7 +1319,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private List getDatasetDataAsListofString(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsListofString(res);
 				}
@@ -1319,7 +1338,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private JsonArray getDatasetDataAsGsonJson(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsGsonJsonArray(res);
 				}
@@ -1339,7 +1358,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private JSONArray getDatasetDataAsJson(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsJsonArray(res);
 				}
@@ -1359,7 +1378,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	private List getDatasetDataAsList(JSONObject connectionDetails, String query)
 			throws SQLException, NoSuchAlgorithmException {
 		try (Connection conn = getDbConnection(connectionDetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return extractAsList(res);
 				}
@@ -1408,7 +1427,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		String query = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + SqlSanitizationUtil.escapeSqlLiteral(tableName)
 				+ "' AND TABLE_SCHEMA = " + "'" + SqlSanitizationUtil.escapeSqlLiteral(dbName[dbName.length - 1]) + "'";
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					return res.next();
 				}
@@ -1426,7 +1445,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		//String query = "DESCRIBE " + tablename.replaceAll("^\"|\"$", "");
 		String query = "DESCRIBE " + SqlSanitizationUtil.validateIdentifier(tablename.replaceAll("(^\")|(\"$)", ""));
 		try (Connection conn = getDbConnection(condetails)) {
-			try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(query))) {
 				try (ResultSet res = stmt.executeQuery()) {
 					while (res.next()) {
 						JSONObject obj = new JSONObject();
@@ -1514,7 +1533,7 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 		String qryinsert = String.format("INSERT INTO %s_audit (%s) VALUES(%s)", tableName, columns, colvalues);
 		JSONObject obj = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		try (Connection conn = getDbConnection(obj)) {
-			try (PreparedStatement stmt = conn.prepareStatement(qryinsert)) {
+			try (PreparedStatement stmt = conn.prepareStatement(SqlStatementValidator.validateSingleStatement(qryinsert))) {
 				stmt.executeUpdate();
 			}
 		}

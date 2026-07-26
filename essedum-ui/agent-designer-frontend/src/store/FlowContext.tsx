@@ -376,10 +376,96 @@ export function FlowProvider({ children }: { children: ReactNode }) {
         const execId = runResult.execution_id;
         dispatch({ type: 'SET_EXECUTION_ID', executionId: execId });
         addLog({ level: 'info', message: `  Execution queued: ${execId}` });
-        addLog({ level: 'success', message: `✓ Execution submitted to backend (id: ${execId})` });
+
+        // Mark every node as running until we get real per-node updates
         s.nodes.forEach((n) => {
-          dispatch({ type: 'UPDATE_NODE_STATUS', nodeId: n.id, status: 'success' });
+          dispatch({ type: 'UPDATE_NODE_STATUS', nodeId: n.id, status: 'running' });
         });
+
+        // Poll for completion (max ~120s)
+        const POLL_INTERVAL_MS = 1000;
+        const MAX_POLLS = 120;
+        const seenLogIds = new Set<string>();
+
+        for (let i = 0; i < MAX_POLLS; i++) {
+          await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+
+          // Stream new logs and reflect per-node status as they arrive
+          try {
+            const logs = await executionService.getLogs(execId);
+            for (const log of logs) {
+              if (seenLogIds.has(log.id)) continue;
+              seenLogIds.add(log.id);
+
+              const node = log.node_id ? s.nodes.find((n) => n.id === log.node_id) : undefined;
+              const level = (log.level === 'success' || log.level === 'error' || log.level === 'warning' || log.level === 'info')
+                ? log.level
+                : 'info';
+              addLog({
+                level: level as LogEntry['level'],
+                message: log.message,
+                nodeId: log.node_id ?? undefined,
+                nodeLabel: node?.data.label,
+              });
+
+              if (log.node_id) {
+                if (log.level === 'success') {
+                  dispatch({ type: 'UPDATE_NODE_STATUS', nodeId: log.node_id, status: 'success' });
+                } else if (log.level === 'error') {
+                  dispatch({ type: 'UPDATE_NODE_STATUS', nodeId: log.node_id, status: 'error' });
+                }
+              }
+            }
+          } catch {
+            // Ignore transient log fetch errors and keep polling.
+          }
+
+          if (stateRef.current.execution.status !== 'running') {
+            // User pressed Stop
+            return;
+          }
+
+          const exec = await executionService.get(execId);
+          if (exec.status === 'completed') {
+            // Extract output text from the final state
+            const output = exec.output || {};
+            const outText =
+              (output.output as string | undefined) ??
+              (output.message as string | undefined) ??
+              (output.result as string | undefined) ??
+              JSON.stringify(output);
+
+            addLog({ level: 'success', message: `✓ Execution completed — output: ${outText}` });
+
+            // Attach final output to the chat_output / output-category node
+            const outputNode = s.nodes.find(
+              (n) => n.data.definition.type === 'chat_output' || n.data.definition.category === 'output'
+            );
+            if (outputNode) {
+              dispatch({
+                type: 'UPDATE_NODE_STATUS',
+                nodeId: outputNode.id,
+                status: 'success',
+                output: outText,
+              });
+            }
+
+            dispatch({ type: 'EXEC_COMPLETE' });
+            return;
+          }
+          if (exec.status === 'error') {
+            addLog({ level: 'error', message: `✗ Execution failed: ${exec.error || 'unknown error'}` });
+            dispatch({ type: 'EXEC_COMPLETE' });
+            return;
+          }
+          if (exec.status === 'stopped') {
+            addLog({ level: 'warning', message: '⏹ Execution stopped' });
+            dispatch({ type: 'EXEC_COMPLETE' });
+            return;
+          }
+        }
+
+        addLog({ level: 'warning', message: '⏱ Execution polling timed out (still running on server).' });
         dispatch({ type: 'EXEC_COMPLETE' });
         return;
       } catch (apiErr) {

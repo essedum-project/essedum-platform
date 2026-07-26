@@ -10,6 +10,8 @@ class FlowCreate(BaseModel):
     nodes: list[dict[str, Any]] = Field(default_factory=list)
     edges: list[dict[str, Any]] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
+    env_vars: list[dict[str, Any]] = Field(default_factory=list)
+    secrets: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class FlowUpdate(BaseModel):
@@ -18,6 +20,8 @@ class FlowUpdate(BaseModel):
     nodes: list[dict[str, Any]] | None = None
     edges: list[dict[str, Any]] | None = None
     tags: list[str] | None = None
+    env_vars: list[dict[str, Any]] | None = None
+    secrets: list[dict[str, Any]] | None = None
 
 
 class FlowResponse(BaseModel):
@@ -27,6 +31,8 @@ class FlowResponse(BaseModel):
     nodes: list[dict[str, Any]]
     edges: list[dict[str, Any]]
     tags: list[str]
+    env_vars: list[dict[str, Any]]
+    secrets: list[dict[str, Any]]
     created_at: datetime
     updated_at: datetime
 

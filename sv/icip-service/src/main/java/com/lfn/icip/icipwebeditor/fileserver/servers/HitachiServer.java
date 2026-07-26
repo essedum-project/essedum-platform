@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import com.lfn.ai.comm.lib.util.SecureTrustManagerUtil;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -266,7 +267,15 @@ public class HitachiServer implements FileServerUtil {
 	public String getLastIndex(String fileid, String bucket) throws Exception {
 		bucket = getBucket(bucket);
 		Path dirpath = commonService.createTempPath();
-		Path path = Paths.get(dirpath.toAbsolutePath().toString(), fileid, constants.getCountFile());
+		// Sanitise the user-controlled fileid component: the resolved path must
+		// remain inside `dirpath`. PathValidationUtil.validatePath canonicalises
+		// the result and asserts containment, which is the sanitiser barrier
+		// taint trackers (e.g. CodeQL java/path-injection) recognise for the
+		// Files.createDirectories sink below.
+		Path path = com.lfn.icip.dataset.util.PathValidationUtil
+				.validatePath(dirpath.toAbsolutePath().toString(),
+						fileid + java.io.File.separator + constants.getCountFile())
+				.toPath();
 		Files.createDirectories(path.getParent());
 //		minioClient.downloadObject(DownloadObjectArgs
 //				.builder().bucket(bucket).object(String.format(LoggerConstants.STRING_SLASH_STRING_SLASH_STRING, fileid,
@@ -388,21 +397,7 @@ public class HitachiServer implements FileServerUtil {
 				
 	}
 	private TrustManager[] getTrustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-			}
-
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new java.security.cert.X509Certificate[] {};
-			}
-		} };
-		return trustAllCerts;
+		return SecureTrustManagerUtil.getValidatingTrustManagers();
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {

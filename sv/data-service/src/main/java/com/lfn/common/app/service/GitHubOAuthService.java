@@ -17,8 +17,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.*;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -36,44 +34,14 @@ public class GitHubOAuthService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public GitHubOAuthService() {
-        this.restTemplate = createRestTemplate();
-    }
-
-    /**
-     * Create RestTemplate with SSL verification disabled
-     * WARNING: Only for development! Use proper SSL in production
-     */
-    private RestTemplate createRestTemplate() {
-        try {
-            // Create trust manager that trusts all certificates
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-            };
-
-            // Install the all-trusting trust manager
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-
-            // Set default SSL socket factory and hostname verifier
-            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
-
-            log.warn("SSL verification is disabled for GitHub OAuth - DO NOT USE IN PRODUCTION");
-
-            return new RestTemplate();
-
-        } catch (Exception e) {
-            log.error("Failed to create SSL-disabled RestTemplate: {}", e.getMessage());
-            return new RestTemplate();
-        }
+        // Use a plain RestTemplate that relies on the JVM's default SSL trust
+        // configuration. If the corporate proxy / interception certificate is
+        // missing from the JDK trust store, import it via -Djavax.net.ssl.trustStore
+        // or `keytool -importcert` rather than disabling certificate checks. The
+        // previous implementation installed an all-trusting X509TrustManager,
+        // which CodeQL flags as "TrustManager that accepts all certificates"
+        // (CWE-295) and is unsafe in any non-throwaway environment.
+        this.restTemplate = new RestTemplate();
     }
 
     // In-memory storage for tokens (use Redis or database in production)

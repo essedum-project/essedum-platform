@@ -13,10 +13,19 @@ spec:
       labels:
         app: essedum-frontend-vibe-studio
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: essedum-frontend-vibe-studio
-        image: localhost:5000/essedum-frontend-vibe-studio:micro_latest
+        image: localhost:5000/essedum-frontend-vibe-studio:v15
         imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 80
 ---

@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,7 +70,7 @@ public class ICIPAdaptersV1Controller {
 	@Autowired
 	private ICIPAdaptersV1Service iCIPAdaptersV1Service;
 
-	@GetMapping(path = "/{org}/{specname}/{methodname}")
+	@GetMapping(path = "/{org}/{specname}/{methodname}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getData(@PathVariable(name = "specname") String specname,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
@@ -81,7 +82,7 @@ public class ICIPAdaptersV1Controller {
 		}
 	}
 
-	@PostMapping(path = "/{org}/{specname}/{methodname}")
+	@PostMapping(path = "/{org}/{specname}/{methodname}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getPostData(@PathVariable(name = "specname") String specname,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,
@@ -94,7 +95,7 @@ public class ICIPAdaptersV1Controller {
 		}
 	}
 
-	@DeleteMapping(path = "/{org}/{specname}/{methodname}")
+	@DeleteMapping(path = "/{org}/{specname}/{methodname}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> deleteData(@PathVariable(name = "specname") String specname,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params) {
@@ -106,7 +107,7 @@ public class ICIPAdaptersV1Controller {
 		}
 	}
 
-	@PostMapping(path = "/{org}/{specname}/{methodname}/file")
+	@PostMapping(path = "/{org}/{specname}/{methodname}/file", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getPostDataForFile(@PathVariable(name = "specname") String specname,
 			@PathVariable(name = "methodname") String methodname, @PathVariable(name = "org") String org,
 			@RequestHeader Map<String, String> headers, @RequestParam Map<String, String> params,

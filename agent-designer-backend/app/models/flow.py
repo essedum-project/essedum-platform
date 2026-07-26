@@ -14,6 +14,8 @@ class Flow(Base):
     nodes: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     edges: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     tags: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
+    env_vars: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
+    secrets: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.utcnow
     )
