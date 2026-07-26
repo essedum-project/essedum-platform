@@ -71,6 +71,5 @@ CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} \
     -DLOG_PATH=/app/log \
     -Dlogging.level.org.springframework.security=INFO \
     -Dspring.profiles.active=oauth2 \
-    -cp conf/*:api-gateway-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.gateway.ApiGatewayApplication"]
+    -jar api-gateway-3.3-SNAPSHOT.jar"]
 

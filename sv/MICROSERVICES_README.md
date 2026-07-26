@@ -28,6 +28,102 @@ The ESSEDUM platform has been decomposed from a monolithic architecture into **4
           └──────────── Eureka Discovery Service (:8761) ─────────────┘
 ```
 
+## Mermaid Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Clients["Clients"]
+        UI["Angular Shell UI\n(:8080 / :46067)"]
+        EXT["External Systems\n/ REST Clients"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        GW["API Gateway\n:8080\nSpring Cloud Gateway"]
+        EUR["Eureka Discovery\n:8761"]
+    end
+
+    subgraph Microservices["Microservices"]
+        USM["USM Service\n:8081\nUser & Security Mgmt"]
+        ICIP["ICIP Service\n:8082\nAI/ML Pipelines & Jobs"]
+        DATA["Data Service\n:8083\nFiles & Data Adapters"]
+        VIBE["Vibe Service\n:8084\nAI-Assisted Coding"]
+    end
+
+    subgraph Databases["Databases"]
+        MYSQL[("MySQL\n:3306")]
+        QUARTZ[("Quartz DB\n(job scheduler)")]
+        MODELDB[("Model DB")]
+    end
+
+    subgraph Messaging["Messaging"]
+        KAFKA["Kafka\n:9092"]
+        RABBIT["RabbitMQ"]
+    end
+
+    subgraph Storage["External Storage"]
+        S3["AWS S3 /\nMinIO"]
+        AZBLOB["Azure Blob\nStorage"]
+        LOCAL["Local\nFilesystem"]
+    end
+
+    subgraph ExternalAPIs["External APIs"]
+        GOOSE["Goose AI\n(Coding Agent)"]
+        GITHUB["GitHub API"]
+        SAGEMAKER["AWS SageMaker"]
+        VERTEX["GCP Vertex AI"]
+        AZUREML["Azure ML"]
+    end
+
+    UI -->|"HTTP/WS"| GW
+    EXT -->|"HTTP"| GW
+
+    GW -->|"/api/users/**\n/api/roles/**\n/api/authenticate"| USM
+    GW -->|"/api/aip/**\n/api/event/**\n/api/webhook/**\n/api/modelservice/**"| ICIP
+    GW -->|"/api/file/**\n/api/datasets/**\n/api/adapters/**"| DATA
+    GW -->|"/api/vibe/**\n/api/goose/**\n/api/github/**"| VIBE
+
+    GW <-->|"register / discover"| EUR
+    USM <-->|"register / discover"| EUR
+    ICIP <-->|"register / discover"| EUR
+    DATA <-->|"register / discover"| EUR
+    VIBE <-->|"register / discover"| EUR
+
+    USM --- MYSQL
+    ICIP --- MYSQL
+    ICIP --- QUARTZ
+    ICIP --- MODELDB
+    DATA --- MYSQL
+    VIBE --- MYSQL
+
+    ICIP -->|"publish events"| KAFKA
+    ICIP -->|"publish events"| RABBIT
+
+    DATA -->|"store / fetch files"| S3
+    DATA -->|"store / fetch files"| AZBLOB
+    DATA -->|"store / fetch files"| LOCAL
+
+    ICIP -->|"training jobs"| SAGEMAKER
+    ICIP -->|"training jobs"| VERTEX
+    ICIP -->|"training jobs"| AZUREML
+
+    VIBE -->|"AI code relay"| GOOSE
+    VIBE -->|"push / pull / PR"| GITHUB
+
+    classDef gateway fill:#f4a261,stroke:#e76f51,color:#000
+    classDef service fill:#457b9d,stroke:#1d3557,color:#fff
+    classDef infra fill:#2a9d8f,stroke:#264653,color:#fff
+    classDef db fill:#e9c46a,stroke:#f4a261,color:#000
+    classDef external fill:#a8dadc,stroke:#457b9d,color:#000
+    classDef client fill:#e8e8e8,stroke:#999,color:#000
+
+    class GW gateway
+    class USM,ICIP,DATA,VIBE service
+    class EUR infra
+    class MYSQL,QUARTZ,MODELDB db
+    class KAFKA,RABBIT,S3,AZBLOB,LOCAL,GOOSE,GITHUB,SAGEMAKER,VERTEX,AZUREML external
+    class UI,EXT client
+```
+
 ## Services
 
 ### 1. USM Service (`usm-service`) - Port 8081
