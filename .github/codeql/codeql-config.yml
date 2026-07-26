@@ -20,7 +20,7 @@ paths-ignore:
   - "**/*.min.js"
 
 # Include the project-local model pack containing our sanitizer declarations.
-packs:
-  java:
-    - ./extensions/essedum-sanitizers
+# Use repo-rooted path (resolved from checkout root, not the temp config file location).
+paths:
+  - .github/codeql/extensions/essedum-sanitizers
 

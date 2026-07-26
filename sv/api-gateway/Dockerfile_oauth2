@@ -9,9 +9,8 @@
 # -------------------------------------------------------
 # Stage 1: Build with Maven
 # -------------------------------------------------------
-FROM eclipse-temurin:21-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files (build context = sv/ root)
@@ -19,17 +18,12 @@ COPY . .
 
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B clean install -pl api-gateway -am \
+    mvn -U -B clean install -pl api-gateway -am \
         -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
-RUN mkdir -p /app/conf /app/lib /app/log && \
+RUN mkdir -p /app/conf /app/log && \
     cp /sv/api-gateway/src/main/resources/*.yml /app/conf && \
-    # Build runtime classpath
-    cd /sv/api-gateway && \
-    mvn dependency:copy-dependencies \
-        -DoutputDirectory=/app/lib -Dmdep.prependGroupId=false \
-        -DskipTests -DincludeScope=runtime && \
     cp /sv/api-gateway/target/api-gateway-3.3-SNAPSHOT.jar /app/
 
 # -------------------------------------------------------
@@ -71,6 +65,5 @@ CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} \
     -DLOG_PATH=/app/log \
     -Dlogging.level.org.springframework.security=INFO \
     -Dspring.profiles.active=oauth2 \
-    -cp conf/*:api-gateway-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.gateway.ApiGatewayApplication"]
+    -jar $(ls /app/api-gateway*.jar | head -1)"]
 

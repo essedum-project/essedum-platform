@@ -1,21 +1,16 @@
 # -------------------------------------------------------
 # Stage 1: Build with Maven
 # -------------------------------------------------------
-FROM eclipse-temurin:21-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files
 COPY . .
 
-# Copy Maven settings and project settings
-COPY .m2/settings.xml /root/.m2/settings.xml
-COPY .settings /sv/.settings
-
 # Build using BuildKit cache for dependencies
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B -s /root/.m2/settings.xml clean install -pl icip-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+    mvn -U -B clean install -pl icip-service -am -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
 RUN mkdir -p /app/conf /app/lib /app/log && \
@@ -34,9 +29,6 @@ RUN mkdir -p /app/conf /app/lib /app/log && \
 # Stage 2: Runtime Image
 # -------------------------------------------------------
 FROM eclipse-temurin:21-jdk
-
-RUN apt-get update && apt-get install -y nginx && apt-get clean
-COPY nginx_backend.conf /etc/nginx/nginx.conf
 
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
@@ -57,7 +49,6 @@ ENV ESSEDUM_HOME=/app
 EXPOSE 8082
 
 CMD ["/bin/bash", "-c", "\
-    service nginx start && \
     java \
     -Dspring.config.location=/app/conf/ \
     -Dencryption.key=essedum$123## \
@@ -69,6 +60,5 @@ CMD ["/bin/bash", "-c", "\
     -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8082 \
-    -cp conf/*:icip-service-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.icip.IcipServiceApplication"]
+    -jar $(ls /app/icip-service*.jar | head -1)"]
 

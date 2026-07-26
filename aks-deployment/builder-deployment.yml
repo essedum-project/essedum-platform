@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: builder-service
-  namespace: aipns
+  namespace: essedum
 spec:
   replicas: 1
   selector:
@@ -15,30 +15,40 @@ spec:
         app: builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
-      imagePullSecrets:
-        - name: regcred
+      imagePullSecrets: []
+      nodeSelector:
+        registry: "local"
       containers:
         - name: builder
-          image: localhost:5000/builder-service:v15
-          imagePullPolicy: Always
+          image: ${REGISTRY}/essedum/adk-code-builder-deployer:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
-          resources:
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
-            limits:
-              cpu: "2"
-              memory: "2Gi"
+          envFrom:
+            - secretRef:
+                name: essedum-secret
+            - configMapRef:
+                name: essedum-config
           env:
             - name: BUILDKIT_ADDR
               value: "tcp://buildkitd:1234"   # Points to your buildkitd Service
             - name: PYTHONUNBUFFERED
               value: "1"
+            - name: DOCKER_CONFIG
+              value: "/root/.docker"
           volumeMounts:
+            - name: docker-config
+              mountPath: /root/.docker
+              readOnly: true
             - name: dockerfile-template
               mountPath: /opt/fallback
       volumes:
+        - name: docker-config
+          secret:
+            secretName: regcred
+            items:
+              - key: .dockerconfigjson
+                path: config.json
         - name: dockerfile-template
           configMap:
             name: adk-dockerfile-template
@@ -47,14 +57,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: builder-service
-  namespace: aipns
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  namespace: essedum
 spec:
   selector:
     app: builder
   ports:
     - port: 80
       targetPort: 5000
-  type: LoadBalancer
+  type: ClusterIP
   sessionAffinity: ClientIP

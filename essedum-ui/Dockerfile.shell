@@ -1,33 +1,30 @@
 # Build context: essedum-platform/ (repo root)
 FROM node:20-alpine AS build
 
-ARG NPM_REGISTRY_URL
-ARG NPM_AUTH_TOKEN
-ARG ARTIFACTORY_REPO_USER
-ARG ARTIFACTORY_REPO_PASS
-
-# Inject corporate CA so npm can reach registries through Zscaler proxy
-COPY docker/certs/corp-ca.crt /usr/local/share/ca-certificates/corp-ca.crt
-RUN cat /usr/local/share/ca-certificates/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/corp-ca.crt
-
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 RUN npm run build-prod || (echo "=== Angular error log ===" && cat /tmp/ng-*/angular-errors.log 2>/dev/null && exit 1)
+# Generate self-signed cert in the build stage (network available here).
+RUN for i in 1 2 3; do \
+		apk add --no-cache openssl && break; \
+		echo "apk add failed (attempt $i), retrying..."; \
+		sleep $((i * 5)); \
+	done && \
+	command -v openssl >/dev/null && \
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+		-subj "/CN=localhost" \
+		-keyout /tmp/server.key \
+		-out /tmp/server.crt && \
+	apk del openssl
 
 FROM nginx:alpine
-# Inject corporate CA so apk can reach Alpine CDN through Zscaler proxy
-COPY docker/certs/corp-ca.crt /etc/ssl/certs/corp-ca.crt
-RUN cat /etc/ssl/certs/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
-
 RUN mkdir -p /etc/nginx/ssl
-# Use pre-generated self-signed cert (avoids apk add openssl in container)
-COPY docker/ssl/server.key /etc/nginx/ssl/server.key
-COPY docker/ssl/server.crt /etc/nginx/ssl/server.crt
+# Copy pre-generated cert from the build stage (no apk needed at runtime).
+COPY --from=build /tmp/server.key /etc/nginx/ssl/server.key
+COPY --from=build /tmp/server.crt /etc/nginx/ssl/server.crt
 
 COPY essedum-ui/nginx_shell.conf /etc/nginx/nginx.conf
 WORKDIR /app

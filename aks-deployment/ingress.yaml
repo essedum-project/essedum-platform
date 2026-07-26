@@ -16,10 +16,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - lfn.essedum.anuket.iol.unh.edu
+    - ${INGRESS_HOST}
     secretName: essedum-secret
   rules:
-  - host: lfn.essedum.anuket.iol.unh.edu
+  - host: ${INGRESS_HOST}
     http:
       paths:
       - backend:

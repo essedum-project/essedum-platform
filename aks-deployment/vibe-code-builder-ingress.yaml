@@ -17,10 +17,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - localhost
-    secretName: your-tls-secret
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
   rules:
-  - host: localhost
+  - host: essedum-lfn.infosys.com
     http:
       paths:
       - backend:

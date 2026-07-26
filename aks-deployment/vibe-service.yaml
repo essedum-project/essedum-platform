@@ -18,25 +18,29 @@ spec:
       labels:
         app: essedum-backend-vibe
     spec:
-      imagePullSecrets:
-      - name: regcred
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: essedum-1
       tolerations:
       - key: "node.kubernetes.io/disk-pressure"
         operator: "Exists"
         effect: "NoSchedule"
+      hostAliases:
+      - ip: "10.200.111.51"
+        hostnames:
+        - "keycloak.essedum.local"
       containers:
       - name: essedum-backend-vibe
-        image: localhost:5000/essedum-vibe-service:v15
+        image: ${DOCKER_REGISTRY}/essedum-vibe-service:${IMAGE_TAG}
         imagePullPolicy: Always
-        command: ["/bin/bash", "-c"]
-        args: ["java ${JAVA_OPTS:--Xms128m -Xmx256m} -Dspring.config.location=/app/conf/ -DLOG_PATH=/app/log -jar $(ls /app/vibe-service*.jar | head -1)"]
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1536Mi"
         env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "mysql,oauth2,dbconstants"
-        - name: OAUTH2_ISSUER_URI
-          value: "https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM"
-        - name: OAUTH2_JWK_URI
-          value: "http://keycloak:8180/realms/ESSEDUM/protocol/openid-connect/certs"
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
@@ -74,25 +78,33 @@ spec:
               key: VIBE_AZURE_OPENAI_API_KEY
         - name: GOOSE_URL
           value: "http://goosed-service:3005"
-        - name: GOOSE_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: goose-secret
-              key: secret-key
-        - name: ENCRYPTION_KEY
-          valueFrom:
-            secretKeyRef:
-              name: essedum-encryption-secret
-              key: ENCRYPTION_KEY
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "512Mi"
-          limits:
-            cpu: "1"
-            memory: "768Mi"
+        - name: OAUTH2_JWK_URI
+          value: "http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs"
+        - name: OAUTH2_ISSUER_URI
+          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
         ports:
         - containerPort: 8084
+        startupProbe:
+          tcpSocket:
+            port: 8084
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 24
+        readinessProbe:
+          tcpSocket:
+            port: 8084
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+        livenessProbe:
+          tcpSocket:
+            port: 8084
+          initialDelaySeconds: 50
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 6
 ---
 apiVersion: v1
 kind: Service
