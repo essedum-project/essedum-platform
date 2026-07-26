@@ -28,7 +28,9 @@ export class AppConfigService {
 
    public getMfeAppConfig(): Observable<CustomManifest> {  
       return Observable.create((observer) => {  
-         this.https.get<CustomManifest>(sessionStorage.getItem("contextPath") + 'assets/json/mf.manifest.json').subscribe((response) => {  
+         const contextPath = sessionStorage.getItem("contextPath") || '/';
+         const manifestUrl = contextPath + 'assets/json/mf.manifest.json?v=' + Date.now();
+         this.https.get<CustomManifest>(manifestUrl).subscribe((response) => {  
             this.mfeappConfiguration.next(response);  
             return observer.next(response);  
          });  
