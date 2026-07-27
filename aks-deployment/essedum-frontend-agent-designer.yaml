@@ -21,7 +21,7 @@ spec:
         image: ${DOCKER_REGISTRY}/essedum-frontend-agent-designer:${IMAGE_TAG}
         imagePullPolicy: Always
         securityContext:
-          runAsNonRoot: true
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         ports:
