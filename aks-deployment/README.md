@@ -27,7 +27,7 @@ build-and-push.sh                                           deploy.sh
 ```
 
 ### Key Design Decisions
-- **Zero hardcoding** — `192.168.28.36:5000`, `aipns`, `essedum-lfn.infosys.com` etc. only appear in `.env`.
+- **Zero hardcoding** — registry host, namespace, and ingress hostnames only appear in `.env`.
 - **`envsubst`** replaces `${VAR}` in all YAML at apply-time, not at write-time.
 - **Idempotent** — every `kubectl apply` uses `--dry-run=client -o yaml | apply` for namespaces; YAML changes are diffed.
 - **Retry logic** — build-and-push.sh retries failed Docker builds up to 3 times.
@@ -85,35 +85,35 @@ Open `docker/.env.sample`, copy it to `docker/.env`, then fill in every section.
 
 ```bash
 # Target environment
-ENVIRONMENT=lfn                            # aks | 5g | lfn
+ENVIRONMENT=<aks|5g|lfn>
 
 # Registry — where images are stored
-DOCKER_REGISTRY=192.168.28.36:5000        # Your private registry
+DOCKER_REGISTRY=<YOUR_REGISTRY_HOST>      # Your private registry
 DOCKER_USERNAME=                          # Leave blank for unauthenticated
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest                    # Tag applied to every built image
+IMAGE_TAG=<your-image-tag>                # Tag applied to every built image
 
 # Kubernetes cluster
-KUBE_CONTEXT=lfn-cluster                  # kubectl config get-contexts
-KUBE_NAMESPACE=aipns
+KUBE_CONTEXT=<YOUR_KUBE_CONTEXT>          # kubectl config get-contexts
+KUBE_NAMESPACE=<YOUR_NAMESPACE>
 
 # Ingress
-INGRESS_HOST=essedum-lfn.infosys.com
-INGRESS_HOST_LFN=lfn.essedum.anuket.iol.unh.edu
-KEYCLOAK_INGRESS_HOST=login.essedum-lfn.infosys.com
-TLS_SECRET_NAME=essedum-lfn-tls
+INGRESS_HOST=<YOUR_INGRESS_HOST>
+INGRESS_HOST_LFN=<YOUR_LFN_HOST>
+KEYCLOAK_INGRESS_HOST=<YOUR_KEYCLOAK_HOST>
+TLS_SECRET_NAME=<YOUR_TLS_SECRET_NAME>
 
 # Database (Kubernetes internal DNS)
-DB_HOST=mysql.aipns.svc.cluster.local
-DB_NAME=aipdb
+DB_HOST=mysql.<YOUR_NAMESPACE>.svc.cluster.local
+DB_NAME=<YOUR_DB_NAME>
 
 # Keycloak
-EXTERNAL_ISSUER_URI=https://login.essedum-lfn.infosys.com/realms/ESSEDUM
-EXTERNAL_KC_URL=https://login.essedum-lfn.infosys.com
-EXTERNAL_BASE_URL=https://essedum-lfn.infosys.com:8082
+EXTERNAL_ISSUER_URI=https://<YOUR_KEYCLOAK_HOST>/realms/ESSEDUM
+EXTERNAL_KC_URL=https://<YOUR_KEYCLOAK_HOST>
+EXTERNAL_BASE_URL=https://<YOUR_INGRESS_HOST>:8082
 
-# NPM (only needed if using JFrog Artifactory)
-NPM_REGISTRY_URL=https://infyartifactory.jfrog.io/artifactory/api/npm/npm-local/
+# NPM (only needed if using a private npm registry)
+NPM_REGISTRY_URL=<YOUR_NPM_REGISTRY_URL>
 NPM_AUTH_TOKEN=<your-token>
 ```
 
@@ -219,42 +219,42 @@ chmod +x deploy.sh
 ### AKS (Azure)
 ```bash
 ENVIRONMENT=aks
-DOCKER_REGISTRY=mycompany.azurecr.io
-DOCKER_USERNAME=mycompany
-DOCKER_PASSWORD=<acr-password>
-IMAGE_TAG=v15.0
-KUBE_CONTEXT=my-aks-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum.mycompany.com
-TLS_SECRET_NAME=essedum-aks-tls
+DOCKER_REGISTRY=<YOUR_ACR_REGISTRY>
+DOCKER_USERNAME=<your-registry-username>
+DOCKER_PASSWORD=<your-registry-password>
+IMAGE_TAG=<your-image-tag>
+KUBE_CONTEXT=<YOUR_KUBE_CONTEXT>
+KUBE_NAMESPACE=<YOUR_NAMESPACE>
+INGRESS_HOST=<YOUR_INGRESS_HOST>
+TLS_SECRET_NAME=<YOUR_TLS_SECRET_NAME>
 ```
 
 ### 5G Server
 ```bash
 ENVIRONMENT=5g
-DOCKER_REGISTRY=192.168.10.50:5000
+DOCKER_REGISTRY=<YOUR_REGISTRY_HOST>
 DOCKER_USERNAME=
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest
-KUBE_CONTEXT=5g-k8s-admin@5g-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum-5g.internal.company.com
-TLS_SECRET_NAME=essedum-5g-tls
+IMAGE_TAG=<your-image-tag>
+KUBE_CONTEXT=<YOUR_KUBE_CONTEXT>
+KUBE_NAMESPACE=<YOUR_NAMESPACE>
+INGRESS_HOST=<YOUR_INGRESS_HOST>
+TLS_SECRET_NAME=<YOUR_TLS_SECRET_NAME>
 ```
 
 ### LFN Server
 ```bash
 ENVIRONMENT=lfn
-DOCKER_REGISTRY=192.168.28.36:5000
+DOCKER_REGISTRY=<YOUR_REGISTRY_HOST>
 DOCKER_USERNAME=
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest
-KUBE_CONTEXT=lfn-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum-lfn.infosys.com
-INGRESS_HOST_LFN=lfn.essedum.anuket.iol.unh.edu
-KEYCLOAK_INGRESS_HOST=login.essedum-lfn.infosys.com
-TLS_SECRET_NAME=essedum-lfn-tls
+IMAGE_TAG=<your-image-tag>
+KUBE_CONTEXT=<YOUR_KUBE_CONTEXT>
+KUBE_NAMESPACE=<YOUR_NAMESPACE>
+INGRESS_HOST=<YOUR_INGRESS_HOST>
+INGRESS_HOST_LFN=<YOUR_LFN_HOST>
+KEYCLOAK_INGRESS_HOST=<YOUR_KEYCLOAK_HOST>
+TLS_SECRET_NAME=<YOUR_TLS_SECRET_NAME>
 ```
 
 ---
