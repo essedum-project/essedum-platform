@@ -5,9 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '@essedum/shared-lib';
 import { DatasetServices } from '../dataset-service';
 @Component({
-  selector: 'app-dataset-fullscreen-view',
-  templateUrl: './dataset-fullscreen-view.component.html',
-  styleUrls: ['./dataset-fullscreen-view.component.scss']
+    selector: 'app-dataset-fullscreen-view',
+    templateUrl: './dataset-fullscreen-view.component.html',
+    styleUrls: ['./dataset-fullscreen-view.component.scss'],
+    standalone: false
 })
 export class DatasetFullscreenViewComponent implements OnInit, OnChanges, DoCheck {
   busy: Subscription;

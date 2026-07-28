@@ -29,9 +29,10 @@ import * as moment from "moment-timezone";
 import { C } from "@angular/cdk/keycodes";
 import { DashConstantService } from "../../services/dash-constant.service";
 @Component({
-  selector: "lib-manage-users",
-  templateUrl: "./manage-users.component.html",
-  styleUrls: ["./manage-users.component.css"],
+    selector: "lib-manage-users",
+    templateUrl: "./manage-users.component.html",
+    styleUrls: ["./manage-users.component.css"],
+    standalone: false
 })
 export class ManageUsersComponent implements OnInit, OnDestroy {
   lazyloadevent = {

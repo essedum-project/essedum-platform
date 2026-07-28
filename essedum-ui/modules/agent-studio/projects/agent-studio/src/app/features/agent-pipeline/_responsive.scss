@@ -2,17 +2,47 @@
 //  AGENT PIPELINE — Responsive  ✦  2026 AI Platform
 // ═══════════════════════════════════════════════════════════════════
 
-@media (max-width: 1200px) {
+// Below 1500px: shrink AI chat panel to save room for the code editor
+@media (max-width: 1500px) {
   .file-structure-container {
-    .file-panel { min-width: 180px; max-width: 200px; }
+    .file-panel {
+      grid-template-columns: 240px minmax(0, 1fr) 340px !important;
+    }
+  }
+}
+
+// Below 1280px: shrink AI chat panel further
+@media (max-width: 1280px) {
+  .file-structure-container {
+    .file-panel {
+      grid-template-columns: 220px minmax(0, 1fr) 300px !important;
+    }
+    .ai-chat-panel { min-width: 0; }
+  }
+}
+
+@media (max-width: 1024px) {
+  .file-structure-container {
+    .file-panel {
+      grid-template-columns: 200px minmax(0, 1fr) !important;
+    }
+    // Hide AI chat panel entirely on narrow screens (the ai-chat-toggle-fab
+    // floating button still lets users open the panel)
+    .ai-chat-panel { display: none !important; }
   }
 }
 
 @media (max-width: 768px) {
   .file-structure-container {
     flex-direction: column;
-    .file-panel { max-width: 100%; min-width: 100%; max-height: 200px; border-radius: 8px 8px 0 0; border-right: none; border-bottom: none !important; }
+    .file-panel {
+      display: flex !important;
+      flex-direction: column !important;
+      grid-template-columns: none !important;
+    }
+    .file-explorer { max-width: 100%; min-width: 100%; max-height: 200px; border-radius: 8px 8px 0 0; border-right: none; border-bottom: none !important; }
     .file-editor-container { border-radius: 0 0 8px 8px; }
+    .ai-chat-panel { display: none !important; }
   }
 
   .aip-container { padding: 12px; }

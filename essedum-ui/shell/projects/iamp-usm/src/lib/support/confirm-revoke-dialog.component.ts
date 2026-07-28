@@ -17,8 +17,8 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-confirm-revoke-dialog',
-  template: `
+    selector: 'app-confirm-revoke-dialog',
+    template: `
     <h2 mat-dialog-title>Revoke Confirmation</h2>
     <div mat-dialog-content>  
     Do you want to revoke?
@@ -28,7 +28,8 @@ import { MatDialogRef } from '@angular/material/dialog';
     <button mat-raised-button (click)="dialogRef.close('delete')">Yes</button>&nbsp;
     <button mat-raised-button (click)="dialogRef.close('cancel')">No</button>
   </div>
-  `
+  `,
+    standalone: false
 })
 export class ConfirmRevokeDialogComponent {
   constructor(public dialogRef: MatDialogRef<ConfirmRevokeDialogComponent>) {}

@@ -5,8 +5,8 @@ import { GitHubRepository } from '../../../sharedModule/models/github.models';
 import { GitLinkValue } from './pipeline-options.constants';
 
 @Component({
-  selector: 'app-git-link-step',
-  template: `
+    selector: 'app-git-link-step',
+    template: `
     <div class="git-step">
       <h3 class="step-title"><mat-icon>cloud_sync</mat-icon> Push to GitHub</h3>
 
@@ -100,7 +100,7 @@ import { GitLinkValue } from './pipeline-options.constants';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .git-step { padding: 4px 0; }
     .step-title {
       display: flex; align-items: center; gap: 8px;
@@ -145,6 +145,7 @@ import { GitLinkValue } from './pipeline-options.constants';
       .git-commit-hint { color:#475569; }
     }
   `],
+    standalone: false
 })
 export class GitLinkStepComponent implements OnInit {
   @Input() initialValue: GitLinkValue;

@@ -7,9 +7,10 @@ import { DashConstantService } from '../../services/dash-constant.service';
 import { MessageService } from '../../services/message.service';
 
 @Component({
-  selector: 'lib-theme-mgmt',
-  templateUrl: './theme-mgmt.component.html',
-  styleUrls: ['./theme-mgmt.component.css']
+    selector: 'lib-theme-mgmt',
+    templateUrl: './theme-mgmt.component.html',
+    styleUrls: ['./theme-mgmt.component.css'],
+    standalone: false
 })
 export class ThemeMgmtComponent implements OnInit {
 

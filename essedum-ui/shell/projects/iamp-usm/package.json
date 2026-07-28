@@ -2,8 +2,8 @@
   "name": "iamp-usm",
   "version": "3.2.0",
   "peerDependencies": {
-    "@angular/common": "^11.2.8",
-    "@angular/core": "^11.2.8",
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0",
     "@angular-material-components/datetime-picker": "^8.0.0",
     "@angular-material-components/moment-adapter": "^8.0.0",
     "ng2-file-upload": "^1.4.0",

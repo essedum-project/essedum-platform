@@ -17,9 +17,10 @@ import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-schema',
-  templateUrl: './schema.component.html',
-  styleUrls: ['./schema.component.scss'],
+    selector: 'app-schema',
+    templateUrl: './schema.component.html',
+    styleUrls: ['./schema.component.scss'],
+    standalone: false
 })
 export class SchemaComponent implements OnInit, OnChanges {
   // Constants

@@ -6,8 +6,8 @@ const ACTIVE_STATUSES   = new Set(['STARTED', 'RUNNING']);
 const TERMINAL_STATUSES = new Set(['COMPLETED', 'FAILED', 'ERROR', 'STOPPED', 'CANCELLED']);
 
 @Component({
-  selector: 'app-logs-tab',
-  template: `
+    selector: 'app-logs-tab',
+    template: `
     <div class="logs-tab">
       <header>
         <h3><mat-icon>terminal</mat-icon>&nbsp;Logs</h3>
@@ -51,7 +51,7 @@ const TERMINAL_STATUSES = new Set(['COMPLETED', 'FAILED', 'ERROR', 'STOPPED', 'C
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display:block; height:100%; }
     .logs-tab {
       padding: 20px 24px;
@@ -183,6 +183,7 @@ const TERMINAL_STATUSES = new Set(['COMPLETED', 'FAILED', 'ERROR', 'STOPPED', 'C
       --lt-banner-err-fg:  #fca5a5;
     }
   `],
+    standalone: false
 })
 export class LogsTabComponent implements OnInit, OnDestroy {
   @Input() model: WizardPipelineModel;

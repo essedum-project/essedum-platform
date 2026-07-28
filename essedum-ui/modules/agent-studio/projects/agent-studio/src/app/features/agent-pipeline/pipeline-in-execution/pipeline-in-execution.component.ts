@@ -7,6 +7,7 @@ import { Services } from '@essedum/shared-lib';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PodLogDialogComponent } from './pod-log-dialog/pod-log-dialog.component';
 import { PodWatcherService, PipelinePodsResponse } from '../../services/pod-watcher.service';
+import { AipGridColumn, AipGridAction } from '../../sharedModule/aip-grid/aip-grid.component';
 
 export interface ExecutionPipeline {
   pod_name:         string;
@@ -30,6 +31,7 @@ export interface ExecutionPipeline {
   selector: 'app-pipeline-in-execution',
   templateUrl: './pipeline-in-execution.component.html',
   styleUrls: ['./pipeline-in-execution.component.scss'],
+  standalone: false
 })
 export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   loading   = true;
@@ -61,6 +63,70 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly DELETECONTAINER           = 'Delete Container';
   readonly PODDELETEDSUCCESS         = 'Pod deleted successfully!';
   readonly DEPLOYMENTDELETEDSUCCESS  = 'Pipeline deployment deleted!';
+
+  // ── aip-grid configuration ─────────────────────────────────────────────────
+  readonly GRID_TEMPLATE = '26% 22% 12% 24% 16%';
+
+  readonly gridColumns: AipGridColumn[] = [
+    {
+      key: 'pipeline', label: this.COLPIPELINE, field: 'container_name', cssClass: 'col-name',
+      type: 'icon-text',
+      iconFn: (row) => this.getTypeIcon((row.type || '').toLowerCase()),
+      iconWrapperCssFn: (row) => `exec-type-icon mode-${(row.type || '').toLowerCase()}`,
+      subField: 'deployment_name',
+    },
+    {
+      key: 'podname', label: this.COLPODNAME, field: 'pod_name', cssClass: 'col-pod-name',
+      type: 'text', textCssClass: 'exec-pod-name',
+    },
+    {
+      key: 'type', label: this.COLTYPE, field: 'type', cssClass: 'col-type',
+      type: 'badge',
+      badgeCssFn: (v) => `exec-type-badge type-${(v || '').toLowerCase()}`,
+    },
+    {
+      key: 'status', label: this.COLSTATUS, field: 'pod_phase', cssClass: 'col-status',
+      type: 'status-badge',
+      badgeCssFn:   (v) => `exec-status-badge status-${(v || '').toLowerCase()}`,
+      badgeLabelFn: (v) => this.getStatusLabel(v),
+      badgeIconFn:  (v) => this.getStatusIcon(v),
+    },
+  ];
+
+  readonly gridActions: AipGridAction[] = [
+    {
+      key: 'logs',
+      label: this.VIEWPODLOGS,
+      icon: 'description',
+      iconCssClass: 'menu-icon-log',
+      visibleFn: (row) => ['running','pending','succeeded','failed'].includes((row.pod_phase || '').toLowerCase()),
+    },
+    {
+      key: 'delete-pod',
+      label: this.DELETEPOD,
+      icon: 'delete_sweep',
+      iconCssClass: 'menu-icon-delete-pod',
+      visibleFn: (row) => ['running','pending','failed'].includes((row.pod_phase || '').toLowerCase()),
+    },
+    {
+      key: 'delete-container',
+      label: this.DELETECONTAINER,
+      icon: 'delete_outline',
+      iconCssClass: 'menu-icon-delete',
+      cssClass: 'exec-delete-item',
+      dividerBefore: true,
+    },
+  ];
+
+  readonly actionButtonVisibleFn = (row: any) => (row.pod_phase || '').toLowerCase() !== 'inactive';
+
+  onGridAction(event: { key: string; row: ExecutionPipeline }): void {
+    switch (event.key) {
+      case 'logs':             this.checkPodLog(event.row);               break;
+      case 'delete-pod':       this.deletePipelinePod(event.row);         break;
+      case 'delete-container': this.deletePipelineAsContainer(event.row); break;
+    }
+  }
 
   // ── Dynamic filter option definitions ───────────────────────────────────
   readonly typeOptions = [
@@ -107,10 +173,12 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.selectedStatus = params['status'] || 'all';
-      this.loadAllPipelines();
-    });
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        this.selectedStatus = params['status'] || 'all';
+        this.loadAllPipelines();
+      });
 
     // Auto-refresh: re-fetch all records for current type every 15 s
     interval(15000)
@@ -265,7 +333,6 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['../'], { relativeTo: null });
     window.history.back();
   }
 
@@ -328,7 +395,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: { entityName: pipeline.pod_name }
     });
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result === 'delete') {
         this.podWatcher
           .deletePod(pipeline.pod_name, pipeline.namespace)
@@ -345,7 +412,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     const ref = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: { entityName: pipeline.deployment_name }
     });
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result === 'delete') {
         this.podWatcher
           .deleteDeployment(pipeline.deployment_name, pipeline.namespace)

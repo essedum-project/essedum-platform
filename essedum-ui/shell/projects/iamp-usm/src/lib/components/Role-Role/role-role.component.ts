@@ -37,8 +37,9 @@ import {
   @Component({
     selector: 'lib-role-role',
     templateUrl: './role-role.component.html',
-    styleUrls: ['./role-role.component.css']
-  })
+    styleUrls: ['./role-role.component.css'],
+    standalone: false
+})
   export class RoleRoleComponent implements OnInit, OnDestroy {
     @Input() selectedRole: Role;
     @Input() header = "UsmRolePermissions...";

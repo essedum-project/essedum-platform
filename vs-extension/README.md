@@ -1,22 +1,21 @@
-# Essedum AI Platform Extension for VS Code
+# Essedum AI Platform — VS Code Extension
 
-This extension integrates VS Code with the Essedum AI Platform, providing seamless authentication and pipeline execution capabilities with enhanced OAuth 2.0 security.
+> Architecture & design decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## ✨ Features
+Integrates VS Code with the Essedum AI Platform: OAuth 2.0/PKCE authentication, pipeline browsing, job submission, and real-time execution monitoring.
 
-- **🔐 Automatic OAuth 2.0 Authentication**: Secure, one-click authentication with PKCE support - no more manual token copying!
-- **🚀 Pipeline Execution**: Submit and run scripts directly from VS Code on Essedum pipelines
-- **📊 Real-time Monitoring**: View execution results, logs, and status in an integrated sidebar
-- **🎨 Modern UI**: Clean, VS Code-themed interface with loading indicators and comprehensive error handling
-- **🔄 Automatic Token Refresh**: Seamless token management with automatic renewal
-- **⚙️ Configurable Settings**: Customizable OAuth server port and authentication options
+## Features
+
+- **OAuth 2.0 / PKCE Authentication** — one-click login via Keycloak, no manual token copying
+- **Pipeline Browsing** — view available pipelines from the Activity Bar sidebar
+- **Job Submission** — submit and monitor pipeline executions without leaving the editor
+- **Automatic Token Refresh** — seamless session management
 
 ## Requirements
 
-- Visual Studio Code version 1.103.0 or higher
-- Active Essedum AI Platform account
-- Network access to the Essedum AI Platform server
-- Available port 8085 (configurable) for OAuth callback server
+- VS Code 1.103.0+
+- Active Essedum Platform account
+- Port 8085 available (OAuth callback — configurable)
 
 ## Installation
 
@@ -40,7 +39,7 @@ The extension acts as a client for the Essedum Platform.
     *   Listens on a local port for the callback code.
 3.  **API Client**:
     *   Communicates with the Essedum Backend (e.g., `https://aiplatform...`).
-    *   Attaches Bearer tokens to requests.
+    *   Attaches Bearer tokens to requests. 
 
 ### Authentication Flow
 

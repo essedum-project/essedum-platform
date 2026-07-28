@@ -4,9 +4,10 @@ import { ApisService } from "../../services/apis.service";
 import { AppOAuthService } from "../../core/auth.service";
 
 @Component({
-  selector: 'app-inactivity-popup',
-  templateUrl: './inactivity-popup.component.html',
-  styleUrls: ['./inactivity-popup.component.scss']
+    selector: 'app-inactivity-popup',
+    templateUrl: './inactivity-popup.component.html',
+    styleUrls: ['./inactivity-popup.component.scss'],
+    standalone: false
 })
 export class InactivityPopupComponent {
   countdown: number;

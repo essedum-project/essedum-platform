@@ -72,20 +72,21 @@ enum FilterType {
 }
 
 @Component({
-  selector: 'app-aip-filter',
-  templateUrl: './aip-filter.component.html',
-  styleUrls: ['./aip-filter.component.scss'],
-  animations: [
-    trigger('slideToggle', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0 }),
-        animate('600ms ease-out', style({ height: '*', opacity: 1 })),
-      ]),
-      transition(':leave', [
-        animate('600ms ease-in', style({ height: 0, opacity: 0 })),
-      ]),
-    ]),
-  ],
+    selector: 'app-aip-filter',
+    templateUrl: './aip-filter.component.html',
+    styleUrls: ['./aip-filter.component.scss'],
+    animations: [
+        trigger('slideToggle', [
+            transition(':enter', [
+                style({ height: 0, opacity: 0 }),
+                animate('600ms ease-out', style({ height: '*', opacity: 1 })),
+            ]),
+            transition(':leave', [
+                animate('600ms ease-in', style({ height: 0, opacity: 0 })),
+            ]),
+        ]),
+    ],
+    standalone: false
 })
 export class AipFilterComponent implements OnInit, OnChanges {
   // Input properties
@@ -459,13 +460,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets agent directory filter options
    */
   getAgentDirectoryFilters(): void {
-    console.log('[Filter] getAgentDirectoryFilters called, data:', this.agentDirectoryData);
+    // console.log('[Filter] getAgentDirectoryFilters called, data:', this.agentDirectoryData);
     if (!this.agentDirectoryData || this.agentDirectoryData.length === 0) {
-      console.log('[Filter] No agent directory data available yet');
+      // console.log('[Filter] No agent directory data available yet');
       return;
     }
 
-    console.log('[Filter] Processing', this.agentDirectoryData.length, 'agent records');
+    // console.log('[Filter] Processing', this.agentDirectoryData.length, 'agent records');
 
     // Extract unique skills from mock data
     const skillsSet = new Set<string>();
@@ -536,10 +537,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
       selected: false
     }));
 
-    console.log('[Filter] Filter lists populated - Skills:', this.agentSkillsList.length, 
-                'Locators:', this.agentLocatorTypesList.length,
-                'Modules:', this.agentModulesList.length,
-                'Types:', this.agentAllTypesList.length);
+    // console.log('[Filter] Filter lists populated - Skills:', this.agentSkillsList.length, 
+    //             'Locators:', this.agentLocatorTypesList.length,
+    //             'Modules:', this.agentModulesList.length,
+    //             'Types:', this.agentAllTypesList.length);
   }
 
   /**

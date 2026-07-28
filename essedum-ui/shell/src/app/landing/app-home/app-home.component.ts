@@ -4,9 +4,10 @@ import { ApisService } from '../../services/apis.service';
 import { MessageService } from '../../services/message.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './app-home.component.html',
-  styleUrls: ['./app-home.component.scss']
+    selector: 'app-home',
+    templateUrl: './app-home.component.html',
+    styleUrls: ['./app-home.component.scss'],
+    standalone: false
 })
 export class AppHomeComponent implements OnInit {
   lazyloadevent = {

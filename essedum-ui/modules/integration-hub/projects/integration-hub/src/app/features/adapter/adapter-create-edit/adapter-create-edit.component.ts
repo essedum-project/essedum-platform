@@ -56,9 +56,10 @@ interface User {
 }
 
 @Component({
-  selector: 'app-adapter-create-edit',
-  templateUrl: './adapter-create-edit.component.html',
-  styleUrls: ['./adapter-create-edit.component.scss'],
+    selector: 'app-adapter-create-edit',
+    templateUrl: './adapter-create-edit.component.html',
+    styleUrls: ['./adapter-create-edit.component.scss'],
+    standalone: false
 })
 export class AdapterCreateEditComponent implements OnInit {
   @Input() data?: AdapterData;

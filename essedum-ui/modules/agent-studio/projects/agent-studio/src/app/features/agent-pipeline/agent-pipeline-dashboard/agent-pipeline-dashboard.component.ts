@@ -20,9 +20,10 @@ import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard
 import { TrainingPipelineWizardLocalComponent } from '../wizard/training-pipeline-wizard/training-pipeline-wizard.component';
 
 @Component({
-  selector: 'app-agent-pipeline-dashboard',
-  templateUrl: './agent-pipeline-dashboard.component.html',
-  styleUrls: ['./agent-pipeline-dashboard.component.scss'],
+    selector: 'app-agent-pipeline-dashboard',
+    templateUrl: './agent-pipeline-dashboard.component.html',
+    styleUrls: ['./agent-pipeline-dashboard.component.scss'],
+    standalone: false
 })
 export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   // Constants

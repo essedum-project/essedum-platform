@@ -112,6 +112,9 @@ class CustomAuthSecurityConfig {
 			http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
 					.requestMatchers(PATH_MATCHERS.matcher(ACTUATOR_PATTERN)).permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher("/error/**")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui/**")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui.html")).permitAll()
+					.requestMatchers(PATH_MATCHERS.matcher("/v3/api-docs/**")).permitAll()
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher(LANGFLOW_AGENT_EXPORT)).permitAll()
 					.requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()
@@ -127,6 +130,9 @@ class CustomAuthSecurityConfig {
 				authorizationManagerRequestMatcherRegistry
 						.requestMatchers(PATH_MATCHERS.matcher(ACTUATOR_PATTERN)).permitAll()
 						.requestMatchers(PATH_MATCHERS.matcher("/error/**")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui/**")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/swagger-ui.html")).permitAll()
+						.requestMatchers(PATH_MATCHERS.matcher("/v3/api-docs/**")).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(PATH_MATCHERS.matcher(LANGFLOW_AGENT_EXPORT)).permitAll()
                         .requestMatchers(PATH_MATCHERS.matcher("/api/aip/langflow/get_langflow_agent_export")).permitAll()

@@ -19,6 +19,7 @@ import { GitLinkValue } from '../shared/git-link-step.component';
   selector: 'app-data-pipeline-wizard-local',
   templateUrl: './data-pipeline-wizard.component.html',
   styleUrls: ['./data-pipeline-wizard.component.scss'],
+  standalone: false
 })
 export class DataPipelineWizardLocalComponent implements OnInit {
   @ViewChild('stepper') stepper: MatStepper;

@@ -72,3 +72,4 @@ CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} \
     -Dlogging.level.org.springframework.security=INFO \
     -Dspring.profiles.active=oauth2 \
     -jar api-gateway-3.3-SNAPSHOT.jar"]
+

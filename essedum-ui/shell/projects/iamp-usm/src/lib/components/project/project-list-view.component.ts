@@ -54,10 +54,11 @@ import { DashConstant } from "../../models/dash-constant";
 import { DashConstantService } from "../../services/dash-constant.service";
 import { ProjectDetailComponent } from "../project-detail/project-detail.component";
 @Component({
-  //moduleId: module.id,
-  templateUrl: "project-list-view.component.html",
-  selector: "project-list-view",
-  styleUrls: ["project-list-view.component.css"],
+    //moduleId: module.id,
+    templateUrl: "project-list-view.component.html",
+    selector: "project-list-view",
+    styleUrls: ["project-list-view.component.css"],
+    standalone: false
 })
 export class ProjectListViewComponent implements OnInit, OnDestroy {
   @Input() header = "Projects...";

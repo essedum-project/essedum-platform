@@ -23,9 +23,10 @@ interface DeploymentFormData {
 }
 
 @Component({
-  selector: 'app-deployment-form',
-  templateUrl: './deployment-form.component.html',
-  styleUrls: ['./deployment-form.component.scss']
+    selector: 'app-deployment-form',
+    templateUrl: './deployment-form.component.html',
+    styleUrls: ['./deployment-form.component.scss'],
+    standalone: false
 })
 export class DeploymentFormComponent implements OnInit {
   @Output() deploymentFinished = new EventEmitter<DeploymentFormData>();
@@ -686,9 +687,9 @@ export class DeploymentFormComponent implements OnInit {
 
 // Inline Branch Selection Dialog Component
 @Component({
-  selector: 'branch-selection-dialog',
-  templateUrl: './branch-selection-dialog.component.html',
-  styles: [`
+    selector: 'branch-selection-dialog',
+    templateUrl: './branch-selection-dialog.component.html',
+    styles: [`
     :host ::ng-deep .mat-mdc-dialog-container {
       border-radius: 8px;
     }
@@ -697,7 +698,8 @@ export class DeploymentFormComponent implements OnInit {
     }
       ml-18{
         margin-left:-18px;}
-  `]
+  `],
+    standalone: false
 })
 export class BranchSelectionDialogComponent implements OnInit {
   branchForm: FormGroup;

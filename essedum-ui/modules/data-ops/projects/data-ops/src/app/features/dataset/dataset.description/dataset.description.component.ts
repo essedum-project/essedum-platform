@@ -20,9 +20,10 @@ import mammoth from 'mammoth';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-dataset-description',
-  templateUrl: './dataset.description.component.html',
-  styleUrls: ['./dataset.description.component.scss']
+    selector: 'app-dataset-description',
+    templateUrl: './dataset.description.component.html',
+    styleUrls: ['./dataset.description.component.scss'],
+    standalone: false
 })
 export class DatasetDescriptionComponent implements OnInit {
   @Input() cardTitle: String;

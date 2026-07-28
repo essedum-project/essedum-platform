@@ -1,6 +1,6 @@
 {
   "root": true,
-  "comment": "Plan §A.7 — block cross-MFE imports. Activates when ESLint is installed.",
+  // Plan §A.7 — block cross-MFE imports. Activates when ESLint is installed.
   "rules": {
     "no-restricted-imports": ["error", {
       "patterns": [

@@ -225,7 +225,7 @@ class PipelineAgentClient {
         this.hideEmptyState();
 
         // Render cards using exact Pipeline structure
-        this.cardsContainer.innerHTML = message.cards.map(card => this.createCardElement(card)).join(''); // lgtm[js/xss]
+        this.cardsContainer.innerHTML = message.cards.map(card => this.createCardElement(card)).join('');  
 
         // Update pagination with the pagination object from message
         if (message.pagination) {
@@ -254,7 +254,7 @@ class PipelineAgentClient {
         const escapedPipelineId = this.escapeHtml(String(pipelineId));
 
         // Use exact HTML structure from Pipeline cards — all user content escaped
-        return ` // lgtm[js/xss]
+        return `  
             <div class="pipeline-card" tabindex="0" role="article" 
                  aria-label="Pipeline Agent: ${this.escapeHtml(titleCased)}" 
                  data-pipeline-id="${escapedPipelineId}">
@@ -321,7 +321,7 @@ class PipelineAgentClient {
 
         if (this.pipelineInfo) {
             const DEF = this.constants.DEFAULTS;
-            this.pipelineInfo.innerHTML = ` // lgtm[js/xss]
+            this.pipelineInfo.innerHTML = `  
                 <p><strong>Pipeline ID:</strong> ${this.escapeHtml(data.pipelineId || DEF.PIPELINE_ID)}</p>
                 <p><strong>Type:</strong> ${this.escapeHtml(data.type || DEF.PIPELINE_ID)}</p>
                 <p><strong>Organization:</strong> ${this.escapeHtml(data.organization || DEF.PIPELINE_ID)}</p>
@@ -495,46 +495,39 @@ class PipelineAgentClient {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
 
-        // Build HTML string for page numbers
-        let pagesHtml = '';
+        const makePageBtn = (page, isActive) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-pagination page-number' + (isActive ? ' active' : '');
+            btn.dataset.page = page;
+            btn.textContent = page;
+            btn.addEventListener('click', () => this.goToPage(page));
+            return btn;
+        };
+        const makeEllipsis = () => {
+            const span = document.createElement('span');
+            span.className = 'page-ellipsis';
+            span.textContent = '...';
+            return span;
+        };
 
-        // Add first page and ellipsis if needed
+        const fragment = document.createDocumentFragment();
+
         if (startPage > 1) {
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="1">1</button>`;
-            if (startPage > 2) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
+            fragment.appendChild(makePageBtn(1, false));
+            if (startPage > 2) { fragment.appendChild(makeEllipsis()); }
         }
 
-        // Add visible page numbers
         for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage ? 'active' : '';
-            pagesHtml += `<button class="btn btn-pagination page-number ${isActive}" data-page="${i}">${i}</button>`;
+            fragment.appendChild(makePageBtn(i, i === currentPage));
         }
 
-        // Add ellipsis and last page if needed
         if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pagesHtml += `<span class="page-ellipsis">...</span>`;
-            }
-            pagesHtml += `<button class="btn btn-pagination page-number" data-page="${totalPages}">${totalPages}</button>`;
+            if (endPage < totalPages - 1) { fragment.appendChild(makeEllipsis()); }
+            fragment.appendChild(makePageBtn(totalPages, false));
         }
 
-        // Set the HTML - built from safe numeric values only
-        this.paginationPages.innerHTML = pagesHtml; // lgtm[js/xss]
-
-        // Add click listeners to all page number buttons
-        this.paginationPages.querySelectorAll('.page-number').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Use currentTarget to always get the button element, not its children
-                const button = e.currentTarget;
-                const page = parseInt(button.dataset.page);
-                if (!isNaN(page)) {
-                    console.log('[Pipeline Agent Client] Navigating to page:', page);
-                    this.goToPage(page);
-                }
-            });
-        });
+        this.paginationPages.textContent = '';
+        this.paginationPages.appendChild(fragment);
     }
 
     showLoading() {

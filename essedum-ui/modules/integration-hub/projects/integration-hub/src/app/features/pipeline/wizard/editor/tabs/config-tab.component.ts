@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { WizardPipelineModel } from '../pipeline-editor.component';
 
 @Component({
-  selector: 'app-config-tab',
-  template: `
+    selector: 'app-config-tab',
+    template: `
     <div class="cfg-tab">
       <h3><mat-icon>settings</mat-icon>&nbsp;Pipeline configuration</h3>
       <div class="cfg-grid">
@@ -14,7 +14,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display:block; background: var(--cfg-page-bg, #f8fafc); min-height: 100%; }
     .cfg-tab { padding:24px; max-width: 900px; margin: 0 auto; }
     .cfg-tab h3 {
@@ -53,6 +53,7 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
       --cfg-val:      #e6edf3;
     }
   `],
+    standalone: false
 })
 export class ConfigTabComponent {
   @Input() model: WizardPipelineModel;

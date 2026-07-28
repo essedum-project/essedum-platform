@@ -7,7 +7,8 @@ import { Services } from '@essedum/shared-lib';
 @Component({
   selector: 'app-github-push',
   templateUrl: './github-push.component.html',
-  styleUrls: ['./github-push.component.scss']
+  styleUrls: ['./github-push.component.scss'],
+  standalone: false
 })
 export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() mode: 'push' | 'pull' = 'push';

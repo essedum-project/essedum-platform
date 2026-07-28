@@ -6,9 +6,10 @@ import { Validators } from '@angular/forms';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-edit-spec-template',
-  templateUrl: './edit-spec-template.component.html',
-  styleUrls: ['./edit-spec-template.component.scss'],
+    selector: 'app-edit-spec-template',
+    templateUrl: './edit-spec-template.component.html',
+    styleUrls: ['./edit-spec-template.component.scss'],
+    standalone: false
 })
 export class EditSpecTemplateComponent implements OnInit {
     readonly CARD_TITLE = 'Spec';

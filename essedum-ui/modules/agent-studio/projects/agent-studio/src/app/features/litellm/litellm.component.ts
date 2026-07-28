@@ -2,9 +2,10 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 @Component({
-  selector: 'app-litellm',
-  templateUrl: './litellm.component.html',
-  styleUrls: ['./litellm.component.scss'],
+    selector: 'app-litellm',
+    templateUrl: './litellm.component.html',
+    styleUrls: ['./litellm.component.scss'],
+    standalone: false
 })
 export class LitellmComponent implements OnInit, AfterViewInit {
   // Embedded LiteLLM interface URL

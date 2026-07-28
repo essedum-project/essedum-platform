@@ -56,15 +56,19 @@ public class VibeCodingService {
                     .exchangeToMono(response -> response.toEntity(String.class))
                     .block(blockTimeout);
         } catch (WebClientResponseException ex) {
-            logger.error("Goose POST {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
+            logger.error("Goose POST {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
+            String gooseBody = ex.getResponseBodyAsString();
+            String errorBody = (gooseBody != null && !gooseBody.isBlank()) ? gooseBody
+                    : "{\"error\":\"Upstream Goose service returned " + ex.getStatusCode().value() + "\"}";
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Upstream service returned an error\"}");
+                    .body(errorBody);
         } catch (Exception ex) {
-            logger.error("Goose POST {} error: {}", path, ex.getMessage(), ex);
+            String cause = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+            logger.error("Goose POST {} failed — cause: {}", path, cause, ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Request failed\"}");
+                    .body("{\"error\":\"Goose service unreachable\",\"detail\":\"" + cause + "\"}");
         }
     }
 
@@ -74,7 +78,7 @@ public class VibeCodingService {
     public ResponseEntity<String> get(String path, MultiValueMap<String, String> queryParams) {
         logger.debug("Goose GET {}", path);
         try {
-            return gooseWebClient.get()
+            ResponseEntity<String> response = gooseWebClient.get()
                     .uri(uriBuilder -> {
                         var b = uriBuilder.path(path);
                         if (queryParams != null && !queryParams.isEmpty()) {
@@ -82,18 +86,35 @@ public class VibeCodingService {
                         }
                         return b.build();
                     })
-                    .exchangeToMono(response -> response.toEntity(String.class))
+                    .exchangeToMono(r -> r.toEntity(String.class))
                     .block(blockTimeout);
+
+            // Check if goosed returned non-2xx with empty body (common with 404 Not Found from missing endpoints)
+            if (response != null && !response.getStatusCode().is2xxSuccessful()) {
+                String body = response.getBody();
+                if (body == null || body.isBlank()) {
+                    String errorMsg = "{\"error\":\"Upstream Goose service returned " + response.getStatusCode().value() + "\"}";
+                    logger.error("Goose GET {} returned {} with empty body", path, response.getStatusCode().value());
+                    return ResponseEntity.status(response.getStatusCode())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(errorMsg);
+                }
+            }
+            return response;
         } catch (WebClientResponseException ex) {
-            logger.error("Goose GET {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
+            logger.error("Goose GET {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
+            String gooseBody = ex.getResponseBodyAsString();
+            String errorBody = (gooseBody != null && !gooseBody.isBlank()) ? gooseBody
+                    : "{\"error\":\"Upstream Goose service returned " + ex.getStatusCode().value() + "\"}";
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Upstream service returned an error\"}");
+                    .body(errorBody);
         } catch (Exception ex) {
-            logger.error("Goose GET {} error: {}", path, ex.getMessage(), ex);
+            String cause = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+            logger.error("Goose GET {} failed — cause: {}", path, cause, ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Request failed\"}");
+                    .body("{\"error\":\"Goose service unreachable\",\"detail\":\"" + cause + "\"}");
         }
     }
 
@@ -111,15 +132,19 @@ public class VibeCodingService {
                     .exchangeToMono(response -> response.toEntity(String.class))
                     .block(blockTimeout);
         } catch (WebClientResponseException ex) {
-            logger.error("Goose PUT {} responded with {}: {}", path, ex.getStatusCode(), ex.getMessage());
+            logger.error("Goose PUT {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
+            String gooseBody = ex.getResponseBodyAsString();
+            String errorBody = (gooseBody != null && !gooseBody.isBlank()) ? gooseBody
+                    : "{\"error\":\"Upstream Goose service returned " + ex.getStatusCode().value() + "\"}";
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Upstream service returned an error\"}");
+                    .body(errorBody);
         } catch (Exception ex) {
-            logger.error("Goose PUT {} error: {}", path, ex.getMessage(), ex);
+            String cause = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+            logger.error("Goose PUT {} failed — cause: {}", path, cause, ex);
             return ResponseEntity.internalServerError()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"Request failed\"}");
+                    .body("{\"error\":\"Goose service unreachable\",\"detail\":\"" + cause + "\"}");
         }
     }
 

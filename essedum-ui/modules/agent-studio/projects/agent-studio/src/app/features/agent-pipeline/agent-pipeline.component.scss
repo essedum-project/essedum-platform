@@ -1,4 +1,5 @@
 @use 'overlays';
+@use 'ai-chat-panel';
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -139,28 +140,128 @@
 // =============================================================================
 // FILE STRUCTURE (CODESPACE TAB) - VS Code Layout
 // =============================================================================
+// CRITICAL: lock the container to a viewport-relative height so opening a
+// large file cannot stretch the outer card. Each column (explorer / editor /
+// AI chat) then scrolls independently inside this fixed box.
 .file-structure-container {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
-  height: 100% !important;
+  height: calc(100vh - 220px) !important;
+  min-height: 480px !important;
+  max-height: calc(100vh - 180px) !important;
   min-width: 0 !important;
-  min-height: 0 !important;
   background: #0d1117;
+  overflow: hidden !important;
 }
 
-// CRITICAL: explorer + editor side-by-side. Using CSS grid so the editor's
-// width is computed explicitly (1fr after the explorer's fixed column) rather
-// than relying on flex propagation, which the federated chunk doesn't get
-// reliably from Material's tab-body styles.
+// CRITICAL: explorer + editor + ai-chat side-by-side. Using CSS grid so the
+// editor's width is computed explicitly (1fr between the explorer's fixed
+// left column and the chat panel's fixed right column) rather than relying on
+// flex propagation, which the federated chunk doesn't get reliably from
+// Material's tab-body styles.
+// NOTE: the collapse toggle was removed — the AI chat panel is now always
+// visible at a fixed 380px width.
 .file-panel {
   display: grid !important;
-  grid-template-columns: 260px minmax(0, 1fr) !important;
+  grid-template-columns: 260px minmax(0, 1fr) 380px !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 100%;
   flex: 1;
   overflow: hidden;
+
+  // When the user has closed the AI chat panel (via the X button in the
+  // header) the 3rd column collapses; explorer + editor split the row.
+  &.chat-hidden {
+    grid-template-columns: 260px minmax(0, 1fr) !important;
+  }
+}
+
+// =============================================================================
+// TOP CODESPACE TOOLBAR — Deploy banner + reopen chat pill above the grid.
+// Keep bg IDENTICAL to .file-panel so there's no visible seam between the
+// toolbar strip and the codespace row below it.
+// =============================================================================
+.codespace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  flex-shrink: 0;
+  min-height: 0;
+  background: #0d1117 !important;
+
+  .ai-chat-deploy-banner.codespace-toolbar-banner {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  .reopen-chat-btn {
+    // Right-aligned pill next to the (now hidden) close X. Compact height +
+    // slim padding so it doesn't add visual weight when the deploy banner
+    // isn't present.
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    height: 28px;
+    background: linear-gradient(135deg, #4480f5, #7c3aed);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(68,128,245,0.32);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 14px !important;
+      width: 14px !important;
+      height: 14px !important;
+      color: #ffffff !important;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(68,128,245,0.5);
+    }
+  }
+}
+
+// Light-theme toolbar bg should match the light .file-panel color.
+:host-context(body.header-light-theme) .codespace-toolbar {
+  background: #ffffff !important;
+
+  .reopen-chat-btn {
+    background: linear-gradient(135deg, #4742dc, #7c3aed);
+    box-shadow: 0 2px 10px rgba(71,66,220,0.28);
+    &:hover { box-shadow: 0 4px 16px rgba(71,66,220,0.48); }
+  }
+}
+
+// AI chat header — close (X) button. Uses red hover to differentiate from
+// the "new chat" / "clear history" buttons next to it.
+:host ::ng-deep .ai-chat-header-actions .chat-close-btn {
+  color: #8b949e !important;
+  transition: all 0.15s ease !important;
+
+  mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+
+  &:hover {
+    color: #f85149 !important;
+    background: rgba(248,81,73,0.10) !important;
+  }
+}
+:host-context(body.header-light-theme) ::ng-deep .ai-chat-header-actions .chat-close-btn {
+  color: #656d76 !important;
+  &:hover { color: #cf222e !important; background: rgba(207,34,46,0.08) !important; }
 }
 
 // RIGHT SIDE - FILE EDITOR (1fr column in the grid above)
@@ -444,25 +545,34 @@
 }
 
 .editor-controls-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  background: #1c2129;
+  // Position-relative container so the `.editor-actions` group can be pinned
+  // absolutely to the top-right — that guarantees the Save / Delete / Close
+  // buttons stay visible regardless of column width or global CSS conflicts.
+  // NOTE: aip-app-legacy.scss globally sets `.editor-controls-bar { display: flex }`
+  //       and `.editor-actions { gap: 6px }` — we force overrides with !important.
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 120px 0 12px !important;   // reserve 120px on right for actions
+  background: #1c2129 !important;
   border-bottom: none !important;
-  height: 38px;
-  min-height: 38px;
-  gap: 8px;
+  height: 38px !important;
+  min-height: 38px !important;
+  min-width: 0 !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
 
   .file-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow: hidden;
-    flex: 1;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
 
     .file-type-icon {
-      font-size: 15px; width: 15px; height: 15px; color: #8b949e;
+      font-size: 15px; width: 15px; height: 15px; color: #8b949e; flex-shrink: 0;
     }
     .file-name {
       font-size: 13px;
@@ -472,15 +582,37 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex-shrink: 0;
+      max-width: 60%;
       &.modified { color: #d29922; font-style: italic; }
     }
-    .file-path-breadcrumb { font-size: 11px; color: #484f58; margin-left: 8px; }
-    .modified-indicator { color: #d29922; font-size: 18px; line-height: 1; margin-left: 4px; }
+    .file-path-breadcrumb {
+      font-size: 11px;
+      color: #484f58;
+      margin-left: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .modified-indicator { color: #d29922; font-size: 18px; line-height: 1; margin-left: 4px; flex-shrink: 0; }
   }
 
   .editor-actions {
-    display: flex;
-    gap: 4px;
+    // Pinned to the top-right of the toolbar. Because the parent has 120px
+    // right-padding reserved for us, the buttons never overlap the file-info.
+    position: absolute !important;
+    top: 50% !important;
+    right: 8px !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    z-index: 3 !important;
+    flex-shrink: 0 !important;
+    background: #1c2129 !important;
+    padding-left: 4px !important;
 
     button, .action-button {
       width: 30px !important; height: 30px !important; min-width: 30px !important;
@@ -494,9 +626,36 @@
       mat-icon { font-size: 16px !important; width: 16px !important; height: 16px !important; }
     }
     .save-button {
-      color: #3fb950 !important;
-      &:hover { background: rgba(63,185,80,0.1) !important; }
-      &.save-disabled { color: #484f58 !important; }
+      // Default (disabled) state — dim so the enabled state stands out.
+      color: #484f58 !important;
+      opacity: 1 !important;
+      background: transparent !important;
+      transition: all 0.15s ease !important;
+
+      &:hover:not([disabled]) { background: rgba(63,185,80,0.15) !important; }
+
+      // Enabled state — prominent green pill so the user always spots the
+      // save action after making a change.
+      &.save-enabled,
+      &:not([disabled]) {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #238636, #2ea043) !important;
+        box-shadow: 0 2px 8px rgba(35,134,54,0.35) !important;
+        border: 1px solid rgba(63,185,80,0.35) !important;
+        mat-icon { color: #ffffff !important; }
+        &:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important; }
+      }
+
+      // Explicit disabled overrides Material's default half-opacity so the
+      // button is dim but not invisible.
+      &.save-disabled,
+      &[disabled] {
+        color: #484f58 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 1px solid transparent !important;
+        mat-icon { color: #484f58 !important; }
+      }
     }
     .delete-button {
       color: #8b949e !important;
@@ -520,9 +679,16 @@
 }
 
 .text-editor-container {
-  display: flex;
-  flex: 1;
-  overflow: auto;
+  display: flex !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  // The textarea inside handles its own scroll (both axes) via wrap="off" +
+  // white-space: pre. Keeping overflow: hidden here prevents a competing outer
+  // scrollbar and guarantees horizontal scroll shows up on the textarea itself.
+  // aip-app-legacy.scss sets `.file-editor-container { overflow: auto }` — this
+  // container is a sibling not a parent, but we still force `hidden` explicitly.
+  overflow: hidden !important;
   background: #0d1117;
 }
 
@@ -601,26 +767,45 @@
   }
 }
 
-.text-editor-column { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.text-editor-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  // Never clip horizontal overflow here — the textarea inside handles the
+  // scroll and we don't want a phantom outer clip hiding its scrollbar.
+  overflow: visible;
+}
 
 // The actual code textarea
+// IMPORTANT: aip-app-legacy.scss defines a competing `.file-content-editor`
+// without `overflow` / `white-space` rules — every critical scroll-related
+// property here MUST use `!important` so the textarea gets its own horizontal
+// + vertical scrollbars when the middle editor column is narrow.
 .file-content-editor {
-  flex: 1;
-  resize: none;
-  border: none;
-  outline: none;
+  flex: 1 !important;
+  resize: none !important;
+  border: none !important;
+  outline: none !important;
   background: #0d1117 !important;
   color: #e6edf3 !important;
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace !important;
   font-size: 13px !important;
-  line-height: 20px;
-  padding: 10px 16px;
-  tab-size: 4;
-  white-space: pre;
-  overflow-wrap: normal;
-  overflow: auto;
-  caret-color: #58a6ff;
-  width: 100%;
+  line-height: 20px !important;
+  padding: 10px 16px !important;
+  tab-size: 4 !important;
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  // Explicitly enable BOTH axes — some browsers otherwise skip the horizontal
+  // scrollbar when the parent is a flex item with min-width: 0.
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  caret-color: #58a6ff !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
 
   &::placeholder { color: #484f58; font-style: italic; }
   &:focus { background: #0d1117 !important; }
@@ -1151,6 +1336,754 @@
   color: #8b949e;
   transition: color 0.15s;
   &:hover { color: #58a6ff; }
+}
+
+// =============================================================================
+// AI CHAT — DEPLOY BANNER
+// Appears in the AI chat panel once files are generated. push-to-github runs
+// automatically every round; deployment is manual via the Deploy button below.
+// =============================================================================
+.ai-chat-deploy-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 12px 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(124,58,237,0.10));
+  border: 1px solid rgba(88,166,255,0.28);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  animation: fadeUp 0.3s ease-out;
+
+  &.deploying {
+    border-color: rgba(210,153,34,0.45);
+    background: linear-gradient(135deg, rgba(210,153,34,0.10), rgba(88,166,255,0.06));
+  }
+  &.success {
+    border-color: rgba(63,185,80,0.45);
+    background: linear-gradient(135deg, rgba(63,185,80,0.10), rgba(88,166,255,0.06));
+  }
+  &.error {
+    border-color: rgba(248,81,73,0.45);
+    background: linear-gradient(135deg, rgba(248,81,73,0.10), rgba(248,81,73,0.04));
+  }
+
+  .deploy-banner-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .deploy-banner-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #58a6ff !important;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &.deploying .deploy-banner-icon {
+    color: #d29922 !important;
+    animation: spin 1.2s linear infinite;
+  }
+  &.success .deploy-banner-icon { color: #3fb950 !important; }
+  &.error .deploy-banner-icon { color: #f85149 !important; }
+
+  .deploy-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    strong {
+      font-size: 12px;
+      color: #e6edf3;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    span {
+      font-size: 11px;
+      color: #8b949e;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    a {
+      color: #58a6ff;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+
+  .deploy-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.35);
+    transition: transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 16px !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    &:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 20px rgba(79,70,229,0.55);
+    }
+    &[disabled] {
+      opacity: 0.65;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+}
+
+// Light theme
+:host-context(body.header-light-theme) .ai-chat-deploy-banner {
+  background: linear-gradient(135deg, rgba(71,66,220,0.05), rgba(124,58,237,0.06));
+  border-color: rgba(71,66,220,0.25);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+
+  .deploy-banner-icon { color: #4742dc !important; }
+  .deploy-banner-text {
+    strong { color: #1f2328; }
+    span { color: #57606a; }
+    a { color: #4742dc; }
+  }
+}
+
+// =============================================================================
+// GITHUB PUSH TOAST + DETAILS PANEL
+// Floats in the top-right of the viewport — below the top nav / tabs and
+// above the codespace grid, so it never fights the code editor, the AI chat
+// input, the deploy banner, or the LFN footer. Compact by default, expands
+// inline to show metadata (branch / commit / push ID / error) and an editable
+// Repository URL field for retry.
+// =============================================================================
+@keyframes gh-toast-slide-in {
+  from { opacity: 0; transform: translateX(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateX(0)    scale(1); }
+}
+
+.gh-push-toast {
+  position: fixed;
+  // Anchor ABOVE the codespace tab bar ("Essedum Codespace / Playground /
+  // Deployment / Environment") — the toast sits high-right so it never
+  // overlaps the tab strip, deploy banner, code editor, chat panel, or LFN
+  // footer. Only the top nav (~55px) stays above it.
+  top: 110px;
+  // Shifted in from the viewport edge so the toast aligns with the right
+  // edge of the codespace card (where the Deploy / Open AI Chat buttons sit)
+  // instead of hugging the browser scrollbar.
+  right: 80px;
+  z-index: 9500;
+  width: 400px;
+  max-width: calc(100vw - 48px);
+  // Cap total height so the expanded panel never overflows the viewport.
+  // Header stays put, details scroll inside if the payload is big.
+  max-height: calc(100vh - 150px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(22, 27, 34, 0.92);
+  // Subtle backdrop blur for a modern glass-morphism feel. Disabled on
+  // reduced-motion devices via the media query below.
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  border-radius: 14px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.55),
+    0 2px 8px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.03) inset;
+  overflow: hidden;
+  animation: gh-toast-slide-in 0.32s cubic-bezier(0.34, 1.4, 0.42, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  // 2px accent strip that changes color by phase
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4480f5, #7c3aed, #06b6d4);
+    pointer-events: none;
+  }
+  &.pushing::before { background: linear-gradient(90deg, #d29922, #f0883e, #d29922); }
+  &.success::before { background: linear-gradient(90deg, #238636, #2ea043, #3fb950); }
+  &.failed::before  { background: linear-gradient(90deg, #da3633, #f85149, #da3633); }
+
+  &.expanded {
+    width: 460px;
+  }
+
+  .gh-push-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    user-select: none;
+    flex-shrink: 0;
+    &:hover { background: rgba(255,255,255,0.03); }
+  }
+
+  .gh-push-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+    mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+    }
+  }
+  &.pushing .gh-push-icon-wrap {
+    background: rgba(210,153,34,0.14);
+    mat-icon { color: #d29922 !important; }
+  }
+  &.success .gh-push-icon-wrap {
+    background: rgba(63,185,80,0.14);
+    mat-icon { color: #3fb950 !important; }
+  }
+  &.failed .gh-push-icon-wrap {
+    background: rgba(248,81,73,0.14);
+    mat-icon { color: #f85149 !important; }
+  }
+
+  .gh-push-title-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    strong {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e6edf3;
+      line-height: 1.3;
+    }
+    span {
+      font-size: 11px;
+      color: #8b949e;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 10.5px;
+      color: #58a6ff;
+      background: rgba(88,166,255,0.08);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+  }
+
+  .gh-push-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+
+    .gh-push-toggle-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      color: #8b949e !important;
+      transition: color 0.15s ease;
+    }
+
+    // Dismiss (×) button — hidden until the toast is hovered so it doesn't
+    // compete visually with the phase icon. Red hover mirrors the AI chat
+    // panel's close button.
+    .gh-push-dismiss-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      margin-left: 2px;
+      border: none;
+      background: transparent;
+      color: #8b949e;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+
+      mat-icon {
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      &:hover {
+        color: #f85149;
+        background: rgba(248, 81, 73, 0.10);
+      }
+      &:focus-visible {
+        outline: 2px solid rgba(88, 166, 255, 0.55);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  .gh-push-details {
+    padding: 12px 14px 14px;
+    border-top: 1px solid #21262d;
+    background: #0d1117;
+    animation: fadeUp 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    // Scroll internally when the details are taller than the remaining
+    // toast height (viewport - header - own padding).
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; &:hover { background: #484f58; } }
+  }
+
+  .gh-push-meta {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 6px 12px;
+    font-size: 12px;
+
+    .gh-meta-row {
+      display: contents;
+    }
+    dt {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      padding-top: 2px;
+    }
+    dd {
+      margin: 0;
+      color: #c9d1d9;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 11px;
+      color: #58a6ff;
+      background: rgba(88,166,255,0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  }
+
+  .gh-status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: rgba(88,166,255,0.12);
+    color: #58a6ff;
+    &.pushing { background: rgba(210,153,34,0.14); color: #d29922; }
+    &.success { background: rgba(63,185,80,0.14);  color: #3fb950; }
+    &.failed  { background: rgba(248,81,73,0.14);  color: #f85149; }
+  }
+
+  .gh-push-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(248,81,73,0.06);
+    border: 1px solid rgba(248,81,73,0.28);
+    border-radius: 8px;
+
+    mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: #f85149 !important;
+      margin-top: 1px;
+    }
+    .gh-error-text {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      strong {
+        font-size: 11.5px;
+        color: #f85149;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      pre {
+        margin: 0;
+        max-height: 120px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+        font-size: 11px;
+        color: #ffb4a8;
+        line-height: 1.45;
+      }
+    }
+  }
+
+  .gh-repo-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    > span {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+    }
+    input {
+      background: rgba(13,17,23,0.9);
+      border: 1px solid rgba(88,166,255,0.28);
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 12px;
+      padding: 8px 10px;
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      &:focus {
+        border-color: #58a6ff;
+        box-shadow: 0 0 0 2px rgba(88,166,255,0.15);
+      }
+      &::placeholder { color: #484f58; }
+    }
+    small {
+      font-size: 10.5px;
+      color: #8b949e;
+      em { color: #c9d1d9; font-style: normal; font-weight: 600; }
+    }
+  }
+
+  .gh-push-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .gh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      height: 30px;
+      border-radius: 7px;
+      border: none;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      letter-spacing: 0.2px;
+      mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; }
+    }
+    .gh-btn-secondary {
+      background: transparent;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      &:hover:not([disabled]) { border-color: #58a6ff; color: #ffffff; background: rgba(88,166,255,0.06); }
+    }
+    .gh-btn-primary {
+      background: linear-gradient(135deg, #4480f5, #7c3aed);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(68,128,245,0.32);
+      &:hover:not([disabled]) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(68,128,245,0.5); }
+    }
+    .gh-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+  }
+}
+
+// Light theme
+:host-context(body.header-light-theme) .gh-push-toast {
+  background: rgba(255, 255, 255, 0.94);
+  color: #1f2328;
+  border-color: rgba(208, 215, 222, 0.9);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.16),
+    0 2px 8px rgba(0,0,0,0.08),
+    0 0 0 1px rgba(0,0,0,0.02) inset;
+
+  .gh-push-icon-wrap { background: rgba(0,0,0,0.04); }
+  &.pushing .gh-push-icon-wrap { background: rgba(210,153,34,0.10); }
+  &.success .gh-push-icon-wrap { background: rgba(46,160,67,0.10); mat-icon { color: #2ea043 !important; } }
+  &.failed  .gh-push-icon-wrap { background: rgba(207,34,46,0.10); mat-icon { color: #cf222e !important; } }
+
+  .gh-push-title-text { strong { color: #1f2328; } span { color: #57606a; } code { color: #4742dc; background: rgba(71,66,220,0.08); } }
+  .gh-push-header:hover { background: rgba(0,0,0,0.03); }
+  .gh-push-header-actions .gh-push-toggle-icon { color: #57606a !important; }
+
+  .gh-push-details { background: #f6f8fa; border-top-color: #e1e4e8; }
+  .gh-push-meta { dt { color: #57606a; } dd { color: #24292f; } code { color: #4742dc; background: rgba(71,66,220,0.08); } }
+  .gh-status-chip { background: rgba(71,66,220,0.08); color: #4742dc; &.success { background: rgba(46,160,67,0.10); color: #2ea043; } &.failed { background: rgba(207,34,46,0.10); color: #cf222e; } &.pushing { background: rgba(210,153,34,0.10); color: #bf8700; } }
+  .gh-push-error { background: rgba(207,34,46,0.05); border-color: rgba(207,34,46,0.25); mat-icon { color: #cf222e !important; } .gh-error-text { strong { color: #cf222e; } pre { color: #82061e; } } }
+  .gh-repo-field { > span { color: #57606a; } input { background: #ffffff; border-color: #d0d7de; color: #1f2328; &:focus { border-color: #4742dc; box-shadow: 0 0 0 2px rgba(71,66,220,0.15); } } small { color: #57606a; em { color: #1f2328; } } }
+  .gh-push-actions {
+    .gh-btn-secondary { color: #1f2328; border-color: #d0d7de; &:hover:not([disabled]) { border-color: #4742dc; color: #4742dc; background: rgba(71,66,220,0.06); } }
+    .gh-btn-primary { background: linear-gradient(135deg, #4742dc, #7c3aed); box-shadow: 0 2px 10px rgba(71,66,220,0.28); &:hover:not([disabled]) { box-shadow: 0 4px 16px rgba(71,66,220,0.5); } }
+  }
+}
+
+// =============================================================================
+// UNSAVED CHANGES + DELETE CONFIRMATION MODAL DIALOGS
+// These were previously unstyled (rendering inline at the bottom of the page).
+// Now they're proper centered modals with dark + light theme support.
+// =============================================================================
+.unsaved-changes-overlay,
+.delete-confirmation-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
+  animation: fadeUp 0.2s ease-out;
+}
+
+.unsaved-changes-popup,
+.delete-confirmation-popup {
+  background: #161b22 !important;
+  border: 1px solid #30363d !important;
+  border-radius: 12px !important;
+  width: 460px;
+  max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6) !important;
+  overflow: hidden;
+  position: relative;
+  animation: floatIn 0.25s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #d29922, #f0883e, #d29922);
+    pointer-events: none;
+  }
+}
+
+.delete-confirmation-popup::before {
+  background: linear-gradient(90deg, #f85149, #da3633, #f85149) !important;
+}
+
+.unsaved-changes-header,
+.delete-confirmation-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px !important;
+  border-bottom: 1px solid #21262d !important;
+  background: #1c2129 !important;
+
+  h3 {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #e6edf3 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .close-button {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #8b949e !important;
+    transition: all 0.15s ease !important;
+
+    mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+    &:hover { color: #f85149 !important; background: rgba(248,81,73,0.08) !important; }
+  }
+}
+
+.unsaved-changes-content,
+.delete-confirmation-content {
+  padding: 20px 24px !important;
+  background: #161b22 !important;
+
+  p {
+    font-size: 13px;
+    color: #c9d1d9 !important;
+    margin: 0 0 10px !important;
+    line-height: 1.5;
+
+    strong { color: #e6edf3 !important; font-weight: 600; }
+    &:last-child { margin-bottom: 0 !important; }
+  }
+
+  .warning-text {
+    color: #d29922 !important;
+    font-size: 12px !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.delete-confirmation-content .warning-text {
+  color: #f85149 !important;
+}
+
+.unsaved-changes-footer,
+.delete-confirmation-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 14px 20px !important;
+  border-top: 1px solid #21262d !important;
+  background: #1c2129 !important;
+
+  button {
+    height: 34px !important;
+    padding: 0 16px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+  }
+
+  .cancel-btn {
+    background: transparent !important;
+    color: #8b949e !important;
+    border: 1px solid #30363d !important;
+    &:hover { border-color: #58a6ff !important; color: #e6edf3 !important; background: rgba(88,166,255,0.06) !important; }
+  }
+
+  .discard-btn {
+    background: transparent !important;
+    color: #f85149 !important;
+    border: 1px solid rgba(248,81,73,0.4) !important;
+    &:hover { background: rgba(248,81,73,0.1) !important; border-color: #f85149 !important; }
+  }
+
+  .save-btn {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.35) !important;
+    &:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(79,70,229,0.55) !important; }
+  }
+
+  .delete-btn {
+    background: linear-gradient(135deg, #da3633, #f85149) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 3px 12px rgba(248,81,73,0.35) !important;
+    &:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(248,81,73,0.55) !important; }
+  }
+}
+
+// Light theme
+:host-context(body.header-light-theme) {
+  .unsaved-changes-overlay,
+  .delete-confirmation-overlay {
+    background: rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .unsaved-changes-popup,
+  .delete-confirmation-popup {
+    background: #ffffff !important;
+    border-color: #e1e4e8 !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .unsaved-changes-header,
+  .delete-confirmation-header {
+    background: #f6f8fa !important;
+    border-bottom-color: #e1e4e8 !important;
+
+    h3 { color: #1f2328 !important; }
+    .close-button { color: #656d76 !important; &:hover { color: #cf222e !important; background: rgba(207,34,46,0.08) !important; } }
+  }
+
+  .unsaved-changes-content,
+  .delete-confirmation-content {
+    background: #ffffff !important;
+    p {
+      color: #24292f !important;
+      strong { color: #1f2328 !important; }
+    }
+    .warning-text { color: #bf8700 !important; }
+  }
+
+  .delete-confirmation-content .warning-text { color: #cf222e !important; }
+
+  .unsaved-changes-footer,
+  .delete-confirmation-footer {
+    background: #f6f8fa !important;
+    border-top-color: #e1e4e8 !important;
+
+    .cancel-btn {
+      color: #656d76 !important;
+      border-color: #d0d7de !important;
+      &:hover { border-color: #4742dc !important; color: #1f2328 !important; background: rgba(71,66,220,0.06) !important; }
+    }
+    .discard-btn {
+      color: #cf222e !important;
+      border-color: rgba(207,34,46,0.4) !important;
+      &:hover { background: rgba(207,34,46,0.08) !important; border-color: #cf222e !important; }
+    }
+    .save-btn {
+      background: linear-gradient(135deg, #4742dc, #7c3aed) !important;
+    }
+  }
 }
 
 // =============================================================================

@@ -16,9 +16,10 @@ import { SecretAddComponent } from "./secret-add/secret-add.component";
 import { debounceTime, Observable, Subject } from "rxjs";
 
 @Component({
-  selector: "lib-secrets",
-  templateUrl: "./secrets.component.html",
-  styleUrls: ["./secrets.component.css"],
+    selector: "lib-secrets",
+    templateUrl: "./secrets.component.html",
+    styleUrls: ["./secrets.component.css"],
+    standalone: false
 })
 export class SecretsComponent {
   showList: boolean = true;

@@ -17,8 +17,8 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-confirm-regenerate-dialog',
-  template: `
+    selector: 'app-confirm-regenerate-dialog',
+    template: `
     <h2 mat-dialog-title>Regenerate Confirmation</h2>
     <div mat-dialog-content>
     Do you want to regenate?
@@ -28,7 +28,8 @@ import { MatDialogRef } from '@angular/material/dialog';
     <button mat-raised-button (click)="dialogRef.close('delete')">Yes</button>&nbsp;
     <button mat-raised-button (click)="dialogRef.close('cancel')">No</button>
 </div>
-  `
+  `,
+    standalone: false
 })
 export class ConfirmRegenerateDialogComponent {
   constructor(public dialogRef: MatDialogRef<ConfirmRegenerateDialogComponent>) {}

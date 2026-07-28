@@ -4,9 +4,10 @@ import { TagsService } from '@essedum/shared-lib';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-tags',
-  templateUrl: './tags.component.html',
-  styleUrls: ['./tags.component.scss'],
+    selector: 'app-tags',
+    templateUrl: './tags.component.html',
+    styleUrls: ['./tags.component.scss'],
+    standalone: false
 })
 export class TagsComponent {
   @Input('data') data: any;

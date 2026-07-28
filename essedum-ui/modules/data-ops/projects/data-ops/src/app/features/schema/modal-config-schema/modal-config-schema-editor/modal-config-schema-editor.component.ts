@@ -50,9 +50,10 @@ export enum ColumnType {
 }
 
 @Component({
-  selector: 'lib-modal-config-schema-editor',
-  templateUrl: './modal-config-schema-editor.component.html',
-  styleUrls: ['./modal-config-schema-editor.component.scss'],
+    selector: 'lib-modal-config-schema-editor',
+    templateUrl: './modal-config-schema-editor.component.html',
+    styleUrls: ['./modal-config-schema-editor.component.scss'],
+    standalone: false
 })
 export class ModalConfigSchemaEditorComponent {
   readonly action: string;

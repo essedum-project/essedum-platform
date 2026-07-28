@@ -9,9 +9,10 @@ import { SwaggerCustomComponent } from '../../swagger-custom/swagger-custom.comp
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-method-create-edit',
-  templateUrl: './method-create-edit.component.html',
-  styleUrls: ['./method-create-edit.component.scss'],
+    selector: 'app-method-create-edit',
+    templateUrl: './method-create-edit.component.html',
+    styleUrls: ['./method-create-edit.component.scss'],
+    standalone: false
 })
 export class MethodCreateEditComponent {
   tab: any = 'connectionTab';

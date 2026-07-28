@@ -5,9 +5,10 @@ import { JobDataViewerComponent } from '../pipeline.description/job-data-viewer/
 import { ShowOutputArtifactsComponent } from '../pipeline.description/show-output-artifacts/show-output-artifacts.component';
 
 @Component({
-  selector: 'app-jobs',
-  templateUrl: './jobs.component.html',
-  styleUrls: ['./jobs.component.scss'],
+    selector: 'app-jobs',
+    templateUrl: './jobs.component.html',
+    styleUrls: ['./jobs.component.scss'],
+    standalone: false
 })
 export class JobsComponent implements OnInit {
   @Input() internalJob;

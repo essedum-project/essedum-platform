@@ -175,6 +175,19 @@ vibe:
       secret-key: ${GOOSE_SECRET_KEY:sk-1234}
     working-dir: ${GOOSE_WORKING_DIR:/app/goose}
 
+  salus:
+    enabled: ${SALUS_ENABLED:false}
+    fail-closed: ${SALUS_FAIL_CLOSED:false}
+    moderation-url: ${SALUS_MODERATION_URL:http://localhost:30000}
+    timeout-seconds: ${SALUS_TIMEOUT_SECONDS:10}
+    input-checks: ${SALUS_INPUT_CHECKS:PromptInjection,JailBreak,Toxicity}
+    output-checks: ${SALUS_OUTPUT_CHECKS:Toxicity,Refusal}
+    prompt-injection-threshold: ${SALUS_PROMPT_INJECTION_THRESHOLD:0.70}
+    jailbreak-threshold: ${SALUS_JAILBREAK_THRESHOLD:0.70}
+    toxicity-threshold: ${SALUS_TOXICITY_THRESHOLD:0.60}
+    refusal-threshold: ${SALUS_REFUSAL_THRESHOLD:0.70}
+
+
   github:
     enabled: ${VIBE_GITHUB_ENABLED:false}
     repo-url: ${VIBE_GITHUB_REPO_URL:}

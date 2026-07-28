@@ -4,9 +4,10 @@ import { environment } from '../../../environments/environment';
 
 
 @Component({
-  selector: 'app-langfuse',
-  templateUrl: './langfuse.component.html',
-  styleUrls: ['./langfuse.component.scss'],
+    selector: 'app-langfuse',
+    templateUrl: './langfuse.component.html',
+    styleUrls: ['./langfuse.component.scss'],
+    standalone: false
 })
 export class LangfuseComponent implements OnInit, AfterViewInit {
   // Embedded Langfuse interface URL

@@ -39,7 +39,193 @@
 
                     <!-- File Structure -->
                     <div class="file-structure-container">
-                      <div class="file-panel">
+
+                      <!-- ════════════════════════════════════════════════════════════════════
+                           GITHUB PUSH STATUS — floating toast in the top-right corner.
+                           Appears when a push-to-github round starts (auto after every
+                           generation) and stays until the user dismisses it. Clicking the
+                           card expands an inline details panel (repo URL / branch / commit
+                           SHA / error message / editable URL for retry).
+                           ═══════════════════════════════════════════════════════════════════ -->
+                      <div class="gh-push-toast"
+                           *ngIf="pushStatusVisible"
+                           [class.pushing]="pushStatus.phase === 'pushing'"
+                           [class.success]="pushStatus.phase === 'success'"
+                           [class.failed]="pushStatus.phase === 'failed'"
+                           [class.expanded]="pushStatusPanelOpen">
+                        <!-- Compact header row -->
+                        <div class="gh-push-header" (click)="pushStatusPanelOpen ? closePushStatusPanel() : openPushStatusPanel()">
+                          <span class="gh-push-icon-wrap">
+                            <mat-icon *ngIf="pushStatus.phase === 'pushing'" class="spin-icon">sync</mat-icon>
+                            <mat-icon *ngIf="pushStatus.phase === 'success'">check_circle</mat-icon>
+                            <mat-icon *ngIf="pushStatus.phase === 'failed'">error</mat-icon>
+                          </span>
+                          <div class="gh-push-title-text">
+                            <strong>
+                              {{ pushStatus.phase === 'pushing' ? 'Pushing to GitHub…'
+                                 : (pushStatus.phase === 'success' ? 'Pushed to GitHub'
+                                 : 'GitHub push failed') }}
+                            </strong>
+                            <span *ngIf="pushStatus.branch">Branch: <code>{{ pushStatus.branch }}</code></span>
+                            <span *ngIf="!pushStatus.branch && pushStatus.message">{{ pushStatus.message }}</span>
+                          </div>
+                          <div class="gh-push-header-actions">
+                            <mat-icon class="gh-push-toggle-icon">{{ pushStatusPanelOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+                            <button type="button"
+                                    class="gh-push-dismiss-btn"
+                                    (click)="dismissPushStatus($event)"
+                                    matTooltip="Dismiss"
+                                    matTooltipPosition="above"
+                                    aria-label="Dismiss push status">
+                              <mat-icon>close</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Expandable details panel -->
+                        <div class="gh-push-details" *ngIf="pushStatusPanelOpen">
+                          <!-- Status + metadata -->
+                          <dl class="gh-push-meta">
+                            <div class="gh-meta-row">
+                              <dt>Status</dt>
+                              <dd>
+                                <span class="gh-status-chip"
+                                      [class.pushing]="pushStatus.phase === 'pushing'"
+                                      [class.success]="pushStatus.phase === 'success'"
+                                      [class.failed]="pushStatus.phase === 'failed'">
+                                  {{ pushStatus.phase | titlecase }}
+                                </span>
+                              </dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.sessionId">
+                              <dt>Session</dt>
+                              <dd><code>{{ pushStatus.sessionId }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.configId">
+                              <dt>Push ID</dt>
+                              <dd><code>{{ pushStatus.configId }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.branch">
+                              <dt>Branch</dt>
+                              <dd><code>{{ pushStatus.branch }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.commitSha">
+                              <dt>Commit</dt>
+                              <dd><code>{{ pushStatus.commitSha }}</code></dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.org">
+                              <dt>Org</dt>
+                              <dd>{{ pushStatus.org }}</dd>
+                            </div>
+                            <div class="gh-meta-row" *ngIf="pushStatus.updatedAt">
+                              <dt>Updated</dt>
+                              <dd>{{ pushStatus.updatedAt | date:'shortTime' }}</dd>
+                            </div>
+                          </dl>
+
+                          <!-- Error details on failure -->
+                          <div class="gh-push-error" *ngIf="pushStatus.phase === 'failed' && pushStatus.errorMessage">
+                            <mat-icon>report_problem</mat-icon>
+                            <div class="gh-error-text">
+                              <strong>Error details</strong>
+                              <pre>{{ pushStatus.errorMessage }}</pre>
+                            </div>
+                          </div>
+
+                          <!-- Editable repo URL -->
+                          <label class="gh-repo-field">
+                            <span>Repository URL</span>
+                            <input type="text"
+                                   [(ngModel)]="pushStatusRepoUrlDraft"
+                                   placeholder="https://github.com/org/repo.git"
+                                   spellcheck="false" />
+                            <small>Override the target repo, then click <em>Save &amp; Retry</em> to push again.</small>
+                          </label>
+
+                          <!-- Actions -->
+                          <div class="gh-push-actions">
+                            <button type="button"
+                                    class="gh-btn gh-btn-secondary"
+                                    (click)="refreshPushStatus()"
+                                    [disabled]="pushStatus.phase === 'pushing'"
+                                    matTooltip="Poll the /github-status endpoint">
+                              <mat-icon>refresh</mat-icon>
+                              <span>Check status</span>
+                            </button>
+                            <button type="button"
+                                    class="gh-btn gh-btn-primary"
+                                    (click)="saveRepoUrlAndRetry()"
+                                    [disabled]="pushStatus.phase === 'pushing'">
+                              <mat-icon>rocket_launch</mat-icon>
+                              <span>Save &amp; Retry</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- ════════════════════════════════════════════════════════════════════
+                           TOP TOOLBAR — Deploy banner + reopen chat pill.
+                           Sits above the 3-column grid (explorer / editor / chat).
+                           ═══════════════════════════════════════════════════════════════════ -->
+                      <div class="codespace-toolbar"
+                           *ngIf="aiChatDeployAvailable || !aiChatVisible">
+                        <div class="ai-chat-deploy-banner codespace-toolbar-banner"
+                             *ngIf="aiChatDeployAvailable"
+                             [class.deploying]="aiChatDeployStatus === 'deploying'"
+                             [class.success]="aiChatDeployStatus === 'success'"
+                             [class.error]="aiChatDeployStatus === 'error'">
+                          <div class="deploy-banner-info">
+                            <mat-icon class="deploy-banner-icon">
+                              {{ aiChatDeployStatus === 'success' ? 'rocket_launch'
+                                 : (aiChatDeployStatus === 'error' ? 'error_outline'
+                                 : (aiChatDeployStatus === 'deploying' ? 'sync' : 'auto_awesome')) }}
+                            </mat-icon>
+                            <div class="deploy-banner-text">
+                              <ng-container [ngSwitch]="aiChatDeployStatus">
+                                <ng-container *ngSwitchCase="'deploying'">
+                                  <strong>Deploying…</strong>
+                                  <span>Building your preview container. This may take a minute.</span>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'success'">
+                                  <strong>Deployed successfully.</strong>
+                                  <span *ngIf="aiChatDeployedUrl">
+                                    Preview: <a [href]="aiChatDeployedUrl" target="_blank" rel="noopener">{{ aiChatDeployedUrl }}</a>
+                                  </span>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'error'">
+                                  <strong>Deployment failed.</strong>
+                                  <span>Something went wrong. Check the pipeline logs and try again.</span>
+                                </ng-container>
+                                <ng-container *ngSwitchDefault>
+                                  <strong>Files generated &amp; saved.</strong>
+                                  <span>All files are stored and pushed to GitHub. Click Deploy when you're ready to launch a preview.</span>
+                                </ng-container>
+                              </ng-container>
+                            </div>
+                          </div>
+                          <button type="button" class="deploy-banner-btn"
+                                  [disabled]="aiChatDeployStatus === 'deploying'"
+                                  (click)="deployAiChatFiles()">
+                            <mat-icon *ngIf="aiChatDeployStatus !== 'deploying'">rocket_launch</mat-icon>
+                            <mat-icon *ngIf="aiChatDeployStatus === 'deploying'" class="spin-icon">sync</mat-icon>
+                            <span>
+                              {{ aiChatDeployStatus === 'deploying' ? 'Deploying…'
+                                 : (aiChatDeployStatus === 'success' ? 'Redeploy'
+                                 : (aiChatDeployStatus === 'error' ? 'Retry Deploy' : 'Deploy')) }}
+                            </span>
+                          </button>
+                        </div>
+                        <button type="button"
+                                *ngIf="!aiChatVisible"
+                                class="reopen-chat-btn"
+                                (click)="showAiChatPanel()"
+                                matTooltip="Open AI Chat" matTooltipPosition="below">
+                          <mat-icon>auto_awesome</mat-icon>
+                          <span>Open AI Chat</span>
+                        </button>
+                      </div>
+
+                      <div class="file-panel" [class.chat-hidden]="!aiChatVisible">
                         <div class="file-explorer">
                           <div class="explorer-header">
                             <div class="header-left">
@@ -153,28 +339,28 @@
                                 </div>
                                 <div class="text-editor-column">
                                   <ng-container *ngIf="fileExtension === 'json'">
-                                    <textarea class="file-content-editor json-editor"
+                                    <textarea class="file-content-editor json-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="JSON content..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'java'">
-                                    <textarea class="file-content-editor java-editor"
+                                    <textarea class="file-content-editor java-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Java code..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'xml'">
-                                    <textarea class="file-content-editor xml-editor"
+                                    <textarea class="file-content-editor xml-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="XML content..." spellcheck="false"
                                       [style.background-image]="getLineDiffStyles()"></textarea>
                                   </ng-container>
                                   <ng-container *ngIf="fileExtension === 'properties'">
-                                    <textarea class="file-content-editor properties-editor"
+                                    <textarea class="file-content-editor properties-editor" wrap="off"
                                       [class.editor-modified]="isFileModified" [(ngModel)]="selectedFileContent"
                                       (ngModelChange)="onTextContentChange($event)" (scroll)="onTextareaScroll($event)"
                                       placeholder="Properties content..." spellcheck="false"
@@ -182,7 +368,7 @@
                                   </ng-container>
                                   <ng-container
                                     *ngIf="fileExtension != 'json' && fileExtension != 'java' && fileExtension != 'xml' && fileExtension != 'properties'">
-                                    <textarea class="file-content-editor" [class.editor-modified]="isFileModified"
+                                    <textarea class="file-content-editor" wrap="off" [class.editor-modified]="isFileModified"
                                       [(ngModel)]="selectedFileContent" (ngModelChange)="onTextContentChange($event)"
                                       (scroll)="onTextareaScroll($event)" placeholder="File content..."
                                       spellcheck="false" [style.background-image]="getLineDiffStyles()"></textarea>
@@ -198,6 +384,208 @@
                             <mat-icon>folder_open</mat-icon>
                             <h3>Select a file to view its contents</h3>
                             <p>Choose a file from the project explorer to start editing</p>
+                          </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════════════════
+                             AI CHAT PANEL (VS Code Copilot-style)
+                             Always visible — 3rd column of .file-panel grid.
+                             Wired to the real Goose backend via AiChatCoderService
+                             (same endpoints Vibe Studio uses). Deployment is NOT
+                             triggered automatically — a "Deploy" banner appears
+                             once files are generated so the user can trigger it.
+                             ═══════════════════════════════════════════════════════════ -->
+                        <div class="ai-chat-panel"
+                             *ngIf="aiChatVisible"
+                             (click)="onAiChatPanelClick($event)">
+                          <!-- Header -->
+                          <div class="ai-chat-header">
+                            <div class="ai-chat-title">
+                              <span class="ai-avatar">
+                                <mat-icon>auto_awesome</mat-icon>
+                              </span>
+                              <div class="ai-title-text">
+                                <span class="ai-title-name">Essedum AI Assistant</span>
+                                <span class="ai-title-sub">{{ aiChatSelectedAgentLabel }} · {{ aiChatSelectedModelLabel }}</span>
+                              </div>
+                            </div>
+                            <div class="ai-chat-header-actions">
+                              <button type="button" (click)="clearAiChat()" matTooltip="New chat" matTooltipPosition="above">
+                                <mat-icon>add_comment</mat-icon>
+                              </button>
+                              <button type="button" (click)="clearAiChat()" matTooltip="Clear history" matTooltipPosition="above">
+                                <mat-icon>delete_sweep</mat-icon>
+                              </button>
+                              <button type="button" class="chat-close-btn" (click)="hideAiChatPanel()" matTooltip="Close panel" matTooltipPosition="above">
+                                <mat-icon>close</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Message stream -->
+                          <div class="ai-chat-messages" #aiChatMessagesEl>
+                            <!-- Empty state (welcome) -->
+                            <div class="ai-chat-empty" *ngIf="aiChatMessages.length === 0">
+                              <span class="empty-hero"><mat-icon>auto_awesome</mat-icon></span>
+                              <h4>How can I help with this codespace?</h4>
+                              <p>Ask about a file, generate code, fix bugs, write tests, or explain what the {{ pipelineMode === 'mcp' ? 'MCP server' : (pipelineMode === 'app' ? 'app' : 'agent') }} is doing.</p>
+                              <div class="suggestion-chips">
+                                <button type="button" *ngFor="let s of aiChatSuggestions" (click)="useAiChatSuggestion(s)">
+                                  <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Message list -->
+                            <div class="ai-msg" *ngFor="let msg of aiChatMessages; trackBy: trackAiMsg" [ngClass]="msg.role">
+                              <div class="ai-msg-header">
+                                <span class="ai-msg-avatar">
+                                  <mat-icon *ngIf="msg.role === 'assistant'">auto_awesome</mat-icon>
+                                  <mat-icon *ngIf="msg.role === 'user'">person</mat-icon>
+                                  <mat-icon *ngIf="msg.role === 'system'">info</mat-icon>
+                                </span>
+                                <span class="ai-msg-name">
+                                  {{ msg.role === 'user' ? 'You' : (msg.role === 'system' ? 'System' : (aiChatSelectedAgentLabel || 'Assistant')) }}
+                                </span>
+                                <span class="ai-msg-time">{{ msg.timestamp | date:'shortTime' }}</span>
+                              </div>
+
+                              <!-- Attached-skill chips on user messages -->
+                              <div class="ai-chat-attached" *ngIf="msg.role === 'user' && msg.skills?.length" style="padding:0 2px;">
+                                <span class="attached-chip" *ngFor="let s of msg.skills">
+                                  <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                                </span>
+                              </div>
+
+                              <div class="ai-msg-body">
+                                <ng-container *ngIf="!msg.streaming; else typingTpl">{{ msg.content }}</ng-container>
+                                <ng-template #typingTpl>
+                                  <span *ngIf="msg.content">{{ msg.content }}</span>
+                                  <span class="ai-typing" *ngIf="!msg.content"><span></span><span></span><span></span></span>
+                                </ng-template>
+                              </div>
+
+                              <!-- Streaming event lines (VS Code Copilot-style tool trace) -->
+                              <div class="ai-msg-events" *ngIf="msg.events?.length">
+                                <div class="event-line" *ngFor="let ev of msg.events" [class.pending]="ev.pending">
+                                  <mat-icon>{{ ev.pending ? 'radio_button_unchecked' : 'check_circle' }}</mat-icon>
+                                  <span>{{ ev.text }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Deploy banner moved to the top codespace toolbar. -->
+
+                          <!-- Attached skills preview above input -->
+                          <div class="ai-chat-attached" *ngIf="aiChatAttachedSkills.length > 0">
+                            <span class="attached-chip" *ngFor="let s of aiChatAttachedSkills; let i = index">
+                              <mat-icon>{{ s.icon }}</mat-icon>{{ s.label }}
+                              <button type="button" class="remove-chip" (click)="removeAttachedSkill(i)">
+                                <mat-icon>close</mat-icon>
+                              </button>
+                            </span>
+                          </div>
+
+                          <!-- Input area -->
+                          <div class="ai-chat-input-wrap">
+                            <div class="ai-chat-input-shell">
+                              <textarea
+                                class="ai-chat-textarea"
+                                #aiChatTextarea
+                                [(ngModel)]="aiChatInput"
+                                (keydown)="onAiChatKeydown($event)"
+                                placeholder="Ask the assistant anything about your codespace…"
+                                rows="2"></textarea>
+
+                              <div class="ai-chat-toolbar">
+                                <div class="toolbar-left">
+                                  <!-- Attach skill -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="ai-attach-btn"
+                                            [class.active]="aiChatOpenMenu === 'skill'"
+                                            (click)="toggleAiChatMenu('skill', $event)"
+                                            matTooltip="Attach skill" matTooltipPosition="above">
+                                      <mat-icon>add</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover" *ngIf="aiChatOpenMenu === 'skill'">
+                                      <div class="menu-heading">Attach a skill</div>
+                                      <div class="menu-empty" *ngIf="aiChatSkillsLoading">Loading skills…</div>
+                                      <div class="menu-empty" *ngIf="!aiChatSkillsLoading && aiChatSkills.length === 0">
+                                        No skills available
+                                      </div>
+                                      <div class="menu-item" *ngFor="let s of aiChatSkills"
+                                           [class.selected]="isSkillAttached(s)"
+                                           (click)="toggleAttachSkill(s)">
+                                        <mat-icon>{{ s.icon }}</mat-icon>
+                                        <div style="flex:1;min-width:0;">
+                                          <div class="menu-item-label">{{ s.label }}</div>
+                                        </div>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Agent picker -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="pill-trigger"
+                                            [class.open]="aiChatOpenMenu === 'agent'"
+                                            (click)="toggleAiChatMenu('agent', $event)">
+                                      <mat-icon class="pill-icon">smart_toy</mat-icon>
+                                      <span class="pill-label">{{ aiChatSelectedAgentLabel }}</span>
+                                      <mat-icon class="pill-caret">expand_more</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover" *ngIf="aiChatOpenMenu === 'agent'">
+                                      <div class="menu-heading">Agent provider</div>
+                                      <div class="menu-item" *ngFor="let a of aiChatAgents"
+                                           [class.selected]="a.value === aiChatSelectedAgent"
+                                           (click)="selectAiChatAgent(a)">
+                                        <mat-icon>smart_toy</mat-icon>
+                                        <span class="menu-item-label">{{ a.label }}</span>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                      <div class="menu-empty" *ngIf="aiChatAgents.length === 0">No agents available</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="toolbar-right">
+                                  <!-- Model picker (right-aligned) -->
+                                  <div class="ai-pill-dropdown">
+                                    <button type="button" class="pill-trigger"
+                                            [class.open]="aiChatOpenMenu === 'model'"
+                                            (click)="toggleAiChatMenu('model', $event)">
+                                      <mat-icon class="pill-icon">memory</mat-icon>
+                                      <span class="pill-label">{{ aiChatSelectedModelLabel }}</span>
+                                      <mat-icon class="pill-caret">expand_more</mat-icon>
+                                    </button>
+                                    <div class="ai-menu-popover align-right" *ngIf="aiChatOpenMenu === 'model'">
+                                      <div class="menu-heading">Model</div>
+                                      <div class="menu-item" *ngFor="let m of aiChatModels"
+                                           [class.selected]="m.value === aiChatSelectedModel"
+                                           (click)="selectAiChatModel(m)">
+                                        <mat-icon>memory</mat-icon>
+                                        <span class="menu-item-label">{{ m.label }}</span>
+                                        <mat-icon class="menu-item-check">check</mat-icon>
+                                      </div>
+                                      <div class="menu-empty" *ngIf="aiChatModels.length === 0">No models available</div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Send -->
+                                  <button type="button" class="ai-send-btn"
+                                          [disabled]="!aiChatInput.trim() || aiChatStreaming"
+                                          (click)="sendAiChatMessage()"
+                                          matTooltip="Send (Enter)" matTooltipPosition="above">
+                                    <mat-icon>{{ aiChatStreaming ? 'stop' : 'send' }}</mat-icon>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="ai-chat-footer">
+                              <kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> for newline
+                            </div>
                           </div>
                         </div>
                       </div>

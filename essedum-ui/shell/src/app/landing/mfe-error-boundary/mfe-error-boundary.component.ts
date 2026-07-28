@@ -4,8 +4,8 @@ import { Component, Input } from '@angular/core';
 // fails to load (network outage, stale manifest, broken deploy). Rendered by
 // buildRoutes() in mfe-config-route.ts when the loadRemoteModule promise rejects.
 @Component({
-  selector: 'app-mfe-error-boundary',
-  template: `
+    selector: 'app-mfe-error-boundary',
+    template: `
     <div class="mfe-error">
       <i class="fa fa-exclamation-triangle"></i>
       <h2>This section is temporarily unavailable</h2>
@@ -17,7 +17,7 @@ import { Component, Input } from '@angular/core';
       <button class="retry-btn" (click)="reload()">Retry</button>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host { display: block; padding: 48px 32px; }
     .mfe-error {
       max-width: 480px;
@@ -46,6 +46,7 @@ import { Component, Input } from '@angular/core';
     }
     .retry-btn:hover { transform: translateY(-1px); }
   `],
+    standalone: false
 })
 export class MfeErrorBoundaryComponent {
   @Input() mfeName?: string;
