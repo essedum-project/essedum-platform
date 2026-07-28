@@ -2,3 +2,253 @@
 # Agent Designer Backend – Kubernetes Deployment
 # Includes: PostgreSQL, Redis, API server, Celery worker
 # =============================================================================
+
+# --- PostgreSQL for Agent Designer ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-postgres
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-postgres
+  template:
+    metadata:
+      labels:
+        app: agent-designer-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        securityContext:
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "768Mi"
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "agentflow"
+        - name: POSTGRES_USER
+          value: "agentflow"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: agent-designer-secrets
+              key: POSTGRES_PASSWORD
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "agentflow"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-tmp
+          mountPath: /tmp
+        - name: postgres-run
+          mountPath: /run/postgresql
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+      - name: postgres-tmp
+        emptyDir: {}
+      - name: postgres-run
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-postgres
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+  type: ClusterIP
+---
+
+# --- Redis for Agent Designer ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-redis
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-redis
+  template:
+    metadata:
+      labels:
+        app: agent-designer-redis
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        securityContext:
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: redis-tmp
+          mountPath: /tmp
+      volumes:
+      - name: redis-tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-redis
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+  type: ClusterIP
+---
+
+# --- Agent Designer Backend API ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-designer-backend
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-designer-backend
+  template:
+    metadata:
+      labels:
+        app: agent-designer-backend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: essedum-1
+      containers:
+      - name: agent-designer-backend
+        image: ${DOCKER_REGISTRY}/agent-designer-backend:${IMAGE_TAG}
+        imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1536Mi"
+        ports:
+        - containerPort: 8180
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: agent-designer-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          value: "redis://agent-designer-redis:6379"
+        - name: QDRANT_HOST
+          value: "qdrant"
+        - name: QDRANT_PORT
+          value: "6333"
+        startupProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 20
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 18
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 25
+          timeoutSeconds: 3
+          periodSeconds: 10
+          failureThreshold: 6
+        livenessProbe:
+          httpGet:
+            path: /docs
+            port: 8180
+          initialDelaySeconds: 45
+          timeoutSeconds: 3
+          periodSeconds: 20
+          failureThreshold: 6
+        volumeMounts:
+        - name: backend-tmp
+          mountPath: /tmp
+      volumes:
+      - name: backend-tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-designer-backend-service
+  namespace: aipns
+spec:
+  selector:
+    app: agent-designer-backend
+  ports:
+  - protocol: TCP
+    port: 8180
+    targetPort: 8180
+  type: ClusterIP
+---
+
+# --- Secret (create this first or replace with your actual values) ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agent-designer-secrets
+  namespace: aipns
+type: Opaque
+stringData:
+  # IMPORTANT: Replace these placeholders before applying to any cluster.
+  # Set real values via:
+  #   kubectl create secret generic agent-designer-secrets -n aipns \
+  #     --from-literal=POSTGRES_PASSWORD='<real-password>' \
+  #     --from-literal=DATABASE_URL='postgresql+asyncpg://agentflow:<real-password>@agent-designer-postgres:5432/agentflow' \
+  #     --dry-run=client -o yaml | kubectl apply -f -
+  POSTGRES_PASSWORD: "<CHANGEME>"
+  DATABASE_URL: "<CHANGEME>"

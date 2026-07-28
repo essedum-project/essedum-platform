@@ -13,21 +13,27 @@ spec:
       labels:
         app: essedum-frontend-agent
     spec:
-      imagePullSecrets:
-      - name: regcred
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: essedum-1
       containers:
       - name: essedum-frontend-agent
-        image: localhost:5000/essedum-frontend-agent:v18
+        image: ${DOCKER_REGISTRY}/essedum-frontend-agent:${IMAGE_TAG}
         imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "50m"
-            memory: "64Mi"
-          limits:
-            cpu: "200m"
-            memory: "128Mi"
         ports:
         - containerPort: 80
+        command: ["/bin/sh", "-c"]
+        args:
+        - "find /app/ui -type f -name '*.js' -exec sed -i \"s|__FE_MINIO_ENDPOINT__|${FE_MINIO_ENDPOINT}|g; s|__FE_MINIO_BUCKET__|${FE_MINIO_BUCKET}|g; s|__FE_CONTAINER_REGISTRY_PREFIX__|${FE_CONTAINER_REGISTRY_PREFIX}|g; s|__FE_CONTAINER_REGISTRY_VERSION__|${FE_CONTAINER_REGISTRY_VERSION}|g\" {} + && nginx -g 'daemon off;'"
+        env:
+        - name: FE_MINIO_ENDPOINT
+          value: "http://minio-service:9000"
+        - name: FE_MINIO_BUCKET
+          value: "aiptest"
+        - name: FE_CONTAINER_REGISTRY_PREFIX
+          value: "${DOCKER_REGISTRY}/"
+        - name: FE_CONTAINER_REGISTRY_VERSION
+          value: "${IMAGE_TAG}"
 ---
 apiVersion: v1
 kind: Service

@@ -1,0 +1,49 @@
+# =============================================================================
+# Generic Ingress Template (NGINX)
+# All ${VAR} placeholders substituted by envsubst from docker/.env.
+#
+# Per-service variables:
+#   SERVICE_NAME   – name of the backing Service (without -service suffix)
+#   SERVICE_PORT   – port on the Service
+#   INGRESS_PATH   – URL path prefix (e.g. / or /api)
+#
+# Global variables: KUBE_NAMESPACE, ENVIRONMENT, INGRESS_HOST,
+#                   TLS_SECRET_NAME, INGRESS_CLASS
+#
+# Usage:
+#   export SERVICE_NAME=essedum-frontend-shell SERVICE_PORT=8084 INGRESS_PATH=/
+#   envsubst < templates/ingress.yaml | kubectl apply -f -
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${SERVICE_NAME}-ingress
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: ${SERVICE_NAME}
+    environment: ${ENVIRONMENT}
+  annotations:
+    kubernetes.io/ingress.class: "${INGRESS_CLASS}"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+spec:
+  ingressClassName: ${INGRESS_CLASS}
+  tls:
+    - hosts:
+        - ${INGRESS_HOST}
+      secretName: ${TLS_SECRET_NAME}
+  rules:
+    - host: ${INGRESS_HOST}
+      http:
+        paths:
+          - path: ${INGRESS_PATH}
+            pathType: Prefix
+            backend:
+              service:
+                name: ${SERVICE_NAME}-service
+                port:
+                  number: ${SERVICE_PORT}

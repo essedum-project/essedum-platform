@@ -1,260 +1,75 @@
+# =============================================================================
+# Essedum Platform — Production Docker Compose
+# =============================================================================
+# Services: 28 containers across 4 networks
+# Environment-agnostic: zero hardcoded IPs; all inter-service communication
+# uses Docker DNS (container service names). SERVER_IP in .env is only used
+# by build.sh to print access URLs — it is NOT injected into service configs.
+#
+# Usage:
+#   cd essedum-platform/docker
+#   cp .env.sample .env && vi .env     # fill in secrets
+#   ./build.sh start                   # one-touch deployment
+#
+# Prerequisites:
+#   - essedum-agents repo cloned as sibling to essedum-platform/
+#   - Java microservices pre-built: mvn -f ../sv/pom.xml clean package -DskipTests
+# =============================================================================
+
+name: essedum
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  frontend-net:
+    name: essedum-frontend-net
+  backend-net:
+    name: essedum-backend-net
+  infra-net:
+    name: essedum-infra-net
+  essedum-net:
+    name: essedum-net
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  mysql-data:
+    external: true
+    name: docker_mysql-data
+  qdrant-data:
+    external: true
+    name: docker_qdrant-data
+  minio-data:
+    external: true
+    name: docker_minio-data
+  ollama-models:
+  gateway-logs:
+  usm-logs:
+  icip-logs:
+  icip-gitrepo:
+  data-logs:
+  vibe-logs:
+  agent-designer-data:
+  goose-working-dir:
+
+# =============================================================================
+# SERVICES
+# =============================================================================
 services:
-  leap-app-backend-service:
-    profiles: ["app"]
-    build:
-      context: ../sv
-      dockerfile: api-gateway/Dockerfile_oauth2
-    ports:
-      - "${BACKEND_PORT:-8082}:8080"
-    env_file:
-      - .env
-    environment:
-      - LEAP_HOME=/app
-      - spring.config.location=/app/conf/
-      - encryption.key=${ENCRYPTION_KEY}
-      - encryption.salt=${ENCRYPTION_SALT}
-      - LOG_PATH=/app/log
-      - license=${LICENSE}
-      - publickey=${PUBLIC_KEY}
-      - logging.level.com.springframework.security=DEBUG
-      - logging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR
-      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault,github
-      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
-      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
-      - USM_SERVICE_URL=http://usm-service:8081
-      - ICIP_SERVICE_URL=http://icip-service:8082
-      - DATA_SERVICE_URL=http://data-service:8083
-      - VIBE_SERVICE_URL=http://vibe-service:8084
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-      qdrant:
-        condition: service_started
-        required: false
-      keycloak:
-        condition: service_started
-        required: false
 
-  usm-service:
-    profiles: ["app"]
-    build:
-      context: ../sv
-      dockerfile: usm-service/Dockerfile_oauth2
-    expose:
-      - "8081"
-    env_file:
-      - .env
-    environment:
-      - LEAP_HOME=/app
-      - spring.config.location=/app/conf/
-      - encryption.key=${ENCRYPTION_KEY}
-      - encryption.salt=${ENCRYPTION_SALT}
-      - LOG_PATH=/app/log
-      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
-      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - SPRING_LIQUIBASE_ENABLED=true
-      - SPRING_LIQUIBASE_CONTEXTS=fresh
-      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
-      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-      keycloak:
-        condition: service_started
-        required: false
-
-  icip-service:
-    profiles: ["app"]
-    build:
-      context: ../sv
-      dockerfile: icip-service/Dockerfile_oauth2
-    expose:
-      - "8082"
-    env_file:
-      - .env
-    environment:
-      - LEAP_HOME=/app
-      - spring.config.location=/app/conf/
-      - encryption.key=${ENCRYPTION_KEY}
-      - encryption.salt=${ENCRYPTION_SALT}
-      - LOG_PATH=/app/log
-      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
-      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - SPRING_LIQUIBASE_ENABLED=true
-      - SPRING_LIQUIBASE_CONTEXTS=fresh
-      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
-      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-      keycloak:
-        condition: service_started
-        required: false
-
-  data-service:
-    profiles: ["app"]
-    build:
-      context: ../sv
-      dockerfile: data-service/Dockerfile_oauth2
-    expose:
-      - "8083"
-    env_file:
-      - .env
-    environment:
-      - LEAP_HOME=/app
-      - spring.config.location=/app/conf/
-      - encryption.key=${ENCRYPTION_KEY}
-      - encryption.salt=${ENCRYPTION_SALT}
-      - LOG_PATH=/app/log
-      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
-      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - SPRING_LIQUIBASE_ENABLED=true
-      - SPRING_LIQUIBASE_CONTEXTS=fresh
-      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
-      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-      keycloak:
-        condition: service_started
-        required: false
-
-  vibe-service:
-    profiles: ["app"]
-    build:
-      context: ../sv
-      dockerfile: vibe-service/Dockerfile_oauth2
-    expose:
-      - "8084"
-    env_file:
-      - .env
-    environment:
-      - LEAP_HOME=/app
-      - spring.config.location=/app/conf/
-      - encryption.key=${ENCRYPTION_KEY}
-      - encryption.salt=${ENCRYPTION_SALT}
-      - LOG_PATH=/app/log
-      - spring.profiles.active=mysql,oauth2,btf,dbconstants,vault
-      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - SPRING_LIQUIBASE_ENABLED=true
-      - SPRING_LIQUIBASE_CONTEXTS=fresh
-      - security.issuer-uri=${EXTERNAL_KC_URL}/realms/ESSEDUM
-      - security.jwk-set-uri=http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-      keycloak:
-        condition: service_started
-        required: false
-
-  frontend:
-    profiles: ["app"]
-    build:
-      context: ..
-      dockerfile: essedum-ui/Dockerfile
-    ports:
-      - "${FRONTEND_PORT:-8084}:8084"
-      - "${LANGFLOW_HTTPS_PORT:-8086}:8086"
-      - "${LANGFUSE_HTTPS_PORT:-8087}:8087"
-      - "${LITELLM_HTTPS_PORT:-4000}:4000"
-      - "${LANGFUSE_DB_HTTPS_PORT:-8089}:8089"
-    env_file:
-      - .env
-    environment:
-      - FE_LANGFLOW_URL=${FE_LANGFLOW_URL}
-      - FE_LANGFUSE_URL=${FE_LANGFUSE_URL}
-      - FE_LITELLM_URL=${FE_LITELLM_URL}
-      - FE_SALUS_URL=${FE_SALUS_URL}
-      - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT}
-      - FE_MINIO_BUCKET=${FE_MINIO_BUCKET}
-      - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX}
-      - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION}
-      - ESSEDUM_BACKEND_UPSTREAM=${ESSEDUM_BACKEND_UPSTREAM:-essedum-backend-api-gateway-service:8080}
-      - ESSEDUM_KEYCLOAK_UPSTREAM=${ESSEDUM_KEYCLOAK_UPSTREAM:-keycloak:8180}
-      - KEYCLOAK_ISSUER=${KEYCLOAK_ISSUER:-}
-    depends_on:
-      - leap-app-backend-service
-
-  py-job-executor:
-    profiles: ["app"]
-    build:
-      context: ../py-job-executer
-      dockerfile: Dockerfile
-    ports:
-      - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-
-  py-job-sagemaker-executer:
-    profiles: ["app"]
-    build:
-      context: ../py-job-sagemaker-executer
-      dockerfile: Dockerfile
-    ports:
-      - "${PYJOB_SAGEMAKER_EXECUTER_PORT:-5002}:5002"
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - SAGEMAKER_ROLE=${SAGEMAKER_ROLE}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET=${MINIO_BUCKET}
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-
-  py-job-vertex-executer:
-    profiles: ["app"]
-    build:
-      context: ../py-job-vertex-executer
-      dockerfile: Dockerfile
-    ports:
-      - "${PYJOB_VERTEX_EXECUTER_PORT:-5007}:5007"
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
-      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
-      - VERTEX_LOCATION=${VERTEX_LOCATION}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET=${MINIO_BUCKET}
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+  # ===========================================================================
+  # INFRASTRUCTURE
+  # ===========================================================================
 
   mysql:
     profiles: ["infra"]
+    profiles: ["infra"]
     image: mysql:8.0
-    env_file:
-      - .env
+    container_name: essedum-mysql
+    hostname: mysql
+    env_file: .env
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
@@ -262,35 +77,62 @@ services:
       - mysql-data:/var/lib/mysql
     ports:
       - "${MYSQL_PORT:-3307}:3306"
+      - "${MYSQL_PORT:-3307}:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
+    restart: unless-stopped
+    networks:
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   qdrant:
     profiles: ["infra"]
+    profiles: ["infra"]
     image: qdrant/qdrant:latest
+    container_name: essedum-qdrant
+    hostname: qdrant
     ports:
       - "${QDRANT_PORT:-6333}:6333"
     volumes:
       - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/6333' 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   keycloak:
-    profiles: ["infra"]
-    image: quay.io/keycloak/keycloak:25.0.1
-    env_file:
-      - .env
+    image: quay.io/keycloak/keycloak:26.2.3
+    container_name: essedum-keycloak
+    hostname: keycloak
+    env_file: .env
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_PROXY=edge
       - KC_HOSTNAME=${EXTERNAL_KC_URL}
       - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_PORT=8080
       - KC_DB=mysql
       - KC_DB_URL=jdbc:mysql://mysql:3306/${KC_DB_NAME}
-      - KC_DB_USERNAME=${KC_DB_USER}
+      - KC_DB_USERNAME=${KC_DB_USERNAME}
       - KC_DB_PASSWORD=${KC_DB_PASSWORD}
     ports:
       - "${KEYCLOAK_PORT:-8180}:8080"
@@ -299,25 +141,74 @@ services:
         condition: service_healthy
     command:
       - "start-dev"
+    restart: unless-stopped
+    networks:
+      - infra-net
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  proxy-service:
-    profiles: ["app"]
-    build:
-      context: ../proxy-service
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-
- # BuildKit daemon — required by adk-code-builder-deployer to build and push images
-  buildkitd:
+  minio:
     profiles: ["infra"]
+    profiles: ["infra"]
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: essedum-minio
+    hostname: minio
+    command: server /data --console-address :9001
+    env_file: .env
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BROWSER=${MINIO_BROWSER:-on}
+      - MINIO_PROMETHEUS_AUTH_TYPE=${MINIO_PROMETHEUS_AUTH_TYPE:-public}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - infra-net
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: essedum-ollama
+    hostname: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_MODELS=/root/.ollama
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - infra-net
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  buildkitd:
     image: moby/buildkit:v0.18.2
+    container_name: essedum-buildkitd
+    hostname: buildkitd
     privileged: true
     ports:
       - "1234:1234"
@@ -325,379 +216,842 @@ services:
       - --addr
       - tcp://0.0.0.0:1234
     restart: unless-stopped
+    networks:
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # JAVA MICROSERVICES — requires Maven pre-build (see build.sh step 6)
+  # ===========================================================================
+
+  essedum-api-gateway:
+    build:
+      context: ../sv/api-gateway
+      dockerfile: Dockerfile
+    image: essedum/api-gateway:latest
+    container_name: essedum-api-gateway
+    hostname: essedum-api-gateway
+    env_file: .env
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx256m
+      - SPRING_PROFILES_ACTIVE=mysql,oauth2,dbconstants
+      - USM_SERVICE_URL=${USM_SERVICE_URL:-http://essedum-usm-service:8081}
+      - ICIP_SERVICE_URL=${ICIP_SERVICE_URL:-http://essedum-icip-service:8082}
+      - DATA_SERVICE_URL=${DATA_SERVICE_URL:-http://essedum-data-service:8083}
+      - VIBE_SERVICE_URL=${VIBE_SERVICE_URL:-http://essedum-vibe-service:8084}
+      - FILESERVER_MINIO_URL=${FILESERVER_MINIO_URL:-http://minio:9000}
+      - FILESERVER_MINIO_ACCESS_KEY=${FILESERVER_MINIO_ACCESS_KEY}
+      - FILESERVER_MINIO_SECRET_KEY=${FILESERVER_MINIO_SECRET_KEY}
+    ports:
+      - "${API_GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    volumes:
+      - gateway-logs:/app/log
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  essedum-usm-service:
+    build:
+      context: ../sv/usm-service
+      dockerfile: Dockerfile
+    image: essedum/usm-service:latest
+    container_name: essedum-usm-service
+    hostname: essedum-usm-service
+    env_file: .env
+    environment:
+      - JAVA_OPTS=-Xms128m -Xmx256m
+      - SPRING_PROFILES_ACTIVE=mysql,oauth2,dbconstants
+      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-https://10.200.111.177:8084/realms/ESSEDUM}
+      - OAUTH2_JWK_URI=${OAUTH2_JWK_URI:-http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs}
+      - SECURITY_ISSUER_URI=${SECURITY_ISSUER_URI:-https://10.200.111.177:8084/realms/ESSEDUM}
+      - SECURITY_CLIENT_ID=${SECURITY_CLIENT_ID:-essedum-45}
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - SPRING_LIQUIBASE_ENABLED=false
+    ports:
+      - "${USM_SERVICE_PORT:-8081}:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    volumes:
+      - usm-logs:/app/log
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  essedum-icip-service:
+    build:
+      context: ../sv/icip-service
+      dockerfile: Dockerfile
+    image: essedum/icip-service:latest
+    container_name: essedum-icip-service
+    hostname: essedum-icip-service
+    env_file: .env
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx1024m
+      - SPRING_PROFILES_ACTIVE=mysql,oauth2,dbconstants
+      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-https://10.200.111.177:8084/realms/ESSEDUM}
+      - OAUTH2_JWK_URI=${OAUTH2_JWK_URI:-http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs}
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    ports:
+      - "${ICIP_SERVICE_PORT:-8082}:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    volumes:
+      - icip-logs:/app/log
+      - icip-gitrepo:/app/gitRepo
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8082' 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  essedum-data-service:
+    build:
+      context: ../sv/data-service
+      dockerfile: Dockerfile
+    image: essedum/data-service:latest
+    container_name: essedum-data-service
+    hostname: essedum-data-service
+    env_file: .env
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - SPRING_PROFILES_ACTIVE=mysql,oauth2,dbconstants
+      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-https://10.200.111.177:8084/realms/ESSEDUM}
+      - OAUTH2_JWK_URI=${OAUTH2_JWK_URI:-http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs}
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    ports:
+      - "${DATA_SERVICE_PORT:-8083}:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      minio:
+        condition: service_healthy
+    volumes:
+      - data-logs:/app/log
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8083' 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  essedum-vibe-service:
+    build:
+      context: ../sv/vibe-service
+      dockerfile: Dockerfile
+    image: essedum/vibe-service:latest
+    container_name: essedum-vibe-service
+    hostname: essedum-vibe-service
+    env_file: .env
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - SPRING_PROFILES_ACTIVE=mysql,oauth2,dbconstants
+      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-https://10.200.111.177:8084/realms/ESSEDUM}
+      - OAUTH2_JWK_URI=${OAUTH2_JWK_URI:-http://keycloak:8080/realms/ESSEDUM/protocol/openid-connect/certs}
+      - MYSQL_DATASOURCE_URL=${MYSQL_DATASOURCE_URL}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - VIBE_AZURE_OPENAI_ENDPOINT=${VIBE_AZURE_OPENAI_ENDPOINT}
+      - VIBE_AZURE_OPENAI_DEPLOYMENT_NAME=${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME}
+      - VIBE_AZURE_OPENAI_API_VERSION=${VIBE_AZURE_OPENAI_API_VERSION}
+      - VIBE_AZURE_OPENAI_API_KEY=${VIBE_AZURE_OPENAI_API_KEY}
+      - GOOSE_URL=http://goosed:3005
+      - GOOSE_SECRET_KEY=${GOOSE_SERVER__SECRET_KEY}
+    expose:
+      - "8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      goosed:
+        condition: service_started
+    volumes:
+      - vibe-logs:/app/log
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8084/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # PYTHON BACKEND SERVICES
+  # ===========================================================================
+
+  agent-designer-backend:
+    build:
+      context: ../agent-designer-backend
+      dockerfile: Dockerfile
+    image: essedum/agent-designer-backend:latest
+    container_name: essedum-agent-designer-backend
+    hostname: agent-designer-backend
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "${AGENT_DESIGNER_PORT:-8181}:8180"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    volumes:
+      - agent-designer-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8180/health\", timeout=3)' 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  proxy-service:
+    build:
+      context: ../proxy-service
+      dockerfile: Dockerfile
+    image: essedum/proxy-service:latest
+    container_name: essedum-proxy-service
+    hostname: proxy-service
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TARGET_NAMESPACE=aipns
+    ports:
+      - "${PROXY_SERVICE_PORT:-8000}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/health\", timeout=3)' 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   adk-code-builder-deployer:
-    profiles: ["app"]
     build:
       context: ../adk-code-builder-deployer
       dockerfile: Dockerfile
-    ports:
-      - "${ADK_DEPLOYER_PORT:-5003}:5000"
-    env_file:
-      - .env
+    image: essedum/adk-code-builder-deployer:latest
+    container_name: essedum-adk-code-builder
+    hostname: adk-code-builder-deployer
+    env_file: .env
     environment:
+      - PYTHONUNBUFFERED=1
       - DEPLOY_MODE=${DEPLOY_MODE:-docker}
-      - DOCKER_NETWORK=docker_default
+      - DOCKER_NETWORK=essedum-net
       - BUILDKIT_ADDR=tcp://buildkitd:1234
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION:-us-east-1}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    ports:
+      - "${ADK_CODE_BUILDER_PORT:-5003}:5000"
     user: "0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      buildkitd:
-        condition: service_started
-        required: false
+      - buildkitd
+      - minio
+    restart: unless-stopped
     networks:
-      - default
+      - backend-net
+      - infra-net
       - essedum-net
-    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  minio:
-    profiles: ["infra"]
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
-    container_name: minio
-    command: server /data --console-address :9001
+  vibe-code-builder-deployer:
+    build:
+      context: ../vibe-code-builder-deployer
+      dockerfile: Dockerfile
+    image: essedum/vibe-code-builder-deployer:latest
+    container_name: essedum-vibe-code-builder
+    hostname: vibe-code-builder-deployer
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEPLOY_MODE=${DEPLOY_MODE:-docker}
+      - DOCKER_NETWORK=essedum-net
+      - BUILDKIT_ADDR=tcp://buildkitd:1234
+      - REGISTRY_URL=${REGISTRY_URL:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     ports:
-      - "${MINIO_PORT:-9000}:9000"  # MinIO API
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # MinIO Console
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_BROWSER=${MINIO_BROWSER:-on}
-      - MINIO_PROMETHEUS_AUTH_TYPE=${MINIO_PROMETHEUS_AUTH_TYPE:-public}
-      - MINIO_SERVER_URL=${MINIO_SERVER_URL}
+      - "${VIBE_CODE_BUILDER_PORT:-5001}:5000"
+    user: "0"
     volumes:
-      - minio-data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    env_file:
-      - .env
-
-
-  litellm-postgres:
-    profiles: ["infra"]
-    image: postgres:16
-    container_name: litellm-postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=litellm
-      - POSTGRES_USER=litellm
-      - POSTGRES_PASSWORD=${LITELLM_DB_PASSWORD:-litellm}
-    volumes:
-      - litellm-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  litellm:
-    profiles: ["infra"]
-    image: ghcr.io/berriai/litellm:main-latest
-    container_name: litellm
-    restart: unless-stopped
-    env_file:
-      - .env
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      litellm-postgres:
-        condition: service_healthy
-    environment:
-      - OLLAMA_HOST=${OLLAMA_HOST:-192.168.10.9}
-      - OLLAMA_PORT=${OLLAMA_PORT:-11434}
-      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234}
-      - LITELLM_LOG_LEVEL=${LITELLM_LOG_LEVEL:-INFO}
-      - UI_USERNAME=${LITELLM_UI_USERNAME:-admin}
-      - UI_PASSWORD=${LITELLM_UI_PASSWORD:-admin}
-      - DATABASE_URL=postgresql://litellm:${LITELLM_DB_PASSWORD:-litellm}@litellm-postgres:5432/litellm
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
-      - LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL}
-    command: [
-      "--config", "/app/config/config.yaml",
-      "--host", "0.0.0.0",
-      "--port", "4000"
-    ]
-    volumes:
-      - ../lite-llm/config:/app/config:ro
-      - ../lite-llm/data:/app/data
-
-
-  langflow-stable-postgres:
-    profiles: ["infra"]
-    image: postgres:16
-    container_name: langflow-stable-postgres
+      - buildkitd
+      - minio
     restart: unless-stopped
-    env_file:
-      - .env
+    networks:
+      - backend-net
+      - infra-net
+      - essedum-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  vibe-pod-watcher:
+    build:
+      context: ../vibe-pod-watcher
+      dockerfile: Dockerfile
+    image: essedum/vibe-pod-watcher:latest
+    container_name: essedum-vibe-pod-watcher
+    hostname: vibe-pod-watcher
+    env_file: .env
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - langflow_stable_pg_data:/var/lib/postgresql/data
+      - PYTHONUNBUFFERED=1
     ports:
-      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
+      - "${VIBE_POD_WATCHER_PORT:-5004}:5000"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -sf http://localhost:5000/health || exit 1"]
+      interval: 20s
       timeout: 5s
       retries: 5
-
-  langflow-stable:
-    profiles: ["infra"]
-    image: langflowai/langflow:latest
-    container_name: langflow-stable
+      start_period: 15s
     restart: unless-stopped
-    user: "0:0"
-    env_file:
-      - .env
+    networks:
+      - backend-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  py-job-executor:
+    build:
+      context: ../py-job-executer
+      dockerfile: Dockerfile
+    image: essedum/py-job-executor:latest
+    container_name: essedum-py-job-executor
+    hostname: py-job-executor
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
     ports:
-      - "${LANGFLOW_PORT}:${LANGFLOW_PORT}"
-    volumes:
-      - langflow_stable_data:/app/langflow
+      - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
     depends_on:
-      langflow-stable-postgres:
+      mysql:
         condition: service_healthy
-    environment:
-      - LANGFLOW_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@langflow-stable-postgres:${POSTGRES_PORT}/${POSTGRES_DB}
-      - LANGFLOW_HOST=${LANGFLOW_HOST}
-      - LANGFLOW_PORT=${LANGFLOW_PORT}
-      - LANGFLOW_SECRET_KEY=${LANGFLOW_SECRET_KEY}
-      - LANGFLOW_CONFIG_DIR=${LANGFLOW_CONFIG_DIR}
-
-  langfuse-postgres:
-    profiles: ["infra"]
-    image: postgres:15-alpine
-    container_name: langfuse-postgres
     restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  py-job-azure-executer:
+    build:
+      context: ../py-job-azure-executer
+      dockerfile: Dockerfile
+    image: essedum/py-job-azure-executer:latest
+    container_name: essedum-py-job-azure
+    hostname: py-job-azure-executer
+    env_file: .env
     environment:
-      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER:-langfuse}
-      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD:-langfuse123}
-      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB:-langfuse}
-      TZ: UTC
+      - PYTHONUNBUFFERED=1
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    ports:
+      - "${PYJOB_AZURE_EXECUTER_PORT:-5005}:5005"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  py-job-sagemaker-executer:
+    build:
+      context: ../py-job-sagemaker-executer
+      dockerfile: Dockerfile
+    image: essedum/py-job-sagemaker-executer:latest
+    container_name: essedum-py-job-sagemaker
+    hostname: py-job-sagemaker-executer
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - SAGEMAKER_ROLE=${SAGEMAKER_ROLE}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    ports:
+      - "${PYJOB_SAGEMAKER_EXECUTER_PORT:-5002}:5002"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  py-job-vertex-executer:
+    build:
+      context: ../py-job-vertex-executer
+      dockerfile: Dockerfile
+    image: essedum/py-job-vertex-executer:latest
+    container_name: essedum-py-job-vertex
+    hostname: py-job-vertex-executer
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - VERTEX_LOCATION=${VERTEX_LOCATION}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    ports:
+      - "${PYJOB_VERTEX_EXECUTER_PORT:-5007}:5007"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # GOOSE AI SERVICES
+  # Source: ../../../essedum-agents/goose-vibe-studio-agent/ (sibling repo)
+  # Prerequisite: essedum-agents must be cloned alongside essedum-platform/
+  # ===========================================================================
+
+  goosed:
+    build:
+      context: ../../essedum-agents/goose-vibe-studio-agent
+      dockerfile: Dockerfile.goosed-multistage
+    image: essedum/goosed:latest
+    container_name: essedum-goosed
+    hostname: goosed
+    env_file: .env
+    environment:
+      - GOOSE_HOST=0.0.0.0
+      - GOOSE_PORT=3005
+      - GOOSE_TLS=${GOOSE_TLS:-false}
+      - GOOSE_SERVER__SECRET_KEY=${GOOSE_SERVER__SECRET_KEY}
+      - GOOSE_WORKING_DIR=${GOOSE_WORKING_DIR:-/home/goose}
+      - BUILDER_KIT2_URL=${BUILDER_KIT2_URL:-http://goose-builder-kit:8080}
+      - OLLAMA_HOST=http://ollama:11434
+      - GOOSE_MINIO_ENDPOINT=http://minio:9000
+      - GOOSE_MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - GOOSE_MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - GOOSE_MINIO_BUCKET=${MINIO_BUCKET}
+      - GOOSE_MINIO_REGION=${MINIO_REGION:-us-east-1}
+      - GOOSE_MINIO_UPLOAD_ENABLED=true
+      - GOOSE_MINIO_TLS_SKIP_VERIFY=false
+    ports:
+      - "${GOOSED_PORT:-3005}:3005"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - goose-working-dir:/home/goose
+    depends_on:
+      minio:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  goose-ui:
+    build:
+      context: ../../essedum-agents/goose-vibe-studio-agent
+      dockerfile: Dockerfile.streamlit
+    image: essedum/goose-ui:latest
+    container_name: essedum-goose-ui
+    hostname: goose-ui
+    env_file: .env
+    environment:
+      - GOOSE_URL=http://goosed:3005
+      - GOOSE_SERVER__SECRET_KEY=${GOOSE_SERVER__SECRET_KEY}
+      - GOOSE_WORKING_DIR=${GOOSE_WORKING_DIR:-/home/goose}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_DEPLOYMENT_NAME=${AZURE_OPENAI_DEPLOYMENT_NAME}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+    ports:
+      - "${GOOSE_UI_PORT:-8501}:8501"
+    depends_on:
+      goosed:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - frontend-net
+      - backend-net
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  goose-builder-kit:
+    build:
+      context: ../../essedum-agents/goose-vibe-studio-agent/services/builder-kit-2
+      dockerfile: Dockerfile
+    image: essedum/goose-builder-kit:latest
+    container_name: essedum-goose-builder-kit
+    hostname: goose-builder-kit
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=apps
+      - MINIO_PREFIX=goose-apps
+      - PUBLIC_BASE_URL=http://${SERVER_IP:-localhost}:${GOOSE_BUILDER_KIT_PORT:-8092}
+      - PORT=8080
+    ports:
+      - "${GOOSE_BUILDER_KIT_PORT:-8092}:8080"
+    depends_on:
+      minio:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_POSTGRES_USER:-langfuse}"]
-      interval: 10s
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 15s
       timeout: 5s
-      retries: 10
-    ports:
-      - "127.0.0.1:${LANGFUSE_POSTGRES_PORT:-5434}:5432"
-
-  clickhouse:
-    profiles: ["infra"]
-    image: clickhouse/clickhouse-server:24.9
-    container_name: langfuse-clickhouse
+      retries: 5
+      start_period: 15s
     restart: unless-stopped
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-      - clickhouse_logs:/var/log/clickhouse-server
-      - ./clickhouse/config.d/timezone.xml:/etc/clickhouse-server/config.d/timezone.xml:ro
+    networks:
+      - backend-net
+      - infra-net
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # FRONTEND — Micro-Frontend Architecture (Shell + 4 MFEs + Agent Designer)
+  # Shell proxies /mfe/* to individual MFE containers via nginx_shell.conf
+  # ===========================================================================
+
+  essedum-frontend-shell:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile.shell.docker
+    image: essedum/frontend-shell:latest
+    container_name: essedum-frontend-shell
+    hostname: essedum-frontend-shell
+    env_file: .env
     environment:
-      TZ: UTC
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8123/ping || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+      - FE_SALUS_URL=${FE_SALUS_URL}
+      - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT}
+      - FE_MINIO_BUCKET=${FE_MINIO_BUCKET}
+      - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX}
+      - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION:-latest}
     ports:
-      - "127.0.0.1:${CLICKHOUSE_HTTP_PORT}:8123"
-      - "127.0.0.1:${CLICKHOUSE_NATIVE_PORT}:9000"
-
-  redis:
-    profiles: ["infra"]
-    image: redis:7-alpine
-    container_name: langfuse-redis
-    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}"]
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-    ports:
-      - "127.0.0.1:${REDIS_HOST_PORT}:6379"
-
-  langfuse-minio:
-    profiles: ["infra"]
-    image: minio/minio:latest
-    container_name: langfuse-minio
-    command: ["server", "/data", "--console-address", ":9001"]
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      TZ: UTC
-    volumes:
-      - minio_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "mc alias set local http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} >/dev/null 2>&1 && mc ready local"]
-      interval: 10s
-      timeout: 10s
-      retries: 20
-    ports:
-      - "127.0.0.1:${MINIO_API_PORT:-9100}:9000"
-      - "127.0.0.1:${LANGFUSE_MINIO_CONSOLE_PORT:-9101}:9001"
-
-  minio-setup:
-    profiles: ["infra"]
-    image: minio/mc:latest
-    container_name: langfuse-minio-setup
+      - "${FRONTEND_PORT:-8084}:8084"
     depends_on:
-      langfuse-minio:
+      essedum-api-gateway:
         condition: service_healthy
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      "mc alias set local http://langfuse-minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
-       mc mb --ignore-existing local/${MINIO_BUCKET} &&
-       mc anonymous set none local/${MINIO_BUCKET} &&
-       echo 'MinIO bucket ready' && sleep 1"
-    restart: "no"
-
-  langfuse-worker:
-    profiles: ["infra"]
-    image: langfuse/langfuse-worker:3
-    container_name: langfuse-worker
-    depends_on:
-      langfuse-postgres:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      langfuse-minio:
-        condition: service_healthy
-      minio-setup:
-        condition: service_completed_successfully
-    environment:
-      TZ: UTC
-      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
-      SALT: ${SALT}
-      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
-      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED}
-      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES}
-      CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL}
-      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
-      CLICKHOUSE_CLUSTER_ENABLED: "false"
-      REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
-      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
-      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
-      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
-      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
-      LANGFUSE_S3_BATCH_EXPORT_ENABLED: "true"
-      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_BATCH_EXPORT_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_BATCH_EXPORT_PREFIX: exports/
-      LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
+      essedum-frontend-agent:
+        condition: service_started
+      essedum-frontend-data-ops:
+        condition: service_started
+      essedum-frontend-integration:
+        condition: service_started
+      essedum-frontend-vibe-studio:
+        condition: service_started
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:${WORKER_HOST_PORT}:3030"
+    networks:
+      - frontend-net
+      - backend-net
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  langfuse-web:
-    profiles: ["infra"]
-    image: langfuse/langfuse:3
-    container_name: langfuse-web
-    depends_on:
-      langfuse-postgres:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      langfuse-minio:
-        condition: service_healthy
-      minio-setup:
-        condition: service_completed_successfully
-    environment:
-      TZ: UTC
-      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
-      SALT: ${SALT}
-      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
-      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED}
-      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES}
-      CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL}
-      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
-      CLICKHOUSE_CLUSTER_ENABLED: "false"
-      REDIS_CONNECTION_STRING: ${REDIS_CONNECTION_STRING}
-      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
-      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
-      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
-      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
-      LANGFUSE_S3_BATCH_EXPORT_ENABLED: "true"
-      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${MINIO_BUCKET}
-      LANGFUSE_S3_BATCH_EXPORT_REGION: ${MINIO_REGION}
-      LANGFUSE_S3_BATCH_EXPORT_PREFIX: exports/
-      LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT}
-      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
-      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
-      LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: ${LANGFUSE_S3_FORCE_PATH_STYLE}
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+  essedum-frontend-agent:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile.agent.docker
+    image: essedum/frontend-agent:latest
+    container_name: essedum-frontend-agent
+    hostname: essedum-frontend-agent
+    expose:
+      - "80"
     restart: unless-stopped
+    networks:
+      - frontend-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  essedum-frontend-data-ops:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile.data-ops.docker
+    image: essedum/frontend-data-ops:latest
+    container_name: essedum-frontend-data-ops
+    hostname: essedum-frontend-data-ops
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - frontend-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  essedum-frontend-integration:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile.integration.docker
+    image: essedum/frontend-integration:latest
+    container_name: essedum-frontend-integration
+    hostname: essedum-frontend-integration
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - frontend-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  essedum-frontend-vibe-studio:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile.vibe-studio.docker
+    image: essedum/frontend-vibe-studio:latest
+    container_name: essedum-frontend-vibe-studio
+    hostname: essedum-frontend-vibe-studio
+    expose:
+      - "80"
+    restart: unless-stopped
+    networks:
+      - frontend-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  agent-designer-frontend:
+    build:
+      context: ../essedum-ui/agent-designer-frontend
+      dockerfile: Dockerfile
+    image: essedum/agent-designer-frontend:latest
+    container_name: essedum-agent-designer-frontend
+    hostname: agent-designer-frontend
     ports:
-      - "${WEB_HOST_PORT:-3000}:3000"
-
-
-
-volumes:
-  mysql-data:
-  qdrant-data:
-  langflow_stable_pg_data:
-  langflow_stable_data:
-  minio-data:
-  minio_data:
-  langfuse-db-data:
-  litellm-db-data:
-  postgres_data:
-  clickhouse_data:
-  clickhouse_logs:
-
-networks:
-  default:
-  essedum-net:
-    name: essedum-net
-  salus-network:
-    external: true
-    name: salus_salus-network
-
-
+      - "${AGENT_DESIGNER_FRONTEND_PORT:-3030}:3030"
+    restart: unless-stopped
+    networks:
+      - frontend-net
+      - backend-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"

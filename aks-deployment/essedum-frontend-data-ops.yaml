@@ -13,19 +13,13 @@ spec:
       labels:
         app: essedum-frontend-data-ops
     spec:
-      imagePullSecrets:
-      - name: regcred
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: essedum-1
       containers:
       - name: essedum-frontend-data-ops
-        image: localhost:5000/essedum-frontend-data-ops:v15
+        image: ${DOCKER_REGISTRY}/essedum-frontend-data-ops:${IMAGE_TAG}
         imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "50m"
-            memory: "64Mi"
-          limits:
-            cpu: "200m"
-            memory: "128Mi"
         ports:
         - containerPort: 80
 ---
