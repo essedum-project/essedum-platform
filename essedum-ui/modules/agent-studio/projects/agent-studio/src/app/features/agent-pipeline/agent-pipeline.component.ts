@@ -3443,18 +3443,18 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * via the pill dropdowns.
    */
   private applyOriginBasedDefaults(): void {
-    const origin = (typeof window !== 'undefined' && window.location.origin) || '';
-    if (origin.includes('aipatform') ||
-        origin.includes('essedum.az.ad.idemo-ppc.com') ||
-        origin.includes('azure')) {
+    const hostname = (typeof window !== 'undefined' && window.location.hostname) || '';
+    if (hostname.includes('aipatform') ||
+        hostname === 'essedum.az.ad.idemo-ppc.com' ||
+        hostname.includes('azure')) {
       this.aiChatSelectedAgent = 'azure_openai';
       this.aiChatSelectedModel = 'gpt-4o-mini';
-    } else if (origin.includes('localhost') ||
-               origin.includes('essedum-lfn.infosys.com')) {
+    } else if (hostname === 'localhost' ||
+               hostname === 'essedum-lfn.infosys.com') {
       this.aiChatSelectedAgent = 'ollama';
       this.aiChatSelectedModel = 'qwen3:4b';
     } else {
-      // Safe fallback for any unrecognised origin.
+      // Safe fallback for any unrecognised hostname.
       this.aiChatSelectedAgent = 'ollama';
       this.aiChatSelectedModel = 'qwen3:4b';
     }

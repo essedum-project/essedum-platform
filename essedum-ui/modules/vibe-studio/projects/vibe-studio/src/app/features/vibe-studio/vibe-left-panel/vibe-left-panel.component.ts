@@ -67,24 +67,33 @@ export class VibeLeftPanelComponent implements OnInit, OnDestroy {
    * Removes tags that trigger network requests when injected via innerHTML:
    * <link>, <script>, <iframe>, <object>, <embed>, <base>, <meta>. Also
    * strips `src`/`href` attributes on <img>/<audio>/<video>/<source>/<track>
-   * so those don't fetch either.
+   * so those don't fetch either. Uses DOMParser so malformed/nested markup
+   * cannot bypass removal (regex substitution is bypassable).
    */
   private stripDangerousTags(html: string): string {
     if (!html) return '';
-    return html
-      // Drop the whole element (opening + content + closing) for tags that
-      // execute or fetch on parse.
-      .replace(/<(link|script|iframe|object|embed|base|meta|form)\b[\s\S]*?<\/\1\s*>/gi, '')
-      // Self-closing / void variants of the same set.
-      .replace(/<(link|script|iframe|object|embed|base|meta|form)\b[^>]*\/?>/gi, '')
-      // Neutralise resource-fetching attributes on media tags.
-      .replace(/<(img|audio|video|source|track)([^>]*)>/gi, (_, tag, attrs) => {
-        const cleaned = String(attrs)
-          .replace(/\s(src|href|srcset|poster|data)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-        return `<${tag}${cleaned}>`;
-      })
-      // Drop inline event handlers (onclick, onerror, onload, …).
-      .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const blockedTags = ['link', 'script', 'iframe', 'object', 'embed', 'base', 'meta', 'form'];
+    const fetchAttrs = ['src', 'href', 'srcset', 'poster', 'data'];
+    const mediaTags = ['img', 'audio', 'video', 'source', 'track'];
+
+    blockedTags.forEach(tag => {
+      doc.querySelectorAll(tag).forEach(el => el.remove());
+    });
+
+    doc.querySelectorAll('*').forEach(el => {
+      Array.from(el.attributes)
+        .filter(attr => attr.name.toLowerCase().startsWith('on'))
+        .forEach(attr => el.removeAttribute(attr.name));
+    });
+
+    mediaTags.forEach(tag => {
+      doc.querySelectorAll(tag).forEach(el => {
+        fetchAttrs.forEach(attr => el.removeAttribute(attr));
+      });
+    });
+
+    return doc.body.innerHTML;
   }
 
   sendPrompt(): void {
