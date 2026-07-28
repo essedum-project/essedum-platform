@@ -27,7 +27,7 @@ build-and-push.sh                                           deploy.sh
 ```
 
 ### Key Design Decisions
-- **Zero hardcoding** — `192.168.28.36:5000`, `aipns`, `essedum-lfn.infosys.com` etc. only appear in `.env`.
+- **Zero hardcoding** — registry address, namespace, and ingress hostnames only appear in `.env`.
 - **`envsubst`** replaces `${VAR}` in all YAML at apply-time, not at write-time.
 - **Idempotent** — every `kubectl apply` uses `--dry-run=client -o yaml | apply` for namespaces; YAML changes are diffed.
 - **Retry logic** — build-and-push.sh retries failed Docker builds up to 3 times.
@@ -85,35 +85,35 @@ Open `docker/.env.sample`, copy it to `docker/.env`, then fill in every section.
 
 ```bash
 # Target environment
-ENVIRONMENT=lfn                            # aks | 5g | lfn
+ENVIRONMENT=<aks|5g|lfn>
 
 # Registry — where images are stored
-DOCKER_REGISTRY=192.168.28.36:5000        # Your private registry
+DOCKER_REGISTRY=<your-registry-host>      # Your private registry
 DOCKER_USERNAME=                          # Leave blank for unauthenticated
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest                    # Tag applied to every built image
+IMAGE_TAG=<image-tag>                     # Tag applied to every built image
 
 # Kubernetes cluster
-KUBE_CONTEXT=lfn-cluster                  # kubectl config get-contexts
-KUBE_NAMESPACE=aipns
+KUBE_CONTEXT=<your-kube-context>          # kubectl config get-contexts
+KUBE_NAMESPACE=<your-namespace>
 
 # Ingress
-INGRESS_HOST=essedum-lfn.infosys.com
-INGRESS_HOST_LFN=lfn.essedum.anuket.iol.unh.edu
-KEYCLOAK_INGRESS_HOST=login.essedum-lfn.infosys.com
-TLS_SECRET_NAME=essedum-lfn-tls
+INGRESS_HOST=<your-ingress-host>
+INGRESS_HOST_LFN=<your-lfn-ingress-host>
+KEYCLOAK_INGRESS_HOST=<your-keycloak-ingress-host>
+TLS_SECRET_NAME=<your-tls-secret-name>
 
 # Database (Kubernetes internal DNS)
-DB_HOST=mysql.aipns.svc.cluster.local
-DB_NAME=aipdb
+DB_HOST=mysql.<your-namespace>.svc.cluster.local
+DB_NAME=<your-db-name>
 
 # Keycloak
-EXTERNAL_ISSUER_URI=https://login.essedum-lfn.infosys.com/realms/ESSEDUM
-EXTERNAL_KC_URL=https://login.essedum-lfn.infosys.com
-EXTERNAL_BASE_URL=https://essedum-lfn.infosys.com:8082
+EXTERNAL_ISSUER_URI=https://<keycloak-host>/realms/<realm-name>
+EXTERNAL_KC_URL=https://<keycloak-host>
+EXTERNAL_BASE_URL=https://<your-ingress-host>:<port>
 
-# NPM (only needed if using JFrog Artifactory)
-NPM_REGISTRY_URL=https://infyartifactory.jfrog.io/artifactory/api/npm/npm-local/
+# NPM (only needed if using a private npm registry)
+NPM_REGISTRY_URL=https://<your-npm-registry-url>/
 NPM_AUTH_TOKEN=<your-token>
 ```
 
@@ -219,42 +219,42 @@ chmod +x deploy.sh
 ### AKS (Azure)
 ```bash
 ENVIRONMENT=aks
-DOCKER_REGISTRY=mycompany.azurecr.io
-DOCKER_USERNAME=mycompany
+DOCKER_REGISTRY=<your-acr-name>.azurecr.io
+DOCKER_USERNAME=<acr-username>
 DOCKER_PASSWORD=<acr-password>
-IMAGE_TAG=v15.0
-KUBE_CONTEXT=my-aks-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum.mycompany.com
-TLS_SECRET_NAME=essedum-aks-tls
+IMAGE_TAG=<image-tag>
+KUBE_CONTEXT=<your-aks-context>
+KUBE_NAMESPACE=<your-namespace>
+INGRESS_HOST=<your-ingress-host>
+TLS_SECRET_NAME=<your-tls-secret-name>
 ```
 
 ### 5G Server
 ```bash
 ENVIRONMENT=5g
-DOCKER_REGISTRY=192.168.10.50:5000
+DOCKER_REGISTRY=<your-registry-host>:<port>
 DOCKER_USERNAME=
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest
-KUBE_CONTEXT=5g-k8s-admin@5g-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum-5g.internal.company.com
-TLS_SECRET_NAME=essedum-5g-tls
+IMAGE_TAG=<image-tag>
+KUBE_CONTEXT=<your-5g-kube-context>
+KUBE_NAMESPACE=<your-namespace>
+INGRESS_HOST=<your-5g-ingress-host>
+TLS_SECRET_NAME=<your-tls-secret-name>
 ```
 
 ### LFN Server
 ```bash
 ENVIRONMENT=lfn
-DOCKER_REGISTRY=192.168.28.36:5000
+DOCKER_REGISTRY=<your-registry-host>:<port>
 DOCKER_USERNAME=
 DOCKER_PASSWORD=
-IMAGE_TAG=micro_latest
-KUBE_CONTEXT=lfn-cluster
-KUBE_NAMESPACE=aipns
-INGRESS_HOST=essedum-lfn.infosys.com
-INGRESS_HOST_LFN=lfn.essedum.anuket.iol.unh.edu
-KEYCLOAK_INGRESS_HOST=login.essedum-lfn.infosys.com
-TLS_SECRET_NAME=essedum-lfn-tls
+IMAGE_TAG=<image-tag>
+KUBE_CONTEXT=<your-lfn-kube-context>
+KUBE_NAMESPACE=<your-namespace>
+INGRESS_HOST=<your-lfn-ingress-host>
+INGRESS_HOST_LFN=<your-lfn-alternate-host>
+KEYCLOAK_INGRESS_HOST=<your-keycloak-host>
+TLS_SECRET_NAME=<your-tls-secret-name>
 ```
 
 ---
