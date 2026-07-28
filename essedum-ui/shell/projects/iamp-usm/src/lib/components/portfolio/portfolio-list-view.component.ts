@@ -47,9 +47,10 @@ import { ProjectService } from "../../services/project.service";
 import { PortfolioAddComponent } from "./portfolio-add/portfolio-add.component";
 
 @Component({
-  templateUrl: "portfolio-list-view.component.html",
-  styleUrls: ["./portfolio-list-view.component.scss"],
-  selector: "portfolio-list-view",
+    templateUrl: "portfolio-list-view.component.html",
+    styleUrls: ["./portfolio-list-view.component.scss"],
+    selector: "portfolio-list-view",
+    standalone: false
 })
 export class PortfolioListViewComponent implements OnInit, OnDestroy {
   @Input() header = "UsmPortfolios...";

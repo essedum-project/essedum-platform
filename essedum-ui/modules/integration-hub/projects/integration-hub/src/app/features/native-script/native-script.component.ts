@@ -39,9 +39,10 @@ interface Elementt {
 }
 
 @Component({
-  selector: 'app-native-script',
-  templateUrl: './native-script.component.html',
-  styleUrls: ['./native-script.component.scss'],
+    selector: 'app-native-script',
+    templateUrl: './native-script.component.html',
+    styleUrls: ['./native-script.component.scss'],
+    standalone: false
 })
 export class NativeScriptComponent implements OnInit, OnChanges {
   @Input() initiativeData: any;

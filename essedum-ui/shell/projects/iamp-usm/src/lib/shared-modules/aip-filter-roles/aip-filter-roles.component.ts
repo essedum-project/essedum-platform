@@ -9,9 +9,10 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'app-aip-filter-roles',
-  templateUrl: './aip-filter-roles.component.html',
-  styleUrls: ['./aip-filter-roles.component.scss']
+    selector: 'app-aip-filter-roles',
+    templateUrl: './aip-filter-roles.component.html',
+    styleUrls: ['./aip-filter-roles.component.scss'],
+    standalone: false
 })
 export class AipFilterRolesComponent implements OnInit, OnChanges {
   // Input properties

@@ -67,3 +67,4 @@ CMD ["/bin/bash", "-c", "\
     -Dlogback.configurationFile=/app/conf/logback-spring.xml \
     -Dhttp.nonProxyHosts=http://10.200.111.174:8082 \
     -jar icip-service-3.3-SNAPSHOT.jar"]
+

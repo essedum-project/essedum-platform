@@ -15,7 +15,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         Do you want to delete?
       </ng-template>
     </mat-dialog-content>
-  
+
     <mat-dialog-actions align="end" class="confirm-actions">
       <button mat-raised-button class="confirm-btn" (click)="dialogRef.close('delete')">Yes</button>
       <button mat-raised-button class="confirm-btn" (click)="dialogRef.close('cancel')">No</button>
@@ -51,7 +51,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         background: rgba(55, 90, 148, 0.45) !important;
       }
     `,
-  ]
+  ],
+  standalone: false
 })
 export class ConfirmDeleteDialogComponent {
   constructor(

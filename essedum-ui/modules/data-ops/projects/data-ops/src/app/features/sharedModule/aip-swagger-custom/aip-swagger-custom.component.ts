@@ -16,9 +16,10 @@ import { MLOpsSwaggerAPISpec } from '@essedum/shared-lib';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-aip-swagger-custom',
-  templateUrl: './aip-swagger-custom.component.html',
-  styleUrls: ['./aip-swagger-custom.component.scss']
+    selector: 'app-aip-swagger-custom',
+    templateUrl: './aip-swagger-custom.component.html',
+    styleUrls: ['./aip-swagger-custom.component.scss'],
+    standalone: false
 })
 export class AipSwaggerCustomComponent implements OnInit {
   @Input() adapterName: any;

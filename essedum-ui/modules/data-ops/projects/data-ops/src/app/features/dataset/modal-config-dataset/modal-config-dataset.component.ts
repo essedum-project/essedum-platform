@@ -15,9 +15,10 @@ import { OptionsDTO } from '@essedum/shared-lib';
 import { RaiservicesService } from '../../services/raiservices.service';
 
 @Component({
-  selector: 'app-modal-config-dataset',
-  templateUrl: './modal-config-dataset.component.html',
-  styleUrls: ['./modal-config-dataset.component.scss']
+    selector: 'app-modal-config-dataset',
+    templateUrl: './modal-config-dataset.component.html',
+    styleUrls: ['./modal-config-dataset.component.scss'],
+    standalone: false
 })
 export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
   @Output() responseLink = new EventEmitter<any>();

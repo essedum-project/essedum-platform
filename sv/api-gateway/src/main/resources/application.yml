@@ -172,6 +172,10 @@ spring:
           uri: ${ICIP_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/api/aip/agent-directory/**
+        - id: icip-skills
+          uri: ${ICIP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/aip/skills/**
         - id: icip-runtime
           uri: ${ICIP_SERVICE_URL:http://localhost:8082}
           predicates:

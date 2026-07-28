@@ -55,10 +55,9 @@ export class AppOAuthService {
     // Useful for debugging:
     this.oauthService.events.subscribe((event) => {
       if (event instanceof OAuthErrorEvent) {
-        console.error("OAuthErrorEvent Object:", event);
-      } else {
-        console.warn("OAuthEvent Object:", event);
+        console.error("OAuth Error:", event);
       }
+
     });
 
     // This is tricky, as it might cause race conditions (where access_token is set in another
@@ -98,11 +97,11 @@ export class AppOAuthService {
             if (localStorage.getItem("returnUrl") && localStorage.getItem("returnUrl") != "/landing" && sessionStorage.getItem("needRouting") == "true") {
 
               let sSplit = localStorage.getItem("returnUrl").split("?")
-              if(sSplit.length >1){
+              if (sSplit.length > 1) {
                 this.router.navigateByUrl(localStorage.getItem("returnUrl"))
               }
               else
-              this.router.navigate(["." + localStorage.getItem("returnUrl")])
+                this.router.navigate(["." + localStorage.getItem("returnUrl")])
               sessionStorage.removeItem("needRouting")
             }
             // this.router.navigate(["landing"])

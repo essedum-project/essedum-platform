@@ -1,0 +1,181 @@
+<div class="aip-grid">
+
+  <!-- ── Dynamic header (from columns input) ─────────────────────────────── -->
+  <div *ngIf="columns.length > 0"
+       class="aip-grid-header-row"
+       [ngStyle]="headerStyle">
+    <span *ngFor="let col of columns" [ngClass]="col.cssClass">{{ col.label }}</span>
+    <span *ngIf="actions.length > 0" class="aip-grid-cell-actions">{{ actionsLabel }}</span>
+  </div>
+
+  <!-- ── Projected header (fallback when no columns provided) ─────────────── -->
+  <ng-content select="[aip-grid-header]"></ng-content>
+
+  <!-- ── Loading spinner ──────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="aip-grid-loading">
+    <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+    <span>{{ loadingMessage }}</span>
+  </div>
+
+  <!-- ── Data list ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading" class="aip-grid-list">
+
+    <!-- Empty state -->
+    <div *ngIf="rows.length === 0" class="aip-grid-empty">
+      <mat-icon>{{ emptyIcon }}</mat-icon>
+      <p>{{ emptyMessage }}</p>
+      <ng-content select="[aip-grid-empty-action]"></ng-content>
+    </div>
+
+    <!-- ── Template mode: parent provides cell divs, grid adds the row wrapper + actions ── -->
+    <ng-container *ngIf="rowTemplate; else dynamicRows">
+      <div *ngFor="let row of rows"
+           class="aip-grid-row"
+           [ngStyle]="rowStyle"
+           (click)="rowClick.emit(row)">
+
+        <!-- Parent-defined cells (no outer wrapper, no actions div) -->
+        <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: row }"></ng-container>
+
+        <!-- Grid-managed actions cell -->
+        <div *ngIf="actions.length > 0" class="aip-grid-cell-actions">
+          <ng-container *ngIf="showActionButton(row)">
+            <button mat-icon-button
+                    [matMenuTriggerFor]="rowMenu"
+                    class="aip-grid-action-btn"
+                    (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #rowMenu="matMenu"
+                      [panelClass]="actionMenuCssClass"
+                      xPosition="before">
+              <ng-container *ngFor="let action of actions">
+                <mat-divider *ngIf="action.dividerBefore"></mat-divider>
+                <button mat-menu-item
+                        *ngIf="!action.visibleFn || action.visibleFn(row)"
+                        [ngClass]="action.cssClass"
+                        (click)="onAction(action.key, row)">
+                  <mat-icon [ngClass]="action.iconCssClass">{{ action.icon }}</mat-icon>
+                  <span>{{ action.label }}</span>
+                </button>
+              </ng-container>
+            </mat-menu>
+          </ng-container>
+        </div>
+
+      </div>
+    </ng-container>
+
+    <!-- ── Fully-dynamic mode: grid renders all cells from column definitions ── -->
+    <ng-template #dynamicRows>
+      <div *ngFor="let row of rows"
+           class="aip-grid-row"
+           [ngStyle]="rowStyle"
+           (click)="rowClick.emit(row)">
+
+        <div *ngFor="let col of columns"
+             [ngClass]="['aip-grid-cell', col.cssClass || '']">
+
+          <!-- text (default) -->
+          <ng-container *ngIf="!col.type || col.type === 'text'">
+            <span [ngClass]="col.textCssClass"
+                  [matTooltip]="getTooltip(row, col)">
+              {{ getCellValue(row, col) }}
+            </span>
+          </ng-container>
+
+          <!-- badge -->
+          <ng-container *ngIf="col.type === 'badge'">
+            <span [ngClass]="col.badgeCssFn ? col.badgeCssFn(getCellValue(row, col), row) : ''"
+                  [matTooltip]="getTooltip(row, col)">
+              {{ col.badgeLabelFn ? col.badgeLabelFn(getCellValue(row, col), row) : getCellValue(row, col) }}
+            </span>
+          </ng-container>
+
+          <!-- status-badge (badge + inline icon) -->
+          <ng-container *ngIf="col.type === 'status-badge'">
+            <span [ngClass]="col.badgeCssFn ? col.badgeCssFn(getCellValue(row, col), row) : ''">
+              <mat-icon *ngIf="col.badgeIconFn" class="status-icon">
+                {{ col.badgeIconFn(getCellValue(row, col), row) }}
+              </mat-icon>
+              {{ col.badgeLabelFn ? col.badgeLabelFn(getCellValue(row, col), row) : getCellValue(row, col) }}
+            </span>
+          </ng-container>
+
+          <!-- date -->
+          <ng-container *ngIf="col.type === 'date'">
+            <span [ngClass]="col.textCssClass">
+              {{ col.dateFn ? col.dateFn(getCellValue(row, col)) : getCellValue(row, col) }}
+            </span>
+          </ng-container>
+
+          <!-- icon-text -->
+          <ng-container *ngIf="col.type === 'icon-text'">
+            <div class="aip-grid-icon-text">
+              <div class="aip-grid-icon-wrap"
+                   [ngClass]="col.iconWrapperCssFn ? col.iconWrapperCssFn(row) : col.iconWrapperCssClass">
+                <mat-icon>{{ col.iconFn ? col.iconFn(row) : col.icon }}</mat-icon>
+              </div>
+              <div class="aip-grid-name-block">
+                <span [matTooltip]="getTooltip(row, col)">{{ getCellValue(row, col) }}</span>
+                <span *ngIf="col.subField" class="aip-grid-sub-text">{{ row[col.subField] }}</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- user badge -->
+          <ng-container *ngIf="col.type === 'user'">
+            <span class="aip-grid-user-badge">
+              <mat-icon class="aip-grid-user-icon">person</mat-icon>
+              {{ getCellValue(row, col) }}
+            </span>
+          </ng-container>
+
+        </div>
+
+        <!-- Actions cell (dynamic mode) -->
+        <div *ngIf="actions.length > 0" class="aip-grid-cell-actions">
+          <ng-container *ngIf="showActionButton(row)">
+            <button mat-icon-button
+                    [matMenuTriggerFor]="dynRowMenu"
+                    class="aip-grid-action-btn"
+                    (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #dynRowMenu="matMenu"
+                      [panelClass]="actionMenuCssClass"
+                      xPosition="before">
+              <ng-container *ngFor="let action of actions">
+                <mat-divider *ngIf="action.dividerBefore"></mat-divider>
+                <button mat-menu-item
+                        *ngIf="!action.visibleFn || action.visibleFn(row)"
+                        [ngClass]="action.cssClass"
+                        (click)="onAction(action.key, row)">
+                  <mat-icon [ngClass]="action.iconCssClass">{{ action.icon }}</mat-icon>
+                  <span>{{ action.label }}</span>
+                </button>
+              </ng-container>
+            </mat-menu>
+          </ng-container>
+        </div>
+
+      </div>
+    </ng-template>
+
+  </div>
+
+  <!-- ── Pagination (rendered internally from bound inputs) ──────────────── -->
+  <app-aip-pagination
+    *ngIf="noOfPages > 0"
+    [pageNumber]="pageNumber"
+    [noOfPages]="noOfPages"
+    [pageArr]="pageArr"
+    [startIndex]="startIndex"
+    [endIndex]="endIndex"
+    [hoverStates]="hoverStates"
+    (prevPage)="prevPage.emit()"
+    (nextPage)="nextPage.emit()"
+    (changePage)="changePage.emit($event)">
+  </app-aip-pagination>
+
+</div>

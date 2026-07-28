@@ -1,0 +1,40 @@
+# docker-compose.ui-only.yml
+#
+# Runs ONLY the Essedum frontend (UI) locally, proxying all API and auth
+# traffic to a shared remote backend server.
+#
+# Usage:
+#   cp .env.ui-only.sample .env.ui-only
+#   # Edit .env.ui-only with your shared server's IP / hostname
+#   docker compose -f docker-compose.ui-only.yml up
+#
+# The UI will be available at https://localhost:8084
+# (self-signed cert — accept the browser warning on first visit)
+
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: essedum-ui/Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-8084}:8084"
+    env_file:
+      - .env.ui-only
+    environment:
+      # ── Upstreams: point at the shared backend server ──────────────────
+      # Format: <host-or-ip>:<port>  (no http:// prefix)
+      - ESSEDUM_BACKEND_UPSTREAM=${ESSEDUM_BACKEND_UPSTREAM}
+      - ESSEDUM_KEYCLOAK_UPSTREAM=${ESSEDUM_KEYCLOAK_UPSTREAM}
+
+      # ── Keycloak OIDC issuer (full URL, browser-accessible) ────────────
+      - KEYCLOAK_ISSUER=${KEYCLOAK_ISSUER}
+
+      # ── Optional iframe service URLs ───────────────────────────────────
+      - FE_LANGFLOW_URL=${FE_LANGFLOW_URL:-}
+      - FE_LANGFUSE_URL=${FE_LANGFUSE_URL:-}
+      - FE_LITELLM_URL=${FE_LITELLM_URL:-}
+      - FE_SALUS_URL=${FE_SALUS_URL:-}
+      - FE_MINIO_ENDPOINT=${FE_MINIO_ENDPOINT:-}
+      - FE_MINIO_BUCKET=${FE_MINIO_BUCKET:-}
+      - FE_CONTAINER_REGISTRY_PREFIX=${FE_CONTAINER_REGISTRY_PREFIX:-}
+      - FE_CONTAINER_REGISTRY_VERSION=${FE_CONTAINER_REGISTRY_VERSION:-}

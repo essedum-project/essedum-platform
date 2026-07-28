@@ -17,15 +17,16 @@ import { TagEventDTO } from '@essedum/shared-lib';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
-  selector: 'app-dataset',
-  templateUrl: './dataset.component.html',
-  styleUrls: ['./dataset.component.scss'],
-  animations: [
-    trigger('fadeInOut', [
-      transition(':enter', [style({ opacity: 0 }), animate('180ms', style({ opacity: 1 }))]),
-      transition(':leave', [animate('180ms', style({ opacity: 0 }))]),
-    ]),
-  ],
+    selector: 'app-dataset',
+    templateUrl: './dataset.component.html',
+    styleUrls: ['./dataset.component.scss'],
+    animations: [
+        trigger('fadeInOut', [
+            transition(':enter', [style({ opacity: 0 }), animate('180ms', style({ opacity: 1 }))]),
+            transition(':leave', [animate('180ms', style({ opacity: 0 }))]),
+        ]),
+    ],
+    standalone: false
 })
 export class DatasetComponent implements OnInit, OnChanges {
   @ViewChild('scrollableDiv', { read: ElementRef })

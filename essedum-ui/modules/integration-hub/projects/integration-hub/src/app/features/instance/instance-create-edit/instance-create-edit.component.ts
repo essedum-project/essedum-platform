@@ -16,9 +16,10 @@ import { Location } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-instance-create-edit',
-  templateUrl: './instance-create-edit.component.html',
-  styleUrls: ['./instance-create-edit.component.scss'],
+    selector: 'app-instance-create-edit',
+    templateUrl: './instance-create-edit.component.html',
+    styleUrls: ['./instance-create-edit.component.scss'],
+    standalone: false
 })
 export class InstanceCreateEditComponent implements OnInit {
   readonly CARD_TITLE = 'Instances';

@@ -4,9 +4,10 @@ import { AdapterServices } from '@essedum/shared-lib';
 import { OptionsDTO } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-spec-template-custom-swagger',
-  templateUrl: './spec-template-custom-swagger.component.html',
-  styleUrls: ['./spec-template-custom-swagger.component.scss'],
+    selector: 'app-spec-template-custom-swagger',
+    templateUrl: './spec-template-custom-swagger.component.html',
+    styleUrls: ['./spec-template-custom-swagger.component.scss'],
+    standalone: false
 })
 export class SpecTemplateCustomSwaggerComponent implements OnInit {
   @Input() data: any;

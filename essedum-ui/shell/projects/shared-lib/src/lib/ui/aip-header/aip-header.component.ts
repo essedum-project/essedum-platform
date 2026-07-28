@@ -14,44 +14,36 @@ import {
 } from '@angular/animations';
 
 @Component({
-  selector: 'app-aip-header',
-  templateUrl: './aip-header.component.html',
-  styleUrls: ['./aip-header.component.scss'],
-  animations: [
-    trigger('searchAnimation', [
-      state(
-        'hidden',
-        style({
-          opacity: 0,
-          width: '0px',
-          margin: '0',
-          padding: '0',
-          visibility: 'hidden',
-        })
-      ),
-      state(
-        'visible',
-        style({
-          opacity: 1,
-          width: '200px',
-          visibility: 'visible',
-        })
-      ),
-      transition('hidden => visible', [
-        style({ visibility: 'visible', width: '0px' }),
-        animate('600ms ease-in'),
-      ]),
-      transition('visible => hidden', [
-        animate(
-          '600ms ease-out',
-          style({
-            opacity: 0,
-            width: '0px',
-          })
-        ),
-      ]),
-    ]),
-  ],
+    selector: 'app-aip-header',
+    templateUrl: './aip-header.component.html',
+    styleUrls: ['./aip-header.component.scss'],
+    animations: [
+        trigger('searchAnimation', [
+            state('hidden', style({
+                opacity: 0,
+                width: '0px',
+                margin: '0',
+                padding: '0',
+                visibility: 'hidden',
+            })),
+            state('visible', style({
+                opacity: 1,
+                width: '200px',
+                visibility: 'visible',
+            })),
+            transition('hidden => visible', [
+                style({ visibility: 'visible', width: '0px' }),
+                animate('600ms ease-in'),
+            ]),
+            transition('visible => hidden', [
+                animate('600ms ease-out', style({
+                    opacity: 0,
+                    width: '0px',
+                })),
+            ]),
+        ]),
+    ],
+    standalone: false
 })
 export class AipHeaderComponent {
   @Input() cardTitle: string = '';

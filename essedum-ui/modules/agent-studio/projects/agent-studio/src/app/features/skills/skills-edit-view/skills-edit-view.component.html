@@ -1,0 +1,248 @@
+<div class="skill-edit-view-page">
+
+  <!-- Page Header -->
+  <div class="skill-page-header">
+    <div class="skill-page-header-left">
+      <button class="back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1 class="skill-page-title">{{ pageTitle }}</h1>
+    </div>
+    <div class="skill-page-header-actions">
+      <button class="btn-cancel" type="button" (click)="goBack()">
+        {{ isView ? BTNCLOSE : BTNCANCEL }}
+      </button>
+      <button class="btn-save" *ngIf="isEdit" type="button" (click)="onSubmit()">{{ BTNUPDATE }}</button>
+    </div>
+  </div>
+
+  <!-- Page Body -->
+  <div class="skill-page-body">
+
+    <!-- ── Section: Basic Information ──────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-header" (click)="toggleSection('basic')">
+        <div class="section-header-left">
+          <mat-icon class="section-icon">info_outline</mat-icon>
+          <span class="section-title">{{ SECLBLBASIC }}</span>
+        </div>
+        <mat-icon class="section-toggle" [class.rotated]="!sectionStates['basic']">
+          keyboard_arrow_up
+        </mat-icon>
+      </div>
+
+      <div class="section-body" *ngIf="sectionStates['basic']">
+
+        <!-- Skill Name -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLNAME }} <span class="req-star">*</span></mat-label>
+          <input matInput [(ngModel)]="skillModel.skillName" name="skillName" [readonly]="isView" required
+            (blur)="markFieldTouched('skillName')" [placeholder]="PHNAME" />
+          <mat-error *ngIf="!skillModel.skillName?.trim()">{{ ERRREQ }}</mat-error>
+          <mat-error *ngIf="isFieldInvalid('skillName') && skillModel.skillName?.length! > 256">{{ ERRMAXNAME }}</mat-error>
+        </mat-form-field>
+
+        <!-- Alias | Version -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLALIAS }}</mat-label>
+            <input matInput [(ngModel)]="skillModel.skillAlias" name="skillAlias" [readonly]="isView"
+              (blur)="markFieldTouched('skillAlias')" [placeholder]="PHALIAS" />
+            <mat-error *ngIf="isFieldInvalid('skillAlias') && skillModel.skillAlias?.length! > 128">{{ ERRMAXALIAS }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLVERSION }} <span class="req-star">*</span></mat-label>
+            <input matInput [(ngModel)]="skillModel.skillVersion" name="skillVersion" [readonly]="isView" required
+              (blur)="markFieldTouched('skillVersion')" [placeholder]="PHVERSION" />
+            <mat-error *ngIf="!skillModel.skillVersion?.trim()">{{ ERRREQ }}</mat-error>
+            <mat-error *ngIf="isFieldInvalid('skillVersion') && skillModel.skillVersion?.length! > 20">{{ ERRMAXVERSION }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Type | Category -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLTYPE }} <span class="req-star">*</span></mat-label>
+            <mat-select [(ngModel)]="skillModel.skillType" name="skillType" [disabled]="isView" required
+              (blur)="markFieldTouched('skillType')" placeholder="Select type">
+              <mat-option *ngFor="let opt of skillTypeOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="!skillModel.skillType">{{ ERRREQ }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLCATEGORY }} <span class="req-star">*</span></mat-label>
+            <mat-select [(ngModel)]="skillModel.skillCategory" name="skillCategory" [disabled]="isView" required
+              (blur)="markFieldTouched('skillCategory')" placeholder="Select category">
+              <mat-option *ngFor="let opt of categoryOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="!skillModel.skillCategory">{{ ERRREQ }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Sub-Category -->
+        <mat-form-field appearance="fill" class="half-width" floatLabel="always">
+          <mat-label>{{ LBLSUBCATEGORY }}</mat-label>
+          <mat-select [(ngModel)]="skillModel.skillSubcategory" name="skillSubcategory" [disabled]="isView" placeholder="Select sub-category">
+            <mat-option value="">— None —</mat-option>
+            <mat-option *ngFor="let opt of subcategoryOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLDESC }} <span class="req-star">*</span></mat-label>
+          <textarea matInput [(ngModel)]="skillModel.description" name="description" [readonly]="isView" required
+            (blur)="markFieldTouched('description')" [placeholder]="PHDESC" rows="5"></textarea>
+          <mat-hint align="end">{{ (skillModel.description?.length || 0) }}/16000</mat-hint>
+          <mat-error *ngIf="!skillModel.description?.trim()">{{ ERRREQ }}</mat-error>
+        </mat-form-field>
+        <mat-error style="margin-left:0" *ngIf="skillModel.description?.length! > 16000">{{ ERRMAXDESC }}</mat-error>
+
+      </div>
+    </div>
+
+    <!-- ── Section: Technical Details ──────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-header" (click)="toggleSection('technical')">
+        <div class="section-header-left">
+          <mat-icon class="section-icon">code</mat-icon>
+          <span class="section-title">{{ SECLBLTECH }}</span>
+        </div>
+        <mat-icon class="section-toggle" [class.rotated]="!sectionStates['technical']">
+          keyboard_arrow_up
+        </mat-icon>
+      </div>
+
+      <div class="section-body" *ngIf="sectionStates['technical']">
+
+        <!-- Language | Runtime -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLLANGUAGE }}</mat-label>
+            <mat-select [(ngModel)]="skillModel.language" name="language" [disabled]="isView" placeholder="Select language">
+              <mat-option value="">— None —</mat-option>
+              <mat-option *ngFor="let opt of languageOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLRUNTIME }}</mat-label>
+            <mat-select [(ngModel)]="skillModel.runtime" name="runtime" [disabled]="isView" placeholder="Select runtime">
+              <mat-option value="">— None —</mat-option>
+              <mat-option *ngFor="let opt of runtimeOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Framework | Entrypoint -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLFRAMEWORK }}</mat-label>
+            <input matInput [(ngModel)]="skillModel.framework" name="framework" [readonly]="isView" [placeholder]="PHFRAMEWORK" />
+            <mat-error *ngIf="isFieldInvalid('framework') && skillModel.framework?.length! > 128">Max 128 chars</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLENTRYPOINT }}</mat-label>
+            <input matInput [(ngModel)]="skillModel.entrypoint" name="entrypoint" [readonly]="isView" [placeholder]="PHENTRYPOINT" />
+            <mat-error *ngIf="isFieldInvalid('entrypoint') && skillModel.entrypoint?.length! > 512">Max 512 chars</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Tags -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLTAGS }}</mat-label>
+          <input matInput [(ngModel)]="skillModel.tags" name="tags" [readonly]="isView" [placeholder]="PHTAGS" />
+          <mat-hint>Comma-separated list of tags</mat-hint>
+        </mat-form-field>
+
+        <!-- Trigger Keywords -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLTRIGKEYWORDS }}</mat-label>
+          <input matInput [(ngModel)]="skillModel.triggerKeywords" name="triggerKeywords" [readonly]="isView" [placeholder]="PHTRIGKW" />
+          <mat-hint>Comma-separated keywords that auto-match this skill</mat-hint>
+        </mat-form-field>
+
+        <!-- Input Schema -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLINPUTSCHEMA }}</mat-label>
+          <textarea matInput [(ngModel)]="skillModel.inputSchema" name="inputSchema" [readonly]="isView"
+            [placeholder]="PHINPUTSCHEMA" rows="3"></textarea>
+        </mat-form-field>
+
+        <!-- Output Schema -->
+        <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+          <mat-label>{{ LBLOUTPUTSCHEMA }}</mat-label>
+          <textarea matInput [(ngModel)]="skillModel.outputSchema" name="outputSchema" [readonly]="isView"
+            [placeholder]="PHOUTPUTSCHEMA" rows="3"></textarea>
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- ── Section: Availability & Access ──────────────────────────── -->
+    <div class="form-section">
+      <div class="section-header" (click)="toggleSection('availability')">
+        <div class="section-header-left">
+          <mat-icon class="section-icon">tune</mat-icon>
+          <span class="section-title">{{ SECLBLAVA }}</span>
+        </div>
+        <mat-icon class="section-toggle" [class.rotated]="!sectionStates['availability']">
+          keyboard_arrow_up
+        </mat-icon>
+      </div>
+
+      <div class="section-body" *ngIf="sectionStates['availability']">
+
+        <!-- Pipeline Scope | Status -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLPIPESCOPE }} <span class="req-star">*</span></mat-label>
+            <mat-select [(ngModel)]="skillModel.pipelineScope" name="pipelineScope" [disabled]="isView">
+              <mat-option *ngFor="let opt of pipelineScopeOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isFieldInvalid('pipelineScope') && !skillModel.pipelineScope">{{ ERRREQ }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLSTATUS }} <span class="req-star">*</span></mat-label>
+            <mat-select [(ngModel)]="skillModel.status" name="status" [disabled]="isView">
+              <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isFieldInvalid('status') && !skillModel.status">{{ ERRREQ }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Visibility | Organization -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" floatLabel="always">
+            <mat-label>{{ LBLVISIBILITY }} <span class="req-star">*</span></mat-label>
+            <mat-select [(ngModel)]="skillModel.visibility" name="visibility" [disabled]="isView">
+              <mat-option *ngFor="let opt of visibilityOptions" [value]="opt.value">
+                {{ opt.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="isFieldInvalid('visibility') && !skillModel.visibility">{{ ERRREQ }}</mat-error>
+          </mat-form-field>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Global error -->
+    <mat-error *ngIf="showError" class="global-error">{{ ERRGLOBAL }}</mat-error>
+
+  </div>
+
+</div>

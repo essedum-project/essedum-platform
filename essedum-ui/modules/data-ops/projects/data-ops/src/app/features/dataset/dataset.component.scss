@@ -115,7 +115,7 @@ mat-icon.aip-led-icons, .back-icon {
 }
 
 // ── Card grid ─────────────────────────────────────────────────────
-.ds-card-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)) !important; gap: 14px !important; }
+.ds-card-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(270px, 320px)) !important; gap: 14px !important; }
 
 // ── Individual dataset card ───────────────────────────────────────
 .ds-card {

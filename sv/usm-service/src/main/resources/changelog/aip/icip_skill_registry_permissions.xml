@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ============================================================
+         Skill Registry API Permissions
+         icip-service: /api/aip/skills/**
+         Role: IT Portfolio Manager — full access (list, create, get, update, delete)
+         ============================================================ -->
+
+    <changeSet id="aip-skill-registry-permissions-001" author="essedum" runOnChange="false">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="usm_permissions" />
+            <tableExists tableName="usm_permission_api" />
+            <tableExists tableName="usm_role_permissions" />
+            <tableExists tableName="usm_role" />
+        </preConditions>
+
+        <!-- Step 1: Register permission keys -->
+        <sql>INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-list');</sql>
+        <sql>INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-create');</sql>
+        <sql>INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-getById');</sql>
+        <sql>INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-update');</sql>
+        <sql>INSERT IGNORE INTO usm_permissions (module, permission) VALUES ('cip', 'cip-skills-delete');</sql>
+
+        <!-- Step 2: Map URL patterns + HTTP methods to permissions -->
+        <sql>INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+             SELECT '/api/aip/skills', 'GET', 0, 'List skills - icip-skill-controller',
+             id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-list' LIMIT 1;</sql>
+
+        <sql>INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+             SELECT '/api/aip/skills/create', 'POST', 0, 'Create skill - icip-skill-controller',
+             id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-create' LIMIT 1;</sql>
+
+        <sql>INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+             SELECT '/api/aip/skills/[0-9]*', 'GET', 0, 'Get skill by id - icip-skill-controller',
+             id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-getById' LIMIT 1;</sql>
+
+        <sql>INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+             SELECT '/api/aip/skills/[0-9]*', 'PUT', 0, 'Update skill - icip-skill-controller',
+             id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-update' LIMIT 1;</sql>
+
+        <sql>INSERT IGNORE INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION, permission_id)
+             SELECT '/api/aip/skills/[0-9]*', 'DELETE', 0, 'Delete skill - icip-skill-controller',
+             id FROM usm_permissions WHERE module='cip' AND permission='cip-skills-delete' LIMIT 1;</sql>
+
+        <!-- Step 3: Grant full access to IT Portfolio Manager role -->
+        <sql>INSERT IGNORE INTO usm_role_permissions (permission, ROLE)
+             SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r
+             WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-list'
+             AND p.module='cip' AND r.project_id IS NULL;</sql>
+
+        <sql>INSERT IGNORE INTO usm_role_permissions (permission, ROLE)
+             SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r
+             WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-create'
+             AND p.module='cip' AND r.project_id IS NULL;</sql>
+
+        <sql>INSERT IGNORE INTO usm_role_permissions (permission, ROLE)
+             SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r
+             WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-getById'
+             AND p.module='cip' AND r.project_id IS NULL;</sql>
+
+        <sql>INSERT IGNORE INTO usm_role_permissions (permission, ROLE)
+             SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r
+             WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-update'
+             AND p.module='cip' AND r.project_id IS NULL;</sql>
+
+        <sql>INSERT IGNORE INTO usm_role_permissions (permission, ROLE)
+             SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p, usm_role r
+             WHERE r.name='IT Portfolio Manager' AND p.permission='cip-skills-delete'
+             AND p.module='cip' AND r.project_id IS NULL;</sql>
+
+    </changeSet>
+
+</databaseChangeLog>
+

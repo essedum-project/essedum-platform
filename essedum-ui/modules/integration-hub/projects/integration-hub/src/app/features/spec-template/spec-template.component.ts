@@ -18,9 +18,10 @@ import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '@essedum/shared-lib';
 
 @Component({
-  selector: 'app-spec-template',
-  templateUrl: './spec-template.component.html',
-  styleUrls: ['./spec-template.component.scss'],
+    selector: 'app-spec-template',
+    templateUrl: './spec-template.component.html',
+    styleUrls: ['./spec-template.component.scss'],
+    standalone: false
 })
 export class SpecTemplateComponent implements OnInit, OnChanges {
   // Constants

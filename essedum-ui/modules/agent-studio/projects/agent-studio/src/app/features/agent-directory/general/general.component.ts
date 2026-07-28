@@ -10,9 +10,10 @@ import { Services } from '@essedum/shared-lib';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-general',
-  templateUrl: './general.component.html',
-  styleUrls: ['./general.component.scss'],
+    selector: 'app-general',
+    templateUrl: './general.component.html',
+    styleUrls: ['./general.component.scss'],
+    standalone: false
 })
 export class GeneralComponent implements OnInit, OnChanges {
   @Input() agentData: any;

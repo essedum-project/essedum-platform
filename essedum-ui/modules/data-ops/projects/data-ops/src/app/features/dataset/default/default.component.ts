@@ -8,9 +8,10 @@ import { MatSelect } from '@angular/material/select';
 import { FileItem, FileUploader, ParsedResponseHeaders } from 'ng2-file-upload';
 
 @Component({
-  selector: 'app-default',
-  templateUrl: './default.component.html',
-  styleUrls: ['./default.component.scss']
+    selector: 'app-default',
+    templateUrl: './default.component.html',
+    styleUrls: ['./default.component.scss'],
+    standalone: false
 })
 export class DefaultComponent {
   splunkTypesOpt = [];

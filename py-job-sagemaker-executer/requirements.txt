@@ -1,6 +1,6 @@
 flask
 boto3
-sagemaker>=3.4.0
+sagemaker>=2.200.0,<3.0.0
 minio
 flask_swagger_ui
 dateutils

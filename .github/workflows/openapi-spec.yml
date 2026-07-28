@@ -1,0 +1,69 @@
+name: "Generate OpenAPI Spec - Data Service"
+
+# Fetches sv/data-service/docs/openapi.yaml from a RUNNING data-service
+# instance using curl and commits the result.
+#
+# The data-service has deep bootstrap dependencies (dbconstants profile,
+# DB-backed config, Vault) that prevent it starting with an in-memory DB.
+# The reliable approach is to fetch the spec from an already-running
+# dev or staging instance.
+#
+# Local generation (no CI needed):
+#   curl http://localhost:8083/v3/api-docs.yaml \
+#        -o sv/data-service/docs/openapi.yaml
+#   git add sv/data-service/docs/openapi.yaml
+#   git commit -m "docs: update data-service openapi.yaml"
+
+on:
+  workflow_dispatch:
+    inputs:
+      data_service_url:
+        description: "Data-service base URL (must be reachable from the runner)"
+        required: false
+        default: "http://localhost:8083"
+      reason:
+        description: "Reason for manual run"
+        required: false
+        default: "Manual spec regeneration"
+
+concurrency:
+  group: openapi-spec-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  generate-spec:
+    name: "Fetch & Commit openapi.yaml"
+    runs-on: [self-hosted, essedum-runner]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch OpenAPI spec from running service
+        run: |
+          URL="${{ github.event.inputs.data_service_url }}"
+          URL="${URL:-http://localhost:8083}"
+          echo "Fetching spec from ${URL}/v3/api-docs.yaml ..."
+          mkdir -p sv/data-service/docs
+          curl -f -s "${URL}/v3/api-docs.yaml" -o sv/data-service/docs/openapi.yaml
+          echo "Spec size: $(wc -c < sv/data-service/docs/openapi.yaml) bytes"
+          echo "### OpenAPI spec fetched from ${URL}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit updated spec
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sv/data-service/docs/openapi.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to openapi.yaml - skipping commit"
+          else
+            git commit -m "docs: update data-service openapi.yaml [skip ci]"
+            git push
+          fi

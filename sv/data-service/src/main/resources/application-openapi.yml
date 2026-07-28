@@ -1,0 +1,118 @@
+# -----------------------------------------------------------------------
+# application-openapi.yml
+#
+# Activation: spring.profiles.active=dbjwt,openapi
+#
+# Purpose: Allow the service to start without any external infrastructure
+# (MySQL, Kafka, RabbitMQ, Vault, Azure KV) so that the springdoc-openapi-
+# maven-plugin can call /v3/api-docs.yaml and write docs/openapi.yaml.
+#
+# This profile MUST NOT be used for any runtime environment.
+# -----------------------------------------------------------------------
+
+server:
+  port: 8083
+
+# ── All datasources → H2 in-memory ──────────────────────────────────────
+# The service has four named datasource configs:
+#   spring.datasource     → DashboardDbConfig  (primary / dashboard)
+#   icip.datasource       → ICIPDbConfig + ICIPModDBConfig
+#   quartz.datasource     → ICIPQuartzDbConfig
+#   telemetry.datasource  → TelemetryDbConfig
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:dashboard;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  # In-memory Quartz (no DB required)
+  quartz:
+    job-store-type: memory
+
+  # Disable auto-configurations that require external services
+  autoconfigure:
+    exclude:
+      - org.springframework.cloud.vault.config.VaultAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+  # Disable Vault bootstrap
+  cloud:
+    vault:
+      enabled: false
+    config:
+      enabled: false
+
+  # Mail — stub (no actual sending during spec generation)
+  mail:
+    host: localhost
+    port: 25
+
+icip:
+  datasource:
+    url: jdbc:h2:mem:icipdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+quartz:
+  datasource:
+    url: jdbc:h2:mem:quartzdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+telemetry:
+  datasource:
+    url: jdbc:h2:mem:telemetrydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+
+# ── Security ─────────────────────────────────────────────────────────────
+# dbjwt profile requires a jwt.secret and csrf config
+jwt:
+  secret: openapi-generation-placeholder-secret-not-for-production-use
+  expiration: 86400
+
+csrf:
+  ignore:
+    urls: /api/**,/swagger-ui/**,/v3/api-docs/**,/actuator/**
+
+# ── Placeholders for @Value-injected properties ──────────────────────────
+encryption:
+  key: openapi-placeholder-key
+  salt: openapi-placeholder-salt
+
+license: placeholder
+publickey: placeholder
+
+# ── Logging override ─────────────────────────────────────────────────────
+# Redirect logs to /tmp so the app starts without the /app/log directory
+logging:
+  file:
+    path: /tmp
+
+# ── Springdoc ────────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.lfn

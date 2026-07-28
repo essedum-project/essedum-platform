@@ -16,9 +16,10 @@ import { MLOpsSwaggerAPISpec } from '@essedum/shared-lib';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'lib-swagger-custom',
-  templateUrl: './swagger-custom.component.html',
-  styleUrls: ['./swagger-custom.component.css'],
+    selector: 'lib-swagger-custom',
+    templateUrl: './swagger-custom.component.html',
+    styleUrls: ['./swagger-custom.component.css'],
+    standalone: false
 })
 export class SwaggerCustomComponent implements OnInit {
   @Input() adapterName: any;
