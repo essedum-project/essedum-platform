@@ -2,6 +2,19 @@
 # Shell sources needed for @essedum/shared-lib TypeScript path alias in tsconfig.
 FROM node:20-alpine AS build
 
+ARG NPM_REGISTRY_URL
+ARG NPM_AUTH_TOKEN
+ARG NPM_ALWAYS_AUTH=true
+
+# Configure Artifactory npm registry when credentials are supplied
+RUN if [ -n "${NPM_REGISTRY_URL}" ] && [ -n "${NPM_AUTH_TOKEN}" ]; then \
+      REGISTRY_HOST=$(echo "${NPM_REGISTRY_URL}" | sed 's|https:||'); \
+      echo "registry=${NPM_REGISTRY_URL}" >> /root/.npmrc && \
+      echo "${REGISTRY_HOST}:_authToken=${NPM_AUTH_TOKEN}" >> /root/.npmrc && \
+      echo "always-auth=${NPM_ALWAYS_AUTH}" >> /root/.npmrc && \
+      echo "strict-ssl=false" >> /root/.npmrc; \
+    fi
+
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
@@ -10,9 +23,8 @@ RUN npm install --legacy-peer-deps
 COPY essedum-ui/modules/agent-studio/ /workspace/modules/agent-studio/
 WORKDIR /workspace/modules/agent-studio
 RUN rm -f package-lock.json yarn.lock
-RUN npm install --legacy-peer-deps
-# Explicitly install dayjs — required by @jsonforms/angular-material as a peer dep.
-RUN node -e "require('dayjs')" 2>/dev/null || npm install dayjs --save --legacy-peer-deps
+RUN npm install --legacy-peer-deps && \
+    (node -e "require('dayjs')" 2>/dev/null || npm install dayjs --save --legacy-peer-deps)
 RUN npm run build-prod
 
 FROM nginx:alpine

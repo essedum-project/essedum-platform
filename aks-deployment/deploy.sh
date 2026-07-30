@@ -160,6 +160,100 @@ check_prerequisites() {
   success "Pre-flight OK — cluster is reachable."
 }
 
+# ─── DB SAFETY GUARD ─────────────────────────────────────────────────────────
+# Verifies that PVCs already exist and are Bound before any MySQL/Qdrant deploy.
+# Prevents accidentally creating a fresh empty volume on an existing cluster.
+# Set DB_WIPE_PROTECTION=false in .env only for a brand-new cluster first install.
+check_db_safety() {
+  if [[ "${DB_WIPE_PROTECTION:-true}" == "false" ]]; then
+    warn "DB_WIPE_PROTECTION=false — skipping PVC safety check (fresh install mode)."
+    return 0
+  fi
+
+  local failed=0
+  for pvc in "mysql-pvc" "qdrant-pvc"; do
+    local phase
+    phase="$(kubectl get pvc "${pvc}" -n "${KUBE_NAMESPACE}" \
+      -o jsonpath='{.status.phase}' 2>/dev/null || echo "MISSING")"
+    if [[ "${phase}" == "Bound" ]]; then
+      success "  PVC ${pvc}: Bound ✓"
+    else
+      warn "  PVC ${pvc}: ${phase}"
+      failed=1
+    fi
+  done
+
+  if [[ "${failed}" -eq 1 ]]; then
+    error "One or more database PVCs are not Bound. \
+Run prerequisite steps first:
+  kubectl apply -f aks-deployment/mysql_file_pv.yaml
+  kubectl apply -f aks-deployment/qdrantfilepv.yaml
+See aks-deployment/deploy-prerequisite.md for full instructions.
+To skip this check for a fresh install: set DB_WIPE_PROTECTION=false in docker/.env"
+  fi
+}
+
+# ─── KEYCLOAK REALM BOOTSTRAP ────────────────────────────────────────────────
+# Idempotent: creates the ESSEDUM realm and essedum-45 client if they do not
+# exist. Safe to run on every deploy — existing config is never overwritten.
+bootstrap_keycloak() {
+  info "--- [6b/9] Keycloak realm bootstrap (idempotent) ---"
+
+  local kc_admin_pass
+  kc_admin_pass="$(kubectl get secret keycloak-admin-secret -n "${KUBE_NAMESPACE}" \
+    -o jsonpath='{.data.password}' 2>/dev/null | base64 -d 2>/dev/null || echo "admin123")"
+
+  local redirect_uri="https://${INGRESS_HOST}/*"
+  local web_origin="https://${INGRESS_HOST}"
+  local realm="${KEYCLOAK_REALM:-ESSEDUM}"
+  local client_id="${OAUTH2_CLIENT_ID:-essedum-45}"
+
+  kubectl exec -n "${KUBE_NAMESPACE}" deploy/keycloak -- sh -c "
+KCADM=/opt/keycloak/bin/kcadm.sh
+\$KCADM config credentials \
+  --server http://localhost:8180 \
+  --realm master \
+  --user admin \
+  --password '${kc_admin_pass}' 2>&1 | grep -v 'Logging into'
+
+# ── Realm ──
+if \$KCADM get realms/${realm} >/dev/null 2>&1; then
+  echo '[bootstrap] Realm ${realm} already exists — skipping.'
+else
+  \$KCADM create realms \
+    -s realm='${realm}' \
+    -s enabled=true \
+    -s displayName='ESSEDUM Platform' \
+    -s sslRequired=none \
+    -s loginWithEmailAllowed=true \
+    -s resetPasswordAllowed=true \
+    -s bruteForceProtected=true
+  echo '[bootstrap] Realm ${realm} created.'
+fi
+
+# ── Client ──
+CLIENT_EXISTS=\$(\$KCADM get clients -r '${realm}' \
+  --fields clientId 2>/dev/null | grep -c '\"${client_id}\"' || true)
+if [ \"\${CLIENT_EXISTS}\" -gt 0 ]; then
+  echo '[bootstrap] Client ${client_id} already exists — skipping.'
+else
+  \$KCADM create clients -r '${realm}' \
+    -s clientId='${client_id}' \
+    -s enabled=true \
+    -s publicClient=true \
+    -s standardFlowEnabled=true \
+    -s implicitFlowEnabled=false \
+    -s directAccessGrantsEnabled=false \
+    -s 'redirectUris=[\"${redirect_uri}\",\"http://localhost:4200/*\"]' \
+    -s 'webOrigins=[\"${web_origin}\",\"http://localhost:4200\"]' \
+    -s 'attributes={\"post.logout.redirect.uris\":\"+\"}'
+  echo '[bootstrap] Client ${client_id} created.'
+fi
+" 2>&1 | while IFS= read -r line; do info "  ${line}"; done \
+    && success "Keycloak realm bootstrap complete." \
+    || warn "Keycloak bootstrap step had warnings — check realm manually."
+}
+
 # ─── DEPLOY ──────────────────────────────────────────────────────────────────
 deploy() {
   step "Essedum Deployment — Env: ${ENVIRONMENT} | Cluster: ${KUBE_CONTEXT:-current} | Namespace: ${KUBE_NAMESPACE}"
@@ -177,47 +271,45 @@ deploy() {
 
   # ── [2/9] MetalLB (bare-metal / 5G / LFN; no-op on AKS) ─────────────────
   info "--- [2/9] MetalLB config ---"
-  apply "metallb-config" "metallib-config.yaml"
+  if [[ "${SKIP_METALLB:-false}" == "true" ]]; then
+    warn "Skipping MetalLB config (SKIP_METALLB=true)."
+  else
+    apply "metallb-config" "metallib-config.yaml"
+  fi
 
-  # ── [3/9] Application namespace ──────────────────────────────────────────
-  info "--- [3/9] Namespace: ${KUBE_NAMESPACE} ---"
-  kubectl create namespace "${KUBE_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-  success "Namespace '${KUBE_NAMESPACE}' ready."
-
-  # ── [3b/9] Vibe Studio namespaces ────────────────────────────────────────
-  info "--- [3b/9] Vibe Studio namespaces ---"
-  for ns in "${VIBE_APPS_NAMESPACE}" "${VIBE_MCP_NAMESPACE}" "${VIBE_AGENTS_NAMESPACE}"; do
-    kubectl create namespace "${ns}" --dry-run=client -o yaml | kubectl apply -f -
-  done
-  success "Vibe namespaces (${VIBE_APPS_NAMESPACE}, ${VIBE_MCP_NAMESPACE}, ${VIBE_AGENTS_NAMESPACE}) ready."
-  apply "vibe-apps-rbac"   "vibe-apps-rbac.yaml"
-  apply "vibe-mcp-rbac"    "vibe-mcp-rbac.yaml"
-  apply "vibe-agents-rbac" "vibe-agents-rbac.yaml"
-
-  # ── [3.5/9] Secrets ───────────────────────────────────────────────────────
-  info "--- [3.5/9] Secrets ---"
-  apply "minio-secret" "essedum-minio-secret.yaml"
-
-  # ── [4/9] Persistent storage ─────────────────────────────────────────────
-  info "--- [4/9] Persistent Volumes & Claims ---"
-  apply "mysql-pv"    "mysql_file_pv.yaml"
-  apply "qdrant-pv"   "qdrantfilepv.yaml"
-  warn "Skipping optional service: langflow_file_pv.yaml (policy: microservices-only)."
-
-  # ── [5/9] Data stores ────────────────────────────────────────────────────
-  info "--- [5/9] Data stores (MySQL, Qdrant) ---"
+  # ── [3/9] Data stores ────────────────────────────────────────────────────
+  info "--- [3/9] Data stores (MySQL, Qdrant) ---"
+  check_db_safety
   apply "mysql"  "mysql_deployment_v3.yaml"
   apply "qdrant" "qdrant_deployment.yaml"
   wait_for "mysql"  "${KUBE_NAMESPACE}"
   wait_for "qdrant" "${KUBE_NAMESPACE}"
 
-  # ── [6/9] Identity ───────────────────────────────────────────────────────
-  info "--- [6/9] Keycloak ---"
+  # ── [4/9] Identity ───────────────────────────────────────────────────────
+  info "--- [4/9] Keycloak ---"
+  # Ensure the keycloak schema exists before Keycloak starts (it creates tables but not the DB)
+  info "Ensuring 'keycloak' MySQL database exists ..."
+  if kubectl rollout status deployment/mysql -n "${KUBE_NAMESPACE}" --timeout=30s >/dev/null 2>&1; then
+    local mysql_pass
+    mysql_pass="$(kubectl get secret essedum-db-secret -n "${KUBE_NAMESPACE}" \
+      -o jsonpath='{.data.MYSQL_PASSWORD}' 2>/dev/null | base64 -d 2>/dev/null || echo "")"
+    if [[ -n "${mysql_pass}" ]]; then
+      kubectl exec -n "${KUBE_NAMESPACE}" deploy/mysql -- \
+        mysql -u root -p"${mysql_pass}" \
+        -e "CREATE DATABASE IF NOT EXISTS keycloak CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" \
+        2>/dev/null && success "  'keycloak' database ready." || warn "  Could not create keycloak DB — may already exist or secret missing."
+    else
+      warn "  essedum-db-secret not found — skipping keycloak DB pre-create."
+    fi
+  else
+    warn "  MySQL not ready yet — skipping keycloak DB pre-create."
+  fi
   apply "keycloak" "keycloak_deployment.yaml"
   wait_for "keycloak" "${KUBE_NAMESPACE}"
+  bootstrap_keycloak
 
-  # ── [7/9] Core application workloads ─────────────────────────────────────
-  info "--- [7/9] Backend microservices ---"
+  # ── [5/9] Core application workloads ─────────────────────────────────────
+  info "--- [5/9] Backend microservices ---"
   apply "essedum-backend-api-gateway"   "essedum-backend.yaml"
   apply "essedum-backend-usm"          "usm-service.yaml"
   apply "essedum-backend-icip"         "icip-service.yaml"
@@ -230,7 +322,7 @@ deploy() {
   wait_for "essedum-backend-data"        "${KUBE_NAMESPACE}"
   wait_for "essedum-backend-vibe"        "${KUBE_NAMESPACE}"
 
-  info "--- [7b/9] Frontend microservices (MFE shell + modules) ---"
+  info "--- [5b/9] Frontend microservices (MFE shell + modules) ---"
   apply "essedum-frontend-shell"              "essedum-frontend-shell.yaml"
   apply "essedum-frontend-agent"              "essedum-frontend-agent.yaml"
   apply "essedum-frontend-agent-designer"     "essedum-frontend-agent-designer.yaml"
@@ -245,34 +337,32 @@ deploy() {
   wait_for "essedum-frontend-integration"     "${KUBE_NAMESPACE}"
   wait_for "essedum-frontend-vibe-studio"     "${KUBE_NAMESPACE}"
 
-  info "--- [7c/9] Supporting services ---"
+  info "--- [5c/9] Supporting services ---"
   apply "pyjob-executor"     "pyjob-executor.yaml"
   apply "proxy"              "proxy-deployment.yml"
-  warn "Skipping optional service: langflow-deployment-with-tls.yaml (policy: microservices-only)."
   apply "builder-rbac"       "builder-rbac.yml"
   apply "builder"            "builder-deployment.yml"
   apply "goosed"             "goosed-deployment.yaml"
   apply "goose-ui"           "goose-ui-deployment.yaml"
   apply "vibe-configmap"     "vibe-code-builder-configmap.yml"
   apply "vibe-builder"       "vibe-code-builder-deployment.yml"
-  apply "adk-deployer"       "adk-code-builder-deployer.yaml"
 
   wait_for "pyjob-executor" "${KUBE_NAMESPACE}"
 
-  # ── [8/9] HPA ────────────────────────────────────────────────────────────
-  info "--- [8/9] Horizontal Pod Autoscalers ---"
+  # ── [6/9] HPA ────────────────────────────────────────────────────────────
+  info "--- [6/9] Horizontal Pod Autoscalers ---"
   apply "backend-hpa"  "essedum-backend-hpa.yaml"
   warn "Skipping monolithic manifest: essedum-ui-hpa.yaml (policy: microservices-only)."
   apply "keycloak-hpa" "keycloak-hpa.yaml"
   apply "pyjob-hpa"    "pyjob-executor-hpa.yaml"
 
-  # ── [9/9] Ingress rules ───────────────────────────────────────────────────
-  info "--- [9/9] Ingress rules (host: ${INGRESS_HOST}) ---"
-  apply "frontend-ingress"     "essedum-frontend-ingress.yaml"
-  apply "frontend-mfe-ingress" "essedum-frontend-mfe-ingress.yaml"
-  apply "api-ingress"          "essedum-api-ingress.yaml"
-  apply "keycloak-ingress"     "keycloak-ingress.yaml"
-  apply "main-ingress"         "ingress.yaml"
+  # ── [7/9] Ingress rules ───────────────────────────────────────────────────
+  info "--- [7/9] Ingress rules (host: ${INGRESS_HOST}) ---"
+  apply "frontend-ingress"        "essedum-frontend-ingress.yaml"
+  apply "api-ingress"             "essedum-api-ingress.yaml"
+  apply "keycloak-ingress"        "keycloak-ingress.yaml"
+  apply "keycloak-proxy-ingress"  "keycloak-proxy-ingress.yaml"
+  apply "main-ingress"            "ingress.yaml"
   apply "goose-ingress"        "goose-ingress.yaml"
   apply "vibe-builder-ingress" "vibe-code-builder-ingress.yaml"
 

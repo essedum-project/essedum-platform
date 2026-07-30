@@ -13,9 +13,6 @@ spec:
       labels:
         app: keycloak
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: essedum-1
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.2.3
@@ -50,7 +47,7 @@ spec:
             - name: KC_HTTPS_ENABLED
               value: "true"
             - name: KC_HOSTNAME
-              value: "https://keycloak.essedum.local:30443"
+              value: "https://${INGRESS_HOST}"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "true"
             - name: KC_HTTPS_CERTIFICATE_FILE
@@ -114,16 +111,22 @@ kind: Service
 metadata:
   name: keycloak
   namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: keycloak
   ports:
-    - name: https
+    - name: keycloak-https
       protocol: TCP
       port: 8443
       targetPort: 8443
-    - name: http
+    - name: keycloak-http
       protocol: TCP
       port: 8180
       targetPort: 8180
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8443
   type: LoadBalancer

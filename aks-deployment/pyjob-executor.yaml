@@ -13,16 +13,14 @@ spec:
       labels:
         app: pyjob-executor
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: pyjob-executor-container
-        image: ${DOCKER_REGISTRY}/py-job-executer:${IMAGE_TAG}
+        image: ${DOCKER_REGISTRY}/${PYJOB_IMAGE}:${IMAGE_TAG}
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: false
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
         resources:
           requests:
             cpu: "100m"

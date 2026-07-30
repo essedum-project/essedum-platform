@@ -5,12 +5,23 @@
 #
 # Usage:
 #   ./build-and-push.sh [target]
-#   target: all | frontend | backend | <service> (default: all)
+#   target: all | frontend | backend | services | <service> (default: all)
 #
-#   Services: api-gateway | usm-service | icip-service | data-service |
-#             vibe-service | agent-designer | agent-designer-backend |
-#             frontend-shell | frontend-agent | frontend-data-ops |
-#             frontend-integration | frontend-vibe-studio
+#   Groups:
+#     frontend  — agent-designer + all frontend MFEs
+#     backend   — api-gateway usm-service icip-service data-service vibe-service
+#     services  — agent-designer-backend pyjob-executer proxy-service
+#                 vibe-code-builder adk-deployer goosed-base goosed
+#
+#   Individual services:
+#     api-gateway | usm-service | icip-service | data-service | vibe-service |
+#     agent-designer | agent-designer-backend | frontend-shell | frontend-agent |
+#     frontend-data-ops | frontend-integration | frontend-vibe-studio |
+#     pyjob-executer | proxy-service | vibe-code-builder | adk-deployer |
+#     goosed-base | goosed
+#
+#   goosed target builds goosed-base first, then the wrapper (required order).
+#   goose-ui has no local Dockerfile — skipped (external image).
 #
 # Environments: AKS | 5G | LFN — same script, different .env values.
 # =============================================================================
@@ -75,16 +86,34 @@ validate_env() {
 # ─── Registry login ───────────────────────────────────────────────────────────
 registry_login() {
   if [[ -n "${DOCKER_USERNAME:-}" && -n "${DOCKER_PASSWORD:-}" ]]; then
-    info "Logging in to registry: ${DOCKER_REGISTRY}"
+    info "Logging in to registry: ${DOCKER_REGISTRY} (username/password)"
     if echo "${DOCKER_PASSWORD}" | docker login "${DOCKER_REGISTRY}" \
       -u "${DOCKER_USERNAME}" --password-stdin; then
       success "Registry login OK."
     else
-      error "Registry login failed. Check DOCKER_USERNAME / DOCKER_PASSWORD."
+      error "Registry login failed. Check DOCKER_USERNAME / DOCKER_PASSWORD in docker/.env."
     fi
   else
-    warn "DOCKER_USERNAME or DOCKER_PASSWORD not set — skipping registry login."
-    warn "Ensure the registry is reachable without auth, or login manually first."
+    # ── ACR auto-login via Azure CLI (fallback when credentials not set) ──
+    local acr_name
+    acr_name="${DOCKER_REGISTRY%%.*}"   # strip .azurecr.io → e.g. acrreq0762935
+    if command -v az >/dev/null 2>&1; then
+      info "DOCKER_USERNAME/DOCKER_PASSWORD not set — attempting ACR login via Azure CLI."
+      info "  Registry: ${DOCKER_REGISTRY}  |  ACR name: ${acr_name}"
+      if az acr login --name "${acr_name}"; then
+        success "ACR login via Azure CLI OK."
+      else
+        error "ACR login failed. Run: az login  then retry, or set DOCKER_USERNAME / DOCKER_PASSWORD in docker/.env."
+      fi
+    else
+      warn "DOCKER_USERNAME/DOCKER_PASSWORD not set and 'az' CLI not found."
+      warn "Options to fix:"
+      warn "  1. Set DOCKER_USERNAME and DOCKER_PASSWORD in docker/.env"
+      warn "     (get ACR admin password: az acr credential show --name ${acr_name})"
+      warn "  2. Run 'docker login ${DOCKER_REGISTRY}' manually before deploying"
+      warn "  3. Install Azure CLI and run 'az login' then retry"
+      error "Cannot authenticate to registry ${DOCKER_REGISTRY}. Aborting."
+    fi
   fi
 }
 
@@ -109,17 +138,21 @@ clean_npm_lockfiles() {
 }
 
 # ─── npm registry config ──────────────────────────────────────────────────────
+# Accepts consolidated REGISTRY_TOKEN or legacy NPM_AUTH_TOKEN.
+# A JFrog identity token works for both npm (frontend) and Maven (backend).
 configure_npm() {
-  if [[ -n "${NPM_REGISTRY_URL:-}" ]]; then
+  local npm_token="${NPM_AUTH_TOKEN:-${REGISTRY_TOKEN:-}}"
+  if [[ -n "${NPM_REGISTRY_URL:-}" ]] && [[ -n "${npm_token}" ]]; then
     info "Configuring npm registry: ${NPM_REGISTRY_URL}"
     npm config set registry "${NPM_REGISTRY_URL}" 2>/dev/null || \
       warn "npm config set failed — npm may not be installed on this host (OK for Docker-only builds)."
-    if [[ -n "${NPM_AUTH_TOKEN:-}" ]]; then
-      local reg_host
-      reg_host="${NPM_REGISTRY_URL#http*:}"
-      npm config set "${reg_host}:_authToken" "${NPM_AUTH_TOKEN}" 2>/dev/null || true
-      success "npm auth token configured for ${reg_host}."
-    fi
+    local reg_host
+    reg_host="${NPM_REGISTRY_URL#http*:}"
+    npm config set "${reg_host}:_authToken" "${npm_token}" 2>/dev/null || true
+    success "npm auth token configured for ${reg_host}."
+  elif [[ -n "${NPM_REGISTRY_URL:-}" ]]; then
+    info "NPM_REGISTRY_URL set but no token — using unauthenticated registry."
+    npm config set registry "${NPM_REGISTRY_URL}" 2>/dev/null || true
   fi
 }
 
@@ -147,7 +180,11 @@ build_and_push() {
         --build-arg DOCKER_REGISTRY="${DOCKER_REGISTRY}" \
         --build-arg IMAGE_TAG="${IMAGE_TAG}" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-}" \
-        --build-arg NPM_AUTH_TOKEN="${NPM_AUTH_TOKEN:-}" \
+        --build-arg NPM_AUTH_TOKEN="${NPM_AUTH_TOKEN:-${REGISTRY_TOKEN:-}}" \
+        --build-arg NPM_ALWAYS_AUTH="${NPM_ALWAYS_AUTH:-true}" \
+        --build-arg ARTIFACTORY_REPO_USER="${ARTIFACTORY_REPO_USER:-${REGISTRY_USER:-}}" \
+        --build-arg ARTIFACTORY_REPO_PASS="${ARTIFACTORY_REPO_PASS:-${REGISTRY_TOKEN:-}}" \
+        --build-arg MAVEN_SETTINGS_FILE="${MAVEN_SETTINGS_FILE:-maven-settings.xml}" \
         -t "${image}" \
         -f "${context}/${dockerfile}" \
         "${context}"; then
@@ -249,6 +286,56 @@ build_frontend_vibe_studio() {
     "essedum-ui/Dockerfile.vibe-studio"
 }
 
+build_pyjob_executer() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${PYJOB_IMAGE:-py-job-executer}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/py-job-executer" \
+    "Dockerfile"
+}
+
+build_proxy_service() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${PROXY_IMAGE:-proxy-service}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/proxy-service" \
+    "Dockerfile"
+}
+
+build_vibe_code_builder() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${VIBE_BUILDER_IMAGE:-vibe-code-builder-deployer}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/vibe-code-builder-deployer" \
+    "Dockerfile"
+}
+
+build_adk_deployer() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${ADK_DEPLOYER_IMAGE:-adk-code-builder-deployer}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/adk-code-builder-deployer" \
+    "Dockerfile"
+}
+
+build_goosed_base() {
+  local goose_path="${GOOSE_PATH:-/home/useradmin/goose-vibe-studio-agent/essedum-agents/goose-vibe-studio-agent}"
+  [[ -d "${goose_path}" ]] || \
+    error "GOOSE_PATH not found: ${goose_path}. Set GOOSE_PATH in docker/.env."
+  [[ -f "${goose_path}/goosed-bin" ]] || \
+    warn "goosed-bin not found in ${goose_path} — Docker build may fail if binary is missing."
+  build_and_push \
+    "${DOCKER_REGISTRY}/${GOOSED_BASE_IMAGE:-goosed-base}:${IMAGE_TAG}" \
+    "${goose_path}" \
+    "Dockerfile.goosed"
+}
+
+build_goosed_wrapper() {
+  local ctx
+  ctx="$(cd "${REPO_ROOT}/../goosed-wrapper" 2>/dev/null && pwd)" \
+    || error "goosed-wrapper directory not found at ${REPO_ROOT}/../goosed-wrapper"
+  build_and_push \
+    "${DOCKER_REGISTRY}/${GOOSED_IMAGE:-goosed}:${IMAGE_TAG}" \
+    "${ctx}" \
+    "Dockerfile"
+}
+
 # ─── Entry point ─────────────────────────────────────────────────────────────
 command -v docker >/dev/null 2>&1 || error "docker not found in PATH."
 
@@ -268,12 +355,20 @@ case "${TARGET}" in
     build_icip_service
     build_data_service
     build_vibe_service
+    build_agent_designer_backend
     build_agent_designer
     build_frontend_shell
     build_frontend_agent
     build_frontend_data_ops
     build_frontend_integration
     build_frontend_vibe_studio
+    build_pyjob_executer
+    build_proxy_service
+    build_vibe_code_builder
+    build_adk_deployer
+    build_goosed_base
+    build_goosed_wrapper
+    warn "goose-ui has no local Dockerfile — skipping (external image)."
     ;;
   frontend)
     build_agent_designer
@@ -290,6 +385,15 @@ case "${TARGET}" in
     build_data_service
     build_vibe_service
     ;;
+  services)
+    build_agent_designer_backend
+    build_pyjob_executer
+    build_proxy_service
+    build_vibe_code_builder
+    build_adk_deployer
+    build_goosed_base
+    build_goosed_wrapper
+    ;;
   api-gateway)              build_api_gateway            ;;
   usm-service)              build_usm_service            ;;
   icip-service)             build_icip_service           ;;
@@ -302,11 +406,18 @@ case "${TARGET}" in
   frontend-data-ops)        build_frontend_data_ops      ;;
   frontend-integration)     build_frontend_integration   ;;
   frontend-vibe-studio)     build_frontend_vibe_studio   ;;
+  pyjob-executer)           build_pyjob_executer         ;;
+  proxy-service)            build_proxy_service          ;;
+  vibe-code-builder)        build_vibe_code_builder      ;;
+  adk-deployer)             build_adk_deployer           ;;
+  goosed-base)              build_goosed_base            ;;
+  goosed)                   build_goosed_base && build_goosed_wrapper ;;
   *)
-    error "Unknown target '${TARGET}'. Valid: all | frontend | backend | \
+    error "Unknown target '${TARGET}'. Valid: all | frontend | backend | services | \
 api-gateway | usm-service | icip-service | data-service | vibe-service | \
 agent-designer | agent-designer-backend | frontend-shell | frontend-agent | \
-frontend-data-ops | frontend-integration | frontend-vibe-studio"
+frontend-data-ops | frontend-integration | frontend-vibe-studio | \
+pyjob-executer | proxy-service | vibe-code-builder | adk-deployer | goosed-base | goosed"
     ;;
 esac
 

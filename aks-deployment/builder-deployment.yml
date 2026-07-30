@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: builder-service
-  namespace: essedum
+  namespace: aipns
 spec:
   replicas: 1
   selector:
@@ -16,11 +16,9 @@ spec:
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
       imagePullSecrets: []
-      nodeSelector:
-        registry: "local"
       containers:
         - name: builder
-          image: ${REGISTRY}/essedum/adk-code-builder-deployer:${IMAGE_TAG}
+          image: ${DOCKER_REGISTRY}/${ADK_DEPLOYER_IMAGE:-adk-code-builder-deployer}:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
@@ -57,7 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: builder-service
-  namespace: essedum
+  namespace: aipns
 spec:
   selector:
     app: builder

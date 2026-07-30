@@ -15,8 +15,6 @@ spec:
         app: vibe-code-builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
         - name: vibe-code-builder
           image: ${DOCKER_REGISTRY}/vibe-code-builder-deployer:${IMAGE_TAG}
@@ -39,6 +37,8 @@ kind: Service
 metadata:
   name: vibe-code-builder-service
   namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: vibe-code-builder

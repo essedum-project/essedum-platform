@@ -19,8 +19,6 @@ spec:
       labels:
         app: agent-designer-postgres
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: postgres
         image: postgres:16-alpine
@@ -98,8 +96,6 @@ spec:
       labels:
         app: agent-designer-redis
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: redis
         image: redis:7-alpine
@@ -159,8 +155,6 @@ spec:
       labels:
         app: agent-designer-backend
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: agent-designer-backend
         image: ${DOCKER_REGISTRY}/agent-designer-backend:${IMAGE_TAG}
