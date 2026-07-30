@@ -13,9 +13,6 @@ spec:
       labels:
         app: essedum-frontend-vibe-studio
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: essedum-frontend-vibe-studio
         image: ${DOCKER_REGISTRY}/essedum-frontend-vibe-studio:${IMAGE_TAG}

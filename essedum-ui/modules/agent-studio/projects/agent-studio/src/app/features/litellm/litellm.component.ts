@@ -37,7 +37,7 @@ export class LitellmComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.litellmIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.litellmUrl).origin; } catch { return this.litellmUrl; }
+      try { return new URL(this.litellmUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {

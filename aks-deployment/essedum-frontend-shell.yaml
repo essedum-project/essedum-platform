@@ -13,23 +13,32 @@ spec:
       labels:
         app: essedum-frontend-shell
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: essedum-frontend-shell
         image: ${DOCKER_REGISTRY}/essedum-frontend-shell:${IMAGE_TAG}
         imagePullPolicy: Always
+        env:
+        - name: ESSEDUM_BACKEND_UPSTREAM
+          value: "${ESSEDUM_BACKEND_UPSTREAM}"
+        - name: KEYCLOAK_ISSUER
+          value: "${KEYCLOAK_ISSUER}"
         ports:
         - containerPort: 8084
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         volumeMounts:
-        - name: auth-config-vol
-          mountPath: /app/ui/shell/configs/auth-config.json
-          subPath: auth-config.json
+        - name: mfe-manifest
+          mountPath: /app/ui/shell/assets/json/mf.manifest.json
+          subPath: mf.manifest.json
       volumes:
-      - name: auth-config-vol
+      - name: mfe-manifest
         configMap:
-          name: essedum-auth-config
+          name: essedum-mfe-manifest
 ---
 apiVersion: v1
 kind: Service

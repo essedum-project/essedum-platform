@@ -18,17 +18,10 @@ spec:
       labels:
         app: essedum-backend-vibe
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: essedum-1
       tolerations:
       - key: "node.kubernetes.io/disk-pressure"
         operator: "Exists"
         effect: "NoSchedule"
-      hostAliases:
-      - ip: "10.200.111.51"
-        hostnames:
-        - "keycloak.essedum.local"
       containers:
       - name: essedum-backend-vibe
         image: ${DOCKER_REGISTRY}/essedum-vibe-service:${IMAGE_TAG}
@@ -78,10 +71,15 @@ spec:
               key: VIBE_AZURE_OPENAI_API_KEY
         - name: GOOSE_URL
           value: "http://goosed-service:3005"
+        - name: GOOSE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: goose-secret
+              key: secret-key
         - name: OAUTH2_JWK_URI
-          value: "http://keycloak.aipns.svc.cluster.local:8180/realms/ESSEDUM/protocol/openid-connect/certs"
+          value: "${OAUTH2_JWK_URI}"
         - name: OAUTH2_ISSUER_URI
-          value: "https://keycloak.essedum.local:30443/realms/ESSEDUM"
+          value: "${OAUTH2_ISSUER_URI}"
         ports:
         - containerPort: 8084
         startupProbe:

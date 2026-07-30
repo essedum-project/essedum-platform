@@ -20,9 +20,12 @@ replace_placeholder '__FE_MINIO_BUCKET__'                "$FE_MINIO_BUCKET"
 replace_placeholder '__FE_CONTAINER_REGISTRY_PREFIX__'   "$FE_CONTAINER_REGISTRY_PREFIX"
 replace_placeholder '__FE_CONTAINER_REGISTRY_VERSION__'  "$FE_CONTAINER_REGISTRY_VERSION"
 
-# ── Replace Keycloak issuer URL in JSON config assets ──
+# ── Replace Keycloak issuer URL in auth-config.json ──
 if [ -n "$KEYCLOAK_ISSUER" ]; then
-  find /app/ui -type f -name '*.json' -exec sed -i "s|__KEYCLOAK_ISSUER__|${KEYCLOAK_ISSUER}|g" {} +
+  auth_config="/app/ui/shell/configs/auth-config.json"
+  if [ -f "$auth_config" ] && [ -w "$auth_config" ]; then
+    sed -i "s|__KEYCLOAK_ISSUER__|${KEYCLOAK_ISSUER}|g" "$auth_config"
+  fi
 fi
 
 # ── Render Nginx config with runtime-configurable upstreams ──

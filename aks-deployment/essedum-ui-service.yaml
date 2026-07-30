@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: essedum-frontend-ui-service
   namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: essedum-frontend-ui # Matches the label in the Deployment

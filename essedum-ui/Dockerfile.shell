@@ -1,19 +1,28 @@
 # Build context: essedum-platform/ (repo root)
 FROM node:20-alpine AS build
 
+ARG NPM_REGISTRY_URL
+ARG NPM_AUTH_TOKEN
+ARG NPM_ALWAYS_AUTH=true
+
+# Configure Artifactory npm registry when credentials are supplied
+RUN if [ -n "${NPM_REGISTRY_URL}" ] && [ -n "${NPM_AUTH_TOKEN}" ]; then \
+      REGISTRY_HOST=$(echo "${NPM_REGISTRY_URL}" | sed 's|https:||'); \
+      echo "registry=${NPM_REGISTRY_URL}" >> /root/.npmrc && \
+      echo "${REGISTRY_HOST}:_authToken=${NPM_AUTH_TOKEN}" >> /root/.npmrc && \
+      echo "always-auth=${NPM_ALWAYS_AUTH}" >> /root/.npmrc && \
+      echo "strict-ssl=false" >> /root/.npmrc; \
+    fi
+
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 RUN npm run build-prod || (echo "=== Angular error log ===" && cat /tmp/ng-*/angular-errors.log 2>/dev/null && exit 1)
-# Generate self-signed cert in the build stage (network available here).
-RUN for i in 1 2 3; do \
-		apk add --no-cache openssl && break; \
-		echo "apk add failed (attempt $i), retrying..."; \
-		sleep $((i * 5)); \
-	done && \
-	command -v openssl >/dev/null && \
+# apk CDN uses HTTPS which is blocked by TLS proxy — switch to HTTP mirror to install openssl.
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|http://dl-cdn.alpinelinux.org|g' /etc/apk/repositories && \
+	apk add --no-cache openssl && \
 	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 		-subj "/CN=localhost" \
 		-keyout /tmp/server.key \

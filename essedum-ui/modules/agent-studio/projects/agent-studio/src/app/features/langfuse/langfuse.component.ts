@@ -41,7 +41,7 @@ export class LangfuseComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langfuseIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.langfuseUrl).origin; } catch { return this.langfuseUrl; }
+      try { return new URL(this.langfuseUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {

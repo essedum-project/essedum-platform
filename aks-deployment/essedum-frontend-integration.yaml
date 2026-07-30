@@ -13,9 +13,6 @@ spec:
       labels:
         app: essedum-frontend-integration
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: essedum-frontend-integration
         image: ${DOCKER_REGISTRY}/essedum-frontend-integration:${IMAGE_TAG}

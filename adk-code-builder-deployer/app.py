@@ -819,10 +819,14 @@ def handle_pipeline_trigger(data):
             k8s_apps = client.AppsV1Api()
 
             try:
-                # If it exists, PATCH
-                k8s_apps.read_namespaced_deployment(
+                # If it exists, PATCH — but guard against Terminating objects:
+                # a deployment being deleted is still returned by read but will
+                # disappear moments later, causing wait_for_deployment_ready to 404.
+                existing = k8s_apps.read_namespaced_deployment(
                     name=deploy_name, namespace=target_namespace
                 )
+                if existing.metadata.deletion_timestamp:
+                    raise client.exceptions.ApiException(status=404, reason="Terminating")
                 log_to_client("Deployment exists. Updating image...", step="DEPLOY")
                 patch = {
                     "spec": {
@@ -1126,7 +1130,12 @@ def wait_for_deployment_ready(api, name, namespace, timeout_seconds=120):
     import time
     start = time.time()
     while time.time() - start < timeout_seconds:
-        dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        try:
+            dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                return False
+            raise
         desired = dep.status.replicas or 0
         ready   = dep.status.ready_replicas or 0
         if desired > 0 and ready == desired:

@@ -15,8 +15,6 @@ spec:
       labels:
         app: proxy-service
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: essedum-1
       containers:
       - name: proxy
         image: ${DOCKER_REGISTRY}/proxy-service:${IMAGE_TAG}
@@ -25,7 +23,7 @@ spec:
         - containerPort: 8080
         env:
         - name: TARGET_NAMESPACE
-          value: "aipns"
+          value: "vibe-apps"
         # Optional allowlist: uncomment to restrict services
         # - name: ALLOWLIST
         #   value: "runner-service,tunner-service,abc-service"
