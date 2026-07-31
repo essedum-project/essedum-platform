@@ -93,8 +93,11 @@ registry_login() {
     else
       error "Registry login failed. Check DOCKER_USERNAME / DOCKER_PASSWORD in docker/.env."
     fi
+  elif [[ "${ENVIRONMENT:-}" == "5G" || "${ENVIRONMENT:-}" == "LFN" ]]; then
+    # Local/bare-metal registry — Azure login is not applicable; registry is on-prem.
+    info "ENVIRONMENT=${ENVIRONMENT} — skipping Azure login for local registry ${DOCKER_REGISTRY}."
   else
-    # ── ACR auto-login via Azure CLI (fallback when credentials not set) ──
+    # ── ACR auto-login via Azure CLI (fallback when credentials not set, AKS only) ──
     local acr_name
     acr_name="${DOCKER_REGISTRY%%.*}"   # strip .azurecr.io → e.g. acrreq0762935
     if command -v az >/dev/null 2>&1; then
@@ -328,8 +331,9 @@ build_goosed_base() {
 
 build_goosed_wrapper() {
   local ctx
-  ctx="$(cd "${REPO_ROOT}/../goosed-wrapper" 2>/dev/null && pwd)" \
-    || error "goosed-wrapper directory not found at ${REPO_ROOT}/../goosed-wrapper"
+  local wrapper_path="${GOOSED_WRAPPER_PATH:-${REPO_ROOT}/../goosed-wrapper}"
+  ctx="$(cd "${wrapper_path}" 2>/dev/null && pwd)" \
+    || error "goosed-wrapper directory not found at ${wrapper_path}. Set GOOSED_WRAPPER_PATH in docker/.env."
   build_and_push \
     "${DOCKER_REGISTRY}/${GOOSED_IMAGE:-goosed}:${IMAGE_TAG}" \
     "${ctx}" \

@@ -44,6 +44,12 @@ spec:
           value: "${OAUTH2_JWK_URI}"
         - name: OAUTH2_ISSUER_URI
           value: "${OAUTH2_ISSUER_URI}"
+        - name: OAUTH2_CLIENT_ID
+          value: "${OAUTH2_CLIENT_ID}"
+        - name: SERVICE_ACCESS_TOKEN
+          value: "${SERVICE_ACCESS_TOKEN}"
+        - name: SERVICE_PROXY_USER
+          value: "${SERVICE_PROXY_USER}"
         ports:
         - containerPort: 8081
         startupProbe:

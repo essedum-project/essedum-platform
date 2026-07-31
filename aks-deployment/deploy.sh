@@ -193,67 +193,6 @@ To skip this check for a fresh install: set DB_WIPE_PROTECTION=false in docker/.
   fi
 }
 
-# ─── KEYCLOAK REALM BOOTSTRAP ────────────────────────────────────────────────
-# Idempotent: creates the ESSEDUM realm and essedum-45 client if they do not
-# exist. Safe to run on every deploy — existing config is never overwritten.
-bootstrap_keycloak() {
-  info "--- [6b/9] Keycloak realm bootstrap (idempotent) ---"
-
-  local kc_admin_pass
-  kc_admin_pass="$(kubectl get secret keycloak-admin-secret -n "${KUBE_NAMESPACE}" \
-    -o jsonpath='{.data.password}' 2>/dev/null | base64 -d 2>/dev/null || echo "admin123")"
-
-  local redirect_uri="https://${INGRESS_HOST}/*"
-  local web_origin="https://${INGRESS_HOST}"
-  local realm="${KEYCLOAK_REALM:-ESSEDUM}"
-  local client_id="${OAUTH2_CLIENT_ID:-essedum-45}"
-
-  kubectl exec -n "${KUBE_NAMESPACE}" deploy/keycloak -- sh -c "
-KCADM=/opt/keycloak/bin/kcadm.sh
-\$KCADM config credentials \
-  --server http://localhost:8180 \
-  --realm master \
-  --user admin \
-  --password '${kc_admin_pass}' 2>&1 | grep -v 'Logging into'
-
-# ── Realm ──
-if \$KCADM get realms/${realm} >/dev/null 2>&1; then
-  echo '[bootstrap] Realm ${realm} already exists — skipping.'
-else
-  \$KCADM create realms \
-    -s realm='${realm}' \
-    -s enabled=true \
-    -s displayName='ESSEDUM Platform' \
-    -s sslRequired=none \
-    -s loginWithEmailAllowed=true \
-    -s resetPasswordAllowed=true \
-    -s bruteForceProtected=true
-  echo '[bootstrap] Realm ${realm} created.'
-fi
-
-# ── Client ──
-CLIENT_EXISTS=\$(\$KCADM get clients -r '${realm}' \
-  --fields clientId 2>/dev/null | grep -c '\"${client_id}\"' || true)
-if [ \"\${CLIENT_EXISTS}\" -gt 0 ]; then
-  echo '[bootstrap] Client ${client_id} already exists — skipping.'
-else
-  \$KCADM create clients -r '${realm}' \
-    -s clientId='${client_id}' \
-    -s enabled=true \
-    -s publicClient=true \
-    -s standardFlowEnabled=true \
-    -s implicitFlowEnabled=false \
-    -s directAccessGrantsEnabled=false \
-    -s 'redirectUris=[\"${redirect_uri}\",\"http://localhost:4200/*\"]' \
-    -s 'webOrigins=[\"${web_origin}\",\"http://localhost:4200\"]' \
-    -s 'attributes={\"post.logout.redirect.uris\":\"+\"}'
-  echo '[bootstrap] Client ${client_id} created.'
-fi
-" 2>&1 | while IFS= read -r line; do info "  ${line}"; done \
-    && success "Keycloak realm bootstrap complete." \
-    || warn "Keycloak bootstrap step had warnings — check realm manually."
-}
-
 # ─── DEPLOY ──────────────────────────────────────────────────────────────────
 deploy() {
   step "Essedum Deployment — Env: ${ENVIRONMENT} | Cluster: ${KUBE_CONTEXT:-current} | Namespace: ${KUBE_NAMESPACE}"
@@ -306,7 +245,6 @@ deploy() {
   fi
   apply "keycloak" "keycloak_deployment.yaml"
   wait_for "keycloak" "${KUBE_NAMESPACE}"
-  bootstrap_keycloak
 
   # ── [5/9] Core application workloads ─────────────────────────────────────
   info "--- [5/9] Backend microservices ---"
@@ -323,6 +261,7 @@ deploy() {
   wait_for "essedum-backend-vibe"        "${KUBE_NAMESPACE}"
 
   info "--- [5b/9] Frontend microservices (MFE shell + modules) ---"
+  apply "mfe-manifest-configmap"              "essedum-mfe-manifest-configmap.yaml"
   apply "essedum-frontend-shell"              "essedum-frontend-shell.yaml"
   apply "essedum-frontend-agent"              "essedum-frontend-agent.yaml"
   apply "essedum-frontend-agent-designer"     "essedum-frontend-agent-designer.yaml"

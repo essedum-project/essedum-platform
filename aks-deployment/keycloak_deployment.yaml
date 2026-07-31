@@ -48,6 +48,8 @@ spec:
               value: "true"
             - name: KC_HOSTNAME
               value: "https://${INGRESS_HOST}"
+            - name: KC_HOSTNAME_ADMIN
+              value: "https://${KEYCLOAK_INGRESS_HOST}"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "true"
             - name: KC_HTTPS_CERTIFICATE_FILE
