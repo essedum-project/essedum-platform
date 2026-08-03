@@ -46,6 +46,12 @@ spec:
           value: "${OAUTH2_ISSUER_URI}"
         - name: SSRF_ALLOWED_HOSTS
           value: "pyjob-executor-service"
+        - name: OAUTH2_CLIENT_ID
+          value: "${OAUTH2_CLIENT_ID}"
+        - name: SERVICE_ACCESS_TOKEN
+          value: "${SERVICE_ACCESS_TOKEN}"
+        - name: SERVICE_PROXY_USER
+          value: "${SERVICE_PROXY_USER}"
         ports:
         - containerPort: 8083
         startupProbe:

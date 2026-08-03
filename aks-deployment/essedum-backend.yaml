@@ -53,6 +53,8 @@ spec:
           value: "${OAUTH2_SCOPE}"
         - name: OAUTH2_USER_CLAIM
           value: "${OAUTH2_USER_CLAIM}"
+        - name: SERVICE_ACCESS_TOKEN
+          value: "${SERVICE_ACCESS_TOKEN}"
 ---
 apiVersion: v1
 kind: Service
