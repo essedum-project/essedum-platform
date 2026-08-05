@@ -1,5 +1,6 @@
 package com.lfn.icip.vibecoding.rest;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -201,12 +202,28 @@ public class GooseSessionController {
     /**
      * Preview the generated app for a session.
      * Calls the Goose preview API with the configured working directory.
+     * Accepts an optional request body containing {@code env_vars} and {@code secrets}
+     * arrays (each element: {@code {"name": "KEY", "value": "VAL"}}). These are forwarded
+     * to the downstream build service so they are injected into the container at runtime.
      */
     @PostMapping(value = "/sessions/{sessionId}/preview",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, "*/*" },
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sessionPreview(@PathVariable(value = "sessionId") String sessionId) {
+    public ResponseEntity<String> sessionPreview(
+            @PathVariable(value = "sessionId") String sessionId,
+            @RequestBody(required = false) Map<String, Object> requestBody) {
         logger.info("Session preview request, session={}", sessionId);
-        Map<String, String> body = Map.of("working_dir", workingDir);
+        Map<String, Object> body = new HashMap<>();
+        body.put("working_dir", workingDir);
+        // Forward env_vars and secrets from the frontend Environment tab if provided
+        if (requestBody != null) {
+            if (requestBody.containsKey("env_vars")) {
+                body.put("env_vars", requestBody.get("env_vars"));
+            }
+            if (requestBody.containsKey("secrets")) {
+                body.put("secrets", requestBody.get("secrets"));
+            }
+        }
         return vibeCodingService.post("/sessions/" + sessionId + "/preview", body);
     }
 }

@@ -116,7 +116,7 @@ keycloak:
   proxy: edge
   hostnameStrict: "false"
   httpsEnabled: "true"
-  hostname: aiplatform.az.ad.idemo-ppc.com
+  hostname: https://keycloak.essedum.local:30443
   hostnameStrictHttps: "true"
   tlsCrtPath: /etc/keycloak/certs/tls.crt
   tlsKeyPath: /etc/keycloak/certs/tls.key

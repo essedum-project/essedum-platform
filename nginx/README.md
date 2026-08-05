@@ -1,19 +1,23 @@
-# Nginx Configuration for Essedum Platform
+# Nginx Configuration
 
-This directory contains the Nginx configuration for the Essedum platform. Nginx is used as a reverse proxy to serve the frontend application and route API requests to the backend services.
+> Architecture and design decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## Overview
+Nginx reverse proxy serving the Essedum frontend and routing API requests to backend services.
 
-In the Essedum architecture, Nginx plays a crucial role in decoupling the frontend from the backend. It serves the static files of the Angular-based frontend and forwards all API calls to the appropriate backend service. This setup simplifies the deployment and scaling of the platform.
+## Configuration Files
 
-### Key Responsibilities
+| File | Purpose |
+|---|---|
+| `nginx_shell.conf` | Production — shell app on :8084 with SSL |
+| `nginx_ui.conf` | Production Docker — full MFE stack |
+| `nginx_ui_5g.conf` | 5G lab deployment variant |
+| `nginx_mfe.conf` | Micro-frontend serving |
+| `nginx.conf` | Local development |
 
--   **Serving Frontend Application**: Nginx serves the static HTML, CSS, and JavaScript files of the frontend application.
--   **Reverse Proxy**: It acts as a reverse proxy, forwarding requests from the client to the backend services. This helps in load balancing and securing the backend.
--   **Request Routing**: The `nginx.conf` file contains rules for routing different requests to their respective services. For example, all requests with the `/api` prefix are routed to the backend API server.
+## Key Routes
 
-## Configuration
-
-The main configuration file is `nginx.conf`. This file defines the server blocks, locations, and proxy settings. When deploying the Essedum platform, this configuration is used to run an Nginx container that serves the frontend and proxies the backend.
-
-For local development, you may need to adjust the `proxy_pass` directive in `nginx.conf` to point to the correct address of your backend service.
+| Path | Destination |
+|---|---|
+| `/` | Angular shell app (static files) |
+| `/api/**` | Backend API Gateway `:8080` |
+| `/realms/**` | Keycloak `:8180` |

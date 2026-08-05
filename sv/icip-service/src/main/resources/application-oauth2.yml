@@ -5,12 +5,12 @@
 # =====================================================
 
 security:
-  issuer-uri: ${OAUTH2_ISSUER_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM}
-  jwk-set-uri: ${OAUTH2_JWK_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM/protocol/openid-connect/certs}
-  clientId: ${OAUTH2_CLIENT_ID:essedum-45}
+  issuer-uri: ${OAUTH2_ISSUER_URI}
+  jwk-set-uri: ${OAUTH2_JWK_URI}
+  clientId: ${OAUTH2_CLIENT_ID}
   scope: ${OAUTH2_SCOPE:openid profile email}
-  claim: ${OAUTH2_USER_CLAIM:email}
-  display-claim: ${OAUTH2_DISPLAY_CLAIM:preferred_username}
+  claim: ${OAUTH2_USER_CLAIM:email||admin}
+  display-claim: ${OAUTH2_DISPLAY_CLAIM:preferred_username||admin}
   createUserIfNotExist: ${OAUTH2_CREATE_USER_IF_NOT_EXIST:true}
   silentRefreshTimeoutFactor: ${OAUTH2_SILENT_REFRESH_FACTOR:0.85}
 

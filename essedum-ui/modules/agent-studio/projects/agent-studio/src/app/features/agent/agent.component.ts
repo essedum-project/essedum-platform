@@ -9,9 +9,9 @@ import { environment } from '../../../environments/environment';
     standalone: false
 })
 export class AgentComponent implements OnInit, AfterViewInit {
-  // Embedded Langflow interface URL - loaded from environment
+  // Embedded Agent Designer interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
-  private readonly langflowUrl = environment.langflowUrl;
+  private readonly langflowUrl = environment.agentDesignerUrl;
 
   @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
 
@@ -32,7 +32,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.langflowUrl).origin; } catch { return this.langflowUrl; }
+      try { return new URL(this.langflowUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {

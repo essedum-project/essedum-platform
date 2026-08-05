@@ -52,9 +52,18 @@ public class VibeCodingService {
                     .uri(path)
                     .contentType(MediaType.APPLICATION_JSON);
             var request = (body != null) ? spec.bodyValue(body) : spec.bodyValue("");
-            return request
+            ResponseEntity<String> entity = request
                     .exchangeToMono(response -> response.toEntity(String.class))
                     .block(blockTimeout);
+            // Goosed returns empty bodies on some success responses (e.g. update_provider).
+            // Ensure a well-formed JSON body so the gateway's Netty stream terminates
+            // cleanly instead of waiting for keep-alive timeout and raising PrematureCloseException.
+            if (entity != null && (entity.getBody() == null || entity.getBody().isBlank())) {
+                return ResponseEntity.status(entity.getStatusCode())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{}");
+            }
+            return entity;
         } catch (WebClientResponseException ex) {
             logger.error("Goose POST {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
             String gooseBody = ex.getResponseBodyAsString();
@@ -78,7 +87,7 @@ public class VibeCodingService {
     public ResponseEntity<String> get(String path, MultiValueMap<String, String> queryParams) {
         logger.debug("Goose GET {}", path);
         try {
-            return gooseWebClient.get()
+            ResponseEntity<String> response = gooseWebClient.get()
                     .uri(uriBuilder -> {
                         var b = uriBuilder.path(path);
                         if (queryParams != null && !queryParams.isEmpty()) {
@@ -86,8 +95,21 @@ public class VibeCodingService {
                         }
                         return b.build();
                     })
-                    .exchangeToMono(response -> response.toEntity(String.class))
+                    .exchangeToMono(r -> r.toEntity(String.class))
                     .block(blockTimeout);
+
+            // Check if goosed returned non-2xx with empty body (common with 404 Not Found from missing endpoints)
+            if (response != null && !response.getStatusCode().is2xxSuccessful()) {
+                String body = response.getBody();
+                if (body == null || body.isBlank()) {
+                    String errorMsg = "{\"error\":\"Upstream Goose service returned " + response.getStatusCode().value() + "\"}";
+                    logger.error("Goose GET {} returned {} with empty body", path, response.getStatusCode().value());
+                    return ResponseEntity.status(response.getStatusCode())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(errorMsg);
+                }
+            }
+            return response;
         } catch (WebClientResponseException ex) {
             logger.error("Goose GET {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
             String gooseBody = ex.getResponseBodyAsString();

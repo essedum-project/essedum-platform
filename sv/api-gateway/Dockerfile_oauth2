@@ -11,15 +11,32 @@
 # -------------------------------------------------------
 FROM eclipse-temurin:21-jdk AS builder
 
+# JFrog Artifactory credentials — passed via --build-arg from build-and-push.sh
+ARG ARTIFACTORY_REPO_USER
+ARG ARTIFACTORY_REPO_PASS
+ARG MAVEN_SETTINGS_FILE=maven-settings.xml
+ENV ARTIFACTORY_REPO_USER=${ARTIFACTORY_REPO_USER}
+ENV ARTIFACTORY_REPO_PASS=${ARTIFACTORY_REPO_PASS}
+# Bypass Infosys corporate SSL inspection cert for JFrog Artifactory
+ENV MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true"
+
 RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files (build context = sv/ root)
 COPY . .
 
-# Build using BuildKit cache for dependencies
+# Import corporate CA cert into the builder JVM trust store so Maven can reach
+# Maven Central through the SSL-inspecting proxy/firewall.
+RUN keytool -importcert -trustcacerts \
+    -file /sv/usm-service/lfn-keycloak2.crt \
+    -alias "lfn-keycloak" \
+    -keystore /opt/java/openjdk/lib/security/cacerts \
+    -storepass changeit --noprompt
+
+# Build using BuildKit cache for dependencies — resolve via JFrog Artifactory mirror
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B clean install -pl api-gateway -am \
+    mvn -B -s /sv/${MAVEN_SETTINGS_FILE} clean install -pl api-gateway -am \
         -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
 
 # Prepare app structure
@@ -71,6 +88,5 @@ CMD ["/bin/bash", "-c", "java ${JAVA_OPTS} \
     -DLOG_PATH=/app/log \
     -Dlogging.level.org.springframework.security=INFO \
     -Dspring.profiles.active=oauth2 \
-    -cp conf/*:api-gateway-3.3-SNAPSHOT.jar:lib/* \
-    com.lfn.gateway.ApiGatewayApplication"]
+    -jar api-gateway-3.3-SNAPSHOT.jar"]
 

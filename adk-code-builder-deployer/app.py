@@ -15,6 +15,7 @@ import json, base64, requests
 
 DEPLOY_MODE = os.getenv("DEPLOY_MODE", "kubernetes")  # "kubernetes" or "docker"
 DOCKER_NETWORK = os.getenv("DOCKER_NETWORK", "docker_default")
+ACR_REGISTRY = os.getenv("ACR_REGISTRY", "")  # e.g. myregistry.azurecr.io
 
 if DEPLOY_MODE == "kubernetes":
     from kubernetes import client, config
@@ -493,7 +494,7 @@ def handle_pipeline_trigger(data):
     {
       "minio_endpoint": "...", "access_key": "...", "secret_key": "...",
       "bucket_name": "...", "file_path": "...",
-      "target_image_tag": "acrreq0762935.azurecr.io/app:v1",
+      "target_image_tag": "<ACR_REGISTRY>/app:v1",
       "deployment_name": "runner-service",
       "namespace": "aipns"   # optional
     }
@@ -558,12 +559,17 @@ def handle_pipeline_trigger(data):
             # In Docker mode, no registry needed — use local image name
             image_tag = f"{deploy_name}:v1-{uniq_tag}"
         else:
-            base_repo = data["target_image_tag"].rsplit(":", 1)[0]  # e.g., localhost:5000/test-adk-app
-            # Replace localhost:5000 with the cluster-internal registry (using ClusterIP for kubelet compatibility)
-            base_repo = base_repo.replace("localhost:5000", "10.104.220.183:5000")
-            # Normalize any DNS or NodePort references to ClusterIP
-            base_repo = base_repo.replace("192.168.28.41:32000", "10.104.220.183:5000")
-            base_repo = base_repo.replace("registry.container-registry.svc.cluster.local:5000", "10.104.220.183:5000")
+            base_repo = data["target_image_tag"].rsplit(":", 1)[0]
+            # Normalize any local/NodePort registry references to the configured ACR registry
+            if ACR_REGISTRY:
+                local_registries = [
+                    "localhost:5000",
+                    "192.168.28.41:32000",
+                    "registry.container-registry.svc.cluster.local:5000",
+                    "10.104.220.183:5000",
+                ]
+                for local_reg in local_registries:
+                    base_repo = base_repo.replace(local_reg, ACR_REGISTRY)
             # Use the already-sanitized deploy_name as the image name to avoid invalid reference format
             # (e.g. if target_image_tag contains a leading dash from an unsanitized alias)
             registry = base_repo.rsplit("/", 1)[0]  # e.g., 10.104.220.183:5000
@@ -813,10 +819,14 @@ def handle_pipeline_trigger(data):
             k8s_apps = client.AppsV1Api()
 
             try:
-                # If it exists, PATCH
-                k8s_apps.read_namespaced_deployment(
+                # If it exists, PATCH — but guard against Terminating objects:
+                # a deployment being deleted is still returned by read but will
+                # disappear moments later, causing wait_for_deployment_ready to 404.
+                existing = k8s_apps.read_namespaced_deployment(
                     name=deploy_name, namespace=target_namespace
                 )
+                if existing.metadata.deletion_timestamp:
+                    raise client.exceptions.ApiException(status=404, reason="Terminating")
                 log_to_client("Deployment exists. Updating image...", step="DEPLOY")
                 patch = {
                     "spec": {
@@ -1120,7 +1130,12 @@ def wait_for_deployment_ready(api, name, namespace, timeout_seconds=120):
     import time
     start = time.time()
     while time.time() - start < timeout_seconds:
-        dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        try:
+            dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                return False
+            raise
         desired = dep.status.replicas or 0
         ready   = dep.status.ready_replicas or 0
         if desired > 0 and ready == desired:

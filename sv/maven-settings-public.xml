@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maven settings for 5G / LFN environments where JFrog Artifactory is not
+  reachable. Resolves all dependencies directly from Maven Central and
+  standard public repositories — no credentials required.
+
+  Selected by setting MAVEN_SETTINGS_FILE=maven-settings-public.xml in docker/.env.
+  AKS uses maven-settings.xml (Artifactory mirror) instead.
+-->
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd"
+    xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!-- No <servers> block — public repos require no authentication -->
+
+  <!-- No <mirrors> block — use Maven Central directly -->
+
+  <profiles>
+    <profile>
+      <id>public-repos</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <name>Maven Central</name>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+          <id>spring-releases</id>
+          <name>Spring Releases</name>
+          <url>https://repo.spring.io/release</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <name>Maven Central Plugins</name>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>false</enabled></snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>public-repos</activeProfile>
+  </activeProfiles>
+
+</settings>

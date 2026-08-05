@@ -126,7 +126,6 @@ export class SkillsAddComponent {
   readonly LBLCATEGORY     = 'Category';
   readonly LBLSUBCATEGORY  = 'Sub-Category';
   readonly LBLDESC         = 'Description';
-  readonly LBLLONGDESC     = 'Long Description';
   readonly LBLLANGUAGE     = 'Language';
   readonly LBLFRAMEWORK    = 'Framework';
   readonly LBLRUNTIME      = 'Runtime';
@@ -141,8 +140,7 @@ export class SkillsAddComponent {
   readonly PHNAME         = 'Java REST Code Generator';
   readonly PHALIAS        = 'java-rest-gen';
   readonly PHVERSION      = '1.0.0';
-  readonly PHDESC         = 'Brief description (max 512 chars)…';
-  readonly PHLONGDESC     = 'Full markdown description…';
+  readonly PHDESC         = 'Brief description (max 16000 chars)…';
   readonly PHFRAMEWORK    = 'SpringBoot, LangChain';
   readonly PHENTRYPOINT   = 'com.example.Main';
   readonly PHTAGS         = 'Comma-separated: java, rest, spring';
@@ -155,7 +153,7 @@ export class SkillsAddComponent {
   readonly ERRMAXNAME    = 'Max 256 characters';
   readonly ERRMAXALIAS   = 'Max 128 characters';
   readonly ERRMAXVERSION = 'Max 20 characters';
-  readonly ERRMAXDESC    = 'Max 512 characters';
+  readonly ERRMAXDESC    = 'Max 16000 characters';
   readonly ERRGLOBAL     = 'Please fill in all required fields.';
 
   constructor(
@@ -200,7 +198,7 @@ export class SkillsAddComponent {
       skillName: 256,
       skillAlias: 128,
       skillVersion: 20,
-      description: 512,
+      description: 16000,
       framework: 128,
       entrypoint: 512,
     };

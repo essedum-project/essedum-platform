@@ -14,22 +14,22 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: org.postgresql.Driver
-    jdbcUrl: jdbc:postgresql://${PG_DATASOURCE_URL:localhost:5432}/telemetrydb
-    username: ${PG_USER:postgres}
-    password: ${PG_PASSWORD:password}
+    jdbcUrl: jdbc:postgresql://${PG_DATASOURCE_URL}/telemetrydb
+    username: ${PG_USER}
+    password: ${PG_PASSWORD}
 
 config:
   active-profiles: postgresql,dbjwt,vault
   static-locations: file:/app/static/
 
-  datasourceurl: jdbc:postgresql://${PG_DATASOURCE_URL:localhost:5432}
-  datasourceuser: ${PG_USER:postgres}
-  datasourcepass: ${PG_PASSWORD:password}
+  datasourceurl: jdbc:postgresql://${PG_DATASOURCE_URL}
+  datasourceuser: ${PG_USER}
+  datasourcepass: ${PG_PASSWORD}
   essedumcoredb: essedum_coredb
 
   service-auth:
-    access-token: ${SERVICE_ACCESS_TOKEN:aec127c2-c984-33f6-9a3a-355xd1dof097}
-    proxy-user: ${SERVICE_PROXY_USER:admin}
+    access-token: ${SERVICE_ACCESS_TOKEN}
+    proxy-user: ${SERVICE_PROXY_USER}
 
   driverClassName: org.postgresql.Driver
   essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb}
