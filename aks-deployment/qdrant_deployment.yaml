@@ -54,5 +54,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: ""
+  storageClassName: microk8s-hostpath
   volumeName: qdrantfile-pv

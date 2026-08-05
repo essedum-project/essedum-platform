@@ -9,7 +9,7 @@
 # -------------------------------------------------------
 # Stage 1: Build with Maven
 # -------------------------------------------------------
-FROM eclipse-temurin:21-jdk AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 # JFrog Artifactory credentials — passed via --build-arg from build-and-push.sh
 ARG ARTIFACTORY_REPO_USER
@@ -19,8 +19,6 @@ ENV ARTIFACTORY_REPO_USER=${ARTIFACTORY_REPO_USER}
 ENV ARTIFACTORY_REPO_PASS=${ARTIFACTORY_REPO_PASS}
 # Bypass Infosys corporate SSL inspection cert for JFrog Artifactory
 ENV MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true"
-
-RUN apt-get update && apt-get install -y maven && apt-get clean
 WORKDIR /sv
 
 # Copy project files (build context = sv/ root)

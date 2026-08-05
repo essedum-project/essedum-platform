@@ -285,6 +285,8 @@ deploy() {
   apply "goose-ui"           "goose-ui-deployment.yaml"
   apply "vibe-configmap"     "vibe-code-builder-configmap.yml"
   apply "vibe-builder"       "vibe-code-builder-deployment.yml"
+  apply "vibe-pod-watcher-rbac"       "vibe-pod-watcher-rbac.yaml"
+  apply "vibe-pod-watcher"            "vibe-pod-watcher-deployment.yaml"
 
   wait_for "pyjob-executor" "${KUBE_NAMESPACE}"
 
@@ -303,7 +305,8 @@ deploy() {
   apply "keycloak-proxy-ingress"  "keycloak-proxy-ingress.yaml"
   apply "main-ingress"            "ingress.yaml"
   apply "goose-ingress"        "goose-ingress.yaml"
-  apply "vibe-builder-ingress" "vibe-code-builder-ingress.yaml"
+  apply "vibe-builder-ingress"      "vibe-code-builder-ingress.yaml"
+  apply "vibe-pod-watcher-ingress"  "vibe-pod-watcher-ingress.yaml"
 
   success "====== Deployment Complete ======"
   echo ""

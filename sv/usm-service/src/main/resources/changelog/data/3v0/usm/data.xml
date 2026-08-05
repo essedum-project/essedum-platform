@@ -53,6 +53,12 @@
 		</sql>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="3v0-usm-311026">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="usm_constant" columnName="portfolio_id"/>
+			</not>
+		</preConditions>
     	<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
     		ALTER TABLE usm_constant ADD portfolio_id INT;
     	</sql>

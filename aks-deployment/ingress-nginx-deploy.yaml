@@ -356,6 +356,7 @@ spec:
     targetPort: http
   - appProtocol: https
     name: https
+    nodePort: 30443
     port: 443
     protocol: TCP
     targetPort: https

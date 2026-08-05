@@ -24,17 +24,24 @@ spec:
   - host: ${INGRESS_HOST}
     http:
       paths:
+      - path: /admin
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak
+            port:
+              number: 8080
       - path: /realms
         pathType: Prefix
         backend:
           service:
             name: keycloak
             port:
-              number: 8180
+              number: 8080
       - path: /resources
         pathType: Prefix
         backend:
           service:
             name: keycloak
             port:
-              number: 8180
+              number: 8080

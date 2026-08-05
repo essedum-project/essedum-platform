@@ -18,7 +18,7 @@
 #     agent-designer | agent-designer-backend | frontend-shell | frontend-agent |
 #     frontend-data-ops | frontend-integration | frontend-vibe-studio |
 #     pyjob-executer | proxy-service | vibe-code-builder | adk-deployer |
-#     goosed-base | goosed
+#     vibe-pod-watcher | goosed-base | goosed
 #
 #   goosed target builds goosed-base first, then the wrapper (required order).
 #   goose-ui has no local Dockerfile — skipped (external image).
@@ -180,6 +180,7 @@ build_and_push() {
     info "Build [${attempt}/${MAX_RETRIES}]: ${image}"
     if docker build \
         --progress=plain \
+        --network=host \
         --build-arg DOCKER_REGISTRY="${DOCKER_REGISTRY}" \
         --build-arg IMAGE_TAG="${IMAGE_TAG}" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-}" \
@@ -329,6 +330,13 @@ build_goosed_base() {
     "Dockerfile.goosed"
 }
 
+build_vibe_pod_watcher() {
+  build_and_push \
+    "${DOCKER_REGISTRY}/${VIBE_POD_WATCHER_IMAGE:-vibe-pod-watcher}:${IMAGE_TAG}" \
+    "${REPO_ROOT}/vibe-pod-watcher" \
+    "Dockerfile"
+}
+
 build_goosed_wrapper() {
   local ctx
   local wrapper_path="${GOOSED_WRAPPER_PATH:-${REPO_ROOT}/../goosed-wrapper}"
@@ -370,6 +378,7 @@ case "${TARGET}" in
     build_proxy_service
     build_vibe_code_builder
     build_adk_deployer
+    build_vibe_pod_watcher
     build_goosed_base
     build_goosed_wrapper
     warn "goose-ui has no local Dockerfile — skipping (external image)."
@@ -395,6 +404,7 @@ case "${TARGET}" in
     build_proxy_service
     build_vibe_code_builder
     build_adk_deployer
+    build_vibe_pod_watcher
     build_goosed_base
     build_goosed_wrapper
     ;;
@@ -414,6 +424,7 @@ case "${TARGET}" in
   proxy-service)            build_proxy_service          ;;
   vibe-code-builder)        build_vibe_code_builder      ;;
   adk-deployer)             build_adk_deployer           ;;
+  vibe-pod-watcher)         build_vibe_pod_watcher       ;;
   goosed-base)              build_goosed_base            ;;
   goosed)                   build_goosed_base && build_goosed_wrapper ;;
   *)
@@ -421,7 +432,7 @@ case "${TARGET}" in
 api-gateway | usm-service | icip-service | data-service | vibe-service | \
 agent-designer | agent-designer-backend | frontend-shell | frontend-agent | \
 frontend-data-ops | frontend-integration | frontend-vibe-studio | \
-pyjob-executer | proxy-service | vibe-code-builder | adk-deployer | goosed-base | goosed"
+pyjob-executer | proxy-service | vibe-code-builder | adk-deployer | vibe-pod-watcher | goosed-base | goosed"
     ;;
 esac
 

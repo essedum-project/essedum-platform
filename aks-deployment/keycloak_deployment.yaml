@@ -37,29 +37,33 @@ spec:
                   name: keycloak-admin-secret
                   key: password
             - name: KC_HTTP_PORT
-              value: "8180"
+              value: "8080"
             - name: KC_HTTPS_PORT
               value: "8443"
-            - name: KC_PROXY
-              value: "edge"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
             - name: KC_HOSTNAME_STRICT
-              value: "false"
+              value: "true"
             - name: KC_HTTPS_ENABLED
+              value: "false"
+            - name: KC_HTTP_ENABLED
               value: "true"
             - name: KC_HOSTNAME
-              value: "https://${INGRESS_HOST}"
-            - name: KC_HOSTNAME_ADMIN
+              value: "https://${INGRESS_HOST}:30443"
+            - name: KC_HOSTNAME_ADMIN_URL
               value: "https://${KEYCLOAK_INGRESS_HOST}"
             - name: KC_HOSTNAME_STRICT_HTTPS
-              value: "true"
-            - name: KC_HTTPS_CERTIFICATE_FILE
-              value: "/etc/keycloak/certs/tls.crt"
-            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
-              value: "/etc/keycloak/certs/tls.key"
+              value: "false"
             - name: KC_DB
               value: mysql
             - name: KC_DB_URL
-              value: "jdbc:mysql://mysql.aipns.svc.cluster.local:3306/keycloak"
+              value: "jdbc:mysql://${KC_DB_HOST}:3306/keycloak?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=15000&socketTimeout=60000&autoReconnect=true"
+            - name: KC_DB_POOL_INITIAL_SIZE
+              value: "1"
+            - name: KC_DB_POOL_MIN_SIZE
+              value: "1"
+            - name: KC_DB_POOL_MAX_SIZE
+              value: "5"
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -73,30 +77,29 @@ spec:
           ports:
             - containerPort: 8443
               protocol: TCP
-            - containerPort: 8180
+            - containerPort: 8080
               protocol: TCP
           startupProbe:
             tcpSocket:
-              port: 8180
+              port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 24
           readinessProbe:
             tcpSocket:
-              port: 8180
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 6
           livenessProbe:
             tcpSocket:
-              port: 8180
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 20
             timeoutSeconds: 3
             failureThreshold: 6
-
           volumeMounts:
             - name: tls-cert
               mountPath: /etc/keycloak/certs
@@ -105,6 +108,8 @@ spec:
         - name: tls-cert
           secret:
             secretName: essedum-secret
+
+
 
 
 ---
@@ -125,8 +130,9 @@ spec:
       targetPort: 8443
     - name: keycloak-http
       protocol: TCP
-      port: 8180
-      targetPort: 8180
+      port: 8080
+      targetPort: 8080
+      nodePort: 30180
     - name: https
       protocol: TCP
       port: 443

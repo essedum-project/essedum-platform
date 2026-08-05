@@ -9,6 +9,7 @@ on:
       ref:
         description: "Git ref to rollback to (commit SHA or branch)"
         required: true
+        default: essedum-lfn-v16.0-actions
         type: string
       confirmation:
         description: "Type 'ROLLBACK' to confirm"
@@ -64,16 +65,16 @@ jobs:
           ref: ${{ github.event.inputs.ref }}
           fetch-depth: 1
 
-      - name: Load runner-local env (docker/.env.sample)
+      - name: Load runner-local env (docker/.env)
         # Uses grep+cut to extract only the 4 needed variables — no shell
         # expansion of values (safe for keys containing $, #, = etc).
         # NEVER uses GitHub secrets for registry credentials — public repo.
         run: |
-          # docker/.env.sample is NOT committed to git (contains credentials).
+          # docker/.env is NOT committed to git (contains credentials).
           # Use the stable runner working copy — never overwritten by git checkout.
-          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env.sample"
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env"
           if [ ! -f "$ENV_FILE" ]; then
-            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            echo "::error::docker/.env not found at $ENV_FILE"
             exit 1
           fi
           DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')

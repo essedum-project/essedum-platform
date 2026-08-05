@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY package.json ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps --fetch-retries=3 --fetch-retry-mintimeout=10000 --fetch-timeout=120000
 
 COPY . .
 

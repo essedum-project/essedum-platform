@@ -37,17 +37,17 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: essedum-lfn-v15.0-actions
+          ref: essedum-lfn-v16.0-actions
           fetch-depth: 1
 
-      - name: Load runner-local env (docker/.env.sample)
+      - name: Load runner-local env (docker/.env)
         # Sources registry address and credentials from the machine-local file.
         # NEVER uses GitHub secrets for registry credentials — public repo.
         # ::add-mask:: hides the password value from all log output.
         run: |
-          ENV_FILE="$GITHUB_WORKSPACE/docker/.env.sample"
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env"
           if [ ! -f "$ENV_FILE" ]; then
-            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            echo "::error::docker/.env not found at $ENV_FILE"
             exit 1
           fi
           set -a

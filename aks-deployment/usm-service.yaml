@@ -25,6 +25,8 @@ spec:
             cpu: "1000m"
             memory: "1024Mi"
         env:
+        - name: SPRING_LIQUIBASE_ENABLED
+          value: "true"
         - name: MYSQL_DATASOURCE_URL
           valueFrom:
             secretKeyRef:
