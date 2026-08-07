@@ -10,6 +10,7 @@ import { PodWatcherService, PipelinePodsResponse } from '../../services/pod-watc
 import { AipGridColumn, AipGridAction } from '../../sharedModule/aip-grid/aip-grid.component';
 
 export interface ExecutionPipeline {
+  pipeline_name: any;
   pod_name:         string;
   container_name:   string;
   deployment_name:  string;
@@ -197,7 +198,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         ))
       )
       .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
         this.applyClientFilters();
       });
   }
@@ -213,7 +214,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     this.podWatcher
       .getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType)
       .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
         this.applyClientFilters();
         this.loading = false;
       });
@@ -346,7 +347,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   viewPipeline(pipeline: ExecutionPipeline): void {
    // const name = pipeline.container_name;
-    const pipelineName = '';
+    const pipelineName = pipeline.pipeline_name;
 
     const cardTitle =
       pipeline.pipelineMode === 'mcp' ? 'MCP Pipelines' :
@@ -401,7 +402,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.service.message(
-          `Could not load pipeline details for "${name}". Opening with limited data.`,
+          `Could not load pipeline details for "${pipelineName}". Opening with limited data.`,
           'warning'
         );
         navigate(null);
