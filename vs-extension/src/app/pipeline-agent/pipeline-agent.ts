@@ -236,6 +236,29 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     /** Changed files tracking */
     private changedFiles: Set<string> = new Set();
 
+    /** Path to the current "Attached Skills" context file, if any skills are attached */
+    private attachedSkillsContextPath?: string;
+
+    /**
+     * Debounced watch on a pipeline's real ADK folder (the same one "Open
+     * Copilot"/"Edit Code" use — see getPipelineFolderPath) armed by "Add
+     * Skill with Copilot Chat" when that pipeline has no server-side files
+     * yet. Once the folder settles (no changes for a few seconds), its
+     * contents are bulk-uploaded and the local copy is removed — see
+     * armSkillFolderUploadWatch().
+     */
+    private skillFolderUploadWatch?: {
+        folderPath: string;
+        disposables: vscode.Disposable[];
+        debounceTimer?: NodeJS.Timeout;
+    };
+
+    /** Which pipeline's generation target (workspace folder / adkContext) was last prepared by "Add Skill", to avoid redundant re-preparation on every skill toggle */
+    private lastSkillGenerationPreparedPipelineId?: string;
+
+    /** Quiet period after the last file change before an auto-upload fires */
+    private static readonly AUTO_UPLOAD_DEBOUNCE_MS = 3000;
+
     /** Component logger prefix */
     private readonly logPrefix = CONSTANTS.LOG_PREFIX;
 
@@ -292,6 +315,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
         // Check for pending copilot action after extension reload
         this.checkPendingCopilotAction();
+
+        // Check for a pending "Add Skill" folder setup after extension reload
+        this.checkPendingSkillGenerationSetup();
 
         logger.info(`${this.logPrefix} Pipeline Agent Provider initialized independently`);
         logger.info(`${this.logPrefix} Organization: ${this.organization}, Page size: ${this.pageSize}`);
@@ -424,6 +450,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.COPY_JSON:
                         await this.handleCopyJson(message.pipelineId);
+                        break;
+                    case CONSTANTS.WEBVIEW_COMMANDS.ADD_SKILLS_TO_COPILOT:
+                        await this.handleSyncSkillsContext(message.skills, message.pipelineId);
                         break;
                     case CONSTANTS.WEBVIEW_COMMANDS.LOGOUT:
                         await this.handleLogout();
@@ -1443,8 +1472,418 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 }
             }
 
+            // Load skills catalogue for the "Attach a skill" menu (non-blocking;
+            // a failure here should never prevent the detail view from showing)
+            await this.fetchAndSendSkills();
+
             progress.report({ increment: 100, message: 'Complete!' });
         });
+    }
+
+    /**
+     * Fetch the skills catalogue and push it to the webview for the
+     * "Attach a skill" menu. Mirrors the web app's agent-pipeline chat panel
+     * (loadAiChatSkills/toChatSkill in agent-pipeline.component.ts), which
+     * lets users attach a skill before sending a message to the AI agent.
+     */
+    private async fetchAndSendSkills(): Promise<void> {
+        if (!this._view) {
+            return;
+        }
+        try {
+            const response = await this._pipelineAgentService.getSkills({ org: this.organization });
+            const rawSkills = Array.isArray(response)
+                ? response
+                : (response?.skills || response?.content || response?.data || []);
+
+            const skills = Array.isArray(rawSkills)
+                ? rawSkills.map((s: any) => this.mapToChatSkill(s)).filter((s): s is { value: string; label: string; icon: string; description: string } => !!s)
+                : [];
+
+            this._view.webview.postMessage({
+                command: CONSTANTS.CLIENT_COMMANDS.SKILLS_LOADED,
+                skills
+            });
+        } catch (error) {
+            logger.warn(`${this.logPrefix} Failed to load skills for attach-skill menu:`, error);
+            this._view.webview.postMessage({
+                command: CONSTANTS.CLIENT_COMMANDS.SKILLS_LOADED,
+                skills: []
+            });
+        }
+    }
+
+    /**
+     * Map a raw skill record from the API to the simplified shape used by
+     * the "Add Skill with Copilot Chat" menu: { value, label, icon, description }.
+     * The description isn't shown in the chip UI, but it IS sent to Copilot
+     * (see handleSyncSkillsContext) so the full skill context is available
+     * even though only the name is visible on screen.
+     */
+    private mapToChatSkill(s: any): { value: string; label: string; icon: string; description: string } | null {
+        if (!s || typeof s !== 'object') {
+            return null;
+        }
+        const value = String(s.skillUid ?? s.id ?? s.skillAlias ?? s.skillName ?? '').trim();
+        if (!value) {
+            return null;
+        }
+        const label = String(s.skillName ?? s.skillAlias ?? s.name ?? value).trim();
+        const description = String(s.description ?? '').trim();
+        const type = String(s.skillType ?? '').toUpperCase();
+        const icon = CONSTANTS.SKILL_ICON_MAP[type] || CONSTANTS.DEFAULT_SKILL_ICON;
+        return { value, label, icon, description };
+    }
+
+    /**
+     * Resolve where the "Attached Skills" context file should live: inside
+     * the open workspace (so it's a normal file the user can drag into chat
+     * as an attachment) if a workspace folder is open, otherwise fall back
+     * to the extension's cache directory.
+     */
+    private getSkillsContextFilePath(): string {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        const dir = workspaceRoot ? path.join(workspaceRoot, '.essedum') : this.cacheDir;
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        return path.join(dir, 'attached-skills-context.md');
+    }
+
+    /**
+     * Keep the "Attached Skills" context file in sync with the current
+     * attach/detach state from the webview. This intentionally does NOT
+     * send anything into chat automatically — it only prepares a file with
+     * each attached skill's name + full description (so nothing gets
+     * truncated), which the user can drag/attach into their own chat
+     * message alongside whatever they want to ask. Removing the last
+     * attached skill deletes the file entirely; removing one of several
+     * just rewrites the file without it.
+     *
+     * If the currently selected pipeline (`pipelineId`) is known, this also
+     * prepares that pipeline's REAL ADK folder (the same one "Open
+     * Copilot"/"Edit Code" use) as a workspace root — see
+     * prepareSkillGenerationTarget() for why: telling the coding agent
+     * "use this folder" via a note was unreliable, but agents do reliably
+     * write inside whatever folder is actually open as the workspace root.
+     */
+    private async handleSyncSkillsContext(
+        skills?: Array<{ value?: string; label?: string; description?: string }>,
+        pipelineId?: string
+    ): Promise<void> {
+        try {
+            const list = (skills || []).filter(s => s && s.label);
+
+            if (!list.length) {
+                await this.removeSkillsContextFile();
+                this.disposeSkillFolderUploadWatch();
+                this.lastSkillGenerationPreparedPipelineId = undefined;
+                return;
+            }
+
+            this.refreshAuthData();
+            const card = pipelineId ? this.allCards.find(c => c.pipelineId === pipelineId) : undefined;
+            const pipelineName = card?.name || card?.alias || pipelineId;
+
+            const filePath = this.getSkillsContextFilePath();
+            const body = list
+                .map(s => `## ${s.label}\n\n${s.description ? s.description : '_No description provided._'}`)
+                .join('\n\n');
+            const content = `# Attached Skills\n\nAttach this file to your Copilot/Chat message (drag it in, or use the attach/"+" button), then type your own question or instruction — the assistant should use the skill guidance below alongside it.\n\n${body}\n`;
+
+            fs.writeFileSync(filePath, content, 'utf-8');
+            this.attachedSkillsContextPath = filePath;
+
+            // Open it as a normal tab in the active editor group (no split),
+            // without stealing focus from whatever the user is doing.
+            const doc = await vscode.workspace.openTextDocument(filePath);
+            await vscode.window.showTextDocument(doc, {
+                viewColumn: vscode.ViewColumn.Active,
+                preview: true,
+                preserveFocus: true
+            });
+
+            const count = list.length;
+            this.sendMessageToWebview({
+                command: 'actionComplete',
+                message: `✓ ${count} skill${count > 1 ? 's' : ''} ready — attach the opened file to your chat message`
+            });
+
+            // Prepare the generation target in the background (may involve
+            // an extension reload if the folder isn't in the workspace yet —
+            // both "Edit Code" and this flow already survive that via their
+            // own persisted state, so this doesn't need to block the visible
+            // "skill ready" step above). Skipped if already prepared for
+            // this exact pipeline this session.
+            if (pipelineId && pipelineName && this.lastSkillGenerationPreparedPipelineId !== pipelineId) {
+                this.lastSkillGenerationPreparedPipelineId = pipelineId;
+                this.prepareSkillGenerationTarget(pipelineId, pipelineName, card).catch(error => {
+                    logger.warn(`${this.logPrefix} Failed to prepare skill generation target:`, error);
+                });
+            }
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} Error syncing skills context file:`, error);
+            this.sendMessageToWebview({ command: 'actionError', message: `Failed to prepare skill context: ${error.message}` });
+        }
+    }
+
+    /**
+     * Decide how to make this pipeline's real folder available for the
+     * coding agent to write into, depending on whether it already has
+     * server-side files:
+     * - Has files → reuse the exact, already-working "Edit Code" flow
+     *   (handleViewAdk): pulls files locally with real server IDs and arms
+     *   the existing per-file sync-on-save. No new upload logic needed.
+     * - No files yet → add the same folder "Open Copilot" would use to the
+     *   workspace (so the agent has a single, concrete root to target) and
+     *   bulk-upload it once generation settles — see
+     *   ensureSkillGenerationWorkspaceFolder().
+     */
+    private async prepareSkillGenerationTarget(pipelineId: string, pipelineName: string, card: any): Promise<void> {
+        const hasFiles = await this.pipelineHasAdkFiles(pipelineName);
+        if (hasFiles) {
+            await this.handleViewAdk(pipelineId);
+            return;
+        }
+        await this.ensureSkillGenerationWorkspaceFolder(pipelineId, pipelineName, card);
+    }
+
+    private async pipelineHasAdkFiles(pipelineName: string): Promise<boolean> {
+        try {
+            const files = await this._pipelineAgentService.listAdkFiles(pipelineName);
+            return !!(files && files.length > 0);
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Add this pipeline's real ADK folder to the workspace (same folder,
+     * same mechanism "Open Copilot" uses — getPipelineFolderPath +
+     * updateWorkspaceFolders) if it isn't already there, then arm a
+     * debounced bulk-upload watch on it. If adding it to the workspace
+     * triggers an extension reload, persisted state survives it — see
+     * checkPendingSkillGenerationSetup().
+     */
+    private async ensureSkillGenerationWorkspaceFolder(pipelineId: string, pipelineName: string, card: any): Promise<void> {
+        const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
+        const folderExists = vscode.workspace.workspaceFolders?.some(
+            folder => folder.uri.fsPath === pipelineFolderPath
+        );
+
+        if (!folderExists) {
+            await this._context.globalState.update('pendingSkillGenerationSetup', {
+                pipelineId,
+                pipelineName,
+                organization: this.organization,
+                pipelineFolderPath,
+                timestamp: Date.now()
+            });
+
+            const pipelineDisplayName = card?.alias || card?.name || pipelineId;
+            const workspaceFoldersCount = vscode.workspace.workspaceFolders?.length || 0;
+            const added = vscode.workspace.updateWorkspaceFolders(
+                workspaceFoldersCount,
+                0,
+                { uri: vscode.Uri.file(pipelineFolderPath), name: pipelineDisplayName }
+            );
+
+            if (added) {
+                logger.info(`${this.logPrefix} Added skill-generation folder to workspace, extension will reload...`);
+            }
+            // Execution may stop here due to extension reload; resumed via
+            // checkPendingSkillGenerationSetup().
+            return;
+        }
+
+        this.armSkillFolderUploadWatch(pipelineFolderPath, pipelineId, pipelineName, this.organization);
+    }
+
+    /**
+     * Resume arming the skill-generation folder watch after an extension
+     * reload triggered by ensureSkillGenerationWorkspaceFolder() adding the
+     * folder to the workspace (mirrors checkPendingCopilotAction()'s
+     * pattern for the same kind of reload).
+     */
+    private checkPendingSkillGenerationSetup(): void {
+        try {
+            const pending = this._context.globalState.get<any>('pendingSkillGenerationSetup');
+            if (!pending) {
+                return;
+            }
+
+            const age = Date.now() - (pending.timestamp || 0);
+            this._context.globalState.update('pendingSkillGenerationSetup', undefined);
+
+            if (age > 30000) {
+                logger.info(`${this.logPrefix} Pending skill-generation setup is stale (${age}ms old), ignoring`);
+                return;
+            }
+
+            if (fs.existsSync(pending.pipelineFolderPath)) {
+                this.armSkillFolderUploadWatch(
+                    pending.pipelineFolderPath,
+                    pending.pipelineId,
+                    pending.pipelineName,
+                    pending.organization
+                );
+            }
+        } catch (error) {
+            logger.warn(`${this.logPrefix} Error resuming pending skill-generation setup:`, error);
+        }
+    }
+
+    /**
+     * Debounced watch on `folderPath`: once nothing has changed in it for a
+     * few seconds, zip its contents, upload the whole thing (isVibeStudio
+     * =true, since it has no pipeline metadata.json yet — the same bypass
+     * the web app's Vibe Studio/AI-chat-coder persist flows already use),
+     * delete the local copy, then hand off to the exact same "Edit Code"
+     * flow so any further edits in the same session get the already-working
+     * per-file sync instead of another bulk upload.
+     */
+    private armSkillFolderUploadWatch(folderPath: string, pipelineId: string, pipelineName: string, organization: string): void {
+        this.disposeSkillFolderUploadWatch();
+
+        const scheduleUpload = () => {
+            const state = this.skillFolderUploadWatch;
+            if (!state) {
+                return;
+            }
+            if (state.debounceTimer) {
+                clearTimeout(state.debounceTimer);
+            }
+            state.debounceTimer = setTimeout(() => {
+                this.uploadSkillGenerationFolder(pipelineId, pipelineName, organization, folderPath).catch(error => {
+                    logger.error(`${this.logPrefix} Skill-attach folder upload failed:`, error);
+                });
+            }, PipelineAgentProvider.AUTO_UPLOAD_DEBOUNCE_MS);
+        };
+
+        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folderPath, '**/*'));
+        const disposables: vscode.Disposable[] = [
+            watcher,
+            watcher.onDidCreate(scheduleUpload),
+            watcher.onDidChange(scheduleUpload),
+            watcher.onDidDelete(scheduleUpload)
+        ];
+
+        this.skillFolderUploadWatch = { folderPath, disposables };
+        this._context.subscriptions.push(...disposables);
+
+        logger.info(`${this.logPrefix} Armed skill-attach folder upload watch: ${folderPath}`);
+    }
+
+    private disposeSkillFolderUploadWatch(): void {
+        const state = this.skillFolderUploadWatch;
+        if (!state) {
+            return;
+        }
+        if (state.debounceTimer) {
+            clearTimeout(state.debounceTimer);
+        }
+        state.disposables.forEach(d => d.dispose());
+        this.skillFolderUploadWatch = undefined;
+    }
+
+    /**
+     * Zip the pipeline's freshly-generated folder, upload it, delete the
+     * local copy, then transition to "Edit Code"'s per-file sync now that
+     * the pipeline has server-assigned file IDs.
+     */
+    private async uploadSkillGenerationFolder(
+        pipelineId: string,
+        pipelineName: string,
+        organization: string,
+        folderPath: string
+    ): Promise<void> {
+        if (!fs.existsSync(folderPath)) {
+            return;
+        }
+        const items = fs.readdirSync(folderPath);
+        if (!items.length) {
+            return; // nothing generated yet — keep waiting
+        }
+
+        try {
+            const AdmZip = require('adm-zip');
+            const zip = new AdmZip();
+            let fileCount = 0;
+
+            const countFiles = (dirPath: string) => {
+                for (const entry of fs.readdirSync(dirPath)) {
+                    const fullPath = path.join(dirPath, entry);
+                    if (fs.statSync(fullPath).isDirectory()) {
+                        countFiles(fullPath);
+                    } else {
+                        fileCount++;
+                    }
+                }
+            };
+            countFiles(folderPath);
+
+            for (const item of items) {
+                const itemPath = path.join(folderPath, item);
+                if (fs.statSync(itemPath).isDirectory()) {
+                    zip.addLocalFolder(itemPath, item);
+                } else {
+                    zip.addLocalFile(itemPath);
+                }
+            }
+
+            const zipBuffer = zip.toBuffer();
+            const zipFileName = `${pipelineName}_${organization}.zip`;
+            await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, 'App');
+
+            this.disposeSkillFolderUploadWatch();
+            await this.closeTabsUnder(folderPath);
+            fs.rmSync(folderPath, { recursive: true, force: true });
+
+            this.sendMessageToWebview({
+                command: 'actionComplete',
+                message: `✓ Saved ${fileCount} file${fileCount === 1 ? '' : 's'} to server`
+            });
+            logger.info(`${this.logPrefix} Skill-attach folder upload complete for ${pipelineName}: ${fileCount} file(s)`);
+
+            // Now that the pipeline has server-assigned file IDs, switch to
+            // the existing per-file sync for anything further in this chat.
+            await this.handleViewAdk(pipelineId);
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} Skill-attach folder upload failed for ${pipelineName}:`, error);
+            this.sendMessageToWebview({
+                command: 'actionError',
+                message: `Auto-save to server failed: ${error.message}`
+            });
+        }
+    }
+
+    /**
+     * Delete the "Attached Skills" context file (and close its editor tab if
+     * open) once no skills remain attached.
+     */
+    private async removeSkillsContextFile(): Promise<void> {
+        const filePath = this.attachedSkillsContextPath;
+        if (!filePath) {
+            return;
+        }
+        this.attachedSkillsContextPath = undefined;
+
+        try {
+            const targetUri = vscode.Uri.file(filePath);
+            const openEditors = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+            for (const tab of openEditors) {
+                if (tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath) {
+                    await vscode.window.tabGroups.close(tab);
+                    break;
+                }
+            }
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                logger.info(`${this.logPrefix} Deleted skills context file: ${filePath}`);
+            }
+        } catch (error) {
+            logger.warn(`${this.logPrefix} Failed to delete skills context file:`, error);
+        }
     }
 
     // ================================
@@ -2397,6 +2836,30 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         } catch (error: any) {
             logger.error(`${this.logPrefix} Error syncing file:`, error);
             vscode.window.showErrorMessage(`Failed to sync file: ${error.message}`);
+        }
+    }
+
+    /**
+     * Close any open editor tabs whose file is at, or nested under, `targetPath`.
+     */
+    private async closeTabsUnder(targetPath: string): Promise<void> {
+        const normalizedTarget = path.normalize(targetPath).toLowerCase();
+        const tabsToClose = vscode.window.tabGroups.all
+            .flatMap(group => group.tabs)
+            .filter(tab => {
+                if (!(tab.input instanceof vscode.TabInputText)) {
+                    return false;
+                }
+                const tabPath = path.normalize(tab.input.uri.fsPath).toLowerCase();
+                return tabPath === normalizedTarget || tabPath.startsWith(normalizedTarget + path.sep);
+            });
+
+        for (const tab of tabsToClose) {
+            try {
+                await vscode.window.tabGroups.close(tab);
+            } catch (error) {
+                logger.warn(`${this.logPrefix} Failed to close tab for deleted file:`, error);
+            }
         }
     }
 
