@@ -51,6 +51,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly FILTERTYPELABEL    = 'Agent Type';
   readonly FILTERSTATUSLABEL  = 'Pipeline Status';
   readonly COLPIPELINE        = 'Pipeline';
+  readonly COLCONTAINERNAME   = 'Container Name';
   readonly COLPODNAME         = 'Pod Name';
   readonly COLTYPE            = 'Type';
   readonly COLSTATUS          = 'Execution Status';
@@ -66,11 +67,12 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly DEPLOYMENTDELETEDSUCCESS  = 'Pipeline deployment deleted!';
 
   // ── aip-grid configuration ─────────────────────────────────────────────────
-  readonly GRID_TEMPLATE = '26% 22% 12% 24% 16%';
+  // 5 data columns + 1 actions column
+  readonly GRID_TEMPLATE = '24% 18% 20% 10% 18% 10%';
 
   readonly gridColumns: AipGridColumn[] = [
     {
-      key: 'pipeline', label: this.COLPIPELINE, field: 'container_name', cssClass: 'col-name',
+      key: 'pipeline', label: this.COLPIPELINE, field: 'pipeline_name', cssClass: 'col-name',
       type: 'icon-text',
       iconFn: (row) => this.getTypeIcon((row.type || '').toLowerCase()),
       iconWrapperCssFn: (row) => `exec-type-icon mode-${(row.type || '').toLowerCase()}`,
@@ -79,6 +81,10 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     {
       key: 'podname', label: this.COLPODNAME, field: 'pod_name', cssClass: 'col-pod-name',
       type: 'text', textCssClass: 'exec-pod-name',
+    },
+    {
+      key: 'containername', label: this.COLCONTAINERNAME, field: 'container_name', cssClass: 'col-container-name',
+      type: 'text', textCssClass: 'exec-container-name',
     },
     {
       key: 'type', label: this.COLTYPE, field: 'type', cssClass: 'col-type',
