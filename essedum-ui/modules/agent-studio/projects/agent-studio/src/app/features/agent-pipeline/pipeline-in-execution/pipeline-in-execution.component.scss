@@ -239,8 +239,20 @@
 // ── Dynamic cell styles (rendered inside aip-grid's view scope) ───────────────
 ::ng-deep {
   .col-pod-name { overflow: hidden; }
+  .col-container-name { overflow: hidden; }
 
   .exec-pod-name {
+    display: block;
+    font-size: 11px;
+    color: #6e9abb;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+  }
+
+  .exec-container-name {
     display: block;
     font-size: 11px;
     color: #6e9abb;
