@@ -243,9 +243,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
      * Debounced watch on a pipeline's real ADK folder (the same one "Open
      * Copilot"/"Edit Code" use — see getPipelineFolderPath) armed by "Add
      * Skill with Copilot Chat" when that pipeline has no server-side files
-     * yet. Once the folder settles (no changes for a few seconds), its
-     * contents are bulk-uploaded and the local copy is removed — see
-     * armSkillFolderUploadWatch().
+     * yet. Every time the folder settles (no changes for a few seconds),
+     * its CURRENT, COMPLETE contents are re-uploaded — see
+     * armSkillFolderUploadWatch() for why the local copy is never deleted
+     * and the watch never gets torn down after a single upload.
      */
     private skillFolderUploadWatch?: {
         folderPath: string;
@@ -1614,7 +1615,9 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             // both "Edit Code" and this flow already survive that via their
             // own persisted state, so this doesn't need to block the visible
             // "skill ready" step above). Skipped if already prepared for
-            // this exact pipeline this session.
+            // this exact pipeline this session. Note: if this triggers a
+            // reload, the sidebar resets to the card list — by design, not
+            // restored (the user reselects the card).
             if (pipelineId && pipelineName && this.lastSkillGenerationPreparedPipelineId !== pipelineId) {
                 this.lastSkillGenerationPreparedPipelineId = pipelineId;
                 this.prepareSkillGenerationTarget(pipelineId, pipelineName, card).catch(error => {
@@ -1712,11 +1715,17 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 return;
             }
 
+            // Adding an unfamiliar folder to the workspace can trigger VS
+            // Code's own "Do you trust the authors..." prompt, and granting
+            // trust can cause its OWN separate extension-host reload after
+            // this one. Only clear this marker once it's stale — while
+            // fresh, leave it in place so a follow-up reload from that trust
+            // prompt can also find it and re-arm the watch (idempotent, so
+            // re-running this is harmless).
             const age = Date.now() - (pending.timestamp || 0);
-            this._context.globalState.update('pendingSkillGenerationSetup', undefined);
-
-            if (age > 30000) {
-                logger.info(`${this.logPrefix} Pending skill-generation setup is stale (${age}ms old), ignoring`);
+            if (age > 90000) {
+                logger.info(`${this.logPrefix} Pending skill-generation setup is stale (${age}ms old), clearing`);
+                this._context.globalState.update('pendingSkillGenerationSetup', undefined);
                 return;
             }
 
@@ -1728,6 +1737,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     pending.organization
                 );
             }
+
+            // Clean up shortly after, but only if nothing interrupts this —
+            // if another reload (e.g. from a trust-prompt grant) happens
+            // first, this scheduled clear never runs and the marker survives
+            // for that reload to consume too.
+            setTimeout(() => {
+                this._context.globalState.update('pendingSkillGenerationSetup', undefined);
+            }, 5000);
         } catch (error) {
             logger.warn(`${this.logPrefix} Error resuming pending skill-generation setup:`, error);
         }
@@ -1735,12 +1752,18 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
     /**
      * Debounced watch on `folderPath`: once nothing has changed in it for a
-     * few seconds, zip its contents, upload the whole thing (isVibeStudio
-     * =true, since it has no pipeline metadata.json yet — the same bypass
-     * the web app's Vibe Studio/AI-chat-coder persist flows already use),
-     * delete the local copy, then hand off to the exact same "Edit Code"
-     * flow so any further edits in the same session get the already-working
-     * per-file sync instead of another bulk upload.
+     * few seconds, zip its CURRENT, COMPLETE contents and upload the whole
+     * thing (isVibeStudio=true, since it has no pipeline metadata.json yet —
+     * the same bypass the web app's Vibe Studio/AI-chat-coder persist flows
+     * already use). The watch stays armed indefinitely and re-uploads on
+     * every subsequent settle, since the backend's folder/upload endpoint
+     * does a full delete-and-replace for this pipeline (not an incremental
+     * add) — deleting the local copy or handing off to "Edit Code"'s
+     * per-file sync after only the first upload would mean any file the
+     * coding agent creates afterward gets fileId=0 in that per-file path
+     * and silently fails to persist while still showing a success toast.
+     * Always re-zipping the whole (never-deleted) local folder avoids that
+     * entirely — each upload is a complete, accurate snapshot.
      */
     private armSkillFolderUploadWatch(folderPath: string, pipelineId: string, pipelineName: string, organization: string): void {
         this.disposeSkillFolderUploadWatch();
@@ -1754,7 +1777,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 clearTimeout(state.debounceTimer);
             }
             state.debounceTimer = setTimeout(() => {
-                this.uploadSkillGenerationFolder(pipelineId, pipelineName, organization, folderPath).catch(error => {
+                this.uploadSkillGenerationFolder(pipelineName, organization, folderPath).catch(error => {
                     logger.error(`${this.logPrefix} Skill-attach folder upload failed:`, error);
                 });
             }, PipelineAgentProvider.AUTO_UPLOAD_DEBOUNCE_MS);
@@ -1771,7 +1794,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         this.skillFolderUploadWatch = { folderPath, disposables };
         this._context.subscriptions.push(...disposables);
 
-        logger.info(`${this.logPrefix} Armed skill-attach folder upload watch: ${folderPath}`);
+        logger.info(`${this.logPrefix} Armed skill-attach folder upload watch for pipeline ${pipelineId}: ${folderPath}`);
     }
 
     private disposeSkillFolderUploadWatch(): void {
@@ -1787,12 +1810,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Zip the pipeline's freshly-generated folder, upload it, delete the
-     * local copy, then transition to "Edit Code"'s per-file sync now that
-     * the pipeline has server-assigned file IDs.
+     * Zip the pipeline's generation folder's CURRENT, COMPLETE contents and
+     * upload it. The local folder is left in place (never deleted) and the
+     * watch stays armed — see armSkillFolderUploadWatch() for why: the
+     * backend replaces this pipeline's server files wholesale on every
+     * call, so every upload must include everything, not just what changed
+     * since the last one.
      */
     private async uploadSkillGenerationFolder(
-        pipelineId: string,
         pipelineName: string,
         organization: string,
         folderPath: string
@@ -1805,24 +1830,41 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             return; // nothing generated yet — keep waiting
         }
 
+        // Defensively exclude the pipeline's own JSON config file, in case
+        // this folder was ever also used by "Open Copilot" for the same
+        // pipeline (which writes {pipelineName}_{org}.json here) — that file
+        // is a separate record, not ADK code, and must never ride along in
+        // this zip.
+        const jsonFileName = `${pipelineName}_${organization}.json`;
+        let fileCount = 0;
+
         try {
             const AdmZip = require('adm-zip');
             const zip = new AdmZip();
-            let fileCount = 0;
 
-            const countFiles = (dirPath: string) => {
+            const countFiles = (dirPath: string, isRoot: boolean) => {
                 for (const entry of fs.readdirSync(dirPath)) {
+                    if (isRoot && entry === jsonFileName) {
+                        continue;
+                    }
                     const fullPath = path.join(dirPath, entry);
                     if (fs.statSync(fullPath).isDirectory()) {
-                        countFiles(fullPath);
+                        countFiles(fullPath, false);
                     } else {
                         fileCount++;
                     }
                 }
             };
-            countFiles(folderPath);
+            countFiles(folderPath, true);
+
+            if (fileCount === 0) {
+                return; // nothing to upload yet (only the JSON config, if anything)
+            }
 
             for (const item of items) {
+                if (item === jsonFileName) {
+                    continue;
+                }
                 const itemPath = path.join(folderPath, item);
                 if (fs.statSync(itemPath).isDirectory()) {
                     zip.addLocalFolder(itemPath, item);
@@ -1834,27 +1876,26 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const zipBuffer = zip.toBuffer();
             const zipFileName = `${pipelineName}_${organization}.zip`;
             await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, 'App');
-
-            this.disposeSkillFolderUploadWatch();
-            await this.closeTabsUnder(folderPath);
-            fs.rmSync(folderPath, { recursive: true, force: true });
-
-            this.sendMessageToWebview({
-                command: 'actionComplete',
-                message: `✓ Saved ${fileCount} file${fileCount === 1 ? '' : 's'} to server`
-            });
-            logger.info(`${this.logPrefix} Skill-attach folder upload complete for ${pipelineName}: ${fileCount} file(s)`);
-
-            // Now that the pipeline has server-assigned file IDs, switch to
-            // the existing per-file sync for anything further in this chat.
-            await this.handleViewAdk(pipelineId);
         } catch (error: any) {
+            // Only a failure of the actual save-to-server belongs here.
             logger.error(`${this.logPrefix} Skill-attach folder upload failed for ${pipelineName}:`, error);
             this.sendMessageToWebview({
                 command: 'actionError',
                 message: `Auto-save to server failed: ${error.message}`
             });
+            return;
         }
+
+        // The save genuinely succeeded — the whole current folder was just
+        // replaced server-side with exactly what's on disk. Nothing is
+        // deleted locally and the watch is left armed (it's still in
+        // skillFolderUploadWatch, untouched) so the next batch of changes
+        // triggers another full re-upload the same way.
+        logger.info(`${this.logPrefix} Skill-attach folder upload complete for ${pipelineName}: ${fileCount} file(s)`);
+        this.sendMessageToWebview({
+            command: 'actionComplete',
+            message: `✓ Saved ${fileCount} file${fileCount === 1 ? '' : 's'} to server`
+        });
     }
 
     /**
@@ -2836,30 +2877,6 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         } catch (error: any) {
             logger.error(`${this.logPrefix} Error syncing file:`, error);
             vscode.window.showErrorMessage(`Failed to sync file: ${error.message}`);
-        }
-    }
-
-    /**
-     * Close any open editor tabs whose file is at, or nested under, `targetPath`.
-     */
-    private async closeTabsUnder(targetPath: string): Promise<void> {
-        const normalizedTarget = path.normalize(targetPath).toLowerCase();
-        const tabsToClose = vscode.window.tabGroups.all
-            .flatMap(group => group.tabs)
-            .filter(tab => {
-                if (!(tab.input instanceof vscode.TabInputText)) {
-                    return false;
-                }
-                const tabPath = path.normalize(tab.input.uri.fsPath).toLowerCase();
-                return tabPath === normalizedTarget || tabPath.startsWith(normalizedTarget + path.sep);
-            });
-
-        for (const tab of tabsToClose) {
-            try {
-                await vscode.window.tabGroups.close(tab);
-            } catch (error) {
-                logger.warn(`${this.logPrefix} Failed to close tab for deleted file:`, error);
-            }
         }
     }
 
