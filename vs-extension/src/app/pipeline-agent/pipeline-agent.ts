@@ -1834,8 +1834,13 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
         // this folder was ever also used by "Open Copilot" for the same
         // pipeline (which writes {pipelineName}_{org}.json here) — that file
         // is a separate record, not ADK code, and must never ride along in
-        // this zip.
+        // this zip. Also exclude ".essedum" — once this folder becomes the
+        // workspace root, getSkillsContextFilePath() anchors the "Attached
+        // Skills" context file (.essedum/attached-skills-context.md) inside
+        // this exact same folder, and that's this extension's own scratch
+        // file, never ADK code either.
         const jsonFileName = `${pipelineName}_${organization}.json`;
+        const excludedTopLevel = new Set([jsonFileName, '.essedum']);
         let fileCount = 0;
 
         try {
@@ -1844,7 +1849,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const countFiles = (dirPath: string, isRoot: boolean) => {
                 for (const entry of fs.readdirSync(dirPath)) {
-                    if (isRoot && entry === jsonFileName) {
+                    if (isRoot && excludedTopLevel.has(entry)) {
                         continue;
                     }
                     const fullPath = path.join(dirPath, entry);
@@ -1858,11 +1863,11 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             countFiles(folderPath, true);
 
             if (fileCount === 0) {
-                return; // nothing to upload yet (only the JSON config, if anything)
+                return; // nothing to upload yet (only excluded items, if anything)
             }
 
             for (const item of items) {
-                if (item === jsonFileName) {
+                if (excludedTopLevel.has(item)) {
                     continue;
                 }
                 const itemPath = path.join(folderPath, item);
