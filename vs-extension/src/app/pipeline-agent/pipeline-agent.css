@@ -769,3 +769,155 @@ body {
     display: none;
     margin-top: 10px;
 }
+
+/* ================================
+   ATTACH A SKILL
+   ================================ */
+
+.attached-skills-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+}
+
+.attached-skills-chips:empty {
+    margin-top: 0;
+}
+
+.attached-skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 2px var(--spacing-xs) 2px var(--spacing-sm);
+    border-radius: var(--radius-xl);
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    max-width: 220px;
+}
+
+.attached-skill-chip .skill-chip-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remove-skill-chip {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    font-size: var(--font-size-sm);
+    line-height: 1;
+    opacity: 0.7;
+    border-radius: 50%;
+}
+
+.remove-skill-chip:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Wraps the "Add Skill with Copilot Chat" button so it sits in the Actions
+   grid like every other action button, while still anchoring its popover. */
+.skill-pill-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.skill-pill-dropdown .btn {
+    width: 100%;
+}
+
+#attachSkillBtn.active {
+    background-color: var(--vscode-button-hoverBackground);
+    outline: 1px solid var(--vscode-focusBorder);
+}
+
+.skill-menu-popover {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 220px;
+    max-width: 280px;
+    max-height: 260px;
+    overflow-y: auto;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background));
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-xs) 0;
+}
+
+.skill-menu-popover.hidden {
+    display: none;
+}
+
+.skill-menu-popover .menu-heading {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.skill-menu-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    color: var(--vscode-foreground);
+}
+
+.skill-menu-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.skill-menu-item.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.skill-menu-item .skill-menu-item-icon {
+    flex-shrink: 0;
+}
+
+.skill-menu-item .skill-menu-item-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.skill-menu-item .skill-menu-item-check {
+    flex-shrink: 0;
+    visibility: hidden;
+}
+
+.skill-menu-item.selected .skill-menu-item-check {
+    visibility: visible;
+}
+
+.skill-menu-empty {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--vscode-descriptionForeground);
+    font-size: var(--font-size-sm);
+}

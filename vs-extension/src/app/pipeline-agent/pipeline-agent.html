@@ -100,6 +100,20 @@
                             <button class="btn btn-primary-bg" id="viewAdkBtn" style="display: none;">
                                 Edit Code
                             </button>
+                            <div class="skill-pill-dropdown">
+                                <button type="button" class="btn btn-primary-bg" id="attachSkillBtn"
+                                    title="Add a skill as context for Copilot Chat"
+                                    aria-label="Add Skill with Copilot Chat" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Add Skill with Copilot Chat
+                                </button>
+                                <div id="skillMenuPopover" class="skill-menu-popover hidden">
+                                    <div class="menu-heading">Click a skill to prepare it as chat context</div>
+                                    <div id="skillMenuList" class="skill-menu-list">
+                                        <div class="skill-menu-empty">Loading skills…</div>
+                                    </div>
+                                </div>
+                            </div>
                             <button class="btn btn-primary-bg" id="downloadAdkBtn" style="display: none;">
                                 Download Code
                             </button>
@@ -110,6 +124,7 @@
                                 Copy
                             </button>
                         </div>
+                        <div id="attachedSkillsChips" class="attached-skills-chips"></div>
                         <div id="actionStatus" class="action-status"></div>
                     </div>
                 </div>
