@@ -1,5 +1,7 @@
 package com.lfn.gateway.security;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -11,21 +13,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * Logs every routed request through the gateway.
+ */
 @Component
 public class RouteLoggingFilter implements GlobalFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(RouteLoggingFilter.class);
 
     @Override
-    @SuppressWarnings("null")
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
         String path = exchange.getRequest().getURI().getPath();
-        if (route != null) {
-            log.info(">>> ROUTE MATCHED: path='{}' -> routeId='{}', uri='{}'", path, route.getId(), route.getUri());
-        } else {
-            log.warn(">>> NO ROUTE MATCHED for path='{}'", path);
-        }
+        Optional.ofNullable((Route) exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR))
+                .ifPresentOrElse(
+                        route -> log.info(">>> ROUTE MATCHED: path='{}' -> routeId='{}', uri='{}'",
+                                path, route.getId(), route.getUri()),
+                        () -> log.warn(">>> NO ROUTE MATCHED for path='{}'", path));
         return chain.filter(exchange);
     }
 

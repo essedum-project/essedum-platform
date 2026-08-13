@@ -1,6 +1,8 @@
 package com.lfn.gateway.security;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,26 +135,23 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
 
-    @SuppressWarnings("null")
     private Mono<Void> onUnauthorized(ServerWebExchange exchange, String message) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = response.getHeaders();          // explicit variable — null checker can verify
+        headers.setContentType(MediaType.APPLICATION_JSON);
         String body = String.format(
                 "{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"%s\",\"path\":\"%s\"}",
                 message, exchange.getRequest().getURI().getPath());
-        DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = response.bufferFactory().wrap(bytes);  // explicit byte[] variable — avoids chained null warning
         return response.writeWith(Mono.just(buffer));
     }
 
-    @SuppressWarnings("null")
     private boolean isOpenPath(String path) {
-        for (String pattern : authProperties.getOpenPaths()) {
-            if (pathMatcher.match(pattern.trim(), path)) {
-                return true;
-            }
-        }
-        return false;
+        List<String> openPaths = Optional.ofNullable(authProperties.getOpenPaths())
+                .orElse(List.of());
+        return openPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern.trim(), path));
     }
 
     @Override

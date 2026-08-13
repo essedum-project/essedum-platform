@@ -64,6 +64,12 @@ services:
   # ============================================
   # Microservice #1: USM Service (Port 8081)
   # ============================================
+  # DEPENDENCY NOTE: icip-service, data-service and vibe-service all depend
+  # on usm-service being FULLY READY before they start because:
+  #   1. USM owns the shared essedum_coredb schema (user/tenant/permission tables)
+  #   2. icip/data/vibe make REST calls to USM at startup to resolve permissions
+  # The healthcheck below ensures downstream services only start after USM's
+  # Spring context is fully initialized (not just the container process).
   usm-service:
     build:
       context: .
@@ -84,6 +90,15 @@ services:
     depends_on:
       discovery-service:
         condition: service_healthy
+    # CHANGE: Added healthcheck so dependent services (icip, data, vibe) wait
+    # until USM's /actuator/health returns UP — not just until the JVM starts.
+    # start_period=90s gives USM time to initialize DB connections + load tables.
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      start_period: 90s
+      retries: 5
     volumes:
       - usm-logs:/app/log
     networks:
@@ -115,8 +130,12 @@ services:
     depends_on:
       discovery-service:
         condition: service_healthy
+      # CHANGE: service_started → service_healthy
+      # service_started only means the container process launched (JVM started).
+      # service_healthy waits for USM's /actuator/health to return UP,
+      # ensuring DB tables are loaded and USM REST API is ready before ICIP starts.
       usm-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - icip-logs:/app/log
       - icip-gitrepo:/app/gitRepo
@@ -150,8 +169,10 @@ services:
     depends_on:
       discovery-service:
         condition: service_healthy
+      # CHANGE: service_started → service_healthy
+      # Waits for USM's /actuator/health UP before data-service starts.
       usm-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - data-logs:/app/log
       - data-files:/app/files
@@ -186,8 +207,10 @@ services:
     depends_on:
       discovery-service:
         condition: service_healthy
+      # CHANGE: service_started → service_healthy
+      # Waits for USM's /actuator/health UP before vibe-service starts.
       usm-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - vibe-logs:/app/log
       - vibe-goose:/app/goose
