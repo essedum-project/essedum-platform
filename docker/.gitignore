@@ -1,2 +1,4 @@
 .env
-.envclear
+.env.local
+# .env.sample is intentionally tracked (safe template)
+!.env.sample

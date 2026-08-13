@@ -73,7 +73,10 @@ public final class ICIPRestPluginUtils {
 			throw new IllegalArgumentException("URI must not be null");
 		}
 		try {
-			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(uri.toString());
+			// Honour SSRF_ALLOWED_HOSTS env var so that legitimate internal cluster
+			// services (e.g. pyjob-executor-service) can be used as REMOTE datasources.
+			List<String> allowedHosts = SsrfProtectionUtil.parseAllowedHosts(System.getenv("SSRF_ALLOWED_HOSTS"));
+			java.net.URL safe = SsrfProtectionUtil.validateAndCreateUrl(uri.toString(), allowedHosts);
 			// Rebuild the URI strictly from the validated URL's components so that
 			// the value flowing into HTTP sinks is no longer the raw input.
 			return new URI(safe.getProtocol(), null, safe.getHost(), safe.getPort(),

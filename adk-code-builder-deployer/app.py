@@ -537,6 +537,7 @@ def handle_pipeline_trigger(data):
         log_to_client("Download complete.", step="DOWNLOAD")
         #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
         deploy_name = data["deployment_name"]
+        cname = data.get("cname", deploy_name)   # original pipeline name before sanitization
 
         # Sanitize deployment name to meet Kubernetes DNS-1035 requirements:
         # - Must start with alphabetic character
@@ -819,10 +820,14 @@ def handle_pipeline_trigger(data):
             k8s_apps = client.AppsV1Api()
 
             try:
-                # If it exists, PATCH
-                k8s_apps.read_namespaced_deployment(
+                # If it exists, PATCH — but guard against Terminating objects:
+                # a deployment being deleted is still returned by read but will
+                # disappear moments later, causing wait_for_deployment_ready to 404.
+                existing = k8s_apps.read_namespaced_deployment(
                     name=deploy_name, namespace=target_namespace
                 )
+                if existing.metadata.deletion_timestamp:
+                    raise client.exceptions.ApiException(status=404, reason="Terminating")
                 log_to_client("Deployment exists. Updating image...", step="DEPLOY")
                 patch = {
                     "spec": {
@@ -843,7 +848,7 @@ def handle_pipeline_trigger(data):
                         "Deployment not found. Creating new deployment...", step="DEPLOY"
                     )
                     deployment_obj = create_deployment_object(
-                        deploy_name, image_tag, target_namespace, secret_to_use, app_port
+                        deploy_name, image_tag, target_namespace, secret_to_use, app_port, cname=cname
                     )
                     k8s_apps.create_namespaced_deployment(
                         namespace=target_namespace, body=deployment_obj
@@ -1004,7 +1009,7 @@ def detect_app_port(build_context_path, default=8000):
     return default
 
 
-def create_deployment_object(name, image, namespace, secret_name=None, app_port=8000):
+def create_deployment_object(name, image, namespace, secret_name=None, app_port=8000, cname=None):
     """Creates a V1Deployment object for the runner"""
 
     env_from = []
@@ -1029,7 +1034,10 @@ def create_deployment_object(name, image, namespace, secret_name=None, app_port=
     )
 
     template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": name}),
+        metadata=client.V1ObjectMeta(
+            labels={"app": name},
+            annotations={"pipeline-cname": cname or name},
+        ),
         spec=client.V1PodSpec(
             containers=[container],
             image_pull_secrets=[client.V1LocalObjectReference(name="regcred")],  # << add
@@ -1126,7 +1134,12 @@ def wait_for_deployment_ready(api, name, namespace, timeout_seconds=120):
     import time
     start = time.time()
     while time.time() - start < timeout_seconds:
-        dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        try:
+            dep = api.read_namespaced_deployment(name=name, namespace=namespace)
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                return False
+            raise
         desired = dep.status.replicas or 0
         ready   = dep.status.ready_replicas or 0
         if desired > 0 and ready == desired:
