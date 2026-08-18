@@ -152,16 +152,19 @@ export class DashboardComponent implements OnInit {
 
   private mapToPipelineCards(pipelines: any[], defaultIcon: string): PipelineCard[] {
     if (!Array.isArray(pipelines)) return [];
-    return pipelines.slice(0, 3).map(p => {
-      const status = this.mapStatus(p.status || p.jobStatus || p.state);
-      return {
-        alias:  p.alias || p.cname || 'Unknown',
-        name:   p.name  || p.jobName || '',
-        status: status,
-        icon:   status === 'running' ? defaultIcon : status === 'failed' ? 'fa-exclamation-circle' : 'fa-check-circle',
-        accent: status === 'running' ? '#22c55e'  : status === 'failed'  ? '#ef4444'              : '#94a3b8'
-      };
-    });
+    return pipelines
+      .filter(p => p != null)
+      .slice(0, 3)
+      .map(p => {
+        const status = this.mapStatus(p.status || p.jobStatus || p.state);
+        return {
+          alias:  p.alias || p.cname || 'Unknown',
+          name:   p.name  || p.jobName || '',
+          status: status,
+          icon:   status === 'running' ? defaultIcon : status === 'failed' ? 'fa-exclamation-circle' : 'fa-check-circle',
+          accent: status === 'running' ? '#22c55e'  : status === 'failed'  ? '#ef4444'              : '#94a3b8'
+        };
+      });
   }
 
   private mapStatus(raw: string): 'running' | 'completed' | 'failed' {

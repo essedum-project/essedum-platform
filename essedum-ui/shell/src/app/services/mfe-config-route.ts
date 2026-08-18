@@ -39,7 +39,7 @@ export function buildRoutes(options: CustomManifest): Routes {
                 }
             }
             else{
-                console.log(remoteEntry)
+                // console.log(remoteEntry)
                 r1 = {
                     path: entry.routePath,
                     loadChildren: () => loadWithFallback(remoteEntry, entry.exposedModule, entry.ngModuleName, entry.routePath)

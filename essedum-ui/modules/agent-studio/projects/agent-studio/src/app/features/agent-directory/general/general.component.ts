@@ -277,6 +277,10 @@ export class GeneralComponent implements OnInit, OnChanges {
   }
 
   private getAllListOfAgentMcpPipeline(): void {
+    if (!this.agentData) {
+      return;
+    }
+    
     const params = this.buildHttpParams();
 
     this.service.getPipelinesCards(params).subscribe(

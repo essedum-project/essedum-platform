@@ -25,10 +25,10 @@ export class AgentComponent implements OnInit, AfterViewInit {
     const token = localStorage.getItem('access_token') || '';
     const parentOrg = localStorage.getItem('organization') || '';
 
-    console.log('Agent Component: Retrieved values', {
-      token: token ? 'present' : 'empty',
-      organisation: parentOrg ? `'${parentOrg}'` : 'null/empty'
-    });
+    // console.log('Agent Component: Retrieved values', {
+    //   token: token ? 'present' : 'empty',
+    //   organisation: parentOrg ? `'${parentOrg}'` : 'null/empty'
+    // });
 
     const iframeEl = this.langflowIframeRef?.nativeElement;
     const childOrigin = (() => {
@@ -40,7 +40,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
       try {
         // log masked token for debugging
         const mask = (s: string) => s ? `${s.substring(0,20)}...${s.slice(-6)}` : '<empty>';
-        console.log('Parent: posting token to iframe', { name: 'access_token', value: mask(token) });
+        // console.log('Parent: posting token to iframe', { name: 'access_token', value: mask(token) });
             // helper to safely post messages to iframe
             const sendToIframe = (msg: any) => {
               if (!iframeEl || !iframeEl.contentWindow) return;
@@ -55,7 +55,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
             // send token
             sendToIframe({ type: 'SET_TOKEN', token });
             sendToIframe({ type: 'SET_ORGANISATION', organisation: parentOrg });
-            console.log('Parent: sent SET_ORGANISATION message', { organisation: parentOrg });
+            // console.log('Parent: sent SET_ORGANISATION message', { organisation: parentOrg });
 
 
             // Build parent session details and send to iframe (do not remove existing token logic)
@@ -82,7 +82,7 @@ export class AgentComponent implements OnInit, AfterViewInit {
                 token,userId,
                 userName, 
               };
-              console.log('Parent: posting parentSessionDetails to iframe', { parentSessionDetails });
+              // console.log('Parent: posting parentSessionDetails to iframe', { parentSessionDetails });
               sendToIframe({ type: 'SET_PARENT_SESSION', parentSessionDetails });
             } catch (err) {
               console.warn('Parent: failed to build/post parentSessionDetails', err);
