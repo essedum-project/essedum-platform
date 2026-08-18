@@ -25,7 +25,8 @@ window.PipelineAgentConstants = {
         VIEW_ADK: 'viewAdk',
         DOWNLOAD_ADK: 'downloadAdk',
         REFRESH_JSON: 'refreshJson',
-        COPY_JSON: 'copyJson'
+        COPY_JSON: 'copyJson',
+        ADD_SKILLS_TO_COPILOT: 'addSkillsToCopilot'
     },
 
     /**
@@ -37,7 +38,8 @@ window.PipelineAgentConstants = {
         ACTION_COMPLETE: 'actionComplete',
         ACTION_ERROR: 'actionError',
         ENABLE_UPLOAD: 'enableUpload',
-        ADK_FILES_STATUS: 'adkFilesStatus'
+        ADK_FILES_STATUS: 'adkFilesStatus',
+        SKILLS_LOADED: 'skillsLoaded'
     },
 
     /**

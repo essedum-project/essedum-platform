@@ -1,92 +1,35 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CHANGE 1 ▸ Parent changed from spring-boot-starter-parent to the
+         root aggregator POM (essedum-platform-sv).
+         Spring Boot BOM is inherited transitively from the root.
+         ════════════════════════════════════════════════════════════════════ -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
-        <relativePath/>
+        <groupId>com.lfn.ai</groupId>
+        <artifactId>essedum-platform-sv</artifactId>
+        <version>3.3-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
+
     <groupId>com.lfn.ai</groupId>
     <artifactId>icip-service</artifactId>
     <version>3.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>ICIP Service</name>
-    <properties>
-        <java.version>21</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <spring-security.version>6.5.10</spring-security.version>
-        <spring-framework.version>6.2.18</spring-framework.version>
-        <jackson.version>2.18.6</jackson.version>
-        <spring-cloud.version>4.1.3</spring-cloud.version>
-        <jjwt.version>0.11.2</jjwt.version>
-        <spring-vault-core.version>3.1.1</spring-vault-core.version>
+    <!-- ════════════════════════════════════════════════════════════════════
+         CHANGE 2 ▸ Entire <properties> section removed (~75 lines).
+         All versions (spring-security, spring-framework, jackson, jjwt,
+         springdoc, database, Azure, AWS, Google, logging, etc.) are now
+         declared once in the root POM's <properties> section.
+         JJWT FIX: was 0.11.2 here — root declares 0.11.5 (unified).
+         ════════════════════════════════════════════════════════════════════ -->
 
-        <ehcache.version>3.10.8</ehcache.version>
-        <modelmapper.version>2.3.0</modelmapper.version>
-        <json-simple.version>1.1.1</json-simple.version>
-        <commons-io.version>2.17.0</commons-io.version>
-        <gson.version>2.14.0</gson.version>
-        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
-        <joda-time.version>2.10.6</joda-time.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <poi.version>5.4.0</poi.version>
-        <okhttp.version>4.9.2</okhttp.version>
-        <logging-interceptor.version>4.9.0</logging-interceptor.version>
-        <gsonfire.version>1.8.5</gsonfire.version>
-        <httpclient.version>4.5.14</httpclient.version>
-        <httpclient5.version>5.2.1</httpclient5.version>
-        <tika.version>3.2.2</tika.version>
-        <jsoup.version>1.15.3</jsoup.version>
-        <guava.version>33.1.0-jre</guava.version>
-        <jgit.version>5.13.4.202507202350-r</jgit.version>
-        <commons-compress.version>1.26.1</commons-compress.version>
-        <azure-keyvault.version>5.13.0</azure-keyvault.version>
-        <azure-identity.version>1.14.0</azure-identity.version>
-        <azure-storage-blob.version>12.29.0</azure-storage-blob.version>
-        <microsoft-graph.version>5.9.0</microsoft-graph.version>
-        <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
-        <json.version>20240303</json.version>
-        <jaxb-impl.version>2.3.3</jaxb-impl.version>
-        <jakarta-servlet.version>6.0.0</jakarta-servlet.version>
-        <jakarta-xml-bind.version>3.0.0</jakarta-xml-bind.version>
-        <tomcat-embed.version>10.1.55</tomcat-embed.version>
-        <logback.version>1.5.25</logback.version>
-        <slf4j.version>2.0.9</slf4j.version>
-        <mysql-connector.version>8.4.0</mysql-connector.version>
-        <postgresql.version>42.7.11</postgresql.version>
-        <lombok.version>1.18.30</lombok.version>
-        <micrometer-prometheus.version>1.12.0</micrometer-prometheus.version>
-        <github-api.version>1.318</github-api.version>
-        <aws.sdk.version>2.20.23</aws.sdk.version>
-        <aws.sdk.cloudwatchlogs.version>2.20.24</aws.sdk.cloudwatchlogs.version>
-        <aws.java.sdk.sagemaker.version>1.12.158</aws.java.sdk.sagemaker.version>
-        <aws.java.sdk.s3.version>1.12.261</aws.java.sdk.s3.version>
-        <aws-java-sdk-core.version>1.12.773</aws-java-sdk-core.version>
-        <aws-sdk-bedrock.version>2.20.162</aws-sdk-bedrock.version>
-        <langchain4j-bedrock.version>0.33.0</langchain4j-bedrock.version>
-        <langchain4j-azure-open-ai.version>0.33.0</langchain4j-azure-open-ai.version>
-        <langchain4j-vertex-ai-gemini.version>0.35.0</langchain4j-vertex-ai-gemini.version>
-        <google-cloud-vertexai.version>1.12.0</google-cloud-vertexai.version>
-        <google-auth.version>1.24.1</google-auth.version>
-        <lucene.version>8.11.1</lucene.version>
-        <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>
-        <opencsv.version>5.7.1</opencsv.version>
-        <sqlbuilder.version>3.0.0</sqlbuilder.version>
-        <jython.version>2.7.4</jython.version>
-        <groovy-all.version>4.0.23</groovy-all.version>
-        <reflections.version>0.9.12</reflections.version>
-        <minio.version>8.6.0</minio.version>
-        <httpmime.version>4.5.14</httpmime.version>
-        <protobuf-java.version>3.25.5</protobuf-java.version>
-        <pdfbox.version>3.0.3</pdfbox.version>
-        <commons-fileupload.version>1.6.0</commons-fileupload.version>
-        <azure-core-http-okhttp.version>1.12.0</azure-core-http-okhttp.version>
-        <azure-ai-textanalytics.version>5.5.0</azure-ai-textanalytics.version>
-    </properties>
     <dependencies>
+        <!-- Spring Boot Starters — versions managed by spring-boot-starter-parent (via root) -->
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>
@@ -100,103 +43,155 @@
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-websocket</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webflux</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-core</artifactId><version>${spring-framework.version}</version></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-context</artifactId><version>${spring-framework.version}</version></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-beans</artifactId><version>${spring-framework.version}</version></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId><version>${spring-framework.version}</version></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId><version>${spring-framework.version}</version></dependency>
-        <dependency><groupId>org.springframework</groupId><artifactId>spring-test</artifactId></dependency>
-        <dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-oauth2-jose</artifactId><version>${spring-security.version}</version></dependency>
-        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-context</artifactId><version>${spring-cloud.version}</version></dependency>
-        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-vault-config</artifactId><version>${spring-cloud.version}</version></dependency>
-        <!-- Eureka removed - using K8s service discovery -->
-        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-stream-kafka</artifactId><version>${spring-cloud.version}</version></dependency>
-        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-stream</artifactId><version>${spring-cloud.version}</version></dependency>
-        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-stream-rabbit</artifactId><version>${spring-cloud.version}</version></dependency>
-        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-api</artifactId><version>${jjwt.version}</version></dependency>
-        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-impl</artifactId><version>${jjwt.version}</version></dependency>
-        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-jackson</artifactId><version>${jjwt.version}</version></dependency>
-        <dependency><groupId>com.nimbusds</groupId><artifactId>nimbus-jose-jwt</artifactId><version>${nimbus-jose-jwt.version}</version></dependency>
-        <dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId><version>${mysql-connector.version}</version></dependency>
-        <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId><version>${postgresql.version}</version></dependency>
 
-        <dependency><groupId>org.springframework.vault</groupId><artifactId>spring-vault-core</artifactId><version>${spring-vault-core.version}</version></dependency>
-        <dependency><groupId>org.ehcache</groupId><artifactId>ehcache</artifactId><version>${ehcache.version}</version></dependency>
-        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-core</artifactId><version>${jackson.version}</version></dependency>
-        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-annotations</artifactId><version>${jackson.version}</version></dependency>
-        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId><version>${jackson.version}</version></dependency>
-        <dependency><groupId>com.fasterxml.jackson.dataformat</groupId><artifactId>jackson-dataformat-xml</artifactId><version>${jackson.version}</version></dependency>
-        <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>${lombok.version}</version><scope>provided</scope></dependency>
-        <dependency><groupId>org.modelmapper</groupId><artifactId>modelmapper</artifactId><version>${modelmapper.version}</version></dependency>
-        <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>${gson.version}</version></dependency>
-        <dependency><groupId>org.json</groupId><artifactId>json</artifactId><version>${json.version}</version></dependency>
-        <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>${commons-io.version}</version></dependency>
-        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId><version>${commons-collections4.version}</version></dependency>
-        <dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId><version>${guava.version}</version></dependency>
-        <dependency><groupId>com.googlecode.json-simple</groupId><artifactId>json-simple</artifactId><version>${json-simple.version}</version></dependency>
-        <dependency><groupId>joda-time</groupId><artifactId>joda-time</artifactId><version>${joda-time.version}</version></dependency>
-        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>${okhttp.version}</version></dependency>
-        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>logging-interceptor</artifactId><version>${logging-interceptor.version}</version></dependency>
-        <dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpclient</artifactId><version>${httpclient.version}</version></dependency>
-        <dependency><groupId>org.apache.httpcomponents.client5</groupId><artifactId>httpclient5</artifactId><version>${httpclient5.version}</version></dependency>
-        <dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpmime</artifactId><version>${httpmime.version}</version></dependency>
-        <dependency><groupId>io.gsonfire</groupId><artifactId>gson-fire</artifactId><version>${gsonfire.version}</version></dependency>
-        <dependency><groupId>org.apache.tika</groupId><artifactId>tika-core</artifactId><version>${tika.version}</version></dependency>
-        <dependency><groupId>org.apache.tika</groupId><artifactId>tika-parsers-standard-package</artifactId><version>${tika.version}</version></dependency>
-        <dependency><groupId>org.apache.poi</groupId><artifactId>poi</artifactId><version>${poi.version}</version></dependency>
-        <dependency><groupId>org.apache.poi</groupId><artifactId>poi-ooxml</artifactId><version>${poi.version}</version></dependency>
-        <dependency><groupId>org.apache.poi</groupId><artifactId>poi-scratchpad</artifactId><version>${poi.version}</version></dependency>
-        <dependency><groupId>org.jsoup</groupId><artifactId>jsoup</artifactId><version>${jsoup.version}</version></dependency>
-        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId><version>${commons-compress.version}</version></dependency>
-        <dependency><groupId>com.azure.spring</groupId><artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId><version>${azure-keyvault.version}</version></dependency>
-        <dependency><groupId>com.azure</groupId><artifactId>azure-identity</artifactId><version>${azure-identity.version}</version></dependency>
-        <dependency><groupId>com.azure</groupId><artifactId>azure-storage-blob</artifactId><version>${azure-storage-blob.version}</version></dependency>
-        <dependency><groupId>com.azure</groupId><artifactId>azure-core-http-okhttp</artifactId><version>${azure-core-http-okhttp.version}</version></dependency>
-        <dependency><groupId>com.azure</groupId><artifactId>azure-ai-textanalytics</artifactId><version>${azure-ai-textanalytics.version}</version></dependency>
-        <dependency><groupId>com.microsoft.graph</groupId><artifactId>microsoft-graph</artifactId><version>${microsoft-graph.version}</version></dependency>
-        <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId><version>${springdoc-openapi.version}</version></dependency>
-        <dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId><version>${micrometer-prometheus.version}</version></dependency>
-        <dependency><groupId>com.sun.xml.bind</groupId><artifactId>jaxb-impl</artifactId><version>${jaxb-impl.version}</version><scope>runtime</scope></dependency>
-        <dependency><groupId>javax.xml.bind</groupId><artifactId>jaxb-api</artifactId><version>2.3.1</version></dependency>
-        <dependency><groupId>jakarta.xml.bind</groupId><artifactId>jakarta.xml.bind-api</artifactId><version>${jakarta-xml-bind.version}</version></dependency>
-        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><version>${jakarta-servlet.version}</version><scope>provided</scope></dependency>
-        <dependency><groupId>org.eclipse.jgit</groupId><artifactId>org.eclipse.jgit</artifactId><version>${jgit.version}</version></dependency>
-        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>${slf4j.version}</version></dependency>
-        <dependency><groupId>ch.qos.logback</groupId><artifactId>logback-classic</artifactId><version>${logback.version}</version></dependency>
-        <dependency><groupId>ch.qos.logback</groupId><artifactId>logback-core</artifactId><version>${logback.version}</version></dependency>
-        <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-core</artifactId><version>${tomcat-embed.version}</version></dependency>
-        <dependency><groupId>org.kohsuke</groupId><artifactId>github-api</artifactId><version>${github-api.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>s3</artifactId><version>${aws.sdk.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>sagemaker</artifactId><version>${aws.sdk.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>regions</artifactId><version>${aws.sdk.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>auth</artifactId><version>${aws.sdk.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>cloudwatchlogs</artifactId><version>${aws.sdk.cloudwatchlogs.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>bedrock</artifactId><version>${aws-sdk-bedrock.version}</version></dependency>
-        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>apache-client</artifactId><version>${aws.sdk.version}</version></dependency>
-        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-sagemaker</artifactId><version>${aws.java.sdk.sagemaker.version}</version></dependency>
-        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-s3</artifactId><version>${aws.java.sdk.s3.version}</version></dependency>
-        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-core</artifactId><version>${aws-java-sdk-core.version}</version></dependency>
-        <dependency><groupId>com.google.cloud</groupId><artifactId>google-cloud-vertexai</artifactId><version>${google-cloud-vertexai.version}</version></dependency>
-        <dependency><groupId>com.google.cloud</groupId><artifactId>google-cloud-storage</artifactId><version>2.30.1</version></dependency>
-        <dependency><groupId>com.google.auth</groupId><artifactId>google-auth-library-oauth2-http</artifactId><version>${google-auth.version}</version></dependency>
-        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-bedrock</artifactId><version>${langchain4j-bedrock.version}</version></dependency>
-        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-azure-open-ai</artifactId><version>${langchain4j-azure-open-ai.version}</version></dependency>
-        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-vertex-ai-gemini</artifactId><version>${langchain4j-vertex-ai-gemini.version}</version></dependency>
-        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>${lucene.version}</version></dependency>
-        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queryparser</artifactId><version>${lucene.version}</version></dependency>
-        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-analyzers-common</artifactId><version>${lucene-analyzers-common.version}</version></dependency>
-        <dependency><groupId>com.opencsv</groupId><artifactId>opencsv</artifactId><version>${opencsv.version}</version></dependency>
-        <dependency><groupId>com.healthmarketscience.sqlbuilder</groupId><artifactId>sqlbuilder</artifactId><version>${sqlbuilder.version}</version></dependency>
-        <dependency><groupId>org.python</groupId><artifactId>jython-standalone</artifactId><version>${jython.version}</version></dependency>
-        <dependency><groupId>org.apache.groovy</groupId><artifactId>groovy-all</artifactId><version>${groovy-all.version}</version><type>pom</type></dependency>
-        <dependency><groupId>org.reflections</groupId><artifactId>reflections</artifactId><version>${reflections.version}</version></dependency>
-        <dependency><groupId>io.minio</groupId><artifactId>minio</artifactId><version>${minio.version}</version></dependency>
-        <dependency><groupId>com.google.protobuf</groupId><artifactId>protobuf-java</artifactId><version>${protobuf-java.version}</version></dependency>
-        <dependency><groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId><version>${pdfbox.version}</version></dependency>
-        <dependency><groupId>commons-fileupload</groupId><artifactId>commons-fileupload</artifactId><version>${commons-fileupload.version}</version></dependency>
+        <!-- ── CHANGE 3 ▸ <version> removed from all deps below — managed by root dependencyManagement -->
+
+        <!-- Spring Framework -->
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-core</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-context</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-beans</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-test</artifactId></dependency>
+
+        <!-- Spring Security / Cloud -->
+        <dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-oauth2-jose</artifactId></dependency>
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-context</artifactId></dependency>
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-vault-config</artifactId></dependency>
+        <!-- Eureka removed - using K8s service discovery -->
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-stream-kafka</artifactId></dependency>
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-stream</artifactId></dependency>
+        <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-stream-rabbit</artifactId></dependency>
+
+        <!-- JWT — version now 0.11.5 via root (was 0.11.2 — version drift fixed) -->
+        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-api</artifactId></dependency>
+        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-impl</artifactId></dependency>
+        <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-jackson</artifactId></dependency>
+        <dependency><groupId>com.nimbusds</groupId><artifactId>nimbus-jose-jwt</artifactId></dependency>
+
+        <!-- Database -->
+        <dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId></dependency>
+        <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId></dependency>
+
+        <!-- Spring Vault / Cache -->
+        <dependency><groupId>org.springframework.vault</groupId><artifactId>spring-vault-core</artifactId></dependency>
+        <dependency><groupId>org.ehcache</groupId><artifactId>ehcache</artifactId></dependency>
+
+        <!-- Jackson -->
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-core</artifactId></dependency>
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-annotations</artifactId></dependency>
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>
+        <dependency><groupId>com.fasterxml.jackson.dataformat</groupId><artifactId>jackson-dataformat-xml</artifactId></dependency>
+
+        <!-- Build -->
+        <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>
+
+        <!-- Utilities -->
+        <dependency><groupId>org.modelmapper</groupId><artifactId>modelmapper</artifactId></dependency>
+        <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId></dependency>
+        <dependency><groupId>org.json</groupId><artifactId>json</artifactId></dependency>
+        <dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId></dependency>
+        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId></dependency>
+        <dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId></dependency>
+        <dependency><groupId>com.googlecode.json-simple</groupId><artifactId>json-simple</artifactId></dependency>
+        <dependency><groupId>joda-time</groupId><artifactId>joda-time</artifactId></dependency>
+
+        <!-- HTTP Clients -->
+        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId></dependency>
+        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>logging-interceptor</artifactId></dependency>
+        <dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpclient</artifactId></dependency>
+        <dependency><groupId>org.apache.httpcomponents.client5</groupId><artifactId>httpclient5</artifactId></dependency>
+        <dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpmime</artifactId></dependency>
+        <dependency><groupId>io.gsonfire</groupId><artifactId>gson-fire</artifactId></dependency>
+
+        <!-- Document / File Processing -->
+        <dependency><groupId>org.apache.tika</groupId><artifactId>tika-core</artifactId></dependency>
+        <dependency><groupId>org.apache.tika</groupId><artifactId>tika-parsers-standard-package</artifactId></dependency>
+        <dependency><groupId>org.apache.poi</groupId><artifactId>poi</artifactId></dependency>
+        <dependency><groupId>org.apache.poi</groupId><artifactId>poi-ooxml</artifactId></dependency>
+        <dependency><groupId>org.apache.poi</groupId><artifactId>poi-scratchpad</artifactId></dependency>
+        <dependency><groupId>org.jsoup</groupId><artifactId>jsoup</artifactId></dependency>
+        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId></dependency>
+
+        <!-- Azure -->
+        <dependency><groupId>com.azure.spring</groupId><artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId></dependency>
+        <dependency><groupId>com.azure</groupId><artifactId>azure-identity</artifactId></dependency>
+        <dependency><groupId>com.azure</groupId><artifactId>azure-storage-blob</artifactId></dependency>
+        <dependency><groupId>com.azure</groupId><artifactId>azure-core-http-okhttp</artifactId></dependency>
+        <dependency><groupId>com.azure</groupId><artifactId>azure-ai-textanalytics</artifactId></dependency>
+        <dependency><groupId>com.microsoft.graph</groupId><artifactId>microsoft-graph</artifactId></dependency>
+
+        <!-- OpenAPI — Spring Boot 3.x compatible artifact (version from root) -->
+        <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>
+
+        <!-- Metrics -->
+        <dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>
+
+        <!-- JAXB / XML -->
+        <dependency><groupId>com.sun.xml.bind</groupId><artifactId>jaxb-impl</artifactId><scope>runtime</scope></dependency>
+        <dependency><groupId>javax.xml.bind</groupId><artifactId>jaxb-api</artifactId><version>2.3.1</version></dependency><!-- javax.xml.bind not in root BOM — legacy namespace -->
+        <dependency><groupId>jakarta.xml.bind</groupId><artifactId>jakarta.xml.bind-api</artifactId></dependency>
+        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
+
+        <!-- Git -->
+        <dependency><groupId>org.eclipse.jgit</groupId><artifactId>org.eclipse.jgit</artifactId></dependency>
+
+        <!-- Logging -->
+        <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+        <dependency><groupId>ch.qos.logback</groupId><artifactId>logback-classic</artifactId></dependency>
+        <dependency><groupId>ch.qos.logback</groupId><artifactId>logback-core</artifactId></dependency>
+
+        <!-- Runtime -->
+        <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-core</artifactId></dependency>
+        <dependency><groupId>org.kohsuke</groupId><artifactId>github-api</artifactId></dependency>
+
+        <!-- AWS SDK v2 -->
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>s3</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>sagemaker</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>regions</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>auth</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>cloudwatchlogs</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>bedrock</artifactId></dependency>
+        <dependency><groupId>software.amazon.awssdk</groupId><artifactId>apache-client</artifactId></dependency>
+
+        <!-- AWS SDK v1 (legacy) -->
+        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-sagemaker</artifactId></dependency>
+        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-s3</artifactId></dependency>
+        <dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-core</artifactId></dependency>
+
+        <!-- Google Cloud -->
+        <dependency><groupId>com.google.cloud</groupId><artifactId>google-cloud-vertexai</artifactId></dependency>
+        <dependency><groupId>com.google.cloud</groupId><artifactId>google-cloud-storage</artifactId></dependency>
+        <dependency><groupId>com.google.auth</groupId><artifactId>google-auth-library-oauth2-http</artifactId></dependency>
+
+        <!-- LangChain4j -->
+        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-bedrock</artifactId></dependency>
+        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-azure-open-ai</artifactId></dependency>
+        <dependency><groupId>dev.langchain4j</groupId><artifactId>langchain4j-vertex-ai-gemini</artifactId></dependency>
+
+        <!-- Search -->
+        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId></dependency>
+        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queryparser</artifactId></dependency>
+        <dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-analyzers-common</artifactId></dependency>
+        <dependency><groupId>com.opencsv</groupId><artifactId>opencsv</artifactId></dependency>
+        <dependency><groupId>com.healthmarketscience.sqlbuilder</groupId><artifactId>sqlbuilder</artifactId></dependency>
+
+        <!-- Scripting -->
+        <dependency><groupId>org.python</groupId><artifactId>jython-standalone</artifactId></dependency>
+        <dependency><groupId>org.apache.groovy</groupId><artifactId>groovy-all</artifactId><type>pom</type></dependency>
+        <dependency><groupId>org.reflections</groupId><artifactId>reflections</artifactId></dependency>
+
+        <!-- Storage -->
+        <dependency><groupId>io.minio</groupId><artifactId>minio</artifactId></dependency>
+        <dependency><groupId>com.google.protobuf</groupId><artifactId>protobuf-java</artifactId></dependency>
+        <dependency><groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId></dependency>
+        <dependency><groupId>commons-fileupload</groupId><artifactId>commons-fileupload</artifactId></dependency>
+
+        <!-- Managed by spring-boot-starter-parent — no version needed -->
         <dependency><groupId>com.jayway.jsonpath</groupId><artifactId>json-path</artifactId></dependency>
         <dependency><groupId>wsdl4j</groupId><artifactId>wsdl4j</artifactId></dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

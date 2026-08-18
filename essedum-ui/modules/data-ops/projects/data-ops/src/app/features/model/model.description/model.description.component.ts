@@ -105,13 +105,12 @@ export class ModelDescriptionComponent implements OnInit {
     params = params.set('project', this.organisation);
     this.service.getModelBySourceId(params).subscribe((res) => {
       this.card = res;
+      if (this.card && this.card.createdBy) {
+        this.cardCreator = this.card.createdBy.split('@')[0];
+        this.avatar = this.cardCreator.charAt(0).toUpperCase();
+      }
       this.getRelatedComponent();
     });
-
-    if (this.card.createdBy) {
-      this.cardCreator = this.card.createdBy.split('@')[0];
-      this.avatar = this.cardCreator.charAt(0).toUpperCase();
-    }
   }
 
   getRelatedComponent() {

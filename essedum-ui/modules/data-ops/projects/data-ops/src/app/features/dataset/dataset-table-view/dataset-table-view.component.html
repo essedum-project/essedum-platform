@@ -21,13 +21,6 @@
               <input matInput placeholder="Highlight" [(ngModel)]="search" />
             </mat-form-field> -->
 
-          <div title="Upload" *ngIf="dataset?.type == 'rw'" (click)="upload = true; selecteddataset = dataset"
-            designType="icon">
-            <span class="">
-              <i class="aip-led-icons icon x-24 upload-icon"></i>
-            </span>
-          </div>
-
           <div (click)="refresh()" title="Click to Synchronize. Last Synced on {{ lastRefreshDate }}">
             <mat-icon class="lfx-icon-hover">refresh</mat-icon>
           </div>
@@ -94,11 +87,6 @@
             title="Terminate Download">
             <span style="color: white">{{ downloadPercentage }} %</span>
           </button>
-          <div *ngIf="!isItsm" title="Display Details" (click)="displayDetails()" designType="icon">
-            <span class="">
-              <i class="aip-led-icons icon x-24 show-icon"></i>
-            </span>
-          </div>
 
           <ng-template #content3 let-modal>
             <!-- <div style="display: none"> -->
@@ -138,9 +126,6 @@
               </div>
             </div>
           </mat-menu>
-          <button mat-icon-button [matMenuTriggerFor]="overflowMenu" title="Choose Columns and Styles">
-            <mat-icon class="lfx-icon-hover">more_vert</mat-icon>
-          </button>
         </div>
       </div>
 

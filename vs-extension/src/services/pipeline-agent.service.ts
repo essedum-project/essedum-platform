@@ -423,9 +423,27 @@ export class PipelineAgentService {
    * @param zipBuffer - ZIP file as Buffer
    * @param zipFileName - Name of the ZIP file
    * @param signal - Optional AbortSignal for cancellation
+   * @param isVibeStudio - Optional. When explicitly set (true/false), sent as the
+   *   backend's `isvibestudio` form field, which skips pipeline-metadata
+   *   validation when true (for AI-generated code with no metadata.json —
+   *   mirrors the web app's Vibe Studio/AI-chat-coder persist flows).
+   *   Left unset by existing callers so their request payload is unchanged.
+   * @param type - Optional. The backend's `type` form field is REQUIRED
+   *   server-side (`@RequestParam(required = true)` in ICIPFolderController)
+   *   — omitting it fails with "missing parameter 'type'". Left unset by
+   *   existing callers so their request payload is unchanged; new callers
+   *   must pass it (e.g. 'App', matching what the web app's Vibe
+   *   Studio/AI-chat-coder flows send for AI-generated code with isVibeStudio=true).
    * @returns Upload response
    */
-  async uploadFolderZip(pipelineId: string, zipBuffer: Buffer, zipFileName: string, signal?: AbortSignal): Promise<any> {
+  async uploadFolderZip(
+    pipelineId: string,
+    zipBuffer: Buffer,
+    zipFileName: string,
+    signal?: AbortSignal,
+    isVibeStudio?: boolean,
+    type?: string
+  ): Promise<any> {
     this.refreshAuthData();
 
     if (!pipelineId || !zipBuffer) {
@@ -448,6 +466,12 @@ export class PipelineAgentService {
       filename: zipFileName,
       contentType: 'application/zip'
     });
+    if (isVibeStudio !== undefined) {
+      formData.append('isvibestudio', String(isVibeStudio));
+    }
+    if (type !== undefined) {
+      formData.append('type', type);
+    }
 
     const baseHeaders = await this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
@@ -840,6 +864,40 @@ export class PipelineAgentService {
     });
 
     return response?.data || { files: [] };
+  }
+
+  /**
+   * Get skills catalogue for the "Attach a skill" feature
+   * GET /api/aip/skills?org={org}&page={page}&size={size}
+   * Mirrors the web app's agent-pipeline chat panel (essedum-ui), which fetches
+   * skills the same way to let users attach them to a message/action.
+   * @param options - org (defaults to current organization), page, size
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns Raw skills API response (array or paginated object depending on backend)
+   */
+  async getSkills(
+    options: { org?: string; page?: number; size?: number } = {},
+    signal?: AbortSignal
+  ): Promise<any> {
+    this.refreshAuthData();
+    configureSSLEnvironment(this.context);
+
+    const org = options.org || this.organization;
+    const page = options.page ?? 0;
+    const size = options.size ?? 50;
+
+    const headers = await this.buildHeaders();
+    const config: AxiosRequestConfig = {
+      httpsAgent: getHTTPSAgent(this.context),
+      timeout: 30000,
+      headers,
+      params: { org, page, size },
+      withCredentials: true,
+      signal,
+    };
+
+    const response = await this.requestWithRetry<any>('get', this.API.SKILLS_LIST, config);
+    return response?.data;
   }
 
 }
