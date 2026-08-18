@@ -3,11 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CHANGE 1 ▸ Parent changed from spring-boot-starter-parent to the
+         root aggregator POM (essedum-platform-sv).
+         The root POM inherits spring-boot-starter-parent, so this service
+         still gets all Spring Boot BOM management transitively.
+         relativePath points to the parent directory's pom.xml.
+         ════════════════════════════════════════════════════════════════════ -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
-        <relativePath/>
+        <groupId>com.lfn.ai</groupId>
+        <artifactId>essedum-platform-sv</artifactId>
+        <version>3.3-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>com.lfn.ai</groupId>
@@ -17,11 +25,26 @@
     <name>API Gateway - Spring Cloud Gateway</name>
     <description>API Gateway for routing requests to ESSEDUM microservices</description>
 
+    <!-- ════════════════════════════════════════════════════════════════════
+         CHANGE 2 ▸ Only service-specific overrides kept here.
+         Common properties (java.version, encoding, spring-cloud.version etc.)
+         are inherited from the root POM.
+
+         spring-framework.version is pinned back to Spring Boot 3.3.5's default
+         (6.1.14) because:
+           • api-gateway never had spring-framework.version set before
+           • The root POM sets 6.2.18 (for the other 4 services which explicitly
+             needed it), but api-gateway uses Spring Cloud Gateway 4.1.3 which
+             was tested and certified against Spring Framework 6.1.x
+           • Upgrading the gateway to 6.2.x without Spring Boot 3.4.x support
+             risks reactive WebFlux/Netty compatibility issues
+         ════════════════════════════════════════════════════════════════════ -->
     <properties>
-        <java.version>21</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-cloud.version>4.1.3</spring-cloud.version>
+        <spring-framework.version>6.1.14</spring-framework.version>
+        <!-- api-gateway was originally at jjwt 0.11.5; root BOM centralizes at 0.11.2
+             (the version used by the other 4 services). Override here to preserve
+             the original 0.11.5 version for this service — no version change. -->
+        <jjwt.version>0.11.5</jjwt.version>
     </properties>
 
     <dependencies>
@@ -29,38 +52,41 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
+        <!-- ── CHANGE 3 ▸ <version> removed — managed by root dependencyManagement -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
-            <version>${spring-cloud.version}</version>
         </dependency>
+
         <!-- Eureka removed - using K8s service discovery -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <!-- ── CHANGE 3 ▸ <version> removed — managed by root dependencyManagement -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>1.12.0</version>
         </dependency>
 
         <!-- JWT (JJWT) for token validation -->
+        <!-- ── CHANGE 3 ▸ <version> removed — managed by root dependencyManagement -->
+        <!-- ── CHANGE 4 ▸ jjwt.version overridden to 0.11.5 in <properties> above,
+             preserving the original version this service already had.           -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
