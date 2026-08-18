@@ -118,6 +118,9 @@ export class DatasetTableViewComponent implements OnInit {
   recipeName: any;
   selectedRecipe: any;
   searchToggle: boolean = false;
+  // True for schema-less datasets (e.g. object-storage CSVs) where searchData/searchDataCount
+  // endpoints don't work; we drive the table via getPaginatedData instead.
+  useDirectPaginated: boolean = false;
   basicReqTab: any = 'create';
   showRecipe: boolean = true;
   showWranglingData: boolean = false;
@@ -288,6 +291,7 @@ export class DatasetTableViewComponent implements OnInit {
         })
       }
       else {
+        this.useDirectPaginated = true;
         let pagination: any = { page: 0, size: 1 };
         this.service.getPaginatedDetails(this.dataset, pagination).subscribe(resp => {
           this.columnNamesList = [];
@@ -425,6 +429,10 @@ export class DatasetTableViewComponent implements OnInit {
       else {
         this.searchIncidentObj = {};
         this.cols.map(ele => ele['filterValue'] = null);
+      }
+      if (this.useDirectPaginated && !this.itsm && !this.tickets) {
+        this.fetchDirectPaginatedRows(pagination);
+        return;
       }
       if (!this.itsm && !this.tickets) {
         let queryParams: any = { number: this.id }
@@ -568,6 +576,36 @@ export class DatasetTableViewComponent implements OnInit {
     }
   }
 
+  fetchDirectPaginatedRows(pagination: any) {
+    this.appLoading = true;
+    this.busy = this.service.getPaginatedDetails(this.dataset, pagination)
+      .subscribe((resp: any) => {
+        let body: any[] = (resp && Array.isArray(resp.body)) ? resp.body : [];
+        this.ticketList = [];
+        body.forEach((element) => {
+          if (element) {
+            Object.keys(element).map(ky => { if (element[ky] != null) element[ky] = element[ky].toString(); });
+            this.ticketList.push(element);
+          }
+        });
+        this.ticketListBackup = this.ticketList;
+        // Best-effort row count: if we filled the page there may be more; otherwise we know total.
+        if (body.length < this.rows) {
+          this.datasetsCount = this.page * this.rows + body.length;
+        } else {
+          this.datasetsCount = Math.max(this.datasetsCount || 0, (this.page + 1) * this.rows + 1);
+        }
+        this.initializePaginationVariables();
+        this.appLoading = false;
+        this.changeDetectorRefs.detectChanges();
+      },
+      (error) => {
+        this.service.message("Could not get the results", "error");
+        this.ticketList = this.ticketListBackup;
+        this.appLoading = false;
+      });
+  }
+
   searchValueAdder(event, columnName: string, dateIndicator?: string) {
     if (event.target.value != "") {
       if (event.target.value.includes(",")) {
@@ -638,6 +676,10 @@ export class DatasetTableViewComponent implements OnInit {
         })
       }
 
+      if (this.useDirectPaginated && !this.itsm) {
+        this.fetchDirectPaginatedRows(pagination);
+        return;
+      }
       if (!this.itsm) {
         this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
           .subscribe(res => {

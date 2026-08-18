@@ -23,9 +23,7 @@
 
           <div title="Upload" *ngIf="dataset?.type == 'rw'" (click)="upload = true; selecteddataset = dataset"
             designType="icon">
-            <span class="">
-              <i class="aip-led-icons icon x-24 upload-icon"></i>
-            </span>
+            <mat-icon class="lfx-icon-hover">cloud_upload</mat-icon>
           </div>
 
           <div (click)="refresh()" title="Click to Synchronize. Last Synced on {{ lastRefreshDate }}">
@@ -95,9 +93,7 @@
             <span style="color: white">{{ downloadPercentage }} %</span>
           </button>
           <div *ngIf="!isItsm" title="Display Details" (click)="displayDetails()" designType="icon">
-            <span class="">
-              <i class="aip-led-icons icon x-24 show-icon"></i>
-            </span>
+            <mat-icon class="lfx-icon-hover">visibility</mat-icon>
           </div>
 
           <ng-template #content3 let-modal>

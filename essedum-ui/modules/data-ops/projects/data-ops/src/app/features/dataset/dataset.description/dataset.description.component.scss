@@ -239,3 +239,33 @@ body.header-light-theme {
   :host ::ng-deep .mdc-text-field--disabled input { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
   :host ::ng-deep .mdc-text-field--disabled .mdc-floating-label { color: #94a3b8 !important; }
 }
+
+// ── Text / Log / Email preview: keep long content inside the preview panel ──
+.text-view {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  overflow: auto;
+  max-height: 60vh;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+
+  .tab_content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 4px 4px;
+
+    // Neutralize Bootstrap .row negative margins so text stays inside the panel.
+    .row {
+      margin: 0 !important;
+      padding: 8px 12px;
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+    }
+  }
+}
