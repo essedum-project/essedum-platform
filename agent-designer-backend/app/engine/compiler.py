@@ -24,7 +24,7 @@ AgentFlowState is a TypedDict with:
 from __future__ import annotations
 
 import logging
-from typing import Any, TypedDict
+from typing import Annotated, Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -38,11 +38,19 @@ logger = logging.getLogger(__name__)
 # Shared state
 # ---------------------------------------------------------------------------
 
+def _merge_dicts(a: dict, b: dict) -> dict:
+    """Reducer for dict-typed state fields — merges b into a."""
+    return {**a, **b}
+
+
 class AgentFlowState(TypedDict):
-    node_outputs: dict[str, Any]   # keyed by node_id
+    # Annotated reducers allow multiple nodes to update these dicts in the same
+    # step (e.g. when the graph has fan-out or cyclic edges).
+    node_outputs: Annotated[dict[str, Any], _merge_dicts]
+    loop_counts:  Annotated[dict[str, int], _merge_dicts]
     execution_id: str
-    context: dict[str, Any]        # flow_id, session_id, input, db, …
-    error: str | None              # set on first node failure
+    context: dict[str, Any]   # flow_id, session_id, input, db, …
+    error: str | None          # set on first node failure
 
 
 # ---------------------------------------------------------------------------
@@ -83,8 +91,12 @@ def compile_flow(
                 if state.get("error"):
                     return {}
 
-                ctx = state["context"]
                 node_outputs = state["node_outputs"]
+
+                # Track per-node execution count for cyclic flows.
+                # Return only the delta — the Annotated reducer merges it.
+                current_count: int = (state.get("loop_counts") or {}).get(nid, 0)
+                ctx = {**state["context"], "loop_count": current_count}
 
                 # Resolve upstream inputs via edges
                 inputs = resolve_inputs(nid, edges, node_outputs)
@@ -102,9 +114,6 @@ def compile_flow(
                     executor = get_executor(nt)
                     output = await executor.execute(n, inputs, ctx)
 
-                    # Persist output into shared state
-                    updated_outputs = {**node_outputs, nid: output}
-
                     if log_fn:
                         await log_fn(
                             ctx["db"], state["execution_id"], nid,
@@ -119,7 +128,11 @@ def compile_flow(
                             "output": output,
                         })
 
-                    return {"node_outputs": updated_outputs}
+                    # Return deltas only — Annotated reducers merge them into state
+                    return {
+                        "node_outputs": {nid: output},
+                        "loop_counts":  {nid: current_count + 1},
+                    }
 
                 except Exception as exc:
                     logger.exception("Node %s (%s) failed: %s", nid, nt, exc)
@@ -135,7 +148,7 @@ def compile_flow(
                             "node_id": nid,
                             "error": str(exc),
                         })
-                    return {"error": str(exc)}
+                    return {"error": str(exc), "loop_counts": {nid: current_count + 1}}
 
             node_fn.__name__ = f"node_{nid}"
             return node_fn

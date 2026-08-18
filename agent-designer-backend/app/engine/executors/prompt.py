@@ -44,6 +44,9 @@ class PromptExecutor(BaseExecutor):
     ) -> dict[str, Any]:
         config: dict = (node.get("data") or {}).get("config") or {}
         template: str = config.get("template", "{input}")
+        # Normalise Jinja2-style {{variable}} → {variable} so users can write
+        # either style and get correct substitution either way.
+        template = re.sub(r"\{\{(\s*[A-Za-z_][\w\.]*\s*)\}\}", r"{\1}", template)
         system_message: str | None = config.get("system_message")
 
         # Build substitution map: inputs + context variables
@@ -54,6 +57,13 @@ class PromptExecutor(BaseExecutor):
                 f"{e.get('role','?')}: {e.get('content','')}"
                 for e in sub_map["history"]
             )
+        # Fall back to the execution's original user message for {input}/{message}
+        # so prompt templates work without requiring a direct Text Input → Prompt edge.
+        ctx_input: dict = context.get("input") or {}
+        user_message: str = ctx_input.get("message") or ctx_input.get("text") or ""
+        if user_message:
+            sub_map.setdefault("input", user_message)
+            sub_map.setdefault("message", user_message)
 
         formatted = _safe_substitute(template, sub_map)
 

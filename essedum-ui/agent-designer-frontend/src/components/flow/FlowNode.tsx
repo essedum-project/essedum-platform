@@ -119,6 +119,19 @@ export const FlowNode = memo(({ id, data: rawData, selected }: NodeProps<AgentFl
         )}
       </div>
 
+      {/* Feedback-loop iteration badge */}
+      {data.definition?.type === 'feedback-loop-agent' && status === 'success' && data.output != null && (
+        <div className="mx-3 mb-1.5 flex items-center justify-center gap-2 px-2 py-1 rounded-md bg-purple-400/10 border border-purple-400/20">
+          <span className="text-[9px] font-mono text-purple-400">
+            {(data.output as Record<string, unknown>).iterations ?? 0} iter
+          </span>
+          <span className="text-[9px] text-muted-foreground">·</span>
+          <span className="text-[9px] font-mono text-purple-400">
+            score {(data.output as Record<string, unknown>).score ?? '?'}/10
+          </span>
+        </div>
+      )}
+
       {/* Output preview */}
       {data.output != null && status === 'success' && (
         <div className="mx-3 mb-2.5 p-2 rounded-lg bg-green-400/5 border border-green-400/20">
