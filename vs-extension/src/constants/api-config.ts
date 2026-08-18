@@ -76,6 +76,7 @@ interface ApiEndpoints {
     AUTH_BASE: string;
     GITHUB_BRANCHES: string;
     GITHUB_PULL: string;
+    SKILLS_LIST: string;
 }
 
 // Dynamic API Endpoints - these are generated on-demand with the current base URL
@@ -131,7 +132,10 @@ export function getApiEndpoints(): ApiEndpoints {
 
         // GitHub integration
         GITHUB_BRANCHES: `${baseUrl}/api/github/branches`,
-        GITHUB_PULL: `${baseUrl}/api/github/pull`
+        GITHUB_PULL: `${baseUrl}/api/github/pull`,
+
+        // Skills (attach-a-skill feature)
+        SKILLS_LIST: `${baseUrl}/api/aip/skills`
     };
 
     return _endpointsCache;

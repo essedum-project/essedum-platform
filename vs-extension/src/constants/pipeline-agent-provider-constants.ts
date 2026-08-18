@@ -37,7 +37,8 @@ export const WEBVIEW_COMMANDS = {
     VIEW_ADK: 'viewAdk',
     DOWNLOAD_ADK: 'downloadAdk',
     REFRESH_JSON: 'refreshJson',
-    COPY_JSON: 'copyJson'
+    COPY_JSON: 'copyJson',
+    ADD_SKILLS_TO_COPILOT: 'addSkillsToCopilot'
 } as const;
 
 /**
@@ -49,8 +50,28 @@ export const CLIENT_COMMANDS = {
     ADK_FILES_STATUS: 'adkFilesStatus',
     AUTHENTICATION_PROGRESS: 'authenticationProgress',
     AUTHENTICATION_ERROR: 'authenticationError',
-    AUTHENTICATION_SUCCESS: 'authenticationSuccess'
+    AUTHENTICATION_SUCCESS: 'authenticationSuccess',
+    SKILLS_LOADED: 'skillsLoaded'
 } as const;
+
+/**
+ * Icon glyphs used by the client for the "Attach a skill" menu, keyed by
+ * skillType returned from the API. This webview has no icon font (unlike the
+ * web app's mat-icon), so plain unicode glyphs are used instead — the type
+ * keys mirror the web app's iconMap (agent-pipeline.component.ts) for parity.
+ */
+export const SKILL_ICON_MAP: Record<string, string> = {
+    CODE_GENERATION: '✨',
+    TEST_GENERATION: '🧪',
+    DOCUMENTATION: '📖',
+    REFACTOR: '🛠',
+    DEBUG: '🐞',
+    SECURITY: '🛡',
+    PERFORMANCE: '⚡',
+    ANALYSIS: '🧩'
+} as const;
+
+export const DEFAULT_SKILL_ICON = '🔧';
 
 /**
  * HTTP parameters for API calls

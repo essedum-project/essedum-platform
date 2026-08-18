@@ -33,11 +33,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     } else if (this.pipelineMode === 'app') {
       return 'App Pipelines';
     } else if (this.pipelineMode === 'pipeline') {
-      return 'Native Pipeline';
+      return 'Native Pipelines';
     } else if (this.pipelineMode === 'data') {
-      return 'Data Pipeline';
+      return 'Data Pipelines';
     } else if (this.pipelineMode === 'training') {
-      return 'Training Pipeline';
+      return 'Training Pipelines';
     } else {
       return 'Agent Pipelines';
     }

@@ -26,6 +26,10 @@ class PipelineAgentClient {
 
         this.currentAgentData = null;
 
+        // "Attach a skill" state
+        this.availableSkills = [];
+        this.attachedSkills = [];
+
         this.initializeElements();
         this.attachEventListeners();
         this.setupMessageHandler();
@@ -72,6 +76,12 @@ class PipelineAgentClient {
         this.refreshJsonBtn = document.getElementById('refreshJsonBtn');
         this.copyJsonBtn = document.getElementById('copyJsonBtn');
         this.actionStatus = document.getElementById('actionStatus');
+
+        // "Attach a skill" elements
+        this.attachSkillBtn = document.getElementById('attachSkillBtn');
+        this.skillMenuPopover = document.getElementById('skillMenuPopover');
+        this.skillMenuList = document.getElementById('skillMenuList');
+        this.attachedSkillsChips = document.getElementById('attachedSkillsChips');
     }
 
     attachEventListeners() {
@@ -105,6 +115,24 @@ class PipelineAgentClient {
         this.downloadAdkBtn?.addEventListener('click', () => this.handleDownloadAdk());
         this.refreshJsonBtn?.addEventListener('click', () => this.handleRefreshJson());
         this.copyJsonBtn?.addEventListener('click', () => this.handleCopyJson());
+
+        // Attach a skill
+        this.attachSkillBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleSkillMenu();
+        });
+
+        // Close the skill popover when clicking outside of it
+        document.addEventListener('click', (e) => {
+            if (!this.skillMenuPopover || this.skillMenuPopover.classList.contains('hidden')) {
+                return;
+            }
+            const clickedInsidePopover = this.skillMenuPopover.contains(e.target);
+            const clickedButton = this.attachSkillBtn && this.attachSkillBtn.contains(e.target);
+            if (!clickedInsidePopover && !clickedButton) {
+                this.closeSkillMenu();
+            }
+        });
     }
 
     setupMessageHandler() {
@@ -132,6 +160,9 @@ class PipelineAgentClient {
                     break;
                 case CMD.ADK_FILES_STATUS:
                     this.handleAdkFilesStatus(message);
+                    break;
+                case CMD.SKILLS_LOADED:
+                    this.handleSkillsLoaded(message);
                     break;
             }
         });
@@ -321,13 +352,26 @@ class PipelineAgentClient {
 
         if (this.pipelineInfo) {
             const DEF = this.constants.DEFAULTS;
-            this.pipelineInfo.innerHTML = `  
+            this.pipelineInfo.innerHTML = `
                 <p><strong>Pipeline ID:</strong> ${this.escapeHtml(data.pipelineId || DEF.PIPELINE_ID)}</p>
                 <p><strong>Type:</strong> ${this.escapeHtml(data.type || DEF.PIPELINE_ID)}</p>
                 <p><strong>Organization:</strong> ${this.escapeHtml(data.organization || DEF.PIPELINE_ID)}</p>
                 <p><strong>Status:</strong> <span class="status-badge">${this.escapeHtml(data.status || DEF.STATUS)}</span></p>
                 ${data.description ? `<p><strong>Description:</strong> ${this.escapeHtml(data.description)}</p>` : ''}
             `;
+        }
+
+        // Reset attach-skill state for the newly opened agent, and clean up
+        // any leftover context file from a previously viewed agent.
+        const hadAttachedSkills = this.attachedSkills.length > 0;
+        this.attachedSkills = [];
+        this.closeSkillMenu();
+        this.renderAttachedSkillChips();
+        if (this.skillMenuList) {
+            this.skillMenuList.innerHTML = '<div class="skill-menu-empty">Loading skills…</div>';
+        }
+        if (hadAttachedSkills) {
+            this.syncSkillsContext();
         }
     }
 
@@ -354,6 +398,119 @@ class PipelineAgentClient {
                 pipelineId: this.currentAgentData.pipelineId
             });
         }
+    }
+
+    // ================================
+    // ATTACH A SKILL
+    // ================================
+
+    handleSkillsLoaded(message) {
+        this.availableSkills = Array.isArray(message.skills) ? message.skills : [];
+        console.log('[Pipeline Agent Client] Skills loaded:', this.availableSkills.length);
+        this.renderSkillMenu();
+    }
+
+    toggleSkillMenu() {
+        if (!this.skillMenuPopover) { return; }
+        const isHidden = this.skillMenuPopover.classList.contains('hidden');
+        if (isHidden) {
+            this.renderSkillMenu();
+        }
+        this.skillMenuPopover.classList.toggle('hidden', !isHidden);
+        this.attachSkillBtn?.classList.toggle('active', isHidden);
+        this.attachSkillBtn?.setAttribute('aria-expanded', String(isHidden));
+    }
+
+    closeSkillMenu() {
+        if (!this.skillMenuPopover) { return; }
+        this.skillMenuPopover.classList.add('hidden');
+        this.attachSkillBtn?.classList.remove('active');
+        this.attachSkillBtn?.setAttribute('aria-expanded', 'false');
+    }
+
+    isSkillAttached(skill) {
+        return this.attachedSkills.some(s => s.value === skill.value);
+    }
+
+    toggleAttachSkill(skill) {
+        const index = this.attachedSkills.findIndex(s => s.value === skill.value);
+        if (index >= 0) {
+            this.attachedSkills.splice(index, 1);
+        } else {
+            this.attachedSkills.push(skill);
+        }
+        this.renderAttachedSkillChips();
+        this.renderSkillMenu();
+        // Keep the "Attached Skills" context file in sync — it holds the
+        // full name + description for each attached skill (chips only show
+        // the name) so the user can drag/attach the file into their own
+        // chat message instead of anything being auto-sent for them.
+        this.syncSkillsContext();
+    }
+
+    removeAttachedSkill(index) {
+        this.attachedSkills.splice(index, 1);
+        this.renderAttachedSkillChips();
+        this.renderSkillMenu();
+        this.syncSkillsContext();
+    }
+
+    syncSkillsContext() {
+        const pipelineId = this.currentAgentData ? this.currentAgentData.pipelineId : undefined;
+        console.log('[Pipeline Agent Client] Syncing attached skills context file:', this.attachedSkills, 'for pipeline:', pipelineId);
+        this.vscode.postMessage({
+            command: this.constants.COMMANDS_TO_EXTENSION.ADD_SKILLS_TO_COPILOT,
+            skills: this.attachedSkills,
+            pipelineId
+        });
+    }
+
+    renderSkillMenu() {
+        if (!this.skillMenuList) { return; }
+
+        if (!this.availableSkills.length) {
+            this.skillMenuList.innerHTML = '<div class="skill-menu-empty">No skills available</div>';
+            return;
+        }
+
+        this.skillMenuList.innerHTML = this.availableSkills.map((skill, i) => {
+            const selected = this.isSkillAttached(skill);
+            return `
+                <div class="skill-menu-item${selected ? ' selected' : ''}" data-skill-index="${i}">
+                    <span class="skill-menu-item-icon">${this.escapeHtml(skill.icon || '🔧')}</span>
+                    <span class="skill-menu-item-label">${this.escapeHtml(skill.label || skill.value)}</span>
+                    <span class="skill-menu-item-check">✓</span>
+                </div>
+            `;
+        }).join('');
+
+        this.skillMenuList.querySelectorAll('.skill-menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const idx = parseInt(item.getAttribute('data-skill-index'), 10);
+                const skill = this.availableSkills[idx];
+                if (skill) { this.toggleAttachSkill(skill); }
+            });
+        });
+    }
+
+    renderAttachedSkillChips() {
+        if (!this.attachedSkillsChips) { return; }
+
+        this.attachedSkillsChips.innerHTML = this.attachedSkills.map((skill, i) => `
+            <span class="attached-skill-chip">
+                <span>${this.escapeHtml(skill.icon || '🔧')}</span>
+                <span class="skill-chip-label">${this.escapeHtml(skill.label || skill.value)}</span>
+                <button type="button" class="remove-skill-chip" data-chip-index="${i}" aria-label="Remove skill">✕</button>
+            </span>
+        `).join('');
+
+        this.attachedSkillsChips.querySelectorAll('.remove-skill-chip').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.getAttribute('data-chip-index'), 10);
+                this.removeAttachedSkill(idx);
+            });
+        });
     }
 
     handleUploadFromGitHub() {
