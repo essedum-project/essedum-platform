@@ -1134,7 +1134,7 @@ export class DatasetByNameComponent {
     // Simulate data fetching
     setTimeout(() => {
       this.lastRefreshedTime = new Date();
-      console.log('Data refreshed!');
+      // console.log('Data refreshed!');
     }, 1000);
   }
   onFilterStatusChange(hasActiveFilters: boolean) {

@@ -37,7 +37,7 @@ export class AppInitService {
    }
 
    init() {
-      console.log("AppInitService.init() called");
+      // console.log("AppInitService.init() called");
       return this.https
          .get("/api/getConfigDetails")
          .pipe(tap((res: any) => {

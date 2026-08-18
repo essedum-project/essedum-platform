@@ -1828,7 +1828,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
         .filter(item => item.selected)
         .map(item => item.value);
         
-      console.log('Model datasource list initialized:', this.modelDataSourceList);
+      // console.log('Model datasource list initialized:', this.modelDataSourceList);
     }
   }
 

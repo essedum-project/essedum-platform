@@ -17,14 +17,14 @@
 
                                 </span>
                                 <span class="lfx-u-mar-l-8 header-title"><span class="title">Model:
-                                    </span>{{card.modelName | titlecase}} </span>
-                                <span class="lfx-u-mar-l-16 lfx-c-badge float-end"
+                                    </span>{{card?.modelName | titlecase}} </span>
+                                <span class="lfx-u-mar-l-16 lfx-c-badge float-end" *ngIf="card"
                                     [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed' ?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
                             </div>
 
                         </div>
                         <div
-                            class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16 aip-panel-shadow">
+                            class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16 aip-panel-shadow" *ngIf="card">
                             <div class="ml-2 row col-md-12">
                                 <div
                                     [ngClass]="card.description==''||card.description==null||card.description=='null'?'noDisplay':'showDesc'">
