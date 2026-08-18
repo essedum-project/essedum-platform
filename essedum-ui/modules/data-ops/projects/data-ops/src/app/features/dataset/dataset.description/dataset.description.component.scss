@@ -245,27 +245,51 @@ body.header-light-theme {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 16px;
-  overflow: auto;
-  max-height: 60vh;
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  padding: 0;
+  overflow: hidden;
+  max-height: 65vh;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.25);
 
+  // Tab header sits flush inside the card
+  ::ng-deep .mat-mdc-tab-group,
+  ::ng-deep .mat-mdc-tab-header {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  }
+  ::ng-deep .mat-mdc-tab-body-wrapper { background: transparent !important; }
+
+  // Content region: single flush panel below the tab strip
   .tab_content {
     width: 100%;
     box-sizing: border-box;
-    padding: 12px 4px 4px;
+    padding: 16px 20px;
+    max-height: 50vh;
+    overflow: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.55;
 
     // Neutralize Bootstrap .row negative margins so text stays inside the panel.
     .row {
       margin: 0 !important;
-      padding: 8px 12px;
+      padding: 0;
       display: block;
       white-space: pre-wrap;
       word-break: break-word;
       overflow-wrap: anywhere;
-      line-height: 1.5;
     }
   }
+}
+
+// pre variant used by Log View
+pre.text-view {
+  padding: 16px 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
 }

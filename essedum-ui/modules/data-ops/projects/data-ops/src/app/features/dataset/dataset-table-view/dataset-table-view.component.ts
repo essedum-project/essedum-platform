@@ -119,8 +119,10 @@ export class DatasetTableViewComponent implements OnInit {
   selectedRecipe: any;
   searchToggle: boolean = false;
   // True for schema-less datasets (e.g. object-storage CSVs) where searchData/searchDataCount
-  // endpoints don't work; we drive the table via getPaginatedData instead.
+  // endpoints don't work; we drive the table via getProxyDbDatasetDetails instead.
   useDirectPaginated: boolean = false;
+  // Resolved datasource object (needed for getProxyDbDatasetDetails).
+  resolvedDatasource: any = null;
   basicReqTab: any = 'create';
   showRecipe: boolean = true;
   showWranglingData: boolean = false;
@@ -193,8 +195,6 @@ export class DatasetTableViewComponent implements OnInit {
               else actionToBeCompared = "update";
               this.getDatasetFormTemplate()
                         this.appLoading = false;
-                        let response: number = +resp;
-                this.datasetsCount = response;
 
             }
             else { this.service.message("Dataset details not found", "error") 
@@ -292,35 +292,42 @@ export class DatasetTableViewComponent implements OnInit {
       }
       else {
         this.useDirectPaginated = true;
-        let pagination: any = { page: 0, size: 1 };
-        this.service.getPaginatedDetails(this.dataset, pagination).subscribe(resp => {
-          this.columnNamesList = [];
-          this.columnHeadersList = [];
-          if (resp && resp.body[0]) {
-            if (this.asChildView) {
+        this.service.getDatasource(this.dataset.datasource).subscribe((dsResp: any) => {
+          this.resolvedDatasource = dsResp;
+          const org = sessionStorage.getItem('organization') || this.dataset.organization;
+          const params = { page: 0, size: 1 };
+          this.service.getProxyDbDatasetDetails(this.dataset, this.resolvedDatasource, params, org, true)
+            .subscribe((resp: any) => {
               this.columnNamesList = [];
               this.columnHeadersList = [];
-            }
-            Object.keys(resp.body[0]).forEach((ky) => {
-              this.columnNamesList.push(ky);
-              this.columnHeadersList.push(ky);
-            })
-            this.checkRouteQueryParams();
-          }
-          else {
-            this.service.message("Dataset query returned no results", "error");
-          }
-        },
-          error => {
-            if (this.asChildView) {
-              this.service.message('Error! '+error, "error");
-              this.columnNamesList = [];
-              this.columnHeadersList = [];
-              this.ticketList = [];
-              this.ticketListBackup = [];
-              this.datasetsCount = 0;
-            }
-          })
+              const firstRow = this.extractFirstRow(resp);
+              if (firstRow && typeof firstRow === 'object') {
+                if (this.asChildView) {
+                  this.columnNamesList = [];
+                  this.columnHeadersList = [];
+                }
+                Object.keys(firstRow).forEach((ky) => {
+                  this.columnNamesList.push(ky);
+                  this.columnHeadersList.push(ky);
+                });
+              }
+              this.checkRouteQueryParams();
+            },
+            (error) => {
+              if (this.asChildView) {
+                this.service.message('Error! ' + error, "error");
+                this.columnNamesList = [];
+                this.columnHeadersList = [];
+                this.ticketList = [];
+                this.ticketListBackup = [];
+                this.datasetsCount = 0;
+              }
+              this.checkRouteQueryParams();
+            });
+        }, (err: any) => {
+          this.service.message('Error resolving datasource: ' + err, 'error');
+          this.checkRouteQueryParams();
+        });
       }
     }
     catch (Exception: any) {
@@ -330,7 +337,7 @@ export class DatasetTableViewComponent implements OnInit {
   }
 
   checkRouteQueryParams() {
-    if (this.columnNamesList && this.columnNamesList.length < 1) {
+    if (this.columnNamesList && this.columnNamesList.length < 1 && !this.useDirectPaginated) {
       this.service.message("Received empty list of columns names", "error");
     }
     else {
@@ -578,32 +585,77 @@ export class DatasetTableViewComponent implements OnInit {
 
   fetchDirectPaginatedRows(pagination: any) {
     this.appLoading = true;
-    this.busy = this.service.getPaginatedDetails(this.dataset, pagination)
-      .subscribe((resp: any) => {
-        let body: any[] = (resp && Array.isArray(resp.body)) ? resp.body : [];
-        this.ticketList = [];
-        body.forEach((element) => {
-          if (element) {
-            Object.keys(element).map(ky => { if (element[ky] != null) element[ky] = element[ky].toString(); });
-            this.ticketList.push(element);
+    const org = sessionStorage.getItem('organization') || this.dataset?.organization;
+    const params = { page: Number(pagination?.page) || 0, size: Number(pagination?.size) || Number(this.rows) || 10 };
+
+    const runFetch = () => {
+      this.busy = this.service.getProxyDbDatasetDetails(this.dataset, this.resolvedDatasource, params, org, true)
+        .subscribe((resp: any) => {
+          const body: any[] = this.extractRows(resp);
+          this.ticketList = [];
+          body.forEach((element) => {
+            if (element && typeof element === 'object') {
+              Object.keys(element).map(ky => { if (element[ky] != null) element[ky] = element[ky].toString(); });
+              this.ticketList.push(element);
+            }
+          });
+          if ((!this.cols || this.cols.length === 0) && this.ticketList.length > 0) {
+            this.columnNamesList = [];
+            this.columnHeadersList = [];
+            Object.keys(this.ticketList[0]).forEach((ky) => {
+              this.columnNamesList.push(ky);
+              this.columnHeadersList.push(ky);
+            });
+            this.createColumn();
           }
+          this.ticketListBackup = this.ticketList;
+          const pageNum = params.page;
+          const pageSize = params.size;
+          if (body.length < pageSize) {
+            this.datasetsCount = pageNum * pageSize + body.length;
+          } else {
+            const prev = Number(this.datasetsCount);
+            this.datasetsCount = Math.max(isFinite(prev) ? prev : 0, (pageNum + 1) * pageSize + 1);
+          }
+          this.initializePaginationVariables();
+          this.appLoading = false;
+          this.changeDetectorRefs.detectChanges();
+        },
+        (error) => {
+          this.service.message("Could not get the results", "error");
+          this.ticketList = this.ticketListBackup;
+          this.appLoading = false;
         });
-        this.ticketListBackup = this.ticketList;
-        // Best-effort row count: if we filled the page there may be more; otherwise we know total.
-        if (body.length < this.rows) {
-          this.datasetsCount = this.page * this.rows + body.length;
-        } else {
-          this.datasetsCount = Math.max(this.datasetsCount || 0, (this.page + 1) * this.rows + 1);
-        }
-        this.initializePaginationVariables();
-        this.appLoading = false;
-        this.changeDetectorRefs.detectChanges();
-      },
-      (error) => {
-        this.service.message("Could not get the results", "error");
-        this.ticketList = this.ticketListBackup;
+    };
+
+    if (!this.resolvedDatasource) {
+      this.service.getDatasource(this.dataset.datasource).subscribe((dsResp: any) => {
+        this.resolvedDatasource = dsResp;
+        runFetch();
+      }, (err: any) => {
+        this.service.message('Error resolving datasource: ' + err, 'error');
         this.appLoading = false;
       });
+    } else {
+      runFetch();
+    }
+  }
+
+  // Normalize the various response shapes (array | {data:[]} | {content:[]} | JSON string) to rows.
+  private extractRows(resp: any): any[] {
+    let raw: any = resp;
+    if (raw && raw.body !== undefined) raw = raw.body;
+    if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch { /* leave */ } }
+    if (Array.isArray(raw)) return raw;
+    if (raw && Array.isArray(raw.data)) return raw.data;
+    if (raw && Array.isArray(raw.content)) return raw.content;
+    if (raw && Array.isArray(raw.rows)) return raw.rows;
+    return [];
+  }
+
+  private extractFirstRow(resp: any): any {
+    const rows = this.extractRows(resp);
+    return rows.length > 0 ? rows[0] : null;
   }
 
   searchValueAdder(event, columnName: string, dateIndicator?: string) {
