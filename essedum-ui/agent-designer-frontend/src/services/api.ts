@@ -1,4 +1,6 @@
-const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL || '';
+// In dev, use empty base URL so Vite proxies /api → backend (avoids CORS).
+// In production builds, use the configured backend URL directly.
+const API_BASE_URL: string = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL || '');
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
