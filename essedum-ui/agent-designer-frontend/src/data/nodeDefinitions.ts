@@ -508,6 +508,58 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     ],
     tags: ['agent', 'router', 'classify'],
   },
+  {
+    type: 'feedback-loop-agent',
+    category: 'agent',
+    label: 'Feedback Loop Agent',
+    description: 'Iteratively generates and self-evaluates output until a quality threshold is met or max iterations are reached',
+    icon: '🔄',
+    color: 'hsl(262 83% 68%)',
+    inputs: [
+      { id: 'input', label: 'Input', type: 'text' },
+    ],
+    outputs: [
+      { id: 'output', label: 'Final Output', type: 'text' },
+      { id: 'score', label: 'Final Score', type: 'data' },
+      { id: 'iterations', label: 'Iteration Count', type: 'data' },
+    ],
+    fields: [
+      { id: 'provider', label: 'Generator Provider', type: 'select', default: 'azure_openai', options: [{ label: 'Azure OpenAI', value: 'azure_openai' }, { label: 'AWS Bedrock', value: 'bedrock' }, { label: 'Google Vertex AI', value: 'vertex_ai' }, { label: 'Ollama (Local)', value: 'ollama' }], group: 'Generator LLM', required: true },
+      { id: 'model', label: 'Generator Model', type: 'text', default: 'gpt-4o', placeholder: 'gpt-4o, claude-3-opus, llama3…', group: 'Generator LLM', required: true },
+      { id: 'generation_prompt', label: 'Generation System Prompt', type: 'textarea', placeholder: 'You are a helpful assistant. Generate high-quality output for the given input.', group: 'Generator LLM' },
+      { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 2, step: 0.1, group: 'Generator LLM' },
+      { id: 'max_tokens', label: 'Max Tokens', type: 'number', default: 2048, min: 64, max: 32000, group: 'Generator LLM' },
+      { id: 'evaluator_provider', label: 'Evaluator Provider', type: 'select', default: 'azure_openai', options: [{ label: 'Azure OpenAI', value: 'azure_openai' }, { label: 'AWS Bedrock', value: 'bedrock' }, { label: 'Google Vertex AI', value: 'vertex_ai' }, { label: 'Ollama (Local)', value: 'ollama' }], group: 'Evaluator LLM', required: true },
+      { id: 'evaluator_model', label: 'Evaluator Model', type: 'text', default: 'gpt-4o', placeholder: 'gpt-4o, claude-3-opus, llama3…', group: 'Evaluator LLM', required: true },
+      { id: 'evaluation_criteria', label: 'Evaluation Criteria', type: 'textarea', placeholder: 'Rate the output from 1-10 based on clarity, accuracy, and completeness.\nReply ONLY with JSON: {"score": <1-10>, "feedback": "<actionable feedback>"}', group: 'Evaluator LLM', required: true },
+      { id: 'score_threshold', label: 'Score Threshold (1–10)', type: 'slider', default: 7, min: 1, max: 10, step: 0.5, group: 'Loop Control' },
+      { id: 'max_iterations', label: 'Max Iterations', type: 'number', default: 3, min: 1, max: 10, group: 'Loop Control' },
+    ],
+    tags: ['agent', 'feedback', 'loop', 'quality', 'self-improving', 'evaluate'],
+  },
+  {
+    type: 'feedback-evaluator',
+    category: 'agent',
+    label: 'Feedback Evaluator',
+    description: 'Scores generated output and routes to retry (loop back to generator) or pass (continue to next node)',
+    icon: '⚖️',
+    color: 'hsl(262 83% 68%)',
+    inputs: [
+      { id: 'input', label: 'Generated Output', type: 'text' },
+    ],
+    outputs: [
+      { id: 'pass',  label: 'Pass (accepted)',           type: 'text' },
+      { id: 'retry', label: 'Retry (improvement prompt)', type: 'text' },
+    ],
+    fields: [
+      { id: 'evaluator_provider', label: 'Evaluator Provider', type: 'select', default: 'azure_openai', options: [{ label: 'Azure OpenAI', value: 'azure_openai' }, { label: 'AWS Bedrock', value: 'bedrock' }, { label: 'Google Vertex AI', value: 'vertex_ai' }, { label: 'Ollama (Local)', value: 'ollama' }], group: 'Evaluator LLM', required: true },
+      { id: 'evaluator_model', label: 'Evaluator Model', type: 'text', default: 'gpt-4o', placeholder: 'gpt-4o, gpt-4o-mini…', group: 'Evaluator LLM', required: true },
+      { id: 'evaluation_criteria', label: 'Evaluation Criteria', type: 'textarea', placeholder: 'Rate 1-10 for clarity and accuracy.\nReply ONLY with JSON: {"score": <1-10>, "feedback": "<actionable improvement>"}', group: 'Evaluator LLM', required: true },
+      { id: 'score_threshold', label: 'Score Threshold (1–10)', type: 'slider', default: 7, min: 1, max: 10, step: 0.5, group: 'Loop Control' },
+      { id: 'max_iterations', label: 'Max Iterations', type: 'number', default: 3, min: 1, max: 10, group: 'Loop Control' },
+    ],
+    tags: ['agent', 'evaluator', 'feedback', 'loop', 'score', 'quality', 'branching'],
+  },
 
   // ── Memory Nodes ──────────────────────────────────────────────────────────────
   {

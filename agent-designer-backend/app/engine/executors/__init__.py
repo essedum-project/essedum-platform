@@ -8,6 +8,8 @@ from app.engine.executors.memory import MemoryExecutor
 from app.engine.executors.http_request import HTTPRequestExecutor
 from app.engine.executors.condition import ConditionExecutor
 from app.engine.executors.router_agent import RouterAgentExecutor
+from app.engine.executors.feedback_loop import FeedbackLoopAgentExecutor
+from app.engine.executors.feedback_evaluator import FeedbackEvaluatorExecutor
 
 EXECUTOR_REGISTRY = {
     "chat_input": ChatInputExecutor(),
@@ -20,11 +22,13 @@ EXECUTOR_REGISTRY = {
     "http_request": HTTPRequestExecutor(),
     "condition": ConditionExecutor(),
     "router_agent": RouterAgentExecutor(),
+    "feedback_loop_agent": FeedbackLoopAgentExecutor(),
+    "feedback_evaluator":  FeedbackEvaluatorExecutor(),
 }
 
 # Node types whose execution emits a routing decision in ``output['_route']``.
 # The compiler uses this set to wire conditional edges instead of plain edges.
-BRANCHING_EXECUTOR_KEYS = {"condition", "router_agent"}
+BRANCHING_EXECUTOR_KEYS = {"condition", "router_agent", "feedback_evaluator"}
 
 
 def get_executor(node_type: str):

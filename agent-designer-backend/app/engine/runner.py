@@ -119,6 +119,7 @@ async def run_flow(
         "session_id": session_id,
         "input": input_data,
         "db": db,
+        "log_fn": _log,
     }
 
     await manager.broadcast(execution_id, {
@@ -147,15 +148,33 @@ async def run_flow(
         return execution_id
 
     # ── Invoke LangGraph graph ─────────────────────────────────────────────
+    # Derive a recursion limit that gives enough headroom for cyclic flows.
+    # Each feedback-evaluator loop iteration visits ~2 nodes; multiply by 4 for
+    # safety and add 10 for all non-looping nodes in the flow.
+    from app.engine.graph import get_node_type as _get_node_type
+    _max_iter = max(
+        (
+            int((n.get("data") or {}).get("config", {}).get("max_iterations") or 3)
+            for n in nodes
+            if _get_node_type(n) == "feedback_evaluator"
+        ),
+        default=3,
+    )
+    _recursion_limit = _max_iter * 4 + 10
+
     initial_state: AgentFlowState = {
         "node_outputs": {},
         "execution_id": execution_id,
         "context": ctx,
         "error": None,
+        "loop_counts": {},
     }
 
     try:
-        final_state: AgentFlowState = await compiled.ainvoke(initial_state)
+        final_state: AgentFlowState = await compiled.ainvoke(
+            initial_state,
+            {"recursion_limit": _recursion_limit},
+        )
     except Exception as exc:
         logger.exception("LangGraph invocation failed: %s", exc)
         await _fail_execution(execution, db, str(exc))
@@ -213,7 +232,9 @@ async def _log(
         timestamp=datetime.now(timezone.utc),
     )
     db.add(log)
-    await db.flush()
+    # Do NOT flush here — the session is shared across concurrent LangGraph node
+    # coroutines; concurrent flushes cause "Session is already flushing".
+    # All log rows are flushed together at the final db.commit().
 
 
 async def _fail_execution(
@@ -221,10 +242,20 @@ async def _fail_execution(
     db: AsyncSession,
     error: str,
 ) -> None:
+    # Roll back any partial/poisoned transaction before writing the error state.
+    # This is necessary when a concurrent flush inside a LangGraph node has
+    # already left the session in a PendingRollbackError state.
+    try:
+        await db.rollback()
+    except Exception:
+        pass
     execution.status = ExecutionStatus.error
     execution.completed_at = datetime.now(timezone.utc)
     execution.error = error
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as commit_exc:
+        logger.warning("Could not persist execution error state: %s", commit_exc)
     await manager.broadcast(execution.id, {
         "event": "execution_error",
         "execution_id": execution.id,

@@ -80,6 +80,7 @@ class ModelExecutor(BaseExecutor):
         system_text: str = (
             inputs.get("system_message")
             or config.get("system_message")
+            or config.get("system_prompt")   # nodeDefinitions uses 'system_prompt'
             or ""
         )
 
