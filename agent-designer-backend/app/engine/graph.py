@@ -135,6 +135,8 @@ _BACKEND_EXECUTOR_KEYS = {
     "http_request",
     "condition",
     "router_agent",
+    "feedback_loop_agent",
+    "feedback_evaluator",
 }
 
 # Specific frontend node-library type strings → backend executor keys.
@@ -148,6 +150,8 @@ _FRONTEND_TYPE_TO_EXECUTOR = {
     "http-request": "http_request",
     "condition": "condition",
     "router-agent": "router_agent",
+    "feedback-loop-agent":  "feedback_loop_agent",
+    "feedback-evaluator":   "feedback_evaluator",
 }
 
 # Category → backend executor key (covers all *-llm, *-memory, mcp-*,

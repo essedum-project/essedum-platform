@@ -29,8 +29,7 @@ import {
 import { cn } from '../../lib/utils';
 import { LABELS } from '../../lib/labels';
 import { useFlowStore } from '../../store/flowStore';
-import { llmService } from '../../services/llmService';
-import type { LlmChatMessage } from '../../models/api';
+import { executionService } from '../../services/executionService';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -86,29 +85,63 @@ function makeSession(flowName: string, index: number): StoredSession {
   };
 }
 
-// Maps frontend node type to the backend-supported provider name.
-// Using Map instead of a plain object avoids Generic Object Injection Sink:
-// Map.get() does not access object properties by user-controlled key.
-const NODE_TYPE_TO_PROVIDER = new Map<string, string>([
-  ['ollama-llm',       'ollama'],
-  ['openai-llm',       'azure_openai'],  // backend uses Azure OpenAI connector (OpenAI-compatible)
-  ['azure-openai-llm', 'azure_openai'],  // Azure OpenAI
-  ['anthropic-llm',    'bedrock'],       // Anthropic via AWS Bedrock
-  ['google-llm',       'vertex_ai'],     // Google via Vertex AI
-  ['mistral-llm',      'bedrock'],       // Mistral via AWS Bedrock
-  ['cohere-llm',       'bedrock'],       // Cohere via AWS Bedrock
-]);
+// ─── Minimal markdown → HTML renderer ───────────────────────────────────────
+// Handles: headings, bold, italic, inline code, fenced code blocks, tables,
+// ordered/unordered lists, and horizontal rules. No external dependency.
 
-// Resolve backend provider from node config (explicit override) or derived from node type.
-// Map.get() is safe from prototype-pollution — no bracket access on a plain object.
-function resolveProvider(nodeType: string, config: Record<string, unknown>): string {
-  return String(config.llm_provider ?? NODE_TYPE_TO_PROVIDER.get(nodeType) ?? 'ollama');
+function _mdToHtml(md: string): string {
+  let s = md
+    // Fenced code blocks (``` ... ```)
+    .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+      const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<pre><code class="language-${lang || 'text'}">${escaped.trim()}</code></pre>`;
+    })
+    // Headings
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,  '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,   '<h1>$1</h1>')
+    // Bold + italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g,     '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,         '<em>$1</em>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Horizontal rule
+    .replace(/^---+$/gm, '<hr/>')
+    // Unordered lists
+    .replace(/((?:^[ \t]*[-*+] .+\n?)+)/gm, (block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[ \t]*[-*+] /, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    })
+    // Ordered lists
+    .replace(/((?:^[ \t]*\d+\. .+\n?)+)/gm, (block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[ \t]*\d+\. /, '')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    })
+    // GFM tables (| col | col |)
+    .replace(/((?:^\|.+\|\n?)+)/gm, (block) => {
+      const rows = block.trim().split('\n').filter(r => !/^\|[-| :]+\|$/.test(r.trim()));
+      if (rows.length === 0) return block;
+      const [head, ...body] = rows;
+      const th = head.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
+      const trs = body.map(r => {
+        const tds = r.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+        return `<tr>${tds}</tr>`;
+      }).join('');
+      return `<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`;
+    })
+    // Paragraphs (double newline)
+    .replace(/\n{2,}/g, '</p><p>')
+    // Single newlines → <br> inside paragraphs
+    .replace(/\n/g, '<br/>');
+
+  return `<p>${s}</p>`;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export function PlaygroundModal({ open, onClose }: PlaygroundModalProps) {
-  const { currentFlowName, currentFlowId, nodes } = useFlowStore();
+  const { currentFlowName, currentFlowId } = useFlowStore();
 
   // Use flow ID (or name as fallback) as the key so sessions are isolated per flow
   const flowKey = currentFlowId ?? currentFlowName;
@@ -193,6 +226,11 @@ export function PlaygroundModal({ open, onClose }: PlaygroundModalProps) {
     const text = inputValue.trim();
     if (!text || isLoading) return;
 
+    if (!currentFlowId) {
+      alert('Save the flow before using the Playground (Flow → Save).');
+      return;
+    }
+
     // Capture session ID at send time to avoid stale closure
     const sessionId = activeSession.info.sessionId;
 
@@ -213,41 +251,43 @@ export function PlaygroundModal({ open, onClose }: PlaygroundModalProps) {
     setInputValue('');
     setIsLoading(true);
 
-    // Resolve provider + model from the first LLM node in the flow
-    const llmNode = nodes.find((n) => n.data.definition.category === 'llm');
-    const nodeType = llmNode?.data.definition.type ?? '';
-    const nodeConfig = llmNode?.data.config ?? {};
-    const provider = resolveProvider(nodeType, nodeConfig);
-    const model = String(nodeConfig.model ?? '');
-    // Prefer temperature/tokens from the node config; fall back to sensible defaults
-    const temperature = typeof nodeConfig.temperature === 'number' ? nodeConfig.temperature : 0.7;
-    const maxTokens =
-      typeof nodeConfig.num_predict === 'number' ? nodeConfig.num_predict  // Ollama field
-      : typeof nodeConfig.max_tokens === 'number' ? nodeConfig.max_tokens  // OpenAI / others
-      : 1000;
-
-    // Build full conversation history from current session messages + new user message
-    const history = activeSession.messages.map<LlmChatMessage>((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-    const llmMessages: LlmChatMessage[] = [
-      ...history,
-      { role: 'user', content: text },
-    ];
-
     try {
-      const data = await llmService.chat({
-        provider,
-        model,
-        messages: llmMessages,
-        temperature,
-        max_tokens: maxTokens,
+      // Trigger the full flow execution
+      const { execution_id } = await executionService.run(currentFlowId, {
+        message: text,
+        session_id: sessionId,
       });
+
+      // Poll until the execution reaches a terminal state (max ~120 s)
+      let execution: Awaited<ReturnType<typeof executionService.get>> | undefined;
+      for (let i = 0; i < 240; i++) {
+        await new Promise<void>((r) => setTimeout(r, 500));
+        execution = await executionService.get(execution_id);
+        if (execution.status === 'completed' || execution.status === 'error') break;
+      }
+
+      if (!execution) throw new Error('Execution timed out.');
+      if (execution.status === 'error') {
+        throw new Error((execution as { error?: string }).error ?? 'Flow execution failed.');
+      }
+
+      // Extract a displayable string from whatever the chat_output node returned.
+      // Use || (not ??) so empty strings fall through to the next candidate.
+      const raw = execution.output;
+      let outputText: string;
+      if (raw == null) {
+        outputText = 'Flow completed with no output. Check the Logs panel for details.';
+      } else {
+        const candidate = String(
+          raw.output || raw.text || raw.response || raw.result || ''
+        ).trim();
+        outputText = candidate || JSON.stringify(raw, null, 2) || 'Flow completed with empty output.';
+      }
+
       const assistantMsg: ChatMessage = {
         id: uid('msg-'),
         role: 'assistant',
-        content: data.response,
+        content: String(outputText),
         timestamp: nowTime(),
       };
       setSessions((prev) =>
@@ -306,23 +346,14 @@ export function PlaygroundModal({ open, onClose }: PlaygroundModalProps) {
             </div>
 
             <div className="flex items-center gap-2 mr-7">
-              {/* LLM indicator — provider/model come from the LLM node in the flow */}
-              {(() => {
-                const llmNode = nodes.find((n) => n.data.definition.category === 'llm');
-                if (!llmNode) return (
-                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 text-muted-foreground">
-                    No LLM node
-                  </Badge>
-                );
-                const nodeType = llmNode.data.definition.type;
-                const provider = resolveProvider(nodeType, llmNode.data.config);
-                const model = String(llmNode.data.config.model ?? '');
-                return (
-                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-mono max-w-[200px] truncate">
-                    {provider}{model ? ` · ${model}` : ''}
-                  </Badge>
-                );
-              })()}
+              {/* Flow execution mode indicator */}
+              <Badge
+                variant="outline"
+                className="text-[10px] h-5 px-1.5 font-mono gap-1 text-primary border-primary/40 bg-primary/5"
+              >
+                <Play className="w-2.5 h-2.5 fill-current" />
+                {currentFlowId ? 'Flow mode' : 'Save flow to run'}
+              </Badge>
 
               {/* Divider */}
               <div className="w-px h-4 bg-border" />
@@ -471,13 +502,26 @@ export function PlaygroundModal({ open, onClose }: PlaygroundModalProps) {
               {/* Bubble */}
               <div
                 className={cn(
-                  'max-w-[75%] rounded-xl px-4 py-2.5 text-sm whitespace-pre-wrap',
+                  'max-w-[75%] rounded-xl px-4 py-2.5 text-sm',
                   msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                    ? 'bg-primary text-primary-foreground rounded-tr-sm whitespace-pre-wrap'
                     : 'bg-muted text-foreground rounded-tl-sm',
                 )}
               >
-                {msg.content}
+                {msg.role === 'assistant' ? (
+                  <div
+                    className="prose prose-sm prose-invert max-w-none
+                      [&_pre]:bg-black/30 [&_pre]:rounded [&_pre]:p-2 [&_pre]:overflow-x-auto [&_pre]:text-xs
+                      [&_code]:bg-black/20 [&_code]:rounded [&_code]:px-1 [&_code]:text-xs
+                      [&_table]:border-collapse [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1
+                      [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:bg-black/20
+                      [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
+                      [&_strong]:font-semibold [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm"
+                    dangerouslySetInnerHTML={{ __html: _mdToHtml(msg.content) }}
+                  />
+                ) : (
+                  msg.content
+                )}
                 <div
                   className={cn(
                     'text-[10px] mt-1 opacity-60',
