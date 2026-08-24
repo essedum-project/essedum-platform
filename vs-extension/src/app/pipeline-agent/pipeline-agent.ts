@@ -2578,7 +2578,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Handle Refresh JSON action
+     * Handle Refresh action — re-checks ADK file availability and updates action buttons
      */
     private async handleRefreshJson(pipelineId: string): Promise<void> {
         try {
@@ -2595,43 +2595,26 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
-                this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
+                this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline not found' });
                 return;
             }
 
             const pipelineName = card.name || card.alias || pipelineId;
-            const jsonFileName = `${pipelineName}_${this.organization}.json`;
 
-            const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
+            // Re-check ADK files to update which action buttons are shown
+            const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
+            const hasFiles = adkFiles && adkFiles.length > 0;
 
-            if (!fileResponse.data) {
-                throw new Error('No data received from server');
-            }
+            this.sendMessageToWebview({
+                command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                hasFiles,
+                fileCount: adkFiles.length
+            });
 
-            const textDecoder = new TextDecoder('utf-8');
-            const fileContent = textDecoder.decode(fileResponse.data);
-            const jsonData = JSON.parse(fileContent);
-            const formattedContent = JSON.stringify(jsonData, null, 2);
-
-            // Update open editor if exists (only if user already has it open)
-            const editors = vscode.window.visibleTextEditors;
-            const jsonEditor = editors.find(e => e.document.fileName.includes(jsonFileName));
-
-            if (jsonEditor) {
-                const edit = new vscode.WorkspaceEdit();
-                const fullRange = new vscode.Range(
-                    jsonEditor.document.positionAt(0),
-                    jsonEditor.document.positionAt(jsonEditor.document.getText().length)
-                );
-                edit.replace(jsonEditor.document.uri, fullRange, formattedContent);
-                await vscode.workspace.applyEdit(edit);
-            }
-
-            vscode.window.showInformationMessage('✓ Configuration refreshed');
-            this.sendMessageToWebview({ command: 'actionComplete', message: '✓ Configuration refreshed' });
+            this.sendMessageToWebview({ command: 'actionComplete', message: '✓ Refreshed' });
 
         } catch (error: any) {
-            console.error(`${this.logPrefix} Error refreshing JSON:`, error);
+            console.error(`${this.logPrefix} Error refreshing:`, error);
             this.sendMessageToWebview({ command: 'actionError', message: `Failed to refresh: ${error.message}` });
         }
     }
