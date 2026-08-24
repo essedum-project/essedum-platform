@@ -2018,18 +2018,6 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             // Use pipeline-specific folder
             const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-
-            // If JSON doesn't exist in cache, fetch it
-            if (!fs.existsSync(jsonFilePath)) {
-                const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
-                if (!fileResponse.data) {
-                    throw new Error('Could not fetch configuration file');
-                }
-                const textDecoder = new TextDecoder('utf-8');
-                const fileContent = textDecoder.decode(fileResponse.data);
-                fs.writeFileSync(jsonFilePath, fileContent, 'utf-8');
-            }
 
             // Read prompt file
             const promptFilePath = path.join(this._context.extensionPath, CONSTANTS.PROMPT_CONFIG.FOLDER, CONSTANTS.PROMPT_CONFIG.FILENAME);
@@ -2042,26 +2030,21 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 throw new Error('Prompt file is empty');
             }
 
-            // Track this file for cleanup
-            const normalizedJsonPath = jsonFilePath.toLowerCase();
-            this.openedCachedFiles.set(normalizedJsonPath, jsonFilePath);
-
             // Add the folder to workspace explorer
             const folderUri = vscode.Uri.file(pipelineFolderPath);
             const workspaceFoldersCount = vscode.workspace.workspaceFolders?.length || 0;
             const pipelineDisplayName = card.alias || card.name || pipelineId;
-            
+
             // Check if folder is already in workspace
             const folderExists = vscode.workspace.workspaceFolders?.some(
                 folder => folder.uri.fsPath === pipelineFolderPath
             );
-            
+
             if (!folderExists) {
                 // Store the copilot action state before workspace reload
                 await this._context.globalState.update('pendingCopilotAction', {
                     pipelineId: pipelineId,
                     pipelineName: pipelineName,
-                    jsonFilePath: jsonFilePath,
                     promptContent: promptContent,
                     pipelineFolderPath: pipelineFolderPath,
                     timestamp: Date.now()
@@ -2083,20 +2066,6 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             } else {
                 logger.info(`${this.logPrefix} Folder already in workspace`);
             }
-
-            // Wait before opening document to ensure workspace is stable
-            await new Promise(resolve => setTimeout(resolve, 200));
-
-            // Open the JSON file
-            const jsonDoc = await vscode.workspace.openTextDocument(jsonFilePath);
-            await vscode.window.showTextDocument(jsonDoc, {
-                viewColumn: vscode.ViewColumn.One,
-                preview: false,
-                preserveFocus: false
-            });
-
-            // Wait for editor to be fully active
-            await new Promise(resolve => setTimeout(resolve, 800));
 
             // Open Copilot Chat panel
             logger.info(`${this.logPrefix} Opening Copilot Chat panel...`);
@@ -2763,27 +2732,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             }
 
             logger.info(`${this.logPrefix} Found pending copilot action, resuming...`);
-            
+
             // Clear the pending action
             await this._context.globalState.update('pendingCopilotAction', undefined);
 
             // Give VS Code time to fully initialize after reload
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Focus the Explorer view
+            // Focus the Explorer view to show the newly added workspace folder
             await vscode.commands.executeCommand('workbench.view.explorer');
             await new Promise(resolve => setTimeout(resolve, 300));
-
-            // Open the JSON file
-            const jsonDoc = await vscode.workspace.openTextDocument(pendingAction.jsonFilePath);
-            await vscode.window.showTextDocument(jsonDoc, {
-                viewColumn: vscode.ViewColumn.One,
-                preview: false,
-                preserveFocus: false
-            });
-
-            // Wait for editor to be fully active
-            await new Promise(resolve => setTimeout(resolve, 800));
 
             // Open Copilot Chat panel
             logger.info(`${this.logPrefix} Opening Copilot Chat panel...`);
