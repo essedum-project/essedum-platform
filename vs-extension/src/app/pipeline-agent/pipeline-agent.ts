@@ -1441,54 +1441,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     console.warn(`${this.logPrefix} Could not parse JSON, displaying raw content:`, parseError);
                 }
 
-                progress.report({ increment: 80, message: 'Opening configuration...' });
-
-                // Check if pipeline folder exists in workspace
-                const pipelineFolderPath = this.getPipelineFolderPath(pipelineName);
-                const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-                const folderExistsInWorkspace = vscode.workspace.workspaceFolders?.some(
-                    folder => folder.uri.fsPath === pipelineFolderPath
-                );
-
-                if (folderExistsInWorkspace && fs.existsSync(jsonFilePath)) {
-                    // Folder exists in workspace - update the physical file and open it
-                    logger.info(`${this.logPrefix} Pipeline folder exists in workspace, opening physical JSON file`);
-                    
-                    // Update the physical file with latest content
-                    fs.writeFileSync(jsonFilePath, formattedContent, 'utf-8');
-                    
-                    // Open the physical file from workspace
-                    const doc = await vscode.workspace.openTextDocument(jsonFilePath);
-                    await vscode.window.showTextDocument(doc, {
-                        viewColumn: vscode.ViewColumn.One,
-                        preview: false
-                    });
-                } else {
-                    // Folder not in workspace - use virtual file system
-                    logger.info(`${this.logPrefix} Pipeline folder not in workspace, opening virtual JSON file`);
-                    
-                    // Register the JSON file with virtual file system
-                    if (!this._fileSystemProvider) {
-                        throw new Error('File system provider not initialized');
-                    }
-
-                    // Register JSON file with virtual file system (similar to ADK files)
-                    const virtualUri = this._fileSystemProvider.registerFile(
-                        jsonFileName,
-                        formattedContent,
-                        pipelineName,
-                        this.organization
-                    );
-
-                    logger.info(`${this.logPrefix} Registered JSON file with virtual FS: ${virtualUri.toString()}`);
-
-                    // Open the virtual JSON file directly in editor (no explorer)
-                    const doc = await vscode.workspace.openTextDocument(virtualUri);
-                    await vscode.window.showTextDocument(doc, {
-                        viewColumn: vscode.ViewColumn.One,
-                        preview: false
-                    });
-                }
+                progress.report({ increment: 80, message: 'Loading detail view...' });
 
             } catch (error: any) {
                 console.error(`${this.logPrefix} Error loading Pipeline Agent JSON:`, error);
@@ -2691,12 +2644,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const jsonData = JSON.parse(fileContent);
             const formattedContent = JSON.stringify(jsonData, null, 2);
 
-            // Update cached file in pipeline-specific folder
-            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const cachedJsonPath = path.join(pipelineFolderPath, jsonFileName);
-            fs.writeFileSync(cachedJsonPath, formattedContent, 'utf-8');
-
-            // Update open editor if exists
+            // Update open editor if exists (only if user already has it open)
             const editors = vscode.window.visibleTextEditors;
             const jsonEditor = editors.find(e => e.document.fileName.includes(jsonFileName));
 
@@ -2736,15 +2684,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
 
-            // Use pipeline-specific folder
-            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-
-            if (!fs.existsSync(jsonFilePath)) {
-                throw new Error('Configuration file not found in cache');
+            // Fetch directly from API (no disk cache needed)
+            const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
+            if (!fileResponse.data) {
+                throw new Error('No data received from server');
             }
+            const textDecoder = new TextDecoder('utf-8');
+            const jsonContent = textDecoder.decode(fileResponse.data);
 
-            const jsonContent = fs.readFileSync(jsonFilePath, 'utf-8');
             await vscode.env.clipboard.writeText(jsonContent);
 
             vscode.window.showInformationMessage('✓ Configuration copied to clipboard');
