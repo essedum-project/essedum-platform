@@ -210,7 +210,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private role: any;
     private filter: string = '';
     private loading: boolean = false;
-    private currentTab: 'agents' | 'mcp' = 'agents'; // Track current active tab
+    private currentTab: 'agents' | 'mcp' | 'app' = 'agents'; // Track current active tab
 
     /** Cache directory for JSON files and generated ADK */
     private cacheDir: string;
@@ -942,14 +942,106 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Handle tab switch between Agents and MCP Servers
+     * Get App Pipeline cards
      */
-    private async handleTabSwitch(tab: 'agents' | 'mcp'): Promise<void> {
+    private async getAppPipelineCards(): Promise<void> {
+        logger.info(`${this.logPrefix} getAppPipelineCards called`);
+
+        this.refreshAuthData();
+
+        if (!this._isAuthenticated) {
+            const contextToken = this._context.globalState.get(CONSTANTS.STATE_KEYS.ACCESS_TOKEN) as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                this.updateToken(contextToken);
+            } else {
+                this.showAuthenticationRequired();
+                return;
+            }
+        }
+
+        if (!this._isAuthenticated) {
+            this.showAuthenticationRequired();
+            return;
+        }
+
+        this.loading = true;
+        this.updateWebview();
+
+        const params = this.buildHttpParams();
+
+        try {
+            logger.info(`${this.logPrefix} Fetching App Pipeline count...`);
+            this.totalCount = await this._pipelineAgentService.getAppPipelineCount(params);
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+
+            logger.info(`${this.logPrefix} Total App count: ${this.totalCount}, Total pages: ${this.totalPages}`);
+
+            const response = await this._pipelineAgentService.getAppPipelineList(params);
+
+            if (response && Array.isArray(response) && response.length > 0) {
+                this.allCards = response.map((element: any) => ({
+                    pipelineId: element.name || element.id || element._id || Math.random().toString(36),
+                    type: element.type || 'appPipeline',
+                    alias: element.alias || element.name || 'No Alias',
+                    createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                    created_by: element.created_by || element.createdBy || 'Unknown',
+                    id: element.id || element._id,
+                    status: 'active',
+                    description: element.description || '',
+                    interfacetype: 'app-pipeline',
+                    ...element
+                }));
+                this.filteredCards = this.allCards;
+            } else {
+                logger.info(`${this.logPrefix} No App Pipeline cards returned from API`);
+                this.allCards = [];
+                this.filteredCards = [];
+            }
+
+            logger.info(`${this.logPrefix} Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total app cards`);
+
+            this.loading = false;
+            this.updateWebview();
+
+        } catch (error: any) {
+            console.error(`${this.logPrefix} Error fetching App Pipeline cards:`, error);
+            this.loading = false;
+
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                this._isAuthenticated = false;
+                const action = error.response.status === 401 ? 'Login' : 'Login Again';
+                vscode.window.showErrorMessage(
+                    `Authentication ${error.response.status === 401 ? 'required' : 'failed'}. Please authenticate.`,
+                    action
+                ).then(selection => {
+                    if (selection === action) {
+                        vscode.commands.executeCommand('essedum.login');
+                    }
+                });
+                this.showAuthenticationRequired();
+                return;
+            }
+
+            let errorMessage = 'Failed to fetch App Pipeline data';
+            if (error.message) {
+                errorMessage = error.message;
+            }
+
+            vscode.window.showErrorMessage(`${this.logPrefix} Error: ${errorMessage}`);
+            this.filteredCards = [];
+            this.updateWebview();
+        }
+    }
+
+    /**
+     * Handle tab switch between Agents, MCP Servers, and App
+     */
+    private async handleTabSwitch(tab: 'agents' | 'mcp' | 'app'): Promise<void> {
         logger.info(`${this.logPrefix} Switching to tab: ${tab}`);
-        
+
         // Update current tab
         this.currentTab = tab;
-        
+
         // Reset pagination
         this.pageNumber = 1;
         this.totalCount = 0;
@@ -963,6 +1055,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             await this.getAgentCards();
         } else if (tab === 'mcp') {
             await this.getMcpServerCards();
+        } else if (tab === 'app') {
+            await this.getAppPipelineCards();
         }
     }
 
@@ -974,6 +1068,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             await this.getAgentCards();
         } else if (this.currentTab === 'mcp') {
             await this.getMcpServerCards();
+        } else if (this.currentTab === 'app') {
+            await this.getAppPipelineCards();
         }
     }
 

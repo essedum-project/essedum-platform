@@ -203,7 +203,7 @@ class PipelineAgentClient {
         }
 
         // Update search placeholder
-        const placeholder = tab === 'mcp' ? 'Search MCP servers...' : 'Search pipeline agents...';
+        const placeholder = tab === 'mcp' ? 'Search MCP servers...' : tab === 'app' ? 'Search app pipelines...' : 'Search pipeline agents...';
         if (this.searchInput) {
             this.searchInput.placeholder = placeholder;
         }
