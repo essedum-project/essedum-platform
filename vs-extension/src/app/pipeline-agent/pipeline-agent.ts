@@ -1325,10 +1325,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 progress.report({ increment: 60, message: 'Uploading to server...' });
 
                 // Upload ZIP using the bulk upload API
+                // 'type' is required by the server: Agent | MCP | Application
+                // isVibeStudio=true bypasses metadata.json validation (extension uploads won't have it)
+                const uploadType = this.getUploadType(card);
                 await this._pipelineAgentService.uploadFolderZip(
                     pipelineName,
                     zipBuffer,
-                    zipFileName
+                    zipFileName,
+                    undefined,
+                    true,
+                    uploadType
                 );
 
                 progress.report({ increment: 100, message: 'Complete!' });
@@ -2192,8 +2198,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 progress.report({ increment: 70, message: 'Uploading to server...' });
 
-                // Upload ZIP to server
-                await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName);
+                // Upload ZIP to server — 'type' is required by the server: Agent | MCP | Application
+                // isVibeStudio=true bypasses metadata.json validation (extension uploads won't have it)
+                const uploadType = this.getUploadType(card);
+                await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, uploadType);
 
                 progress.report({ increment: 100, message: 'Complete!' });
 
@@ -3367,6 +3375,20 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             logger.info(`${this.logPrefix} Created pipeline-specific folder: ${pipelineFolderPath}`);
         }
         return pipelineFolderPath;
+    }
+
+    /**
+     * Map a card's interfacetype to the upload 'type' param required by
+     * /api/aip/folder/upload — mirrors the web app's uploadAgentFiles() logic:
+     *   mcp-pipeline  → 'MCP'
+     *   app-pipeline  → 'Application'
+     *   pipeline-agent (or any other) → 'Agent'
+     */
+    private getUploadType(card: PipelineAgentCard | undefined): string {
+        const interfacetype = card?.interfacetype || '';
+        if (interfacetype === 'mcp-pipeline') { return 'MCP'; }
+        if (interfacetype === 'app-pipeline') { return 'Application'; }
+        return 'Agent';
     }
 
     /**

@@ -469,9 +469,7 @@ export class PipelineAgentService {
     if (isVibeStudio !== undefined) {
       formData.append('isvibestudio', String(isVibeStudio));
     }
-    if (type !== undefined) {
-      formData.append('type', type);
-    }
+    // NOTE: 'type' must be a URL query param (not a form field) — mirrors web app: ?zipFile=null&type=Agent
 
     const baseHeaders = await this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
@@ -482,8 +480,14 @@ export class PipelineAgentService {
       ? PipelineAgentService.httpsAgent
       : PipelineAgentService.httpAgent;
 
+    // Build query params: always include zipFile=null; add type when provided
+    const queryParams: Record<string, string> = { zipFile: 'null' };
+    if (type !== undefined) {
+      queryParams.type = type;
+    }
+
     const config = await this.buildAxiosConfig(
-      { zipFile: 'null' },
+      queryParams,
       {
         timeout: 600000, // 10 minutes for large uploads
         httpAgent: PipelineAgentService.httpAgent,
