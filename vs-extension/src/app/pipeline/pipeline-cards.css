@@ -169,6 +169,40 @@ body {
    SEARCH AND FILTERS
    ================================ */
 
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    gap: 2px;
+    margin-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding-bottom: 0;
+}
+
+.tab-button {
+    padding: 5px 10px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    font-size: 0.85em;
+    font-family: var(--vscode-font-family);
+    opacity: 0.7;
+    margin-bottom: -1px;
+    transition: all 0.15s ease;
+}
+
+.tab-button:hover {
+    opacity: 1;
+    color: var(--vscode-focusBorder);
+}
+
+.tab-button.active {
+    opacity: 1;
+    border-bottom-color: var(--vscode-focusBorder);
+    color: var(--vscode-focusBorder);
+}
+
 .search-container {
     display: flex;
     flex-direction: row;

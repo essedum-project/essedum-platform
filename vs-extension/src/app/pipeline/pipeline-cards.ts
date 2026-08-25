@@ -95,6 +95,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private loading: boolean = false;
     private cards: PipelineCard[] = [];
     private filteredCards: PipelineCard[] = [];
+    private currentTab: 'native' | 'data-wizard' | 'training-wizard' = 'native';
 
     /** Pipeline service instance */
     private _pipelineService: PipelineService;
@@ -235,6 +236,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
             logger.info(`${this.logPrefix} Saved active view state: pipeline`);
         });
 
+        // Read which tab was requested from navigation (native / data-wizard / training-wizard)
+        const requestedTab = this._context.globalState.get<string>('pipelineInitialTab') || 'native';
+        this.currentTab = requestedTab as 'native' | 'data-wizard' | 'training-wizard';
+        this._context.globalState.update('pipelineInitialTab', undefined);
+        logger.info(`${this.logPrefix} Initial pipeline tab: ${this.currentTab}`);
+
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [this._extensionUri]
@@ -242,11 +249,21 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
+        // Tell the client which tab to activate (queued until webview loads)
+        webviewView.webview.postMessage({ command: 'setTab', tab: this.currentTab });
+
         // Handle messages from the webview
         webviewView.webview.onDidReceiveMessage(
             async (message) => {
                 switch (message.command) {
                     case 'loadCards':
+                        await this.getCards();
+                        break;
+                    case 'switchTab':
+                        this.currentTab = message.tab as 'native' | 'data-wizard' | 'training-wizard';
+                        this.pageNumber = 1;
+                        this.filter = '';
+                        this.selectedAdapterType = [];
                         await this.getCards();
                         break;
                     case 'viewDetails':
@@ -867,8 +884,15 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
         logger.info(`Building HTTP params - Page: ${this.pageNumber}, Size: ${this.pageSize}`);
 
+        // Filter by pipeline subtype based on active tab (user filter overrides tab)
         if (this.selectedAdapterType.length >= 1) {
             params.type = this.selectedAdapterType.toString();
+        } else if (this.currentTab === 'data-wizard') {
+            params.type = 'DataPipeline';
+        } else if (this.currentTab === 'training-wizard') {
+            params.type = 'TrainingPipeline';
+        } else {
+            params.type = 'NativeScript';
         }
 
         if (this.filter.length >= 1) {

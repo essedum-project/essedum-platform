@@ -11,14 +11,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="details-title">Pipelines</div>
-            <!-- <div class="header-buttons">
-                <button type="button" class="btn btn-primary" id="btn-refresh" aria-describedby="refresh-tooltip"
-                    title="Refresh pipeline cards">
-                    <span class="btn-icon" aria-hidden="true">↻</span>
-                    <span class="btn-text">Refresh</span>
-                </button>
-            </div> -->
+            <div class="details-title" id="pipelineHeaderTitle">Pipelines</div>
 
             <div class="header-buttons">
                 <div class="action-button">
@@ -28,6 +21,13 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Pipeline Type Tab Navigation (shown only in wizard mode) -->
+        <div class="tab-navigation" id="pipelineTabNav" style="display:none;">
+            <button class="tab-button" data-tab="native" style="display:none;">Native</button>
+            <button class="tab-button active" data-tab="data-wizard">Data Wizard</button>
+            <button class="tab-button" data-tab="training-wizard">Training Wizard</button>
         </div>
 
         <div class="search-container">
