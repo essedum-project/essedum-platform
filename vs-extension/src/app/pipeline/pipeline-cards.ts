@@ -276,6 +276,9 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     case 'refresh':
                         await this.getCards();
                         break;
+                    case 'openCopilot':
+                        await this.handleOpenCopilot(message.pipelineName);
+                        break;
                     case 'goToPage':
                         this.goToPage(message.page);
                         break;
@@ -2023,10 +2026,13 @@ if __name__ == "__main__":
                 datasource: datasource
             });
 
+            // Always use NativeScript as the pipelineType for the run-pipeline endpoint.
+            // Wizard pipelines (DataPipeline/TrainingPipeline) also execute via NativeScript
+            // on the run endpoint — same as the integration-hub wizard editor does.
             const executionResult = await this.runPipeline(
                 alias,
                 streamItem.name,
-                streamItem.type || 'NativeScript',
+                'NativeScript',
                 isLocal === 'true' ? 'Local' : 'REMOTE',
                 datasource,
                 '{}',
@@ -3104,6 +3110,45 @@ if __name__ == "__main__":
             }
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
+        }
+    }
+
+    /**
+     * Open Copilot Chat for wizard pipeline context
+     */
+    private async handleOpenCopilot(pipelineName: string): Promise<void> {
+        try {
+            const prompt = `You are working on the wizard pipeline: "${pipelineName}". Help me understand and work with this pipeline.`;
+            await vscode.env.clipboard.writeText(prompt);
+
+            // Try Copilot Chat commands in order until one succeeds
+            const copilotCommands = [
+                'workbench.panel.chat.view.copilot.focus',
+                'github.copilot.chat.focus',
+                'workbench.action.chat.open'
+            ];
+
+            let opened = false;
+            for (const cmd of copilotCommands) {
+                try {
+                    await vscode.commands.executeCommand(cmd);
+                    opened = true;
+                    break;
+                } catch {
+                    // try next command
+                }
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            if (opened) {
+                vscode.window.showInformationMessage(`Copilot opened! Paste the context (Ctrl+V) into the chat.`);
+            } else {
+                vscode.window.showWarningMessage(`Could not open Copilot automatically. Context for "${pipelineName}" copied to clipboard — open Copilot Chat manually and paste it.`);
+            }
+        } catch (error: any) {
+            logger.error(`${this.logPrefix} Failed to open Copilot:`, error);
+            vscode.window.showErrorMessage(`Failed to open Copilot: ${error.message}`);
         }
     }
 

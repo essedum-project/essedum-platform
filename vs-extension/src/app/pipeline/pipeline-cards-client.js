@@ -336,6 +336,7 @@ class PipelineCardsClient {
         this.runPipelineBtn = document.getElementById('runPipelineBtn');
         this.viewLogsBtn = document.getElementById('viewLogsBtn');
         this.refreshScriptsBtn = document.getElementById('refreshScriptsBtn');
+        this.openCopilotBtn = document.getElementById('openCopilotBtn');
 
         // Track current view state
         this.currentView = 'list'; // 'list' or 'details'
@@ -822,11 +823,17 @@ class PipelineCardsClient {
         // Update pipeline info
         this.updatePipelineInfo(pipeline);
 
-        // Update scripts
+        // Update scripts (filters .ipynb in wizard mode)
         this.updateScriptsContent(scripts);
 
         // Update run types
         this.updateRunTypesContent(runTypes);
+
+        // Show/hide Open Copilot button based on wizard mode
+        const isWizard = (this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard');
+        if (this.openCopilotBtn) {
+            this.openCopilotBtn.style.display = isWizard ? 'inline-flex' : 'none';
+        }
 
         // Setup action buttons
         this.setupActionButtons(pipeline);
@@ -902,8 +909,19 @@ class PipelineCardsClient {
             return;
         }
 
+        // Filter out .ipynb files in wizard mode
+        const isWizard = (this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard');
+        const filesToShow = isWizard
+            ? scripts.files.filter(f => !f.fileName.endsWith('.ipynb'))
+            : scripts.files;
+
+        if (filesToShow.length === 0) {
+            this.scriptsContainer.innerHTML = `<div class="empty-scripts"><p>${UI_TEXT.EMPTY_STATES.NO_SCRIPTS}</p></div>`;
+            return;
+        }
+
         const fragment = document.createDocumentFragment();
-        scripts.files.forEach((file, index) => {
+        filesToShow.forEach((file, index) => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'script-item';
 
@@ -1036,6 +1054,17 @@ class PipelineCardsClient {
                 this.vscode.postMessage({
                     command: 'refreshScript',
                     cardId: pipeline.id
+                });
+            };
+        }
+
+        // Open Copilot button (wizard mode only)
+        if (this.openCopilotBtn) {
+            this.openCopilotBtn.onclick = () => {
+                this.vscode.postMessage({
+                    command: 'openCopilot',
+                    cardId: pipeline.id,
+                    pipelineName: pipeline.alias || pipeline.name || pipeline.id
                 });
             };
         }
