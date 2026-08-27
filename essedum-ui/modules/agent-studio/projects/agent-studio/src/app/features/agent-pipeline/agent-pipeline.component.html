@@ -168,7 +168,7 @@
                            Sits above the 3-column grid (explorer / editor / chat).
                            ═══════════════════════════════════════════════════════════════════ -->
                       <div class="codespace-toolbar"
-                           *ngIf="aiChatDeployAvailable || !aiChatVisible">
+                           *ngIf="aiChatDeployAvailable || true">
                         <div class="ai-chat-deploy-banner codespace-toolbar-banner"
                              *ngIf="aiChatDeployAvailable"
                              [class.deploying]="aiChatDeployStatus === 'deploying'"
@@ -215,17 +215,18 @@
                             </span>
                           </button>
                         </div>
-                        <button type="button"
+                          <!-- <button type="button"
                                 *ngIf="!aiChatVisible"
                                 class="reopen-chat-btn"
                                 (click)="showAiChatPanel()"
                                 matTooltip="Open AI Chat" matTooltipPosition="below">
                           <mat-icon>auto_awesome</mat-icon>
                           <span>Open AI Chat</span>
-                        </button>
+                        </button> -->
+                        <!-- Open AI Chat button intentionally removed; restore by adding back the reopen-chat-btn button here -->
                       </div>
 
-                      <div class="file-panel" [class.chat-hidden]="!aiChatVisible">
+                      <div class="file-panel" [class.chat-hidden]="true">
                         <div class="file-explorer">
                           <div class="explorer-header">
                             <div class="header-left">
@@ -396,7 +397,7 @@
                              once files are generated so the user can trigger it.
                              ═══════════════════════════════════════════════════════════ -->
                         <div class="ai-chat-panel"
-                             *ngIf="aiChatVisible"
+                             *ngIf="false"
                              (click)="onAiChatPanelClick($event)">
                           <!-- Header -->
                           <div class="ai-chat-header">
