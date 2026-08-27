@@ -284,3 +284,212 @@
     }
   }
 }
+
+// ── GitHub Auth Button ───────────────────────────────────────────────────────
+
+.gh-auth-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gh-icon {
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.gh-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(79,142,247,0.25);
+  border-radius: 8px;
+  color: #b8cce0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(79,142,247,0.12);
+    border-color: rgba(79,142,247,0.5);
+    color: #e2eaf4;
+  }
+
+  .gh-icon {
+    opacity: 0.85;
+  }
+}
+
+.gh-loading-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  color: #b8cce0;
+  font-size: 13px;
+  border: 1px solid rgba(79,142,247,0.2);
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+.gh-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(79,142,247,0.25);
+  border-top-color: #4f8ef7;
+  border-radius: 50%;
+  animation: gh-spin 0.7s linear infinite;
+}
+
+@keyframes gh-spin {
+  to { transform: rotate(360deg); }
+}
+
+.gh-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  background: rgba(79,142,247,0.1);
+  border: 1px solid rgba(79,142,247,0.35);
+  border-radius: 8px;
+  color: #cde0ff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(79,142,247,0.18);
+    border-color: rgba(79,142,247,0.55);
+  }
+
+  .gh-icon-authenticated {
+    fill: #4f8ef7;
+  }
+
+  .gh-username {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gh-status-dot {
+    width: 7px;
+    height: 7px;
+    background: #3dd68c;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(61,214,140,0.25);
+    flex-shrink: 0;
+  }
+
+  .gh-chevron {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: rgba(255,255,255,0.45);
+    transition: transform 0.2s;
+  }
+}
+
+.gh-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1100;
+  min-width: 210px;
+  background: #1a2236;
+  border: 1px solid rgba(79,142,247,0.2);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  overflow: hidden;
+  animation: gh-dropdown-in 0.15s ease-out;
+
+  @keyframes gh-dropdown-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+.gh-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  background: rgba(79,142,247,0.06);
+
+  .gh-icon-lg {
+    fill: #4f8ef7;
+    flex-shrink: 0;
+  }
+}
+
+.gh-dropdown-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.gh-dropdown-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2eaf4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-dropdown-label {
+  font-size: 11px;
+  color: #6b80a0;
+}
+
+.gh-dropdown-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.gh-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: #b8cce0;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .gh-dropdown-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    color: #6b80a0;
+  }
+}
+
+.gh-logout-item {
+  &:hover {
+    background: rgba(239,68,68,0.08);
+    color: #f87171;
+
+    .gh-dropdown-icon { color: #f87171; }
+  }
+}

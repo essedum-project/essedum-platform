@@ -8,6 +8,63 @@
 
     <!-- Pipeline Status button projected into the header action row -->
     <div header-extra-action>
+
+      <!-- GitHub Login / User Button -->
+      <div class="gh-auth-wrapper">
+
+        <!-- Not authenticated: Login button -->
+        <button
+          *ngIf="!isGitAuthenticated && !isGitLoading"
+          class="gh-login-btn"
+          type="button"
+          (click)="gitLogin()"
+          title="Login to GitHub">
+          <svg class="gh-icon" height="16" viewBox="0 0 24 24" width="16" aria-hidden="true">
+            <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"/>
+          </svg>
+          <span>Login to GitHub</span>
+        </button>
+
+        <!-- Loading spinner -->
+        <div *ngIf="isGitLoading" class="gh-loading-btn">
+          <div class="gh-spinner"></div>
+          <span>Connecting...</span>
+        </div>
+
+        <!-- Authenticated: User chip -->
+        <button
+          *ngIf="isGitAuthenticated && !isGitLoading"
+          class="gh-user-btn"
+          type="button"
+          (click)="toggleGitDropdown($event)"
+          title="GitHub account options">
+          <svg class="gh-icon gh-icon-authenticated" height="15" viewBox="0 0 24 24" width="15" aria-hidden="true">
+            <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"/>
+          </svg>
+          <span class="gh-username">{{ gitUsername }}</span>
+          <span class="gh-status-dot"></span>
+          <mat-icon class="gh-chevron">expand_more</mat-icon>
+        </button>
+
+        <!-- Dropdown menu -->
+        <div *ngIf="showGitDropdown" class="gh-dropdown">
+          <div class="gh-dropdown-header">
+            <svg class="gh-icon-lg" height="20" viewBox="0 0 24 24" width="20" aria-hidden="true">
+              <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"/>
+            </svg>
+            <div class="gh-dropdown-user-info">
+              <span class="gh-dropdown-username">{{ gitUsername }}</span>
+              <span class="gh-dropdown-label">GitHub Account</span>
+            </div>
+          </div>
+          <div class="gh-dropdown-divider"></div>
+          <button class="gh-dropdown-item gh-logout-item" type="button" (click)="gitLogout()">
+            <mat-icon class="gh-dropdown-icon">logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+
       <button class="execution-btn" type="button" [matMenuTriggerFor]="execStatusMenu">
         <mat-icon class="execution-btn-icon">play_circle_filled</mat-icon>
         Pipeline Status
