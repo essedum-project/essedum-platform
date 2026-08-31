@@ -78,6 +78,12 @@ function apiFlowToSaved(f: FlowResponse): SavedFlow {
     createdAt: f.created_at,
     updatedAt: f.updated_at,
     tags: f.tags,
+    // Publish / deployment fields (present after backend migration; default gracefully)
+    status: (f.status as SavedFlow['status']) ?? 'draft',
+    version: f.version ?? 1,
+    published_at: f.published_at ?? undefined,
+    service_endpoint: f.service_endpoint ?? undefined,
+    replicas: f.replicas ?? 1,
   };
 }
 

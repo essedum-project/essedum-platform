@@ -31,6 +31,38 @@ export interface FlowResponse {
   secrets: Array<{ name: string; value: string }>;
   created_at: string;
   updated_at: string;
+  // Publish / deployment fields (populated after backend Phase 1 migration)
+  status?: string;
+  version?: number;
+  published_at?: string | null;
+  service_endpoint?: string | null;
+  replicas?: number;
+}
+
+// ─── Publish / Deployment Models ─────────────────────────────────────────────
+
+export interface PublishRequest {
+  replicas: number;
+  version_label?: string;
+}
+
+export interface K8sCondition {
+  type: string;
+  status: string;
+  reason?: string;
+  message?: string;
+}
+
+export interface WorkflowDeploymentStatusResponse {
+  workflow_id: string;
+  deployment_name: string;
+  service_endpoint: string;
+  version: number;
+  status: 'deploying' | 'ready' | 'degraded' | 'unknown';
+  desired_replicas: number;
+  ready_replicas: number;
+  conditions: K8sCondition[];
+  last_updated: string;
 }
 
 // ─── Execution Models ─────────────────────────────────────────────────────────

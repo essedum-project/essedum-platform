@@ -92,4 +92,32 @@ export const LABELS = {
   LIBRARY_TITLE: 'Node Library',
   LIBRARY_SEARCH_PLACEHOLDER: 'Search nodes…',
   LIBRARY_DRAG_HINT: 'Drag nodes onto the canvas',
+  // ── Publish / Deploy ───────────────────────────────────────────────────────
+  TOPBAR_PUBLISH_WORKFLOW: 'Create Pipeline',
+  TOPBAR_UPDATE_DEPLOYMENT: 'Update Pipeline',
+  TOPBAR_SAVE_PIPELINE: 'Save Pipeline',
+  TOPBAR_VIEW_DEPLOYMENT: 'View Deployment Status',
+  TOPBAR_DEPLOYMENTS_PAGE: 'View Agent Pipelines',
+  TOPBAR_TOAST_PUBLISHED: 'Pipeline created successfully',
+  TOPBAR_TOAST_PUBLISH_SAVE_FIRST: 'Save the flow before creating a pipeline',
+
+  // ── Deployments Page ──────────────────────────────────────────────────────
+  DEPLOYMENTS_TITLE: 'View Agent Pipelines',
+  DEPLOYMENTS_SEARCH_PLACEHOLDER: 'Search pipelines…',
+  DEPLOYMENTS_EMPTY: 'No pipelines found',
+  DEPLOYMENTS_EMPTY_HINT: 'Save and create a pipeline in the Agent Designer to see it here.',
+  DEPLOYMENTS_OPEN_IN_DESIGNER: 'Open in Designer',
+  DEPLOYMENTS_VIEW_IN_AGENT_STUDIO: 'View in Agent Studio',
+  DEPLOYMENTS_STATUS_BTN: 'Status',
+  DEPLOYMENTS_BACK_TO_DESIGNER: 'Go to Designer',
+
+  // ── PublishModal ──────────────────────────────────────────────────────────────
+  PUBLISH_MODAL_PIPELINE_LIVE: 'Pipeline is live!',
+  PUBLISH_MODAL_VIEW_STATUS: 'View Status',
+  PUBLISH_MODAL_CANCEL: 'Cancel',
+  PUBLISH_MODAL_CLOSE: 'Close',
+  PUBLISH_MODAL_BTN_CREATE: 'Create',
+  PUBLISH_MODAL_BTN_UPDATE: 'Update',
+  PUBLISH_MODAL_BTN_RETRY: 'Retry',
+  PUBLISH_MODAL_TOAST_ERROR: 'Pipeline creation failed',
 } as const;

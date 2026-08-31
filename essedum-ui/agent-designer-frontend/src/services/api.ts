@@ -68,6 +68,9 @@ export const api = {
   put: <T>(url: string, body?: unknown) =>
     request<T>(url, { method: 'PUT', body }),
 
+  patch: <T>(url: string, body?: unknown) =>
+    request<T>(url, { method: 'PATCH', body }),
+
   delete: <T = void>(url: string) =>
     request<T>(url, { method: 'DELETE' }),
 };

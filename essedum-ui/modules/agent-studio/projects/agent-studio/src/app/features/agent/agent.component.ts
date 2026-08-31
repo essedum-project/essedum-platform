@@ -1,5 +1,6 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -8,17 +9,46 @@ import { environment } from '../../../environments/environment';
     styleUrls: ['./agent.component.scss'],
     standalone: false
 })
-export class AgentComponent implements OnInit, AfterViewInit {
+export class AgentComponent implements OnInit, AfterViewInit, OnDestroy {
   // Embedded Langflow interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
   private readonly langflowUrl = environment.langflowUrl;
 
   @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  private messageHandler!: (event: MessageEvent) => void;
+
+  constructor(private sanitizer: DomSanitizer, private router: Router) {}
 
   ngOnInit(): void {
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.langflowUrl);
+
+    // Listen for navigation requests from the embedded agent-designer iframe.
+    this.messageHandler = (event: MessageEvent) => {
+      const msg = event.data;
+      if (!msg || !msg.type) return;
+
+      if (msg.type === 'NAVIGATE_TO_AGENT_STUDIO') {
+        // msg.path = '/landing/agent/pipeline/view/:id'
+        // msg.queryParams = 'page=1&search=...'
+        const path: string = msg.path ?? '/landing/agent/pipeline';
+        const qp: Record<string, string> = {};
+        if (msg.queryParams) {
+          (msg.queryParams as string).split('&').forEach((pair: string) => {
+            const [k, v] = pair.split('=');
+            if (k) qp[k] = decodeURIComponent(v ?? '');
+          });
+        }
+        // Use the full absolute path (e.g. '/landing/agent/pipeline/view/:id').
+        // Pass source in state so the pipeline view's back button returns here.
+        this.router.navigate([path], { queryParams: qp, state: { source: 'agent-designer' } });
+      }
+    };
+    window.addEventListener('message', this.messageHandler);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.messageHandler);
   }
 
   ngAfterViewInit(): void {

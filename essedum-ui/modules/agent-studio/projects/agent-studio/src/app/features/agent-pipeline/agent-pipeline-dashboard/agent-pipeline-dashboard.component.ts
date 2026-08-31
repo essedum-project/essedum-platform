@@ -536,7 +536,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           pipelineAlias: this.streamItem.alias,
           streamItem: this.streamItem,
           card: card,
-          pipelineMode: this.pipelineMode
+          pipelineMode: this.pipelineMode,
+          source: 'agent-pipeline',
         },
         relativeTo: this.route,
       };

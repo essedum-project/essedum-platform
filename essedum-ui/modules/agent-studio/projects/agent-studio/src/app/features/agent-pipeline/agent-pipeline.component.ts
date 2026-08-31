@@ -561,6 +561,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isHoveredDuplicate = false;
   isBackHovered = false;
 
+  /** Tracks which screen navigated here so the back button returns to the right place.
+   *  Values: 'agent-designer' | 'pipeline-in-execution' | 'agent-pipeline' (default)
+   */
+  private navigationSource: string = 'agent-pipeline';
+
   // Reference to mat-tab-group for programmatic tab switching
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
@@ -610,6 +615,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Check if we have router state data with card information
     const historyState = history.state;
     const cardFromState = historyState?.card;
+
+    // Track where we came from for smart back navigation
+    if (historyState?.source) {
+      this.navigationSource = historyState.source;
+    }
     
     // Set pipeline mode from navigation state if available
     if (historyState?.pipelineMode) {
@@ -1036,11 +1046,23 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.resetToDashboardState();
     
     // Get current route parameters to preserve org and roleId
+
+    if (this.navigationSource === 'agent-designer') {
+      // Came from the Agent Designer iframe — go back to the studio route.
+      this.router.navigate(['/landing/agent/studio']);
+      return;
+    }
+
+    if (this.navigationSource === 'pipeline-in-execution') {
+      // Came from Pipeline Execution Status — browser history takes us back there.
+      this.location.back();
+      return;
+    }
+
+    // Default: came from Agent Pipeline dashboard.
     const org = localStorage.getItem('organisation') || 'leo1311';
     const roleId = localStorage.getItem('roleId') || '1';
-    
-    // Navigate to the agent-pipeline dashboard with proper query parameters
-    this.router.navigate(['/landing/aip/agent-pipeline'], {
+    this.router.navigate(['/landing/agent/pipeline'], {
       queryParams: {
         page: 1,
         search: '',

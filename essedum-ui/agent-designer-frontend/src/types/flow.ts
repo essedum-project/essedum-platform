@@ -48,6 +48,19 @@ export interface FlowNodeData {
 // React Flow requires data to extend Record<string, unknown>; intersection avoids widening FlowNodeData properties
 export type AgentFlowNode = Node<FlowNodeData & Record<string, unknown>, 'agentNode'>;
 
+export type FlowStatus = 'draft' | 'published' | 'deprecated';
+
+export interface WorkflowDeploymentStatus {
+  workflow_id: string;
+  deployment_name: string;
+  service_endpoint: string;
+  version: number;
+  status: 'deploying' | 'ready' | 'degraded' | 'unknown';
+  desired_replicas: number;
+  ready_replicas: number;
+  last_updated: string;
+}
+
 export interface SavedFlow {
   id: string;
   name: string;
@@ -59,6 +72,12 @@ export interface SavedFlow {
   tags?: string[];
   env_vars?: Array<{ name: string; value: string }>;
   secrets?: Array<{ name: string; value: string }>;
+  /** Deployment lifecycle fields — populated when backend is updated. */
+  status?: FlowStatus;
+  version?: number;
+  published_at?: string;
+  service_endpoint?: string;
+  replicas?: number;
 }
 
 export interface LogEntry {

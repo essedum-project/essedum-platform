@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { Toaster } from '../components/ui/sonner';
 import { useFlowStore } from '../store/flowStore';
@@ -10,7 +11,19 @@ import { FlowManager } from '../components/flow/FlowManager';
 import { KeyboardShortcuts } from '../components/flow/KeyboardShortcuts';
 
 export default function Designer() {
-  const { showNodeLibrary, showInspector, showLogs } = useFlowStore();
+  const { showNodeLibrary, showInspector, showLogs, loadFlow } = useFlowStore();
+
+  // Deep-link: ?flowId=<id> auto-loads a specific flow on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkId = params.get('flowId');
+    if (deepLinkId) {
+      loadFlow(deepLinkId).catch(() => {
+        console.warn('Deep-link flow not found:', deepLinkId);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <TooltipProvider delayDuration={300}>

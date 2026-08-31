@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFlowStore } from '../../store/flowStore';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -8,11 +9,13 @@ import { Badge } from '../ui/badge';
 import {
   Play, Square, Save, Download, Upload,
   Plus, PanelLeft, PanelRight, Terminal, Edit2, Check, X,
-  Layers, Zap
+  Layers, Zap, Rocket, Activity, Globe,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 import { PlaygroundModal } from './PlaygroundModal';
+import { PublishModal } from './PublishModal';
+import { DeploymentStatusDrawer } from './DeploymentStatusDrawer';
 import { LABELS } from '../../lib/labels';
 
 export function TopBar() {
@@ -21,14 +24,19 @@ export function TopBar() {
     runFlow, stopExecution, execution,
     showNodeLibrary, showInspector, showLogs,
     toggleNodeLibrary, toggleInspector, toggleLogs,
-    setShowFlowManager, nodes, edges,
+    setShowFlowManager, nodes, edges, savedFlows,
   } = useFlowStore();
 
+  const navigate = useNavigate();
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(currentFlowName);
   const [playgroundOpen, setPlaygroundOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [statusDrawerOpen, setStatusDrawerOpen] = useState(false);
 
   const isRunning = execution.status === 'running';
+  const currentFlow = savedFlows.find((f) => f.id === currentFlowId);
+  const isPublished = currentFlow?.status === 'published';
 
   const handleRename = () => {
     if (nameVal.trim()) { renameFlow(nameVal.trim()); toast.success(LABELS.TOPBAR_TOAST_FLOW_RENAMED); }
@@ -160,6 +168,14 @@ export function TopBar() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => navigate('/deployments')}>
+              <Globe className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{LABELS.TOPBAR_DEPLOYMENTS_PAGE}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { newFlow(); toast.info(LABELS.TOPBAR_TOAST_NEW_FLOW); }}>
               <Plus className="w-4 h-4" />
             </Button>
@@ -174,6 +190,23 @@ export function TopBar() {
           </TooltipTrigger>
           <TooltipContent>{LABELS.TOPBAR_SAVE_FLOW}</TooltipContent>
         </Tooltip>
+
+        {/* Deployment Status — only when published */}
+        {isPublished && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon" variant="ghost"
+                className="h-8 w-8 text-green-400 hover:text-green-300"
+                onClick={() => setStatusDrawerOpen(true)}
+              >
+                <Activity className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{LABELS.TOPBAR_VIEW_DEPLOYMENT}</TooltipContent>
+          </Tooltip>
+        )}
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={exportFlow}>
@@ -191,6 +224,30 @@ export function TopBar() {
           <TooltipContent>{LABELS.TOPBAR_IMPORT_JSON}</TooltipContent>
         </Tooltip>
       </div>
+
+      <Separator orientation="vertical" className="h-6" />
+
+      {/* Create Pipeline / Save Pipeline button */}
+      <Button
+        size="sm"
+        variant={isPublished ? 'outline' : 'default'}
+        className={cn(
+          'h-8 gap-1.5 text-xs font-semibold',
+          isPublished
+            ? 'border-amber-500/40 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300'
+            : 'bg-primary text-primary-foreground hover:bg-primary/90',
+          !currentFlowId && 'opacity-40 cursor-not-allowed',
+        )}
+        onClick={() => {
+          if (!currentFlowId) { toast.warning(LABELS.TOPBAR_TOAST_PUBLISH_SAVE_FIRST); return; }
+          setPublishOpen(true);
+        }}
+      >
+        {isPublished
+          ? <Save className="w-3 h-3" />
+          : <Rocket className="w-3 h-3 fill-current" />}
+        {isPublished ? LABELS.TOPBAR_SAVE_PIPELINE : LABELS.TOPBAR_PUBLISH_WORKFLOW}
+      </Button>
 
       <Separator orientation="vertical" className="h-6" />
 
@@ -235,6 +292,34 @@ export function TopBar() {
       )}
 
       <PlaygroundModal open={playgroundOpen} onClose={() => setPlaygroundOpen(false)} />
+
+      {/* Publish Modal */}
+      {currentFlowId && (
+        <PublishModal
+          open={publishOpen}
+          onOpenChange={setPublishOpen}
+          flowId={currentFlowId}
+          flowName={currentFlowName}
+          nodeCount={nodes.length}
+          edgeCount={edges.length}
+          currentStatus={currentFlow?.status ?? 'draft'}
+          currentVersion={currentFlow?.version}
+          onPublished={() => toast.success(LABELS.TOPBAR_TOAST_PUBLISHED)}
+          onViewStatus={() => setStatusDrawerOpen(true)}
+        />
+      )}
+
+      {/* Deployment Status Drawer */}
+      {currentFlowId && isPublished && (
+        <DeploymentStatusDrawer
+          open={statusDrawerOpen}
+          onOpenChange={setStatusDrawerOpen}
+          flowId={currentFlowId}
+          flowName={currentFlowName}
+          version={currentFlow?.version}
+          onOpenInDesigner={() => setStatusDrawerOpen(false)}
+        />
+      )}
     </header>
   );
 }

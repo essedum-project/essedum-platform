@@ -122,6 +122,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   onGridAction(event: { key: string; row: ExecutionPipeline }): void {
     switch (event.key) {
+      case 'view':            this.viewPipeline(event.row);               break;
       case 'logs':             this.checkPodLog(event.row);               break;
       case 'delete-pod':       this.deletePipelinePod(event.row);         break;
       case 'delete-container': this.deletePipelineAsContainer(event.row); break;
@@ -358,6 +359,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
           streamItem: res,
           card: pipeline,
           pipelineMode: pipeline.pipelineMode,
+          source: 'pipeline-in-execution',
         },
         relativeTo: this.route,
       };
