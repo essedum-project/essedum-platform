@@ -144,6 +144,20 @@ public class ICIPPipelineNewController {
 		return new ResponseEntity<>( pipelineService.populateSchemaDetails(pipelineService.getJson(cname, org), org), HttpStatus.OK);
 	}
 
+	@GetMapping(value = "/deploy/{cname}/{org}")
+	public ResponseEntity<?> deployAsContainer(@PathVariable(name = "cname") String cname,
+			@PathVariable(name = "org") String org) {
+		logger.info("Container deploy requested for pipeline: {}", cname);
+		ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(cname, org);
+		return pipelineService.createJob(ss.getType(), cname, ss.getAlias(), org, "container", null,
+				ICIPUtils.generateCorrelationId(), 0, null, "");
+	}
+
+	@GetMapping(value = "/container-status/{deployId}")
+	public ResponseEntity<?> getContainerDeployStatus(@PathVariable(name = "deployId") String deployId) {
+		return pipelineService.getContainerDeployStatus(deployId);
+	}
+
 	/**
 	 * Handle all.
 	 *

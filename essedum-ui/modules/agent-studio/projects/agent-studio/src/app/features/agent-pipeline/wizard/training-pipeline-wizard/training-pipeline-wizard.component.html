@@ -180,6 +180,29 @@
           </mat-form-field>
         </div>
 
+        <!-- Container fields — shown only when container-executor is selected -->
+        <ng-container *ngIf="dataExecForm.value.executor === 'container-executor'">
+          <mat-divider class="my-3"></mat-divider>
+          <h4 class="step-subtitle"><mat-icon>inventory_2</mat-icon> Container Configuration</h4>
+          <div class="row two-col">
+            <mat-form-field appearance="fill">
+              <mat-label>Custom Docker Image (optional)</mat-label>
+              <input matInput formControlName="containerImage" placeholder="myregistry.io/my-trainer:latest">
+              <mat-hint>Leave blank to auto-build from code.</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Container Registry URL (optional)</mat-label>
+              <input matInput formControlName="containerRegistry" placeholder="https://myregistry.azurecr.io">
+            </mat-form-field>
+          </div>
+          <div class="gpu-toggle-row" *ngIf="isLLM">
+            <mat-slide-toggle formControlName="useGpu" color="primary">
+              Request GPU node (<code>accelerator: nvidia-gpu</code>)
+            </mat-slide-toggle>
+            <span class="hint-text">Enable for SLM fine-tuning, reasoning, and distillation jobs.</span>
+          </div>
+        </ng-container>
+
         <div class="step-actions">
           <button mat-button matStepperPrevious>Back</button>
           <button mat-flat-button color="primary" matStepperNext [disabled]="dataExecForm.invalid">Next</button>

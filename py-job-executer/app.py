@@ -20,6 +20,7 @@ from datetime import datetime
 from functionadapter import function_execute
 from importlib import import_module
 import asyncio
+import socketio as sio_module
 
 
 if USE_TASK_RETRIVER:
@@ -46,6 +47,7 @@ process_lock = Lock()
 db_operations = DatabaseOperations()
 submitted_futures = {}
 pause_event = Event()
+container_deploy_results = {}
 
 @app.after_request
 def add_security_headers(response):
@@ -506,6 +508,157 @@ def get_venvs():
     except Exception as err:
         logger.error(f'Exception occured: {err}', exc_info=True)
         return jsonify({"status": "failed to get venvs"}), 500
+
+def _run_container_deploy(deploy_id, payload):
+    """Connect to adk-code-builder-deployer via SocketIO and trigger a container build+deploy."""
+    deployer_url = payload['deployer_url']
+    start_payload = {
+        'bucket_name': payload['bucket_name'],
+        'file_path': payload['file_path'],
+        'target_image_tag': payload['target_image_tag'],
+        'deployment_name': payload['deployment_name'],
+        'namespace': payload.get('namespace', 'vibe-pipelines'),
+        'env_vars': payload.get('env_vars', []),
+        'secrets': payload.get('secrets', []),
+    }
+    if payload.get('node_selector'):
+        start_payload['node_selector'] = payload['node_selector']
+
+    done_event = Event()
+    sio_client = sio_module.Client(logger=False)
+
+    @sio_client.on('pipeline_status')
+    def on_pipeline_status(data):
+        container_deploy_results[deploy_id].update({
+            'status': data.get('status', 'ERROR'),
+            'internal_dns_url': data.get('internal_dns_url', ''),
+            'message': data.get('message', ''),
+        })
+        done_event.set()
+
+    @sio_client.on('connect')
+    def on_connect():
+        container_deploy_results[deploy_id]['status'] = 'RUNNING'
+        sio_client.emit('start_pipeline', start_payload)
+
+    @sio_client.on('connect_error')
+    def on_connect_error(data):
+        container_deploy_results[deploy_id].update({
+            'status': 'ERROR',
+            'message': f'Connection error: {data}',
+        })
+        done_event.set()
+
+    try:
+        sio_client.connect(deployer_url, transports=['websocket'])
+        done_event.wait(timeout=300)
+        if not done_event.is_set():
+            container_deploy_results[deploy_id].update({
+                'status': 'ERROR',
+                'message': 'Deployment timed out after 300s',
+            })
+    except Exception as e:
+        logger.error('Container deploy error', exc_info=True)
+        container_deploy_results[deploy_id].update({'status': 'ERROR', 'message': str(e)})
+    finally:
+        try:
+            if sio_client.connected:
+                sio_client.disconnect()
+        except Exception:
+            pass
+
+
+@app.route('/container-deploy-with-zip', methods=['POST'])
+def container_deploy_with_zip():
+    """Accept a zip file from Java, upload to MinIO, then trigger container deployment."""
+    if 'zip_file' not in request.files:
+        return jsonify({'error': 'Missing zip_file in multipart form'}), 400
+
+    required_form_fields = ['deployer_url', 'target_image_tag', 'deployment_name',
+                             'minio_endpoint', 'minio_access_key', 'minio_secret_key', 'minio_bucket']
+    for field in required_form_fields:
+        if not request.form.get(field):
+            return jsonify({'error': f'Missing required form field: {field}'}), 400
+
+    zip_file = request.files['zip_file']
+    deployer_url = request.form['deployer_url']
+    target_image_tag = request.form['target_image_tag']
+    deployment_name = request.form['deployment_name']
+    namespace = request.form.get('namespace', 'vibe-pipelines')
+    minio_endpoint = request.form['minio_endpoint']
+    minio_access_key = request.form['minio_access_key']
+    minio_secret_key = request.form['minio_secret_key']
+    minio_bucket = request.form['minio_bucket']
+    node_selector_raw = request.form.get('node_selector')
+    env_vars_raw = request.form.get('env_vars', '[]')
+    secrets_raw = request.form.get('secrets', '[]')
+
+    file_path = f"ai-pipeline-scripts/{deployment_name}/{deployment_name}.zip"
+    try:
+        import boto3
+        s3 = boto3.client('s3',
+            endpoint_url=minio_endpoint,
+            aws_access_key_id=minio_access_key,
+            aws_secret_access_key=minio_secret_key)
+        s3.upload_fileobj(zip_file, minio_bucket, file_path)
+        logger.info(f"Uploaded zip to MinIO: {minio_bucket}/{file_path}")
+    except Exception as e:
+        logger.error('MinIO upload failed', exc_info=True)
+        return jsonify({'error': f'MinIO upload failed: {str(e)}'}), 500
+
+    deploy_payload = {
+        'deployer_url': deployer_url,
+        'bucket_name': minio_bucket,
+        'file_path': file_path,
+        'target_image_tag': target_image_tag,
+        'deployment_name': deployment_name,
+        'namespace': namespace,
+        'env_vars': json.loads(env_vars_raw),
+        'secrets': json.loads(secrets_raw),
+    }
+    if node_selector_raw:
+        try:
+            deploy_payload['node_selector'] = json.loads(node_selector_raw)
+        except Exception:
+            pass
+
+    deploy_id = str(uuid.uuid4())
+    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None}
+    executor.submit(_run_container_deploy, deploy_id, deploy_payload)
+    return jsonify({'deploy_id': deploy_id, 'status': 'SUBMITTED'})
+
+
+@app.route('/container-deploy', methods=['POST'])
+def container_deploy():
+    """Submit a container build-and-deploy job to adk-code-builder-deployer."""
+    if not request.get_json():
+        abort(400)
+    payload = request.get_json()
+
+    required_fields = ['deployer_url', 'bucket_name', 'file_path', 'target_image_tag', 'deployment_name']
+    for field in required_fields:
+        if not payload.get(field):
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+
+    deploy_id = str(uuid.uuid4())
+    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None}
+    executor.submit(_run_container_deploy, deploy_id, payload)
+    return jsonify({'deploy_id': deploy_id, 'status': 'SUBMITTED'})
+
+
+@app.route('/container-deploy/<deploy_id>/status', methods=['GET'])
+def get_container_deploy_status(deploy_id):
+    """Poll the status of a container deploy job."""
+    try:
+        uuid.UUID(deploy_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid deploy ID'}), 400
+
+    result = container_deploy_results.get(deploy_id)
+    if result is None:
+        abort(404)
+    return jsonify({'deploy_id': deploy_id, **result})
+
 
 if __name__ == '__main__':
     if DB_TRUNCATE == "True":

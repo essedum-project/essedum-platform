@@ -2253,6 +2253,21 @@ export class Services {
       }));
   }
 
+  deployPipelineAsContainer(cname: string): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/pipeline/deploy/' + cname + '/' + org, { responseType: 'text' })
+      .pipe(map((response) => response))
+      .pipe(catchError((error: any) => this.handleError(error)));
+  }
+
+  getContainerDeployStatus(deployId: string): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/pipeline/container-status/' + deployId)
+      .pipe(map((response) => response))
+      .pipe(catchError((error: any) => this.handleError(error)));
+  }
+
   //pipeline.description
   savePipelineJSON(name, jsonObj): Observable<any> {
     const org = sessionStorage.getItem('organization');

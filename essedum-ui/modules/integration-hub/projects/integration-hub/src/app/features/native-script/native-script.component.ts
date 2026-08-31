@@ -118,6 +118,10 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     isBackHovered=false;
     envCollapsed = true;
     secretsCollapsed = true;
+    containerDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+    containerDeployMessage: string = '';
+    containerInternalDnsUrl: string = '';
+    private _containerPollInterval: any = null;
     envEditIndex: number = -1;
     envEditMode: boolean = false;
     secretsEditIndex: number = -1;
@@ -676,6 +680,45 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.service.message('Could not get the results', 'error');
         }
       );
+  }
+
+  deployAsContainer() {
+    this.containerDeployStatus = 'deploying';
+    this.containerDeployMessage = 'Initiating container build...';
+    this.containerInternalDnsUrl = '';
+    this.service.deployPipelineAsContainer(this.streamItem.name).subscribe(
+      (res: any) => {
+        let deployId: string;
+        try {
+          const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+          deployId = parsed.deploy_id;
+        } catch {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = 'Failed to parse deploy response';
+          return;
+        }
+        this._containerPollInterval = setInterval(() => {
+          this.service.getContainerDeployStatus(deployId).subscribe((status: any) => {
+            if (status.status === 'SUCCESS') {
+              clearInterval(this._containerPollInterval);
+              this.containerDeployStatus = 'success';
+              this.containerDeployMessage = 'Deployment complete';
+              this.containerInternalDnsUrl = status.internal_dns_url || '';
+            } else if (status.status === 'ERROR') {
+              clearInterval(this._containerPollInterval);
+              this.containerDeployStatus = 'error';
+              this.containerDeployMessage = status.message || 'Deployment failed';
+            } else {
+              this.containerDeployMessage = status.message || 'Building...';
+            }
+          });
+        }, 5000);
+      },
+      (error) => {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = 'Failed to start container deployment';
+      }
+    );
   }
 
   copyPipeline() {

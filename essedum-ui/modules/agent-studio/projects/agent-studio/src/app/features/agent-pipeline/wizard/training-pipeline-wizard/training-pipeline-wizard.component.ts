@@ -121,6 +121,9 @@ export class TrainingPipelineWizardLocalComponent implements OnInit {
       loraRank: [16],
       loraAlpha: [32],
       maxLen: [2048],
+      containerImage: [''],
+      containerRegistry: [''],
+      useGpu: [false],
     });
 
     // Keep git file path in sync with name
@@ -249,6 +252,9 @@ export class TrainingPipelineWizardLocalComponent implements OnInit {
         loraRank: cfg.loraRank,
         loraAlpha: cfg.loraAlpha,
         maxLen: cfg.maxLen,
+        containerImage: cfg.containerImage || '',
+        containerRegistry: cfg.containerRegistry || '',
+        useGpu: cfg.useGpu || false,
         kind: 'training-job',
         datasetColumns: this.datasetColumns,
         datasetSample: this.datasetRows,

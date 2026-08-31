@@ -73,6 +73,46 @@
       <app-run-history-tab [model]="model"></app-run-history-tab>
     </mat-tab>
 
+    <!-- Container deployment tab — shown when container-executor is selected -->
+    <mat-tab *ngIf="model.pipelineAttrs?.executor === 'container-executor'">
+      <ng-template mat-tab-label><mat-icon>inventory_2</mat-icon>&nbsp;Container</ng-template>
+      <div class="container-tab-shell p-3">
+        <div class="container-meta mb-3" *ngIf="model.pipelineAttrs?.containerImage">
+          <span class="text-muted">Image: </span><code>{{ model.pipelineAttrs.containerImage }}</code>
+        </div>
+        <div *ngIf="containerDeployStatus === 'idle'" class="text-muted">
+          Click <strong>Deploy as Container</strong> to build and deploy this pipeline to Kubernetes.
+        </div>
+        <div *ngIf="containerDeployStatus === 'deploying'" class="d-flex align-items-center">
+          <mat-spinner diameter="20" class="lfx-u-mar-r-8"></mat-spinner>
+          <span>{{ containerDeployMessage }}</span>
+        </div>
+        <div *ngIf="containerDeployStatus === 'success'">
+          <div class="d-flex align-items-center mb-2">
+            <mat-icon class="text-success lfx-u-mar-r-8">check_circle</mat-icon>
+            <strong>Deployment successful</strong>
+          </div>
+          <div *ngIf="containerInternalDnsUrl">
+            <span class="text-muted">Internal URL: </span><code>{{ containerInternalDnsUrl }}</code>
+          </div>
+        </div>
+        <div *ngIf="containerDeployStatus === 'error'">
+          <div class="d-flex align-items-center mb-2">
+            <mat-icon class="text-danger lfx-u-mar-r-8">error</mat-icon>
+            <strong>Deployment failed</strong>
+          </div>
+          <div class="text-muted">{{ containerDeployMessage }}</div>
+        </div>
+        <div class="mt-3">
+          <button mat-flat-button color="primary"
+                  [disabled]="containerDeployStatus === 'deploying'"
+                  (click)="deployAsContainer()">
+            <mat-icon>inventory_2</mat-icon>&nbsp;Deploy as Container
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
   </mat-tab-group>
 </div>
 
