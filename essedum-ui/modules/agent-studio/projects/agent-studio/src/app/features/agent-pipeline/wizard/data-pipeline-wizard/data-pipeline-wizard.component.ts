@@ -124,6 +124,8 @@ export class DataPipelineWizardLocalComponent implements OnInit {
     this.executionForm = this.fb.group({
       executor: ['py-job-executor', Validators.required],
       schedule: [''],
+      containerImage: [''],
+      containerRegistry: [''],
     });
 
     // Keep git file path in sync with name
@@ -323,6 +325,8 @@ export class DataPipelineWizardLocalComponent implements OnInit {
         outputFormat: cfg.outputFormat,
         executor: cfg.executor,
         schedule: cfg.schedule,
+        containerImage: cfg.containerImage || '',
+        containerRegistry: cfg.containerRegistry || '',
         kind: 'data-pipeline',
         datasetColumns: this.targetColumns,
         datasetSample: this.datasetRows,

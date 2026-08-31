@@ -184,6 +184,22 @@
             </mat-chip-option>
           </mat-chip-listbox>
         </div>
+
+        <!-- Container fields — shown only when container-executor is selected -->
+        <ng-container *ngIf="executionForm.value.executor === 'container-executor'">
+          <mat-divider class="my-3"></mat-divider>
+          <h4 class="step-subtitle"><mat-icon>inventory_2</mat-icon> Container Configuration</h4>
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Custom Docker Image (optional — leave blank to auto-build)</mat-label>
+            <input matInput formControlName="containerImage" placeholder="myregistry.io/my-pipeline:latest">
+            <mat-hint>If blank, the pipeline code will be automatically built into a new image.</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Container Registry URL (optional)</mat-label>
+            <input matInput formControlName="containerRegistry" placeholder="https://myregistry.azurecr.io">
+          </mat-form-field>
+        </ng-container>
+
         <div class="step-actions">
           <button mat-button matStepperPrevious>Back</button>
           <button mat-flat-button color="primary" matStepperNext [disabled]="executionForm.invalid">Next</button>

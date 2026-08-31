@@ -39,6 +39,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   defaultRuntimeFromDB: any;
   runtypesCheck = true;
 
+  // Container deployment state
+  containerDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+  containerDeployMessage = '';
+  containerInternalDnsUrl = '';
+  private _containerPollInterval: any = null;
+
   private destroy$ = new Subject<void>();
 
   @ViewChild(RunHistoryTabComponent) runHistoryTab: RunHistoryTabComponent;
@@ -267,5 +273,45 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.services.message(msg, 'error');
         },
       });
+  }
+
+  deployAsContainer(): void {
+    if (!this.model) return;
+    this.containerDeployStatus = 'deploying';
+    this.containerDeployMessage = 'Initiating container build...';
+    this.containerInternalDnsUrl = '';
+    this.services.deployPipelineAsContainer(this.model.name).subscribe({
+      next: (res: any) => {
+        let deployId: string;
+        try {
+          const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+          deployId = parsed.deploy_id;
+        } catch {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = 'Failed to parse deploy response';
+          return;
+        }
+        this._containerPollInterval = setInterval(() => {
+          this.services.getContainerDeployStatus(deployId).subscribe((status: any) => {
+            if (status.status === 'SUCCESS') {
+              clearInterval(this._containerPollInterval);
+              this.containerDeployStatus = 'success';
+              this.containerDeployMessage = 'Deployment complete';
+              this.containerInternalDnsUrl = status.internal_dns_url || '';
+            } else if (status.status === 'ERROR') {
+              clearInterval(this._containerPollInterval);
+              this.containerDeployStatus = 'error';
+              this.containerDeployMessage = status.message || 'Deployment failed';
+            } else {
+              this.containerDeployMessage = status.message || 'Building...';
+            }
+          });
+        }, 5000);
+      },
+      error: () => {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = 'Failed to start container deployment';
+      },
+    });
   }
 }
