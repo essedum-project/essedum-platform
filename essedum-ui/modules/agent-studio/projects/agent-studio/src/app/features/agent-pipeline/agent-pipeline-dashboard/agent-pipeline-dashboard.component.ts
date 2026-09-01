@@ -38,6 +38,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return 'Data Pipelines';
     } else if (this.pipelineMode === 'training') {
       return 'Training Pipelines';
+    } else if (this.pipelineMode === 'designer') {
+      return 'Designer Pipelines';
     } else {
       return 'Agent Pipelines';
     }
@@ -45,7 +47,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   readonly SERVICE_V1 = 'pipelineagent';
 
   // Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' = 'agent';
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' | 'designer' = 'agent';
 
   // Component state
   hoverStates: boolean[] = [];
@@ -133,7 +135,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   private handleRouteState(): void {
     const state = this.location.getState() as any;
 
-    if (state?.pipelineMode && ['agent', 'mcp', 'app'].includes(state.pipelineMode)) {
+    if (state?.pipelineMode && ['agent', 'mcp', 'app', 'designer'].includes(state.pipelineMode)) {
       this.pipelineMode = state.pipelineMode;
     }
 
@@ -493,6 +495,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           data: { interfacetype: 'pipeline', type: 'NativeScript', mode: 'create' },
           successMessage: 'Pipeline created successfully!'
         };
+      case 'designer':
+        return {
+          data: { interfacetype: 'designer-pipeline', type: 'DesignerPipeline', mode: 'create' },
+          successMessage: 'Designer Pipeline created successfully!'
+        };
       default:
         return {
           data: { interfacetype: 'pipeline-agent', type: 'AIAgent', mode: 'create' },
@@ -564,13 +571,15 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
           });
         }
       }
-      // For agent, MCP, and app pipeline types - use existing logic
+      // For agent, MCP, app, and designer pipeline types - use existing logic
       else if (this.streamItem.type === 'AIAgent' || 
           this.streamItem.type === 'mcpServer' || 
           this.streamItem.type === 'appPipeline' ||
           this.streamItem.type === 'NativeScript' ||
+          this.streamItem.type === 'DesignerPipeline' ||
           this.pipelineMode === 'mcp' ||
           this.pipelineMode === 'app' ||
+          this.pipelineMode === 'designer' ||
           (this.pipelineMode === 'agent' && this.streamItem.interfacetype === 'pipeline-agent')) {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
       } else {
@@ -652,7 +661,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   /**
    * Switch to specific pipeline mode - simplified method
    */
-  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training'): void {
+  switchToPipelineMode(mode: 'agent' | 'mcp' | 'app' | 'pipeline' | 'data' | 'training' | 'designer'): void {
     
     if (this.pipelineMode !== mode) {
       this.pipelineMode = mode;
@@ -702,6 +711,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       return {
         type: 'TrainingPipeline',
         interfacetype: 'pipeline'
+      };
+    } else if (this.pipelineMode === 'designer') {
+      return {
+        type: 'DesignerPipeline',
+        interfacetype: 'designer-pipeline'
       };
     } else {
       return {

@@ -441,8 +441,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   showUploadDialog = false;
   selectedZipFile: File | null = null;
 
-  // MCP Pipeline Mode Support
-  pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
+  // MCP / App / Designer Pipeline Mode Support
+  pipelineMode: 'agent' | 'mcp' | 'app' | 'designer' = 'agent';
 
   // Hardcoded agent cards with fixed cnames
   agentCards: AgentCard[] = [
@@ -593,6 +593,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return 'MCP server';
     } else if (this.pipelineMode === 'app') {
       return 'app';
+    } else if (this.pipelineMode === 'designer') {
+      return 'designer pipeline';
     } else {
       return 'agent';
     }
@@ -630,6 +632,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         this.cardTitle = 'MCP Pipelines';
       } else if (this.pipelineMode === 'app') {
         this.cardTitle = 'App Pipelines';
+      } else if (this.pipelineMode === 'designer') {
+        this.cardTitle = 'Designer Pipelines';
       } else {
         this.cardTitle = 'Agent Pipelines';
       }
@@ -762,6 +766,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         this.cardTitle = 'MCP Pipelines';
       } else if (this.pipelineMode === 'app') {
         this.cardTitle = 'App Pipelines';
+      } else if (this.pipelineMode === 'designer') {
+        this.cardTitle = 'Designer Pipelines';
       } else {
         this.cardTitle = 'Agent Pipelines';
       }
@@ -1148,6 +1154,28 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           this.service.message('App Pipelines created successfully!', 'success');
+          // Navigate back to dashboard to see the new pipeline
+          this.navigateBack();
+        }
+      });
+    } else if (this.pipelineMode === 'designer') {
+      
+      // Open the pipeline creation dialog with Designer-specific parameters
+      const dialogRef = this.dialog.open(PipelineCreateComponent, {
+        width: '460px',
+        maxWidth: '92vw',
+        disableClose: true,
+        data: {
+          interfacetype: 'designer-pipeline', // Designer-specific interface type
+          type: 'DesignerPipeline',           // Designer-specific type
+          mode: 'create'
+        }
+      });
+      
+      // Handle dialog result
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.service.message('Designer Pipelines created successfully!', 'success');
           // Navigate back to dashboard to see the new pipeline
           this.navigateBack();
         }
@@ -3011,7 +3039,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const organization = this.getOrganization();
 
 // Call the upload API with type param: Agent | MCP | App
-    const uploadType = this.pipelineMode === 'mcp' ? 'MCP' : this.pipelineMode === 'app' ? 'Application' : 'Agent';
+    const uploadType = this.pipelineMode === 'mcp' ? 'MCP' : this.pipelineMode === 'app' ? 'Application' : this.pipelineMode === 'designer' ? 'Designer' : 'Agent';
     this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType).subscribe({
          next: (response) => {
         this.service.message(
@@ -3072,6 +3100,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         type: 'appPipeline',
         interface: 'app-pipeline'
       };
+    } else if (this.pipelineMode === 'designer') {
+      return {
+        type: 'DesignerPipeline',
+        interface: 'designer-pipeline'
+      };
     } else {
       return {
         type: 'AIAgent',
@@ -3089,6 +3122,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return 'vibe-mcp';
     } else if (this.pipelineMode === 'app') {
       return 'vibe-apps';
+    } else if (this.pipelineMode === 'designer') {
+      return 'vibe-designer';
     } else {
       return 'vibe-agents';
     }
@@ -3101,9 +3136,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    *   mcp-pipeline    → mcp
    *   app-pipeline    → app
    */
-  private modeFromInterfaceType(interfacetype: string): 'agent' | 'mcp' | 'app' {
+  private modeFromInterfaceType(interfacetype: string): 'agent' | 'mcp' | 'app' | 'designer' {
     if (interfacetype === 'mcp-pipeline') return 'mcp';
     if (interfacetype === 'app-pipeline') return 'app';
+    if (interfacetype === 'designer-pipeline') return 'designer';
     return 'agent';
   }
 
@@ -3142,6 +3178,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
               this.cardTitle = 'MCP Pipelines';
             } else if (this.pipelineMode === 'app') {
               this.cardTitle = 'App Pipelines';
+            } else if (this.pipelineMode === 'designer') {
+              this.cardTitle = 'Designer Pipelines';
             } else {
               this.cardTitle = 'Agent Pipelines';
             }
