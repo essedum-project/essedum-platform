@@ -4,7 +4,7 @@ export const environment = {
   routePrefix: 'agent',
   baseUrl: '/api/aip',
   datasetsUrl: '/api/aip',
-  langflowUrl: '/langflow/',
+  agentDesignerUrl: 'agentDesigner',  // local dev: AgentFlow Designer
   litellmUrl: '/litellm/',
   langfuseUrl: '/langfuse/',
 };

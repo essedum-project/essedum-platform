@@ -12,16 +12,16 @@ import { environment } from '../../../environments/environment';
 export class AgentComponent implements OnInit, AfterViewInit, OnDestroy {
   // Embedded Langflow interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
-  private readonly langflowUrl = environment.langflowUrl;
+  private readonly agentDesignerUrl = environment.agentDesignerUrl;
 
-  @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
+  @ViewChild('agentDesignerIframeRef') agentDesignerIframeRef!: ElementRef<HTMLIFrameElement>;
 
   private messageHandler!: (event: MessageEvent) => void;
 
   constructor(private sanitizer: DomSanitizer, private router: Router) {}
 
   ngOnInit(): void {
-    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.langflowUrl);
+    this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.agentDesignerUrl);
 
     // Listen for navigation requests from the embedded agent-designer iframe.
     this.messageHandler = (event: MessageEvent) => {
@@ -60,9 +60,9 @@ export class AgentComponent implements OnInit, AfterViewInit, OnDestroy {
     //   organisation: parentOrg ? `'${parentOrg}'` : 'null/empty'
     // });
 
-    const iframeEl = this.langflowIframeRef?.nativeElement;
+    const iframeEl = this.agentDesignerIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.langflowUrl).origin; } catch { return this.langflowUrl; }
+      try { return new URL(this.agentDesignerUrl).origin; } catch { return this.agentDesignerUrl; }
     })();
 
     const postToIframe = () => {

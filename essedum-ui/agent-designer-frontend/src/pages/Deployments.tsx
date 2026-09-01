@@ -99,7 +99,11 @@ export default function Deployments() {
    */
   const viewInAgentStudio = (pipelineId: string) => {
     const path = `/landing/agent/pipeline/view/${pipelineId}`;
-    const queryParams = `page=1&search=&pipelineType=&org=leo1311&roleId=1`;
+    // Prefer session values injected by the parent shell (via SET_PARENT_SESSION).
+    // Fall back to env vars for standalone dev mode only.
+    const org    = sessionStorage.getItem('organisation');
+    const roleId = sessionStorage.getItem('roleId');
+    const queryParams = `page=1&search=&pipelineType=&org=${org}&roleId=${roleId}`;
 
     const isEmbedded = window.self !== window.top;
     if (isEmbedded) {
@@ -109,11 +113,13 @@ export default function Deployments() {
         '*'
       );
     } else {
-      // Standalone dev — shell is at 8087 by default.
-      const shellOrigin = window.location.port === '3000'
-        ? 'http://localhost:8087'
+      // Standalone dev — shell origin from env, falls back to current origin.
+      const devPort      = import.meta.env.VITE_PORT        ?? '3000';
+      const shellOrigin  = import.meta.env.VITE_SHELL_ORIGIN ?? 'http://localhost:8087';
+      const origin = window.location.port === devPort
+        ? shellOrigin
         : window.location.origin;
-      window.open(`${shellOrigin}/#${path}?${queryParams}`, '_blank');
+      window.open(`${origin}/#${path}?${queryParams}`, '_blank');
     }
   };
 

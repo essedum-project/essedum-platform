@@ -13,7 +13,7 @@ export interface ApiConfig {
   /** Sandbox / experiments path — e.g. '/api/exp'. */
   sandboxUrl: string;
   /** Optional: Langflow embed URL used by agent-mfe. */
-  langflowUrl?: string;
+  agentDesignerUrl?: string;
   /** Optional: LiteLLM URL. */
   litellmUrl?: string;
   /** Optional: Langfuse URL. */

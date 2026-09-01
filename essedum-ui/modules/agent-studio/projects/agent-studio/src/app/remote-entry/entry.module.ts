@@ -214,7 +214,7 @@ import { environment } from '../../environments/environment';
         baseUrl: environment.baseUrl ?? '/api/aip',
         datasetsUrl: environment.datasetsUrl ?? '/api/aip',
         sandboxUrl: '/api/exp',
-        langflowUrl: environment.langflowUrl ?? '/langflow/',
+        agentDesignerUrl: environment.agentDesignerUrl ?? '/agentDesigner/',
       } as ApiConfig,
     },
     { provide: 'envi',     useFactory: (cfg: ApiConfig) => cfg.baseUrl,     deps: [API_CONFIG] },
