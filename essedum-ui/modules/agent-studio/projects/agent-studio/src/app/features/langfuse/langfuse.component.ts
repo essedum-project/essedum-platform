@@ -25,7 +25,8 @@ export class LangfuseComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Guard against unsubstituted build-time placeholders (e.g. __FE_LANGFUSE_URL__).
-    this.isUrlConfigured = !!(this.langfuseUrl?.startsWith('http'));
+    // Accept both absolute (https://...) and root-relative (/langfuse/) URLs.
+    this.isUrlConfigured = !!(this.langfuseUrl && (this.langfuseUrl.startsWith('http') || this.langfuseUrl.startsWith('/')));
     const url = this.isUrlConfigured ? this.langfuseUrl : 'about:blank';
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
@@ -41,7 +42,7 @@ export class LangfuseComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.langfuseIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.langfuseUrl).origin; } catch { return this.langfuseUrl; }
+      try { return new URL(this.langfuseUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {

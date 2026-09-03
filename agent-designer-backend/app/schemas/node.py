@@ -68,14 +68,14 @@ NODE_REGISTRY: dict[str, NodeDefinition] = {
     "model": NodeDefinition(
         type="model",
         label="Model",
-        description="Calls an LLM via Azure OpenAI, AWS Bedrock, or Google Vertex AI.",
+        description="Calls an LLM via Azure OpenAI, AWS Bedrock, Google Vertex AI, Ollama, or the LiteLLM gateway.",
         inputs=[NodePort(name="prompt", type="string")],
         outputs=[NodePort(name="response", type="string")],
         config_schema={
             "provider": NodeConfigField(
                 type="string",
                 required=True,
-                enum=["azure_openai", "bedrock", "vertex_ai"],
+                enum=["azure_openai", "bedrock", "vertex_ai", "ollama", "litellm"],
             ),
             "model": NodeConfigField(type="string", required=True),
             "temperature": NodeConfigField(type="number", default=0.7),
@@ -115,7 +115,7 @@ NODE_REGISTRY: dict[str, NodeDefinition] = {
             "provider": NodeConfigField(
                 type="string",
                 required=True,
-                enum=["azure_openai", "bedrock", "vertex_ai"],
+                enum=["azure_openai", "bedrock", "vertex_ai", "ollama", "litellm"],
             ),
             "model": NodeConfigField(type="string", required=True),
             "system_prompt": NodeConfigField(type="string", required=False),

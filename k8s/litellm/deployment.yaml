@@ -83,12 +83,17 @@ spec:
                 configMapKeyRef:
                   name: essedum-config
                   key: LANGFUSE_BASE_URL
+            - name: SERVER_ROOT_PATH
+              value: "/litellm"
           volumeMounts:
             - name: litellm-config
               mountPath: /app/config
               readOnly: true
             - name: litellm-data
               mountPath: /app/data
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
           resources:
             requests:
               cpu: "250m"
@@ -115,6 +120,22 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
+        - name: nginx-proxy
+          image: nginx:alpine
+          ports:
+            - containerPort: 9080
+              name: nginx-proxy
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
       volumes:
         - name: litellm-config
           persistentVolumeClaim:
@@ -122,3 +143,6 @@ spec:
         - name: litellm-data
           persistentVolumeClaim:
             claimName: litellm-data-pvc
+        - name: nginx-config
+          configMap:
+            name: litellm-nginx-config

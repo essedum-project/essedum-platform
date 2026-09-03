@@ -36,6 +36,7 @@ import pipelineConfig from './pipeline-config.json';
 import { OptionsDTO } from '@essedum/shared-lib';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../../environments/environment';
 
 interface FileNode {
   name: string;
@@ -404,6 +405,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   get aiChatSelectedModelLabel(): string {
     return this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)?.label
       ?? this.aiChatSelectedModel ?? 'Select model';
+  }
+  /** Last Langfuse trace ID — set after each generation round. */
+  lastLangfuseTraceId: string | null = null;
+  get langfuseTraceUrl(): string | null {
+    if (!this.lastLangfuseTraceId) return null;
+    const base = (environment as any).langfuseUrl ?? '/langfuse';
+    return `${base.replace(/\/$/, '')}/trace/${this.lastLangfuseTraceId}`;
   }
   appPort = ''; // Store app port from deployment
 
@@ -3471,6 +3479,29 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       next: (res) => this.applyProvidersResponse(res),
       error: () => { /* keep hardcoded fallback silently */ },
     });
+
+    // Configure Salus + LiteLLM URLs on the coder service so it can run safety
+    // checks and surface LiteLLM models in the provider dropdown.
+    const litellmUrl = (environment as any).litellmUrl ?? '/litellm/';
+    const salusUrl   = (environment as any).salusUrl   ?? '';
+    this.aiChatCoder.litellmUrl = litellmUrl;
+    this.aiChatCoder.salusUrl   = salusUrl;
+
+    // Load LiteLLM models and append them to the model dropdown.
+    this.aiChatCoder.getLiteLLMModels(litellmUrl).then(models => {
+      if (!models.length) return;
+      // Add "LiteLLM" agent entry if not already present
+      if (!this.aiChatAgents.find(a => a.value === 'litellm')) {
+        this.aiChatAgents = [...this.aiChatAgents, { value: 'litellm', label: 'LiteLLM' }];
+      }
+      // Merge new models, deduplicating by value
+      const existing = new Set(this.aiChatModels.map(m => m.value));
+      const newModels = models.filter(m => !existing.has(m.value));
+      if (newModels.length) {
+        this.aiChatModels = [...this.aiChatModels, ...newModels];
+      }
+      this.cdr.markForCheck?.();
+    });
   }
 
   /**
@@ -3633,6 +3664,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatDeployAvailable = false;
     this.aiChatDeployStatus = 'idle';
     this.aiChatDeployedUrl = null;
+    this.lastLangfuseTraceId = null;
   }
 
   /**
@@ -3694,6 +3726,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         this.aiChatDeployAvailable = files.length > 0;
         this.hasGeneratedAgent = files.length > 0;
         this.isJsonProcessed = files.length > 0;
+        // Capture the Langfuse trace ID from this generation round.
+        this.lastLangfuseTraceId = this.aiChatCoder.lastTraceId;
         this.cdr.detectChanges();
       })
     );

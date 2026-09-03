@@ -4,4 +4,5 @@ export const environment = {
   routePrefix: 'vibe',
   baseUrl: '/api/aip',
   datasetsUrl: '/api/aip',
+  salusUrl: '/',
 };
