@@ -1,0 +1,62 @@
+---
+# Routes /litellm/* → LiteLLM nginx sidecar (port 9080) which serves the Admin UI
+# The sidecar strips frame-blocking headers and routes requests to the correct paths.
+# SERVER_ROOT_PATH=/litellm causes LiteLLM to mount its UI at /litellm/ui/ and
+# assets at /litellm/_next/, which the sidecar maps correctly from the /litellm/ prefix.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: essedum-litellm-path
+  namespace: essedum
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - path: /litellm(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: litellm
+            port:
+              number: 9080
+---
+# Routes /swagger* → LiteLLM FastAPI directly (port 4000) so Swagger UI CSS/JS load correctly
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: essedum-litellm-swagger
+  namespace: essedum
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - path: /swagger
+        pathType: Prefix
+        backend:
+          service:
+            name: litellm
+            port:
+              number: 4000

@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: langfuse-nginx-config
+  namespace: essedum
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        proxy_hide_header Content-Security-Policy;
+
+        server {
+            listen 8080;
+
+            # Strip /langfuse prefix — allows embedding via the main domain at /langfuse/
+            location /langfuse/ {
+                rewrite ^/langfuse/(.*)$ /$1 break;
+                proxy_pass http://127.0.0.1:3000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_hide_header Content-Security-Policy;
+                add_header Content-Security-Policy "default-src 'self' https://*.langfuse.com https://*.langfuse.dev https://*.posthog.com https://*.sentry.io wss://*.crisp.chat https://*.crisp.chat; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.langfuse.com https://*.langfuse.dev https://client.crisp.chat https://settings.crisp.chat https://challenges.cloudflare.com https://*.sentry.io https://static.cloudflareinsights.com https://*.stripe.com; style-src 'self' 'unsafe-inline' https://client.crisp.chat; img-src 'self' https: blob: data: http://localhost:* https://client.crisp.chat https://image.crisp.chat https://storage.crisp.chat; font-src 'self' https://client.crisp.chat; frame-src 'self' https://challenges.cloudflare.com https://*.stripe.com https://game.crisp.chat; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://essedum-lfn.infosys.com; connect-src 'self' https://*.langfuse.com https://*.langfuse.dev https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat https://*.ingest.us.sentry.io; media-src 'self' https: http://localhost:* https://client.crisp.chat;" always;
+                proxy_connect_timeout 600s;
+                proxy_send_timeout 600s;
+                proxy_read_timeout 600s;
+            }
+
+            # Direct + _next/ asset serving.
+            # sub_filter rewrites root-relative API/asset paths so they work through the
+            # /langfuse/ path-based proxy: /api/ → /langfuse/api/, /icon.svg → /langfuse/icon.svg
+            # Accept-Encoding "" disables gzip so sub_filter can process the response body.
+            location / {
+                proxy_pass http://127.0.0.1:3000;
+                proxy_set_header Accept-Encoding "";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                sub_filter_types application/javascript text/javascript;
+                sub_filter '"/api/' '"/langfuse/api/';
+                sub_filter '"/icon.svg"' '"/langfuse/icon.svg"';
+                sub_filter '"/favicon.ico"' '"/langfuse/favicon.ico"';
+                sub_filter_once off;
+                proxy_hide_header Content-Security-Policy;
+                add_header Content-Security-Policy "default-src 'self' https://*.langfuse.com https://*.langfuse.dev https://*.posthog.com https://*.sentry.io wss://*.crisp.chat https://*.crisp.chat; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.langfuse.com https://*.langfuse.dev https://client.crisp.chat https://settings.crisp.chat https://challenges.cloudflare.com https://*.sentry.io https://static.cloudflareinsights.com https://*.stripe.com; style-src 'self' 'unsafe-inline' https://client.crisp.chat; img-src 'self' https: blob: data: http://localhost:* https://client.crisp.chat https://image.crisp.chat https://storage.crisp.chat; font-src 'self' https://client.crisp.chat; frame-src 'self' https://challenges.cloudflare.com https://*.stripe.com https://game.crisp.chat; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://essedum-lfn.infosys.com; connect-src 'self' https://*.langfuse.com https://*.langfuse.dev https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat https://*.ingest.us.sentry.io; media-src 'self' https: http://localhost:* https://client.crisp.chat;" always;
+                proxy_connect_timeout 600s;
+                proxy_send_timeout 600s;
+                proxy_read_timeout 600s;
+            }
+        }
+    }

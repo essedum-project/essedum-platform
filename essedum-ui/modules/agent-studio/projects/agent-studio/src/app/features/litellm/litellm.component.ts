@@ -21,7 +21,8 @@ export class LitellmComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Guard against unsubstituted build-time placeholders (e.g. __FE_LITELLM_URL__).
-    this.isUrlConfigured = !!(this.litellmUrl?.startsWith('http'));
+    // Accept both absolute (https://...) and root-relative (/litellm/) URLs.
+    this.isUrlConfigured = !!(this.litellmUrl && (this.litellmUrl.startsWith('http') || this.litellmUrl.startsWith('/')));
     const url = this.isUrlConfigured ? this.litellmUrl : 'about:blank';
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
@@ -37,7 +38,7 @@ export class LitellmComponent implements OnInit, AfterViewInit {
 
     const iframeEl = this.litellmIframeRef?.nativeElement;
     const childOrigin = (() => {
-      try { return new URL(this.litellmUrl).origin; } catch { return this.litellmUrl; }
+      try { return new URL(this.litellmUrl, window.location.origin).origin; } catch { return window.location.origin; }
     })();
 
     const postToIframe = () => {

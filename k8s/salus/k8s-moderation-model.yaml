@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: salus-moderation-model
+  namespace: aipns
+  labels:
+    app: salus-moderation-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: salus-moderation-model
+  template:
+    metadata:
+      labels:
+        app: salus-moderation-model
+    spec:
+      containers:
+      - name: salus-moderation-model
+        image: 192.168.28.36:5000/aipns/salus-moderation-model:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: "2"
+            memory: 6Gi
+        readinessProbe:
+          httpGet:
+            path: /rai/v1/raimoderationmodels/docs
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 10
+        livenessProbe:
+          httpGet:
+            path: /rai/v1/raimoderationmodels/docs
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 30
+          failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: salus-moderation-model
+  namespace: aipns
+  labels:
+    app: salus-moderation-model
+spec:
+  selector:
+    app: salus-moderation-model
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP

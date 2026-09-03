@@ -1,6 +1,7 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject, BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import {
   VibeSession,
   VibeChatMessage,
@@ -238,6 +239,8 @@ export class VibeStudioService implements OnDestroy {
   private streamingAssistantIndex: number | null = null;
   /** Guards against duplicate push-to-github calls within a single generation round. */
   private pushInFlight = false;
+  /** Salus base URL — set from environment; empty string disables safety checks. */
+  private readonly salusUrl: string = (environment as any).salusUrl ?? '';
 
   readonly sseEvents$         = new Subject<any>();
   readonly status$            = new BehaviorSubject<VibeSessionStatus>('idle');
@@ -316,26 +319,44 @@ export class VibeStudioService implements OnDestroy {
    * Alias: `generate()` is kept so left-panel component needs no changes.
    */
   generate(prompt: string, displayText?: string): void {
+    // Show the user bubble immediately so the chat feels responsive
     const userMsg: VibeChatMessage = { role: 'user', content: displayText ?? prompt, timestamp: new Date() };
     this.session.messages.push(userMsg);
     this.messages$.next([...this.session.messages]);
     this.status$.next('generating');
 
-    this.cancelReply(); // abort any in-flight reply stream first
-    this.pushInFlight = false; // allow push for this new generation round
+    this.cancelReply();
+    this.pushInFlight = false;
 
-    this.ensureAgentStarted().then((sessionId) => {
-      this.openReplyStream(sessionId, prompt + ' - send all code files generated here');
-    }).catch(() => {
-      const errMsg: VibeChatMessage = {
-        role: 'assistant',
-        content: '⚠️ Failed to start the AI agent session. Please refresh the page and try again.',
-        timestamp: new Date(),
-      };
-      this.session.messages.push(errMsg);
-      this.messages$.next([...this.session.messages]);
-      this.status$.next('error');
-    });
+    const proceed = (llmPrompt: string) => {
+      this.ensureAgentStarted().then((sessionId) => {
+        this.openReplyStream(sessionId, llmPrompt + ' - send all code files generated here');
+      }).catch(() => {
+        const errMsg: VibeChatMessage = {
+          role: 'assistant',
+          content: '⚠️ Failed to start the AI agent session. Please refresh the page and try again.',
+          timestamp: new Date(),
+        };
+        this.session.messages.push(errMsg);
+        this.messages$.next([...this.session.messages]);
+        this.status$.next('error');
+      });
+    };
+
+    if (this.salusUrl) {
+      // Salus pre-LLM: anonymize PII → moderation check
+      this.salusPreProcess(prompt, this.salusUrl).then(result => {
+        if (!result.allowed) {
+          this.session.messages.push({ role: 'assistant', content: result.message, timestamp: new Date() });
+          this.messages$.next([...this.session.messages]);
+          this.status$.next('idle');
+          return;
+        }
+        proceed(result.text);
+      });
+    } else {
+      proceed(prompt);
+    }
   }
 
   /** Cancel the currently streaming Goose reply locally (if any). */
@@ -817,6 +838,16 @@ export class VibeStudioService implements OnDestroy {
       }
     }
 
+    // Salus post-LLM: moderation + PII analysis on the response
+    if (this.salusUrl && text && text.trim()) {
+      this.salusPostProcess(text, this.salusUrl).then(warnings => {
+        if (warnings.length) {
+          this.session.messages.push({ role: 'assistant', content: warnings.join('\n'), timestamp: new Date() });
+          this.messages$.next([...this.session.messages]);
+        }
+      });
+    }
+
     // Call list_apps after every reply to get all generated files.
     if (this.session.id) {
       const sid = this.session.id;
@@ -1200,6 +1231,145 @@ export class VibeStudioService implements OnDestroy {
         next: () => {},
         error: () => {},
       });
+  }
+
+  // ─── Salus safety hooks ──────────────────────────────────────────────────────
+
+  /**
+   * Pre-LLM Salus pipeline:
+   * 1. Privacy anonymize — redact PII from `prompt` (full text sent to LLM).
+   * 2. Moderation check  — run on `moderationText` when provided (the user's raw
+   *    typed message), otherwise falls back to the full prompt. Using the raw message
+   *    prevents codebase context from diluting the moderation signal.
+   *
+   * Returns { allowed: true, text: anonymizedPrompt } or { allowed: false, message }.
+   */
+  private buildModerationPayload(text: string): object {
+    return {
+      Prompt: text,
+      ModerationChecks: ['Toxicity', 'PromptInjection'],
+      ModerationCheckThresholds: {
+        PromptinjectionThreshold: 0.70,
+        JailbreakThreshold: 0.70,
+        PiientitiesConfiguredToBlock: [],
+        RefusalThreshold: 0.70,
+        ToxicityThresholds: {
+          ToxicityThreshold: 0.60,
+          SevereToxicityThreshold: 0.60,
+          ObsceneThreshold: 0.60,
+          ThreatThreshold: 0.60,
+          InsultThreshold: 0.60,
+          IdentityAttackThreshold: 0.60,
+          SexualExplicitThreshold: 0.60,
+        },
+        ProfanityCountThreshold: 1,
+        RestrictedtopicDetails: { Restrictedtopics: [], RestrictedtopicThreshold: 0.60 },
+        CustomTheme: {},
+      },
+    };
+  }
+
+  async salusPreProcess(
+    prompt: string,
+    salusUrl: string,
+    moderationText?: string,
+  ): Promise<{ allowed: boolean; text: string; message: string }> {
+    const base = salusUrl.replace(/\/$/, '');
+    let processedText = prompt;
+
+    // Step 1: Privacy anonymize the full prompt
+    try {
+      const privResp = await fetch(`${base}/v1/privacy/text/anonymize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputText: prompt }),
+        credentials: 'include',
+      });
+      if (privResp.ok) {
+        const privData = await privResp.json();
+        if (typeof privData?.anonymizedText === 'string' && privData.anonymizedText) {
+          processedText = privData.anonymizedText;
+        }
+      }
+    } catch { /* fail open */ }
+
+    // Step 2: Moderation on user's raw typed text only (not the full context-injected prompt)
+    const textToModerate = (moderationText ?? processedText).trim();
+    try {
+      const modResp = await fetch(`${base}/salus-moderation-layer/rai/v1/moderations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.buildModerationPayload(textToModerate)),
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      if (modResp.ok) {
+        const modData = await modResp.json();
+        const status = modData?.moderationResults?.summary?.status;
+        if (status && status !== 'PASSED') {
+          const reasons = modData?.moderationResults?.summary?.reason ?? [];
+          const detail = reasons.length ? ` Reason: ${reasons.join(', ')}.` : '';
+          return {
+            allowed: false,
+            text: processedText,
+            message: `⚠️ Your message was flagged by the Salus safety filter and has not been sent.${detail} Please revise your prompt.`,
+          };
+        }
+      }
+    } catch { /* fail open */ }
+
+    return { allowed: true, text: processedText, message: '' };
+  }
+
+  /**
+   * Post-LLM Salus pipeline:
+   * 1. Moderation check on LLM response — warn if harmful content detected.
+   * 2. Privacy analyze on LLM response — warn if PII detected.
+   * Returns array of warning strings (empty = clean).
+   */
+  async salusPostProcess(responseText: string, salusUrl: string): Promise<string[]> {
+    const base = salusUrl.replace(/\/$/, '');
+    const warnings: string[] = [];
+
+    // Step 1: Moderation check on LLM response
+    try {
+      const modResp = await fetch(`${base}/salus-moderation-layer/rai/v1/moderations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.buildModerationPayload(responseText.slice(0, 4000))),
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      if (modResp.ok) {
+        const modData = await modResp.json();
+        const status = modData?.moderationResults?.summary?.status;
+        if (status && status !== 'PASSED') {
+          const reasons = modData?.moderationResults?.summary?.reason ?? [];
+          const detail = reasons.length ? ` (${reasons.join(', ')})` : '';
+          warnings.push(`⚠️ Salus detected potentially harmful content in the AI response${detail}.`);
+        }
+      }
+    } catch { /* fail open */ }
+
+    // Step 2: Privacy analysis on LLM response
+    try {
+      const privResp = await fetch(`${base}/v1/privacy/text/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputText: responseText.slice(0, 4000) }),
+        credentials: 'include',
+      });
+      if (privResp.ok) {
+        const privData = await privResp.json();
+        const entities = privData?.piiEntities ?? privData?.entities ?? privData?.results ?? [];
+        if (Array.isArray(entities) && entities.length > 0) {
+          const types = [...new Set(entities.map((e: any) => e?.type ?? e?.entity_type ?? 'PII'))].join(', ');
+          warnings.push(`⚠️ Salus detected potential PII in the AI response (${types}). Please review before sharing.`);
+        }
+      }
+    } catch { /* fail open */ }
+
+    return warnings;
   }
 
   /**
