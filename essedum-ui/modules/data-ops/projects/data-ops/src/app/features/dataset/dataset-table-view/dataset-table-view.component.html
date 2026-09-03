@@ -181,11 +181,7 @@
                       ">
                     </mat-checkbox> -->
                 </td>
-                <td *ngFor="let col of cols" [hidden]="!col.visible" style="
-                      max-width: 90vh;
-                      min-width: 8vh;
-                      word-break: break-all;
-                    ">
+                <td *ngFor="let col of cols" [hidden]="!col.visible" class="dtv-cell">
 
                   <span style="cursor: pointer; text-decoration: underline" *ngIf="col.field == unqId"
                     (click)="edit(ticketList[i])" class="selector-795-91" innerHTML="{{

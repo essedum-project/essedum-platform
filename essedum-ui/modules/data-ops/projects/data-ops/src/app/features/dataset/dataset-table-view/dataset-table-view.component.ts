@@ -8,6 +8,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Project } from '@essedum/shared-lib';
 import { DatasetServices } from '../dataset-service';
 import { MatDialog } from '@angular/material/dialog';
+import { HttpClient, HttpParams } from '@angular/common/http';
 @Component({
     selector: 'app-dataset-table-view',
     templateUrl: './dataset-table-view.component.html',
@@ -118,11 +119,13 @@ export class DatasetTableViewComponent implements OnInit {
   recipeName: any;
   selectedRecipe: any;
   searchToggle: boolean = false;
-  // True for schema-less datasets (e.g. object-storage CSVs) where searchData/searchDataCount
-  // endpoints don't work; we drive the table via getProxyDbDatasetDetails instead.
+  // Schema-less (object-storage/CSV/XLSX) flow: fetch all rows once via getProxyDbDatasetDetails,
+  // then paginate/sort client-side. searchData/searchDataCount don't work for these datasets.
   useDirectPaginated: boolean = false;
-  // Resolved datasource object (needed for getProxyDbDatasetDetails).
   resolvedDatasource: any = null;
+  allRowsCache: any[] = [];
+  // Monotonic token used to ignore in-flight responses when a newer load has started.
+  private directLoadToken: number = 0;
   basicReqTab: any = 'create';
   showRecipe: boolean = true;
   showWranglingData: boolean = false;
@@ -140,6 +143,7 @@ export class DatasetTableViewComponent implements OnInit {
     private changeDetectorRefs: ChangeDetectorRef,
     private datasetsService: DatasetServices,
     private dialog: MatDialog,
+    private http: HttpClient,
   ) {
 
   }
@@ -195,6 +199,8 @@ export class DatasetTableViewComponent implements OnInit {
               else actionToBeCompared = "update";
               this.getDatasetFormTemplate()
                         this.appLoading = false;
+                        let response: number = +resp;
+                this.datasetsCount = response;
 
             }
             else { this.service.message("Dataset details not found", "error") 
@@ -292,41 +298,20 @@ export class DatasetTableViewComponent implements OnInit {
       }
       else {
         this.useDirectPaginated = true;
-        this.service.getDatasource(this.dataset.datasource).subscribe((dsResp: any) => {
-          this.resolvedDatasource = dsResp;
-          const org = sessionStorage.getItem('organization') || this.dataset.organization;
-          const params = { page: 0, size: 1 };
-          this.service.getProxyDbDatasetDetails(this.dataset, this.resolvedDatasource, params, org, true)
-            .subscribe((resp: any) => {
-              this.columnNamesList = [];
-              this.columnHeadersList = [];
-              const firstRow = this.extractFirstRow(resp);
-              if (firstRow && typeof firstRow === 'object') {
-                if (this.asChildView) {
-                  this.columnNamesList = [];
-                  this.columnHeadersList = [];
-                }
-                Object.keys(firstRow).forEach((ky) => {
-                  this.columnNamesList.push(ky);
-                  this.columnHeadersList.push(ky);
-                });
-              }
-              this.checkRouteQueryParams();
-            },
-            (error) => {
-              if (this.asChildView) {
-                this.service.message('Error! ' + error, "error");
-                this.columnNamesList = [];
-                this.columnHeadersList = [];
-                this.ticketList = [];
-                this.ticketListBackup = [];
-                this.datasetsCount = 0;
-              }
-              this.checkRouteQueryParams();
-            });
-        }, (err: any) => {
-          this.service.message('Error resolving datasource: ' + err, 'error');
+        this.allRowsCache = [];
+        this.service.getDatasource(this.dataset?.datasource).subscribe(dsource => {
+          if (!dsource) {
+            this.service.message("Datasource not found", "error");
+            this.appLoading = false;
+            return;
+          }
+          this.resolvedDatasource = dsource;
+          // Columns and rows are derived from the actual data fetch; skip pre-flight column probe.
           this.checkRouteQueryParams();
+        },
+        err => {
+          this.service.message("Error resolving datasource: " + err, "error");
+          this.appLoading = false;
         });
       }
     }
@@ -345,34 +330,34 @@ export class DatasetTableViewComponent implements OnInit {
         this.sortEvent = this.columnNamesList[0];
       this.showAddTagBtn = this.columnNamesList.includes("tags");
       this.createColumn();
-      this.route.queryParams.subscribe((params) => {
-        if (params['q']) {
-          let incomingSearchParams = decodeURIComponent(params['q']);
-          let incomingSearchValues = decodeURIComponent(params['r']);
-          let incomingSearchParamList: any[] = incomingSearchParams.split(",");
-          let incomingSearchValueList: any[] = incomingSearchValues.split(",");
-          for (let i = 0; i < incomingSearchParamList.length; i++) {
-            incomingSearchParamList[i] = incomingSearchParamList[i].trim();
-          }
-          for (let i = 0; i < incomingSearchValueList.length; i++) {
-            incomingSearchValueList[i] = incomingSearchValueList[i].trim();
-            if (incomingSearchValueList[i].includes("//")) {
-              let tempArray: string[] = incomingSearchValueList[i].split("//");
-              for (let j = 0; j < tempArray.length; j++) {
-                tempArray[j] = tempArray[j].trim();
-              }
-              incomingSearchValueList[i] = tempArray;
+      // Take a single snapshot of the query params so later navigations don't re-fire refreshTicket
+      // and start a second/third parallel fetch chain.
+      const params: any = (this.route.snapshot?.queryParams) || {};
+      if (params['q']) {
+        let incomingSearchParams = decodeURIComponent(params['q']);
+        let incomingSearchValues = decodeURIComponent(params['r']);
+        let incomingSearchParamList: any[] = incomingSearchParams.split(",");
+        let incomingSearchValueList: any[] = incomingSearchValues.split(",");
+        for (let i = 0; i < incomingSearchParamList.length; i++) {
+          incomingSearchParamList[i] = incomingSearchParamList[i].trim();
+        }
+        for (let i = 0; i < incomingSearchValueList.length; i++) {
+          incomingSearchValueList[i] = incomingSearchValueList[i].trim();
+          if (incomingSearchValueList[i].includes("//")) {
+            let tempArray: string[] = incomingSearchValueList[i].split("//");
+            for (let j = 0; j < tempArray.length; j++) {
+              tempArray[j] = tempArray[j].trim();
             }
+            incomingSearchValueList[i] = tempArray;
           }
-          // To Be Generalised
-          this.fmFlrDsb = true;
-          sessionStorage.setItem("failureDashboardToTickets", "True");
-          this.refreshTicket(incomingSearchParamList, incomingSearchValueList);
         }
-        else {
-          this.refreshTicket();
-        }
-      })
+        this.fmFlrDsb = true;
+        sessionStorage.setItem("failureDashboardToTickets", "True");
+        this.refreshTicket(incomingSearchParamList, incomingSearchValueList);
+      }
+      else {
+        this.refreshTicket();
+      }
     }
   }
 
@@ -438,7 +423,7 @@ export class DatasetTableViewComponent implements OnInit {
         this.cols.map(ele => ele['filterValue'] = null);
       }
       if (this.useDirectPaginated && !this.itsm && !this.tickets) {
-        this.fetchDirectPaginatedRows(pagination);
+        this.loadAllRowsForDirectPaginated();
         return;
       }
       if (!this.itsm && !this.tickets) {
@@ -583,79 +568,204 @@ export class DatasetTableViewComponent implements OnInit {
     }
   }
 
-  fetchDirectPaginatedRows(pagination: any) {
+  // Fetch every page from getProxyDbDatasetDetails in chunks until the tail is reached,
+  // so pagination and count reflect the true dataset size.
+  loadAllRowsForDirectPaginated() {
+    const myToken = ++this.directLoadToken;
     this.appLoading = true;
-    const org = sessionStorage.getItem('organization') || this.dataset?.organization;
-    const params = { page: Number(pagination?.page) || 0, size: Number(pagination?.size) || Number(this.rows) || 10 };
-
-    const runFetch = () => {
-      this.busy = this.service.getProxyDbDatasetDetails(this.dataset, this.resolvedDatasource, params, org, true)
-        .subscribe((resp: any) => {
-          const body: any[] = this.extractRows(resp);
-          this.ticketList = [];
-          body.forEach((element) => {
-            if (element && typeof element === 'object') {
-              Object.keys(element).map(ky => { if (element[ky] != null) element[ky] = element[ky].toString(); });
-              this.ticketList.push(element);
-            }
-          });
-          if ((!this.cols || this.cols.length === 0) && this.ticketList.length > 0) {
-            this.columnNamesList = [];
-            this.columnHeadersList = [];
-            Object.keys(this.ticketList[0]).forEach((ky) => {
-              this.columnNamesList.push(ky);
-              this.columnHeadersList.push(ky);
-            });
-            this.createColumn();
-          }
-          this.ticketListBackup = this.ticketList;
-          const pageNum = params.page;
-          const pageSize = params.size;
-          if (body.length < pageSize) {
-            this.datasetsCount = pageNum * pageSize + body.length;
-          } else {
-            const prev = Number(this.datasetsCount);
-            this.datasetsCount = Math.max(isFinite(prev) ? prev : 0, (pageNum + 1) * pageSize + 1);
-          }
-          this.initializePaginationVariables();
-          this.appLoading = false;
-          this.changeDetectorRefs.detectChanges();
-        },
-        (error) => {
-          this.service.message("Could not get the results", "error");
-          this.ticketList = this.ticketListBackup;
-          this.appLoading = false;
-        });
-    };
-
-    if (!this.resolvedDatasource) {
-      this.service.getDatasource(this.dataset.datasource).subscribe((dsResp: any) => {
-        this.resolvedDatasource = dsResp;
-        runFetch();
-      }, (err: any) => {
-        this.service.message('Error resolving datasource: ' + err, 'error');
-        this.appLoading = false;
-      });
-    } else {
-      runFetch();
-    }
+    this.ticketList = [];
+    this.datasetsCount = 0;
+    this.lastPage = 0;
+    // Accumulate into a chain-local array — never touch this.allRowsCache mid-chain,
+    // so concurrent chains cannot double-append.
+    this.fetchDirectPage(0, myToken, [], null);
   }
 
-  // Normalize the various response shapes (array | {data:[]} | {content:[]} | JSON string) to rows.
+  private fetchDirectPage(pageIdx: number, token: number, acc: any[], firstRowSig: string | null) {
+    if (token !== this.directLoadToken) return; // superseded
+    const CHUNK_SIZE = 500;
+    const MAX_PAGES = 40;   // 20 000-row hard cap for the preview
+    const MAX_ROWS = 20000;
+
+    // Safety caps: some backends return the same page regardless of the ?page= param,
+    // which would otherwise recurse forever.
+    if (pageIdx >= MAX_PAGES || acc.length >= MAX_ROWS) {
+      console.warn('[dataset-table-view] hit safety cap', { pageIdx, rows: acc.length });
+      this.finaliseDirectLoad(acc, token);
+      return;
+    }
+
+    const org = this.dataset?.organization || sessionStorage.getItem("organization");
+    const ds = this.resolvedDatasource;
+    const url = `/api/aip/service/dbdata/${encodeURIComponent(ds?.type)}/${encodeURIComponent(ds?.alias)}/${encodeURIComponent(this.dataset?.alias)}/${encodeURIComponent(org)}/${pageIdx === 0 ? 'true' : 'false'}`;
+    const params = new HttpParams()
+      .set('page', pageIdx.toString())
+      .set('size', CHUNK_SIZE.toString());
+    // Fetch as raw text — some backends return HTML-entity-encoded JSON (e.g. &quot;) that
+    // crashes Angular's default 'json' response parser. Decode entities, then parse ourselves.
+    this.busy = this.http.get(url, { params, responseType: 'text' }).subscribe((raw: string) => {
+      if (token !== this.directLoadToken) return;
+      const parsed = this.parseServerJson(raw);
+      const body = this.extractRows(parsed);
+
+      if (pageIdx === 0 && body.length === 0 && !this.isEmptyResponse(parsed)) {
+        console.warn('[dataset-table-view] unrecognised response shape', parsed);
+      }
+
+      // Detect backends that ignore the ?page= param and return the same records forever.
+      if (pageIdx > 0 && body.length > 0) {
+        const sig = this.rowSignature(body[0]);
+        if (sig && sig === firstRowSig) {
+          console.warn('[dataset-table-view] backend ignores pagination; stopping recursion at page', pageIdx);
+          this.finaliseDirectLoad(acc, token);
+          return;
+        }
+      }
+
+      const nextFirstRowSig = (pageIdx === 0 && body.length > 0) ? this.rowSignature(body[0]) : firstRowSig;
+      acc.push(...body);
+
+      // Only recurse when the backend returned a truly full page AND we haven't hit caps.
+      if (body.length === CHUNK_SIZE && acc.length < MAX_ROWS && pageIdx + 1 < MAX_PAGES) {
+        this.fetchDirectPage(pageIdx + 1, token, acc, nextFirstRowSig);
+        return;
+      }
+      this.finaliseDirectLoad(acc, token);
+    },
+    (error) => {
+      if (token !== this.directLoadToken) return;
+      const status = error?.status;
+      if (pageIdx > 0 && (status === 400 || status === 404 || status === 416)) {
+        this.finaliseDirectLoad(acc, token);
+        return;
+      }
+      const backendMsg =
+        (typeof error === 'string' && error) ||
+        error?.error?.message ||
+        (typeof error?.error === 'string' && error.error) ||
+        error?.message ||
+        'Unknown error';
+      this.service.message("Could not load data: " + backendMsg, "error");
+      this.appLoading = false;
+    });
+  }
+
+  private rowSignature(row: any): string | null {
+    if (!row || typeof row !== 'object') return null;
+    try { return JSON.stringify(row); } catch { return null; }
+  }
+
+  // Decode HTML entities the backend sometimes emits inside a JSON payload, then JSON.parse.
+  // Fall back to a lenient scan for {...} objects when the payload is not strict JSON.
+  private parseServerJson(raw: any): any {
+    if (raw == null) return null;
+    if (typeof raw !== 'string') return raw;
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    // Strict parse first (fastest, handles well-formed responses).
+    try { return JSON.parse(trimmed); } catch { /* fall through */ }
+    // Decode common HTML entities (&quot; &amp; &#39; &lt; &gt; &#x27; numeric refs).
+    const decoded = this.decodeHtmlEntities(trimmed);
+    try { return JSON.parse(decoded); } catch { /* fall through */ }
+    // Last-ditch: try DOMParser textContent decode (handles rarer entities) then parse.
+    try {
+      const doc = new DOMParser().parseFromString(decoded, 'text/html');
+      const textDecoded = doc.documentElement.textContent || decoded;
+      return JSON.parse(textDecoded);
+    } catch { /* give up */ }
+    return null;
+  }
+
+  private decodeHtmlEntities(s: string): string {
+    return s
+      .replace(/&quot;/g, '"')
+      .replace(/&#34;/g, '"')
+      .replace(/&#x22;/gi, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&#x27;/gi, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&#60;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&#62;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+      .replace(/&amp;/g, '&'); // must be last, else it re-decodes decoded entities
+  }
+
+  private finaliseDirectLoad(acc: any[], token: number) {
+    if (token !== this.directLoadToken) return;
+    this.allRowsCache = acc;
+    if ((!this.cols || this.cols.length === 0) && this.allRowsCache.length > 0) {
+      this.columnNamesList = Object.keys(this.allRowsCache[0]);
+      this.columnHeadersList = [...this.columnNamesList];
+      this.createColumn();
+    }
+    this.datasetsCount = this.allRowsCache.length;
+    this.page = 0;
+    this.initializePaginationVariables();
+    this.applyClientPage();
+    this.appLoading = false;
+    this.changeDetectorRefs.detectChanges();
+  }
+
+  // Normalise the many response shapes getProxyDbDatasetDetails can emit (array, JSON string,
+  // {data|content|records|rows|result|results|response|items: [...]}, or 2D-array of headers+rows).
   private extractRows(resp: any): any[] {
     let raw: any = resp;
-    if (raw && raw.body !== undefined) raw = raw.body;
-    if (typeof raw === 'string') { try { raw = JSON.parse(raw); } catch { /* leave */ } }
-    if (Array.isArray(raw)) return raw;
-    if (raw && Array.isArray(raw.data)) return raw.data;
-    if (raw && Array.isArray(raw.content)) return raw.content;
-    if (raw && Array.isArray(raw.rows)) return raw.rows;
-    return [];
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim();
+      if (!trimmed) return [];
+      try { raw = JSON.parse(trimmed); } catch { return []; }
+    }
+    let arr: any[] | null = null;
+    if (Array.isArray(raw)) arr = raw;
+    else if (raw && typeof raw === 'object') {
+      const knownKeys = ['data', 'content', 'records', 'rows', 'result', 'results', 'response', 'items', 'body'];
+      for (const k of knownKeys) {
+        if (Array.isArray(raw[k])) { arr = raw[k]; break; }
+      }
+      // Fallback: first array-valued property on the object.
+      if (!arr) {
+        for (const k of Object.keys(raw)) {
+          if (Array.isArray(raw[k])) { arr = raw[k]; break; }
+        }
+      }
+    }
+    if (!arr) return [];
+
+    // Sheet response: first row is header labels, remaining rows are arrays of values.
+    if (arr.length > 1 && Array.isArray(arr[0]) && arr.every(r => Array.isArray(r))) {
+      const headers: string[] = arr[0].map((h: any, i: number) => (h != null ? h.toString() : 'col' + i));
+      return arr.slice(1).map((row: any[]) => {
+        const obj: any = {};
+        headers.forEach((h, i) => { obj[h] = row[i] != null ? row[i].toString() : ''; });
+        return obj;
+      });
+    }
+    // Standard record response: array of plain objects.
+    const rows = arr.filter(el => el && typeof el === 'object' && !Array.isArray(el));
+    rows.forEach(el => Object.keys(el).forEach(k => { if (el[k] != null) el[k] = el[k].toString(); }));
+    return rows;
   }
 
-  private extractFirstRow(resp: any): any {
-    const rows = this.extractRows(resp);
-    return rows.length > 0 ? rows[0] : null;
+  private isEmptyResponse(resp: any): boolean {
+    if (resp == null) return true;
+    if (Array.isArray(resp) && resp.length === 0) return true;
+    if (typeof resp === 'string' && resp.trim() === '') return true;
+    return false;
+  }
+
+  applyClientPage() {
+    const pageSize = Number(this.rows) || 10;
+    const pageNum = Number(this.page) || 0;
+    const start = pageNum * pageSize;
+    const end = start + pageSize;
+    this.ticketList = (this.allRowsCache || []).slice(start, end);
+    this.ticketListBackup = this.ticketList;
+    this.appLoading = false;
+    this.changeDetectorRefs.detectChanges();
   }
 
   searchValueAdder(event, columnName: string, dateIndicator?: string) {
@@ -709,6 +819,21 @@ export class DatasetTableViewComponent implements OnInit {
       this.sortorder = -1;
     }
     this.oldSortEvent = this.sortEvent;
+    if (this.useDirectPaginated && this.allRowsCache?.length > 0) {
+      const dir = this.sortorder;
+      this.allRowsCache.sort((a: any, b: any) => {
+        const va = a?.[column]; const vb = b?.[column];
+        if (va === vb) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        const na = Number(va); const nb = Number(vb);
+        if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
+        return va.toString().localeCompare(vb.toString()) * dir;
+      });
+      this.page = 0;
+      this.applyClientPage();
+      return;
+    }
     this.loadObjects(this.andObj);
   }
   quickStatsData: any = '';
@@ -729,7 +854,7 @@ export class DatasetTableViewComponent implements OnInit {
       }
 
       if (this.useDirectPaginated && !this.itsm) {
-        this.fetchDirectPaginatedRows(pagination);
+        this.applyClientPage();
         return;
       }
       if (!this.itsm) {
@@ -841,7 +966,9 @@ export class DatasetTableViewComponent implements OnInit {
       var col = {};
       col["field"] = key;
       col["header"] = header;
-      col["visible"] = index < 5 ? true : false;
+      // For schema-less object-storage datasets (CSV/XLSX preview) show every column.
+      // Schema-backed datasets keep the legacy "first 5 visible" default.
+      col["visible"] = this.useDirectPaginated ? true : (index < 5);
       col["filterValue"] = null;
       this.cols.push(col);
     });
@@ -853,6 +980,9 @@ export class DatasetTableViewComponent implements OnInit {
     this.selectedTickets = [];
     this.lastRefreshDate = this.datepipe.transform(new Date(), "dd-MMM-yyyy hh:mm:ss a");
     this.resetSelection();
+    if (this.useDirectPaginated) {
+      this.allRowsCache = [];
+    }
     this.refreshTicket();
 
   }
@@ -1152,10 +1282,9 @@ export class DatasetTableViewComponent implements OnInit {
     }
     this.getIncidentsByPage();
   }
-  ngOnChanges() {
-    this.ngOnInit();
-
-  }
+  // NOTE: previously re-invoked ngOnInit() on every input change, which triggered duplicate
+  // data-fetch chains and doubled the visible row count. Left as a no-op.
+  ngOnChanges() {}
 
 
   selectChange($event) {

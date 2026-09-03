@@ -43,7 +43,10 @@ export class Services {
 
   getMlTags(): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/service/v1/tags/fetchAll', { observe: 'response' })
+      .get(this.dataUrl + '/service/v1/tags/fetchAll', {
+        observe: 'response',
+        params: { org: sessionStorage.getItem('organization') || '' },
+      })
       .pipe(
         map((response) => {
           return response.body;

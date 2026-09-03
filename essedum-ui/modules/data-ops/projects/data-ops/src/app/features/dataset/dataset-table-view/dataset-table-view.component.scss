@@ -113,18 +113,24 @@
 
 // ── Table scroll container ────────────────────────────────────────
 .table-scroll-container {
-  overflow: auto !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
   max-height: 520px !important;
+  min-height: 220px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 
-  &::-webkit-scrollbar { width: 5px; height: 5px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.22); border-radius: 4px; &:hover { background: rgba(79,142,247,0.42); } }
+  &::-webkit-scrollbar { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-track { background: rgba(79,142,247,0.05); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.32); border-radius: 4px; &:hover { background: rgba(79,142,247,0.55); } }
 }
 
 // ── Table ─────────────────────────────────────────────────────────
 .table, table {
-  width: 100% !important;
+  width: max-content !important;
+  min-width: 100% !important;
   border-collapse: collapse !important;
+  table-layout: auto !important;
 
   thead tr th {
     font-size: 10.5px !important; font-weight: 700 !important; color: #4d6882 !important;
@@ -133,8 +139,10 @@
     padding: 11px 16px !important; white-space: nowrap !important;
     position: sticky; top: 0; z-index: 2; backdrop-filter: blur(8px);
     cursor: pointer; user-select: none;
+    min-width: 140px !important;
+    max-width: 320px !important;
     transition: color 0.15s, background 0.15s !important;
-    &:first-child { padding-left: 20px !important; }
+    &:first-child { padding-left: 20px !important; min-width: 24px !important; max-width: 24px !important; }
     &:last-child  { padding-right: 20px !important; }
     &:hover { color: #7eb8ff !important; background: rgba(79,142,247,0.12) !important; }
   }
@@ -170,8 +178,17 @@
     td {
       padding: 9px 16px !important; font-size: 12.5px !important; color: #8aaccc !important;
       vertical-align: middle !important; transition: color 0.14s !important;
-      &:first-child { padding-left: 20px !important; cursor: pointer !important; color: #7eb8ff !important; font-weight: 600 !important; text-decoration: none !important; &:hover { text-decoration: underline !important; text-underline-offset: 3px !important; } }
+      min-width: 140px !important;
+      max-width: 320px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      &:first-child { padding-left: 20px !important; min-width: 24px !important; max-width: 24px !important; cursor: pointer !important; color: #7eb8ff !important; font-weight: 600 !important; text-decoration: none !important; &:hover { text-decoration: underline !important; text-underline-offset: 3px !important; } }
       &:last-child  { padding-right: 20px !important; }
+      &.dtv-cell {
+        span { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+        &:hover { overflow: visible !important; white-space: normal !important; word-break: break-word !important; }
+      }
     }
   }
 
