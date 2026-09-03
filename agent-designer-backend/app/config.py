@@ -58,6 +58,22 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434/v1"
 
     # ---------------------------------------------------------------------------
+    # LiteLLM gateway (OpenAI-compatible proxy for all providers)
+    # ---------------------------------------------------------------------------
+    # Internal k8s service URL for LiteLLM; agent-designer routes all LLM calls
+    # through LiteLLM when the node provider is set to "litellm".
+    litellm_base_url: str = "http://litellm:4000/v1"
+    litellm_api_key: Optional[str] = None
+
+    # ---------------------------------------------------------------------------
+    # Langfuse observability (tracing for flow executions and LLM calls)
+    # ---------------------------------------------------------------------------
+    langfuse_enabled: bool = False
+    langfuse_host: str = "http://langfuse:3000"
+    langfuse_public_key: Optional[str] = None
+    langfuse_secret_key: Optional[str] = None
+
+    # ---------------------------------------------------------------------------
     # Salus Responsible-AI (privacy + moderation)
     # ---------------------------------------------------------------------------
     salus_enabled: bool = False

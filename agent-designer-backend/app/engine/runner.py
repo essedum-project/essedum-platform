@@ -127,6 +127,10 @@ async def run_flow(
         "execution_id": execution_id,
     })
 
+    # Langfuse: open a trace for this execution
+    from app.core.langfuse_tracer import start_trace
+    start_trace(execution_id, flow_id, input_data)
+
     # ── Validate V1 node types (after execution record exists so we can mark error) ──
     try:
         for node in nodes:
@@ -198,6 +202,10 @@ async def run_flow(
     execution.output = final_output
     await db.commit()
 
+    # Langfuse: close and flush the trace
+    from app.core.langfuse_tracer import end_trace
+    end_trace(execution_id, output=final_output)
+
     await manager.broadcast(execution_id, {
         "event": "execution_completed",
         "execution_id": execution_id,
@@ -256,6 +264,11 @@ async def _fail_execution(
         await db.commit()
     except Exception as commit_exc:
         logger.warning("Could not persist execution error state: %s", commit_exc)
+
+    # Langfuse: close trace with error
+    from app.core.langfuse_tracer import end_trace
+    end_trace(execution.id, output={}, error=error)
+
     await manager.broadcast(execution.id, {
         "event": "execution_error",
         "execution_id": execution.id,

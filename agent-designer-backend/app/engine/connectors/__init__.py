@@ -1,6 +1,6 @@
 from typing import Any
 
-_SUPPORTED = {"azure_openai", "bedrock", "vertex_ai", "ollama"}
+_SUPPORTED = {"azure_openai", "bedrock", "vertex_ai", "ollama", "litellm"}
 _INSTANCES: dict[str, Any] = {}
 
 
@@ -48,5 +48,8 @@ def get_connector(provider: str):
         elif provider == "ollama":
             from app.engine.connectors.ollama import OllamaConnector
             raw = OllamaConnector()
+        elif provider == "litellm":
+            from app.engine.connectors.litellm import LiteLLMConnector
+            raw = LiteLLMConnector()
         _INSTANCES[provider] = _SalusGuardedConnector(raw)
     return _INSTANCES[provider]

@@ -19,16 +19,18 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'tokens', label: 'Token Usage', type: 'data' },
     ],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'gpt-4o', options: [
-        { label: 'GPT-4o', value: 'gpt-4o' },
-        { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
-        { label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-        { label: 'GPT-4', value: 'gpt-4' },
-        { label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
-        { label: 'o1', value: 'o1' },
-        { label: 'o1-mini', value: 'o1-mini' },
-        { label: 'o3-mini', value: 'o3-mini' },
-      ], group: 'Model', required: true },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'gpt-4o', options: [
+          { label: 'GPT-4o', value: 'gpt-4o' },
+          { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
+          { label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
+          { label: 'GPT-4', value: 'gpt-4' },
+          { label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
+          { label: 'o1', value: 'o1' },
+          { label: 'o1-mini', value: 'o1-mini' },
+          { label: 'o3-mini', value: 'o3-mini' },
+        ], group: 'Model', required: true
+      },
       { id: 'api_key', label: 'API Key', type: 'password', placeholder: 'sk-...', group: 'Authentication', description: 'Your OpenAI API key' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 2, step: 0.1, group: 'Parameters' },
       { id: 'max_tokens', label: 'Max Tokens', type: 'number', default: 2048, min: 1, max: 128000, group: 'Parameters' },
@@ -55,16 +57,18 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'tokens', label: 'Token Usage', type: 'data' },
     ],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'gpt-4o', options: [
-        { label: 'GPT-4o', value: 'gpt-4o' },
-        { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
-        { label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
-        { label: 'GPT-4', value: 'gpt-4' },
-        { label: 'GPT-3.5 Turbo', value: 'gpt-35-turbo' },
-        { label: 'GPT-3.5 Turbo 16K', value: 'gpt-35-turbo-16k' },
-        { label: 'o1', value: 'o1' },
-        { label: 'o1-mini', value: 'o1-mini' },
-      ], group: 'Model', required: true },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'gpt-4o', options: [
+          { label: 'GPT-4o', value: 'gpt-4o' },
+          { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
+          { label: 'GPT-4 Turbo', value: 'gpt-4-turbo' },
+          { label: 'GPT-4', value: 'gpt-4' },
+          { label: 'GPT-3.5 Turbo', value: 'gpt-35-turbo' },
+          { label: 'GPT-3.5 Turbo 16K', value: 'gpt-35-turbo-16k' },
+          { label: 'o1', value: 'o1' },
+          { label: 'o1-mini', value: 'o1-mini' },
+        ], group: 'Model', required: true
+      },
       { id: 'endpoint', label: 'Endpoint', type: 'text', placeholder: 'https://<resource>.openai.azure.com/', group: 'Authentication', description: 'Your Azure OpenAI resource endpoint URL' },
       { id: 'api_key', label: 'API Key', type: 'password', placeholder: 'Your Azure OpenAI API key', group: 'Authentication', description: 'Your Azure OpenAI API key' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 2, step: 0.1, group: 'Parameters' },
@@ -90,13 +94,15 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'output', label: 'Response', type: 'text' },
     ],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'claude-3-5-sonnet-20241022', options: [
-        { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
-        { label: 'Claude 3.5 Haiku', value: 'claude-3-5-haiku-20241022' },
-        { label: 'Claude 3 Opus', value: 'claude-3-opus-20240229' },
-        { label: 'Claude 3 Sonnet', value: 'claude-3-sonnet-20240229' },
-        { label: 'Claude 3 Haiku', value: 'claude-3-haiku-20240307' },
-      ], group: 'Model', required: true },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'claude-3-5-sonnet-20241022', options: [
+          { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
+          { label: 'Claude 3.5 Haiku', value: 'claude-3-5-haiku-20241022' },
+          { label: 'Claude 3 Opus', value: 'claude-3-opus-20240229' },
+          { label: 'Claude 3 Sonnet', value: 'claude-3-sonnet-20240229' },
+          { label: 'Claude 3 Haiku', value: 'claude-3-haiku-20240307' },
+        ], group: 'Model', required: true
+      },
       { id: 'api_key', label: 'API Key', type: 'password', placeholder: 'sk-ant-...', group: 'Authentication' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
       { id: 'max_tokens', label: 'Max Tokens', type: 'number', default: 4096, group: 'Parameters' },
@@ -119,18 +125,39 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'output', label: 'Response', type: 'text' },
     ],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'gemini-1.5-pro', options: [
-        { label: 'Gemini 2.0 Flash', value: 'gemini-2.0-flash' },
-        { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
-        { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash' },
-        { label: 'Gemini 1.0 Pro', value: 'gemini-pro' },
-      ], group: 'Model', required: true },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'gemini-1.5-pro', options: [
+          { label: 'Gemini 2.0 Flash', value: 'gemini-2.0-flash' },
+          { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
+          { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash' },
+          { label: 'Gemini 1.0 Pro', value: 'gemini-pro' },
+        ], group: 'Model', required: true
+      },
       { id: 'api_key', label: 'API Key', type: 'password', placeholder: 'AIza...', group: 'Authentication' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
       { id: 'max_output_tokens', label: 'Max Output Tokens', type: 'number', default: 8192, group: 'Parameters' },
       { id: 'system_instruction', label: 'System Instruction', type: 'textarea', group: 'Prompting' },
     ],
     tags: ['google', 'gemini', 'chat'],
+  },
+  {
+    type: 'litellm-llm',
+    category: 'llm',
+    label: 'LiteLLM Gateway',
+    description: 'Route to any provider through the LiteLLM proxy',
+    icon: '🔀',
+    color: 'hsl(195 100% 50%)',
+    inputs: [{ id: 'prompt', label: 'Prompt', type: 'text' }],
+    outputs: [{ id: 'output', label: 'Response', type: 'text' }],
+    fields: [
+      { id: 'model', label: 'Model', type: 'text', default: 'gpt-4o', placeholder: 'gpt-4o, claude-3-5-sonnet, gemini-1.5-pro...', group: 'Model', required: true },
+      { id: 'base_url', label: 'Gateway URL', type: 'text', default: 'http://litellm:4000/v1', group: 'Connection' },
+      { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
+      { id: 'system_prompt', label: 'System Prompt', type: 'textarea', group: 'Model' },
+      { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
+      { id: 'max_tokens', label: 'Max Tokens', type: 'number', default: 1000, group: 'Parameters' },
+    ],
+    tags: ['litellm', 'gateway', 'proxy', 'multi-provider'],
   },
   {
     type: 'mistral-llm',
@@ -142,14 +169,16 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     inputs: [{ id: 'prompt', label: 'Prompt', type: 'text' }],
     outputs: [{ id: 'output', label: 'Response', type: 'text' }],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'mistral-large-latest', options: [
-        { label: 'Mistral Large', value: 'mistral-large-latest' },
-        { label: 'Mistral Medium', value: 'mistral-medium-latest' },
-        { label: 'Mistral Small', value: 'mistral-small-latest' },
-        { label: 'Mixtral 8x7B', value: 'open-mixtral-8x7b' },
-        { label: 'Mixtral 8x22B', value: 'open-mixtral-8x22b' },
-        { label: 'Mistral 7B', value: 'open-mistral-7b' },
-      ], group: 'Model' },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'mistral-large-latest', options: [
+          { label: 'Mistral Large', value: 'mistral-large-latest' },
+          { label: 'Mistral Medium', value: 'mistral-medium-latest' },
+          { label: 'Mistral Small', value: 'mistral-small-latest' },
+          { label: 'Mixtral 8x7B', value: 'open-mixtral-8x7b' },
+          { label: 'Mixtral 8x22B', value: 'open-mixtral-8x22b' },
+          { label: 'Mistral 7B', value: 'open-mistral-7b' },
+        ], group: 'Model'
+      },
       { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
     ],
@@ -183,12 +212,14 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     inputs: [{ id: 'prompt', label: 'Prompt', type: 'text' }],
     outputs: [{ id: 'output', label: 'Response', type: 'text' }],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'command-r-plus', options: [
-        { label: 'Command R+', value: 'command-r-plus' },
-        { label: 'Command R', value: 'command-r' },
-        { label: 'Command', value: 'command' },
-        { label: 'Command Light', value: 'command-light' },
-      ], group: 'Model' },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'command-r-plus', options: [
+          { label: 'Command R+', value: 'command-r-plus' },
+          { label: 'Command R', value: 'command-r' },
+          { label: 'Command', value: 'command' },
+          { label: 'Command Light', value: 'command-light' },
+        ], group: 'Model'
+      },
       { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
     ],
@@ -204,12 +235,14 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     inputs: [{ id: 'prompt', label: 'Prompt', type: 'text' }],
     outputs: [{ id: 'output', label: 'Response', type: 'text' }],
     fields: [
-      { id: 'model', label: 'Model', type: 'select', default: 'llama3-70b-8192', options: [
-        { label: 'Llama 3 70B', value: 'llama3-70b-8192' },
-        { label: 'Llama 3 8B', value: 'llama3-8b-8192' },
-        { label: 'Mixtral 8x7B', value: 'mixtral-8x7b-32768' },
-        { label: 'Gemma 7B', value: 'gemma-7b-it' },
-      ], group: 'Model' },
+      {
+        id: 'model', label: 'Model', type: 'select', default: 'llama3-70b-8192', options: [
+          { label: 'Llama 3 70B', value: 'llama3-70b-8192' },
+          { label: 'Llama 3 8B', value: 'llama3-8b-8192' },
+          { label: 'Mixtral 8x7B', value: 'mixtral-8x7b-32768' },
+          { label: 'Gemma 7B', value: 'gemma-7b-it' },
+        ], group: 'Model'
+      },
       { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
       { id: 'temperature', label: 'Temperature', type: 'slider', default: 0.7, min: 0, max: 1, step: 0.01, group: 'Parameters' },
     ],
@@ -247,13 +280,15 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'summary', label: 'Summary', type: 'text' },
     ],
     fields: [
-      { id: 'provider', label: 'Provider', type: 'select', default: 'serper', options: [
-        { label: 'Serper', value: 'serper' },
-        { label: 'Tavily', value: 'tavily' },
-        { label: 'DuckDuckGo', value: 'duckduckgo' },
-        { label: 'Bing', value: 'bing' },
-        { label: 'SerpAPI', value: 'serpapi' },
-      ], group: 'Configuration' },
+      {
+        id: 'provider', label: 'Provider', type: 'select', default: 'serper', options: [
+          { label: 'Serper', value: 'serper' },
+          { label: 'Tavily', value: 'tavily' },
+          { label: 'DuckDuckGo', value: 'duckduckgo' },
+          { label: 'Bing', value: 'bing' },
+          { label: 'SerpAPI', value: 'serpapi' },
+        ], group: 'Configuration'
+      },
       { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
       { id: 'num_results', label: 'Num Results', type: 'number', default: 5, min: 1, max: 20, group: 'Configuration' },
     ],
@@ -289,11 +324,13 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'error', label: 'Error', type: 'text' },
     ],
     fields: [
-      { id: 'language', label: 'Language', type: 'select', default: 'python', options: [
-        { label: 'Python', value: 'python' },
-        { label: 'JavaScript', value: 'javascript' },
-        { label: 'Bash', value: 'bash' },
-      ], group: 'Configuration' },
+      {
+        id: 'language', label: 'Language', type: 'select', default: 'python', options: [
+          { label: 'Python', value: 'python' },
+          { label: 'JavaScript', value: 'javascript' },
+          { label: 'Bash', value: 'bash' },
+        ], group: 'Configuration'
+      },
       { id: 'timeout', label: 'Timeout (s)', type: 'number', default: 30, group: 'Configuration' },
     ],
     tags: ['code', 'python', 'javascript'],
@@ -314,13 +351,15 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'status', label: 'Status', type: 'text' },
     ],
     fields: [
-      { id: 'method', label: 'Method', type: 'select', default: 'GET', options: [
-        { label: 'GET', value: 'GET' },
-        { label: 'POST', value: 'POST' },
-        { label: 'PUT', value: 'PUT' },
-        { label: 'DELETE', value: 'DELETE' },
-        { label: 'PATCH', value: 'PATCH' },
-      ], group: 'Request' },
+      {
+        id: 'method', label: 'Method', type: 'select', default: 'GET', options: [
+          { label: 'GET', value: 'GET' },
+          { label: 'POST', value: 'POST' },
+          { label: 'PUT', value: 'PUT' },
+          { label: 'DELETE', value: 'DELETE' },
+          { label: 'PATCH', value: 'PATCH' },
+        ], group: 'Request'
+      },
       { id: 'url', label: 'URL', type: 'text', placeholder: 'https://api.example.com/...', group: 'Request', required: true },
       { id: 'headers', label: 'Headers (JSON)', type: 'code', placeholder: '{"Authorization": "Bearer ..."}', group: 'Request' },
       { id: 'body', label: 'Body (JSON)', type: 'code', placeholder: '{"key": "value"}', group: 'Request' },
@@ -340,14 +379,16 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'metadata', label: 'Metadata', type: 'data' },
     ],
     fields: [
-      { id: 'file_type', label: 'File Type', type: 'select', default: 'auto', options: [
-        { label: 'Auto Detect', value: 'auto' },
-        { label: 'PDF', value: 'pdf' },
-        { label: 'CSV', value: 'csv' },
-        { label: 'JSON', value: 'json' },
-        { label: 'TXT', value: 'txt' },
-        { label: 'Markdown', value: 'md' },
-      ], group: 'Configuration' },
+      {
+        id: 'file_type', label: 'File Type', type: 'select', default: 'auto', options: [
+          { label: 'Auto Detect', value: 'auto' },
+          { label: 'PDF', value: 'pdf' },
+          { label: 'CSV', value: 'csv' },
+          { label: 'JSON', value: 'json' },
+          { label: 'TXT', value: 'txt' },
+          { label: 'Markdown', value: 'md' },
+        ], group: 'Configuration'
+      },
     ],
     tags: ['file', 'document', 'parse'],
   },
@@ -365,13 +406,15 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'results', label: 'Results', type: 'data' },
     ],
     fields: [
-      { id: 'db_provider', label: 'Vector DB', type: 'select', default: 'pinecone', options: [
-        { label: 'Pinecone', value: 'pinecone' },
-        { label: 'Weaviate', value: 'weaviate' },
-        { label: 'Chroma', value: 'chroma' },
-        { label: 'Qdrant', value: 'qdrant' },
-        { label: 'Milvus', value: 'milvus' },
-      ], group: 'Configuration' },
+      {
+        id: 'db_provider', label: 'Vector DB', type: 'select', default: 'pinecone', options: [
+          { label: 'Pinecone', value: 'pinecone' },
+          { label: 'Weaviate', value: 'weaviate' },
+          { label: 'Chroma', value: 'chroma' },
+          { label: 'Qdrant', value: 'qdrant' },
+          { label: 'Milvus', value: 'milvus' },
+        ], group: 'Configuration'
+      },
       { id: 'api_key', label: 'API Key', type: 'password', group: 'Authentication' },
       { id: 'index_name', label: 'Index / Collection', type: 'text', group: 'Configuration' },
       { id: 'top_k', label: 'Top K', type: 'number', default: 5, group: 'Configuration' },
@@ -395,9 +438,11 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'tools', label: 'Available Tools', type: 'data' },
     ],
     fields: [
-      { id: 'transport', label: 'Transport', type: 'select', default: 'http', options: [
-        { label: 'HTTP (Streamable)', value: 'http' },
-      ], group: 'Connection', required: true },
+      {
+        id: 'transport', label: 'Transport', type: 'select', default: 'http', options: [
+          { label: 'HTTP (Streamable)', value: 'http' },
+        ], group: 'Connection', required: true
+      },
       { id: 'server_url', label: 'Server URL / Command', type: 'text', placeholder: 'ws://localhost:3000 or node server.js', group: 'Connection', required: true },
       { id: 'auth_token', label: 'Auth Token', type: 'password', group: 'Authentication' },
       { id: 'timeout', label: 'Timeout (ms)', type: 'number', default: 30000, group: 'Configuration' },
@@ -418,11 +463,13 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     outputs: [{ id: 'result', label: 'Result', type: 'data' }],
     fields: [
       { id: 'root_path', label: 'Root Path', type: 'text', placeholder: '/workspace', group: 'Configuration' },
-      { id: 'allowed_ops', label: 'Allowed Operations', type: 'select', default: 'read', options: [
-        { label: 'Read Only', value: 'read' },
-        { label: 'Read & Write', value: 'readwrite' },
-        { label: 'All', value: 'all' },
-      ], group: 'Permissions' },
+      {
+        id: 'allowed_ops', label: 'Allowed Operations', type: 'select', default: 'read', options: [
+          { label: 'Read Only', value: 'read' },
+          { label: 'Read & Write', value: 'readwrite' },
+          { label: 'All', value: 'all' },
+        ], group: 'Permissions'
+      },
     ],
     tags: ['mcp', 'filesystem', 'files'],
   },
@@ -548,7 +595,7 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'input', label: 'Generated Output', type: 'text' },
     ],
     outputs: [
-      { id: 'pass',  label: 'Pass (accepted)',           type: 'text' },
+      { id: 'pass', label: 'Pass (accepted)', type: 'text' },
       { id: 'retry', label: 'Retry (improvement prompt)', type: 'text' },
     ],
     fields: [
@@ -596,19 +643,23 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
       { id: 'memories', label: 'Memories', type: 'data' },
     ],
     fields: [
-      { id: 'embedding_model', label: 'Embedding Model', type: 'select', default: 'text-embedding-3-small', options: [
-        { label: 'OpenAI text-embedding-3-small', value: 'text-embedding-3-small' },
-        { label: 'OpenAI text-embedding-3-large', value: 'text-embedding-3-large' },
-        { label: 'OpenAI ada-002', value: 'text-embedding-ada-002' },
-        { label: 'Cohere embed-v3', value: 'embed-english-v3.0' },
-        { label: 'HuggingFace BAAI/bge-small', value: 'BAAI/bge-small-en-v1.5' },
-      ], group: 'Model' },
-      { id: 'vector_db', label: 'Vector Store', type: 'select', default: 'chroma', options: [
-        { label: 'Chroma (local)', value: 'chroma' },
-        { label: 'Pinecone', value: 'pinecone' },
-        { label: 'Qdrant', value: 'qdrant' },
-        { label: 'Weaviate', value: 'weaviate' },
-      ], group: 'Storage' },
+      {
+        id: 'embedding_model', label: 'Embedding Model', type: 'select', default: 'text-embedding-3-small', options: [
+          { label: 'OpenAI text-embedding-3-small', value: 'text-embedding-3-small' },
+          { label: 'OpenAI text-embedding-3-large', value: 'text-embedding-3-large' },
+          { label: 'OpenAI ada-002', value: 'text-embedding-ada-002' },
+          { label: 'Cohere embed-v3', value: 'embed-english-v3.0' },
+          { label: 'HuggingFace BAAI/bge-small', value: 'BAAI/bge-small-en-v1.5' },
+        ], group: 'Model'
+      },
+      {
+        id: 'vector_db', label: 'Vector Store', type: 'select', default: 'chroma', options: [
+          { label: 'Chroma (local)', value: 'chroma' },
+          { label: 'Pinecone', value: 'pinecone' },
+          { label: 'Qdrant', value: 'qdrant' },
+          { label: 'Weaviate', value: 'weaviate' },
+        ], group: 'Storage'
+      },
       { id: 'top_k', label: 'Retrieve Top K', type: 'number', default: 5, group: 'Configuration' },
     ],
     tags: ['memory', 'vector', 'rag'],
@@ -646,10 +697,12 @@ export const NODE_DEFINITIONS: NodeDefinition[] = [
     fields: [
       { id: 'template', label: 'Template', type: 'textarea', placeholder: 'You are a {role}. Answer the following: {question}', group: 'Template', required: true },
       { id: 'input_vars', label: 'Input Variables (comma-sep)', type: 'text', placeholder: 'role, question', group: 'Template' },
-      { id: 'template_format', label: 'Format', type: 'select', default: 'fstring', options: [
-        { label: 'f-string {var}', value: 'fstring' },
-        { label: 'Jinja2 {{var}}', value: 'jinja2' },
-      ], group: 'Template' },
+      {
+        id: 'template_format', label: 'Format', type: 'select', default: 'fstring', options: [
+          { label: 'f-string {var}', value: 'fstring' },
+          { label: 'Jinja2 {{var}}', value: 'jinja2' },
+        ], group: 'Template'
+      },
     ],
     tags: ['prompt', 'template', 'variables'],
   },
