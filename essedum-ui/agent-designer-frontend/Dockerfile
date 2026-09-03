@@ -3,7 +3,8 @@ FROM node:23-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json .npmrc ./
+# .npmrc is optional — present only when building against an internal registry.
+COPY package.json package-lock.json .npmrc* ./
 
 RUN npm install
 

@@ -56,6 +56,12 @@ public class VibeCodingController {
     @Value("${vibe.azure.openai.api-key}")
     private String azureOpenAiApiKey;
 
+    @Value("${vibe.litellm.base-url:http://litellm.aipns.svc.cluster.local:4000}")
+    private String litellmBaseUrl;
+
+    @Value("${vibe.litellm.api-key:sk-1234}")
+    private String litellmApiKey;
+
     public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService) {
         this.vibeCodingService = vibeCodingService;
         this.salusService = salusService;
@@ -139,8 +145,12 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
-        logger.info("Agent update provider request — original provider/model: {}/{} — updated to azure_openai/{}",
-                originalProvider, originalModel, azureOpenAiDeploymentName);
+
+        // Translate "litellm" → goosed's "openai" provider (LiteLLM is OpenAI-compatible).
+        // The actual provider sent to goosed and the config upserts are handled below.
+        String gooseProvider = "litellm".equals(originalProvider) ? "openai" : originalProvider;
+        logger.info("Agent update provider request — original provider/model: {}/{} — goose provider: {}",
+                originalProvider, originalModel, gooseProvider);
 
         // ── Step 1: call update_provider IMMEDIATELY (before upserts) ──────
         // Calling right after agent/start wins the session-creation lock race,
@@ -148,7 +158,7 @@ public class VibeCodingController {
         // background extension-loading task.  The Azure config keys are already
         // persisted in goosed's config.yaml from the first session; the upserts
         // below keep them fresh but are not required for the provider call.
-        request.put("provider", originalProvider);
+        request.put("provider", gooseProvider);
         request.put("model", originalModel);
 
         int maxAttempts = 36;           // 36 × 5 s = 3 min ceiling (safety net)
@@ -171,7 +181,7 @@ public class VibeCodingController {
             }
         }
 
-        // ── Step 2: refresh Azure OpenAI config in goosed config store ──────
+        // ── Step 2: refresh provider config in goosed config store ──────
         // Done after update_provider so it never adds latency to the lock race.
         if ("azure_openai".equals(originalProvider) && azureOpenAiEndpoint != null) {
             vibeCodingService.post("/config/upsert",
@@ -182,6 +192,13 @@ public class VibeCodingController {
                     Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
             vibeCodingService.post("/config/upsert",
                     Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
+        } else if ("litellm".equals(originalProvider) && litellmBaseUrl != null) {
+            // LiteLLM is OpenAI-compatible; point goosed's openai provider at the LiteLLM proxy.
+            // Goose 1.30+ uses OPENAI_BASE_URL (standard OpenAI client convention).
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "OPENAI_BASE_URL", "value", litellmBaseUrl, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "OPENAI_API_KEY", "value", litellmApiKey, "is_secret", true));
         }
 
         if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {

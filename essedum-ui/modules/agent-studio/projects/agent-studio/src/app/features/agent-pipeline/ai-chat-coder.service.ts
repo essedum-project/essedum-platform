@@ -1046,7 +1046,7 @@ export class AiChatCoderService implements OnDestroy {
   private buildModerationPayload(text: string): object {
     return {
       Prompt: text,
-      ModerationChecks: ['Toxicity', 'PromptInjection'],
+      ModerationChecks: ['Toxicity'],
       ModerationCheckThresholds: {
         PromptinjectionThreshold: 0.70,
         JailbreakThreshold: 0.70,
