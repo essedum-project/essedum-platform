@@ -253,29 +253,46 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   downloadModel(card: any) {
-    let obj = JSON.parse(card.attributes).object;
-    let extension = obj.split('.').pop();
-    let fileName = obj.split('/').toString();
+    const attrs = typeof card.attributes === 'string' ? JSON.parse(card.attributes) : (card.attributes || {});
+    const obj: string = attrs.object || '';
+    const path: string = attrs.path || '';
+    const extension = obj.split('.').pop() || '';
+    // Backend fileData resolves against attributes.object under attributes.path; sending path/object
+    // matches the S3 key it computes so the request survives even if attributes lookup fails.
+    const fileName = (path && obj) ? `${path}/${obj}` : obj;
     if (extension.match('mkv')) {
       this.service.messageService('This file cannot be downloaded currently');
-    } else {
-      this.service.messageNotificaionService('success', 'Download initiated');
-
-      this.service
-        .getModelFileData(card.modelName, `${fileName}`, card.organisation)
-        .subscribe(blob=> {
-              const linkA = document.createElement('a');
-              const url = window.URL.createObjectURL(blob);
-              linkA.href = url
-              linkA.download = fileName;
-              linkA.click();
-              window.URL.revokeObjectURL(url);
-            },
-              err => {
-              this.service.message('Download Failed. Invalid Data', 'error');
-            });
-          
+      return;
     }
+    this.service.messageNotificaionService('success', 'Download initiated');
+    this.service
+      .getModelFileData(card.modelName, `${fileName}`, card.organisation)
+      .subscribe(async (blob: Blob) => {
+        if (!blob || blob.size === 0) {
+          this.service.message('Download Failed. File not found on the server.', 'error');
+          return;
+        }
+        // Backend may return JSON `[null]` / `null` / `[]` with a non-error status when the S3
+        // object cannot be located; sniff the first bytes to catch these regardless of blob size.
+        try {
+          const head = await blob.slice(0, 512).text();
+          const trimmed = head.trim();
+          if (!trimmed || trimmed === 'null' || trimmed === '[null]' || trimmed === '[]'
+              || /^\{\s*"error"/i.test(trimmed) || /^request failed$/i.test(trimmed)) {
+            this.service.message('Download Failed. File not found on the server.', 'error');
+            return;
+          }
+        } catch { /* fall through to actual download */ }
+        const linkA = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        linkA.href = url;
+        linkA.download = obj || fileName;
+        linkA.click();
+        window.URL.revokeObjectURL(url);
+      },
+      err => {
+        this.service.message('Download Failed. ' + (err?.message || 'Invalid Data'), 'error');
+      });
   }
 
   selectChange(value: string): void {

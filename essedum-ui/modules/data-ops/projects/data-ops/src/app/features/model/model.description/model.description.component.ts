@@ -201,8 +201,6 @@ export class ModelDescriptionComponent implements OnInit {
     const obj: string = attrs.object || '';
     const path: string = attrs.path || '';
     const extension = obj.split('.').pop() || '';
-    // Backend fileData endpoint resolves against path/object inside the bucket, not just the
-    // bare object name — sending only "mock_data.csv" makes it return `[null]`.
     const fileName = (path && obj) ? `${path}/${obj}` : obj;
     if (extension.match('mkv')) {
       this.service.messageService('This file cannot be downloaded currently');
@@ -216,16 +214,16 @@ export class ModelDescriptionComponent implements OnInit {
           this.service.message('Download Failed. File not found on the server.', 'error');
           return;
         }
-        // Guard against the backend's "[null]" JSON-array-of-null response being wrapped as a blob.
-        if (blob.size < 64) {
-          try {
-            const text = (await blob.text()).trim();
-            if (!text || text === 'null' || text === '[null]' || text === '[]') {
-              this.service.message('Download Failed. File not found on the server.', 'error');
-              return;
-            }
-          } catch { /* fall through to actual download */ }
-        }
+        // Sniff head bytes so JSON error payloads like `[null]` don't get saved as the file.
+        try {
+          const head = await blob.slice(0, 512).text();
+          const trimmed = head.trim();
+          if (!trimmed || trimmed === 'null' || trimmed === '[null]' || trimmed === '[]'
+              || /^\{\s*"error"/i.test(trimmed) || /^request failed$/i.test(trimmed)) {
+            this.service.message('Download Failed. File not found on the server.', 'error');
+            return;
+          }
+        } catch { /* fall through to actual download */ }
         const linkA = document.createElement('a');
         const url = window.URL.createObjectURL(blob);
         linkA.href = url;
