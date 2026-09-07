@@ -22,6 +22,11 @@ import {
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
 import { AiChatCoderService, AiChatFile, AiChatPushState } from './ai-chat-coder.service';
+import {
+  SavePushConfigDialogComponent,
+  SavePushConfigDialogData,
+  SavePushFileItem,
+} from './save-push-config-dialog/save-push-config-dialog.component';
 import { Subscription } from 'rxjs';
 import { StreamingServices } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
@@ -30,6 +35,8 @@ import {
   DynamicSecretsGrid,
 } from '../native-script/pipeline.models';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
+import { GitHubService } from '../sharedModule/services/github.service';
+import { PullOperationSummary, PushRequest } from '../sharedModule/models/github.models';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
 import pipelineConfig from './pipeline-config.json';
@@ -440,6 +447,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isOpeningUploadDialog = false; // Tracks button loading state before dialog renders
   showUploadDialog = false;
   selectedZipFile: File | null = null;
+  // True when selectedZipFile came from "Clone from GitHub" rather than a manual ZIP upload.
+  // Arbitrary external repos never contain Essedum's metadata.json, so pulled ZIPs must skip
+  // that server-side validation while manual uploads (real pipeline exports) still enforce it.
+  isZipFromGitHubPull = false;
 
   // MCP Pipeline Mode Support
   pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
@@ -539,6 +550,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isCheckingDeploymentData = false;
   deploymentEnvironment: string = ''; // Store selected deployment environment
 
+  // Phase 1B: Save + Push integration
+  autoPushOnSave = false;
+  isPushingAfterSave = false;
+  lastPulledRepo = '';
+  lastPulledBranch = '';
+
   // Drag and Drop functionality
   isDragging = false;
   draggedNode: FileNode | null = null;
@@ -573,6 +590,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     private dialog: MatDialog,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
+    private githubService: GitHubService,
     private cdr: ChangeDetectorRef,
     private http: HttpClient,
     private aiChatCoder: AiChatCoderService,
@@ -1189,7 +1207,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   // Save current file changes
-  async saveFile(): Promise<void> {
+  async saveFile(options?: { suppressAutoPush?: boolean }): Promise<void> {
     if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
       return;
     }
@@ -1225,6 +1243,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
+
+      if (this.autoPushOnSave && !options?.suppressAutoPush) {
+        this.pushChangesToConfiguredBranch('Git Auto push after save');
+      }
     } catch (error: any) {
       console.error('Error saving file:', error);
       // Check if error has the new format with details
@@ -1240,6 +1262,182 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     } finally {
       this.isSavingFile = false;
     }
+  }
+
+  async saveAndPushFile(commitMessage?: string): Promise<void> {
+    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
+      return;
+    }
+
+    await this.saveFile({ suppressAutoPush: true });
+
+    // If save failed, isFileModified remains true and push should not start.
+    if (this.isFileModified) {
+      return;
+    }
+
+    this.pushChangesToConfiguredBranch('Manual save and push', commitMessage);
+  }
+
+  openSavePushConfigDialog(): void {
+    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
+      return;
+    }
+
+    const changedFiles = this.collectChangedFilesForPush();
+    const organization = sessionStorage.getItem('organization') || this.organisation || this.getConsistentOrganization();
+
+    const openDialog = (config?: any): void => {
+      const gitContext = this.getSavePushGitContext(config);
+      const defaultCommitMessage = this.buildSavePushCommitMessage(
+        gitContext.repoName,
+        gitContext.branch,
+        changedFiles.length
+      );
+
+      const dialogData: SavePushConfigDialogData = {
+        username: gitContext.username,
+        repoName: gitContext.repoName,
+        branch: gitContext.branch,
+        sourceLabel: gitContext.sourceLabel,
+        commitMessage: defaultCommitMessage,
+        changedFiles,
+      };
+
+      const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
+        width: '620px',
+        maxWidth: '94vw',
+        panelClass: 'save-push-config-dialog-panel',
+        data: dialogData,
+        autoFocus: false,
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result?.confirmed) {
+          const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
+          this.saveAndPushFile(finalMessage);
+        }
+      });
+    };
+
+    if (organization) {
+      this.service.getGitConfig(this.currentCname, organization).subscribe({
+        next: (config) => openDialog(config),
+        error: () => openDialog(),
+      });
+    } else {
+      openDialog();
+    }
+  }
+
+  onGitHubPullCompleted(summary: PullOperationSummary): void {
+    this.lastPulledRepo = summary.repoName || '';
+    this.lastPulledBranch = summary.branch || '';
+    this.githubUsername = summary.githubUsername || this.githubUsername;
+  }
+
+  private pushChangesToConfiguredBranch(trigger: string, customCommitMessage?: string): void {
+    if (!this.currentCname || this.isPushingAfterSave) {
+      return;
+    }
+
+    const organization = sessionStorage.getItem('organization');
+    if (!organization) {
+      this.service.message('Organization not found for Git push', 'warning');
+      return;
+    }
+
+    this.isPushingAfterSave = true;
+    const commitMessage = (customCommitMessage || `${trigger} - ${new Date().toISOString()}`).trim();
+
+    this.service.getGitConfig(this.currentCname, organization).subscribe({
+      next: (config) => {
+        const repoName = config?.repo;
+        const branch = config?.bname;
+
+        if (!repoName || !branch) {
+          this.isPushingAfterSave = false;
+          this.service.message('Git config is missing. Pull or push once to set repo/branch.', 'warning');
+          return;
+        }
+
+        this.agentPipelineService.getFilesList(this.currentCname).subscribe({
+          next: (fetchedFiles) => {
+            const request: PushRequest = {
+              repoName,
+              branch,
+              commitMessage,
+              files: fetchedFiles.map(file => ({
+                path: file.filePath,
+                fileName: file.filename,
+                id: file.id,
+                content: file.filescript
+              }))
+            };
+
+            this.githubService.pushToGitHub(request).subscribe({
+              next: () => {
+                this.service.message(`Saved and pushed to ${repoName}/${branch}`, 'success');
+                this.isPushingAfterSave = false;
+              },
+              error: (error) => {
+                const msg = error?.error || error?.message || 'Git push failed after save';
+                this.service.message(msg, 'error');
+                this.isPushingAfterSave = false;
+              }
+            });
+          },
+          error: (error) => {
+            const msg = error?.error || error?.message || 'Failed to fetch files for Git push';
+            this.service.message(msg, 'error');
+            this.isPushingAfterSave = false;
+          }
+        });
+      },
+      error: () => {
+        this.service.message('Git config not found. Please pull or push once first.', 'warning');
+        this.isPushingAfterSave = false;
+      }
+    });
+  }
+
+  private buildSavePushCommitMessage(repoName: string, branch: string, changedFileCount: number): string {
+    const safeRepo = repoName || this.lastPulledRepo || 'repository';
+    const safeBranch = branch || this.lastPulledBranch || 'main';
+    const countLabel = changedFileCount === 1 ? '1 file' : `${changedFileCount} files`;
+    return `chore: update ${safeRepo}/${safeBranch} (${countLabel})`;
+  }
+
+  private getSavePushGitContext(config?: any): { username: string; repoName: string; branch: string; sourceLabel: string } {
+    const username =
+      sessionStorage.getItem('git_username') ||
+      sessionStorage.getItem('username') ||
+      this.githubUsername ||
+      localStorage.getItem('github_username') ||
+      'unknown';
+    const repoName = this.lastPulledRepo || config?.repo || this.githubRepoName || 'repository';
+    const branch = this.lastPulledBranch || config?.bname || this.selectedBranch || 'main';
+    const sourceLabel = this.lastPulledRepo || this.lastPulledBranch || config?.repo || config?.bname
+      ? 'Pulled earlier'
+      : 'Current configuration';
+
+    return { username, repoName, branch, sourceLabel };
+  }
+
+  private collectChangedFilesForPush(): SavePushFileItem[] {
+    const changedFiles: SavePushFileItem[] = [];
+
+    if (this.selectedFileName && this.isFileModified) {
+      const changedLines = this.getDiffStats().total;
+      changedFiles.push({
+        path: this.selectedFilePath || this.selectedFileName,
+        status: 'modified',
+        changedLines,
+        preview: (this.selectedFileContent || '').slice(0, 220),
+      });
+    }
+
+    return changedFiles;
   }
 
   // Show delete confirmation dialog
@@ -2936,6 +3134,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   openUploadDialog(): void {
     this.isOpeningUploadDialog = true;
     this.selectedZipFile = null;
+    this.isZipFromGitHubPull = false;
     // Let Angular render the button spinner, then open the dialog
     setTimeout(() => {
       this.showUploadDialog = true;
@@ -2951,6 +3150,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.showUploadDialog = false;
     this.isOpeningUploadDialog = false;
     this.selectedZipFile = null;
+    this.isZipFromGitHubPull = false;
   }
 
   /**
@@ -2960,6 +3160,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
       this.selectedZipFile = file;
+      this.isZipFromGitHubPull = false;
     } else {
       this.service.message('Please select a valid ZIP file', 'error');
       this.selectedZipFile = null;
@@ -2971,6 +3172,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   onGitHubPullZipCreated(zipFile: File): void {
     this.selectedZipFile = zipFile;
+    this.isZipFromGitHubPull = true;
     
     // Automatically trigger upload
     this.uploadAgentFiles();
@@ -2990,7 +3192,9 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
 // Call the upload API with type param: Agent | MCP | App
     const uploadType = this.pipelineMode === 'mcp' ? 'MCP' : this.pipelineMode === 'app' ? 'Application' : 'Agent';
-    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType).subscribe({
+    // Skip server-side metadata.json validation for ZIPs pulled from an arbitrary GitHub repo —
+    // only files exported from Essedum's own pipeline packaging contain that file.
+    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType, this.isZipFromGitHubPull).subscribe({
          next: (response) => {
         this.service.message(
           `${this.pipelineMode === 'mcp' ? 'MCP server' : 'Agent'} files uploaded successfully!`, 

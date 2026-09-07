@@ -657,6 +657,42 @@
         mat-icon { color: #484f58 !important; }
       }
     }
+    .save-and-push-button {
+      color: #8b949e !important;
+      border: 1px solid rgba(88, 166, 255, 0.25) !important;
+
+      &:hover:not([disabled]) {
+        color: #58a6ff !important;
+        background: rgba(88, 166, 255, 0.12) !important;
+        border-color: rgba(88, 166, 255, 0.45) !important;
+      }
+
+      &[disabled] {
+        opacity: 0.45;
+      }
+    }
+
+    .auto-push-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-right: 4px;
+      font-size: 11px;
+      color: #8b949e;
+      user-select: none;
+      cursor: pointer;
+
+      input[type='checkbox'] {
+        width: 13px;
+        height: 13px;
+        accent-color: #58a6ff;
+        cursor: pointer;
+      }
+
+      span {
+        line-height: 1;
+      }
+    }
     .delete-button {
       color: #8b949e !important;
       &:hover { background: rgba(248,81,73,0.1) !important; color: #f85149 !important; }

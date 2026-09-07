@@ -291,6 +291,8 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  // Push this element after the Add (+) button within the flex header-actions row.
+  order: 3;
 }
 
 .gh-icon {

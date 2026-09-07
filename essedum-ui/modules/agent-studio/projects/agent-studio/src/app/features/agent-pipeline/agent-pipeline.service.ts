@@ -476,14 +476,18 @@ export class AgentPipelineService {
   
   /**
    * Upload agent files ZIP to backend
+   * @param skipMetadataValidation When true, sends isvibestudio=true so the backend skips
+   *   metadata.json validation. Use this for ZIPs that did not originate from an Essedum
+   *   pipeline export (e.g. files pulled from an arbitrary external GitHub repository),
+   *   since those will never contain a metadata.json at the ZIP root.
    */
-  uploadAgentFilesZip(cname: string, organization: string, zipFile: File, type: string = 'Agent'): Observable<any> {
+  uploadAgentFilesZip(cname: string, organization: string, zipFile: File, type: string = 'Agent', skipMetadataValidation: boolean = false): Observable<any> {
     const url = `${this.baseUrl}/folder/upload/${cname}/${organization}?zipFile=null&type=${type}`;  
 
     // Create FormData for file upload
     const formData = new FormData();
     formData.append('zipFile', zipFile);
-    formData.append('isvibestudio', 'false');
+    formData.append('isvibestudio', skipMetadataValidation ? 'true' : 'false');
 
     // Get auth token from localStorage or session storage
     const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';

@@ -80,6 +80,9 @@ public class GitHubIntegrationService {
             // Validation errors - re-throw as-is
             log.error("Validation error in {}: {}", operation, e.getMessage());
             throw e;
+        } else if (e instanceof GHFileNotFoundException) {
+            log.error("GitHub resource not found in {} ({}): {}", operation, context, e.getMessage());
+            throw e;
         } else if (e instanceof org.kohsuke.github.HttpException) {
             // GitHub API errors - re-throw to preserve status code
             org.kohsuke.github.HttpException httpEx = (org.kohsuke.github.HttpException) e;
@@ -229,17 +232,16 @@ public class GitHubIntegrationService {
      * @throws Exception if push fails
      */
     public void pushToGitHub(PushRequest request, String token, String username) throws Exception {
-        try {
-            log.info("Starting push to GitHub - Repo: {}, Branch: {}",
-                     request.getRepoName(), request.getBranch());
+        log.info("Starting push to GitHub - Repo: {}, Branch: {}",
+                 request.getRepoName(), request.getBranch());
 
-            GitHub github = createGitHubInstance(token);
-            GHRepository repo = github.getRepository(request.getRepoName());
-            String remoteUrl = repo.getHttpTransportUrl();
+        GitHub github = createGitHubInstance(token);
+        GHRepository repo = github.getRepository(request.getRepoName());
+        String remoteUrl = repo.getHttpTransportUrl();
 
-            // Check if files list is provided (new approach) or localPath (old approach)
-            if (request.getFiles() != null && !request.getFiles().isEmpty()) {
-                log.info("Pushing {} files directly from content", request.getFiles().size());
+        if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+            log.info("Pushing {} files directly from content", request.getFiles().size());
+            try {
                 gitStorageProvider.pushFileContents(
                     request.getFiles(),
                     remoteUrl,
@@ -249,8 +251,37 @@ public class GitHubIntegrationService {
                     token,
                     verifySsl
                 );
-            } else if (request.getLocalPath() != null && !request.getLocalPath().isEmpty()) {
-                log.info("Pushing from local path: {}", request.getLocalPath());
+            } catch (Exception primaryEx) {
+                String deepestMessage = deepestCauseMessage(primaryEx).toLowerCase();
+
+                // "git-receive-pack not permitted" indicates the git smart-HTTP protocol push
+                // was rejected (network/proxy policy blocking git-receive-pack traffic to
+                // github.com), even though the same token works fine against the GitHub REST
+                // API. Fall back to committing via the GitHub Git Data API instead of a raw
+                // git push.
+                boolean gitProtocolBlocked = deepestMessage.contains("not permitted") || deepestMessage.contains("not authorized");
+
+                if (gitProtocolBlocked) {
+                    log.warn("Git protocol push was rejected ({}). Falling back to GitHub REST API (Git Data API) to commit files.",
+                        deepestCauseMessage(primaryEx));
+                    try {
+                        pushViaRestApi(repo, request);
+                        log.info("Successfully pushed to GitHub via REST API fallback - Repo: {}, Branch: {}",
+                            request.getRepoName(), request.getBranch());
+                        return;
+                    } catch (Exception restEx) {
+                        log.error("REST API fallback push also failed: {}", restEx.getMessage(), restEx);
+                        handleGitHubException(restEx, "push to GitHub (REST fallback)", request.getRepoName() + ":" + request.getBranch());
+                        return; // Never reached
+                    }
+                }
+
+                handleGitHubException(primaryEx, "push to GitHub", request.getRepoName() + ":" + request.getBranch());
+                return; // Never reached
+            }
+        } else if (request.getLocalPath() != null && !request.getLocalPath().isEmpty()) {
+            log.info("Pushing from local path: {}", request.getLocalPath());
+            try {
                 gitStorageProvider.push(
                     request.getLocalPath(),
                     remoteUrl,
@@ -260,15 +291,67 @@ public class GitHubIntegrationService {
                     token,
                     verifySsl
                 );
-            } else {
-                throw new IllegalArgumentException("Either 'files' or 'localPath' must be provided in the request");
+            } catch (Exception e) {
+                handleGitHubException(e, "push to GitHub", request.getRepoName() + ":" + request.getBranch());
+                return; // Never reached
             }
+        } else {
+            throw new IllegalArgumentException("Either 'files' or 'localPath' must be provided in the request");
+        }
 
-            log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
-                     request.getRepoName(), request.getBranch());
+        log.info("Successfully pushed to GitHub - Repo: {}, Branch: {}",
+                 request.getRepoName(), request.getBranch());
+    }
+
+    /**
+     * Commit file contents to a branch via the GitHub Git Data API (blobs/trees/commits/refs)
+     * instead of a raw git push. Used as a fallback when the git smart-HTTP protocol
+     * (git-receive-pack) is rejected, which can happen due to network/proxy policy even when
+     * the REST API itself works fine.
+     *
+     * @param repo Already-resolved GitHub repository
+     * @param request Push request containing branch, commit message, and file contents
+     * @throws Exception if the REST API commit fails
+     */
+    private void pushViaRestApi(GHRepository repo, PushRequest request) throws Exception {
+        String branch = request.getBranch();
+
+        String baseCommitSha = null;
+        boolean branchExists = true;
+        try {
+            baseCommitSha = repo.getBranch(branch).getSHA1();
         } catch (Exception e) {
-            handleGitHubException(e, "push to GitHub", request.getRepoName() + ":" + request.getBranch());
-            // Never reached
+            branchExists = false;
+            try {
+                baseCommitSha = repo.getBranch(repo.getDefaultBranch()).getSHA1();
+            } catch (Exception ex) {
+                baseCommitSha = null; // Repository appears to be empty
+            }
+        }
+
+        GHTreeBuilder treeBuilder = repo.createTree();
+        if (baseCommitSha != null) {
+            GHCommit baseCommit = repo.getCommit(baseCommitSha);
+            treeBuilder = treeBuilder.baseTree(baseCommit.getTree().getSha());
+        }
+        for (FileContent file : request.getFiles()) {
+            String path = (file.getPath() != null && !file.getPath().isEmpty()) ? file.getPath() : file.getFileName();
+            treeBuilder = treeBuilder.add(path, file.getContent() != null ? file.getContent() : "", false);
+        }
+        GHTree newTree = treeBuilder.create();
+
+        GHCommitBuilder commitCreator = repo.createCommit()
+            .message(request.getCommitMessage())
+            .tree(newTree.getSha());
+        if (baseCommitSha != null) {
+            commitCreator = commitCreator.parent(baseCommitSha);
+        }
+        GHCommit newCommit = commitCreator.create();
+
+        if (branchExists) {
+            repo.getRef("heads/" + branch).updateTo(newCommit.getSHA1(), false);
+        } else {
+            repo.createRef("refs/heads/" + branch, newCommit.getSHA1());
         }
     }
 
@@ -300,19 +383,19 @@ public class GitHubIntegrationService {
      * @throws Exception if pull fails
      */
     public PullResponse pullFromGitHub(PullRequest request, String token, String username) throws Exception {
+        log.info("Starting pull from GitHub - Repo: {}, Branch: {}",
+                 request.getRepoUrl(), request.getBranch());
+
+        // Validate inputs
+        if (request.getRepoUrl() == null || request.getRepoUrl().isEmpty()) {
+            throw new IllegalArgumentException("Repository URL is required");
+        }
+        if (request.getBranch() == null || request.getBranch().isEmpty()) {
+            throw new IllegalArgumentException("Branch name is required");
+        }
+
         try {
-            log.info("Starting pull from GitHub - Repo: {}, Branch: {}",
-                     request.getRepoUrl(), request.getBranch());
-
-            // Validate inputs
-            if (request.getRepoUrl() == null || request.getRepoUrl().isEmpty()) {
-                throw new IllegalArgumentException("Repository URL is required");
-            }
-            if (request.getBranch() == null || request.getBranch().isEmpty()) {
-                throw new IllegalArgumentException("Branch name is required");
-            }
-
-            // Pull from GitHub
+            // Pull from GitHub via git clone (JGit)
             PullResponse response = gitStorageProvider.pull(
                 request.getRepoUrl(),
                 request.getBranch(),
@@ -326,10 +409,108 @@ public class GitHubIntegrationService {
                      request.getRepoUrl(), request.getBranch(), response.getFiles().size());
 
             return response;
-        } catch (Exception e) {
-            handleGitHubException(e, "pull from GitHub", request.getRepoUrl() + ":" + request.getBranch());
+        } catch (Exception primaryEx) {
+            String deepestMessage = deepestCauseMessage(primaryEx).toLowerCase();
+
+            // "git-upload-pack not permitted" / "not authorized" indicate the git smart-HTTP
+            // protocol request was rejected (private repo without a proper 401 challenge, or a
+            // network/proxy policy blocking git-upload-pack traffic to github.com) even though
+            // the same token works fine against the GitHub REST API. Fall back to fetching the
+            // repository contents via the REST API instead of a raw git clone.
+            boolean gitProtocolBlocked = deepestMessage.contains("not permitted") || deepestMessage.contains("not authorized");
+
+            if (gitProtocolBlocked) {
+                log.warn("Git protocol clone was rejected ({}). Falling back to GitHub REST API to fetch repository contents.",
+                    deepestCauseMessage(primaryEx));
+                try {
+                    PullResponse restResponse = pullViaRestApi(request.getRepoUrl(), request.getBranch(), token);
+                    log.info("Successfully pulled from GitHub via REST API fallback - Repo: {}, Branch: {}, Files: {}",
+                        request.getRepoUrl(), request.getBranch(), restResponse.getFiles().size());
+                    return restResponse;
+                } catch (Exception restEx) {
+                    log.error("REST API fallback pull also failed: {}", restEx.getMessage(), restEx);
+                    handleGitHubException(restEx, "pull from GitHub (REST fallback)", request.getRepoUrl() + ":" + request.getBranch());
+                    return null; // Never reached
+                }
+            }
+
+            handleGitHubException(primaryEx, "pull from GitHub", request.getRepoUrl() + ":" + request.getBranch());
             return null; // Never reached
         }
+    }
+
+    /**
+     * Fetch repository contents via the GitHub REST API instead of a raw git clone.
+     * Used as a fallback when the git smart-HTTP protocol (git-upload-pack) is rejected,
+     * which can happen due to network/proxy policy even when the REST API itself works fine.
+     *
+     * @param repoUrl GitHub repository URL (e.g., https://github.com/owner/repo)
+     * @param branch Branch name to read from
+     * @param token GitHub Personal Access Token / OAuth token
+     * @return PullResponse containing branch, commit SHA, and file contents
+     * @throws Exception if the REST API fetch fails
+     */
+    private PullResponse pullViaRestApi(String repoUrl, String branch, String token) throws Exception {
+        String ownerRepo = extractOwnerRepoFromUrl(repoUrl);
+        GitHub github = createGitHubInstance(token);
+        GHRepository repo = github.getRepository(ownerRepo);
+
+        GHBranch ghBranch = repo.getBranch(branch);
+        String sha = ghBranch.getSHA1();
+
+        GHTree tree = repo.getTreeRecursive(sha, 1);
+
+        List<FileContent> files = tree.getTree().stream()
+            .filter(entry -> "blob".equals(entry.getType()))
+            .map(entry -> {
+                try {
+                    GHContent content = repo.getFileContent(entry.getPath(), sha);
+                    FileContent fileContent = new FileContent();
+                    fileContent.setPath(entry.getPath());
+                    fileContent.setContent(content.getContent());
+                    return fileContent;
+                } catch (Exception ex) {
+                    log.warn("Skipping file {} during REST-based pull: {}", entry.getPath(), ex.getMessage());
+                    return null;
+                }
+            })
+            .filter(java.util.Objects::nonNull)
+            .collect(Collectors.toList());
+
+        PullResponse response = new PullResponse();
+        response.setBranch(branch);
+        response.setCommitHash(sha);
+        response.setFiles(files);
+        return response;
+    }
+
+    /**
+     * Extract "owner/repo" from a GitHub URL. Supports https://github.com/owner/repo,
+     * github.com/owner/repo, and plain owner/repo, with or without a trailing .git.
+     */
+    private String extractOwnerRepoFromUrl(String repoUrl) {
+        String cleaned = repoUrl.trim().replaceAll("/+$", "").replaceAll("\\.git$", "");
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+            .compile("github\\.com[/:]([^/]+)/([^/]+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+            .matcher(cleaned);
+        if (matcher.find()) {
+            return matcher.group(1) + "/" + matcher.group(2);
+        }
+        if (cleaned.matches("^[^/]+/[^/]+$")) {
+            return cleaned;
+        }
+        throw new IllegalArgumentException("Invalid GitHub repository URL: " + repoUrl);
+    }
+
+    /**
+     * Walk to the deepest cause of an exception chain and return its message.
+     */
+    private String deepestCauseMessage(Throwable t) {
+        Throwable current = t;
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+        return current.getMessage() != null ? current.getMessage() : "";
     }
 
     /**

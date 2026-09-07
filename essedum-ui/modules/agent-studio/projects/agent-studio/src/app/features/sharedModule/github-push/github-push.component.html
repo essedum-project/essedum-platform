@@ -9,7 +9,7 @@
 <div *ngIf="mode === 'pull'" class="github-pull-input-container">
 <button class="github-pull-input-label" (click)="openModal($event)" type="button">
 <mat-icon>cloud_download</mat-icon>
-<span>Pull from GitHub</span>
+<span>Clone from GitHub</span>
 </button>
 </div>
  
@@ -71,8 +71,8 @@
 </button>
 </div>
  
-      <!-- Authenticated (Both Push and Pull Mode) -->
-<div *ngIf="isAuthenticated && !isLoading" class="content-section">
+        <!-- Authenticated (Both Push and Pull Mode) -->
+<div *ngIf="isAuthenticated" class="content-section">
 <!-- User Info -->
 <div class="user-info">
 <p>Logged in as: <strong>{{ username }}</strong></p>
@@ -86,6 +86,12 @@
 
             placeholder="https://github.com/owner/repository">
 <small class="form-text">Enter the URL of any public GitHub repository</small>
+<div class="pull-actions-row">
+<button class="btn btn-secondary" type="button" (click)="loadPullBranches()" [disabled]="!extractedRepoName || isLoading">
+            {{ isLoading ? 'Loading Branches...' : 'Load Branches' }}
+</button>
+<small class="form-text" *ngIf="extractedRepoName">Detected repository: {{ extractedRepoName }}</small>
+</div>
 </div>
  
         <!-- Repository and Branch Selection (Push Mode Only) -->
@@ -145,11 +151,53 @@
             Default: Automated commit - [timestamp]
 </small>
 </div>
+
+        <!-- Push operation visibility (Phase 1A) -->
+<div class="operation-card" *ngIf="mode === 'push' && pushPreview">
+<h4>Before Push</h4>
+<div class="operation-row"><span>Username</span><strong>{{ pushPreview.githubUsername || '-' }}</strong></div>
+<div class="operation-row"><span>Repository</span><strong>{{ pushPreview.repoName }}</strong></div>
+<div class="operation-row"><span>Branch</span><strong>{{ pushPreview.branch }}</strong></div>
+<div class="operation-row"><span>Commit Message</span><strong>{{ pushPreview.commitMessage }}</strong></div>
+<div class="operation-row"><span>Files</span><strong>{{ pushPreview.filesCount }}</strong></div>
+<div class="operation-row"><span>Requested At</span><strong>{{ pushPreview.requestedAt | date:'medium' }}</strong></div>
+</div>
+
+<div class="operation-card success" *ngIf="mode === 'push' && pushResult">
+<h4>After Push</h4>
+<div class="operation-row"><span>Status</span><strong>{{ pushResult.status | uppercase }}</strong></div>
+<div class="operation-row"><span>Repository</span><strong>{{ pushResult.repoName }}</strong></div>
+<div class="operation-row"><span>Branch</span><strong>{{ pushResult.branch }}</strong></div>
+<div class="operation-row"><span>Username</span><strong>{{ pushResult.githubUsername || '-' }}</strong></div>
+<div class="operation-row"><span>Completed At</span><strong>{{ pushResult.completedAt | date:'medium' }}</strong></div>
+<div class="operation-row" *ngIf="pushResult.commitSha"><span>Commit SHA</span><strong>{{ pushResult.commitSha }}</strong></div>
+<div class="operation-row" *ngIf="pushResult.message"><span>Message</span><strong>{{ pushResult.message }}</strong></div>
+</div>
+
+        <!-- Pull operation visibility (Phase 1A) -->
+<div class="operation-card" *ngIf="mode === 'pull' && pullPreview">
+<h4>Before Pull</h4>
+<div class="operation-row"><span>Username</span><strong>{{ pullPreview.githubUsername || '-' }}</strong></div>
+<div class="operation-row"><span>Repository</span><strong>{{ pullPreview.repoName }}</strong></div>
+<div class="operation-row"><span>Branch</span><strong>{{ pullPreview.branch }}</strong></div>
+<div class="operation-row"><span>Requested At</span><strong>{{ pullPreview.requestedAt | date:'medium' }}</strong></div>
+</div>
+
+<div class="operation-card success" *ngIf="mode === 'pull' && pullResult">
+<h4>After Pull</h4>
+<div class="operation-row"><span>Status</span><strong>{{ pullResult.status | uppercase }}</strong></div>
+<div class="operation-row"><span>Repository</span><strong>{{ pullResult.repoName }}</strong></div>
+<div class="operation-row"><span>Branch</span><strong>{{ pullResult.branch }}</strong></div>
+<div class="operation-row"><span>Username</span><strong>{{ pullResult.githubUsername || '-' }}</strong></div>
+<div class="operation-row"><span>Completed At</span><strong>{{ pullResult.completedAt | date:'medium' }}</strong></div>
+<div class="operation-row" *ngIf="pullResult.commitHash"><span>Commit Hash</span><strong>{{ pullResult.commitHash }}</strong></div>
+<div class="operation-row" *ngIf="pullResult.filesCount !== undefined"><span>Files Pulled</span><strong>{{ pullResult.filesCount }}</strong></div>
+</div>
  
       </div>
 </div>
  
-     <div class="github-modal-footer" *ngIf="isAuthenticated && !isLoading">
+        <div class="github-modal-footer" *ngIf="isAuthenticated">
 <button class="btn btn-primary" type="button" (click)="executeAction()" [disabled]="!canExecuteAction()">
 
          {{ getButtonText() }}

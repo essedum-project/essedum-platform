@@ -144,6 +144,19 @@
       color: #8b949e;
       margin-top: 4px;
     }
+
+    .pull-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+
+      .form-text {
+        margin-top: 0;
+        text-align: right;
+      }
+    }
   }
 
   .form-control {
@@ -228,6 +241,47 @@
     background: rgba(63, 185, 80, 0.1);
     border: 1px solid rgba(63, 185, 80, 0.3);
     color: #3fb950;
+  }
+
+  .operation-card {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    background: rgba(88, 166, 255, 0.06);
+
+    h4 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #c9d1d9;
+    }
+
+    .operation-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 0;
+
+      span {
+        font-size: 12px;
+        color: #8b949e;
+      }
+
+      strong {
+        font-size: 12px;
+        font-weight: 600;
+        color: #e6edf3;
+        text-align: right;
+        word-break: break-word;
+      }
+    }
+
+    &.success {
+      border-color: rgba(63, 185, 80, 0.35);
+      background: rgba(63, 185, 80, 0.08);
+    }
   }
 
   // Loading

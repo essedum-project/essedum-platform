@@ -1,0 +1,168 @@
+.dialog-title {
+  margin: 0;
+  color: #e5eefc;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.save-push-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #c8d8ee;
+  min-width: 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(96, 143, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(7, 14, 27, 0.65);
+}
+
+.summary-label,
+.section-heading,
+.commit-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7f9fc8;
+}
+
+.summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #eff6ff;
+  word-break: break-word;
+}
+
+.files-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(96, 143, 255, 0.24);
+  background: rgba(8, 17, 33, 0.45);
+  color: #9fb2cf;
+  font-size: 12px;
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 190px;
+  overflow: auto;
+}
+
+.file-row {
+  padding: 10px 12px;
+  border: 1px solid rgba(96, 143, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(8, 17, 33, 0.8);
+}
+
+.file-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.file-path {
+  font-weight: 600;
+  color: #eff6ff;
+  word-break: break-word;
+  font-size: 12px;
+}
+
+.status-pill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-modified {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.status-added {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+}
+
+.status-deleted {
+  background: rgba(248, 113, 113, 0.16);
+  color: #f87171;
+}
+
+.file-row-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #8da6c6;
+}
+
+.file-preview {
+  margin: 8px 0 0;
+  max-height: 110px;
+  overflow: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(3, 8, 16, 0.92);
+  border: 1px solid rgba(96, 143, 255, 0.12);
+  color: #dbeafe;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.commit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.commit-section input {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(96, 143, 255, 0.2);
+  background: rgba(7, 14, 27, 0.8);
+  color: #e5eefc;
+  padding: 0 12px;
+  outline: none;
+}
+
+.commit-section input:focus {
+  border-color: #4f8cff;
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.18);
+}
+
+.dialog-actions {
+  padding-top: 6px;
+}
+
+@media (max-width: 720px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -295,11 +295,22 @@
                             </div>
                             <div class="editor-actions">
 
+                              <label class="auto-push-toggle" title="Automatically push to configured branch after each successful save">
+                                <input type="checkbox" [(ngModel)]="autoPushOnSave" />
+                                <span>Git Auto Save</span>
+                              </label>
+
                               <button mat-icon-button class="action-button save-button"
                                 [class.save-enabled]="isFileModified" [class.save-disabled]="!isFileModified"
                                 (click)="saveFile()" [disabled]="!isFileModified" matTooltip="Save File"
                                 matTooltipPosition="above">
                                 <mat-icon>save</mat-icon>
+                              </button>
+                              <button mat-icon-button class="action-button save-and-push-button"
+                                [disabled]="!isFileModified || isSavingFile || isPushingAfterSave"
+                                (click)="openSavePushConfigDialog()" matTooltip="Review changes and push"
+                                matTooltipPosition="above">
+                                <mat-icon>{{ isPushingAfterSave ? 'hourglass_empty' : 'cloud_upload' }}</mat-icon>
                               </button>
                               <button mat-icon-button class="action-button delete-button"
                                 [class.delete-enabled]="selectedFileName && !isSavingFile"
@@ -1034,7 +1045,7 @@
 
       <!-- GitHub pull section: lazy-rendered to avoid blocking dialog open -->
       <div class="github-pull-section">
-        <app-github-push mode="pull" (zipFileCreated)="onGitHubPullZipCreated($event)"></app-github-push>
+        <app-github-push mode="pull" [cname]="currentCname" (zipFileCreated)="onGitHubPullZipCreated($event)" (pullCompleted)="onGitHubPullCompleted($event)"></app-github-push>
       </div>
     </div>
 

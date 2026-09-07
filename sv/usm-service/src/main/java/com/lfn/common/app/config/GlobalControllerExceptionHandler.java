@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.kohsuke.github.GHFileNotFoundException;
+import org.kohsuke.github.HttpException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -167,9 +170,89 @@ public class GlobalControllerExceptionHandler {
 	@ExceptionHandler(GitOperationException.class)
 	public ResponseEntity<ErrorResponse> handleGitOperationException(GitOperationException ex, WebRequest request) {
 		logger.error("Git operation failed: {}", ex.getMessage(), ex);
+
+		// Inspect the underlying cause for known git-transport failure patterns so the
+		// UI gets an actionable reason instead of one fixed generic sentence.
+		String causeMessage = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+		String lowerCause = causeMessage != null ? causeMessage.toLowerCase() : "";
+
+		if (lowerCause.contains("not permitted") || lowerCause.contains("not authorized")) {
+			return buildErrorResponse(HttpStatus.FORBIDDEN, "Git Protocol Access Denied",
+					"GitHub rejected the git clone/fetch request for this repository.",
+					"This usually means the repository is private and the connected GitHub account "
+						+ "does not have access, or a network/proxy policy is blocking the git-upload-pack "
+						+ "protocol to github.com. Verify repository visibility/access, and confirm your "
+						+ "proxy allows git operations to github.com. Details: " + causeMessage,
+					request);
+		}
+
+		if (lowerCause.contains("not found") || lowerCause.contains("repository not found")) {
+			return buildErrorResponse(HttpStatus.NOT_FOUND, "Git Repository Not Found",
+					"The requested repository or branch could not be found.",
+					"Verify the repository URL and branch name, and ensure the account has access if the "
+						+ "repository is private. Details: " + causeMessage,
+					request);
+		}
+
 		return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Git Operation Failed",
 				"A Git operation failed. Please verify your configuration.",
-				"Verify your GitHub token has the necessary permissions. Check repository name, branch, and network connectivity.",
+				"Verify your GitHub token has the necessary permissions. Check repository name, branch, "
+					+ "and network connectivity. Details: " + causeMessage,
+				request);
+	}
+
+	/**
+	 * Handle GitHub client exceptions with actionable guidance.
+	 */
+	@ExceptionHandler(HttpException.class)
+	public ResponseEntity<ErrorResponse> handleGitHubHttpException(HttpException ex, WebRequest request) {
+		logger.error("GitHub API request failed: {}", ex.getMessage(), ex);
+
+		Throwable cause = ex.getCause();
+		if (ex.getResponseCode() == -1 && cause instanceof SSLPeerUnverifiedException) {
+			return buildErrorResponse(HttpStatus.BAD_GATEWAY, "GitHub SSL Verification Failed",
+					"The server could not establish a trusted TLS connection to GitHub.",
+					"Enable standard SSL verification for GitHub API calls or import the corporate proxy certificate into the JVM trust store.",
+					request);
+		}
+
+		if (ex.getResponseCode() == 401) {
+			return buildErrorResponse(HttpStatus.UNAUTHORIZED, "GitHub Authentication Failed",
+					"GitHub rejected the current token.",
+					"Re-authenticate with GitHub and retry the operation.",
+					request);
+		}
+
+		if (ex.getResponseCode() == 403) {
+			return buildErrorResponse(HttpStatus.FORBIDDEN, "GitHub Access Denied",
+					"GitHub denied access to the requested resource.",
+					"Verify repository permissions and token scopes for this GitHub account.",
+					request);
+		}
+
+		if (ex.getResponseCode() == 404) {
+			return buildErrorResponse(HttpStatus.NOT_FOUND, "GitHub Resource Not Found",
+					"The requested GitHub repository or branch was not found.",
+					"Verify the owner/repository name and ensure the repository is accessible to the authenticated GitHub account.",
+					request);
+		}
+
+		return buildErrorResponse(HttpStatus.BAD_GATEWAY, "GitHub API Error",
+				"GitHub returned an unexpected response while processing the request.",
+				"Retry the operation. If it persists, verify network connectivity, proxy settings, and GitHub access for this account.",
+				request);
+	}
+
+	/**
+	 * Handle GitHub 404s explicitly. GitHub returns 404 both when a repository
+	 * does not exist and when the authenticated user cannot access a private repo.
+	 */
+	@ExceptionHandler(GHFileNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleGitHubFileNotFound(GHFileNotFoundException ex, WebRequest request) {
+		logger.error("GitHub resource not found: {}", ex.getMessage(), ex);
+		return buildErrorResponse(HttpStatus.NOT_FOUND, "GitHub Resource Not Found",
+				"The requested GitHub repository or branch was not found.",
+				"Verify the owner/repository name. If the repository is private, ensure the logged-in GitHub account has access to it.",
 				request);
 	}
 
