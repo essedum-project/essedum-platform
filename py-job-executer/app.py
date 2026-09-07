@@ -20,7 +20,6 @@ from datetime import datetime
 from functionadapter import function_execute
 from importlib import import_module
 import asyncio
-import socketio as sio_module
 
 
 if USE_TASK_RETRIVER:
@@ -47,7 +46,6 @@ process_lock = Lock()
 db_operations = DatabaseOperations()
 submitted_futures = {}
 pause_event = Event()
-container_deploy_results = {}
 
 @app.after_request
 def add_security_headers(response):
@@ -527,8 +525,28 @@ def _run_container_deploy(deploy_id, payload):
     done_event = Event()
     sio_client = sio_module.Client(logger=False)
 
+    container_deploy_results[deploy_id].setdefault('logs', [])
+    _logs = container_deploy_results[deploy_id]['logs']
+
+    def _append_log(line):
+        _logs.append(line)
+        # Cap retained log lines to avoid unbounded growth of the status payload.
+        if len(_logs) > 1000:
+            del _logs[:len(_logs) - 1000]
+
+    @sio_client.on('pipeline_update')
+    def on_pipeline_update(data):
+        _append_log(f"[{data.get('step', 'INFO')}] {data.get('message', '')}")
+
+    @sio_client.on('build_log')
+    def on_build_log(data):
+        line = data.get('log', '') if isinstance(data, dict) else str(data)
+        if line:
+            _append_log(line)
+
     @sio_client.on('pipeline_status')
     def on_pipeline_status(data):
+        _append_log(f"[STATUS] {data.get('status', 'ERROR')}: {data.get('message', '')}")
         container_deploy_results[deploy_id].update({
             'status': data.get('status', 'ERROR'),
             'internal_dns_url': data.get('internal_dns_url', ''),
@@ -568,6 +586,74 @@ def _run_container_deploy(deploy_id, payload):
             pass
 
 
+def _ensure_buildable_zip(raw_bytes):
+    """Ensure the pipeline zip is buildable by the deployer's fallback Dockerfile.
+
+    The fallback Dockerfile requires a requirements.txt to be present and runs a
+    recognised entry point (app.py/main.py/run.py/server.py). Native/data/training
+    pipeline zips contain only the raw script(s), so inject an empty
+    requirements.txt and a main.py wrapper that runs the first .py script when
+    those are missing. Returns the (possibly rewritten) zip bytes.
+    """
+    import io
+    import os
+    import zipfile
+    try:
+        zin = zipfile.ZipFile(io.BytesIO(raw_bytes), 'r')
+    except zipfile.BadZipFile:
+        return raw_bytes
+    names = [n for n in zin.namelist() if not n.endswith('/')]
+    basenames = {os.path.basename(n).lower() for n in names}
+    entry_points = {'app.py', 'main.py', 'run.py', 'server.py'}
+    py_scripts = [n for n in names if n.lower().endswith('.py')]
+    has_requirements = 'requirements.txt' in basenames
+    has_entry = bool(entry_points & basenames)
+    if has_requirements and has_entry:
+        zin.close()
+        return raw_bytes
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            zout.writestr(item, zin.read(item.filename))
+        if not has_requirements:
+            zout.writestr('requirements.txt', '')
+        if not has_entry and py_scripts:
+            target = py_scripts[0]
+            wrapper = (
+                "import runpy\n"
+                "import time\n"
+                "import threading\n"
+                "import traceback\n"
+                "from http.server import HTTPServer, BaseHTTPRequestHandler\n"
+                "\n"
+                "class _Health(BaseHTTPRequestHandler):\n"
+                "    def do_GET(self):\n"
+                "        self.send_response(200); self.end_headers(); self.wfile.write(b'ok')\n"
+                "    def log_message(self, *a):\n"
+                "        pass\n"
+                "\n"
+                "# Serve a health endpoint on 8000 so the Deployment's readiness probe\n"
+                "# (tcpSocket:8000) passes and the pod becomes Ready. The port literal\n"
+                "# here also lets the deployer's detect_app_port() resolve to 8000.\n"
+                "def _serve():\n"
+                "    HTTPServer(('0.0.0.0', 8000), _Health).serve_forever()\n"
+                "\n"
+                "threading.Thread(target=_serve, daemon=True).start()\n"
+                "try:\n"
+                f"    runpy.run_path({target!r}, run_name='__main__')\n"
+                "    print('Pipeline script completed.', flush=True)\n"
+                "except Exception:\n"
+                "    traceback.print_exc()\n"
+                "# Keep the container alive so the Kubernetes Deployment stays Ready.\n"
+                "while True:\n"
+                "    time.sleep(3600)\n"
+            )
+            zout.writestr('main.py', wrapper)
+    zin.close()
+    logger.info('Normalized pipeline zip (added requirements.txt/main.py as needed)')
+    return out.getvalue()
+
+
 @app.route('/container-deploy-with-zip', methods=['POST'])
 def container_deploy_with_zip():
     """Accept a zip file from Java, upload to MinIO, then trigger container deployment."""
@@ -596,36 +682,40 @@ def container_deploy_with_zip():
     file_path = f"ai-pipeline-scripts/{deployment_name}/{deployment_name}.zip"
     try:
         import boto3
+        from io import BytesIO
+        normalized_zip = _ensure_buildable_zip(zip_file.read())
         s3 = boto3.client('s3',
             endpoint_url=minio_endpoint,
             aws_access_key_id=minio_access_key,
             aws_secret_access_key=minio_secret_key)
-        s3.upload_fileobj(zip_file, minio_bucket, file_path)
+        s3.upload_fileobj(BytesIO(normalized_zip), minio_bucket, file_path)
         logger.info(f"Uploaded zip to MinIO: {minio_bucket}/{file_path}")
     except Exception as e:
         logger.error('MinIO upload failed', exc_info=True)
         return jsonify({'error': f'MinIO upload failed: {str(e)}'}), 500
 
-    deploy_payload = {
-        'deployer_url': deployer_url,
+    # Sandbox approach (parity with agent/mcp pipelines): return the prepared
+    # deploy config so the BROWSER connects directly to the deployer's SocketIO
+    # (/apps/builder-service/socket.io), emits start_pipeline, and streams the
+    # live build/deploy logs. We only upload the zip here; we do NOT run the
+    # deployer server-side.
+    prepared = {
+        'status': 'prepared',
         'bucket_name': minio_bucket,
         'file_path': file_path,
         'target_image_tag': target_image_tag,
         'deployment_name': deployment_name,
         'namespace': namespace,
-        'env_vars': json.loads(env_vars_raw),
-        'secrets': json.loads(secrets_raw),
+        'minio_endpoint': minio_endpoint,
+        'env_vars': json.loads(env_vars_raw or '[]'),
+        'secrets': json.loads(secrets_raw or '[]'),
     }
     if node_selector_raw:
         try:
-            deploy_payload['node_selector'] = json.loads(node_selector_raw)
+            prepared['node_selector'] = json.loads(node_selector_raw)
         except Exception:
             pass
-
-    deploy_id = str(uuid.uuid4())
-    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None}
-    executor.submit(_run_container_deploy, deploy_id, deploy_payload)
-    return jsonify({'deploy_id': deploy_id, 'status': 'SUBMITTED'})
+    return jsonify(prepared)
 
 
 @app.route('/container-deploy', methods=['POST'])
@@ -641,7 +731,7 @@ def container_deploy():
             return jsonify({'error': f'Missing required field: {field}'}), 400
 
     deploy_id = str(uuid.uuid4())
-    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None}
+    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None, 'logs': []}
     executor.submit(_run_container_deploy, deploy_id, payload)
     return jsonify({'deploy_id': deploy_id, 'status': 'SUBMITTED'})
 

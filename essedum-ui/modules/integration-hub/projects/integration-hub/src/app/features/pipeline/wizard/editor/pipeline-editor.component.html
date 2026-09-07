@@ -73,8 +73,8 @@
       <app-run-history-tab [model]="model"></app-run-history-tab>
     </mat-tab>
 
-    <!-- Container deployment tab — shown when container-executor is selected -->
-    <mat-tab *ngIf="model.pipelineAttrs?.executor === 'container-executor'">
+    <!-- Container deployment tab — available for any data/training pipeline -->
+    <mat-tab *ngIf="model.kind === 'data-pipeline' || model.kind === 'training-job'">
       <ng-template mat-tab-label><mat-icon>inventory_2</mat-icon>&nbsp;Container</ng-template>
       <div class="container-tab-shell p-3">
         <div class="container-meta mb-3" *ngIf="model.pipelineAttrs?.containerImage">
@@ -102,6 +102,10 @@
             <strong>Deployment failed</strong>
           </div>
           <div class="text-muted">{{ containerDeployMessage }}</div>
+        </div>
+        <div *ngIf="containerDeployLogs.length > 0" class="mt-3">
+          <div style="font-weight:600;margin-bottom:4px;">Deployment logs</div>
+          <pre style="background:#0d1117;color:#c9d1d9;padding:10px;border-radius:6px;max-height:340px;overflow:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;margin:0;">{{ containerDeployLogs.join('\n') }}</pre>
         </div>
         <div class="mt-3">
           <button mat-flat-button color="primary"
