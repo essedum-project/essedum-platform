@@ -1,7 +1,48 @@
 // ═══════════════════════════════════════════════════════════════════
 //  DATASET DESCRIPTION / METADATA PANEL — Enterprise AI Platform
 // ═══════════════════════════════════════════════════════════════════
-:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+:host {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+// This component's markup nests <app-dataset-table-view> inside Bootstrap's
+// .row/.col-lg-12 grid. The global stylesheet forces `.row { display: flex }`,
+// and flex items default to min-width:auto (i.e. their content's intrinsic
+// width) unless told otherwise — so a wide table inside .col-lg-12 was able
+// to force .row, and everything alongside it, wider than the viewport,
+// dragging the whole page (including toolbar icons and pagination that live
+// in a totally different component) into horizontal scroll. Neutralize that
+// here, and stop it from recurring at every wrapper level down to the table.
+.row {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.row > [class*="col-"] {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.lfx-l-level1-wrapper,
+.lfx-l-level1-middle-col,
+.lfx-l-base-layout-center,
+.lfx-l-level2-middle-ctr,
+.lfx-l-level2-middle-col,
+.data-container {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+:host ::ng-deep mat-card,
+:host ::ng-deep mat-card-content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
 
 @keyframes fadeUp    { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 @keyframes borderShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
@@ -238,58 +279,4 @@ body.header-light-theme {
   :host ::ng-deep .mdc-text-field--disabled .mat-mdc-input-element,
   :host ::ng-deep .mdc-text-field--disabled input { color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; }
   :host ::ng-deep .mdc-text-field--disabled .mdc-floating-label { color: #94a3b8 !important; }
-}
-
-// ── Text / Log / Email preview: keep long content inside the preview panel ──
-.text-view {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0;
-  overflow: hidden;
-  max-height: 65vh;
-  border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.25);
-
-  // Tab header sits flush inside the card
-  ::ng-deep .mat-mdc-tab-group,
-  ::ng-deep .mat-mdc-tab-header {
-    background: transparent !important;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  }
-  ::ng-deep .mat-mdc-tab-body-wrapper { background: transparent !important; }
-
-  // Content region: single flush panel below the tab strip
-  .tab_content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 16px 20px;
-    max-height: 50vh;
-    overflow: auto;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.55;
-
-    // Neutralize Bootstrap .row negative margins so text stays inside the panel.
-    .row {
-      margin: 0 !important;
-      padding: 0;
-      display: block;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-  }
-}
-
-// pre variant used by Log View
-pre.text-view {
-  padding: 16px 20px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.55;
 }
