@@ -14,6 +14,20 @@ spring:
 server:
   port: 8082
 
+icip:
+  container:
+    pyjob:
+      url: ${CONTAINER_PYJOB_URL:http://py-job-executer:5000}
+    deployer:
+      url: ${CONTAINER_DEPLOYER_URL:http://adk-code-builder-deployer:5000}
+    registry:
+      prefix: ${CONTAINER_REGISTRY_PREFIX:}
+    namespace:
+      pipeline: ${CONTAINER_NAMESPACE_PIPELINE:vibe-pipelines}
+      training: ${CONTAINER_NAMESPACE_TRAINING:vibe-training}
+    minio:
+      bucket: ${CONTAINER_MINIO_BUCKET:aiptest}
+
 pipeline:
   metadata:
     validation:

@@ -70,6 +70,23 @@
                   </div>
                 </li>
                 <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="deployAsContainer()"
+                    style="cursor: pointer"
+                    [class.disabled]="containerDeployStatus === 'deploying'"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Deploy as Container"
+                      [disabled]="containerDeployStatus === 'deploying'"
+                    >
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons">inventory_2</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <li class="li-style">
                     <div
                     class="lfx-u-mar-r-24 aip-cursor"
                     (click)="saveJson(streamItem.name)"
@@ -478,6 +495,36 @@
                   *ngIf="streamItem"
                   [cname]="streamItem.name"
                 ></app-jobs>
+              </mat-tab>
+              <mat-tab label="Container" class="lfx-u-header-xl">
+                <div class="tab-content p-3">
+                  <div *ngIf="containerDeployStatus === 'idle'" class="text-muted p-2">
+                    Click the <strong>Deploy as Container</strong> button to build and deploy this pipeline as a Kubernetes container.
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'deploying'" class="d-flex align-items-center p-2">
+                    <mat-spinner diameter="20" class="lfx-u-mar-r-8"></mat-spinner>
+                    <span>{{ containerDeployMessage }}</span>
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'success'" class="p-2">
+                    <div class="d-flex align-items-center mb-2">
+                      <mat-icon class="text-success lfx-u-mar-r-8">check_circle</mat-icon>
+                      <strong>Deployment successful</strong>
+                    </div>
+                    <div *ngIf="containerInternalDnsUrl" class="mt-1">
+                      <span class="text-muted">Internal URL: </span>
+                      <code>{{ containerInternalDnsUrl }}</code>
+                    </div>
+                    <button mat-stroked-button color="primary" class="mt-3" (click)="deployAsContainer()">Re-deploy</button>
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'error'" class="p-2">
+                    <div class="d-flex align-items-center mb-2">
+                      <mat-icon class="text-danger lfx-u-mar-r-8">error</mat-icon>
+                      <strong>Deployment failed</strong>
+                    </div>
+                    <div class="text-muted">{{ containerDeployMessage }}</div>
+                    <button mat-stroked-button color="warn" class="mt-3" (click)="deployAsContainer()">Retry</button>
+                  </div>
+                </div>
               </mat-tab>
             </mat-tab-group>
           </div>

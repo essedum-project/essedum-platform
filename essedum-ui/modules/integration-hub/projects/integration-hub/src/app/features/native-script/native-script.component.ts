@@ -1,1311 +1,539 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  Inject,
-  OnChanges,
-  EventEmitter,
-  Output,
-  ChangeDetectorRef,
-} from '@angular/core';
-import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
-import * as FileSaver from 'file-saver';
-import { MatDialog } from '@angular/material/dialog';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { Services, StreamingServices, OptionsDTO } from '@essedum/shared-lib';
-import { NativeScriptDialogComponent } from './native-script-dialog/native-script-dialog.component';
-import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Location } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
-import { DynamicParamsGrid, DynamicSecretsGrid } from './pipeline.models';
-import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
-
-interface FileNode {
-  name: string;
-  extension: string;
-  selected?: boolean;
-  children?: FileNode[];
-}
-
-interface Elementt {
-  name: string;
-  value: string;
-  type: string;
-  alias: string;
-  children?: Elementt[];
-  index: string;
-}
-
-@Component({
-    selector: 'app-native-script',
-    templateUrl: './native-script.component.html',
-    styleUrls: ['./native-script.component.scss'],
-    standalone: false
-})
-export class NativeScriptComponent implements OnInit, OnChanges {
-  @Input() initiativeData: any;
-  @Input() streamItem: StreamingServices;
-  @Input() cardTitle: String = 'Pipeline';
-  @Input() cardToggled: boolean = false;
-  @Input() pipelineAlias: String;
-  @Input() card: any;
-  @Output() newItemEvent = new EventEmitter<boolean>();
-  uploader: FileUploader;
-  cardName: any;
-  uploadingCounter = 0;
-  uploadingError = false;
-  data: any = {
-    filetype: 'Python3',
-    files: [],
-    arguments: [],
-    dataset: [],
-  };
-  choosenFile = '';
-  filetypes: any[] = [
-    { viewValue: 'Python2', value: 'Python2' },
-    { viewValue: 'Python3', value: 'Python3' },
-    { viewValue: 'JavaScript', value: 'JavaScript' },
-    { viewValue: 'Jython', value: 'Jython' },
-  ];
-  script: any[] = [];
-  lang: string;
-  loadScript: boolean = false;
-  isAuth: boolean = true;
-  addTags: string = 'Add Tags to Pipeline';
-  entity: string = 'pipeline';
-  tooltipPoition: string = 'above';
-  permissionList;
-  relatedloaded = false;
-  isExpand: boolean = true;
-  component: any = [];
-  linkAuth: boolean;
-  relatedComponent: any;
-  isAuthRun: boolean = true;
-  treeData: Elementt[] = [];
-  dataSource = new MatTreeNestedDataSource<Elementt>();
-  dataSet = new MatTreeNestedDataSource<Elementt>();
-  treeControl = new NestedTreeControl<Elementt>((node) => node.children);
-  
-  // File structure properties for the new panel
-  fileStructure: FileNode[] = [];
-  selectedFileNode: FileNode | null = null;
-  fileTreeControl = new NestedTreeControl<FileNode>(node => node.children);
-  fileTreeDataSource = new MatTreeNestedDataSource<FileNode>();
-  scriptsObj: any;
-  fileExtension: string = 'py';
-  scriptSelected: string;
-  runTypes: OptionsDTO[] = [];
-  selectedRunType: any;
-  selectedDatasource: string = '';
-  runtypesCheck: boolean = true;
-  organisation: any;
-  initiativeView: boolean;
-  inGroupedJob: boolean;
-  environment: any;
-  dynamicEnvArray: Array<DynamicParamsGrid> = [];
-  envModified = false;
-    secrets: any;
-  dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
-  secretsModified = false;
-    defaultRuntime: any;
-    isHovered=false;
-    isHoveredSave=false;
-    isHoveredRun=false;
-    isHoveredTag=false;
-    defaultRuntimeFromDB: any;
-    isBackHovered=false;
-    envCollapsed = true;
-    secretsCollapsed = true;
-    envEditIndex: number = -1;
-    envEditMode: boolean = false;
-    secretsEditIndex: number = -1;
-    secretsEditMode: boolean = false;
-    secretsShowValue: boolean[] = [];
-    private _saveDebounceTimer: any = null;
-  constructor(
-    @Inject('envi') private baseUrl: string,
-    private service: Services,
-    public dialog: MatDialog,
-    private _location: Location,
-    private router: Router,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef 
-  ) 
- 
-  {
-    this.route.queryParams.subscribe((params) => {
-      if (params['org']) {
-        this.organisation = params['org'];
-      } else {
-        this.organisation = sessionStorage.getItem('organization');
-      }
-    });
-  }
-
-  ngOnInit() {
-    this.route.params.subscribe((params) => {
-      if (params['cname']) {
-        this.cardName = params['cname'];
-      } else {
-        this.cardName = this.streamItem.name;
-      }
-    });
-    if (this.router.url.includes('chains')) {
-      this.inGroupedJob = true;
-    } else {
-      this.inGroupedJob = false;
-    }
-    if (this.router.url.includes('initiative')) {
-      this.initiativeView = false;
-      this.cardName = this.initiativeData.name;
-    } else {
-      this.initiativeView = true;
-    }
-
-    this.getStreamService();
-    this.getPipelineByName();
-    this.authentications();
-  }
-  getStreamService() {
-    this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
-      this.streamItem = res;
-      this.pipelineAlias = res.alias;
-      
-      // Load files for code explorer
-      // Files will be loaded after data is parsed in try block below
-
-      if (this.router.url.includes('preview')) {
-        this.pipelineAlias = this.streamItem.alias;
-      }
-      this.uploader = new FileUploader({
-        url:
-          this.baseUrl +
-          '/file/pipeline/native/upload/' +
-          this.streamItem.name +
-          '/' +
-          this.streamItem.organization,
-      });
-      try {
-        if (this.runtypesCheck == true) this.fetchRunTypes();
-        if (this.router.url.includes('native')) {
-          this.data = JSON.parse(
-            this.streamItem.jsonContent
-          ).elements[0].attributes;
-          this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
-    if (this.dynamicEnvArray?.length) {
-      this.envCollapsed = false;
-    }
-
-        } else {
-          if (this.streamItem.json_content) {
-            this.dynamicEnvArray = JSON.parse(this.streamItem.json_content).environment;
-            this.defaultRuntimeFromDB = JSON.parse(this.streamItem.json_content).default_runtime;
-            this.selectedRunType = this.defaultRuntimeFromDB;
-          }
-          this.data = JSON.parse(
-            this.streamItem.json_content
-          ).elements[0].attributes;
-          this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
-    if (this.dynamicEnvArray?.length) {
-      this.envCollapsed = false;
-    }
-
-        }
-        if (this.data.dataset) {
-          this.data.dataset.forEach((data) => {
-            if (data.datasource) {
-              this.service
-                .getDatasource(data.datasource.name)
-                .subscribe((resp) => {
-                  data.datasource = resp;
-                });
-            }
-          });
-        }
-        if (this.data.filetype == 'Python') {
-          this.data.filetype = 'Python3';
-        }
-        if (this.data.filetype) {
-          this.changeLang(this.data.filetype);
-        }
-        if (this.data.arguments) {
-          this.treeData = this.data.arguments;
-        }
-        if (this.data.dataset) {
-          this.dataSet.data = this.data.dataset;
-        }
-        if (this.data.arguments) {
-          this.refreshTree();
-        }
-        if (this.data.files && this.data.files.length > 0) {
-          // Don't read files here - let buildFileStructure handle it
-          // this.readFile(this.data.files[0]);
-        }
-        if(this.data.usedSecrets){
-          this.dynamicSecretsArray=this.data.usedSecrets;
-          if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
-          this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
-        }
-        if(this.data.files==null || this.data.files==undefined){
-          this.data['files'] = [];
-          this.loadScript = true;
-        }        
-        this.buildFileStructure();
-     
-      } catch (e) {
-        this.loadScript = true;
-        console.error('no attribute found in json[element0]');
-      }
-      this.uploader.onErrorItem = (item, response, status, headers) =>
-        this.onErrorItem(item, response, status, headers);
-      this.uploader.onSuccessItem = (item, response, status, headers) =>
-        this.onSuccessItem(item, response, status, headers);
-      this.getRelatedComponent();
-
-      this.linkAuth = true;
-    });
-  }
-  getRelatedComponent() {
-    this.component = [];
-    this.service
-      .getRelatedComponent(this.streamItem.cid, 'PIPELINE')
-      .subscribe({
-        next: (res) => {
-          this.relatedComponent = res[0];
-          this.relatedComponent.data = JSON.parse(this.relatedComponent.data);
-          this.component.push(this.relatedComponent);
-          this.cdr.detectChanges();
-
-
-        },
-        complete() {
-        },
-        error: (err) => {
-        },
-      });
-  }
-  refeshrelated(event: any) {
-    if (event == true) {
-      this.relatedloaded = false;
-      setTimeout(() => {
-        this.getRelatedComponent();
-      }, 2000);
-    }
-  }
-  expandCollapse() {
-    this.isExpand = !this.isExpand;
-  }
-
-  getPipelineByName() {
-    let params: HttpParams = new HttpParams();
-    params = params.set('name', this.cardName);
-    params = params.set('org', this.organisation);
-    this.service.getPipelineByName(params).subscribe((res) => {
-      this.cardTitle = 'Pipeline';
-      this.card = res[0];
-    });
-  }
-  authentications() {
-    this.service.getPermission('cip').subscribe((cipAuthority) => {
-      if (cipAuthority.includes('pipeline-edit')) this.isAuth = false;
-      if (cipAuthority.includes('pipeline-run')) this.isAuthRun = false;
-    });
-  }
-
-
-  ngOnChanges() {
-    this.ngOnInit();
-    if (this.runtypesCheck == true) this.fetchRunTypes();
-  }
-
-  fetchRunTypes() {
-    this.runTypes = [];
-    this.service.fetchJobRunTypes().subscribe((resp) => {
-      resp.forEach((ele) => {
-        this.runTypes.push(new OptionsDTO(ele.type + '-' + ele.dsAlias, ele));
-      });
-      if (this.data.filetype === 'Jython') {
-        this.runTypes.push(
-          new OptionsDTO('Local-', { dsAlias: '', dsName: '', type: 'Local' })
-        );
-      }
-      if (!this.defaultRuntimeFromDB) {
-        this.selectedRunType = this.runTypes[0].value;
-      }
-      else {
-        if (this.defaultRuntimeFromDB) {
-          const matchingOption = this.runTypes.find(
-            (option: any) => option.value.dsName === this.defaultRuntimeFromDB.dsName &&
-              option.value.type === this.defaultRuntimeFromDB.type
-          );
-
-          if (matchingOption) {
-            this.selectedRunType = matchingOption.value;
-            this.defaultRuntime = matchingOption.value;
-          } else {
-            this.selectedRunType = this.runTypes[0]?.value;
-          }
-        } else {
-          this.selectedRunType = this.runTypes[0]?.value;
-        }
-      }
-      this.runtypesCheck = false;
-    });
-  }
-  onInputTypeChange(filetype) {
-    this.uploader.clearQueue();
-    this.changeLang(filetype);
-    if (filetype === 'Jython') {
-      let index = this.runTypes.findIndex(
-        (option) => option.viewValue === 'Local-'
-      );
-      if (index == -1)
-        this.runTypes.push(
-          new OptionsDTO('Local-', { dsAlias: '', dsName: '', type: 'Local' })
-        );
-    } else {
-      let index = this.runTypes.findIndex(
-        (option) => option.viewValue === 'Local-'
-      );
-      if (index > -1) this.runTypes.splice(index, 1);
-    }
-  }
-
-  runTypeChanged($event) {
-    this.defaultRuntime = $event;
-    const data = this.runTypes.find(option => option.value === this.defaultRuntime);
-    if (data) {
-      this.selectedRunType = data.value;
-    }
-  }
-
-  onSuccessItem(
-    item: FileItem,
-    response: string,
-    status: number,
-    headers: ParsedResponseHeaders
-  ): any {
-    this.data.files.push(response);
-    this.uploadingCounter++;
-    if (this.uploadingCounter == this.uploader.queue.length) {
-      this.service.message('Uploaded Successfully', 'success');
-      this.uploader.clearQueue();
-      this.readFile(response);
-    }
-  }
-
-  onErrorItem(
-    item: FileItem,
-    response: string,
-    status: number,
-    headers: ParsedResponseHeaders
-  ): any {
-    const error = response;
-    this.service.message('Error! while uploading file', 'error');
-    this.uploadingError = true;
-  }
-
-  readFile(filename: string, retryCount = 0) {
-    if (!filename || !this.streamItem?.name || !this.streamItem?.organization) {
-      console.error('Missing required parameters for readFile:', { filename, streamName: this.streamItem?.name, org: this.streamItem?.organization });
-      this.service.message('Error: Missing file or stream information', 'error');
-      return;
-    }
-    
-    const extension = filename.split('.').pop()?.toLowerCase();
-    if (extension !== 'py') {
-      this.script = [];
-      this.loadScript = true;
-      return;
-    }
-    
-    const encodedFilename = encodeURIComponent(filename);
-    
-    this.service
-      .readNativeFile(
-        this.streamItem.name,
-        this.streamItem.organization,
-        encodedFilename
-      )
-      .subscribe({
-        next: (resp) => {
-          try {
-            const textDecoder = new TextDecoder('utf-8');
-            this.script = textDecoder.decode(resp).split('\n');
-            this.loadScript = true;
-            
-            if (this.fileStructure.length > 0) {
-              this.fileStructure.forEach(file => {
-                file.selected = file.name === filename && file.extension === 'py';
-              });
-              this.selectedFileNode = this.fileStructure.find(f => f.name === filename && f.extension === 'py') || null;
-            }
-            
-            this.cdr.detectChanges();
-          } catch (e) {
-            console.error('Error decoding file:', e);
-            this.service.message('Error decoding file content', 'error');
-            this.script = [];
-            this.loadScript = true;
-          }
-        },
-        error: (err) => {
-          console.error('readFile failed', filename, 'attempt', retryCount + 1, 'status', err?.status);
-
-          if (retryCount < 3) {
-            setTimeout(() => {
-              this.readFile(filename, retryCount + 1);
-            }, (retryCount + 1) * 1000);
-            return;
-          }
-          
-          let errorMessage = 'Error reading file';
-          if (err.status === 404) {
-            errorMessage = 'Python file not found. The file may still be processing.';
-          } else if (err.status === 400) {
-            errorMessage = 'Invalid file request. Please check the file name.';
-          } else if (err.status === 500) {
-            errorMessage = 'Server error while reading file. Please try again.';
-          } else {
-            errorMessage += ': ' + (err.message || err.statusText || 'Unknown error');
-          }
-          
-          this.service.message(errorMessage, 'error');
-          this.script = [];
-          this.loadScript = true;
-        },
-        complete: () => {
-        }
-      });
-  }
-  showDatasets(dataset) {
-    
-  }
-
-  showInfo(dataset) {
-
-  }
-
-  deleteDataset(dataset) {
-    for (var i = 0, j = this.data.dataset.length; i < j; i++) {
-      if (this.data.dataset[i] == dataset) {
-        this.data.dataset.splice(i, 1);
-        break;
-      }
-    }
-    this.saveJson(this.data.name);
-  }
-
-  uploads() {
-    if (this.uploader.queue.length > 1 || this.data.files.length >= 1) {
-      this.service.message(
-        'Error! Executable file cannot be more than 1',
-        'error'
-      );
-    } else {
-      this.uploadingError = false;
-      this.uploadingCounter = 0;
-      this.uploader.queue.forEach((element) => {
-        this.uploader.uploadItem(element);
-      });
-    }
-  }
-
-  deleteDataFile(file) {
-    this.data.files = this.data.files.filter(function (f) {
-      return f != file;
-    });
-    this.script = [];
-  }
-
-  downloadFile(filename) {
-    this.service
-      .downloadNativeFile(
-        this.streamItem.name,
-        this.streamItem.organization,
-        filename
-      )
-      .subscribe(
-        (response) => {
-          FileSaver.saveAs(response, filename);
-        },
-        (error) => {
-          this.service.message('Error! While Downloading File', 'error');
-        }
-      );
-  }
-
-  deleteFile(file) {
-    this.uploader.queue = this.uploader.queue.filter(function (f) {
-      return f != file;
-    });
-  }
-
-  onScriptChange($event) {
-    this.script = $event;
-  }
-
-  onLangChange() {
-    this.changeLang(this.data.filetype);
-  }
-
-  changeLang(type) {
-    switch (type) {
-      case 'Python2':
-      case 'Python3':
-      case 'Jython':
-        this.lang = 'python';
-        break;
-      case 'JavaScript':
-        this.lang = 'javascript';
-        break;
-      default:
-        this.lang = undefined;
-    }
-  }
-
-  reload($event: any) {
-    if ($event) {
-      this.ngOnInit();
-    }
-  }
-  saveJson(pname: string) {
-    try {
-      if (!this.data.files) {
-        this.data.files = [];
-      }
-
-      let targetFileName: string;      
-      if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
-        targetFileName = this.selectedFileNode.name;
-      } else {
-        targetFileName = `${pname}_${this.streamItem.organization}.py`;
-      }
-      
-      let scriptContent = this.script.join('\n');
-      
-      this.service
-        .createNativeFile(
-          pname,
-          this.streamItem.organization,
-          targetFileName,
-          this.data.filetype,
-          scriptContent
-        )
-        .subscribe({
-          next: (response) => {
-            this.streamItem.name = pname;
-            let fileExists = false;
-            if (Array.isArray(this.data.files)) {
-              for (let i = 0; i < this.data.files.length; i++) {
-                let fileEntry = this.data.files[i];
-                if (typeof fileEntry === 'string') {
-                  if (fileEntry.includes(targetFileName)) {
-                    this.data.files[i] = response;
-                    fileExists = true;
-                    break;
-                  }
-                }
-              }
-            }
-            
-            if (!fileExists) {
-              this.data.files.push(response);
-            }
-            
-            this.data.arguments = this.treeData;
-            this.data.usedSecrets = this.dynamicSecretsArray;            
-            this.streamItem.json_content = JSON.stringify({
-              elements: [{ attributes: this.data }],
-              environment: this.dynamicEnvArray,
-              default_runtime: this.selectedRunType
-            });
-            
-            this.service.update(this.streamItem).subscribe({
-              next: (updateResponse) => {
-                this.service.message('Pipeline saved successfully', 'success');
-                this.buildFileStructureFromCurrentData();
-                setTimeout(() => {
-                  this.refreshFileStructureAfterSave();
-                }, 2000);
-              },
-              error: (error) => {
-                console.error('Error updating streamItem:', error);
-                this.service.message(
-                  'Pipeline saved but failed to update metadata: ' + error,
-                  'warning'
-                );
-                this.buildFileStructureFromCurrentData();
-              }
-            });
-          },
-          error: (error) => {
-            console.error('Error creating native file:', error);
-            this.service.message('Error saving pipeline: ' + error, 'error');
-          }
-        });
-    } catch (Exception) {
-      console.error('Exception in saveJson:', Exception);
-      this.service.message('Error occurred while saving', 'error');
-    }
-  }
-
-  runPipeline() {
-    this.saveJson(this.streamItem.name);
-    this.service
-      .runPipeline(
-        this.streamItem.alias ? this.streamItem.alias : this.streamItem.name,
-        this.streamItem.name,
-        'NativeScript',
-        this.selectedRunType['type'],
-        this.selectedRunType['dsName']
-      )
-      .subscribe(
-        (pageResponse) => {
-          if (this.data.files && this.data.files.length > 0)
-            this.service.message('Pipeline has been Started!', 'success');
-          else
-            this.service.message(
-              'Pipeline has been Started with empty script!',
-              'success'
-            );
-        },
-        (error) => {
-          this.service.message('Could not get the results', 'error');
-        }
-      );
-  }
-
-  copyPipeline() {
-    const dialogRef = this.dialog.open(PipelineCreateComponent, {
-      width: '460px',
-      maxWidth: '92vw',
-      data: {
-        sourceToCopy: this.data,
-        type: this.streamItem.type,
-        interfacetype: this.streamItem.interfacetype,
-        copy: true,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) this.copyPipelineJson(result);
-    });
-  }
-
-  displayDialog(button, name, value, type, index, alias) {
-    const dialogRef = this.dialog.open(NativeScriptDialogComponent, {
-      width: '480px',
-      maxWidth: '90vw',
-      disableClose: false,
-      panelClass: 'argument-dialog-panel',
-      data: {
-        button: button,
-        name: name,
-        value: value,
-        type: type,
-        index: index,
-        alias: alias,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result != undefined) {
-        if (button == 'ADD') {
-          this.addElementInTree(
-            result.index,
-            result.name,
-            result.value,
-            result.type,
-            result.alias
-          );
-        } else {
-          if (button == 'MODIFY') {
-            this.modifyNode(
-              result.index,
-              result.name,
-              result.value,
-              result.type,
-              result.alias
-            );
-          }
-        }
-        this.refreshTree();
-      }
-    });
-  }
- 
-
-  deleteAll() {
-    this.treeData = [];
-    this.refreshTree();
-  }
-
-  deleteNode(index) {
-    this.treeData = this.deleteNodeInTree(
-      this.treeData,
-      this.returnTreeElement(this.treeData, index)
-    );
-    this.refreshTree();
-  }
-
-  modifyNode(index, key, value, type, alias) {
-    this.treeData = this.modifyElementInTree(
-      this.treeData,
-      this.returnTreeElement(this.treeData, index),
-      key,
-      value,
-      type,
-      alias
-    );
-    this.refreshTree();
-  }
-
-  refreshTree() {
-    this.dataSource.data = null;
-    this.dataSource.data = this.treeData;
-  }
-
-  returnTreeElement(tree: Elementt[], index): Elementt {
-    for (var i = 0, j = tree.length; i < j; i++) {
-      if (tree[i].index == index) {
-        return tree[i];
-      }
-    }
-    return null;
-  }
-
-  deleteNodeInTree(tree: Elementt[], element: Elementt) {
-    for (var i = 0, j = tree.length; i < j; i++) {
-      if (tree[i] == element) {
-        tree.splice(i, 1);
-        break;
-      }
-    }
-    return tree;
-  }
-
-  modifyElementInTree(tree: Elementt[], element, name, value, type, alias) {
-    for (var i = 0, j = tree.length; i < j; i++) {
-      if (tree[i] == element) {
-        tree[i].name = name;
-        tree[i].value = value;
-        tree[i].type = type;
-        tree[i].alias = alias;
-        break;
-      }
-    }
-    return tree;
-  }
-
-  addElementInTree(index, name, value, type, alias): string {
-    var newNode: Elementt = {
-      name: name,
-      value: value,
-      type: type,
-      alias: alias,
-      index: '' + (this.treeData.length > 0 ? this.treeData.length + 1 : 1),
-    };
-    this.treeData.push(newNode);
-    return newNode.index;
-  }
-
-  getAlias(node) {
-    return node.alias ? node.alias : node.value;
-  }
-
-  navigateBack() {
-    this._location.back();
-  }
-  openModal(content: any): void {
-    this.dialog.open(content, {
-      width: '500px',
-    });
-    this.getRelatedComponent();
-  }
-
-  addEnvVar() {
-    if (this.isAuth) { return; }
-    // If already editing a row, don't add another blank one
-    if (this.envEditMode) { return; }
-    if (!this.dynamicEnvArray) { this.dynamicEnvArray = []; }
-    this.dynamicEnvArray.push({ name: '', value: '' });
-    this.envEditIndex = this.dynamicEnvArray.length - 1;
-    this.envEditMode = true;
-    this.envCollapsed = false;
-  }
-
-  editEnvVar(i: number) {
-    if (this.isAuth) { return; }
-    this.envEditIndex = i;
-    this.envEditMode = true;
-  }
-
-  saveEnvVar(i: number) {
-    this.envEditMode = false;
-    this.envEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  deleteEnvVar(i: number) {
-    if (this.isAuth) { return; }
-    this.dynamicEnvArray.splice(i, 1);
-    this.saveEnvAndSecrets();
-  }
-
-  onEnvDataChange($event) {
-    this.environment = $event;
-    this.dynamicEnvArray = $event;
-    this.envModified = true;
-    if (this.dynamicEnvArray?.length) { this.envCollapsed = false; }
-  }
-
-  onSecretsDataChange($event) {
-    this.secrets = $event;
-    this.dynamicSecretsArray = $event;
-    this.secretsModified = true;
-    if (this.dynamicSecretsArray?.length) { this.secretsCollapsed = false; }
-    this.secretsShowValue = this.dynamicSecretsArray.map(() => false);
-    this.saveEnvAndSecrets();
-  }
-
-  addSecret(): void {
-    if (this.secretsEditMode) { return; }
-    if (!this.dynamicSecretsArray) { this.dynamicSecretsArray = []; }
-    this.dynamicSecretsArray.push({ name: '', value: '' });
-    this.secretsShowValue.push(false);
-    this.secretsEditIndex = this.dynamicSecretsArray.length - 1;
-    this.secretsEditMode = true;
-    this.secretsCollapsed = false;
-  }
-
-  editSecret(i: number): void {
-    this.secretsEditIndex = i;
-    this.secretsEditMode = true;
-  }
-
-  saveSecret(i: number): void {
-    this.secretsEditMode = false;
-    this.secretsEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  deleteSecret(i: number): void {
-    this.dynamicSecretsArray.splice(i, 1);
-    this.secretsShowValue.splice(i, 1);
-    this.secretsEditMode = false;
-    this.secretsEditIndex = -1;
-    this.saveEnvAndSecrets();
-  }
-
-  toggleSecretVisibility(i: number): void {
-    this.secretsShowValue[i] = !this.secretsShowValue[i];
-  }
-
-  saveEnvAndSecrets() {
-    // Debounce: collapse multiple rapid calls into a single API request
-    if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
-    this._saveDebounceTimer = setTimeout(() => {
-      this._saveDebounceTimer = null;
-      this.persistEnvAndSecrets();
-    }, 300);
-  }
-
-  private persistEnvAndSecrets(): void {
-    try {
-      if (!this.streamItem) { return; }
-      const current = this.streamItem.json_content
-        ? JSON.parse(this.streamItem.json_content)
-        : { elements: [{ attributes: this.data || {} }] };
-      current.environment = this.dynamicEnvArray || [];
-      if (current.elements?.[0]?.attributes) {
-        current.elements[0].attributes.usedSecrets = this.dynamicSecretsArray || [];
-      }
-      current.default_runtime = this.selectedRunType;
-      this.streamItem.json_content = JSON.stringify(current);
-      this.service.update(this.streamItem).subscribe({
-        next: () => {
-          this.service.message('Configuration saved', 'success');
-        },
-        error: (err) => {
-          console.error('Failed to save env/secrets:', err);
-          this.service.message('Failed to save configuration', 'error');
-        }
-      });
-    } catch (e) {
-      console.error('saveEnvAndSecrets error:', e);
-    }
-  }
-
-  // File structure methods
-  buildFileStructureFromCurrentData() {
-    this.fileStructure = [];
-    
-    if (this.data && this.data.files && Array.isArray(this.data.files) && this.data.files.length > 0) {
-      this.data.files.forEach((fileEntry: any) => {
-        
-        let fileNames: string[] = [];
-        
-        if (typeof fileEntry === 'string') {
-          if (fileEntry.startsWith('[') && fileEntry.endsWith(']')) {
-            try {
-              const parsedArray = JSON.parse(fileEntry);
-              if (Array.isArray(parsedArray)) {
-                fileNames = parsedArray.filter(name => typeof name === 'string' && name.trim().length > 0);
-              } else {
-                fileNames = [fileEntry.trim()];
-              }
-            } catch (e) {
-              console.warn('Failed to parse bracket format, treating as single file:', fileEntry);
-              const cleanEntry = fileEntry.slice(1, -1);
-              fileNames = cleanEntry.split(',').map(f => f.trim().replace(/"/g, '')).filter(f => f.length > 0);
-            }
-          } else if (fileEntry.includes(',')) {
-            fileNames = fileEntry.split(',').map(f => f.trim().replace(/"/g, '')).filter(f => f.length > 0);
-          } else {
-            fileNames = [fileEntry.trim()];
-          }
-        } else if (Array.isArray(fileEntry)) {
-          fileNames = fileEntry.filter(name => typeof name === 'string' && name.trim().length > 0);
-        }
-        
-        fileNames.forEach((fileName: string) => {
-          if (fileName && fileName.trim().length > 0) {
-            const cleanFileName = fileName.trim();
-            const extension = cleanFileName.split('.').pop()?.toLowerCase();
-            
-            if (extension === 'py' || extension === 'ipynb') {
-              const existingFile = this.fileStructure.find(f => f.name === cleanFileName);
-              if (!existingFile) {
-                this.fileStructure.push({
-                  name: cleanFileName,
-                  extension: extension,
-                  selected: extension === 'py' 
-                });
-              }
-            }
-          }
-        });
-      });
-      
-      this.fileTreeDataSource.data = this.fileStructure;      
-      this.loadScript = true;      
-      const pythonFile = this.fileStructure.find(f => f.extension === 'py' && f.selected);
-      if (pythonFile) {
-        this.selectedFileNode = pythonFile;
-      }
-      
-      this.cdr.detectChanges();
-    } else {
-      this.loadScript = true;
-    }
-  }
-
-  buildFileStructure() {
-    this.fileStructure = [];
-    
-    if (this.streamItem && this.streamItem.json_content) {
-      try {
-        const jsonContent = JSON.parse(this.streamItem.json_content);
-        const files = jsonContent.elements[0]?.attributes?.files;
-        
-        if (files && Array.isArray(files) && files.length > 0) {
-          files.forEach((fileEntry: any, index: number) => {
-            let fileNames: string[] = [];
-            
-            // Handle different formats of file entries
-            if (typeof fileEntry === 'string') {
-              if (fileEntry.startsWith('[') && fileEntry.endsWith(']')) {
-                try {
-                  const parsedArray = JSON.parse(fileEntry);
-                  if (Array.isArray(parsedArray)) {
-                    fileNames = parsedArray.filter(name => typeof name === 'string' && name.trim().length > 0);
-                  } else {
-                    fileNames = [fileEntry.trim()];
-                  }
-                } catch (e) {
-                  console.warn('Failed to parse as JSON, trying manual parsing:', e);
-                  const cleanEntry = fileEntry.slice(1, -1); 
-                  fileNames = cleanEntry.split(',').map(f => f.trim().replace(/[\"\']/g, '')).filter(f => f.length > 0);
-                }
-              } else if (fileEntry.includes(',')) {
-                fileNames = fileEntry.split(',').map(f => f.trim()).filter(f => f.length > 0);
-              } else {
-                fileNames = [fileEntry.trim()];
-              }
-            } else if (Array.isArray(fileEntry)) {
-              fileNames = fileEntry.filter(name => typeof name === 'string' && name.trim().length > 0);
-            } else {
-              console.warn('File entry is neither string nor array:', fileEntry);
-              return; 
-            }
-            
-            fileNames.forEach((fileName: string) => {
-              if (fileName && fileName.length > 0) {
-                const cleanFileName = fileName.trim();
-                const extension = cleanFileName.split('.').pop()?.toLowerCase();
-                
-                if (extension === 'py' || extension === 'ipynb') {
-                  const existingFile = this.fileStructure.find(f => f.name === cleanFileName);
-                  if (!existingFile) {
-                    this.fileStructure.push({
-                      name: cleanFileName,
-                      extension: extension,
-                      selected: false
-                    });
-                  }
-                }
-              }
-            });
-          });
-          
-          // Auto-select the first Python file with a delay to ensure backend is ready
-          if (this.fileStructure.length > 0) {
-            const firstPyFile = this.fileStructure.find(file => file.extension === 'py');
-            if (firstPyFile) {
-              this.fileStructure.forEach(file => file.selected = false);
-              firstPyFile.selected = true;
-              this.selectedFileNode = firstPyFile;
-              
-              if (this.script && this.script.length > 0) {
-                this.loadScript = true;
-                this.cdr.detectChanges();
-              } else {
-                setTimeout(() => {
-                  this.readFile(firstPyFile.name);
-                }, 1000);
-              }
-            } else {
-              this.loadScript = true;
-              this.selectedFileNode = null;
-            }
-          } else {
-            this.loadScript = true;
-          }
-        } else {
-          this.loadScript = true;
-        }
-      } catch (error) {
-        console.error('Error parsing json_content:', error);
-        this.loadScript = true;
-      }
-    } else {
-      this.loadScript = true;
-    }
-    
-    this.fileTreeDataSource.data = this.fileStructure;
-    
-    this.cdr.detectChanges();
-  }
-
-  onFileNodeSelect(fileNode: FileNode) {
-    this.fileStructure.forEach(file => file.selected = false);
-    
-    fileNode.selected = true;
-    this.selectedFileNode = fileNode;
-    
-    if (fileNode.extension === 'ipynb') {
-      this.script = [];
-      this.scriptSelected = '';
-      this.loadScript = true; 
-      this.showNotebookDialog();
-    } else if (fileNode.extension === 'py') {
-      
-      const isCurrentFile = this.data.files && this.data.files.length > 0 && 
-        (this.data.files[0] === fileNode.name || 
-         (typeof this.data.files[0] === 'string' && this.data.files[0].includes(fileNode.name)));
-      const hasContent = this.script && this.script.length > 0;
-      
-      if (isCurrentFile && hasContent) {
-        this.loadScript = true;
-        this.cdr.detectChanges();
-      } else {
-        this.readFile(fileNode.name);
-      }
-    } else {
-      this.script = [];
-      this.loadScript = true;
-      this.cdr.detectChanges();
-    }
-  }
-
-  onFileChange(file: string, i: number) {
-    this.fileExtension = file.substring(file.lastIndexOf(".") + 1);
-    if (this.fileExtension === 'json') {
-      this.scriptSelected = JSON.parse(this.scriptsObj.script[i]);
-    } else {
-      this.scriptSelected = this.scriptsObj.script[i];
-      this.script = this.scriptSelected ? this.scriptSelected.split('\n') : [];
-    }
-  }
-
-  refreshFileStructureAfterSave() {
-    if (!this.streamItem?.name) {
-      console.error('Cannot refresh: streamItem.name is missing');
-      this.buildFileStructureFromCurrentData();
-      return;
-    }
-    
-    // Re-fetch the streaming service data to get updated file list
-    this.service.getStreamingServicesByName(this.streamItem.name).subscribe({
-      next: (serviceData) => {
-        if (serviceData && serviceData.json_content) {
-          this.streamItem = serviceData;
-          
-          try {
-            const jsonContent = JSON.parse(serviceData.json_content);
-            
-            if (jsonContent.elements && jsonContent.elements[0]?.attributes) {
-              this.data = jsonContent.elements[0].attributes;
-              this.dynamicEnvArray = jsonContent.environment || [];
-              this.defaultRuntimeFromDB = jsonContent.default_runtime;
-              if (!this.selectedRunType) {
-                this.selectedRunType = this.defaultRuntimeFromDB;
-              }
-              
-              this.buildFileStructure();
-              
-            } else {
-              console.warn('No attributes found in refreshed data');
-              this.buildFileStructureFromCurrentData();
-            }
-          } catch (error) {
-            console.error('Error parsing updated json_content:', error);
-            this.service.message('Warning: Could not parse updated file data', 'warning');
-            this.buildFileStructureFromCurrentData();
-          }
-        } else {
-          console.warn('No json_content in refreshed service data');
-          this.buildFileStructureFromCurrentData();
-        }
-      },
-      error: (error) => {
-        console.error('Error refreshing service data:', error);
-        this.buildFileStructureFromCurrentData();
-      }
-    });
-  }
-
-  showNotebookDialog() {
-    const dialogRef = this.dialog.open(NotebookDialogComponent, {
-      width: '400px',
-      data: {
-        message: 'Please access notebook extension file using essedum plugin in Visual Studio Code.'
-      } as NotebookDialogData
-    });
-  }
-
-  /**
-   * Copy pipeline with proper file handling and json_content updates
-   * This method ensures:
-   *  New file names are generated based on new cname_orgname.py format
-   *  Json_content is updated with new file names
-   */
-  copyPipelineJson(newPipelineData: any) {
-    try {
-      const newCname = newPipelineData.name;
-      const newOrg = newPipelineData.organization;
-      const newFileName = `${newCname}_${newOrg}.py`;
-      
-      if (this.data.files && this.data.files.length > 0) {
-        let oldFileName = this.data.files[0];
-        
-        if (typeof oldFileName === 'string') {
-          if (oldFileName.startsWith('[') && oldFileName.endsWith(']')) {
-            try {
-              const filesArray = JSON.parse(oldFileName);
-              if (Array.isArray(filesArray)) {
-                oldFileName = filesArray.find((f: string) => f.endsWith('.py')) || filesArray[0];
-              }
-            } catch (e) {
-              console.warn('Failed to parse files array as JSON, trying manual parsing:', e);
-              const cleanStr = oldFileName.slice(1, -1); 
-              const filesArray = cleanStr.split(',').map(f => f.trim().replace(/["\']/g, ''));
-              oldFileName = filesArray.find(f => f.endsWith('.py')) || filesArray[0];
-            }
-          }
-        }
-        
-        this.service.readNativeFile(
-          this.streamItem.name,
-          this.streamItem.organization,
-          oldFileName
-        ).subscribe({
-          next: (fileContent) => {
-            const textDecoder = new TextDecoder('utf-8');
-            const scriptContent = textDecoder.decode(fileContent);
-            
-            this.service.createNativeFile(
-              newCname,
-              newOrg,
-              newFileName,
-              this.data.filetype || 'Python3',
-              scriptContent
-            ).subscribe({
-              next: (createResponse) => {
-                const updatedData = { ...this.data };
-                updatedData.files = [newFileName];
-                
-                const updatedJsonContent = {
-                  elements: [{ attributes: updatedData }],
-                  environment: this.dynamicEnvArray || [],
-                  default_runtime: this.selectedRunType
-                };
-                
-                newPipelineData.json_content = JSON.stringify(updatedJsonContent);
-                
-                this.service.update(newPipelineData).subscribe({
-                  next: (updateResponse) => {
-                    this.service.message('Pipeline copied successfully', 'success');
-                    
-                    setTimeout(() => {
-                      this._location.back();
-                    }, 1500);
-                  },
-                  error: (updateError) => {
-                    console.error('Error updating pipeline:', updateError);
-                    this.service.message('Pipeline copied but failed to update: ' + updateError, 'error');
-                  }
-                });
-              },
-              error: (createError) => {
-                console.error('Error creating new file:', createError);
-                this.service.message('Error creating file for copied pipeline: ' + createError, 'error');
-              }
-            });
-          },
-          error: (readError) => {
-            console.error('Error reading old file:', readError);
-            this.service.message('Error reading original file: ' + readError, 'error');
-          }
-        });
-      } else {
-        const updatedData = { ...this.data };
-        updatedData.files = [];
-        
-        const updatedJsonContent = {
-          elements: [{ attributes: updatedData }],
-          environment: this.dynamicEnvArray || [],
-          default_runtime: this.selectedRunType
-        };
-        
-        newPipelineData.json_content = JSON.stringify(updatedJsonContent);
-        
-        this.service.update(newPipelineData).subscribe({
-          next: (updateResponse) => {
-            this.service.message('Pipeline copied successfully', 'success');
-          },
-          error: (updateError) => {
-            console.error('Error updating pipeline:', updateError);
-            this.service.message('Error copying pipeline: ' + updateError, 'error');
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Exception in copyPipelineJson:', error);
-      this.service.message('Error occurred while copying pipeline', 'error');
-    }
-  }
-
-  hasChild = (_: number, node: FileNode) => !!node.children && node.children.length > 0;
-}
+<!-- <section [ngBusy]="{busy:busy,message:'Loading...'}" class="selector-764-1"> -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="lfx-l-level1-middle-col">
+      <div class="lfx-l-level2-middle-ctr">
+        <div class="lfx-l-level2-middle-col">
+          <div class="align-items-center justify-content-between d-flex">
+            <div class="selector-model-title-head d-flex align-items-center">
+              <span class="">
+                &nbsp;
+                 <mat-icon class="aip-led-icons action-icon-btn" (click)="navigateBack()"
+                                    matTooltip="Back"
+                                    matTooltipPosition="above">arrow_back</mat-icon> &nbsp;
+                       
+              </span>
+              <span class="aip-desc-title lfx-u-header-xxl"
+                ><span style="color: #737373">Pipeline: </span
+                >{{ pipelineAlias | titlecase }}
+              </span>
+            </div>
+            <div class="selector-model-title-tail">
+              <ul
+                class="d-flex justify-content-between align-items-center py-2 px-4"
+              >
+                <li
+                  class="aip-cursor li-style"
+                  style="padding: 5px 13px 2px 0px"
+                  (click)="openModal(content4)"
+                >
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="openModal(content4)"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="{{ addTags }}"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"
+                        >local_offer</mat-icon
+                      >
+                    </button>
+                  </div>
+                  <ng-template #content4 let-modal>
+                    <app-tags
+                      [data]="card"
+                      [entityType]="entity"
+                      [componentType]="'pipelines'"
+                    ></app-tags>
+                  </ng-template>
+                </li>
+                <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="runPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Start"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"
+                        >play_arrow</mat-icon
+                      >
+                    </button>
+                  </div>
+                </li>
+                <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="deployAsContainer()"
+                    style="cursor: pointer"
+                    [class.disabled]="containerDeployStatus === 'deploying'"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Deploy as Container"
+                      [disabled]="containerDeployStatus === 'deploying'"
+                    >
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons">inventory_2</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <li class="li-style">
+                    <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="saveJson(streamItem.name)"
+                    style="cursor: pointer"
+                    >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Save"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"
+                        >save</mat-icon
+                      >
+                    </button>
+                    </div>
+                </li>
+                <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="copyPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Duplicate"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"
+                        >content_copy</mat-icon
+                      >
+                    </button>
+                  </div>
+                  <!-- <span
+                    matTooltip="Duplicate"
+                    matTooltipPosition="above"
+                    (click)="copyPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="color: gray"
+                      >content_copy</mat-icon
+                    >
+                  </span> -->
+                </li>
+                <li class="li-style" *ngIf="!isExpand && initiativeView">
+                  <span
+                    matTooltip="Maximize"
+                    [matTooltipPosition]="tooltipPoition"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="font-size: 24px"
+                      (click)="expandCollapse()"
+                      style="color: gray"
+                      >fullscreen</mat-icon
+                    >
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow native-script-panel"
+          >
+            <mat-tab-group disableRipple>
+              <mat-tab label="Configuration" class="lfx-u-header-xl">
+                <div class="tab-content mb-5">
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span
+                        class="fs"
+                        style="margin-top: 20px !important; margin-right: 5px"
+                        >Type</span
+                      >
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="data.filetype"
+                          [required]="true"
+                          [disabled]="false"
+                          (selectionChange)="onInputTypeChange($event)"
+                        >
+                          <mat-option
+                            *ngFor="let type of filetypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12">
+                    <div class="d-flex selector-764-14">
+                      <div
+                        class="col-2 selector-764-15 d-flex align-items-start"
+                        style="gap: 8px"
+                      >
+                        <span style="font-size: 14px; size: 500"
+                          >Arguments:</span
+                        >
+                        <mat-icon
+                          class="arg-action-icon"
+                          matTooltip="Add Argument"
+                          (click)="displayDialog('ADD', '', '', 'Text', 0, '')"
+                          >add</mat-icon
+                        >
+                        <mat-icon
+                          class="arg-action-icon"
+                          matTooltip="Remove All"
+                          (click)="deleteAll()"
+                          >remove</mat-icon
+                        >
+                      </div>
+                      <mat-tree
+                        [dataSource]="dataSource"
+                        [treeControl]="treeControl"
+                        class="example-tree col-8 selector-764-19"
+                      >
+                        <mat-tree-node
+                          *matTreeNodeDef="let node"
+                          matTreeNodeToggle=""
+                          class="selector-764-20"
+                        >
+                          <li class="mat-tree-node selector-764-21">
+                            <button
+                              mat-icon-button=""
+                              disabled=""
+                              class="selector-764-22"
+                            ></button>
+                            <span
+                              style="max-width: -webkit-fill-available"
+                              class="selector-764-23"
+                              >{{
+                                node.name +
+                                  " :
+                                                            " +
+                                  getAlias(node)
+                              }}&nbsp;&nbsp;
+                              <mat-icon
+                                class="selector-764-24"
+                                matTooltip="Edit"
+                                style="vertical-align: middle; cursor: pointer"
+                                (click)="
+                                  displayDialog(
+                                    'MODIFY',
+                                    node.name,
+                                    node.value,
+                                    node.type,
+                                    node.index,
+                                    node.alias
+                                  )
+                                "
+                                >edit</mat-icon
+                              >&nbsp;&nbsp;
+                              <mat-icon
+                                class="selector-764-25"
+                                matTooltip="Delete"
+                                (click)="deleteNode(node.index)"
+                                style="vertical-align: middle; cursor: pointer"
+                                >remove</mat-icon
+                              >
+                            </span>
+                          </li>
+                        </mat-tree-node>
+                      </mat-tree>
+                    </div>
+                    <mat-tab-group disableRipple>
+                      <mat-tab label="Environment" class="lfx-u-header-xl">
+                        <div class="tab_content" id="tabContent_1">
+                          <div class="collapsible-section">
+                            <div class="collapsible-header" (click)="envCollapsed = !envCollapsed">
+                              <mat-icon class="collapse-icon" [class.expanded]="!envCollapsed">chevron_right</mat-icon>
+                              <span class="collapse-title">Environment Variables</span>
+                              <span class="collapse-badge">{{ dynamicEnvArray?.length || 0 }}</span>
+                            </div>
+                            <div class="collapsible-body" [class.collapsed]="envCollapsed">
+                              <div class="env-card">
+                                <table class="table table-striped env-table" *ngIf="dynamicEnvArray?.length > 0">
+                                  <thead>
+                                    <tr>
+                                      <th class="col-md-5" scope="col">Key</th>
+                                      <th class="col-md-5" scope="col">Value</th>
+                                      <th class="col-md-2" scope="col">Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr *ngFor="let env of dynamicEnvArray; let i = index">
+                                      <td>
+                                        <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.name">{{ env.name || '—' }}</span>
+                                        <input *ngIf="envEditIndex === i && envEditMode"
+                                          [(ngModel)]="dynamicEnvArray[i].name"
+                                          class="form-control" type="text" placeholder="KEY" />
+                                      </td>
+                                      <td>
+                                        <span *ngIf="envEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!env.value">{{ env.value || '—' }}</span>
+                                        <input *ngIf="envEditIndex === i && envEditMode"
+                                          [(ngModel)]="dynamicEnvArray[i].value"
+                                          class="form-control" type="text" placeholder="value" />
+                                      </td>
+                                      <td>
+                                        <mat-icon matTooltip="Edit"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="editEnvVar(i)">edit</mat-icon>
+                                        <mat-icon *ngIf="envEditMode && envEditIndex === i"
+                                          matTooltip="Save"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="saveEnvVar(i)">save</mat-icon>
+                                        <mat-icon matTooltip="Delete"
+                                          class="env-action-icon"
+                                          [ngStyle]="{'opacity': isAuth ? 0.5 : 1, 'pointer-events': isAuth ? 'none' : 'auto'}"
+                                          (click)="deleteEnvVar(i)">delete</mat-icon>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <div *ngIf="!dynamicEnvArray?.length" class="env-empty-state">
+                                  <mat-icon>tune</mat-icon>
+                                  <span>No environment variables defined</span>
+                                </div>
+                                <button mat-raised-button class="env-add-btn"
+                                  [disabled]="isAuth"
+                                  (click)="addEnvVar()">
+                                  <mat-icon>add</mat-icon> Add
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </mat-tab>
+                    </mat-tab-group>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="collapsible-section">
+                      <div class="collapsible-header" (click)="secretsCollapsed = !secretsCollapsed">
+                        <mat-icon class="collapse-icon" [class.expanded]="!secretsCollapsed">chevron_right</mat-icon>
+                        <span class="collapse-title">User Secrets</span>
+                        <span class="collapse-badge">{{ dynamicSecretsArray?.length || 0 }}</span>
+                      </div>
+                      <div class="collapsible-body" [class.collapsed]="secretsCollapsed">
+                        <div class="env-card">
+                          <table class="table table-striped env-table" *ngIf="dynamicSecretsArray?.length > 0">
+                            <thead>
+                              <tr>
+                                <th class="col-md-5" scope="col">Name</th>
+                                <th class="col-md-5" scope="col">Value</th>
+                                <th class="col-md-2" scope="col">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let secret of dynamicSecretsArray; let i = index">
+                                <td>
+                                  <span *ngIf="secretsEditIndex !== i" class="env-cell-text" [class.env-cell-empty]="!secret.name">{{ secret.name || '—' }}</span>
+                                  <input *ngIf="secretsEditIndex === i && secretsEditMode"
+                                    [(ngModel)]="dynamicSecretsArray[i].name"
+                                    class="form-control" type="text" placeholder="secret name"
+                                    autocomplete="nope" />
+                                </td>
+                                <td>
+                                  <span *ngIf="secretsEditIndex !== i" class="env-cell-text secret-value-mask">
+                                    <span *ngIf="!secretsShowValue[i]">••••••••</span>
+                                    <span *ngIf="secretsShowValue[i]">{{ secret.value || '—' }}</span>
+                                    <mat-icon class="env-action-icon secret-eye-icon" matTooltip="Toggle visibility"
+                                      (click)="toggleSecretVisibility(i)">
+                                      {{ secretsShowValue[i] ? 'visibility_off' : 'visibility' }}
+                                    </mat-icon>
+                                  </span>
+                                  <input *ngIf="secretsEditIndex === i && secretsEditMode"
+                                    [(ngModel)]="dynamicSecretsArray[i].value"
+                                    class="form-control secret-value-input" type="text" placeholder="secret value"
+                                    autocomplete="nope" />
+                                </td>
+                                <td>
+                                  <mat-icon matTooltip="Edit"
+                                    class="env-action-icon"
+                                    (click)="editSecret(i)">edit</mat-icon>
+                                  <mat-icon *ngIf="secretsEditMode && secretsEditIndex === i"
+                                    matTooltip="Save"
+                                    class="env-action-icon"
+                                    (click)="saveSecret(i)">save</mat-icon>
+                                  <mat-icon matTooltip="Delete"
+                                    class="env-action-icon"
+                                    (click)="deleteSecret(i)">delete</mat-icon>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div *ngIf="!dynamicSecretsArray?.length" class="env-empty-state">
+                            <mat-icon>lock</mat-icon>
+                            <span>No user secrets defined</span>
+                          </div>
+                          <button mat-raised-button class="env-add-btn"
+                            (click)="addSecret()">
+                            <mat-icon>add</mat-icon> Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-tab>
+              <mat-tab label="Script" class="lfx-u-header-xl">
+                <div class="tab-content selector-764-41 mb-5">
+                  <!-- Top section with run type selector -->
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span class="lfx-u-mar-t-24 lfx-u-mar-l-16 fs">Select run type</span>
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="selectedRunType"
+                          [required]="true"
+                          [disabled]="false"
+                          placeholder=""
+                          (selectionChange)="runTypeChanged(selectedRunType)"
+                        >
+                          <mat-option
+                            *ngFor="let type of runTypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <!-- Main content area with file explorer and code editor -->
+                  <div class="file-explorer-container">
+                    <!-- File Structure Panel -->
+                    <div class="file-explorer-panel">
+                      <div class="file-explorer-header">
+                        <mat-icon>folder_open</mat-icon>
+                        EXPLORER
+                      </div>
+                      <div class="file-explorer-content">
+                        <mat-tree [dataSource]="fileTreeDataSource" [treeControl]="fileTreeControl" class="file-tree">
+                          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding
+                                         [class.selected-file]="node.selected"
+                                         (click)="onFileNodeSelect(node)">
+                            <div class="tree-item-content">
+                              <mat-icon class="file-icon">
+                                {{ node.extension === 'py' ? 'description' : 'book' }}
+                              </mat-icon>
+                              <span class="file-name">{{ node.name }}</span>
+                            </div>
+                          </mat-tree-node>
+                          <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+                            <button mat-icon-button matTreeNodeToggle>
+                              <mat-icon>
+                                {{ fileTreeControl.isExpanded(node) ? 'expand_less' : 'expand_more' }}
+                              </mat-icon>
+                            </button>
+                            <span class="file-name">{{ node.name }}</span>
+                          </mat-tree-node>
+                        </mat-tree>
+
+                        <!-- Empty state when no files -->
+                        <div *ngIf="!fileStructure || fileStructure.length === 0" class="empty-state">
+                          <mat-icon>folder_open</mat-icon>
+                          <div class="empty-title">No script files found</div>
+                          <div class="empty-subtitle">Script files will appear here when loaded</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Code Editor Panel -->
+                    <div class="code-editor-panel">
+                      <div class="code-editor-header">
+                        <mat-icon>code</mat-icon>
+                        <span *ngIf="selectedFileNode?.extension === 'py'">{{ selectedFileNode?.name || 'Select a Python file to view content' }}</span>
+                        <span *ngIf="selectedFileNode?.extension === 'ipynb'">{{ selectedFileNode?.name }} - Use VS Code extension to view notebook content</span>
+                        <span *ngIf="!selectedFileNode">Select a file to view content</span>
+                      </div>
+                      <div class="code-editor-content">
+                        <!-- Show code editor for Python files -->
+                        <app-enl-code-editor
+                          id="ele"
+                          *ngIf="loadScript && (!selectedFileNode || selectedFileNode.extension === 'py')"
+                          [script]="script"
+                          [lang]="lang"
+                          (scriptChange)="onScriptChange($event)"
+                          style="height: 100%; width: 100%;"
+                        >
+                        </app-enl-code-editor>
+
+                        <!-- Show placeholder for notebook files -->
+                        <div *ngIf="selectedFileNode?.extension === 'ipynb'" class="notebook-placeholder">
+                          <mat-icon>book</mat-icon>
+                          <h3>Notebook File Selected</h3>
+                          <p>This is a Jupyter Notebook file. Please use the VS Code extension to view and edit notebook content.</p>
+                          <button mat-raised-button color="primary" (click)="showNotebookDialog()">
+                            <mat-icon>info</mat-icon>
+                            View Instructions
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-tab>
+              <mat-tab label="Jobs" class="lfx-u-header-xl">
+                <app-jobs
+                  *ngIf="streamItem"
+                  [cname]="streamItem.name"
+                ></app-jobs>
+              </mat-tab>
+              <mat-tab label="Container" class="lfx-u-header-xl">
+                <div class="tab-content p-3">
+                  <div *ngIf="containerDeployStatus === 'idle'" class="text-muted p-2">
+                    Click the <strong>Deploy as Container</strong> button to build and deploy this pipeline as a Kubernetes container.
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'deploying'" class="d-flex align-items-center p-2">
+                    <mat-spinner diameter="20" class="lfx-u-mar-r-8"></mat-spinner>
+                    <span>{{ containerDeployMessage }}</span>
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'success'" class="p-2">
+                    <div class="d-flex align-items-center mb-2">
+                      <mat-icon class="text-success lfx-u-mar-r-8">check_circle</mat-icon>
+                      <strong>Deployment successful</strong>
+                    </div>
+                    <div *ngIf="containerInternalDnsUrl" class="mt-1">
+                      <span class="text-muted">Internal URL: </span>
+                      <code>{{ containerInternalDnsUrl }}</code>
+                    </div>
+                    <button mat-stroked-button color="primary" class="mt-3" (click)="deployAsContainer()">Re-deploy</button>
+                  </div>
+                  <div *ngIf="containerDeployStatus === 'error'" class="p-2">
+                    <div class="d-flex align-items-center mb-2">
+                      <mat-icon class="text-danger lfx-u-mar-r-8">error</mat-icon>
+                      <strong>Deployment failed</strong>
+                    </div>
+                    <div class="text-muted">{{ containerDeployMessage }}</div>
+                    <button mat-stroked-button color="warn" class="mt-3" (click)="deployAsContainer()">Retry</button>
+                  </div>
+                  <div *ngIf="containerDeployLogs.length > 0" class="mt-3">
+                    <div style="font-weight:600;margin-bottom:4px;">Deployment logs</div>
+                    <pre style="background:#0d1117;color:#c9d1d9;padding:10px;border-radius:6px;max-height:340px;overflow:auto;font-size:12px;line-height:1.45;white-space:pre-wrap;margin:0;">{{ containerDeployLogs.join('\n') }}</pre>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -507,6 +507,249 @@ def get_venvs():
         logger.error(f'Exception occured: {err}', exc_info=True)
         return jsonify({"status": "failed to get venvs"}), 500
 
+def _run_container_deploy(deploy_id, payload):
+    """Connect to adk-code-builder-deployer via SocketIO and trigger a container build+deploy."""
+    deployer_url = payload['deployer_url']
+    start_payload = {
+        'bucket_name': payload['bucket_name'],
+        'file_path': payload['file_path'],
+        'target_image_tag': payload['target_image_tag'],
+        'deployment_name': payload['deployment_name'],
+        'namespace': payload.get('namespace', 'vibe-pipelines'),
+        'env_vars': payload.get('env_vars', []),
+        'secrets': payload.get('secrets', []),
+    }
+    if payload.get('node_selector'):
+        start_payload['node_selector'] = payload['node_selector']
+
+    done_event = Event()
+    sio_client = sio_module.Client(logger=False)
+
+    container_deploy_results[deploy_id].setdefault('logs', [])
+    _logs = container_deploy_results[deploy_id]['logs']
+
+    def _append_log(line):
+        _logs.append(line)
+        # Cap retained log lines to avoid unbounded growth of the status payload.
+        if len(_logs) > 1000:
+            del _logs[:len(_logs) - 1000]
+
+    @sio_client.on('pipeline_update')
+    def on_pipeline_update(data):
+        _append_log(f"[{data.get('step', 'INFO')}] {data.get('message', '')}")
+
+    @sio_client.on('build_log')
+    def on_build_log(data):
+        line = data.get('log', '') if isinstance(data, dict) else str(data)
+        if line:
+            _append_log(line)
+
+    @sio_client.on('pipeline_status')
+    def on_pipeline_status(data):
+        _append_log(f"[STATUS] {data.get('status', 'ERROR')}: {data.get('message', '')}")
+        container_deploy_results[deploy_id].update({
+            'status': data.get('status', 'ERROR'),
+            'internal_dns_url': data.get('internal_dns_url', ''),
+            'message': data.get('message', ''),
+        })
+        done_event.set()
+
+    @sio_client.on('connect')
+    def on_connect():
+        container_deploy_results[deploy_id]['status'] = 'RUNNING'
+        sio_client.emit('start_pipeline', start_payload)
+
+    @sio_client.on('connect_error')
+    def on_connect_error(data):
+        container_deploy_results[deploy_id].update({
+            'status': 'ERROR',
+            'message': f'Connection error: {data}',
+        })
+        done_event.set()
+
+    try:
+        sio_client.connect(deployer_url, transports=['websocket'])
+        done_event.wait(timeout=300)
+        if not done_event.is_set():
+            container_deploy_results[deploy_id].update({
+                'status': 'ERROR',
+                'message': 'Deployment timed out after 300s',
+            })
+    except Exception as e:
+        logger.error('Container deploy error', exc_info=True)
+        container_deploy_results[deploy_id].update({'status': 'ERROR', 'message': str(e)})
+    finally:
+        try:
+            if sio_client.connected:
+                sio_client.disconnect()
+        except Exception:
+            pass
+
+
+def _ensure_buildable_zip(raw_bytes):
+    """Ensure the pipeline zip is buildable by the deployer's fallback Dockerfile.
+
+    The fallback Dockerfile requires a requirements.txt to be present and runs a
+    recognised entry point (app.py/main.py/run.py/server.py). Native/data/training
+    pipeline zips contain only the raw script(s), so inject an empty
+    requirements.txt and a main.py wrapper that runs the first .py script when
+    those are missing. Returns the (possibly rewritten) zip bytes.
+    """
+    import io
+    import os
+    import zipfile
+    try:
+        zin = zipfile.ZipFile(io.BytesIO(raw_bytes), 'r')
+    except zipfile.BadZipFile:
+        return raw_bytes
+    names = [n for n in zin.namelist() if not n.endswith('/')]
+    basenames = {os.path.basename(n).lower() for n in names}
+    entry_points = {'app.py', 'main.py', 'run.py', 'server.py'}
+    py_scripts = [n for n in names if n.lower().endswith('.py')]
+    has_requirements = 'requirements.txt' in basenames
+    has_entry = bool(entry_points & basenames)
+    if has_requirements and has_entry:
+        zin.close()
+        return raw_bytes
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            zout.writestr(item, zin.read(item.filename))
+        if not has_requirements:
+            zout.writestr('requirements.txt', '')
+        if not has_entry and py_scripts:
+            target = py_scripts[0]
+            wrapper = (
+                "import runpy\n"
+                "import time\n"
+                "import threading\n"
+                "import traceback\n"
+                "from http.server import HTTPServer, BaseHTTPRequestHandler\n"
+                "\n"
+                "class _Health(BaseHTTPRequestHandler):\n"
+                "    def do_GET(self):\n"
+                "        self.send_response(200); self.end_headers(); self.wfile.write(b'ok')\n"
+                "    def log_message(self, *a):\n"
+                "        pass\n"
+                "\n"
+                "# Serve a health endpoint on 8000 so the Deployment's readiness probe\n"
+                "# (tcpSocket:8000) passes and the pod becomes Ready. The port literal\n"
+                "# here also lets the deployer's detect_app_port() resolve to 8000.\n"
+                "def _serve():\n"
+                "    HTTPServer(('0.0.0.0', 8000), _Health).serve_forever()\n"
+                "\n"
+                "threading.Thread(target=_serve, daemon=True).start()\n"
+                "try:\n"
+                f"    runpy.run_path({target!r}, run_name='__main__')\n"
+                "    print('Pipeline script completed.', flush=True)\n"
+                "except Exception:\n"
+                "    traceback.print_exc()\n"
+                "# Keep the container alive so the Kubernetes Deployment stays Ready.\n"
+                "while True:\n"
+                "    time.sleep(3600)\n"
+            )
+            zout.writestr('main.py', wrapper)
+    zin.close()
+    logger.info('Normalized pipeline zip (added requirements.txt/main.py as needed)')
+    return out.getvalue()
+
+
+@app.route('/container-deploy-with-zip', methods=['POST'])
+def container_deploy_with_zip():
+    """Accept a zip file from Java, upload to MinIO, then trigger container deployment."""
+    if 'zip_file' not in request.files:
+        return jsonify({'error': 'Missing zip_file in multipart form'}), 400
+
+    required_form_fields = ['deployer_url', 'target_image_tag', 'deployment_name',
+                             'minio_endpoint', 'minio_access_key', 'minio_secret_key', 'minio_bucket']
+    for field in required_form_fields:
+        if not request.form.get(field):
+            return jsonify({'error': f'Missing required form field: {field}'}), 400
+
+    zip_file = request.files['zip_file']
+    deployer_url = request.form['deployer_url']
+    target_image_tag = request.form['target_image_tag']
+    deployment_name = request.form['deployment_name']
+    namespace = request.form.get('namespace', 'vibe-pipelines')
+    minio_endpoint = request.form['minio_endpoint']
+    minio_access_key = request.form['minio_access_key']
+    minio_secret_key = request.form['minio_secret_key']
+    minio_bucket = request.form['minio_bucket']
+    node_selector_raw = request.form.get('node_selector')
+    env_vars_raw = request.form.get('env_vars', '[]')
+    secrets_raw = request.form.get('secrets', '[]')
+
+    file_path = f"ai-pipeline-scripts/{deployment_name}/{deployment_name}.zip"
+    try:
+        import boto3
+        from io import BytesIO
+        normalized_zip = _ensure_buildable_zip(zip_file.read())
+        s3 = boto3.client('s3',
+            endpoint_url=minio_endpoint,
+            aws_access_key_id=minio_access_key,
+            aws_secret_access_key=minio_secret_key)
+        s3.upload_fileobj(BytesIO(normalized_zip), minio_bucket, file_path)
+        logger.info(f"Uploaded zip to MinIO: {minio_bucket}/{file_path}")
+    except Exception as e:
+        logger.error('MinIO upload failed', exc_info=True)
+        return jsonify({'error': f'MinIO upload failed: {str(e)}'}), 500
+
+    # Sandbox approach (parity with agent/mcp pipelines): return the prepared
+    # deploy config so the BROWSER connects directly to the deployer's SocketIO
+    # (/apps/builder-service/socket.io), emits start_pipeline, and streams the
+    # live build/deploy logs. We only upload the zip here; we do NOT run the
+    # deployer server-side.
+    prepared = {
+        'status': 'prepared',
+        'bucket_name': minio_bucket,
+        'file_path': file_path,
+        'target_image_tag': target_image_tag,
+        'deployment_name': deployment_name,
+        'namespace': namespace,
+        'minio_endpoint': minio_endpoint,
+        'env_vars': json.loads(env_vars_raw or '[]'),
+        'secrets': json.loads(secrets_raw or '[]'),
+    }
+    if node_selector_raw:
+        try:
+            prepared['node_selector'] = json.loads(node_selector_raw)
+        except Exception:
+            pass
+    return jsonify(prepared)
+
+
+@app.route('/container-deploy', methods=['POST'])
+def container_deploy():
+    """Submit a container build-and-deploy job to adk-code-builder-deployer."""
+    if not request.get_json():
+        abort(400)
+    payload = request.get_json()
+
+    required_fields = ['deployer_url', 'bucket_name', 'file_path', 'target_image_tag', 'deployment_name']
+    for field in required_fields:
+        if not payload.get(field):
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+
+    deploy_id = str(uuid.uuid4())
+    container_deploy_results[deploy_id] = {'status': 'SUBMITTED', 'internal_dns_url': None, 'message': None, 'logs': []}
+    executor.submit(_run_container_deploy, deploy_id, payload)
+    return jsonify({'deploy_id': deploy_id, 'status': 'SUBMITTED'})
+
+
+@app.route('/container-deploy/<deploy_id>/status', methods=['GET'])
+def get_container_deploy_status(deploy_id):
+    """Poll the status of a container deploy job."""
+    try:
+        uuid.UUID(deploy_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid deploy ID'}), 400
+
+    result = container_deploy_results.get(deploy_id)
+    if result is None:
+        abort(404)
+    return jsonify({'deploy_id': deploy_id, **result})
+
+
 if __name__ == '__main__':
     if DB_TRUNCATE == "True":
         db_operations.clean_jobs_table()

@@ -4,6 +4,7 @@ import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Services } from '../../../services/service';
+import { io } from 'socket.io-client';
 import { RunHistoryTabComponent } from './tabs/run-history-tab.component';
 import { OptionsDTO, StreamingServices } from '@essedum/shared-lib';
 
@@ -38,6 +39,14 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   selectedRunType: any;
   defaultRuntimeFromDB: any;
   runtypesCheck = true;
+
+  // Container deployment state
+  containerDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
+  containerDeployMessage = '';
+  containerInternalDnsUrl = '';
+  containerDeployLogs: string[] = [];
+  private _containerPollInterval: any = null;
+  private containerSocket: any = null;
 
   private destroy$ = new Subject<void>();
 
@@ -267,5 +276,111 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.services.message(msg, 'error');
         },
       });
+  }
+
+  deployAsContainer(): void {
+    if (!this.model) return;
+    this.containerDeployStatus = 'deploying';
+    this.containerDeployMessage = 'Preparing pipeline package...';
+    this.containerInternalDnsUrl = '';
+    this.containerDeployLogs = [];
+    // Backend zips + uploads scripts to MinIO and returns the prepared config;
+    // the browser then streams the build/deploy directly from the deployer's
+    // WebSocket (sandbox approach, same as agent/mcp pipelines).
+    this.services.deployPipelineAsContainer(this.model.name).subscribe({
+      next: (res: any) => {
+        let config: any;
+        try {
+          config = typeof res === 'string' ? JSON.parse(res) : res;
+        } catch {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = 'Failed to parse deploy response';
+          return;
+        }
+        if (!config || config.status !== 'prepared') {
+          this.containerDeployStatus = 'error';
+          this.containerDeployMessage = (config && config.error) || 'Failed to prepare deployment';
+          return;
+        }
+        this.streamContainerDeploy(config);
+      },
+      error: () => {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = 'Failed to start container deployment';
+      },
+    });
+  }
+
+  private addContainerLog(line: string): void {
+    this.containerDeployLogs = [...this.containerDeployLogs, line];
+  }
+
+  private streamContainerDeploy(config: any): void {
+    this.addContainerLog('Connecting to build service...');
+    this.disconnectContainerSocket();
+    this.containerSocket = io(window.location.origin, {
+      path: '/apps/builder-service/socket.io',
+      transports: ['websocket', 'polling'],
+      timeout: 600000,
+      forceNew: true,
+      rejectUnauthorized: false,
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 50,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+    } as any);
+
+    this.containerSocket.on('connect', () => {
+      this.addContainerLog('Connected. Starting pipeline build & deploy...');
+      const payload: any = {
+        bucket_name: config.bucket_name,
+        file_path: config.file_path,
+        target_image_tag: config.target_image_tag,
+        deployment_name: config.deployment_name,
+        namespace: config.namespace,
+        minio_endpoint: config.minio_endpoint,
+        env_vars: config.env_vars || [],
+        secrets: config.secrets || [],
+      };
+      if (config.node_selector) {
+        payload.node_selector = config.node_selector;
+      }
+      this.containerSocket.emit('start_pipeline', payload);
+    });
+
+    this.containerSocket.on('pipeline_update', (data: any) => {
+      this.containerDeployMessage = `[${data.step}] ${data.message}`;
+      this.addContainerLog(`[${data.step}] ${data.message}`);
+    });
+
+    this.containerSocket.on('build_log', (data: any) => {
+      this.addContainerLog(`${data.log}`);
+    });
+
+    this.containerSocket.on('pipeline_status', (data: any) => {
+      const status = (data.status || '').toString().toUpperCase();
+      if (status === 'SUCCESS') {
+        this.containerDeployStatus = 'success';
+        this.containerDeployMessage = 'Deployment successful';
+        this.addContainerLog('FINAL STATUS: SUCCESS');
+      } else {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = data.message || 'Deployment failed';
+        this.addContainerLog(`FINAL STATUS: ${data.status || 'ERROR'}${data.message ? ' - ' + data.message : ''}`);
+      }
+      this.disconnectContainerSocket();
+    });
+
+    this.containerSocket.on('connect_error', (err: any) => {
+      this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+    });
+  }
+
+  private disconnectContainerSocket(): void {
+    if (this.containerSocket) {
+      try { this.containerSocket.disconnect(); } catch (e) {}
+      this.containerSocket = null;
+    }
   }
 }
