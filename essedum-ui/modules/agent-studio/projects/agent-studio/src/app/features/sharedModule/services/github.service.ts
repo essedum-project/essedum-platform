@@ -178,32 +178,15 @@ export class GitHubService {
           let pollCount = 0;
           const maxPolls = 60; // Maximum 60 seconds
 
-          // Poll for authentication status and check if popup is closed
+          // Poll for authentication status. We check the auth status FIRST on
+          // every tick, and only treat a closed popup as "cancelled" if the
+          // backend still reports the user as unauthenticated. This matters
+          // because the OAuth callback page auto-closes itself as soon as the
+          // exchange succeeds, so the popup is often already closed by the
+          // time the first tick fires — checking popup.closed first would
+          // wrongly report cancellation even though login succeeded.
           this.authCheckSubscription = interval(1000)
-            .pipe(
-              switchMap(() => {
-                // Check if popup was closed by user
-                if (popup.closed) {
-                  this.authCheckSubscription?.unsubscribe();
-                  observer.error({ message: 'Authentication cancelled. Login window was closed.' });
-                  return [];
-                }
-                
-                pollCount++;
-                
-                // Check for timeout
-                if (pollCount >= maxPolls) {
-                  this.authCheckSubscription?.unsubscribe();
-                  if (!popup.closed) {
-                    popup.close();
-                  }
-                  observer.error({ message: 'Authentication timeout. Please try again.' });
-                  return [];
-                }
-                
-                return this.checkAuthStatus();
-              })
-            )
+            .pipe(switchMap(() => this.checkAuthStatus()))
             .subscribe({
               next: (status) => {
                 if (status && status.authenticated) {
@@ -213,6 +196,23 @@ export class GitHubService {
                   }
                   observer.next(status);
                   observer.complete();
+                  return;
+                }
+
+                pollCount++;
+
+                if (popup.closed) {
+                  this.authCheckSubscription?.unsubscribe();
+                  observer.error({ message: 'Authentication cancelled. Login window was closed.' });
+                  return;
+                }
+
+                if (pollCount >= maxPolls) {
+                  this.authCheckSubscription?.unsubscribe();
+                  if (!popup.closed) {
+                    popup.close();
+                  }
+                  observer.error({ message: 'Authentication timeout. Please try again.' });
                 }
               },
               error: (error) => {

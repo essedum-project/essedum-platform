@@ -75,6 +75,16 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.username = cachedUsername;
       this.isAuthenticated = true;
     }
+
+    const cachedRepo = sessionStorage.getItem('git_selected_Repo');
+    if (cachedRepo) {
+      this.selectedRepo = cachedRepo;
+    }
+
+    const cachedBranch = sessionStorage.getItem('git_selected_branch');
+    if (cachedBranch) {
+      this.selectedBranch = cachedBranch;
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -105,6 +115,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         if (status.authenticated && status.githubUsername) {
           this.username = status.githubUsername;
           sessionStorage.setItem('git_username', this.username);
+          if (status.sessionId) {
+            sessionStorage.setItem('git_session_id', status.sessionId);
+          }
           // Only load repositories in push mode (pull mode uses a URL input)
           if (this.mode === 'push') {
             this.loadRepositories();
@@ -227,6 +240,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.isAuthenticated = true;
         this.username = status.githubUsername || '';
         sessionStorage.setItem('git_username', this.username);
+        if (status.sessionId) {
+          sessionStorage.setItem('git_session_id', status.sessionId);
+        }
         this.showModal = true;
         this.cdr.detectChanges();
         this.loadRepositories();
@@ -253,6 +269,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.repositories = [];
         this.branches = [];
         this.resetForm();
+        this.clearGitSessionData();
         this.isLoading = false;
         this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
         this.cdr.detectChanges();
@@ -268,6 +285,17 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    sessionStorage.removeItem('git_username');
+    sessionStorage.removeItem('git_session_id');
+    sessionStorage.removeItem('git_selected_Repo');
+    sessionStorage.removeItem('git_selected_branch');
   }
  
   /**
@@ -299,8 +327,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (!this.selectedRepo) {
       this.branches = [];
       this.selectedRepoObject = null;
-      //sessionStorage.removeItem('git_selected_Repo');
-      //this.updateGitHubConfig();
+      sessionStorage.removeItem('git_selected_Repo');
       return;
     }
  
@@ -308,9 +335,8 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.selectedRepoObject = this.repositories.find(repo => repo.fullName === this.selectedRepo) || null;
  
     // Store selected repo in sessionStorage
-    //sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
+    sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
     this.loadSourceBranch();
-    //this.updateGitHubConfig();
  
     this.isLoading = true;
     this.errorMessage = '';
@@ -338,24 +364,10 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
   onBranchChange(): void {
     if (this.selectedBranch) {
       // Store selected branch in sessionStorage
-      //sessionStorage.setItem('git_selected_branch', this.selectedBranch);
-      //this.updateGitHubConfig();
+      sessionStorage.setItem('git_selected_branch', this.selectedBranch);
     }
   }
- 
-  /**
-   * Update GitHub config object in sessionStorage
-   */
-  // updateGitHubConfig(): void {
-  //   const githubConfig = {
-  //     git_username: sessionStorage.getItem('git_username') || this.username || '',
-  //     git_selected_Repo: sessionStorage.getItem('git_selected_Repo') || this.selectedRepo || '',
-  //     git_selected_branch: sessionStorage.getItem('git_selected_branch') || this.selectedBranch || ''
-  //   };
- 
-  //sessionStorage.setItem('github_config', JSON.stringify(githubConfig));
-  //}
- 
+
   /**
    * Handle repository URL input change (Pull mode only)
    */

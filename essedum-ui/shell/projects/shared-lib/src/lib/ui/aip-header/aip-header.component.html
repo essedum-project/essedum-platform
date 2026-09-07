@@ -53,6 +53,9 @@
                 <mat-icon [ngClass]="{'active': isAddHovered}">add</mat-icon>
             </div>
 
+            <!-- Extra action slot shown immediately after the Add button -->
+            <ng-content select="[header-extra-action-after-add]"></ng-content>
+
             <!-- Refresh button -->
             <div class="action-button" *ngIf="showRefreshButton" (click)="onRefreshClick()"
                  matTooltip="Refresh" [matTooltipPosition]="TOOLTIP_POSITION"

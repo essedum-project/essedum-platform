@@ -152,6 +152,10 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         this.isGitAuthenticated = true;
         this.gitUsername = status.githubUsername || '';
         sessionStorage.setItem('git_username', this.gitUsername);
+        if (status.sessionId) {
+          sessionStorage.setItem('git_session_id', status.sessionId);
+        }
+        this.service.message('Git login success', 'success');
         this.changeDetectionRef.detectChanges();
       },
       error: () => {
@@ -169,7 +173,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         this.isGitAuthenticated = false;
         this.gitUsername = '';
         this.isGitLoading = false;
-        sessionStorage.removeItem('git_username');
+        this.clearGitSessionData();
+        this.service.message('Logout successful', 'success');
         this.changeDetectionRef.detectChanges();
       },
       error: () => {
@@ -177,6 +182,17 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
         this.changeDetectionRef.detectChanges();
       }
     });
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    sessionStorage.removeItem('git_username');
+    sessionStorage.removeItem('git_session_id');
+    sessionStorage.removeItem('git_selected_Repo');
+    sessionStorage.removeItem('git_selected_branch');
   }
 
   toggleGitDropdown(event: Event): void {

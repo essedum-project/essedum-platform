@@ -8,6 +8,7 @@ package com.lfn.common.app.controller;
 import com.lfn.common.app.service.GitHubOAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,29 +68,41 @@ public class GitHubOAuthController {
     }
 
     /**
-     * OAuth callback - handles redirect from GitHub
+     * OAuth callback - handles redirect from GitHub.
+     * Returns a small self-closing HTML page instead of raw JSON so the popup
+     * window doesn't display the raw response to the user. The opener window
+     * detects completion separately by polling /oauth/status.
      */
-    @GetMapping("/callback")
-    public ResponseEntity<Map<String, String>> callback(
+    @GetMapping(value = "/callback", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> callback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
         try {
             String sessionId = oauthService.exchangeCodeForToken(code, state);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Authentication successful");
-            response.put("sessionId", sessionId);
-
             log.info("OAuth callback successful for session: {}", sessionId);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(buildAutoCloseHtml(true, "Authentication successful"));
         } catch (Exception e) {
             log.error("Error in OAuth callback: {}", e.getMessage(), e);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(buildAutoCloseHtml(false, e.getMessage()));
         }
+    }
+
+    /**
+     * Small self-closing HTML page shown briefly in the OAuth popup window.
+     */
+    private String buildAutoCloseHtml(boolean success, String message) {
+        String safeMessage = message == null ? "" : message.replace("<", "&lt;").replace(">", "&gt;");
+        String text = success ? "Login successful. You can close this window."
+                : "Login failed: " + safeMessage + " You can close this window.";
+        return "<!DOCTYPE html><html><head><title>GitHub Login</title></head>"
+                + "<body style=\"font-family:sans-serif;text-align:center;padding-top:40px;\">"
+                + "<p>" + text + "</p>"
+                + "<script>window.close();</script>"
+                + "</body></html>";
     }
 
     /**

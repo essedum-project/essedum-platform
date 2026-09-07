@@ -551,7 +551,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   deploymentEnvironment: string = ''; // Store selected deployment environment
 
   // Phase 1B: Save + Push integration
-  autoPushOnSave = false;
+  autoPushOnSave = true;
   isPushingAfterSave = false;
   lastPulledRepo = '';
   lastPulledBranch = '';
