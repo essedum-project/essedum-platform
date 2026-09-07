@@ -126,6 +126,9 @@
               </div>
             </div>
           </mat-menu>
+          <button mat-icon-button [matMenuTriggerFor]="overflowMenu" title="Choose Columns and Styles">
+            <mat-icon class="lfx-icon-hover">more_vert</mat-icon>
+          </button>
         </div>
       </div>
 
@@ -181,7 +184,11 @@
                       ">
                     </mat-checkbox> -->
                 </td>
-                <td *ngFor="let col of cols" [hidden]="!col.visible" class="dtv-cell">
+                <td *ngFor="let col of cols" [hidden]="!col.visible" style="
+                      max-width: 90vh;
+                      min-width: 8vh;
+                      word-break: break-all;
+                    ">
 
                   <span style="cursor: pointer; text-decoration: underline" *ngIf="col.field == unqId"
                     (click)="edit(ticketList[i])" class="selector-795-91" innerHTML="{{

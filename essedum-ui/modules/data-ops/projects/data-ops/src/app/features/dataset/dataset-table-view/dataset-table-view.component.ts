@@ -966,9 +966,7 @@ export class DatasetTableViewComponent implements OnInit {
       var col = {};
       col["field"] = key;
       col["header"] = header;
-      // For schema-less object-storage datasets (CSV/XLSX preview) show every column.
-      // Schema-backed datasets keep the legacy "first 5 visible" default.
-      col["visible"] = this.useDirectPaginated ? true : (index < 5);
+      col["visible"] = index < 5;
       col["filterValue"] = null;
       this.cols.push(col);
     });
