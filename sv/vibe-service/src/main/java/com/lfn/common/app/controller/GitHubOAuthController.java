@@ -78,30 +78,42 @@ public class GitHubOAuthController {
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
         try {
-            String sessionId = oauthService.exchangeCodeForToken(code, state);
-            log.info("OAuth callback successful for session: {}", sessionId);
+            String accessToken = oauthService.exchangeCodeForToken(code, state);
+            log.info("OAuth callback successful, token obtained");
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_HTML)
-                    .body(buildAutoCloseHtml(true, "Authentication successful"));
+                    .body(buildSuccessHtml(accessToken));
         } catch (Exception e) {
             log.error("Error in OAuth callback: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .contentType(MediaType.TEXT_HTML)
-                    .body(buildAutoCloseHtml(false, e.getMessage()));
+                    .body(buildErrorHtml(e.getMessage()));
         }
     }
 
     /**
-     * Small self-closing HTML page shown briefly in the OAuth popup window.
+     * Posts the token to the opener window via postMessage so the frontend can store
+     * it in sessionStorage and send it as X-GitHub-Token on subsequent API calls.
+     * This makes the flow stateless — no server-side token lookup needed across pods.
      */
-    private String buildAutoCloseHtml(boolean success, String message) {
-        String safeMessage = message == null ? "" : message.replace("<", "&lt;").replace(">", "&gt;");
-        String text = success ? "Login successful. You can close this window."
-                : "Login failed: " + safeMessage + " You can close this window.";
+    private String buildSuccessHtml(String accessToken) {
+        String safeToken = accessToken == null ? "" : accessToken.replaceAll("[^a-zA-Z0-9_\\-]", "");
         return "<!DOCTYPE html><html><head><title>GitHub Login</title></head>"
                 + "<body style=\"font-family:sans-serif;text-align:center;padding-top:40px;\">"
-                + "<p>" + text + "</p>"
-                + "<script>window.close();</script>"
+                + "<p>Login successful. You can close this window.</p>"
+                + "<script>"
+                + "try { if(window.opener){window.opener.postMessage({type:'github-oauth-success',token:'" + safeToken + "'},'*');} } catch(e){}"
+                + "setTimeout(function(){window.close();},500);"
+                + "</script>"
+                + "</body></html>";
+    }
+
+    private String buildErrorHtml(String message) {
+        String safeMessage = message == null ? "" : message.replace("<", "&lt;").replace(">", "&gt;");
+        return "<!DOCTYPE html><html><head><title>GitHub Login</title></head>"
+                + "<body style=\"font-family:sans-serif;text-align:center;padding-top:40px;\">"
+                + "<p>Login failed: " + safeMessage + " You can close this window.</p>"
+                + "<script>setTimeout(function(){window.close();},2000);</script>"
                 + "</body></html>";
     }
 
@@ -129,6 +141,7 @@ public class GitHubOAuthController {
                 String token = oauthService.getAccessToken(username);
                 String githubUsername = oauthService.getGitHubUsername(token);
                 response.put("githubUsername", githubUsername);
+                response.put("githubToken", token);
                 log.info("OAuth status check: user '{}' is authenticated with GitHub as '{}'", username, githubUsername);
             } catch (Exception e) {
                 log.error("Error getting GitHub username for user '{}': {}", username, e.getMessage());

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, interval, Subscription } from 'rxjs';
-import { take, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import {
   GitHubRepository,
   AuthStatus,
@@ -17,9 +17,30 @@ import {
 })
 export class GitHubService {
   private readonly API_BASE = '/api/github';
+  private readonly TOKEN_KEY = 'github_token';
   private authCheckSubscription?: Subscription;
 
   constructor(private http: HttpClient) { }
+
+  private getStoredToken(): string | null {
+    return sessionStorage.getItem(this.TOKEN_KEY);
+  }
+
+  private storeToken(token: string): void {
+    if (token && token.startsWith('gh')) {
+      sessionStorage.setItem(this.TOKEN_KEY, token);
+    }
+  }
+
+  private clearStoredToken(): void {
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem('git_github_token'); // clear old key name if present
+  }
+
+  private githubHeaders(): { headers?: { [key: string]: string } } {
+    const token = this.getStoredToken();
+    return token ? { headers: { 'X-GitHub-Token': token } } : {};
+  }
 
   /**
    * Get OAuth authorization URL
@@ -45,6 +66,7 @@ export class GitHubService {
    * Logout
    */
   logout(): Observable<any> {
+    this.clearStoredToken();
     return this.http.post(
       `${this.API_BASE}/oauth/logout`,
       {},
@@ -58,7 +80,7 @@ export class GitHubService {
   getRepositories(): Observable<GitHubRepository[]> {
     return this.http.get<GitHubRepository[]>(
       `${this.API_BASE}/repos`,
-      { withCredentials: true }
+      { withCredentials: true, ...this.githubHeaders() }
     );
   }
 
@@ -70,7 +92,8 @@ export class GitHubService {
       `${this.API_BASE}/branches`,
       {
         params: { repo: repoName },
-        withCredentials: true
+        withCredentials: true,
+        ...this.githubHeaders()
       }
     );
   }
@@ -84,7 +107,8 @@ export class GitHubService {
       request,
       {
         withCredentials: true,
-        responseType: 'text'
+        responseType: 'text',
+        ...this.githubHeaders()
       }
     );
   }
@@ -96,19 +120,18 @@ export class GitHubService {
     return this.http.post(
       `${this.API_BASE}/pull`,
       request,
-      { withCredentials: true }
+      { withCredentials: true, ...this.githubHeaders() }
     );
   }
 
   /**
    * Push code from source branch to destination branch
-   * This performs a merge/copy operation from source to destination
    */
   pushBranchToBranch(request: BranchToBranchPushRequest): Observable<BranchPushResponse> {
     return this.http.post<BranchPushResponse>(
       `${this.API_BASE}/push-branch-to-branch`,
       request,
-      { withCredentials: true }
+      { withCredentials: true, ...this.githubHeaders() }
     );
   }
 
@@ -125,22 +148,20 @@ export class GitHubService {
 
   /**
    * Get collaborators/reviewers for a repository
-   * @param repo - Repository name in format 'owner/repo'
-   * Returns array of collaborators with various possible field formats
    */
   getCollaborators(repo: string): Observable<any> {
     return this.http.get<any>(
       `${this.API_BASE}/collaborators`,
       {
         params: { repo: repo },
-        withCredentials: true
+        withCredentials: true,
+        ...this.githubHeaders()
       }
     );
   }
 
   /**
    * Create a pull request
-   * @param request - Pull request details
    */
   createPullRequest(request: {
     repoName: string;
@@ -152,18 +173,19 @@ export class GitHubService {
     return this.http.post<any>(
       `${this.API_BASE}/create-pull-request`,
       request,
-      { withCredentials: true }
+      { withCredentials: true, ...this.githubHeaders() }
     );
   }
 
   /**
-   * Open OAuth popup and poll for authentication
+   * Open OAuth popup. Receives the GitHub token via postMessage from the callback
+   * page (primary, stateless — works across AKS pods) and falls back to polling
+   * /oauth/status (secondary, catches edge cases where postMessage is blocked).
    */
   initiateOAuthFlow(): Observable<AuthStatus> {
     return new Observable(observer => {
       this.getAuthorizationUrl().subscribe({
         next: (response) => {
-          // Open popup window
           const popup = window.open(
             response.authorizationUrl,
             'GitHub Login',
@@ -175,51 +197,76 @@ export class GitHubService {
             return;
           }
 
-          let pollCount = 0;
-          const maxPolls = 60; // Maximum 60 seconds
+          let completed = false;
 
-          // Poll for authentication status. We check the auth status FIRST on
-          // every tick, and only treat a closed popup as "cancelled" if the
-          // backend still reports the user as unauthenticated. This matters
-          // because the OAuth callback page auto-closes itself as soon as the
-          // exchange succeeds, so the popup is often already closed by the
-          // time the first tick fires — checking popup.closed first would
-          // wrongly report cancellation even though login succeeded.
+          // Primary path: receive token directly from the OAuth callback popup.
+          // The callback page posts {type:'github-oauth-success', token:'ghX_...'}.
+          // After storing the token, fetch /status once to get githubUsername so the
+          // component can store git_username in sessionStorage.
+          const messageHandler = (event: MessageEvent) => {
+            if (event.data?.type === 'github-oauth-success' && event.data?.token) {
+              const token = event.data.token as string;
+              if (token.startsWith('gh')) {
+                completed = true;
+                this.storeToken(token);
+                window.removeEventListener('message', messageHandler);
+                this.authCheckSubscription?.unsubscribe();
+                if (!popup.closed) { popup.close(); }
+                this.checkAuthStatus().subscribe({
+                  next: (status) => {
+                    observer.next({ ...status, authenticated: true, githubToken: token });
+                    observer.complete();
+                  },
+                  error: () => {
+                    observer.next({ authenticated: true, sessionId: '', githubToken: token });
+                    observer.complete();
+                  }
+                });
+              }
+            }
+          };
+          window.addEventListener('message', messageHandler);
+
+          let pollCount = 0;
+          const maxPolls = 60;
+
+          // Fallback path: poll /oauth/status in case postMessage was blocked.
+          // When status returns authenticated, also cache the token from the response.
           this.authCheckSubscription = interval(1000)
             .pipe(switchMap(() => this.checkAuthStatus()))
             .subscribe({
               next: (status) => {
-                if (status && status.authenticated) {
+                if (completed) { return; }
+                if (status?.authenticated) {
+                  completed = true;
+                  window.removeEventListener('message', messageHandler);
                   this.authCheckSubscription?.unsubscribe();
-                  if (!popup.closed) {
-                    popup.close();
-                  }
+                  if (status.githubToken) { this.storeToken(status.githubToken); }
+                  if (!popup.closed) { popup.close(); }
                   observer.next(status);
                   observer.complete();
                   return;
                 }
 
                 pollCount++;
-
-                if (popup.closed) {
+                if (popup.closed && !completed) {
+                  window.removeEventListener('message', messageHandler);
                   this.authCheckSubscription?.unsubscribe();
                   observer.error({ message: 'Authentication cancelled. Login window was closed.' });
                   return;
                 }
-
                 if (pollCount >= maxPolls) {
+                  completed = true;
+                  window.removeEventListener('message', messageHandler);
                   this.authCheckSubscription?.unsubscribe();
-                  if (!popup.closed) {
-                    popup.close();
-                  }
+                  if (!popup.closed) { popup.close(); }
                   observer.error({ message: 'Authentication timeout. Please try again.' });
                 }
               },
               error: (error) => {
+                window.removeEventListener('message', messageHandler);
                 this.authCheckSubscription?.unsubscribe();
-                if (popup && !popup.closed) {
-                  popup.close();
-                }
+                if (popup && !popup.closed) { popup.close(); }
                 observer.error(error);
               }
             });

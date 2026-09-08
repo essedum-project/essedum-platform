@@ -132,7 +132,7 @@ public class GitHubOAuthService {
 
             log.info("Successfully exchanged code for token, session: {}, user: {}", sessionId, username);
             log.info("Token stored - session tokens: {}, user tokens: {}", sessionTokens.size(), userTokens.size());
-            return sessionId;
+            return accessToken;
         } catch (Exception e) {
             log.error("Error exchanging code for token: {}", e.getMessage(), e);
             throw new Exception("Failed to obtain access token: " + e.getMessage());
