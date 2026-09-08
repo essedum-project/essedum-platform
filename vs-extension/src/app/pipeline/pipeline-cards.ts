@@ -1500,6 +1500,35 @@ if __name__ == "__main__":
         const scriptsDir = this.getLocalScriptsDirectory(this._currentPipelineName);
         const localFilePath = vscode.Uri.joinPath(scriptsDir, scriptFile.fileName);
 
+        // Find the pipeline for auto-save + wizard checks below.
+        const pipeline = this.allCards.find((card: PipelineCard) =>
+            this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
+        const isWizardScript = pipeline?.type === 'DataPipeline' || pipeline?.type === 'TrainingPipeline';
+
+        // Wizard-only: close any tab/buffer still holding the previous version of this
+        // file BEFORE we overwrite it. Without this, `openTextDocument` returns the
+        // cached TextDocument and the editor keeps rendering the old bytes even though
+        // disk and server are up to date. Native flow is untouched.
+        if (isWizardScript) {
+            try {
+                const tabsToClose: vscode.Tab[] = [];
+                for (const group of vscode.window.tabGroups.all) {
+                    for (const tab of group.tabs) {
+                        const input: any = tab.input;
+                        if (input && input.uri && input.uri.toString() === localFilePath.toString()) {
+                            tabsToClose.push(tab);
+                        }
+                    }
+                }
+                if (tabsToClose.length) {
+                    await vscode.window.tabGroups.close(tabsToClose, true);
+                    logger.info(`🔒 Closed ${tabsToClose.length} stale tab(s) for ${scriptFile.fileName}`);
+                }
+            } catch (closeErr: any) {
+                logger.warn('⚠️ Could not close stale tabs:', closeErr?.message);
+            }
+        }
+
         // Save the script content to the local file
         try {
             fs.writeFileSync(localFilePath.fsPath, scriptFile.content, 'utf8');
@@ -1507,6 +1536,24 @@ if __name__ == "__main__":
         } catch (error: any) {
             logger.error('Failed to save script locally:', error);
             throw new Error(`Failed to save script locally: ${error.message}`);
+        }
+
+        // Wizard-only: even after closing tabs, VS Code may still keep the document in
+        // its registry. If getText() differs from disk, force-revert so the buffer is
+        // in sync with what we just wrote.
+        if (isWizardScript) {
+            const existing = vscode.workspace.textDocuments.find(
+                d => d.uri.toString() === localFilePath.toString()
+            );
+            if (existing && existing.getText() !== scriptFile.content) {
+                try {
+                    await vscode.window.showTextDocument(existing, { preview: false, preserveFocus: true });
+                    await vscode.commands.executeCommand('workbench.action.files.revert');
+                    logger.info('🔄 Reverted stale in-memory buffer to fresh on-disk content');
+                } catch (revertErr: any) {
+                    logger.warn('⚠️ Could not revert stale buffer:', revertErr?.message);
+                }
+            }
         }
 
         // Open the local document
@@ -1526,15 +1573,10 @@ if __name__ == "__main__":
         }
 
         // Find the pipeline for auto-save functionality
-        const pipeline = this.allCards.find((card: PipelineCard) =>
-            this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
+        // (`pipeline` and `isWizardScript` were resolved earlier for the revert step above.)
 
         if (pipeline) {
             logger.info('🔧 Setting up auto-save for Essedum file:', scriptFile.fileName);
-
-            // Captured in the closure so save handlers stay correct even if the user
-            // switches tabs while the editor is still open.
-            const isWizardScript = pipeline.type === 'DataPipeline' || pipeline.type === 'TrainingPipeline';
 
             // Remember this open script so "Run" can pick up the freshest on-disk content
             // (covers Copilot edits that may not have flowed into this.scriptContent).
