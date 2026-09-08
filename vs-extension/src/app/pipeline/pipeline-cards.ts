@@ -91,6 +91,10 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private selectedAdapterType: string[] = [];
     private script: string[] = [];
     private scriptContent: string = '';
+    // Tracks scripts opened for editing so that "Run" uploads the freshest on-disk
+    // content (e.g. after Copilot edits) instead of stale in-memory state.
+    // Keyed by pipeline name -> { fileName, localFsPath }.
+    private openEditedScripts: Map<string, { fileName: string; localFsPath: string }> = new Map();
     private selectedTag: string[] = [];
     private loading: boolean = false;
     private cards: PipelineCard[] = [];
@@ -1528,13 +1532,24 @@ if __name__ == "__main__":
         if (pipeline) {
             logger.info('🔧 Setting up auto-save for Essedum file:', scriptFile.fileName);
 
+            // Captured in the closure so save handlers stay correct even if the user
+            // switches tabs while the editor is still open.
+            const isWizardScript = pipeline.type === 'DataPipeline' || pipeline.type === 'TrainingPipeline';
+
+            // Remember this open script so "Run" can pick up the freshest on-disk content
+            // (covers Copilot edits that may not have flowed into this.scriptContent).
+            this.openEditedScripts.set(pipeline.name, {
+                fileName: scriptFile.fileName,
+                localFsPath: localFilePath.fsPath
+            });
+
             // Update script state initially
             const scriptLines = scriptFile.content.split('\n');
             this.onScriptChange(scriptLines);
 
             // Set up auto-save functionality - listen for document changes
             const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
-                if (event.document === doc) {
+                if (event.document.uri.toString() === localFilePath.toString()) {
                     logger.info('📝 Essedum file content changed, triggering onScriptChange...');
 
                     // Get updated content and split into lines 
@@ -1550,12 +1565,30 @@ if __name__ == "__main__":
 
             // Set up save listener - automatically upload when user saves
             const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
-                if (savedDocument === doc) {
+                // Compare by URI, not by reference. Copilot (and external edits) can cause
+                // VS Code to re-create the TextDocument object for the same file, which would
+                // make a `=== doc` check silently fail and skip the upload.
+                if (savedDocument.uri.toString() === localFilePath.toString()) {
                     logger.info('💾 📥 ESSEDUM FILE SAVE EVENT - Auto-uploading script changes...');
 
                     try {
-                        // Get the saved content and update scriptContent
-                        const savedContent = savedDocument.getText();
+                        // VS Code's in-memory text is the exact content just written to disk on
+                        // save. Prefer it over fs.readFileSync — on Windows the disk write can
+                        // still be flushing when the save event fires, especially after Copilot
+                        // edits, which would otherwise cause us to upload stale bytes.
+                        let savedContent = savedDocument.getText();
+                        if (!savedContent || savedContent.length === 0) {
+                            try {
+                                savedContent = fs.readFileSync(localFilePath.fsPath, 'utf8');
+                            } catch { /* keep empty */ }
+                        }
+
+                        // Copilot Chat responses often paste code wrapped in ```lang ... ``` fences.
+                        // Uploading those verbatim causes Python "SyntaxError: invalid syntax" on
+                        // line 1 — strip the outer fence for wizard scripts before we ship it.
+                        if (isWizardScript) {
+                            savedContent = this.stripMarkdownCodeFence(savedContent);
+                        }
                         const savedLines = savedContent.split('\n');
 
                         logger.info('📝 Saved Essedum file content length:', savedContent.length);
@@ -1566,8 +1599,20 @@ if __name__ == "__main__":
 
                         logger.info('📤 Auto-uploading Essedum file:', scriptFile.fileName);
 
-                        // Auto-upload 
-                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName);
+                        // Auto-upload the exact saved content
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName, savedContent);
+
+                        // Wizard pipelines execute from the inline script inside the streaming
+                        // service json_content, so the file upload alone leaves the old code in
+                        // place. Sync the streaming service and verify readback before claiming
+                        // success — otherwise the alert lies and Run still uses old code.
+                        if (isWizardScript) {
+                            await this.syncWizardScriptToStreamingService(pipeline.name, scriptFile.fileName, savedContent);
+                            const verified = await this.verifyServerFileContent(pipeline.name, scriptFile.fileName, savedContent);
+                            if (!verified) {
+                                throw new Error('Server did not persist the new content. Please try saving again.');
+                            }
+                        }
 
                         // Show success message
                         vscode.window.showInformationMessage(
@@ -1612,8 +1657,17 @@ if __name__ == "__main__":
 
                         logger.info('📤 Auto-uploading notebook file:', scriptFile.fileName);
 
-                        // Auto-upload the full notebook JSON
-                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName);
+                        // Auto-upload the full notebook JSON (pass the exact bytes read from disk)
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName, notebookJson);
+
+                        // Wizard: sync inline script in streaming service + verify readback.
+                        if (isWizardScript) {
+                            await this.syncWizardScriptToStreamingService(pipeline.name, scriptFile.fileName, notebookJson);
+                            const verified = await this.verifyServerFileContent(pipeline.name, scriptFile.fileName, notebookJson);
+                            if (!verified) {
+                                throw new Error('Server did not persist the new notebook content. Please try saving again.');
+                            }
+                        }
 
                         // Show success message
                         vscode.window.showInformationMessage(
@@ -1636,7 +1690,7 @@ if __name__ == "__main__":
 
             // Clean up listeners when document is closed
             const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
-                if (closedDocument === doc) {
+                if (closedDocument.uri.toString() === localFilePath.toString()) {
                     logger.info('📄 Essedum file editor closed, cleaning up listeners');
                     changeDisposable.dispose();
                     saveDisposable.dispose();
@@ -1726,8 +1780,8 @@ if __name__ == "__main__":
 
                         logger.info('📤 About to upload file:', scriptFileName);
 
-                        // Auto-upload 
-                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
+                        // Auto-upload the exact saved content
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName, savedContent);
 
                         // Show success message
                         vscode.window.showInformationMessage(
@@ -1923,27 +1977,53 @@ if __name__ == "__main__":
                 logger.info('🔍   script[0] preview:', this.script[0].substring(0, 100) + '...');
             }
 
-            let scriptContent: string;
+            let scriptContent: string = '';
+            let fileName = `${streamItem.name}_${this.organization}.py`;
 
-            if (this.scriptContent && this.scriptContent.length > 0) {
-                // User has saved script content - use it
-                scriptContent = this.scriptContent;
-                logger.info('� ✅ Using saved script content from editor');
-                logger.info('� Saved script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
-            } else if (this.script && this.script.length > 0) {
-                // User has edited the script and it's still in memory - use it
-                scriptContent = this.script.join('\n');
-                logger.info('📝 ✅ Using current this.script content from active editing session');
-                logger.info('📊 Current script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
-            } else {
-                // No edited content - generate fresh script
-                logger.info('� Generating fresh script content for pipeline:', streamItem.name);
-                scriptContent = await this.generatePipelineScript(streamItem.name);
-                logger.info('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+            // If the user has this pipeline's script open for editing, the file on disk is the
+            // single source of truth for the current code (it always reflects the latest save,
+            // including Copilot edits). Prefer it over this.scriptContent, which can be stale.
+            const openScript = this.openEditedScripts.get(streamItem.name);
+            let usedDiskContent = false;
+            if (openScript) {
+                try {
+                    scriptContent = fs.readFileSync(openScript.localFsPath, 'utf8');
+                    fileName = openScript.fileName;
+                    usedDiskContent = true;
+                    logger.info('📝 ✅ Using freshest on-disk content from open editor:', openScript.localFsPath);
+                    logger.info('📊 Disk script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                } catch (readErr: any) {
+                    logger.warn('⚠️ Could not read open script from disk, falling back to in-memory content:', readErr?.message);
+                }
             }
 
-            const fileName = `${streamItem.name}_${this.organization}.py`;
+            if (!usedDiskContent) {
+                if (this.scriptContent && this.scriptContent.length > 0) {
+                    // User has saved script content - use it
+                    scriptContent = this.scriptContent;
+                    logger.info('� ✅ Using saved script content from editor');
+                    logger.info('� Saved script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                } else if (this.script && this.script.length > 0) {
+                    // User has edited the script and it's still in memory - use it
+                    scriptContent = this.script.join('\n');
+                    logger.info('📝 ✅ Using current this.script content from active editing session');
+                    logger.info('📊 Current script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                } else {
+                    // No edited content - generate fresh script
+                    logger.info('� Generating fresh script content for pipeline:', streamItem.name);
+                    scriptContent = await this.generatePipelineScript(streamItem.name);
+                    logger.info('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+                }
+            }
+
             logger.info('📤 Creating script file FIRST:', fileName);
+
+            // Wizard: strip Copilot-fenced markdown before upload so the runner doesn't
+            // hit "SyntaxError: invalid syntax" on line 1 when the file starts with ```python.
+            const isWizardRun = streamItem?.type === 'DataPipeline' || streamItem?.type === 'TrainingPipeline';
+            if (isWizardRun) {
+                scriptContent = this.stripMarkdownCodeFence(scriptContent);
+            }
 
             // Create FormData for upload
             const formData = new FormData();
@@ -1953,6 +2033,19 @@ if __name__ == "__main__":
             });
 
             await this._pipelineService.uploadScript(streamItem.name, fileName, formData);
+
+            // Wizard pipelines execute from the inline `attributes.script` in the streaming
+            // service json_content — the file upload above is not enough. Push the freshest
+            // script content into the streaming service before running so the run endpoint
+            // sees the new code (matches what the web wizard editor does on Run).
+            if (isWizardRun) {
+                try {
+                    await this.syncWizardScriptToStreamingService(streamItem.name, fileName, scriptContent);
+                } catch (syncErr: any) {
+                    logger.error('❌ Failed to sync wizard script to streaming service:', syncErr?.message);
+                    throw new Error(`Failed to push latest script to server before run: ${syncErr?.message || syncErr}`);
+                }
+            }
 
             // Step 2: Save JSON 
             logger.info('💾 Saving JSON for streaming service...');
@@ -2452,20 +2545,158 @@ if __name__ == "__main__":
     }
 
     /**
+     * Remove Copilot-style outer markdown code fences (```lang ... ```) if present.
+     * Copilot Chat frequently emits fenced blocks, and if the user pastes/saves that,
+     * the runner tries to execute the fence as Python and fails on line 1. Only strips
+     * a *fully wrapping* fence — bare content is returned unchanged.
+     */
+    private stripMarkdownCodeFence(content: string): string {
+        if (!content) { return content; }
+        const trimmed = content.trim();
+        // Opening fence: ``` optionally followed by a language token on the same line.
+        const openMatch = trimmed.match(/^```[a-zA-Z0-9_+\-]*\r?\n/);
+        if (!openMatch) { return content; }
+        if (!trimmed.endsWith('```')) { return content; }
+        const inner = trimmed.slice(openMatch[0].length, trimmed.length - 3);
+        // Drop the trailing newline that usually precedes the closing fence.
+        return inner.replace(/\r?\n$/, '');
+    }
+
+    /**
+     * Wizard-only: push the freshly-edited script content back into the streaming
+     * service's json_content so that execution (which reads the inline
+     * `attributes.script` array on wizard pipelines) picks it up.
+     *
+     * Only touches `attributes.script` on the element that already has it —
+     * `attributes.files` and `attributes.filetype` are left completely alone
+     * because the backend runner joins that array on `,` when it builds the
+     * python command, and any duplicate/extra entry blows up the run with
+     * "can't open file 'a.py,b.py'".
+     */
+    private async syncWizardScriptToStreamingService(pipelineName: string, fileName: string, content: string): Promise<void> {
+        const resp = await this._pipelineService.getStreamingService(pipelineName);
+        const streamItem = resp?.data;
+        if (!streamItem) {
+            throw new Error('Streaming service not found for wizard pipeline');
+        }
+
+        let jsonContent: any;
+        const contentStr = streamItem.jsonContent || streamItem.json_content;
+        try {
+            jsonContent = typeof contentStr === 'string' ? JSON.parse(contentStr) : (contentStr || {});
+        } catch {
+            logger.warn('⚠️ Streaming service json_content unparseable; skipping inline script sync');
+            return;
+        }
+
+        if (!Array.isArray(jsonContent.elements) || jsonContent.elements.length === 0) {
+            logger.info('ℹ️ Streaming service has no elements — nothing to sync inline');
+            return;
+        }
+
+        // Repair any `attributes.files` corruption previously introduced (duplicate
+        // entries surface as `python: can't open file 'a.py,a.py'` because the runner
+        // joins the array on ','). Only dedupe — never add or remove real entries.
+        let filesRepaired = false;
+        for (const el of jsonContent.elements) {
+            const files = el?.attributes?.files;
+            if (!Array.isArray(files) || files.length < 2) { continue; }
+            const isFormat2 = typeof files[0] === 'string' && files[0].startsWith('[');
+            let cleaned: string[];
+            if (isFormat2) {
+                let inner: string[] = [];
+                try { inner = JSON.parse(files[0]); } catch { continue; }
+                cleaned = [files[0], ...files.slice(1).filter((f: string) => !inner.includes(f))];
+            } else {
+                cleaned = Array.from(new Set(files));
+            }
+            if (cleaned.length !== files.length) {
+                el.attributes.files = cleaned;
+                filesRepaired = true;
+            }
+        }
+
+        const target = jsonContent.elements.find((el: any) => Array.isArray(el?.attributes?.script))
+            || jsonContent.elements.find((el: any) => Array.isArray(el?.attributes?.files))
+            || jsonContent.elements.find((el: any) => el?.attributes)
+            || jsonContent.elements[0];
+        if (!target.attributes) { target.attributes = {}; }
+        target.attributes.script = content.split('\n');
+
+        const updatedStreamItem = {
+            ...streamItem,
+            json_content: JSON.stringify(jsonContent),
+            organization: streamItem.organization || this.organization,
+        };
+        if ('jsonContent' in updatedStreamItem) {
+            updatedStreamItem.jsonContent = updatedStreamItem.json_content;
+        }
+
+        await this._pipelineService.updateStreamingService(updatedStreamItem);
+
+        const verifyResp = await this._pipelineService.getStreamingService(pipelineName);
+        const verifyStr = verifyResp?.data?.jsonContent || verifyResp?.data?.json_content;
+        let serverScript: string[] | undefined;
+        try {
+            const parsed = typeof verifyStr === 'string' ? JSON.parse(verifyStr) : verifyStr;
+            const el = Array.isArray(parsed?.elements) ? parsed.elements.find((e: any) => Array.isArray(e?.attributes?.script)) : null;
+            serverScript = el?.attributes?.script;
+        } catch { /* ignore */ }
+
+        const serverJoined = Array.isArray(serverScript) ? serverScript.join('\n') : '';
+        const normalize = (s: string) => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        if (normalize(serverJoined) !== normalize(content)) {
+            logger.error(`❌ Wizard sync verification failed. server=${serverJoined.length} bytes, expected=${content.length} bytes, filesRepaired=${filesRepaired}`);
+            throw new Error('Streaming service did not accept the updated script. Old code is still in place.');
+        }
+        logger.info(`✅ Wizard streaming service updated and verified (filesRepaired=${filesRepaired})`);
+    }
+
+    /**
+     * Verify the file on the server matches the given content. Used by the wizard
+     * save flow so we don't show a false-positive "saved" alert when the server
+     * silently keeps the old code (e.g. because the update was rejected without
+     * an error status). Returns false on any read failure or content mismatch.
+     */
+    private async verifyServerFileContent(pipelineName: string, fileName: string, expectedContent: string): Promise<boolean> {
+        try {
+            const response = await this._pipelineService.readPipelineFile(pipelineName, fileName);
+            if (!response || !response.data) {
+                logger.info('🔍 Verification: server returned no data');
+                return false;
+            }
+            const serverContent = new TextDecoder('utf-8').decode(response.data);
+            // Normalize line endings so CRLF vs LF differences don't cause false negatives.
+            const normalize = (s: string) => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const matches = normalize(serverContent) === normalize(expectedContent);
+            logger.info(`🔍 Verification: matches=${matches} (server=${serverContent.length} bytes, expected=${expectedContent.length} bytes)`);
+            return matches;
+        } catch (err: any) {
+            logger.info('🔍 Verification failed with error:', err?.message);
+            return false;
+        }
+    }
+
+    /**
      * Create native file with FormData 
      * script.join('\n') -> Blob -> FormData
      */
-    private async createNativeFileWithFormData(pipelineName: string, fileName: string): Promise<any> {
-        try {
+    private async createNativeFileWithFormData(pipelineName: string, fileName: string, explicitContent?: string): Promise<any> {        try {
             logger.info('🚀 Starting createNativeFileWithFormData...');
             logger.info('📁 Pipeline Name:', pipelineName);
             logger.info('📄 File Name:', fileName);
             logger.info('📝 this.script lines count:', this.script.length);
             logger.info('📝 this.scriptContent length:', this.scriptContent.length);
 
-            // Check if script content exists - prefer scriptContent over script lines
+            // Determine the content to upload.
+            // Prefer the explicit content passed by the caller (the exact bytes that were
+            // just saved) over the shared this.scriptContent state, which can be stale if a
+            // change/save event was missed (e.g. Copilot re-created the document reference).
             let scriptToUpload: string;
-            if (this.scriptContent && this.scriptContent.length > 0) {
+            if (explicitContent !== undefined) {
+                scriptToUpload = explicitContent;
+                logger.info('✅ Using explicit content passed by caller (most reliable)');
+            } else if (this.scriptContent && this.scriptContent.length > 0) {
                 scriptToUpload = this.scriptContent;
                 logger.info('✅ Using this.scriptContent (preferred)');
             } else if (this.script && this.script.length > 0) {
@@ -2818,11 +3049,13 @@ if __name__ == "__main__":
             }
 
             // Create and show the job logs viewer with table interface
+            const isWizardCard = card.type === 'DataPipeline' || card.type === 'TrainingPipeline';
             const jobLogsViewer = new JobLogsViewer(
                 this._context,
                 this._token,
                 card.name, // Pipeline name
-                undefined   // Not an internal job
+                undefined,  // Not an internal job
+                isWizardCard
             );
 
             await jobLogsViewer.showJobLogsViewer();
