@@ -131,6 +131,10 @@ public class ICIPJobsService implements IICIPJobsService {
     @EssedumProperty("icip.cleanup.deletion.days")
     private String daysString;
 
+    /** SSRF allow-list of internal cluster executor hosts (e.g. pyjob-executor-service). */
+    @EssedumProperty("icip.ssrf.allowedHosts")
+    private String ssrfAllowedHosts;
+
     /** The jobs partial repository. */
     @Autowired
     private ICIPJobsPartialRepository jobsPartialRepository;
@@ -334,8 +338,42 @@ public class ICIPJobsService implements IICIPJobsService {
                             } else {
                                 log = logs.toString();
                             }
-                            if (status.equalsIgnoreCase(JobStatus.RUNNING.toString())) {
-                                // Persist the fetched log to the local file for later reads
+                            // pyjob-executor returns the literal string "Log not found" (HTTP 200) when
+                            // log.txt has not been created yet (job just started). Do NOT persist this
+                            // sentinel to disk — persisting it would make shouldFetchRemote=false on the
+                            // next request, locking the UI into "Log not found" permanently.
+                            boolean isLogNotFound = "Log not found".equalsIgnoreCase(log.trim());
+                            // For terminal jobs (COMPLETED/ERROR), retry up to 5 times to hit the right pod.
+                            // pyjob-executor has multiple pods; only the executor pod has the log file locally.
+                            if (isLogNotFound && !status.equalsIgnoreCase(JobStatus.RUNNING.toString())) {
+                                for (int attempt = 1; attempt <= 5; attempt++) {
+                                    logger.info("getLog retry {}/5 for taskId={} status={}", attempt, jobMetaData.getString("taskId"), status);
+                                    try {
+                                        org.json.JSONObject retryRes = getLog(jobMetaData.getString("taskId"), connDetails);
+                                        org.json.JSONObject retryLogs = new org.json.JSONObject(retryRes.get("logs").toString());
+                                        String retryContent = retryLogs.has("content") ? retryLogs.getString("content") : retryLogs.toString();
+                                        if (!"Log not found".equalsIgnoreCase(retryContent.trim()) && !retryContent.isEmpty()) {
+                                            log = retryContent;
+                                            isLogNotFound = false;
+                                            break;
+                                        }
+                                    } catch (Exception retryEx) {
+                                        logger.warn("getLog retry {} failed: {}", attempt, retryEx.getMessage());
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isLogNotFound) {
+                                log = status.equalsIgnoreCase(JobStatus.RUNNING.toString())
+                                        ? "Job is running on the remote executor. Logs will be available shortly, please refresh."
+                                        : "No logs available from remote executor.";
+                                logger.info("pyjob-executor returned 'Log not found' for taskId {} (status={}) after retries — returning wait message",
+                                        jobMetaData.getString("taskId"), status);
+                            } else if (!log.isEmpty()) {
+                                // Cache real log content to local file for all statuses (RUNNING, COMPLETED, ERROR).
+                                // pyjob-executor has multiple pods — the log file is local to the pod that ran the
+                                // job, so getLog requests that hit other pods return "Log not found". Caching here
+                                // ensures the first successful hit is persisted so future reads don't need the pod.
                                 Files.createDirectories(path.getParent());
                                 try (FileOutputStream fs = new FileOutputStream(path.toString())) {
                                     fs.write(log.getBytes());
@@ -421,7 +459,12 @@ public class ICIPJobsService implements IICIPJobsService {
         ICIPJobs result = job.toICIPJobs(log);
 
         if (result.getLog().equals("")) {
-            log = "Unable to write logs at this time. Please try again";
+            ICIPJobs fullJob = iCIPJobsRepository.findByJobId(jobId);
+            if (fullJob != null && fullJob.getLog() != null && !fullJob.getLog().isEmpty()) {
+                log = fullJob.getLog();
+            } else {
+                log = "Unable to write logs at this time. Please try again";
+            }
             result.setLog(log);
         }
         String jobStatus = result.getJobStatus();
@@ -1112,9 +1155,15 @@ public class ICIPJobsService implements IICIPJobsService {
      * returns a safe {@link java.net.URL}. Throws {@link IllegalArgumentException} if the URL
      * is malformed or targets a disallowed/internal address, blocking the outbound request.
      */
-    private static java.net.URL toSafeUrl(String rawUrl) {
+    private java.net.URL toSafeUrl(String rawUrl) {
         try {
-            return SsrfProtectionUtil.validateAndCreateUrl(rawUrl);
+            // Allow legitimate internal cluster executor hosts (e.g. pyjob-executor-service).
+            // Prefer the DB-backed allow-list; fall back to the SSRF_ALLOWED_HOSTS env var.
+            String hosts = ssrfAllowedHosts;
+            if (hosts == null || hosts.trim().isEmpty()) {
+                hosts = System.getenv("SSRF_ALLOWED_HOSTS");
+            }
+            return SsrfProtectionUtil.validateAndCreateUrl(rawUrl, SsrfProtectionUtil.parseAllowedHosts(hosts));
         } catch (java.net.MalformedURLException e) {
             throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
         }

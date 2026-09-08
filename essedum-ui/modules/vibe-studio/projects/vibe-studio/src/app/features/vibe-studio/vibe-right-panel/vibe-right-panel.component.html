@@ -163,7 +163,7 @@
               </a>
             </div>
             <iframe
-              [src]="sanitizeDeploymentUrl(deploymentResult)"
+              [src]="deploymentSafeUrl"
               class="preview-iframe"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               title="Deployment Preview"

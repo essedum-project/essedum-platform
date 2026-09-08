@@ -78,8 +78,7 @@ export class ConfigTabComponent {
       { label: 'Batch size',   value: a.batchSize },
       { label: 'Learning rate', value: a.lr },
       { label: 'Git repo',     value: a.git?.repo },
-      { label: 'Git branch',   value: a.git?.branch },
-      { label: 'File path',    value: a.git?.filePath },
+      { label: 'Model path',   value: a.modelPath },
     ];
     return base.filter(r => r.value !== undefined && r.value !== '');
   }

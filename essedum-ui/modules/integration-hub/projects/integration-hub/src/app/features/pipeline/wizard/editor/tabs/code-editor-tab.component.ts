@@ -790,6 +790,7 @@ export class CodeEditorTabComponent
     { label: 'gemma4:latest',  value: 'gemma4:latest'  },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
     { label: 'gpt-4o-mini',   value: 'gpt-4o-mini'    },
+    { label: 'gpt-5.6-luna',   value: 'gpt-5.6-luna'   },
     { label: 'phi3:mini',      value: 'phi3:mini'      },
     { label: 'gemma3:latest',  value: 'gemma3:latest'  },
     { label: 'llama3:latest',  value: 'llama3:latest'  },
@@ -1121,7 +1122,15 @@ ${dataSection}
    - The model class MUST match the actual data distribution. Wrong choice = immediate crash.
 6. Target/label column: "${attrs.targetCol || ''}" — predict or transform this column
 7. Use scikit-learn (or the most appropriate stdlib-compatible library) for the task
-8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving (use pickle to a local path)
+8. Include: data validation, missing-value handling, feature engineering, model training, evaluation metrics, model artifact saving.
+8a. ARTIFACT PERSISTENCE — CRITICAL: save the trained model as 'model.pkl' into the executor's output directory so the platform auto-uploads it to MinIO/S3. Use exactly:
+    import os, pickle
+    _out_dir = os.environ.get('output_dir', '.')
+    os.makedirs(_out_dir, exist_ok=True)
+    with open(os.path.join(_out_dir, 'model.pkl'), 'wb') as _f:
+        pickle.dump(model, _f)
+    logger.info('Model saved to ' + os.path.join(_out_dir, 'model.pkl'))
+    Do NOT hard-code an absolute path. Do NOT skip this step.
 9. LOGGING — mandatory:
    - After the pip install block add:
      import logging
@@ -1212,7 +1221,15 @@ ${dataSection}
 6. Implement a ${attrs.jobType || 'traditional'} training job using ${attrs.framework || 'scikit-learn'}
 7. Use the ${attrs.baseModel || 'specified algorithm'} as the base model/algorithm
 8. Use columns: ${cols.join(', ') || 'all available columns'}
-9. Include: preprocessing, train/validation split, model initialisation, training, evaluation metrics, model saving (pickle to local path)
+9. Include: preprocessing, train/validation split, model initialisation, training, evaluation metrics, model saving.
+9a. ARTIFACT PERSISTENCE — CRITICAL: save the trained model as 'model.pkl' into the executor's output directory so the platform auto-uploads it to MinIO/S3. Use exactly:
+    import os, pickle
+    _out_dir = os.environ.get('output_dir', '.')
+    os.makedirs(_out_dir, exist_ok=True)
+    with open(os.path.join(_out_dir, 'model.pkl'), 'wb') as _f:
+        pickle.dump(model, _f)
+    logger.info('Model saved to ' + os.path.join(_out_dir, 'model.pkl'))
+    Do NOT hard-code an absolute path. Do NOT skip this step.
 10. LOGGING — mandatory:
     - After pip install block add:
       import logging

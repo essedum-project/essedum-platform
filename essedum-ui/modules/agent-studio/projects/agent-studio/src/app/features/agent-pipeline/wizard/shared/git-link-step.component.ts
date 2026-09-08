@@ -49,11 +49,7 @@ export interface GitLinkValue {
         <!-- Repository -->
         <mat-form-field appearance="fill" class="git-full">
           <mat-label>Repository</mat-label>
-          <mat-select [formControl]="repoCtrl" (selectionChange)="onRepoChange($event.value)">
-            <mat-option *ngFor="let r of repositories" [value]="r.fullName">{{ r.name }}</mat-option>
-            <mat-option *ngIf="repositories.length === 0" [value]="null" disabled>No repositories found</mat-option>
-          </mat-select>
-          <mat-spinner matSuffix diameter="16" *ngIf="loadingRepos"></mat-spinner>
+          <input matInput [formControl]="repoCtrl" placeholder="owner/repository-name" (blur)="onRepoChange(repoCtrl.value)">
         </mat-form-field>
 
         <!-- Branch -->

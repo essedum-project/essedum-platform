@@ -40,6 +40,9 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   runtypesCheck = true;
 
   private destroy$ = new Subject<void>();
+  private modelPathPollTimer: any;
+  private modelPathPollAttempts = 0;
+  private lastPolledJobId: string | null = null;
 
   @ViewChild(RunHistoryTabComponent) runHistoryTab: RunHistoryTabComponent;
 
@@ -62,7 +65,10 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+  ngOnDestroy(): void {
+    this.destroy$.next(); this.destroy$.complete();
+    this.stopModelPathPolling();
+  }
 
   private load(cname: string): void {
     this.loading = true;
@@ -74,6 +80,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         this.defaultRuntimeFromDB = this.model.defaultRuntime ?? null;
         if (this.runtypesCheck) this.fetchRunTypes();
         this.loading = false;
+        this.backfillModelPathIfNeeded();
       },
       error: () => {
         this.services.message('Pipeline not found', 'error');
@@ -242,6 +249,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         next: () => {
           this.running = false;
           this.services.message('Pipeline started!', 'success');
+          this.startModelPathPolling();
           if (this.model?.kind === 'training-job') {
             // Navigate to Run History tab (same component as data-pipeline)
             const rhIdx = this.runHistoryTabIndex;
@@ -267,5 +275,105 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.services.message(msg, 'error');
         },
       });
+  }
+
+  // ─── Model path detection after a successful run ──────────────────────
+  private startModelPathPolling(): void {
+    this.stopModelPathPolling();
+    this.modelPathPollAttempts = 0;
+    // Poll for up to ~5 minutes (75 attempts × 4s) — matches typical pipeline runtime.
+    this.modelPathPollTimer = setInterval(() => this.pollForModelPath(), 4000);
+  }
+
+  private stopModelPathPolling(): void {
+    if (this.modelPathPollTimer) {
+      clearInterval(this.modelPathPollTimer);
+      this.modelPathPollTimer = null;
+    }
+  }
+
+  private pollForModelPath(): void {
+    if (!this.model?.name) { this.stopModelPathPolling(); return; }
+    this.modelPathPollAttempts += 1;
+    if (this.modelPathPollAttempts > 75) { this.stopModelPathPolling(); return; }
+
+    this.services.fetchInternalJobByName(this.model.name, 0, 4).subscribe({
+      next: (jobs: any[]) => {
+        if (!Array.isArray(jobs) || jobs.length === 0) return;
+        const latest = [...jobs].sort((a, b) => {
+          const da = a.submittedOn ? new Date(a.submittedOn).getTime() : 0;
+          const db = b.submittedOn ? new Date(b.submittedOn).getTime() : 0;
+          return db - da;
+        })[0];
+        const status = (latest?.jobStatus ?? latest?.status ?? '').toString().toUpperCase();
+        if (status !== 'COMPLETED') return;
+        if (this.lastPolledJobId === latest.jobId) { this.stopModelPathPolling(); return; }
+        this.lastPolledJobId = latest.jobId;
+        this.stopModelPathPolling();
+        this.applyModelPath(latest.jobId, true);
+      },
+      error: () => { /* keep polling silently until attempts exhausted */ },
+    });
+  }
+
+  /** One-shot check on load: if the latest job is already COMPLETED and no modelPath is stored, populate it. */
+  private backfillModelPathIfNeeded(): void {
+    if (!this.model?.name) return;
+    // Migrate old modelPath values that included the executor prefix (e.g. "py-job-executor container: /Jobs/…").
+    const existing = this.model.pipelineAttrs?.modelPath;
+    if (existing && !existing.trim().startsWith('/Jobs/')) {
+      this.model.pipelineAttrs.modelPath = '';
+    }
+    if (this.model.pipelineAttrs?.modelPath) return;
+    this.services.fetchInternalJobByName(this.model.name, 0, 4).subscribe({
+      next: (jobs: any[]) => {
+        if (!Array.isArray(jobs) || jobs.length === 0) return;
+        const latest = [...jobs].sort((a, b) => {
+          const da = a.submittedOn ? new Date(a.submittedOn).getTime() : 0;
+          const db = b.submittedOn ? new Date(b.submittedOn).getTime() : 0;
+          return db - da;
+        })[0];
+        const status = (latest?.jobStatus ?? latest?.status ?? '').toString().toUpperCase();
+        if (status !== 'COMPLETED' || !latest.jobId) return;
+        this.lastPolledJobId = latest.jobId;
+        this.applyModelPath(latest.jobId, false);
+      },
+      error: () => { /* non-fatal */ },
+    });
+  }
+
+  private applyModelPath(jobId: string, showToast: boolean): void {
+    if (!this.model) return;
+    const modelPath = this.deriveModelPath(jobId);
+    if (!this.model.pipelineAttrs) this.model.pipelineAttrs = {};
+    this.model.pipelineAttrs.modelPath = modelPath;
+
+    // Persist into raw.json_content.pipeline_attributes.modelPath so it survives reloads
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+    parsed.pipeline_attributes = { ...(parsed.pipeline_attributes || {}), modelPath };
+    this.model.raw.json_content = JSON.stringify(parsed);
+    this.services.update(this.model.raw).subscribe({ error: () => {} });
+
+    if (showToast) {
+      this.services.message('Model generated! Check the path in the Config tab.', 'success');
+    }
+  }
+
+  /** Where the artifact actually lives after a successful run.
+   *  Prefers durable object-storage URI when the pipeline runs against minio/s3;
+   *  otherwise falls back to the executor's local (ephemeral) filesystem path. */
+  private deriveModelPath(jobId: string): string {
+    const a = this.model?.pipelineAttrs || {};
+    const container = (a.outputContainer || '').toString().trim().toLowerCase();
+    const bucket   = (a.bucket || a.connection || '').toString().trim();
+    const name     = (this.model?.name || '').toString().trim();
+    const version  = (a.version || 'v1').toString().trim();
+
+    if ((container === 's3' || container === 'minio') && bucket && name) {
+      const scheme = container === 's3' ? 's3' : 'minio';
+      return `${scheme}://${bucket}/${name}/remote/${name}/${version}/outputartifacts/logs/outputs/model.pkl`;
+    }
+    return `/Jobs/${jobId}/model.pkl`;
   }
 }
