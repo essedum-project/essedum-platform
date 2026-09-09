@@ -283,6 +283,65 @@
       .empty-subtitle { color: #94a3b8; }
     }
   }
+
+  // ── GitHub auth button + account dropdown ──────────────────────────────────
+  // These were dark-theme-only (no light variant), so the "GitHub Account"
+  // dropdown always rendered with a dark navy background/text even when the
+  // app-wide theme toggle was set to Light.
+  .gh-login-btn {
+    background: rgba(71,66,220,0.04);
+    border-color: rgba(71,66,220,0.2);
+    color: #57606a;
+    &:hover { background: rgba(71,66,220,0.1); border-color: rgba(71,66,220,0.45); color: #4742dc; }
+  }
+
+  .gh-loading-btn {
+    background: rgba(71,66,220,0.04);
+    border-color: rgba(71,66,220,0.2);
+    color: #57606a;
+  }
+  .gh-spinner {
+    border-color: rgba(71,66,220,0.2);
+    border-top-color: #4742dc;
+  }
+
+  .gh-user-btn {
+    background: rgba(71,66,220,0.06);
+    border-color: rgba(71,66,220,0.3);
+    color: #24292f;
+    &:hover { background: rgba(71,66,220,0.12); border-color: rgba(71,66,220,0.5); }
+    .gh-icon-authenticated { fill: #4742dc; }
+    .gh-chevron { color: rgba(36,41,47,0.45); }
+  }
+
+  .gh-dropdown {
+    background: #ffffff;
+    border-color: #d0d7de;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  }
+
+  .gh-dropdown-header {
+    background: rgba(71,66,220,0.05);
+    .gh-icon-lg { fill: #4742dc; }
+  }
+
+  .gh-dropdown-username { color: #24292f; }
+  .gh-dropdown-label { color: #656d76; }
+  .gh-dropdown-divider { background: #d0d7de; }
+
+  .gh-dropdown-item {
+    color: #24292f;
+    &:hover { background: rgba(71,66,220,0.06); }
+    .gh-dropdown-icon { color: #656d76; }
+  }
+
+  .gh-logout-item {
+    &:hover {
+      background: rgba(207,34,46,0.08);
+      color: #cf222e;
+      .gh-dropdown-icon { color: #cf222e; }
+    }
+  }
 }
 
 // ── GitHub Auth Button ───────────────────────────────────────────────────────
