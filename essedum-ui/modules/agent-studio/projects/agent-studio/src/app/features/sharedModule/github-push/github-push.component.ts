@@ -95,6 +95,21 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     }
   }
 
+  /**
+   * Whether the app-wide header theme toggle is set to "Light".
+   * Bound to a class on the modal root (`.github-modal`) rather than relied
+   * upon via a `:host-context(body.header-light-theme)` ancestor selector,
+   * because the modal is moved to be a direct child of `document.body`
+   * (see ngAfterViewChecked above) once opened. That detaches it from being
+   * a DOM descendant of this component's host element, which breaks
+   * `:host-context` (it requires the host to be an ancestor of the styled
+   * content). Toggling a class directly on the modal's own root element
+   * keeps working correctly regardless of where that element is reparented.
+   */
+  isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('header-light-theme');
+  }
+
   ngOnDestroy(): void {
     // Clean up modal from body if component is destroyed while modal is open
     if (this.modalMovedToBody && this.modalPortalRef?.nativeElement?.parentNode === document.body) {

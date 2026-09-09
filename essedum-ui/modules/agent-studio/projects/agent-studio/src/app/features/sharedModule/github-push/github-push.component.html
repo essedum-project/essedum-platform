@@ -14,7 +14,7 @@
 </div>
  
 <!-- Modal -->
-<div class="github-modal" #modalPortal *ngIf="showModal">
+<div class="github-modal" #modalPortal *ngIf="showModal" [class.header-light-theme]="isLightTheme()">
 <div class="github-modal-overlay" (click)="onOverlayClick($event)" (mousedown)="$event.preventDefault()"></div>
  
   <div class="github-modal-content" (click)="$event.stopPropagation()">

@@ -57,6 +57,14 @@
   border-top: 0 !important;
   border: none !important;
   width: 100% !important;
+  // Single source of truth for the field underline. Applied here (not on
+  // `.mdc-text-field--filled`) so input/select/textarea all get exactly
+  // ONE line, regardless of appearance="fill" MDC container/ripple markup.
+  border-bottom: 1px solid rgba(88,166,255,0.25) !important;
+  transition: border-color 0.2s ease !important;
+}
+:host ::ng-deep .mdc-text-field--focused .mat-mdc-form-field-infix {
+  border-bottom-color: #58a6ff !important;
 }
 
 // The actual field container - let CSS variable --mdc-filled-text-field-active-indicator draw the single underline
@@ -115,6 +123,12 @@
   font-weight: 400 !important;
   padding: 0 !important;
   caret-color: #58a6ff;
+  // common-app-styles.css applies a global `border-bottom` directly on
+  // `.mat-mdc-input-element` (needed elsewhere in the app), but combined
+  // with this component's own single underline on `.mat-mdc-form-field-infix`
+  // above, inputs/textareas end up with two stacked lines. Kill it only
+  // here, scoped to this component, without touching the global rule.
+  border-bottom: none !important;
 }
 :host ::ng-deep textarea.mat-mdc-input-element { line-height: 1.5 !important; }
 :host ::ng-deep input::placeholder,
@@ -190,9 +204,17 @@
 // =============================================================================
 .deployment-container {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 20px 28px;
   animation: fadeUp 0.4s ease-out;
-  overflow: visible !important;
+  // `overflow-x: auto` is a safety net: if an ancestor's width calculation
+  // is ever off by a few px (e.g. scrollbar-gutter miscalculation), a
+  // horizontal scrollbar appears here so the Next/Save/Finish button stays
+  // reachable instead of being silently clipped off-screen with no way to
+  // scroll to it. `overflow-y` stays visible so nothing vertical is clipped.
+  overflow-x: auto !important;
+  overflow-y: visible !important;
 }
 
 .deploy-button-header {
@@ -258,14 +280,34 @@
   display: flex !important;
   flex-wrap: wrap !important;
   margin: 0 -10px !important;
+  max-width: 100% !important;
 }
 
 .col-lg-6, .col-md-6 {
-  flex: 0 0 50% !important;
+  // `flex: 1 1 50%` (grow + shrink) with a lower min-width lets a field
+  // shrink below its natural content width instead of forcing the row
+  // (and the right-aligned Next/Finish buttons + calendar icon) past the
+  // right edge of the viewport. `flex: 0 0 50%` + the default `min-width:
+  // auto` on a flex item was letting long placeholders (e.g. "Enter
+  // Package Location URL...") push the column wider than 50%, overflowing
+  // the page horizontally at 100% zoom (only "fit" again once browser
+  // zoom shrank everything below the overflow threshold).
+  flex: 1 1 50% !important;
   max-width: 50% !important;
+  min-width: 260px !important;
   padding: 0 12px !important;
   box-sizing: border-box !important;
   overflow: visible !important;
+}
+
+// Stack to full width once two 260px-min columns no longer fit side by
+// side — this is what was forcing horizontal overflow on narrower windows.
+@media (max-width: 720px) {
+  .col-lg-6, .col-md-6 {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 .lfx-u-mar-b-16 { margin-bottom: 18px !important; }
@@ -310,11 +352,16 @@
 // =============================================================================
 .dialog-actions, .action-button-container, .form-actions {
   display: flex !important;
+  margin-left: -40px !important;
+  flex-wrap: wrap !important;
   justify-content: flex-end !important;
   align-items: center !important;
   gap: 10px !important;
   padding: 16px 0 4px !important;
   margin-top: 20px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .finish-button,
@@ -394,14 +441,26 @@ button[mat-raised-button]:not([color]):not(.action-button):not(.finish-button) {
 // LIGHT THEME
 // =============================================================================
 :host-context(body.header-light-theme) {
-  // Fields: no underline in light theme (matches dataset)
+  // Recolor the SAME single underline used in dark mode (see the
+  // `.mat-mdc-form-field-infix` rule above) instead of adding a second
+  // border on `.mdc-text-field--filled` — that produced a visible double
+  // underline (the infix border + this wrapper border stacked together).
+  ::ng-deep .mat-mdc-form-field-infix {
+    border-bottom-color: #d0d7de !important;
+  }
+  ::ng-deep .mdc-text-field--focused .mat-mdc-form-field-infix {
+    border-bottom-color: #4f46e5 !important;
+  }
+  ::ng-deep .mdc-text-field--filled:hover .mat-mdc-form-field-infix {
+    border-bottom-color: #94a3b8 !important;
+  }
   ::ng-deep .mdc-text-field--filled,
   ::ng-deep .mdc-text-field {
     border: none !important;
     border-bottom: none !important;
     border-radius: 0 !important;
-    &:hover { background: transparent !important; border-bottom: none !important; }
-    &.mdc-text-field--focused { background: transparent !important; border-bottom: none !important; box-shadow: none !important; }
+    &:hover { background: transparent !important; }
+    &.mdc-text-field--focused { background: transparent !important; box-shadow: none !important; }
   }
   ::ng-deep .mdc-floating-label { color: #64748b !important; }
   ::ng-deep .mdc-floating-label--float-above { color: #4f46e5 !important; }
@@ -412,6 +471,9 @@ button[mat-raised-button]:not([color]):not(.action-button):not(.finish-button) {
   ::ng-deep .mat-mdc-select-placeholder { color: #94a3b8 !important; }
   ::ng-deep .mat-mdc-select-arrow { color: #4f46e5 !important; }
   ::ng-deep .mat-datepicker-toggle { color: #4f46e5 !important; }
+
+  ::ng-deep .mat-mdc-input-element { border-bottom:none }
+
 
   // Checkbox & Radio in light
   ::ng-deep mat-checkbox {

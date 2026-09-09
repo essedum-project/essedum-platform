@@ -979,7 +979,47 @@
     .file-icon { color: #57606a !important; }
   }
 
-  .editor-controls-bar { background: #f6f8fa; border-bottom: none !important; .file-info .file-name { color: #24292f; } .file-info .file-path-breadcrumb { color: #8c959f; } }
+  // NOTE: the dark-mode base rules set `background: #1c2129 !important;` on both
+  // `.editor-controls-bar` AND the pinned `.editor-actions` overlay inside it, so
+  // every override here must also use !important, otherwise the dark background
+  // always wins regardless of selector specificity and the bar stays black.
+  .editor-controls-bar {
+    background: #f6f8fa !important;
+    border-bottom: none !important;
+    .file-info {
+      .file-name { color: #24292f; }
+      .file-path-breadcrumb { color: #8c959f; }
+    }
+    .editor-actions {
+      background: #f6f8fa !important;
+
+      .auto-push-toggle { color: #57606a !important; }
+
+      .save-and-push-button {
+        color: #57606a !important;
+        border-color: rgba(71,66,220,0.25) !important;
+        &:hover:not([disabled]) {
+          color: #4742dc !important;
+          background: rgba(71,66,220,0.08) !important;
+          border-color: rgba(71,66,220,0.45) !important;
+        }
+      }
+      .save-button {
+        &.save-disabled, &[disabled] {
+          color: #8c959f !important;
+          mat-icon { color: #8c959f !important; }
+        }
+      }
+      .delete-button {
+        color: #57606a !important;
+        &:hover { background: rgba(207,34,46,0.08) !important; color: #cf222e !important; }
+      }
+      .close-button {
+        color: #57606a !important;
+        &:hover { background: rgba(87,96,106,0.08) !important; color: #24292f !important; }
+      }
+    }
+  }
   .line-numbers-column { background: #f6f8fa; border-right-color: #d0d7de; .line-number { color: #8c959f; } }
   .file-content-editor { background: #ffffff !important; color: #24292f !important; caret-color: #4742dc; }
   .json-editor { color: #0550ae !important; }

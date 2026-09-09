@@ -425,7 +425,21 @@ button[mat-raised-button][color="primary"] {
 // =============================================================================
 // LIGHT THEME
 // =============================================================================
-:host-context(body.header-light-theme) {
+// NOTE: `openModal()`/`ngAfterViewChecked()` move `.github-modal` (the
+// #modalPortal element) to be a direct child of `document.body` at runtime
+// (see github-push.component.ts) so it can escape any clipping/stacking
+// context ancestor. That means, once open, this markup is no longer a DOM
+// descendant of this component's host element (`<app-github-push>`).
+// Angular's `:host-context(...)` selectors (and any plain `body.foo …`
+// ancestor selector) require either the host element or `<body>` itself to
+// carry this component's private encapsulation attribute / be a descendant
+// of the host — neither holds true once the modal is reparented, so those
+// selectors silently never match here.
+// Instead, `isLightTheme()` toggles a `.header-light-theme` class directly on
+// the `.github-modal` root itself (see the template), so all selectors below
+// stay entirely within this component's own template subtree and work
+// regardless of where that subtree is physically reparented in the DOM.
+.github-modal.header-light-theme {
   .github-modal-content {
     background: #ffffff;
     border-color: #d0d7de;
@@ -514,6 +528,11 @@ button[mat-raised-button][color="primary"] {
   }
 
   .github-header h2 { color: #1f2328 !important; }
+}
+
+// These target elements that stay nested inside the component's own host
+// (not moved to document.body), so :host-context is safe/required here.
+:host-context(body.header-light-theme) {
   :host ::ng-deep .mdc-floating-label, :host ::ng-deep mat-label { color: #656d76 !important; }
   :host ::ng-deep .mat-mdc-input-element { color: #1f2328 !important; }
   :host ::ng-deep .mdc-text-field--filled { background: rgba(246,248,250,0.8) !important; }
