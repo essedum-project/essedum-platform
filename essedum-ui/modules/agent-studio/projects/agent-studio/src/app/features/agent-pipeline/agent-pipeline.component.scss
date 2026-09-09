@@ -632,7 +632,15 @@
       background: transparent !important;
       transition: all 0.15s ease !important;
 
-      &:hover:not([disabled]) { background: rgba(63,185,80,0.15) !important; }
+      // NOTE: must exclude `.save-enabled` — `.save-button:hover:not([disabled])`
+      // (1 class + :hover + :not([disabled])) has HIGHER specificity than
+      // `.save-button.save-enabled` (1 class + 1 class) for the `background`
+      // property, so without this exclusion, hovering an ENABLED (green
+      // gradient) save button was replacing its gradient with this pale
+      // translucent wash — leaving the forced-white icon nearly invisible.
+      // This was a pre-existing bug in the base/dark rule itself, not
+      // something introduced by the light-theme overrides below.
+      &:hover:not([disabled]):not(.save-enabled) { background: rgba(63,185,80,0.15) !important; }
 
       // Enabled state — prominent green pill so the user always spots the
       // save action after making a change.
@@ -643,7 +651,11 @@
         box-shadow: 0 2px 8px rgba(35,134,54,0.35) !important;
         border: 1px solid rgba(63,185,80,0.35) !important;
         mat-icon { color: #ffffff !important; }
-        &:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important; }
+        &:hover {
+          background: linear-gradient(135deg, #238636, #2ea043) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important;
+        }
       }
 
       // Explicit disabled overrides Material's default half-opacity so the
@@ -1005,6 +1017,15 @@
         }
       }
       .save-button {
+        // Idle (unmodified) state only — dark-mode default is `color: #484f58`
+        // which is hard to read against the light `#f6f8fa` toolbar bg. Must
+        // exclude `.save-enabled` or this (tied specificity, later in the
+        // cascade) wins over the enabled state's white text/icon too.
+        &:not(.save-enabled) {
+          color: #8c959f !important;
+          &:hover:not([disabled]) { background: rgba(26,127,55,0.1) !important; }
+        }
+
         &.save-disabled, &[disabled] {
           color: #8c959f !important;
           mat-icon { color: #8c959f !important; }
@@ -1033,6 +1054,43 @@
     .placeholder-content mat-icon { color: #d0d7de !important; }
     .placeholder-content h3 { color: #57606a !important; }
     .placeholder-content p { color: #8c959f !important; }
+  }
+}
+
+// Extra-specificity insurance for the toolbar button hover/idle states.
+// Repeating the same :host-context() selector doubles its specificity
+// (a standard, harmless CSS technique) so these rules are guaranteed to
+// beat any equally-scoped dark-mode rule regardless of declaration order.
+:host-context(body.header-light-theme):host-context(body.header-light-theme) {
+  .editor-controls-bar .editor-actions {
+    .save-button {
+      &:not(.save-enabled) {
+        color: #8c959f !important;
+        &:hover:not([disabled]) { background: rgba(26,127,55,0.12) !important; }
+      }
+      &.save-disabled, &[disabled] { color: #8c959f !important; mat-icon { color: #8c959f !important; } }
+      &.save-enabled, &:not([disabled]) {
+        mat-icon { color: #ffffff !important; }
+        &:hover { box-shadow: 0 4px 14px rgba(35,134,54,0.5) !important; }
+      }
+    }
+    .save-and-push-button {
+      color: #57606a !important;
+      border-color: rgba(71,66,220,0.25) !important;
+      &:hover:not([disabled]) {
+        color: #4742dc !important;
+        background: rgba(71,66,220,0.1) !important;
+        border-color: rgba(71,66,220,0.45) !important;
+      }
+    }
+    .delete-button {
+      color: #57606a !important;
+      &:hover { background: rgba(207,34,46,0.1) !important; color: #cf222e !important; }
+    }
+    .close-button {
+      color: #57606a !important;
+      &:hover { background: rgba(87,96,106,0.1) !important; color: #24292f !important; }
+    }
   }
 }
 
