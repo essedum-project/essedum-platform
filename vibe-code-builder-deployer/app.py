@@ -405,6 +405,7 @@ def handle_pipeline_trigger(data):
         log_to_client("Download complete.", step="DOWNLOAD")
         #suffix = ''.join(random.choices(string.ascii_lowercase, k=5))
         deploy_name = data["deployment_name"]
+        cname = data.get("cname", deploy_name)   # original pipeline name before sanitization
 
         # Sanitize deployment name to meet Kubernetes DNS-1035 requirements:
         # - Must start with alphabetic character
@@ -632,7 +633,7 @@ def handle_pipeline_trigger(data):
                     "Deployment not found. Creating new deployment...", step="DEPLOY"
                 )
                 deployment_obj = create_deployment_object(
-                    deploy_name, image_tag, target_namespace, secret_to_use, container_port=detected_port
+                    deploy_name, image_tag, target_namespace, secret_to_use, container_port=detected_port, cname=cname
                 )
                 k8s_apps.create_namespaced_deployment(
                     namespace=target_namespace, body=deployment_obj
@@ -768,7 +769,7 @@ def _detect_app_port(directory, entry_point):
     return 5000
 
 
-def create_deployment_object(name, image, namespace, secret_name=None, container_port=5000):
+def create_deployment_object(name, image, namespace, secret_name=None, container_port=5000, cname=None):
     """Creates a V1Deployment object for the runner"""
 
     env_from = []
@@ -793,7 +794,10 @@ def create_deployment_object(name, image, namespace, secret_name=None, container
     )
 
     template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(labels={"app": name}),
+        metadata=client.V1ObjectMeta(
+            labels={"app": name},
+            annotations={"pipeline-cname": cname or name},
+        ),
         spec=client.V1PodSpec(
             containers=[container],
             image_pull_secrets=[client.V1LocalObjectReference(name="regcred")],

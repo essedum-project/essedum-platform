@@ -4,6 +4,7 @@ import { routes } from '../landing/landing-routing.module';
 import { CustomManifest } from './Config.model';
 import { WebComponentWrapper,WebComponentWrapperOptions } from '@angular-architects/module-federation-tools';
 import { MfeErrorBoundaryModule } from '../landing/mfe-error-boundary/mfe-error-boundary.module';
+import { AppNavigationComponent } from '../landing/app-navigation/app-navigation.component';
 
 // Plan §13 Pitfall #14 — when an MFE's remoteEntry.js fails to load (network,
 // stale manifest, broken deploy), swap in MfeErrorBoundaryModule so the user
@@ -75,9 +76,19 @@ export function buildRoutes(options: CustomManifest): Routes {
                 }
             }
         }
+        else if(entry['type']=='iframe') {
+            r1 = {
+                path: entry.routePath,
+                component: AppNavigationComponent,
+                data: {
+                    iframeUrl: entry.remoteEntry,
+                    title: entry['title'] || ''
+                }
+            }
+        }
         
         
-        routes[0]['children'].push(r1);
+        if (r1) routes[0]['children'].push(r1);
     }
     return routes;
 }

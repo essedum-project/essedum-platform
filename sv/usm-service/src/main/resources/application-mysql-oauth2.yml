@@ -11,8 +11,8 @@ telemetry:
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://${MYSQL_DATASOURCE_URL:mysql:3306}/telemetrydb
     url: jdbc:mysql://${MYSQL_DATASOURCE_URL:mysql:3306}/telemetrydb
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:password}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
 
 apipermission:
   disable_api_security_validation: false
@@ -27,14 +27,14 @@ config:
   static-locations: file:/app/static/
 
   datasourceurl: jdbc:mysql://${MYSQL_DATASOURCE_URL:mysql:3306}
-  datasourceuser: ${MYSQL_USER:root}
-  datasourcepass: ${MYSQL_PASSWORD:password}
+  datasourceuser: ${MYSQL_USER}
+  datasourcepass: ${MYSQL_PASSWORD}
   essedumcoredb: essedum_coredb
   essedumquartzdb: essedum_quartzdb
 
   service-auth:
-    access-token: ${SERVICE_ACCESS_TOKEN:aec127c2-c984-33f6-9a3a-355xd1dof097}
-    proxy-user: ${SERVICE_PROXY_USER:admin}
+    access-token: ${SERVICE_ACCESS_TOKEN}
+    proxy-user: ${SERVICE_PROXY_USER}
 
   driverClassName: com.mysql.cj.jdbc.Driver
   essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb}
@@ -179,13 +179,13 @@ mailserver:
   accesstoken: bg9126c2-c913-iof6-9r5x-90ecf001h00a
 
 security:
-  issuer-uri: ${OAUTH2_ISSUER_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM}
-  jwk-set-uri: ${OAUTH2_JWK_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM/protocol/openid-connect/certs}
-  clientId: ${OAUTH2_CLIENT_ID:essedum-45}
+  issuer-uri: ${OAUTH2_ISSUER_URI}
+  jwk-set-uri: ${OAUTH2_JWK_URI}
+  clientId: ${OAUTH2_CLIENT_ID}
   scope: ${OAUTH2_SCOPE:openid profile email}
   claim: ${OAUTH2_USER_CLAIM:email}
   createUserIfNotExist: ${OAUTH2_CREATE_USER_IF_NOT_EXIST:true}
-  silentRefreshTimeoutFactor: 0.85
+  silentRefreshTimeoutFactor: ${OAUTH2_SILENT_REFRESH_FACTOR:0.85}
 
 # Eureka removed - using K8s service discovery
 eureka:

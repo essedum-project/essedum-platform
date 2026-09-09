@@ -1,6 +1,12 @@
 import { Component, Input, OnInit, OnDestroy, EventEmitter, Output, ChangeDetectorRef, HostBinding, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 import { GitHubService } from '../services/github.service';
-import { GitHubRepository, PushRequest, PullRequest } from '../models/github.models';
+import {
+  GitHubRepository,
+  PushRequest,
+  PullRequest,
+  PullOperationSummary,
+  PushOperationSummary
+} from '../models/github.models';
 import { AgentPipelineService } from '../../agent-pipeline/agent-pipeline.service';
 import JSZip from 'jszip';
 import { Services } from '@essedum/shared-lib';
@@ -13,6 +19,8 @@ import { Services } from '@essedum/shared-lib';
 export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() mode: 'push' | 'pull' = 'push';
   @Output() zipFileCreated = new EventEmitter<File>();
+  @Output() pullCompleted = new EventEmitter<PullOperationSummary>();
+  @Output() pushCompleted = new EventEmitter<PushOperationSummary>();
 
   @HostBinding('class.pull-mode') get isPullMode() { return this.mode === 'pull'; }
 
@@ -44,6 +52,10 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
   showModal = false;
   errorMessage = '';
   successMessage = '';
+  pullPreview: PullOperationSummary | null = null;
+  pullResult: PullOperationSummary | null = null;
+  pushPreview: PushOperationSummary | null = null;
+  pushResult: PushOperationSummary | null = null;
   private isModalTransitioning = false;
   private allowOverlayClose = false;
   private overlayCloseGuardTimer: ReturnType<typeof setTimeout> | null = null;
@@ -63,6 +75,16 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.username = cachedUsername;
       this.isAuthenticated = true;
     }
+
+    const cachedRepo = sessionStorage.getItem('git_selected_Repo');
+    if (cachedRepo) {
+      this.selectedRepo = cachedRepo;
+    }
+
+    const cachedBranch = sessionStorage.getItem('git_selected_branch');
+    if (cachedBranch) {
+      this.selectedBranch = cachedBranch;
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -71,6 +93,21 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       document.body.appendChild(this.modalPortalRef.nativeElement);
       this.modalMovedToBody = true;
     }
+  }
+
+  /**
+   * Whether the app-wide header theme toggle is set to "Light".
+   * Bound to a class on the modal root (`.github-modal`) rather than relied
+   * upon via a `:host-context(body.header-light-theme)` ancestor selector,
+   * because the modal is moved to be a direct child of `document.body`
+   * (see ngAfterViewChecked above) once opened. That detaches it from being
+   * a DOM descendant of this component's host element, which breaks
+   * `:host-context` (it requires the host to be an ancestor of the styled
+   * content). Toggling a class directly on the modal's own root element
+   * keeps working correctly regardless of where that element is reparented.
+   */
+  isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('header-light-theme');
   }
 
   ngOnDestroy(): void {
@@ -93,6 +130,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         if (status.authenticated && status.githubUsername) {
           this.username = status.githubUsername;
           sessionStorage.setItem('git_username', this.username);
+          if (status.sessionId) {
+            sessionStorage.setItem('git_session_id', status.sessionId);
+          }
           // Only load repositories in push mode (pull mode uses a URL input)
           if (this.mode === 'push') {
             this.loadRepositories();
@@ -153,14 +193,14 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
    * Get modal title based on mode
    */
   getModalTitle(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Pull from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Clone from GitHub';
   }
  
   /**
    * Get button text based on mode
    */
   getButtonText(): string {
-    return this.mode === 'push' ? 'Push to GitHub' : 'Pull from GitHub';
+    return this.mode === 'push' ? 'Push to GitHub' : 'Clone from GitHub';
   }
  
   /**
@@ -215,6 +255,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.isAuthenticated = true;
         this.username = status.githubUsername || '';
         sessionStorage.setItem('git_username', this.username);
+        if (status.sessionId) {
+          sessionStorage.setItem('git_session_id', status.sessionId);
+        }
         this.showModal = true;
         this.cdr.detectChanges();
         this.loadRepositories();
@@ -241,6 +284,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.repositories = [];
         this.branches = [];
         this.resetForm();
+        this.clearGitSessionData();
         this.isLoading = false;
         this.successMessage = 'Logged out successfully. Next login will prompt for account selection.';
         this.cdr.detectChanges();
@@ -256,6 +300,17 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    sessionStorage.removeItem('git_username');
+    sessionStorage.removeItem('git_session_id');
+    sessionStorage.removeItem('git_selected_Repo');
+    sessionStorage.removeItem('git_selected_branch');
   }
  
   /**
@@ -287,8 +342,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (!this.selectedRepo) {
       this.branches = [];
       this.selectedRepoObject = null;
-      //sessionStorage.removeItem('git_selected_Repo');
-      //this.updateGitHubConfig();
+      sessionStorage.removeItem('git_selected_Repo');
       return;
     }
  
@@ -296,9 +350,8 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.selectedRepoObject = this.repositories.find(repo => repo.fullName === this.selectedRepo) || null;
  
     // Store selected repo in sessionStorage
-    //sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
+    sessionStorage.setItem('git_selected_Repo', this.selectedRepo);
     this.loadSourceBranch();
-    //this.updateGitHubConfig();
  
     this.isLoading = true;
     this.errorMessage = '';
@@ -326,24 +379,10 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
   onBranchChange(): void {
     if (this.selectedBranch) {
       // Store selected branch in sessionStorage
-      //sessionStorage.setItem('git_selected_branch', this.selectedBranch);
-      //this.updateGitHubConfig();
+      sessionStorage.setItem('git_selected_branch', this.selectedBranch);
     }
   }
- 
-  /**
-   * Update GitHub config object in sessionStorage
-   */
-  // updateGitHubConfig(): void {
-  //   const githubConfig = {
-  //     git_username: sessionStorage.getItem('git_username') || this.username || '',
-  //     git_selected_Repo: sessionStorage.getItem('git_selected_Repo') || this.selectedRepo || '',
-  //     git_selected_branch: sessionStorage.getItem('git_selected_branch') || this.selectedBranch || ''
-  //   };
- 
-  //sessionStorage.setItem('github_config', JSON.stringify(githubConfig));
-  //}
- 
+
   /**
    * Handle repository URL input change (Pull mode only)
    */
@@ -365,10 +404,20 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     }
  
     this.extractedRepoName = repoName;
+
+    // Do not fetch branches while the user is typing.
+    // Branch loading is triggered explicitly after URL entry is complete.
+  }
+
+  loadPullBranches(): void {
+    if (!this.extractedRepoName) {
+      this.errorMessage = 'Enter a valid GitHub repository URL first';
+      return;
+    }
  
     // Fetch branches for the repository
     this.isLoading = true;
-    this.githubService.getBranches(repoName).subscribe({
+    this.githubService.getBranches(this.extractedRepoName).subscribe({
       next: (branches) => {
         this.branches = branches;
         this.selectedBranch = branches.length > 0 ? branches[0] : '';
@@ -438,11 +487,25 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.agentPipelineService.getFilesList(this.cname).subscribe({
       next: (fetchedFiles) => {
         console.log('Fetched files:', fetchedFiles);
+        const requestedAt = new Date().toISOString();
+        const effectiveCommitMessage = this.getCommitMessage();
+
+        this.pushPreview = {
+          repoName: this.selectedRepo,
+          branch: this.selectedBranch,
+          githubUsername: this.username,
+          commitMessage: effectiveCommitMessage,
+          filesCount: fetchedFiles.length,
+          requestedAt,
+          status: 'started',
+          message: 'Push request prepared'
+        };
+        this.pushResult = null;
  
         const request: PushRequest = {
           repoName: this.selectedRepo,
           branch: this.selectedBranch,
-          commitMessage: this.getCommitMessage(),
+          commitMessage: effectiveCommitMessage,
           files: fetchedFiles.map(file => ({
             path: file.filePath,
             fileName: file.filename,
@@ -455,6 +518,20 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
           next: (response) => {
             this.isLoading = false;
             this.successMessage = response;
+            const commitShaMatch = response?.match(/[a-f0-9]{7,40}/i);
+            this.pushResult = {
+              repoName: this.selectedRepo,
+              branch: this.selectedBranch,
+              githubUsername: this.username,
+              commitMessage: effectiveCommitMessage,
+              filesCount: fetchedFiles.length,
+              requestedAt,
+              completedAt: new Date().toISOString(),
+              commitSha: commitShaMatch ? commitShaMatch[0] : undefined,
+              status: 'success',
+              message: response
+            };
+            this.pushCompleted.emit(this.pushResult);
             this.cdr.detectChanges();
             this.saveGitConfig();
             setTimeout(() => { this.closeModal(); this.cdr.detectChanges(); }, 2000);
@@ -462,6 +539,17 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
           error: (error) => {
             this.isLoading = false;
             this.errorMessage = 'Push failed: ' + (error.error || error.message);
+            this.pushResult = {
+              repoName: this.selectedRepo,
+              branch: this.selectedBranch,
+              githubUsername: this.username,
+              commitMessage: effectiveCommitMessage,
+              filesCount: fetchedFiles.length,
+              requestedAt,
+              completedAt: new Date().toISOString(),
+              status: 'failed',
+              message: error?.error || error?.message || 'Push failed'
+            };
             this.cdr.detectChanges();
           }
         });
@@ -474,7 +562,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
  
   /**
-   * Pull from GitHub
+   * Clone from GitHub
    */
   pullFromGitHub(): void {
     if (!this.selectedBranch) {
@@ -498,6 +586,17 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       repoUrl: repoUrl,
       branch: this.selectedBranch
     };
+
+    this.pullPreview = {
+      repoName: this.extractedRepoName,
+      repoUrl,
+      branch: this.selectedBranch,
+      githubUsername: this.username,
+      requestedAt: new Date().toISOString(),
+      status: 'started',
+      message: 'Pull request prepared'
+    };
+    this.pullResult = null;
  
     this.githubService.pullFromGitHub(request).subscribe({
       next: (response) => {
@@ -507,6 +606,21 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.createZipFromPulledFiles(response.files).then((zipFile) => {
           this.isLoading = false;
           this.successMessage = 'ZIP file created successfully!';
+          const filesCount = Array.isArray(response?.files) ? response.files.length : 0;
+          this.pullResult = {
+            repoName: this.extractedRepoName,
+            repoUrl,
+            branch: response?.branch || this.selectedBranch,
+            githubUsername: this.username,
+            requestedAt: this.pullPreview?.requestedAt || new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+            commitHash: response?.commitHash,
+            filesCount,
+            status: 'success',
+            message: 'Pull completed successfully'
+          };
+          this.pullCompleted.emit(this.pullResult);
+          this.saveGitConfig();
           this.cdr.detectChanges();
           this.zipFileCreated.emit(zipFile);
           setTimeout(() => { this.closeModal(); this.cdr.detectChanges(); }, 2000);
@@ -519,6 +633,16 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = 'Pull failed: ' + (error.error?.message || error.message || 'Unknown error');
+        this.pullResult = {
+          repoName: this.extractedRepoName,
+          repoUrl,
+          branch: this.selectedBranch,
+          githubUsername: this.username,
+          requestedAt: this.pullPreview?.requestedAt || new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          status: 'failed',
+          message: error?.error?.message || error?.message || 'Unknown error'
+        };
         this.cdr.detectChanges();
       }
     });
@@ -582,7 +706,11 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
    * Save git configuration after successful push
    */
   saveGitConfig(): void {
-    if (!this.cname || !this.selectedRepo || !this.selectedBranch) {
+    const resolvedRepo = this.mode === 'pull'
+      ? (this.extractedRepoName || this.selectedRepo)
+      : this.selectedRepo;
+
+    if (!this.cname || !resolvedRepo || !this.selectedBranch) {
       this.service.message('Missing required data for saving git config', 'warning');
       return;
     }
@@ -593,7 +721,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       cname: this.cname,
       org: sessionStorage.getItem('organization'),
       bname: this.selectedBranch,
-      repo: this.selectedRepo,
+      repo: resolvedRepo,
       gituser: this.username,
       createdby: currentUser,
       createdat: new Date().toISOString(),
@@ -650,5 +778,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.successMessage = '';
     this.repoUrl = '';
     this.extractedRepoName = '';
+    this.pullPreview = null;
+    this.pullResult = null;
+    this.pushPreview = null;
+    this.pushResult = null;
   }
 }

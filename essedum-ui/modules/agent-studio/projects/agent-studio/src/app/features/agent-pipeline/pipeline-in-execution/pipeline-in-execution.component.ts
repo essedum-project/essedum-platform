@@ -10,6 +10,7 @@ import { PodWatcherService, PipelinePodsResponse } from '../../services/pod-watc
 import { AipGridColumn, AipGridAction } from '../../sharedModule/aip-grid/aip-grid.component';
 
 export interface ExecutionPipeline {
+  pipeline_name: any;
   pod_name:         string;
   container_name:   string;
   deployment_name:  string;
@@ -50,6 +51,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly FILTERTYPELABEL    = 'Agent Type';
   readonly FILTERSTATUSLABEL  = 'Pipeline Status';
   readonly COLPIPELINE        = 'Pipeline';
+  readonly COLCONTAINERNAME   = 'Container Name';
   readonly COLPODNAME         = 'Pod Name';
   readonly COLTYPE            = 'Type';
   readonly COLSTATUS          = 'Execution Status';
@@ -65,11 +67,12 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   readonly DEPLOYMENTDELETEDSUCCESS  = 'Pipeline deployment deleted!';
 
   // ── aip-grid configuration ─────────────────────────────────────────────────
-  readonly GRID_TEMPLATE = '26% 22% 12% 24% 16%';
+  // 5 data columns + 1 actions column
+  readonly GRID_TEMPLATE = '24% 18% 20% 10% 18% 10%';
 
   readonly gridColumns: AipGridColumn[] = [
     {
-      key: 'pipeline', label: this.COLPIPELINE, field: 'container_name', cssClass: 'col-name',
+      key: 'pipeline', label: this.COLPIPELINE, field: 'pipeline_name', cssClass: 'col-name',
       type: 'icon-text',
       iconFn: (row) => this.getTypeIcon((row.type || '').toLowerCase()),
       iconWrapperCssFn: (row) => `exec-type-icon mode-${(row.type || '').toLowerCase()}`,
@@ -78,6 +81,10 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     {
       key: 'podname', label: this.COLPODNAME, field: 'pod_name', cssClass: 'col-pod-name',
       type: 'text', textCssClass: 'exec-pod-name',
+    },
+    {
+      key: 'containername', label: this.COLCONTAINERNAME, field: 'container_name', cssClass: 'col-container-name',
+      type: 'text', textCssClass: 'exec-container-name',
     },
     {
       key: 'type', label: this.COLTYPE, field: 'type', cssClass: 'col-type',
@@ -94,6 +101,13 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   ];
 
   readonly gridActions: AipGridAction[] = [
+     {
+      key: 'view',
+      label: this.VIEWPIPELINE,
+      icon: 'visibility',
+      iconCssClass: 'menu-icon-view',
+      visibleFn: (row) => ['running','pending','succeeded','failed'].includes((row.pod_phase || '').toLowerCase()),
+    },
     {
       key: 'logs',
       label: this.VIEWPODLOGS,
@@ -122,6 +136,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
 
   onGridAction(event: { key: string; row: ExecutionPipeline }): void {
     switch (event.key) {
+      case 'view':            this.viewPipeline(event.row);               break;
       case 'logs':             this.checkPodLog(event.row);               break;
       case 'delete-pod':       this.deletePipelinePod(event.row);         break;
       case 'delete-container': this.deletePipelineAsContainer(event.row); break;
@@ -189,7 +204,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         ))
       )
       .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
         this.applyClientFilters();
       });
   }
@@ -205,7 +220,7 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
     this.podWatcher
       .getPipelinePods('all', 1, this.FETCH_SIZE, undefined, this.selectedType)
       .subscribe(res => {
-        this.allRecords = (res.records || []).map(r => ({ ...r, pipelineMode: this.modeFromType(r.type) }));
+        this.allRecords = (res.records || []).map(r => ({ ...r, pipeline_name: (r as any)?.pipeline_name || r.container_name, pipelineMode: this.modeFromType(r.type) }));
         this.applyClientFilters();
         this.loading = false;
       });
@@ -337,9 +352,21 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
   }
 
   viewPipeline(pipeline: ExecutionPipeline): void {
-    const name = pipeline.container_name;
-    this.service.getStreamingServicesByName(name).subscribe((res: any) => {
-      const navigationExtras: NavigationExtras = {
+   // const name = pipeline.container_name;
+    const pipelineName = pipeline.pipeline_name;
+
+    const cardTitle =
+      pipeline.pipelineMode === 'mcp' ? 'MCP Pipelines' :
+      pipeline.pipelineMode === 'app' ? 'App Pipelines' :
+      'Agent Pipelines';
+
+    const cardForState = {
+      ...pipeline,
+      name:  pipelineName,  
+    };
+
+    const navigate = (streamItem: any) => {
+      const extras: NavigationExtras = {
         queryParams: {
           page: 1,
           search: '',
@@ -349,28 +376,43 @@ export class PipelineInExecutionComponent implements OnInit, OnDestroy {
         },
         queryParamsHandling: 'merge',
         state: {
-          cardTitle: pipeline.pipelineMode === 'mcp'
-            ? 'MCP Pipelines'
-            : pipeline.pipelineMode === 'app'
-            ? 'App Pipelines'
-            : 'Pipeline Agent',
-          pipelineAlias: res?.alias || pipeline.container_name,
-          streamItem: res,
-          card: pipeline,
+          cardTitle,
+          pipelineAlias: streamItem?.alias || pipeline.container_name,
+          streamItem,
+          card: cardForState,
           pipelineMode: pipeline.pipelineMode,
+          source: 'pipeline-in-execution',
         },
         relativeTo: this.route,
       };
+      this.router.navigate([`../view/${pipelineName}`], extras);
+    };
 
-      if (res?.type === 'AIAgent' ||
+    this.service.getStreamingServicesByName(pipelineName).subscribe({
+      next: (res: any) => {
+        const typeOk =
+          res?.type === 'AIAgent' ||
           res?.type === 'mcpServer' ||
           res?.type === 'appPipeline' ||
-          res?.type === 'NativeScript' ||
+          res?.type === 'NativeScript';
+        const modeOk =
           pipeline.pipelineMode === 'mcp' ||
           pipeline.pipelineMode === 'app' ||
-          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent')) {
-        this.router.navigate([`../view/${name}`], navigationExtras);
-      }
+          (pipeline.pipelineMode === 'agent' && res?.interfacetype === 'pipeline-agent');
+
+        if (typeOk || modeOk) {
+          navigate(res);
+        } else {
+          navigate(res);
+        }
+      },
+      error: () => {
+        this.service.message(
+          `Could not load pipeline details for "${pipelineName}". Opening with limited data.`,
+          'warning'
+        );
+        navigate(null);
+      },
     });
   }
 

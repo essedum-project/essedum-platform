@@ -1,27 +1,19 @@
-# NOTE: Keycloak runs in start-dev mode which does NOT support horizontal clustering.
-# HPA is intentionally disabled. Scale manually if needed after switching to production mode.
-# apiVersion: autoscaling/v2
-# kind: HorizontalPodAutoscaler
-# metadata:
-#   name: keycloak-hpa
-#   namespace: aipns
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: keycloak-hpa
+  namespace: aipns
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: keycloak
   minReplicas: 1
-  maxReplicas: 2
+  maxReplicas: 1
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 70
+          averageUtilization: 80

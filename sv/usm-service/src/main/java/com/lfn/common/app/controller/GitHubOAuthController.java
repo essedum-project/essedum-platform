@@ -8,6 +8,7 @@ package com.lfn.common.app.controller;
 import com.lfn.common.app.service.GitHubOAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,29 +68,53 @@ public class GitHubOAuthController {
     }
 
     /**
-     * OAuth callback - handles redirect from GitHub
+     * OAuth callback - handles redirect from GitHub.
+     * Returns a small self-closing HTML page instead of raw JSON so the popup
+     * window doesn't display the raw response to the user. The opener window
+     * detects completion separately by polling /oauth/status.
      */
-    @GetMapping("/callback")
-    public ResponseEntity<Map<String, String>> callback(
+    @GetMapping(value = "/callback", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> callback(
             @RequestParam("code") String code,
             @RequestParam("state") String state) {
         try {
-            String sessionId = oauthService.exchangeCodeForToken(code, state);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Authentication successful");
-            response.put("sessionId", sessionId);
-
-            log.info("OAuth callback successful for session: {}", sessionId);
-            return ResponseEntity.ok(response);
+            String accessToken = oauthService.exchangeCodeForToken(code, state);
+            log.info("OAuth callback successful, token obtained");
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(buildSuccessHtml(accessToken));
         } catch (Exception e) {
             log.error("Error in OAuth callback: {}", e.getMessage(), e);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(buildErrorHtml(e.getMessage()));
         }
+    }
+
+    /**
+     * Posts the token to the opener window via postMessage so the frontend can store
+     * it in sessionStorage and send it as X-GitHub-Token on subsequent API calls.
+     * This makes the flow stateless — no server-side token lookup needed across pods.
+     */
+    private String buildSuccessHtml(String accessToken) {
+        String safeToken = accessToken == null ? "" : accessToken.replaceAll("[^a-zA-Z0-9_\\-]", "");
+        return "<!DOCTYPE html><html><head><title>GitHub Login</title></head>"
+                + "<body style=\"font-family:sans-serif;text-align:center;padding-top:40px;\">"
+                + "<p>Login successful. You can close this window.</p>"
+                + "<script>"
+                + "try { if(window.opener){window.opener.postMessage({type:'github-oauth-success',token:'" + safeToken + "'},'*');} } catch(e){}"
+                + "setTimeout(function(){window.close();},500);"
+                + "</script>"
+                + "</body></html>";
+    }
+
+    private String buildErrorHtml(String message) {
+        String safeMessage = message == null ? "" : message.replace("<", "&lt;").replace(">", "&gt;");
+        return "<!DOCTYPE html><html><head><title>GitHub Login</title></head>"
+                + "<body style=\"font-family:sans-serif;text-align:center;padding-top:40px;\">"
+                + "<p>Login failed: " + safeMessage + " You can close this window.</p>"
+                + "<script>setTimeout(function(){window.close();},2000);</script>"
+                + "</body></html>";
     }
 
     /**
@@ -116,6 +141,7 @@ public class GitHubOAuthController {
                 String token = oauthService.getAccessToken(username);
                 String githubUsername = oauthService.getGitHubUsername(token);
                 response.put("githubUsername", githubUsername);
+                response.put("githubToken", token);
                 log.info("OAuth status check: user '{}' is authenticated with GitHub as '{}'", username, githubUsername);
             } catch (Exception e) {
                 log.error("Error getting GitHub username for user '{}': {}", username, e.getMessage());

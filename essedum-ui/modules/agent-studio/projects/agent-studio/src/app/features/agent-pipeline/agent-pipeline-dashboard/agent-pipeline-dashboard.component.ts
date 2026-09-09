@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostListener,
   OnChanges,
   OnInit,
   Output,
@@ -14,6 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { HttpParams } from '@angular/common/http';
 import { TagsService } from '@essedum/shared-lib';
 import { Location } from '@angular/common';
+import { GitHubService } from '../../sharedModule/services/github.service';
 import { ConfirmDeleteDialogComponent } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../../pipeline/pipeline-create/pipeline-create.component';
 import { DataPipelineWizardLocalComponent } from '../wizard/data-pipeline-wizard/data-pipeline-wizard.component';
@@ -100,6 +102,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   organization: string;
   pipelineConstantsKey: string = 'icip.pipeline.includeCore';
 
+  // GitHub auth state
+  isGitAuthenticated = false;
+  gitUsername = '';
+  isGitLoading = false;
+  showGitDropdown = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -107,7 +115,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     private changeDetectionRef: ChangeDetectorRef,
     public dialog: MatDialog,
     public tagService: TagsService,
-    private location: Location
+    private location: Location,
+    private githubService: GitHubService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -118,6 +127,11 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     this.filteredCards = [];
     this.organization = sessionStorage.getItem('organization');
 
+    const cachedGitUser = sessionStorage.getItem('git_username');
+    if (cachedGitUser) {
+      this.gitUsername = cachedGitUser;
+      this.isGitAuthenticated = true;
+    }
 
     if (this.organization) {
       this.handleRouteState();
@@ -128,6 +142,67 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
 
     this.loadAuthentications();
     this.updateLastRefreshTime();
+  }
+
+  gitLogin(): void {
+    this.isGitLoading = true;
+    this.githubService.initiateOAuthFlow().subscribe({
+      next: (status) => {
+        this.isGitLoading = false;
+        this.isGitAuthenticated = true;
+        this.gitUsername = status.githubUsername || '';
+        sessionStorage.setItem('git_username', this.gitUsername);
+        if (status.sessionId) {
+          sessionStorage.setItem('git_session_id', status.sessionId);
+        }
+        this.service.message('Git login success', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
+  }
+
+  gitLogout(): void {
+    this.showGitDropdown = false;
+    this.isGitLoading = true;
+    this.githubService.logout().subscribe({
+      next: () => {
+        this.isGitAuthenticated = false;
+        this.gitUsername = '';
+        this.isGitLoading = false;
+        this.clearGitSessionData();
+        this.service.message('Logout successful', 'success');
+        this.changeDetectionRef.detectChanges();
+      },
+      error: () => {
+        this.isGitLoading = false;
+        this.changeDetectionRef.detectChanges();
+      }
+    });
+  }
+
+  /**
+   * Remove all GitHub-related data cached in this browser session
+   * (username, session id, and any previously selected repo/branch).
+   */
+  private clearGitSessionData(): void {
+    sessionStorage.removeItem('git_username');
+    sessionStorage.removeItem('git_session_id');
+    sessionStorage.removeItem('git_selected_Repo');
+    sessionStorage.removeItem('git_selected_branch');
+  }
+
+  toggleGitDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showGitDropdown = !this.showGitDropdown;
+  }
+
+  @HostListener('document:click')
+  closeGitDropdown(): void {
+    this.showGitDropdown = false;
   }
 
   private handleRouteState(): void {

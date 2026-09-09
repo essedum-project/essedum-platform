@@ -497,6 +497,7 @@ def _build_pipeline_record(pod, cs, container_spec) -> dict:
         "pod_name":         pod.metadata.name,
         "container_name":   container_spec.name if container_spec else (cs.name if cs else ""),
         "deployment_name":  deployment_name,
+        "pipeline_name":    annotations.get("pipeline-cname") or deployment_name,
         "namespace":        ns,
         "type":             _namespace_to_type(ns),
         "description":      description,

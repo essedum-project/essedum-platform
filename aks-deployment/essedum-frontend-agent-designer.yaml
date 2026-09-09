@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: essedum-frontend-agent-designer
+  namespace: aipns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: essedum-frontend-agent-designer
+  template:
+    metadata:
+      labels:
+        app: essedum-frontend-agent-designer
+    spec:
+      containers:
+      - name: essedum-frontend-agent-designer
+        image: ${DOCKER_REGISTRY}/essedum-frontend-agent-designer:${IMAGE_TAG}
+        imagePullPolicy: Always
+        securityContext:
+          runAsNonRoot: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        ports:
+        - containerPort: 3030
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - name: nginx-run
+          mountPath: /var/run
+      volumes:
+      - name: tmp-dir
+        emptyDir: {}
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: essedum-frontend-agent-designer-service
+  namespace: aipns
+spec:
+  selector:
+    app: essedum-frontend-agent-designer
+  ports:
+  - protocol: TCP
+    port: 3030
+    targetPort: 3030
+  type: ClusterIP

@@ -12,10 +12,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - essedum.az.ad.idemo-ppc.com
-    secretName: essedum-az-tls
+    - ${INGRESS_HOST}
+    secretName: essedum-secret
   rules:
-  - host: essedum.az.ad.idemo-ppc.com
+  - host: ${INGRESS_HOST}
     http:
       paths:
       - path: /api

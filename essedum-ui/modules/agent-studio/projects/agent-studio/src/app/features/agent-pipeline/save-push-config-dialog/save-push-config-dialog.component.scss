@@ -1,0 +1,320 @@
+.dialog-title {
+  margin: 0;
+  color: #e5eefc;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.save-push-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #c8d8ee;
+  min-width: 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(96, 143, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(7, 14, 27, 0.65);
+}
+
+.summary-label,
+.section-heading,
+.commit-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7f9fc8;
+}
+
+.summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #eff6ff;
+  word-break: break-word;
+}
+
+.files-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(96, 143, 255, 0.24);
+  background: rgba(8, 17, 33, 0.45);
+  color: #9fb2cf;
+  font-size: 12px;
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 190px;
+  overflow: auto;
+}
+
+.file-row {
+  padding: 10px 12px;
+  border: 1px solid rgba(96, 143, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(8, 17, 33, 0.8);
+}
+
+.file-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.file-path {
+  font-weight: 600;
+  color: #eff6ff;
+  word-break: break-word;
+  font-size: 12px;
+}
+
+.status-pill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-modified {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.status-added {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+}
+
+.status-deleted {
+  background: rgba(248, 113, 113, 0.16);
+  color: #f87171;
+}
+
+.file-row-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #8da6c6;
+}
+
+.file-preview {
+  margin: 8px 0 0;
+  max-height: 110px;
+  overflow: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(3, 8, 16, 0.92);
+  border: 1px solid rgba(96, 143, 255, 0.12);
+  color: #dbeafe;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.commit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.commit-section input {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(96, 143, 255, 0.2);
+  background: rgba(7, 14, 27, 0.8);
+  color: #e5eefc;
+  padding: 0 12px;
+  outline: none;
+}
+
+.commit-section input:focus {
+  border-color: #4f8cff;
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.18);
+}
+
+.dialog-actions {
+  padding-top: 6px;
+
+  button[mat-stroked-button] {
+    color: #8da6c6 !important;
+    border-color: rgba(96, 143, 255, 0.3) !important;
+
+    &:hover:not([disabled]) {
+      color: #dbeafe !important;
+      background: rgba(96, 143, 255, 0.1) !important;
+      border-color: rgba(96, 143, 255, 0.55) !important;
+    }
+  }
+
+  button[mat-flat-button][color="primary"] {
+    background: linear-gradient(135deg, #4f8cff, #7c3aed) !important;
+    color: #ffffff !important;
+
+    &:hover:not([disabled]) {
+      box-shadow: 0 4px 16px rgba(79, 140, 255, 0.45) !important;
+    }
+
+    &[disabled] {
+      background: rgba(96, 143, 255, 0.15) !important;
+      color: rgba(219, 234, 254, 0.4) !important;
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// =============================================================================
+// LIGHT THEME
+// =============================================================================
+// This dialog is opened via MatDialog, which renders it inside the CDK
+// overlay container (a direct child of <body>) rather than manually moving
+// DOM nodes around, so (unlike some manually-teleported modals elsewhere in
+// this app) :host-context(body.header-light-theme) works normally here.
+// The component simply never had a light-theme variant before, so it always
+// rendered with its dark navy palette even when the app-wide theme was Light.
+:host-context(body.header-light-theme) {
+  .dialog-title { color: #1f2328; }
+
+  .save-push-dialog-content { color: #24292f; }
+
+  .summary-card {
+    border-color: #d0d7de;
+    background: #f6f8fa;
+  }
+
+  .summary-label,
+  .section-heading,
+  .commit-label {
+    color: #656d76;
+  }
+
+  .summary-value { color: #1f2328; }
+
+  .empty-state {
+    border-color: #d0d7de;
+    background: #f6f8fa;
+    color: #656d76;
+  }
+
+  .file-row {
+    border-color: #d0d7de;
+    background: #ffffff;
+  }
+
+  .file-path { color: #1f2328; }
+
+  .status-modified { background: rgba(154, 103, 0, 0.12); color: #9a6700; }
+  .status-added { background: rgba(26, 127, 55, 0.12); color: #1a7f37; }
+  .status-deleted { background: rgba(207, 34, 46, 0.12); color: #cf222e; }
+
+  .file-row-meta { color: #656d76; }
+
+  .file-preview {
+    background: #f6f8fa;
+    border-color: #d0d7de;
+    color: #1f2328;
+  }
+
+  .commit-section input {
+    border-color: #d0d7de;
+    background: #ffffff;
+    color: #1f2328;
+
+    &::placeholder { color: #8c959f; }
+
+    &:focus {
+      border-color: #0969da;
+      box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.15);
+    }
+  }
+
+  .dialog-actions {
+    button[mat-stroked-button] {
+      color: #57606a !important;
+      border-color: #d0d7de !important;
+
+      &:hover:not([disabled]) {
+        color: #24292f !important;
+        background: rgba(71, 66, 220, 0.06) !important;
+        border-color: rgba(71, 66, 220, 0.4) !important;
+      }
+    }
+
+    button[mat-flat-button][color="primary"] {
+      background: linear-gradient(135deg, #4742dc, #7c3aed) !important;
+      color: #ffffff !important;
+
+      &:hover:not([disabled]) {
+        box-shadow: 0 4px 16px rgba(71, 66, 220, 0.35) !important;
+      }
+
+      &[disabled] {
+        background: rgba(71, 66, 220, 0.12) !important;
+        color: rgba(87, 96, 106, 0.6) !important;
+      }
+    }
+  }
+}
+
+// Extra-specificity insurance: a global rule in shell/src/styles.scss
+// (`body.header-light-theme .mat-mdc-dialog-container .dialog-actions
+// button[color="primary"]`) recolors any dialog's primary button red,
+// intended for delete-confirmation dialogs. Repeating :host-context(...)
+// doubles this rule's specificity so our purple "Save & Push" styling
+// reliably wins over that global rule and any other equally-scoped rule.
+:host-context(body.header-light-theme):host-context(body.header-light-theme) {
+  .dialog-actions {
+    button[mat-stroked-button] {
+      color: #57606a !important;
+      border-color: #d0d7de !important;
+      background: transparent !important;
+      &:hover:not([disabled]) {
+        color: #24292f !important;
+        background: rgba(71, 66, 220, 0.08) !important;
+        border-color: rgba(71, 66, 220, 0.4) !important;
+      }
+    }
+    button[mat-flat-button][color="primary"] {
+      background: linear-gradient(135deg, #4742dc, #7c3aed) !important;
+      color: #ffffff !important;
+      border-color: transparent !important;
+      &:hover:not([disabled]) {
+        background: linear-gradient(135deg, #4742dc, #7c3aed) !important;
+        box-shadow: 0 4px 16px rgba(71, 66, 220, 0.4) !important;
+      }
+      &[disabled] {
+        background: rgba(71, 66, 220, 0.12) !important;
+        color: rgba(87, 96, 106, 0.6) !important;
+      }
+    }
+  }
+}

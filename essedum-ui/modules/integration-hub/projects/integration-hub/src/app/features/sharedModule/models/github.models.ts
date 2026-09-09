@@ -9,6 +9,7 @@ export interface GitHubRepository {
 export interface AuthStatus {
   authenticated: boolean;
   githubUsername?: string;
+  githubToken?: string;
   sessionId: string;
   username?: string;
 }

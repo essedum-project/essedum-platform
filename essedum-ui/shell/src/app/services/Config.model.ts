@@ -1,4 +1,4 @@
-import { Manifest, RemoteConfig } from "@angular-architects/module-federation";
+import { RemoteConfig } from "@angular-architects/module-federation";
 export class Config {  
     settings: ISettings[];  
 }  
@@ -7,14 +7,14 @@ export interface ISettings {
     value: string;  
 }  
  
-export type CustomRemoteConfig = RemoteConfig & {
+export type CustomRemoteConfig = Omit<RemoteConfig, 'type'> & {
     exposedModule: string;
     routePath: string;
     ngModuleName: string;
     remoteEntry: string;
-    type: string;
+    type: 'module' | 'script' | 'iframe';
     elementName: string;
     remoteName: string;
 };
 
-export type CustomManifest = Manifest<CustomRemoteConfig>;
+export type CustomManifest = Record<string, CustomRemoteConfig>;

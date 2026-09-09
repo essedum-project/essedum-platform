@@ -13,17 +13,9 @@ spec:
       labels:
         app: essedum-backend-api-gateway
     spec:
-      # Resolve Keycloak hostname to the nginx ingress IP inside the cluster.
-      # login.essedum-lfn.infosys.com has no external DNS record; without this
-      # the backend cannot fetch the JWK set and JWT validation fails (401).
-      hostAliases:
-      - ip: "localhost"
-        hostnames:
-        - "login.essedum-lfn.infosys.com"
-        - "essedum-lfn.infosys.com"
       containers:
       - name: essedum-backend-api-gateway
-        image: localhost:5000/essedum-api-gateway:micro_latest
+        image: ${DOCKER_REGISTRY}/essedum-api-gateway:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -51,12 +43,26 @@ spec:
           value: "http://essedum-backend-data-service:8083"
         - name: VIBE_SERVICE_URL
           value: "http://essedum-backend-vibe-service:8084"
+        - name: OAUTH2_JWK_URI
+          value: "${OAUTH2_JWK_URI}"
+        - name: OAUTH2_ISSUER_URI
+          value: "${OAUTH2_ISSUER_URI}"
+        - name: OAUTH2_CLIENT_ID
+          value: "${OAUTH2_CLIENT_ID}"
+        - name: OAUTH2_SCOPE
+          value: "${OAUTH2_SCOPE}"
+        - name: OAUTH2_USER_CLAIM
+          value: "${OAUTH2_USER_CLAIM}"
+        - name: SERVICE_ACCESS_TOKEN
+          value: "${SERVICE_ACCESS_TOKEN}"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: essedum-backend-api-gateway-service
   namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: essedum-backend-api-gateway # Matches the label in the Deployment

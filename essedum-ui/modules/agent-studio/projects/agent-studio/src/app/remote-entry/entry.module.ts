@@ -57,6 +57,7 @@ import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipelin
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
 import { PodLogDialogComponent } from '../features/agent-pipeline/pipeline-in-execution/pod-log-dialog/pod-log-dialog.component';
+import { SavePushConfigDialogComponent } from '../features/agent-pipeline/save-push-config-dialog/save-push-config-dialog.component';
 import { GithubLoginComponent } from '../features/agent-pipeline/github-login/github-login.component';
 import { PlaygroundTabComponent } from '../features/agent-pipeline/playground-tab/playground-tab.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from '../features/agent-pipeline/deployment-form/deployment-form.component';
@@ -130,6 +131,7 @@ import { environment } from '../../environments/environment';
     AgentPipelineDashboardComponent,
     PipelineInExecutionComponent,
     PodLogDialogComponent,
+    SavePushConfigDialogComponent,
     PlaygroundTabComponent,
     DeploymentFormComponent,
     BranchSelectionDialogComponent,
@@ -214,7 +216,7 @@ import { environment } from '../../environments/environment';
         baseUrl: environment.baseUrl ?? '/api/aip',
         datasetsUrl: environment.datasetsUrl ?? '/api/aip',
         sandboxUrl: '/api/exp',
-        langflowUrl: environment.langflowUrl ?? '/langflow/',
+        langflowUrl: 'http://localhost:3000/',
       } as ApiConfig,
     },
     { provide: 'envi',     useFactory: (cfg: ApiConfig) => cfg.baseUrl,     deps: [API_CONFIG] },
