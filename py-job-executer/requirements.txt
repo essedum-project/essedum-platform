@@ -1,5 +1,5 @@
 flask
-mysql-connector-python
+pymysql[rsa]
 sagemaker
 minio
 flask_swagger_ui
