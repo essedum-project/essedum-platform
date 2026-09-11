@@ -270,4 +270,4 @@ gateway:
 # ---- Service-to-Service Access Token ----
 config:
   service-auth:
-    access-token: ${SERVICE_ACCESS_TOKEN:aec127c2-c984-33f6-9a3a-355xd1dof097}
+    access-token: ${SERVICE_ACCESS_TOKEN}

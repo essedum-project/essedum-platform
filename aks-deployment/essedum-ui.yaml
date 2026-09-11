@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: essedum-frontend-ui
-        image: acrreq0762935.azurecr.io/essedum-ui:latest
+        image: 192.168.28.36:5000/essedum-ui:micro_latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8082
@@ -24,13 +24,7 @@ spec:
         - name: nginx-conf
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
-        - name: auth-config
-          mountPath: /app/ui/common/configs/auth-config.json
-          subPath: auth-config.json
       volumes:
       - name: nginx-conf
         configMap:
           name: essedum-frontend-ui-nginx-config
-      - name: auth-config
-        configMap:
-          name: essedum-auth-config

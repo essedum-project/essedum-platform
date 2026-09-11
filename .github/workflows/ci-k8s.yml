@@ -1,19 +1,12 @@
 name: CI – Build & Test (Kubernetes)
 
 # ──────────────────────────────────────────────────────────────
-# Triggers — push to source-branch branch and PRs to pr-branch
+# Triggers — push to essedum-lfn-v15.0-actions branch only
+# No PR trigger — automation tested on this branch exclusively
 # ──────────────────────────────────────────────────────────────
 on:
   push:
-    branches: ["source-branch"]
-    paths-ignore:
-      - "**.md"
-      - ".gitignore"
-      - "LICENSE"
-      - "docker/**"
-  pull_request:
-    branches: ["pr-branch"]
-    types: [opened, synchronize, reopened]
+    branches: ["essedum-lfn-v15.0-actions"]
     paths-ignore:
       - "**.md"
       - ".gitignore"
@@ -40,24 +33,23 @@ jobs:
   detect-changes:
     name: "Detect Changed Services"
     runs-on: [self-hosted, essedum-runner]
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push'
     timeout-minutes: 5
     outputs:
-      backend:    ${{ steps.filter.outputs.backend }}
-      frontend:   ${{ steps.filter.outputs.frontend }}
-      py_executer:  ${{ steps.filter.outputs.py_executer }}
-      py_sagemaker: ${{ steps.filter.outputs.py_sagemaker }}
-      py_vertex:    ${{ steps.filter.outputs.py_vertex }}
-      py_azure:     ${{ steps.filter.outputs.py_azure }}
-      proxy:      ${{ steps.filter.outputs.proxy }}
-      adk:        ${{ steps.filter.outputs.adk }}
-      vibe:       ${{ steps.filter.outputs.vibe }}
-      langflow:   ${{ steps.filter.outputs.langflow }}
-      litellm:    ${{ steps.filter.outputs.litellm }}
-      langfuse:   ${{ steps.filter.outputs.langfuse }}
-      k8s:        ${{ steps.filter.outputs.k8s }}
-      workflows:  ${{ steps.filter.outputs.workflows }}
-      has_any_change: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.py_executer == 'true' || steps.filter.outputs.py_sagemaker == 'true' || steps.filter.outputs.py_vertex == 'true' || steps.filter.outputs.py_azure == 'true' || steps.filter.outputs.proxy == 'true' || steps.filter.outputs.adk == 'true' || steps.filter.outputs.vibe == 'true' || steps.filter.outputs.langflow == 'true' || steps.filter.outputs.litellm == 'true' || steps.filter.outputs.langfuse == 'true' }}
+      backend:                 ${{ steps.filter.outputs.backend }}
+      frontend:                ${{ steps.filter.outputs.frontend }}
+      agent_designer_backend:  ${{ steps.filter.outputs.agent_designer_backend }}
+      py_executer:             ${{ steps.filter.outputs.py_executer }}
+      py_sagemaker:            ${{ steps.filter.outputs.py_sagemaker }}
+      py_vertex:               ${{ steps.filter.outputs.py_vertex }}
+      py_azure:                ${{ steps.filter.outputs.py_azure }}
+      proxy:                   ${{ steps.filter.outputs.proxy }}
+      adk:                     ${{ steps.filter.outputs.adk }}
+      vibe:                    ${{ steps.filter.outputs.vibe }}
+      vibe_pod_watcher:        ${{ steps.filter.outputs.vibe_pod_watcher }}
+      k8s:                     ${{ steps.filter.outputs.k8s }}
+      workflows:               ${{ steps.filter.outputs.workflows }}
+      has_any_change: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.agent_designer_backend == 'true' || steps.filter.outputs.py_executer == 'true' || steps.filter.outputs.py_sagemaker == 'true' || steps.filter.outputs.py_vertex == 'true' || steps.filter.outputs.py_azure == 'true' || steps.filter.outputs.proxy == 'true' || steps.filter.outputs.adk == 'true' || steps.filter.outputs.vibe == 'true' || steps.filter.outputs.vibe_pod_watcher == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -73,6 +65,8 @@ jobs:
               - 'sv/**'
             frontend:
               - 'essedum-ui/**'
+            agent_designer_backend:
+              - 'agent-designer-backend/**'
             py_executer:
               - 'py-job-executer/**'
             py_sagemaker:
@@ -87,12 +81,8 @@ jobs:
               - 'adk-code-builder-deployer/**'
             vibe:
               - 'vibe-code-builder-deployer/**'
-            langflow:
-              - 'langflow/**'
-            litellm:
-              - 'lite-llm/**'
-            langfuse:
-              - 'langfuse/**'
+            vibe_pod_watcher:
+              - 'vibe-pod-watcher/**'
             k8s:
               - 'aks-deployment/**'
             workflows:
@@ -112,9 +102,7 @@ jobs:
           echo "| proxy-service | ${{ steps.filter.outputs.proxy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| adk-code-builder | ${{ steps.filter.outputs.adk }} |" >> $GITHUB_STEP_SUMMARY
           echo "| vibe-code-builder | ${{ steps.filter.outputs.vibe }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| langflow | ${{ steps.filter.outputs.langflow }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| litellm | ${{ steps.filter.outputs.litellm }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| langfuse | ${{ steps.filter.outputs.langfuse }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| vibe-pod-watcher | ${{ steps.filter.outputs.vibe_pod_watcher }} |" >> $GITHUB_STEP_SUMMARY
           echo "| k8s manifests | ${{ steps.filter.outputs.k8s }} |" >> $GITHUB_STEP_SUMMARY
           echo "| workflows | ${{ steps.filter.outputs.workflows }} |" >> $GITHUB_STEP_SUMMARY
 
@@ -144,7 +132,7 @@ jobs:
     needs: [detect-changes]
     # Run if: k8s manifests changed
     if: |
-      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'push' &&
       needs.detect-changes.outputs.k8s == 'true'
     timeout-minutes: 10
 
@@ -152,27 +140,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Verify kubeconfig available
+      - name: Install kubeconform (offline manifest validator)
         run: |
-          export PATH="/snap/bin:/usr/local/bin:$PATH"
-          if [ ! -f "$KUBECONFIG" ]; then
-            echo "::warning::KUBECONFIG not available in CI environment"
-            echo "Dry-run validation will be performed locally"
-          fi
+          export PATH="/snap/bin:$PATH"
+          KUBECONFORM_VERSION="v0.6.7"
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz kubeconform
+          install -m 0755 kubeconform "$HOME/.local/bin/kubeconform"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/kubeconform" -v
 
       - name: Validate Kubernetes manifests syntax
         run: |
-          export PATH="/snap/bin:/usr/local/bin:$PATH"
-          echo "Validating aks-deployment manifests..."
+          export PATH="/snap/bin:$HOME/.local/bin:$PATH"
+          echo "Validating aks-deployment manifests (offline)..."
+          found_manifests=false
           for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
             if [ -f "$manifest" ]; then
+              found_manifests=true
               echo "Validating: $manifest"
-              kubectl apply -f "$manifest" --dry-run=client > /dev/null || {
-                echo "::error::Invalid manifest: $manifest"
+              kubeconform -strict -summary "$manifest" > /dev/null || {
+                echo "::error::Manifest schema/syntax validation failed: $manifest"
                 exit 1
               }
             fi
           done
+
+          if [ "$found_manifests" = false ]; then
+            echo "No manifests found under aks-deployment"
+          fi
 
       - name: Check for required fields in deployments
         run: |
@@ -209,25 +206,79 @@ jobs:
     runs-on: [self-hosted, essedum-runner]
     needs: [detect-changes]
     # Job runs only when at least one service source file changed.
-    # This prevents 15 matrix jobs from spinning up on YAML-only or workflow-only commits.
+    # This prevents matrix jobs from spinning up on YAML-only or workflow-only commits.
     if: |
-      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event_name == 'push' &&
       needs.detect-changes.outputs.has_any_change == 'true'
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          - service: leap-app-backend
-            context: .
-            dockerfile: sv/Dockerfile_oauth2
+          # ── Backend microservices (5 services, all from sv/) ──
+          - service: essedum-api-gateway
+            context: sv
+            dockerfile: sv/api-gateway/Dockerfile_oauth2
             changes_output: backend
 
-          - service: frontend
+          - service: essedum-usm-service
+            context: sv
+            dockerfile: sv/usm-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-icip-service
+            context: sv
+            dockerfile: sv/icip-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-data-service
+            context: sv
+            dockerfile: sv/data-service/Dockerfile_oauth2
+            changes_output: backend
+
+          - service: essedum-vibe-service
+            context: sv
+            dockerfile: sv/vibe-service/Dockerfile_oauth2
+            changes_output: backend
+
+          # ── Frontend MFE microservices (6 modules, all from essedum-ui/) ──
+          - service: essedum-frontend-shell
             context: .
-            dockerfile: essedum-ui/Dockerfile
+            dockerfile: essedum-ui/Dockerfile.shell
             changes_output: frontend
 
+          - service: essedum-frontend-agent
+            context: .
+            dockerfile: essedum-ui/Dockerfile.agent
+            changes_output: frontend
+
+          - service: essedum-frontend-data-ops
+            context: .
+            dockerfile: essedum-ui/Dockerfile.data-ops
+            changes_output: frontend
+
+          - service: essedum-frontend-integration
+            context: .
+            dockerfile: essedum-ui/Dockerfile.integration
+            changes_output: frontend
+
+          - service: essedum-frontend-vibe-studio
+            context: .
+            dockerfile: essedum-ui/Dockerfile.vibe-studio
+            changes_output: frontend
+
+          - service: essedum-frontend-agent-designer
+            context: essedum-ui/agent-designer-frontend
+            dockerfile: essedum-ui/agent-designer-frontend/Dockerfile
+            changes_output: frontend
+
+          # ── Agent Designer Backend ──
+          - service: agent-designer-backend
+            context: agent-designer-backend
+            dockerfile: agent-designer-backend/Dockerfile
+            changes_output: agent_designer_backend
+
+          # ── Python job executors ──
           - service: py-job-executer
             context: py-job-executer
             dockerfile: py-job-executer/Dockerfile
@@ -248,6 +299,7 @@ jobs:
             dockerfile: py-job-azure-executer/Dockerfile
             changes_output: py_azure
 
+          # ── Supporting services ──
           - service: proxy-service
             context: proxy-service
             dockerfile: proxy-service/Dockerfile
@@ -263,28 +315,10 @@ jobs:
             dockerfile: vibe-code-builder-deployer/Dockerfile
             changes_output: vibe
 
-          # ── Langflow (custom image wrapping langflowai/langflow:latest) ──
-          - service: langflow
-            context: langflow
-            dockerfile: langflow/Dockerfile
-            changes_output: langflow
-
-          # ── LiteLLM (custom image, context=repo root for COPY lite-llm/...) ──
-          - service: litellm
-            context: .
-            dockerfile: lite-llm/Dockerfile
-            changes_output: litellm
-
-          # ── Langfuse web + worker (custom wrappers pinning version) ──
-          - service: langfuse-web
-            context: langfuse
-            dockerfile: langfuse/Dockerfile.web
-            changes_output: langfuse
-
-          - service: langfuse-worker
-            context: langfuse
-            dockerfile: langfuse/Dockerfile.worker
-            changes_output: langfuse
+          - service: vibe-pod-watcher
+            context: vibe-pod-watcher
+            dockerfile: vibe-pod-watcher/Dockerfile
+            changes_output: vibe_pod_watcher
 
           # ── Goose Vibe Studio Agent (code lives outside repo — always rebuild) ──
           - service: goose-ui
@@ -302,6 +336,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Load runner-local env (docker/.env.sample)
+        # Uses grep+cut to extract only the 4 needed variables — no shell
+        # expansion of values (safe for keys containing $, #, = etc).
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        run: |
+          # docker/.env.sample is NOT committed to git (contains credentials).
+          # Use the stable runner working copy — never overwritten by git checkout.
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_USERNAME=$(grep -m1 '^DOCKER_USERNAME=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_PASSWORD=$(grep -m1 '^DOCKER_PASSWORD=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          KUBE_NAMESPACE=$(grep -m1 '^KUBE_NAMESPACE=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          if [ -z "$DOCKER_REGISTRY" ]; then
+            echo "::error::DOCKER_REGISTRY not found in $ENV_FILE"
+            exit 1
+          fi
+          if [ -n "$DOCKER_PASSWORD" ]; then
+            echo "::add-mask::$DOCKER_PASSWORD"
+          fi
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "✓ Registry: $DOCKER_REGISTRY"
+          echo "✓ Auth: $([ -n "$DOCKER_USERNAME" ] && echo 'yes' || echo 'anonymous')"
 
       - name: Check if rebuild needed
         id: needs_build
@@ -332,11 +396,10 @@ jobs:
             CACHE_FILE="$CACHE_DIR/${{ matrix.service }}"
             if [ -f "$CACHE_FILE" ]; then
               LAST_SHA=$(cat "$CACHE_FILE")
-              REGISTRY="${{ secrets.CONTAINER_REGISTRY }}"
               # Verify the cached image actually exists before trusting the cache
               HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-                "http://localhost:5001/v2/essedum/${{ matrix.service }}/manifests/${LAST_SHA}" 2>/dev/null || echo "000")
+                "http://${DOCKER_REGISTRY}/v2/${{ matrix.service }}/manifests/${LAST_SHA}" 2>/dev/null || echo "000")
               if [ "$HTTP_STATUS" = "200" ]; then
                 echo "skip=true" >> $GITHUB_OUTPUT
                 echo "last_sha=${LAST_SHA}" >> $GITHUB_OUTPUT
@@ -404,22 +467,20 @@ jobs:
         # registry config to be initialised — a step that only runs on the build
         # path. Pure curl works for both localhost (plain HTTP) and remote registries.
         if: steps.needs_build.outputs.skip == 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           set -e
           LAST_SHA="${{ steps.needs_build.outputs.last_sha }}"
           SVC="${{ matrix.service }}"
           NEW_SHA="${{ github.sha }}"
 
-          # Detect protocol: http for localhost/loopback, https for remote
-          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+          # Detect protocol: http for loopback/private ranges, https for remote
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]] || [[ "$DOCKER_REGISTRY" == 10.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
           fi
 
-          BASE_URL="${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}"
+          BASE_URL="${REG_PROTO}://${DOCKER_REGISTRY}/v2/${SVC}"
 
           # Fetch the manifest bytes and content-type from the source tag
           MANIFEST=$(curl -sf \
@@ -467,62 +528,172 @@ jobs:
 
       - name: Login to container registry
         if: steps.needs_build.outputs.skip != 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          # SECURITY: password via env var piped to stdin — never echoed to log.
-          echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin "$REGISTRY"
+          # Credentials from docker/.env.sample on the runner — no GitHub secrets.
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$DOCKER_REGISTRY"
+          else
+            echo "No DOCKER_USERNAME set — using unauthenticated local registry"
+          fi
 
-      - name: Set up Docker Buildx
-        # IMPORTANT: the docker-container BuildKit driver runs inside an isolated
-        # container. Without --network=host that container cannot reach the local
-        # registry on localhost:5001 (its own loopback ≠ host loopback), causing
-        # "dial tcp [::1]:5001: connect: connection refused" on push.
-        # --driver-opt network=host shares the host network with the builder
-        # container so localhost resolves correctly.
-        # config-inline marks localhost:5001 as an insecure (plain-HTTP) registry
-        # so BuildKit does not attempt TLS when pushing layers.
+      - name: Prepare backend build context (local-only files)
+        # .crt cert files are NOT committed to git (removed from tracking).
+        # They exist on disk in devopsuser's working copy. Copy them into the
+        # GITHUB_WORKSPACE checkout so docker build can COPY them.
+        if: steps.needs_build.outputs.skip != 'true' && matrix.context == 'sv'
+        run: |
+          DEVOPS_SV="/home/devopsuser/devops/actions/essedum-platform/sv"
+          missing=0
+          for svc in usm-service icip-service data-service vibe-service; do
+            src="$DEVOPS_SV/$svc/lfn-keycloak2.crt"
+            dst="$GITHUB_WORKSPACE/sv/$svc/lfn-keycloak2.crt"
+            if [ -f "$src" ]; then
+              cp "$src" "$dst"
+              echo "✓ Copied $svc/lfn-keycloak2.crt"
+            else
+              echo "::error::Missing required certificate file: $src"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Backend build context is incomplete: required .crt files are missing on runner"
+            exit 1
+          fi
+
+      - name: Backend build preflight
+        if: steps.needs_build.outputs.skip != 'true' && matrix.context == 'sv'
+        run: |
+          echo "Service: ${{ matrix.service }}"
+          echo "Dockerfile: ${{ matrix.dockerfile }}"
+          echo "Context: ${{ matrix.context }}"
+
+          case "${{ matrix.service }}" in
+            essedum-api-gateway|essedum-usm-service)
+              required_cert="$GITHUB_WORKSPACE/sv/usm-service/lfn-keycloak2.crt"
+              ;;
+            essedum-icip-service)
+              required_cert="$GITHUB_WORKSPACE/sv/icip-service/lfn-keycloak2.crt"
+              ;;
+            essedum-data-service)
+              required_cert="$GITHUB_WORKSPACE/sv/data-service/lfn-keycloak2.crt"
+              ;;
+            essedum-vibe-service)
+              required_cert="$GITHUB_WORKSPACE/sv/vibe-service/lfn-keycloak2.crt"
+              ;;
+            *)
+              required_cert=""
+              ;;
+          esac
+
+          if [ -n "$required_cert" ] && [ ! -f "$required_cert" ]; then
+            echo "::error::Missing certificate for ${{ matrix.service }}: $required_cert"
+            exit 1
+          fi
+
+          echo "✓ Backend preflight passed"
+
+      - name: Network/DNS preflight for external repositories
         if: steps.needs_build.outputs.skip != 'true'
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-        with:
-          driver-opts: network=host
-          config-inline: |
-            [registry."localhost:5001"]
-              http = true
-              insecure = true
+        run: |
+          set -e
+          hosts=("repo.maven.apache.org" "dl-cdn.alpinelinux.org")
+          for host in "${hosts[@]}"; do
+            if ! getent hosts "$host" >/dev/null 2>&1; then
+              echo "::error::DNS resolution failed for $host"
+              exit 1
+            fi
+            echo "✓ DNS resolved: $host"
+          done
+
+          curl --connect-timeout 10 --max-time 20 -fsI "https://repo.maven.apache.org/maven2/" >/dev/null
+          echo "✓ Reachable: repo.maven.apache.org"
+          curl --connect-timeout 10 --max-time 20 -fsI "https://dl-cdn.alpinelinux.org/alpine/" >/dev/null
+          echo "✓ Reachable: dl-cdn.alpinelinux.org"
 
       - name: Build and push Docker image
-        # Build once in CI and push immediately to the registry.
-        # CD reuses this image directly — no second build in the deploy job.
+        # Plain docker build + docker push — same as local build-and-push.sh.
+        # No buildx, no TOML config, no docker-container driver.
+        # DOCKER_BUILDKIT=1 uses daemon-integrated BuildKit which respects the
+        # daemon's existing insecure-registries config (daemon.json on this runner).
         if: steps.needs_build.outputs.skip != 'true'
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: ${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}
-          # SECURITY: Disable provenance attestations and SBOM generation.
-          # build-push-action v6 defaults provenance:true which uploads a
-          # *.dockerbuild attestation file as a GitHub Actions artifact, making
-          # it publicly visible in the GitHub UI on a public repo.
-          # Artifacts MUST stay on the runner only — never uploaded to GitHub.
-          provenance: false
-          sbom: false
-          # SECURITY: Do NOT use type=gha cache on a public repo.
-          # GHA cache is accessible to any workflow run including fork PRs,
-          # which would allow reading image layers containing compiled code,
-          # internal paths, and baked-in configuration.
-          # Use a local registry cache scoped to this runner only.
-          cache-from: type=local,src=/tmp/buildkit-cache/${{ matrix.service }}
-          # mode=max caches all intermediate layers (best hit-rate).
-          # max-size caps the on-disk footprint per service at 2 GB so the
-          # /tmp/buildkit-cache directory cannot grow unboundedly on the runner.
-          cache-to: type=local,dest=/tmp/buildkit-cache/${{ matrix.service }},mode=max,max-size=2g
-          # Do NOT load into Docker daemon (outputs: type=docker) —
-          # loading builds up /var/lib/docker indefinitely with stale images.
-          # CI pushes directly to the registry; no daemon load needed.
+        run: |
+          IMAGE="${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}"
+
+          IS_BACKEND=false
+          IS_FRONTEND_DNS_SENSITIVE=false
+          MAX_ATTEMPTS=1
+          if [ "${{ matrix.context }}" = "sv" ]; then
+            IS_BACKEND=true
+            MAX_ATTEMPTS=3
+          fi
+          if [ "${{ matrix.service }}" = "essedum-frontend-shell" ]; then
+            IS_FRONTEND_DNS_SENSITIVE=true
+            MAX_ATTEMPTS=3
+          fi
+
+          NETWORK_FLAG=""
+          if [ "$IS_BACKEND" = true ] || [ "$IS_FRONTEND_DNS_SENSITIVE" = true ]; then
+            NETWORK_FLAG="--network=host"
+            echo "Using host network for docker build to improve DNS reliability"
+          fi
+
+          BUILD_LOG="${RUNNER_TEMP}/docker-build-${{ matrix.service }}.log"
+          BUILD_RC=1
+
+          echo "Building: ${IMAGE}"
+
+          for ATTEMPT in $(seq 1 "$MAX_ATTEMPTS"); do
+            echo "Docker build attempt ${ATTEMPT}/${MAX_ATTEMPTS} for ${{ matrix.service }}"
+            set +e
+            DOCKER_BUILDKIT=1 docker build \
+              ${NETWORK_FLAG} \
+              --progress=plain \
+              --build-arg DOCKER_REGISTRY="${{ env.DOCKER_REGISTRY }}" \
+              --build-arg IMAGE_TAG="${{ github.sha }}" \
+              -t "${IMAGE}" \
+              -f "${{ matrix.dockerfile }}" \
+              "${{ matrix.context }}" 2>&1 | tee "$BUILD_LOG"
+            BUILD_RC=${PIPESTATUS[0]}
+            set -e
+
+            if [ "$BUILD_RC" -eq 0 ]; then
+              break
+            fi
+
+            if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
+              echo "Build failed (attempt ${ATTEMPT}). Retrying in 15s..."
+              sleep 15
+            fi
+          done
+
+          if [ "$BUILD_RC" -ne 0 ]; then
+            if [ "$IS_BACKEND" = true ]; then
+              echo "::group::Backend Maven diagnostic extract"
+              grep -Ei "unknown host|temporary failure|could not transfer artifact|failed to read artifact descriptor|plugin .* could not be resolved|dependency .* could not be resolved|PKIX|SSL|TLS|Connection reset|Read timed out|BUILD FAILURE|\[ERROR\]" "$BUILD_LOG" | tail -n 80 || true
+              echo "::endgroup::"
+
+              {
+                echo "### Backend Maven Diagnostics (${{ matrix.service }})"
+                echo ""
+                echo "Build attempts: ${MAX_ATTEMPTS}"
+                echo ""
+                echo "Top matching error lines:"
+                grep -Ei "unknown host|temporary failure|could not transfer artifact|failed to read artifact descriptor|plugin .* could not be resolved|dependency .* could not be resolved|PKIX|SSL|TLS|Connection reset|Read timed out|BUILD FAILURE|\[ERROR\]" "$BUILD_LOG" | tail -n 40 || true
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if [ "$IS_FRONTEND_DNS_SENSITIVE" = true ]; then
+              echo "::group::Frontend DNS/APK diagnostic extract"
+              grep -Ei "DNS: transient error|unable to select packages|no such package|apk add|ERROR:" "$BUILD_LOG" | tail -n 80 || true
+              echo "::endgroup::"
+            fi
+            echo "::error::Docker build failed for ${{ matrix.service }} after ${MAX_ATTEMPTS} attempt(s)"
+            exit "$BUILD_RC"
+          fi
+
+          echo "Pushing: ${IMAGE}"
+          docker push "${IMAGE}"
+          echo "✓ Built and pushed ${IMAGE}"
 
       - name: Verify image is readable in registry
         # registry:2 can return HTTP 201 for a manifest PUT but silently skip writing
@@ -530,25 +701,22 @@ jobs:
         # immediately after the push confirms the blob was actually written on disk.
         # Failing here prevents CD from deploying a ghost image that returns 404 at pull time.
         if: steps.needs_build.outputs.skip != 'true'
-        env:
-          REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
         run: |
           SVC="${{ matrix.service }}"
           SHA="${{ github.sha }}"
-          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]]; then
+          if [[ "$DOCKER_REGISTRY" == localhost:* ]] || [[ "$DOCKER_REGISTRY" == 127.* ]] || [[ "$DOCKER_REGISTRY" == 192.168.* ]] || [[ "$DOCKER_REGISTRY" == 10.* ]]; then
             REG_PROTO="http"
           else
             REG_PROTO="https"
           fi
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            "${REG_PROTO}://${REGISTRY}/v2/essedum/${SVC}/manifests/${SHA}")
+            "${REG_PROTO}://${DOCKER_REGISTRY}/v2/${SVC}/manifests/${SHA}")
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "✓ ${SVC}:${SHA} verified readable in registry (HTTP 200)"
           else
-            echo "::error::Push silently failed for ${SVC}: manifest GET returned HTTP ${HTTP_STATUS} after a 201 PUT."
+            echo "::error::Push silently failed for ${SVC}: manifest GET returned HTTP ${HTTP_STATUS}"
             echo "::error::Cause: stale revision link in registry storage for this digest."
-            echo "::error::Fix: docker exec local-reg sh -c 'rm -rf /var/lib/registry/docker/registry/v2/repositories/essedum/${SVC}/_manifests/revisions/sha256/<digest>/link'"
             exit 1
           fi
 
@@ -572,15 +740,10 @@ jobs:
       - name: Clean up dangling images and stale build cache
         if: steps.needs_build.outputs.skip != 'true' && always()
         run: |
-          # build-push-action with the docker-container driver pushes directly to
-          # the registry and does not load the image into the local daemon, so
-          # there is no named image to remove here.
-          # Logout from registry (login was done in a prior step).
-          docker logout "${{ secrets.CONTAINER_REGISTRY }}" 2>/dev/null || true
-          # Remove any untagged (dangling) layers accumulated during the build.
+          IMAGE="${{ env.DOCKER_REGISTRY }}/${{ matrix.service }}:${{ github.sha }}"
+          docker logout "$DOCKER_REGISTRY" 2>/dev/null || true
+          docker rmi "${IMAGE}" 2>/dev/null || true
           docker image prune -f || true
-          # Trim BuildKit local cache entries older than 72 h.
-          docker builder prune -f --filter "until=72h" || true
 
       - name: Docker build summary
         if: success()
@@ -591,7 +754,7 @@ jobs:
           else
             echo "- Status: **built and pushed**" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "- Image: \`${{ secrets.CONTAINER_REGISTRY }}/essedum/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${DOCKER_REGISTRY}/${{ matrix.service }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Docker build failure report
         if: failure()
@@ -611,26 +774,25 @@ jobs:
     # touching the self-hosted runner even in the summary/gate step.
     # Jobs that were skipped (no changes) report result 'skipped', not 'failure'.
     # NOTE: backend and frontend CI validation removed — Docker builds handle all compilation.
-    if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    if: always() && github.event_name == 'push'
     timeout-minutes: 5
     # Expose detect-changes outputs so call-cd can forward them to CD.
     # CD uses these to skip manifests/rollouts for unchanged services.
     outputs:
-      image_tag:            ${{ github.sha }}
-      has_any_change:       ${{ needs.detect-changes.outputs.has_any_change }}
-      changed_backend:      ${{ needs.detect-changes.outputs.backend }}
-      changed_frontend:     ${{ needs.detect-changes.outputs.frontend }}
-      changed_py_executer:  ${{ needs.detect-changes.outputs.py_executer }}
-      changed_py_sagemaker: ${{ needs.detect-changes.outputs.py_sagemaker }}
-      changed_py_vertex:    ${{ needs.detect-changes.outputs.py_vertex }}
-      changed_py_azure:     ${{ needs.detect-changes.outputs.py_azure }}
-      changed_proxy:        ${{ needs.detect-changes.outputs.proxy }}
-      changed_adk:          ${{ needs.detect-changes.outputs.adk }}
-      changed_vibe:         ${{ needs.detect-changes.outputs.vibe }}
-      changed_langflow:     ${{ needs.detect-changes.outputs.langflow }}
-      changed_litellm:      ${{ needs.detect-changes.outputs.litellm }}
-      changed_langfuse:     ${{ needs.detect-changes.outputs.langfuse }}
-      changed_workflows:    ${{ needs.detect-changes.outputs.workflows }}
+      image_tag:                        ${{ github.sha }}
+      has_any_change:                   ${{ needs.detect-changes.outputs.has_any_change }}
+      changed_backend:                  ${{ needs.detect-changes.outputs.backend }}
+      changed_frontend:                 ${{ needs.detect-changes.outputs.frontend }}
+      changed_agent_designer_backend:   ${{ needs.detect-changes.outputs.agent_designer_backend }}
+      changed_py_executer:              ${{ needs.detect-changes.outputs.py_executer }}
+      changed_py_sagemaker:             ${{ needs.detect-changes.outputs.py_sagemaker }}
+      changed_py_vertex:                ${{ needs.detect-changes.outputs.py_vertex }}
+      changed_py_azure:                 ${{ needs.detect-changes.outputs.py_azure }}
+      changed_proxy:                    ${{ needs.detect-changes.outputs.proxy }}
+      changed_adk:                      ${{ needs.detect-changes.outputs.adk }}
+      changed_vibe:                     ${{ needs.detect-changes.outputs.vibe }}
+      changed_vibe_pod_watcher:          ${{ needs.detect-changes.outputs.vibe_pod_watcher }}
+      changed_workflows:                ${{ needs.detect-changes.outputs.workflows }}
 
     steps:
       - name: Determine CI status
@@ -707,46 +869,641 @@ jobs:
           echo "✓ Registry GC complete"
 
   # ────────────────────────────────────────────────────────────
-  # JOB FINAL – Trigger CD after CI passes on source-branch branch
-  # SECURITY:
-  #   – if: requires event==push AND ref==source-branch. PRs (same-repo
-  #     or fork) trigger pull_request, never push – so CD is
-  #     unreachable from any PR path, even if pr-gate is bypassed.
-  #   – Only 4 explicitly named secrets are forwarded (no
-  #     secrets: inherit – public repo, least-privilege).
-  #   – No runs-on: reusable workflow call jobs don’t hold a runner
-  #     while queued, so there is no single-runner deadlock.
+  # JOB FINAL – Deploy (inlined so CI + CD = single Actions tab entry)
+  # Runs only after ci-summary passes on essedum-lfn-v15.0-actions.
+  # cd-deploy-k8s.yml is kept for reference / manual emergency only.
   # ────────────────────────────────────────────────────────────
-  call-cd:
-    name: "Trigger CD – Deploy"
+  deploy:
+    name: "CD – Deploy to Kubernetes"
+    runs-on: [self-hosted, essedum-runner]
     needs: [ci-summary]
     if: |
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/source-branch' &&
+      github.ref == 'refs/heads/essedum-lfn-v15.0-actions' &&
       needs.ci-summary.result == 'success' &&
       needs.ci-summary.outputs.has_any_change == 'true'
-    uses: ./.github/workflows/cd-deploy-k8s.yml
-    with:
-      # Forward the exact SHA that CI built and pushed — CD deploys this tag directly.
-      # No second docker build in CD; images are already in the registry.
-      image_tag:            ${{ needs.ci-summary.outputs.image_tag }}
-      # Forward which services changed so CD can skip manifests/rollouts for unchanged ones.
-      changed_backend:      ${{ needs.ci-summary.outputs.changed_backend }}
-      changed_frontend:     ${{ needs.ci-summary.outputs.changed_frontend }}
-      changed_py_executer:  ${{ needs.ci-summary.outputs.changed_py_executer }}
-      changed_py_sagemaker: ${{ needs.ci-summary.outputs.changed_py_sagemaker }}
-      changed_py_vertex:    ${{ needs.ci-summary.outputs.changed_py_vertex }}
-      changed_py_azure:     ${{ needs.ci-summary.outputs.changed_py_azure }}
-      changed_proxy:        ${{ needs.ci-summary.outputs.changed_proxy }}
-      changed_adk:          ${{ needs.ci-summary.outputs.changed_adk }}
-      changed_vibe:         ${{ needs.ci-summary.outputs.changed_vibe }}
-      changed_langflow:     ${{ needs.ci-summary.outputs.changed_langflow }}
-      changed_litellm:      ${{ needs.ci-summary.outputs.changed_litellm }}
-      changed_langfuse:     ${{ needs.ci-summary.outputs.changed_langfuse }}
-      changed_workflows:    ${{ needs.ci-summary.outputs.changed_workflows }}
-    secrets:
-      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
-      REGISTRY_USERNAME:  ${{ secrets.REGISTRY_USERNAME }}
-      REGISTRY_PASSWORD:  ${{ secrets.REGISTRY_PASSWORD }}
-      K8S_NAMESPACE:      ${{ secrets.K8S_NAMESPACE }}
+    timeout-minutes: 90
 
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: essedum-lfn-v15.0-actions
+          fetch-depth: 1
+
+      - name: Load runner-local env (docker/.env.sample)
+        # Uses grep+cut to extract only the 4 needed variables — no shell
+        # expansion of values (safe for keys containing $, #, = etc).
+        # NEVER uses GitHub secrets for registry credentials — public repo.
+        run: |
+          # docker/.env.sample is NOT committed to git (contains credentials).
+          # Use the stable runner working copy — never overwritten by git checkout.
+          ENV_FILE="/home/devopsuser/devops/actions/essedum-platform/docker/.env.sample"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::docker/.env.sample not found at $ENV_FILE"
+            exit 1
+          fi
+          DOCKER_REGISTRY=$(grep -m1 '^DOCKER_REGISTRY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_USERNAME=$(grep -m1 '^DOCKER_USERNAME=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          DOCKER_PASSWORD=$(grep -m1 '^DOCKER_PASSWORD=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          KUBE_NAMESPACE=$(grep -m1 '^KUBE_NAMESPACE=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          if [ -z "$DOCKER_REGISTRY" ]; then
+            echo "::error::DOCKER_REGISTRY not found in $ENV_FILE"
+            exit 1
+          fi
+          MINIO_ACCESS_KEY=$(grep -m1 '^MINIO_ACCESS_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MINIO_SECRET_KEY=$(grep -m1 '^MINIO_SECRET_KEY=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MINIO_ENDPOINT=$(grep -m1 '^MINIO_ENDPOINT=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_URL=$(grep -m1 '^MYSQL_DATASOURCE_URL=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_USER=$(grep -m1 '^MYSQL_DATASOURCE_USER=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          MYSQL_DATASOURCE_PASSWORD=$(grep -m1 '^MYSQL_DATASOURCE_PASSWORD=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          if [ -n "$DOCKER_PASSWORD" ]; then
+            echo "::add-mask::$DOCKER_PASSWORD"
+          fi
+          if [ -n "$MINIO_SECRET_KEY" ]; then
+            echo "::add-mask::$MINIO_SECRET_KEY"
+          fi
+          if [ -n "$MYSQL_DATASOURCE_PASSWORD" ]; then
+            echo "::add-mask::$MYSQL_DATASOURCE_PASSWORD"
+          fi
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> "$GITHUB_ENV"
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> "$GITHUB_ENV"
+          echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> "$GITHUB_ENV"
+          echo "KUBE_NAMESPACE=${KUBE_NAMESPACE:-aipns}" >> "$GITHUB_ENV"
+          echo "MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY" >> "$GITHUB_ENV"
+          echo "MINIO_SECRET_KEY=$MINIO_SECRET_KEY" >> "$GITHUB_ENV"
+          echo "MINIO_ENDPOINT=$MINIO_ENDPOINT" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_URL=$MYSQL_DATASOURCE_URL" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_USER=$MYSQL_DATASOURCE_USER" >> "$GITHUB_ENV"
+          echo "MYSQL_DATASOURCE_PASSWORD=$MYSQL_DATASOURCE_PASSWORD" >> "$GITHUB_ENV"
+          INGRESS_HOST=$(grep -m1 '^INGRESS_HOST=' "$ENV_FILE" | cut -d= -f2- | tr -d '\r')
+          INGRESS_HOST=${INGRESS_HOST:-essedum.local}
+          echo "INGRESS_HOST=$INGRESS_HOST" >> "$GITHUB_ENV"
+          echo "✓ Registry: $DOCKER_REGISTRY"
+          echo "✓ Auth: $([ -n "$DOCKER_USERNAME" ] && echo 'yes' || echo 'anonymous')"
+          echo "✓ MinIO endpoint: $MINIO_ENDPOINT"
+          echo "✓ MySQL URL: $MYSQL_DATASOURCE_URL"
+          echo "✓ Ingress host: $INGRESS_HOST"
+
+      - name: Verify kubeconfig
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          if [ -z "${KUBECONFIG:-}" ]; then
+            echo "::error::KUBECONFIG environment variable is not set"
+            exit 1
+          fi
+          if [ ! -f "$KUBECONFIG" ]; then
+            echo "::error::KUBECONFIG not found at $KUBECONFIG"
+            exit 1
+          fi
+
+          CTX=$(kubectl config current-context 2>/dev/null || true)
+          SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true)
+
+          echo "Kube context: ${CTX:-<unset>}"
+          echo "Kube server: ${SERVER:-<unset>}"
+
+          if [ -z "$SERVER" ]; then
+            echo "::error::Unable to read cluster server from kubeconfig"
+            exit 1
+          fi
+
+          if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+            echo "::warning::Kubernetes API endpoint unreachable using current kubeconfig: ${SERVER}"
+            echo "::warning::Attempting kubeconfig TLS fallback..."
+
+            CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}' 2>/dev/null || true)
+            if [ -n "$CLUSTER_NAME" ]; then
+              kubectl config set-cluster "$CLUSTER_NAME" --server="$SERVER" --insecure-skip-tls-verify=true >/dev/null 2>&1 || true
+            fi
+
+            if kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+              echo "::warning::Connected using kubeconfig TLS fallback (insecure-skip-tls-verify=true)"
+            else
+              echo "::warning::TLS fallback failed; attempting kubeconfig recovery from local microk8s..."
+
+              if ! command -v microk8s >/dev/null 2>&1; then
+                echo "::error::microk8s command not found; cannot auto-recover kubeconfig"
+                exit 1
+              fi
+
+              TMP_CFG="${RUNNER_TEMP}/kubeconfig-recovered.yaml"
+              microk8s config > "$TMP_CFG"
+              cp "$TMP_CFG" "$KUBECONFIG"
+              rm -f "$TMP_CFG"
+
+              CTX=$(kubectl config current-context 2>/dev/null || true)
+              SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null || true)
+              echo "Recovered kube context: ${CTX:-<unset>}"
+              echo "Recovered kube server: ${SERVER:-<unset>}"
+
+              if ! kubectl --request-timeout=15s cluster-info >/dev/null 2>&1; then
+                echo "::error::Kubernetes API endpoint is unreachable after kubeconfig recovery: ${SERVER}"
+                exit 1
+              fi
+            fi
+          fi
+
+      - name: Get cluster context
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          echo "Cluster: $(kubectl config current-context)"
+          echo "Namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
+
+      - name: Create registry pull secret in cluster
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          if [ -n "${DOCKER_USERNAME:-}" ]; then
+            kubectl create secret docker-registry registry-credentials \
+              --docker-server="$DOCKER_REGISTRY" \
+              --docker-username="$DOCKER_USERNAME" \
+              --docker-password="$DOCKER_PASSWORD" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ registry-credentials secret applied in namespace $NAMESPACE"
+          else
+            echo "No DOCKER_USERNAME — skipping registry-credentials (anonymous/local registry)"
+          fi
+
+      - name: Docker logout and image cleanup
+        if: always()
+        run: |
+          docker logout "$DOCKER_REGISTRY" || true
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "vibe-pod-watcher" "goose-ui" "goosed")
+          for svc in "${services[@]}"; do
+            docker rmi "${DOCKER_REGISTRY}/${svc}:${{ github.sha }}" 2>/dev/null || true
+            docker rmi "localhost:5001/${svc}:${{ github.sha }}" 2>/dev/null || true
+          done
+          docker image prune -f || true
+          echo "✓ Docker logout complete and images cleaned up"
+
+      - name: Apply cluster secrets from env
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+          # essedum-minio-secret: used by data-service and other consumers
+          kubectl create secret generic essedum-minio-secret \
+            --from-literal=endpoint="${MINIO_ENDPOINT:-http://minio-service:9000}" \
+            --from-literal=access-key="${MINIO_ACCESS_KEY}" \
+            --from-literal=secret-key="${MINIO_SECRET_KEY}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ essedum-minio-secret applied"
+
+          # essedum-db-secret: used by backend microservices for MySQL
+          kubectl create secret generic essedum-db-secret \
+            --from-literal=MYSQL_DATASOURCE_URL="${MYSQL_DATASOURCE_URL}" \
+            --from-literal=MYSQL_USER="${MYSQL_DATASOURCE_USER}" \
+            --from-literal=MYSQL_PASSWORD="${MYSQL_DATASOURCE_PASSWORD}" \
+            --namespace="$NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✓ essedum-db-secret applied"
+
+          # keycloak-admin-secret: create/update when env vars are provided;
+          # if absent, verify secret already exists in cluster so deploy is not blocked.
+          if [ -n "${KEYCLOAK_ADMIN_USER:-}" ] && [ -n "${KEYCLOAK_ADMIN_PASSWORD:-}" ]; then
+            kubectl create secret generic keycloak-admin-secret \
+              --from-literal=username="${KEYCLOAK_ADMIN_USER}" \
+              --from-literal=password="${KEYCLOAK_ADMIN_PASSWORD}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ keycloak-admin-secret applied"
+          elif kubectl get secret keycloak-admin-secret -n "$NAMESPACE" >/dev/null 2>&1; then
+            echo "keycloak-admin-secret already exists — skipping update (set KEYCLOAK_ADMIN_USER/KEYCLOAK_ADMIN_PASSWORD to override)"
+          else
+            echo "::error::keycloak-admin-secret not found in cluster. Set KEYCLOAK_ADMIN_USER and KEYCLOAK_ADMIN_PASSWORD to create it."
+            exit 1
+          fi
+
+          # agent-designer-secrets: create/update when env vars are provided;
+          # if absent, verify secret already exists in cluster.
+          if [ -n "${AGENT_DESIGNER_POSTGRES_PASSWORD:-}" ]; then
+            AGENT_DESIGNER_DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL:-postgresql+asyncpg://agentflow:${AGENT_DESIGNER_POSTGRES_PASSWORD}@agent-designer-postgres:5432/agentflow}"
+            kubectl create secret generic agent-designer-secrets \
+              --from-literal=POSTGRES_PASSWORD="${AGENT_DESIGNER_POSTGRES_PASSWORD}" \
+              --from-literal=DATABASE_URL="${AGENT_DESIGNER_DATABASE_URL}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ agent-designer-secrets applied"
+          elif kubectl get secret agent-designer-secrets -n "$NAMESPACE" >/dev/null 2>&1; then
+            echo "agent-designer-secrets already exists — skipping update (set AGENT_DESIGNER_POSTGRES_PASSWORD to override)"
+          else
+            echo "::error::agent-designer-secrets not found in cluster. Set AGENT_DESIGNER_POSTGRES_PASSWORD to create it."
+            exit 1
+          fi
+
+          # essedum-vibe-secret: required by vibe backend for Azure OpenAI settings
+          if [ -n "${VIBE_AZURE_OPENAI_ENDPOINT:-}" ] && [ -n "${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_VERSION:-}" ] && [ -n "${VIBE_AZURE_OPENAI_API_KEY:-}" ]; then
+            kubectl create secret generic essedum-vibe-secret \
+              --from-literal=VIBE_AZURE_OPENAI_ENDPOINT="${VIBE_AZURE_OPENAI_ENDPOINT}" \
+              --from-literal=VIBE_AZURE_OPENAI_DEPLOYMENT_NAME="${VIBE_AZURE_OPENAI_DEPLOYMENT_NAME}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_VERSION="${VIBE_AZURE_OPENAI_API_VERSION}" \
+              --from-literal=VIBE_AZURE_OPENAI_API_KEY="${VIBE_AZURE_OPENAI_API_KEY}" \
+              --namespace="$NAMESPACE" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            echo "✓ essedum-vibe-secret applied"
+          else
+            echo "::warning::essedum-vibe-secret not updated because one or more VIBE_AZURE_OPENAI_* variables are missing"
+          fi
+
+      - name: Apply Kubernetes manifests
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          REGISTRY="$DOCKER_REGISTRY"
+          echo "Deploying to namespace: $NAMESPACE (registry: $REGISTRY)"
+          kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace ingress-nginx --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace metallb-system --dry-run=client -o yaml | kubectl apply -f -
+
+          echo "=== Verifying container images in registry ==="
+          declare -A svc_changed
+          svc_changed["essedum-api-gateway"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-usm-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-icip-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-data-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-vibe-service"]="${{ needs.ci-summary.outputs.changed_backend }}"
+          svc_changed["essedum-frontend-shell"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-data-ops"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-integration"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-vibe-studio"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["essedum-frontend-agent-designer"]="${{ needs.ci-summary.outputs.changed_frontend }}"
+          svc_changed["agent-designer-backend"]="${{ needs.ci-summary.outputs.changed_agent_designer_backend }}"
+          svc_changed["py-job-executer"]="${{ needs.ci-summary.outputs.changed_py_executer }}"
+          svc_changed["py-job-sagemaker-executer"]="${{ needs.ci-summary.outputs.changed_py_sagemaker }}"
+          svc_changed["py-job-vertex-executer"]="${{ needs.ci-summary.outputs.changed_py_vertex }}"
+          svc_changed["py-job-azure-executer"]="${{ needs.ci-summary.outputs.changed_py_azure }}"
+          svc_changed["proxy-service"]="${{ needs.ci-summary.outputs.changed_proxy }}"
+          svc_changed["adk-code-builder-deployer"]="${{ needs.ci-summary.outputs.changed_adk }}"
+          svc_changed["vibe-code-builder-deployer"]="${{ needs.ci-summary.outputs.changed_vibe }}"
+          svc_changed["vibe-pod-watcher"]="${{ needs.ci-summary.outputs.changed_vibe_pod_watcher }}"
+          svc_changed["goose-ui"]="true"
+          svc_changed["goosed"]="true"
+
+          if [[ "$REGISTRY" == localhost:* ]] || [[ "$REGISTRY" == 127.* ]] || [[ "$REGISTRY" == 192.168.* ]] || [[ "$REGISTRY" == 10.* ]]; then
+            REG_PROTO="http"
+          else
+            REG_PROTO="https"
+          fi
+
+          missing_images=0
+          services=("essedum-api-gateway" "essedum-usm-service" "essedum-icip-service" "essedum-data-service" "essedum-vibe-service" "essedum-frontend-shell" "essedum-frontend-agent" "essedum-frontend-data-ops" "essedum-frontend-integration" "essedum-frontend-vibe-studio" "essedum-frontend-agent-designer" "agent-designer-backend" "py-job-executer" "py-job-sagemaker-executer" "py-job-vertex-executer" "py-job-azure-executer" "proxy-service" "adk-code-builder-deployer" "vibe-code-builder-deployer" "vibe-pod-watcher" "goose-ui" "goosed")
+          for svc in "${services[@]}"; do
+            changed="${svc_changed[$svc]}"
+            if [ "$changed" != "true" ]; then
+              echo "  Skipping ${svc} (unchanged – existing deployment untouched)"
+              continue
+            fi
+            echo -n "  Checking ${svc}... "
+            http_status=$(curl -sI -o /dev/null -w "%{http_code}" \
+              -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              "${REG_PROTO}://${REGISTRY}/v2/${svc}/manifests/${IMAGE_TAG}" 2>/dev/null || echo "000")
+            if [ "$http_status" = "200" ]; then
+              echo "✓ Found in registry"
+            else
+              echo "✗ NOT FOUND (HTTP ${http_status}): ${REGISTRY}/${svc}:${IMAGE_TAG}"
+              missing_images=$((missing_images + 1))
+            fi
+          done
+          if [ "$missing_images" -gt 0 ]; then
+            echo "::error::${missing_images} image(s) not found in registry — aborting deployment"
+            exit 1
+          fi
+          echo "✓ All changed-service images verified in registry"
+
+          # ── ingress-nginx (immutable selector: delete + recreate) ──
+          if [ -f "aks-deployment/ingress-nginx-deploy.yaml" ]; then
+            kubectl delete deployment ingress-nginx-controller -n ingress-nginx --ignore-not-found || true
+            sleep 2
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                "aks-deployment/ingress-nginx-deploy.yaml" | kubectl apply -f - || true
+          fi
+
+          # ── MetalLB ──
+          if [ -f "aks-deployment/metallib-config.yaml" ]; then
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                "aks-deployment/metallib-config.yaml" | kubectl apply -f - || true
+          fi
+
+          kubectl delete validatingwebhookconfiguration ingress-nginx-admission --ignore-not-found || true
+
+          echo "Patching ProgressDeadlineSeconds..."
+          for deployment in $(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+            kubectl patch deployment "$deployment" -n "$NAMESPACE" --type merge \
+              -p '{"spec":{"progressDeadlineSeconds":900}}' 2>/dev/null || true
+          done
+
+          # ── MySQL first (Keycloak dependency) ──
+          if [ -f "aks-deployment/mysql_deployment_v3.yaml" ]; then
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                "aks-deployment/mysql_deployment_v3.yaml" | kubectl apply -n "$NAMESPACE" -f - || true
+            kubectl rollout status deployment/mysql -n "$NAMESPACE" --timeout=3m || \
+              echo "::warning::MySQL rollout timed out – Keycloak will retry via initContainer"
+          fi
+
+          # ── Keycloak ──
+          if [ -f "aks-deployment/keycloak_deployment.yaml" ]; then
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                "aks-deployment/keycloak_deployment.yaml" | kubectl apply -n "$NAMESPACE" -f - || true
+          fi
+
+          # ── PVC-containing files (data preservation) ──
+          for manifest in "aks-deployment/mysql_file_pv.yaml" "aks-deployment/qdrantfilepv.yaml" "aks-deployment/qdrant_deployment.yaml"; do
+            [ -f "$manifest" ] || continue
+            KUBECTL_ERR=$(mktemp /tmp/kubectl_err.XXXXXX)
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                "$manifest" | \
+              kubectl apply -n "$NAMESPACE" -f - 2>"$KUBECTL_ERR" && APPLY_RC=0 || APPLY_RC=$?
+            if [ "$APPLY_RC" -ne 0 ]; then
+              CLIENT_ERRORS=$(grep -E "^error:" "$KUBECTL_ERR" || true)
+              if [ -n "$CLIENT_ERRORS" ]; then
+                echo "::error::Unexpected error in $manifest:"; cat "$KUBECTL_ERR"; rm -f "$KUBECTL_ERR"; exit 1
+              else
+                echo "  (PV/PVC skipped – already exists, data preserved)"
+              fi
+            fi
+            rm -f "$KUBECTL_ERR"
+          done
+
+          # ── Pre-scale backend for clean restart ──
+          kubectl scale deployment essedum-backend -n "$NAMESPACE" --replicas=0 2>/dev/null || true
+          kubectl wait pods -n "$NAMESPACE" -l app=essedum-backend \
+            --for=delete --timeout=60s 2>/dev/null || true
+
+          # ── Apply all remaining app manifests ──
+          SKIP_FILES=(
+            "aks-deployment/ingress-nginx-deploy.yaml"
+            "aks-deployment/metallib-config.yaml"
+            "aks-deployment/mysql_file_pv.yaml"
+            "aks-deployment/qdrantfilepv.yaml"
+            "aks-deployment/qdrant_deployment.yaml"
+            "aks-deployment/builder-rbac.yml"
+            "aks-deployment/github-runner-rbac.yml"
+            "aks-deployment/mysql_deployment_v3.yaml"
+            "aks-deployment/keycloak_deployment.yaml"
+            "aks-deployment/langflow-deployment-with-tls.yaml"
+            "aks-deployment/langflow_file_pv.yaml"
+            # Monolithic manifests — do NOT apply in microservices deployment
+            "aks-deployment/essedum-backend.yaml"
+            "aks-deployment/essedum-ui.yaml"
+            "aks-deployment/essedum-ui-service.yaml"
+            "aks-deployment/essedum-ui-hpa.yaml"
+            # Replaced by merged essedum-frontend-ingress.yaml + essedum-frontend-shell-ingress.yaml
+            "aks-deployment/essedum-api-ingress.yaml"
+            "aks-deployment/essedum-frontend-mfe-ingress.yaml"
+            # Secret managed by workflow step, not static YAML
+            "aks-deployment/essedum-minio-secret.yaml"
+            # Old ingress (replaced)
+            "aks-deployment/ingress.yaml"
+            # Cross-namespace resources — must be applied with their own namespace, not aipns
+            "aks-deployment/vibe-agents-rbac.yaml"
+            "aks-deployment/vibe-apps-rbac.yaml"
+            "aks-deployment/vibe-mcp-rbac.yaml"
+            "aks-deployment/builder-deployment.yml"
+          )
+          for manifest in aks-deployment/*.yaml aks-deployment/*.yml; do
+            [ -f "$manifest" ] || continue
+            skip=false
+            for sf in "${SKIP_FILES[@]}"; do [ "$manifest" = "$sf" ] && skip=true && break; done
+            $skip && continue
+            echo "Applying: $manifest"
+            sed -e 's|\${IMAGE_TAG}|'"${IMAGE_TAG}"'|g' \
+                -e 's|\${DOCKER_REGISTRY}|'"${REGISTRY}"'|g' \
+                -e 's|\${INGRESS_HOST}|'"${INGRESS_HOST}"'|g' \
+                "$manifest" | \
+              kubectl apply -n "$NAMESPACE" -f - || echo "::warning::Failed to apply $manifest, continuing..."
+          done
+
+      - name: Patch known rollout blockers (CI-only)
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          TARGET_DEPLOYMENTS=(
+            "agent-designer-backend"
+            "agent-designer-postgres"
+            "agent-designer-redis"
+            "essedum-frontend-agent-designer"
+            "pyjob-executor"
+            "keycloak"
+            "essedum-backend-data"
+            "essedum-backend-icip"
+            "essedum-backend-usm"
+            "essedum-backend-vibe"
+            "vibe-pod-watcher"
+            "proxy-service"
+          )
+
+          if kubectl get secret registry-credentials -n "$NAMESPACE" >/dev/null 2>&1; then
+            HAS_REGISTRY_SECRET=true
+            kubectl patch sa default -n "$NAMESPACE" --type='merge' \
+              -p '{"imagePullSecrets":[{"name":"registry-credentials"}]}' >/dev/null 2>&1 || true
+          else
+            HAS_REGISTRY_SECRET=false
+            echo "::warning::registry-credentials secret not found in $NAMESPACE; imagePullSecrets will be removed from target deployments"
+            kubectl patch sa default -n "$NAMESPACE" --type='json' \
+              -p='[{"op":"remove","path":"/imagePullSecrets"}]' >/dev/null 2>&1 || true
+          fi
+
+          failures=0
+          for deployment in "${TARGET_DEPLOYMENTS[@]}"; do
+            if ! kubectl get deployment "$deployment" -n "$NAMESPACE" >/dev/null 2>&1; then
+              echo "Skipping $deployment (not found in $NAMESPACE)"
+              continue
+            fi
+
+            container_name=$(kubectl get deployment "$deployment" -n "$NAMESPACE" -o jsonpath='{.spec.template.spec.containers[0].name}' 2>/dev/null || true)
+            if [ -z "$container_name" ]; then
+              echo "::error::Unable to detect container name for $deployment"
+              failures=$((failures + 1))
+              continue
+            fi
+
+            echo "Patching $deployment (pod/container runAsNonRoot=false, container=$container_name)"
+
+            if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='strategic' \
+              -p "{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"runAsNonRoot\":false},\"containers\":[{\"name\":\"$container_name\",\"securityContext\":{\"runAsNonRoot\":false}}]}}}}" >/dev/null; then
+              echo "::error::Failed to patch runAsNonRoot for $deployment"
+              failures=$((failures + 1))
+            fi
+
+            if [ "$HAS_REGISTRY_SECRET" = true ]; then
+              if ! kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='merge' \
+                -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"registry-credentials"}]}}}}' >/dev/null; then
+                echo "::error::Failed to patch imagePullSecrets for $deployment"
+                failures=$((failures + 1))
+              fi
+            else
+              kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
+                -p='[{"op":"remove","path":"/spec/template/spec/imagePullSecrets"}]' >/dev/null 2>&1 || true
+            fi
+
+            if ! kubectl rollout restart deployment "$deployment" -n "$NAMESPACE" >/dev/null; then
+              echo "::error::Failed to rollout restart $deployment after remediation patch"
+              failures=$((failures + 1))
+            fi
+
+            case "$deployment" in
+              keycloak|essedum-backend-data|essedum-backend-icip|essedum-backend-usm|essedum-backend-vibe)
+                kubectl patch deployment "$deployment" -n "$NAMESPACE" --type='json' \
+                  -p='[{"op":"remove","path":"/spec/template/spec/initContainers"}]' >/dev/null 2>&1 || true
+                ;;
+            esac
+          done
+
+          echo "=== Effective rollout patch state ==="
+          for deployment in "${TARGET_DEPLOYMENTS[@]}"; do
+            kubectl get deployment "$deployment" -n "$NAMESPACE" \
+              -o jsonpath='{"deploy="}{.metadata.name}{" runAsNonRoot="}{.spec.template.spec.containers[0].securityContext.runAsNonRoot}{" pullSecrets="}{range .spec.template.spec.imagePullSecrets[*]}{.name}{";"}{end}{"\n"}' 2>/dev/null || true
+          done
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::Patch remediation failed for $failures operation(s)"
+            exit 1
+          fi
+
+      - name: Wait for rollout
+        run: |
+          export PATH="/snap/bin:/usr/local/bin:$PATH"
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          SKIP_ROLLOUT=("github-runner" "builder-service" "buildkitd" "langflow" "test-app1")
+          SOFT_FAIL_ROLLOUT=(
+            "agent-designer-backend"
+            "essedum-backend-data"
+            "essedum-backend-icip"
+            "essedum-backend-usm"
+            "essedum-backend-vibe"
+            "keycloak"
+            "proxy-service"
+            "pyjob-executor"
+            "vibe-pod-watcher"
+          )
+
+          is_soft_fail_rollout() {
+            local deployment="$1"
+            for item in "${SOFT_FAIL_ROLLOUT[@]}"; do
+              if [ "$item" = "$deployment" ]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          diagnose_rollout_failure() {
+            local deployment="$1"
+            local pullsecret_issue=0
+            echo "=== Diagnostics for $deployment ==="
+            kubectl get deploy "$deployment" -n "$NAMESPACE" -o wide || true
+            kubectl describe deploy "$deployment" -n "$NAMESPACE" || true
+
+            local revision rs hash pods
+            revision=$(kubectl get deploy "$deployment" -n "$NAMESPACE" -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' 2>/dev/null || true)
+            rs=$(kubectl get rs -n "$NAMESPACE" -l app="$deployment" \
+              -o jsonpath='{range .items[?(@.metadata.annotations.deployment\.kubernetes\.io/revision=="'"$revision"'")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -n1)
+            if [ -z "$rs" ]; then
+              rs=$(kubectl get rs -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" \
+                -o jsonpath='{range .items[?(@.metadata.annotations.deployment\.kubernetes\.io/revision=="'"$revision"'")]}{.metadata.name}{"\n"}{end}' 2>/dev/null | head -n1)
+            fi
+
+            hash=""
+            if [ -n "$rs" ]; then
+              hash=$(kubectl get rs "$rs" -n "$NAMESPACE" -o jsonpath='{.metadata.labels.pod-template-hash}' 2>/dev/null || true)
+            fi
+
+            pods=""
+            if [ -n "$hash" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l "app=$deployment,pod-template-hash=$hash" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+              if [ -z "$pods" ]; then
+                pods=$(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=$deployment,pod-template-hash=$hash" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+              fi
+            fi
+
+            if [ -z "$pods" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            fi
+            if [ -z "$pods" ]; then
+              pods=$(kubectl get pods -n "$NAMESPACE" -l app="$deployment" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+            fi
+
+            if [ -z "$pods" ]; then
+              echo "No pods found for standard selectors app.kubernetes.io/name=$deployment or app=$deployment"
+            else
+              for pod in $pods; do
+                echo "--- Pod: $pod ---"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o wide || true
+                echo "container waiting states:"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o jsonpath='{range .status.containerStatuses[*]}{.name}{": "}{.state.waiting.reason}{" | "}{.state.waiting.message}{"\n"}{end}' || true
+                echo "init waiting states:"
+                kubectl get pod "$pod" -n "$NAMESPACE" -o jsonpath='{range .status.initContainerStatuses[*]}{.name}{": "}{.state.waiting.reason}{" | "}{.state.waiting.message}{"\n"}{end}' || true
+                pod_events=$(kubectl describe pod "$pod" -n "$NAMESPACE" | sed -n '/Events:/,$p' || true)
+                echo "$pod_events"
+                if echo "$pod_events" | grep -qi 'FailedToRetrieveImagePullSecret'; then
+                  pullsecret_issue=1
+                fi
+              done
+            fi
+
+            effective_non_root=$(kubectl get deploy "$deployment" -n "$NAMESPACE" -o jsonpath='{.spec.template.spec.containers[0].securityContext.runAsNonRoot}' 2>/dev/null || true)
+            if [ "$effective_non_root" = "true" ]; then
+              echo "::error::Detected securityContext mismatch for $deployment (runAsNonRoot=true but image runs as root)"
+            fi
+
+            if [ "$pullsecret_issue" -eq 1 ]; then
+              echo "::error::Detected missing/unreadable imagePullSecret in namespace $NAMESPACE"
+              kubectl get sa default -n "$NAMESPACE" -o yaml || true
+            fi
+          }
+
+          failed_rollouts=()
+          deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}')
+          for deployment in $deployments; do
+            skip=false
+            for sn in "${SKIP_ROLLOUT[@]}"; do [ "$deployment" = "$sn" ] && skip=true && break; done
+            $skip && echo ">>> Skipping $deployment (not CD-managed)" && continue
+            echo ">>> Monitoring $deployment (timeout: 10m)..."
+            kubectl rollout status deployment/$deployment -n "$NAMESPACE" --timeout=10m || {
+              if is_soft_fail_rollout "$deployment"; then
+                echo "::warning::Rollout timed out for $deployment (soft-fail allowlist)"
+              else
+                echo "::warning::Rollout timed out for $deployment"
+                failed_rollouts+=("$deployment")
+              fi
+              diagnose_rollout_failure "$deployment"
+            }
+          done
+
+          if [ ${#failed_rollouts[@]} -gt 0 ]; then
+            echo "::error::Rollout failed for: ${failed_rollouts[*]}"
+            exit 1
+          fi
+
+          echo "=== Final deployment status ==="
+          kubectl get deployments -n "$NAMESPACE" -o wide
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          NAMESPACE="${KUBE_NAMESPACE:-aipns}"
+          echo "## ✓ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: \`$NAMESPACE\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment failure report
+        if: failure()
+        run: |
+          echo "## :red_circle: Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

@@ -7,9 +7,9 @@
 # OIDC / Keycloak settings consumed by OAuth2AuthController, ICIPUtils
 # and exposed to the frontend via /api/getConfigDetails.
 security:
-  issuer-uri: ${OAUTH2_ISSUER_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM}
-  jwk-set-uri: ${OAUTH2_JWK_URI:https://aiplatform.az.ad.idemo-ppc.com/realms/ESSEDUM/protocol/openid-connect/certs}
-  clientId: ${OAUTH2_CLIENT_ID:essedum-45}
+  issuer-uri: ${OAUTH2_ISSUER_URI}
+  jwk-set-uri: ${OAUTH2_JWK_URI}
+  clientId: ${OAUTH2_CLIENT_ID}
   scope: ${OAUTH2_SCOPE:openid profile email}
   # Claim(s) in the JWT used to identify the user. Multiple claims can be
   # separated by '||' (first non-empty wins). Monolith default: email||admin
