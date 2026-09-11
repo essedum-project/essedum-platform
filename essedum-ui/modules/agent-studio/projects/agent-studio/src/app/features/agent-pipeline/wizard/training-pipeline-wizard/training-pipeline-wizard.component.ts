@@ -62,6 +62,7 @@ export class TrainingPipelineWizardLocalComponent implements OnInit {
     { label: 'gemma4:latest', value: 'gemma4:latest' },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest' },
     { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+    { label: 'gpt-5.6-luna', value: 'gpt-5.6-luna' },
     { label: 'phi3:mini', value: 'phi3:mini' },
     { label: 'gemma3:latest', value: 'gemma3:latest' },
     { label: 'llama3:latest', value: 'llama3:latest' },
