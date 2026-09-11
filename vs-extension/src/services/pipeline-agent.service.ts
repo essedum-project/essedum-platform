@@ -469,9 +469,7 @@ export class PipelineAgentService {
     if (isVibeStudio !== undefined) {
       formData.append('isvibestudio', String(isVibeStudio));
     }
-    if (type !== undefined) {
-      formData.append('type', type);
-    }
+    // NOTE: 'type' must be a URL query param (not a form field) — mirrors web app: ?zipFile=null&type=Agent
 
     const baseHeaders = await this.buildHeaders();
     delete baseHeaders['content-type']; // FormData sets this
@@ -482,8 +480,14 @@ export class PipelineAgentService {
       ? PipelineAgentService.httpsAgent
       : PipelineAgentService.httpAgent;
 
+    // Build query params: always include zipFile=null; add type when provided
+    const queryParams: Record<string, string> = { zipFile: 'null' };
+    if (type !== undefined) {
+      queryParams.type = type;
+    }
+
     const config = await this.buildAxiosConfig(
-      { zipFile: 'null' },
+      queryParams,
       {
         timeout: 600000, // 10 minutes for large uploads
         httpAgent: PipelineAgentService.httpAgent,
@@ -799,6 +803,70 @@ export class PipelineAgentService {
       dataType: typeof response?.data
     });
     
+    return response?.data || [];
+  }
+
+  /**
+   * Get App Pipeline count
+   * GET /api/aip/service/v1/pipelines/count
+   * @param queryParams - Query parameters (page, size, project, etc.)
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns Count of app pipelines
+   */
+  async getAppPipelineCount(queryParams: HttpParams, signal?: AbortSignal): Promise<number> {
+    this.refreshAuthData();
+
+    const url = `${this.API.PIPELINES_COUNT}`;
+
+    const params = {
+      ...queryParams,
+      interfacetype: 'app-pipeline',
+      type: 'appPipeline',
+      cloud_provider: 'internal'
+    };
+
+    const config = await this.buildAxiosConfig(params, {}, signal);
+    const response = await this.requestWithRetry<any>('get', url, config);
+
+    logger.info('[PipelineAgentService] App Pipeline count response:', {
+      data: response?.data,
+      count: response?.data?.count,
+      dataType: typeof response?.data
+    });
+
+    if (typeof response?.data === 'number') {
+      return response.data;
+    }
+    return response?.data?.count || 0;
+  }
+
+  /**
+   * Get App Pipeline list
+   * GET /api/aip/service/v1/pipelines/training/list
+   * @param queryParams - Query parameters (page, size, project, etc.)
+   * @param signal - Optional AbortSignal for cancellation
+   * @returns List of app pipelines
+   */
+  async getAppPipelineList(queryParams: HttpParams, signal?: AbortSignal): Promise<any[]> {
+    this.refreshAuthData();
+
+    const url = `${this.API.PIPELINES_LIST}`;
+
+    const params = {
+      ...queryParams,
+      interfacetype: 'app-pipeline',
+      type: 'appPipeline'
+    };
+
+    const config = await this.buildAxiosConfig(params, {}, signal);
+    const response = await this.requestWithRetry<any>('get', url, config);
+
+    logger.info('[PipelineAgentService] App Pipeline list response:', {
+      data: response?.data,
+      dataLength: Array.isArray(response?.data) ? response.data.length : 'not an array',
+      dataType: typeof response?.data
+    });
+
     return response?.data || [];
   }
 

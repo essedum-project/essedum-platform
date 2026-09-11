@@ -324,6 +324,7 @@ class PipelineCardsClient {
         this.prevPageBtn = document.getElementById('prevPageBtn');
         this.nextPageBtn = document.getElementById('nextPageBtn');
         this.lastPageBtn = document.getElementById('lastPageBtn');
+        this.pipelineHeaderTitle = document.getElementById('pipelineHeaderTitle');
 
         // Details view elements
         this.detailsView = document.getElementById('detailsView');
@@ -335,11 +336,13 @@ class PipelineCardsClient {
         this.runPipelineBtn = document.getElementById('runPipelineBtn');
         this.viewLogsBtn = document.getElementById('viewLogsBtn');
         this.refreshScriptsBtn = document.getElementById('refreshScriptsBtn');
+        this.openCopilotBtn = document.getElementById('openCopilotBtn');
 
         // Track current view state
         this.currentView = 'list'; // 'list' or 'details'
         this.currentPipelineId = null;
         this.currentPipelineData = null;
+        this.currentTab = 'native';
     }
 
     attachEventListeners() {
@@ -356,6 +359,16 @@ class PipelineCardsClient {
             if (e.key === 'Enter') {
                 this.searchBtn.click();
             }
+        });
+
+        // Pipeline type tab switching (only wizard tabs are ever visible when in wizard mode)
+        document.querySelectorAll('.tab-button[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.getAttribute('data-tab');
+                if (tab === 'native') { return; } // native tab is hidden in wizard mode, ignore
+                this.activateTab(tab);
+                this.vscode.postMessage({ command: 'switchTab', tab });
+            });
         });
 
         // Refresh functionality
@@ -403,6 +416,9 @@ class PipelineCardsClient {
                     break;
                 case 'showLoginError':
                     this.showLoginError(message.message);
+                    break;
+                case 'setTab':
+                    this.activateTab(message.tab || 'native');
                     break;
             }
         });
@@ -807,11 +823,17 @@ class PipelineCardsClient {
         // Update pipeline info
         this.updatePipelineInfo(pipeline);
 
-        // Update scripts
+        // Update scripts (filters .ipynb in wizard mode)
         this.updateScriptsContent(scripts);
 
         // Update run types
         this.updateRunTypesContent(runTypes);
+
+        // Show/hide Open Copilot button based on wizard mode
+        const isWizard = (this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard');
+        if (this.openCopilotBtn) {
+            this.openCopilotBtn.style.display = isWizard ? 'inline-flex' : 'none';
+        }
 
         // Setup action buttons
         this.setupActionButtons(pipeline);
@@ -887,8 +909,19 @@ class PipelineCardsClient {
             return;
         }
 
+        // Filter out .ipynb files in wizard mode
+        const isWizard = (this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard');
+        const filesToShow = isWizard
+            ? scripts.files.filter(f => !f.fileName.endsWith('.ipynb'))
+            : scripts.files;
+
+        if (filesToShow.length === 0) {
+            this.scriptsContainer.innerHTML = `<div class="empty-scripts"><p>${UI_TEXT.EMPTY_STATES.NO_SCRIPTS}</p></div>`;
+            return;
+        }
+
         const fragment = document.createDocumentFragment();
-        scripts.files.forEach((file, index) => {
+        filesToShow.forEach((file, index) => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'script-item';
 
@@ -1024,6 +1057,17 @@ class PipelineCardsClient {
                 });
             };
         }
+
+        // Open Copilot button (wizard mode only)
+        if (this.openCopilotBtn) {
+            this.openCopilotBtn.onclick = () => {
+                this.vscode.postMessage({
+                    command: 'openCopilot',
+                    cardId: pipeline.id,
+                    pipelineName: pipeline.alias || pipeline.name || pipeline.id
+                });
+            };
+        }
     }
 
     openScript(fileIndex) {
@@ -1070,6 +1114,35 @@ class PipelineCardsClient {
                 command: 'generateScripts',
                 cardId: this.currentPipelineId
             });
+        }
+    }
+
+    activateTab(tab) {
+        this.currentTab = tab || 'native';
+        const tabNav = document.getElementById('pipelineTabNav');
+        const isWizardMode = (this.currentTab === 'data-wizard' || this.currentTab === 'training-wizard');
+
+        if (this.currentTab === 'native') {
+            // Native mode: hide the tab bar entirely
+            if (tabNav) { tabNav.style.display = 'none'; }
+            if (this.pipelineHeaderTitle) { this.pipelineHeaderTitle.textContent = 'Native Pipelines'; }
+            if (this.searchInput) { this.searchInput.placeholder = 'Search native pipelines...'; }
+        } else {
+            // Wizard mode: show only Data Wizard and Training Wizard tabs, hide Native tab
+            if (tabNav) { tabNav.style.display = 'flex'; }
+            const nativeBtn = document.querySelector('.tab-button[data-tab="native"]');
+            if (nativeBtn) { nativeBtn.style.display = 'none'; }
+
+            document.querySelectorAll('.tab-button[data-tab]').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.querySelector(`.tab-button[data-tab="${this.currentTab}"]`);
+            if (activeBtn) { activeBtn.classList.add('active'); }
+
+            if (this.pipelineHeaderTitle) {
+                this.pipelineHeaderTitle.textContent = this.currentTab === 'data-wizard' ? 'Data Wizard Pipelines' : 'Training Wizard Pipelines';
+            }
+            if (this.searchInput) {
+                this.searchInput.placeholder = this.currentTab === 'data-wizard' ? 'Search data wizard pipelines...' : 'Search training wizard pipelines...';
+            }
         }
     }
 

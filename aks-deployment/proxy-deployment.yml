@@ -17,13 +17,13 @@ spec:
     spec:
       containers:
       - name: proxy
-        image: localhost:5000/proxy-service:v15
+        image: ${DOCKER_REGISTRY}/proxy-service:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
         - name: TARGET_NAMESPACE
-          value: "aipns"
+          value: "vibe-apps"
         # Optional allowlist: uncomment to restrict services
         # - name: ALLOWLIST
         #   value: "runner-service,tunner-service,abc-service"
@@ -31,8 +31,10 @@ spec:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 3
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
           periodSeconds: 10
+          failureThreshold: 6
         resources:
           requests:
             cpu: "100m"
@@ -40,8 +42,6 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
-      imagePullSecrets:
-      - name: regcred   # if your cluster needs ACR pull creds; remove if not required
 
 ---
 
