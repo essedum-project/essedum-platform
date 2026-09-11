@@ -1,7 +1,8 @@
 import asyncio
 from utils import *
 import json
-import mysql.connector
+import pymysql
+import pymysql.cursors
 import logging
 from dotenv import load_dotenv
 
@@ -18,7 +19,7 @@ def getConnection():
     host = db_configs['host']
     port = db_configs['port']
     database = db_configs['database']
-    connection = mysql.connector.connect(user=username, password=password, host=host, database=database, port=port)
+    connection = pymysql.connect(user=username, password=password, host=host, database=database, port=int(port), charset='utf8mb4')
     return connection
 
 async def get_tasks_from_db():
@@ -26,7 +27,7 @@ async def get_tasks_from_db():
     while attempt < int(db_configs['reconnect_attempts']):
         try:
             mydb = getConnection()
-            mycursor = mydb.cursor(dictionary=True)
+            mycursor = mydb.cursor(pymysql.cursors.DictCursor)
             query = """
                 SELECT *
                 FROM {table_name}
@@ -49,14 +50,14 @@ async def get_tasks_from_db():
                 await process_job_entries(entries)
             attempt = 0
             mydb.commit()
-        except mysql.connector.Error as err:
+        except pymysql.Error as err:
             logger.error(f'Exception occured: {err}', exc_info=True)
-            if err.errno in (2006, 2013):
+            if err.args and err.args[0] in (2006, 2013):
                 attempt+=1
                 await asyncio.sleep(5)
                 continue
             else:
-                if mydb and mydb.is_connected():
+                if mydb and mydb.open:
                     mydb.rollback()
                 attempt+=1
         except (KeyboardInterrupt, asyncio.CancelledError) as e:
@@ -64,7 +65,7 @@ async def get_tasks_from_db():
         except Exception as e:
             logger.error('Exception occured: {e}', exc_info=True)
         finally:
-            if mydb and mydb.is_connected():
+            if mydb and mydb.open:
                 mydb.rollback()
                 mycursor.close()
                 mydb.close()
@@ -100,8 +101,8 @@ async def update_db(entry_id, field, value, compare_field="id"):
             mycursor.execute(update_sql)
             mydb.commit()
             return
-        except mysql.connector.Error as err:
-            if err.errno in (2006, 2013):
+        except pymysql.Error as err:
+            if err.args and err.args[0] in (2006, 2013):
                 attempt += 1
                 await asyncio.sleep(5)
                 continue
@@ -113,7 +114,7 @@ async def update_db(entry_id, field, value, compare_field="id"):
             mydb.rollback()
             break
         finally:
-            if mydb and mydb.is_connected():
+            if mydb and mydb.open:
                 mydb.rollback()
                 mycursor.close()
                 mydb.close()
