@@ -344,20 +344,38 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
 
   private applyModelPath(jobId: string, showToast: boolean): void {
     if (!this.model) return;
-    const modelPath = this.deriveModelPath(jobId);
+    // Try to extract the actual path the pipeline printed ("Model saved to <path>"); fall back to heuristic.
+    this.services.fetchInternalJob(jobId, 0, 0, 'COMPLETED').subscribe({
+      next: (resp: any) => {
+        const data = (typeof resp === 'string') ? (() => { try { return JSON.parse(resp); } catch { return {}; } })() : (resp ?? {});
+        const logText: string = data?.log ?? data?.consolelog ?? data?.output ?? data?.logs ?? '';
+        const parsed = this.extractSavedModelPath(logText);
+        this.persistModelPath(parsed || this.deriveModelPath(jobId), showToast);
+      },
+      error: () => this.persistModelPath(this.deriveModelPath(jobId), showToast),
+    });
+  }
+
+  /** Match the last "Model saved to <path>" line the pipeline logged. */
+  private extractSavedModelPath(logText: string): string | null {
+    if (!logText) return null;
+    const re = /Model saved to\s+(\S+)/gi;
+    let match: RegExpExecArray | null;
+    let last: string | null = null;
+    while ((match = re.exec(logText)) !== null) { last = match[1]; }
+    return last;
+  }
+
+  private persistModelPath(modelPath: string, showToast: boolean): void {
+    if (!this.model) return;
     if (!this.model.pipelineAttrs) this.model.pipelineAttrs = {};
     this.model.pipelineAttrs.modelPath = modelPath;
 
-    // Persist into raw.json_content.pipeline_attributes.modelPath so it survives reloads
     let parsed: any = {};
     try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
     parsed.pipeline_attributes = { ...(parsed.pipeline_attributes || {}), modelPath };
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({ error: () => {} });
-
-    if (showToast) {
-      this.services.message('Model generated! Check the path in the Config tab.', 'success');
-    }
   }
 
   /** Where the artifact actually lives after a successful run.
