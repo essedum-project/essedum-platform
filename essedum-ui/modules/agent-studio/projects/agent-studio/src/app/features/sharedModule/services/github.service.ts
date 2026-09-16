@@ -9,7 +9,9 @@ import {
   PushRequest,
   PullRequest,
   BranchToBranchPushRequest,
-  BranchPushResponse
+  BranchPushResponse,
+  CreateBranchRequest,
+  CreateBranchResponse,
 } from '../models/github.models';
 
 @Injectable({
@@ -161,6 +163,19 @@ export class GitHubService {
   }
 
   /**
+   * Create a new branch in a GitHub repository.
+   * Backend endpoint: POST /api/github/create-branch
+   * If the branch already exists the backend returns success=true, alreadyExisted=true.
+   */
+  createBranch(request: CreateBranchRequest): Observable<CreateBranchResponse> {
+    return this.http.post<CreateBranchResponse>(
+      `${this.API_BASE}/create-branch`,
+      request,
+      { withCredentials: true, ...this.githubHeaders() }
+    );
+  }
+
+  /**
    * Create a pull request
    */
   createPullRequest(request: {
@@ -168,6 +183,7 @@ export class GitHubService {
     title: string;
     sourceBranch: string;
     targetBranch: string;
+    body?: string;
     reviewers?: string[];
   }): Observable<any> {
     return this.http.post<any>(

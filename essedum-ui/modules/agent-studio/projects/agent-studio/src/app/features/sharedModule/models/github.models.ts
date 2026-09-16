@@ -76,3 +76,34 @@ export interface PushOperationSummary {
   status: 'started' | 'success' | 'failed';
   message?: string;
 }
+
+// ─── Session Branch Workflow ──────────────────────────────────────────────────
+
+export interface CreateBranchRequest {
+  repoName: string;
+  branchName: string;
+  sourceBranch?: string;
+}
+
+export interface CreateBranchResponse {
+  success: boolean;
+  message: string;
+  repoName: string;
+  branchName: string;
+  sourceBranch: string;
+  commitSha: string;
+  alreadyExisted: boolean;
+}
+
+export interface SessionBranchState {
+  sessionId: string;
+  repoName: string;
+  mainBranch: string;
+  sessionBranch: string;
+  gitUsername: string;
+  token: string;
+  prStatus: 'none' | 'open' | 'merged';
+  lastCommitId: string;
+  branchCreationStatus: 'pending' | 'creating' | 'ready' | 'failed';
+  prNumber: number | null;
+}

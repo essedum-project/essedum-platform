@@ -36,7 +36,17 @@ import {
 } from '../native-script/pipeline.models';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 import { GitHubService } from '../sharedModule/services/github.service';
-import { PullOperationSummary, PushRequest } from '../sharedModule/models/github.models';
+import {
+  PullOperationSummary,
+  PushRequest,
+  CreateBranchRequest,
+  CreateBranchResponse,
+} from '../sharedModule/models/github.models';
+import {
+  SessionPrPromptDialogComponent,
+  SessionPrPromptDialogData,
+  SessionPrPromptDialogResult,
+} from './session-pr-prompt-dialog/session-pr-prompt-dialog.component';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
 import pipelineConfig from './pipeline-config.json';
@@ -556,6 +566,91 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   lastPulledRepo = '';
   lastPulledBranch = '';
 
+  // ─── Session Branch Workflow (Phase 2) ──────────────────────────────────────
+  // Feature toggle: set window.__ESSEDUM_FLAGS__.sessionBranchWorkflow = false to
+  // revert entirely to the legacy push-to-main flow without touching any other code.
+  readonly sessionBranchWorkflowEnabled: boolean =
+    ((window as any).__ESSEDUM_FLAGS__?.sessionBranchWorkflow ?? true);
+
+  /** Name of the per-session branch, e.g. "session/<sessionId>-2026-09-16". */
+  activeSessionBranch = '';
+  /** True while the session branch is being created via backend API. */
+  sessionBranchCreating = false;
+  /** True once the session branch is confirmed created or already existed. */
+  sessionBranchReady = false;
+  /** Guard so ensureSessionBranch() is only attempted once per session. */
+  sessionBranchCreationAttempted = false;
+  /** PR status for the session branch. */
+  sessionBranchPrStatus: 'none' | 'open' | 'merged' = 'none';
+  /** Commit SHA of the last successful push to the session branch. */
+  sessionBranchLastCommitId = '';
+  /** GitHub PR number after a PR is raised from the session branch. */
+  sessionBranchPrNumber: number | null = null;
+  /** Mirrors autoPushOnSave but routes to the session branch instead of main. */
+  autoSaveToSessionBranch = true;
+  /** True while a session-branch push or PR action is in flight. */
+  isSessionBranchActionInFlight = false;
+  /** Tracks which toolbar action currently owns the busy indicator. */
+  activeSessionBranchAction: 'save' | 'review' | 'pr' | null = null;
+  /** Debounce timer handle for auto-save-to-session-branch. */
+  private sessionBranchAutoSaveTimer: any = null;
+  // ────────────────────────────────────────────────────────────────────────────
+
+  get sessionBranchSaveDisabled(): boolean {
+    return (
+      !this.autoSaveToSessionBranch ||
+      !this.isFileModified ||
+      this.isSavingFile ||
+      this.isSessionBranchActionInFlight ||
+      this.sessionBranchCreating
+    );
+  }
+
+  get isSessionSaveBusy(): boolean {
+    return this.activeSessionBranchAction === 'save' &&
+      (this.isSavingFile || this.isSessionBranchActionInFlight || this.sessionBranchCreating);
+  }
+
+  get reviewSessionBranchSaveDisabled(): boolean {
+    return (
+      this.autoSaveToSessionBranch ||
+      !this.isFileModified ||
+      this.isSavingFile ||
+      this.isSessionBranchActionInFlight ||
+      this.sessionBranchCreating
+    );
+  }
+
+  get isReviewSessionSaveBusy(): boolean {
+    return this.activeSessionBranchAction === 'review' &&
+      (this.isSavingFile || this.isSessionBranchActionInFlight || this.sessionBranchCreating);
+  }
+
+  get raiseSessionPrDisabled(): boolean {
+    return (
+      !this.sessionBranchLastCommitId ||
+      this.isFileModified ||
+      this.isSavingFile ||
+      this.isSessionBranchActionInFlight ||
+      this.sessionBranchCreating ||
+      this.sessionBranchPrStatus === 'open'
+    );
+  }
+
+  get isRaisePrBusy(): boolean {
+    return this.activeSessionBranchAction === 'pr' &&
+      (this.isSessionBranchActionInFlight || this.sessionBranchCreating);
+  }
+
+  get currentGitUsername(): string {
+    return (
+      sessionStorage.getItem('git_username') ||
+      this.githubUsername ||
+      localStorage.getItem('github_username') ||
+      ''
+    ).trim();
+  }
+
   // Drag and Drop functionality
   isDragging = false;
   draggedNode: FileNode | null = null;
@@ -613,9 +708,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
-    
+
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
+
+    // Restore session branch state from sessionStorage (browser refresh / new tab)
+    this.hydrateSessionBranchState();
     
     this.route.params.subscribe((params) => {
       if (params['cname']) {
@@ -1929,6 +2027,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.selectedFileContent = newContent;
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
+      this.onEditorContentModified();
     }
   }
 
@@ -1953,7 +2052,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.updateDiffTracking(newContent);
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
-
+      this.onEditorContentModified();
     } else {
       // Reset flags if content matches original
       this.isFileModified = false;
@@ -4865,5 +4964,716 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Also try a few times in the first second — Material's tab body can
     // animate in after a delay.
     [50, 150, 400, 900].forEach((ms) => setTimeout(apply, ms));
+  }
+
+  canDeactivate(): boolean | Promise<boolean> {
+    // If session branch workflow is disabled or no session branch + repo is configured, allow navigation immediately.
+    const storedRepo = sessionStorage.getItem('session_branch_repo') || '';
+    const storedMain = sessionStorage.getItem('session_branch_main') || '';
+    if (!this.lastPulledRepo && !storedRepo && !this.activeSessionBranch) {
+      return true;
+    }
+
+    // PR already raised and no new local changes — nothing to prompt about.
+    if (this.sessionBranchPrStatus === 'open' && !this.isFileModified) {
+      return true;
+    }
+
+    const repoName = this.lastPulledRepo || storedRepo;
+    const sourceBranch = this.activeSessionBranch || this.lastPulledBranch || 'session-branch';
+    const mainBranch = this.lastPulledBranch || storedMain || 'main';
+
+    const data: SessionPrPromptDialogData = {
+      repoName,
+      sourceBranch,
+      targetBranch: mainBranch,
+      mainBranch,
+      prStatus: this.sessionBranchPrStatus,
+    };
+
+    const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
+      width: '560px',
+      maxWidth: '94vw',
+      panelClass: 'session-pr-dialog-panel',
+      disableClose: true,
+      data,
+    });
+
+    return dialogRef.afterClosed().toPromise().then(async (result: SessionPrPromptDialogResult | undefined) => {
+      if (!result || result.action === 'skip') {
+        // "Later" — navigate away, session branch stays as-is
+        return true;
+      }
+      if (result.action === 'discard') {
+        // Abandon the session branch; navigate away
+        this.clearSessionBranchState();
+        return true;
+      }
+      if (result.action === 'raise-pr') {
+        const success = await this.createPullRequestFromSessionBranch(
+          `Merge session branch ${sourceBranch} into ${mainBranch}`
+        );
+        // Allow navigation whether or not the PR succeeded — errors are shown as toasts
+        return true;
+      }
+      return true;
+    });
+  }
+
+  // ─── Session Branch: Core Infrastructure ─────────────────────────────────────
+
+  /**
+   * Derive the per-session branch name from the current session id and today's date.
+   * Format: "session/<sessionId>-YYYY-MM-DD"
+   */
+  private buildSessionBranchName(): string {
+    const sessionId =
+      sessionStorage.getItem('git_session_id') ||
+      sessionStorage.getItem('sessionId') ||
+      Date.now().toString(36);
+    const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    return `session/${sessionId}-${date}`;
+  }
+
+  /** Return the cached session branch name from sessionStorage, or '' if not set. */
+  private getStoredSessionBranch(): string {
+    return sessionStorage.getItem('session_branch_name') || '';
+  }
+
+  /** Persist session branch state into sessionStorage for cross-tab / refresh resilience. */
+  private storeSessionBranchState(
+    branchName: string,
+    prStatus: 'none' | 'open' | 'merged' = 'none',
+    repoName?: string,
+    mainBranch?: string,
+  ): void {
+    sessionStorage.setItem('session_branch_name', branchName);
+    sessionStorage.setItem('session_branch_status', 'ready');
+    sessionStorage.setItem('session_branch_pr_status', prStatus);
+    if (repoName) sessionStorage.setItem('session_branch_repo', repoName);
+    if (mainBranch) sessionStorage.setItem('session_branch_main', mainBranch);
+  }
+
+  /** Clear session branch state from sessionStorage (called on Discard). */
+  private clearSessionBranchState(): void {
+    sessionStorage.removeItem('session_branch_name');
+    sessionStorage.removeItem('session_branch_status');
+    sessionStorage.removeItem('session_branch_pr_status');
+    sessionStorage.removeItem('session_branch_pr_number');
+    sessionStorage.removeItem('session_branch_last_commit');
+    sessionStorage.removeItem('session_branch_repo');
+    sessionStorage.removeItem('session_branch_main');
+    this.activeSessionBranch = '';
+    this.sessionBranchReady = false;
+    this.sessionBranchCreationAttempted = false;
+    this.sessionBranchPrStatus = 'none';
+    this.sessionBranchPrNumber = null;
+    this.sessionBranchLastCommitId = '';
+  }
+
+  /** Hydrate in-memory session branch state from sessionStorage on ngOnInit. */
+  private hydrateSessionBranchState(): void {
+    const stored = this.getStoredSessionBranch();
+    if (stored) {
+      this.activeSessionBranch = stored;
+      this.sessionBranchReady = sessionStorage.getItem('session_branch_status') === 'ready';
+      this.sessionBranchCreationAttempted = true;
+      const prStatus = sessionStorage.getItem('session_branch_pr_status') as 'none' | 'open' | 'merged' | null;
+      this.sessionBranchPrStatus = prStatus || 'none';
+      const prNumber = sessionStorage.getItem('session_branch_pr_number');
+      this.sessionBranchPrNumber = prNumber ? parseInt(prNumber, 10) : null;
+      this.sessionBranchLastCommitId = sessionStorage.getItem('session_branch_last_commit') || '';
+      // Restore repo/branch so the git-info-panel can display correctly after refresh
+      const storedRepo = sessionStorage.getItem('session_branch_repo');
+      const storedMain = sessionStorage.getItem('session_branch_main');
+      if (storedRepo && !this.lastPulledRepo) this.lastPulledRepo = storedRepo;
+      if (storedMain && !this.lastPulledBranch) this.lastPulledBranch = storedMain;
+    }
+  }
+
+  /**
+   * Ensure a session branch exists for this editing session.
+   * Called on the first content modification in the editor.
+   * Returns true if the branch is ready, false if creation failed.
+   */
+  async ensureSessionBranch(): Promise<boolean> {
+    if (!this.sessionBranchWorkflowEnabled) {
+      return false;
+    }
+
+    // Already ready — nothing to do
+    if (this.sessionBranchReady && this.activeSessionBranch) {
+      return true;
+    }
+
+    // Already attempted and failed — don't retry every keystroke
+    if (this.sessionBranchCreationAttempted && !this.sessionBranchReady) {
+      return false;
+    }
+
+    // Check sessionStorage first (browser refresh / second tab)
+    const stored = this.getStoredSessionBranch();
+    if (stored) {
+      this.activeSessionBranch = stored;
+      this.sessionBranchReady = true;
+      this.sessionBranchCreationAttempted = true;
+      return true;
+    }
+
+    // Resolve the main branch (source for the new branch)
+    const organization = sessionStorage.getItem('organization') || this.getConsistentOrganization();
+    if (!organization || !this.currentCname) {
+      // Not enough context to create the branch yet
+      return false;
+    }
+
+    this.sessionBranchCreationAttempted = true;
+    this.sessionBranchCreating = true;
+
+    return new Promise<boolean>((resolve) => {
+      this.service.getGitConfig(this.currentCname, organization).subscribe({
+        next: (config) => {
+          const repoName = config?.repo || this.lastPulledRepo;
+          const mainBranch = config?.bname || this.lastPulledBranch || 'main';
+
+          if (!repoName) {
+            this.sessionBranchCreating = false;
+            this.service.message('Git repo not configured. Please pull or push once first.', 'warning');
+            resolve(false);
+            return;
+          }
+
+          const branchName = this.buildSessionBranchName();
+          const request: CreateBranchRequest = { repoName, branchName, sourceBranch: mainBranch };
+
+          this.githubService.createBranch(request).subscribe({
+            next: (response: CreateBranchResponse) => {
+              this.sessionBranchCreating = false;
+              if (response.success) {
+                this.activeSessionBranch = response.branchName;
+                this.sessionBranchReady = true;
+                // Propagate repo/branch into component properties so all methods see them
+                if (!this.lastPulledRepo) this.lastPulledRepo = repoName;
+                if (!this.lastPulledBranch) this.lastPulledBranch = mainBranch;
+                this.storeSessionBranchState(response.branchName, 'none', repoName, mainBranch);
+                const msg = response.alreadyExisted
+                  ? `Resuming session on existing branch: ${response.branchName}`
+                  : `Session branch created: ${response.branchName}`;
+                this.service.message(msg, 'success');
+                resolve(true);
+              } else {
+                this.service.message(`Could not create session branch: ${response.message}`, 'warning');
+                resolve(false);
+              }
+            },
+            error: (err: any) => {
+              this.sessionBranchCreating = false;
+              const msg = err?.error?.message || err?.message || 'Session branch creation failed';
+              this.service.message(msg, 'warning');
+              resolve(false);
+            }
+          });
+        },
+        error: () => {
+          this.sessionBranchCreating = false;
+          this.service.message('Git config not found. Cannot create session branch.', 'warning');
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  // ─── Session Branch: Validation ──────────────────────────────────────────────
+
+  /** Pre-save validation: confirm session branch exists in the remote repo. */
+  private async validateSessionBranchPreSave(): Promise<{ valid: boolean; reason?: string }> {
+    const repo = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || '';
+    if (!this.activeSessionBranch || !repo) {
+      return { valid: false, reason: 'Session branch or repository not configured. Please configure Git first.' };
+    }
+    return new Promise<{ valid: boolean; reason?: string }>((resolve) => {
+      this.githubService.getBranches(repo).subscribe({
+        next: (branches: string[]) => {
+          if (branches.includes(this.activeSessionBranch)) {
+            resolve({ valid: true });
+          } else {
+            resolve({ valid: false, reason: `Session branch '${this.activeSessionBranch}' not found in remote.` });
+          }
+        },
+        error: () => resolve({ valid: true }) // allow push attempt even if branch list fails
+      });
+    });
+  }
+
+  /** Pre-PR validation: confirm there is a session branch ahead of main. */
+  private async validatePreCreatePr(): Promise<{ valid: boolean; reason?: string }> {
+    if (!this.activeSessionBranch) {
+      return { valid: false, reason: 'No session branch to merge.' };
+    }
+    if (this.sessionBranchPrStatus === 'open') {
+      return { valid: false, reason: `A PR (#${this.sessionBranchPrNumber}) already exists for this session branch.` };
+    }
+    if (!this.sessionBranchLastCommitId) {
+      return { valid: false, reason: 'No commits on session branch yet. Save changes first.' };
+    }
+    return { valid: true };
+  }
+
+  // ─── Session Branch: Push helper ─────────────────────────────────────────────
+
+  /**
+   * Push all pipeline files to the session branch.
+   * This is the session-branch equivalent of pushChangesToConfiguredBranch().
+   * The original method is NOT modified — it still exists for legacy callers.
+   */
+  private pushToSessionBranch(
+    trigger: string,
+    customCommitMessage?: string,
+    actionType: 'save' | 'review' = 'save'
+  ): void {
+    const repo = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || '';
+    if (!this.currentCname || this.isSessionBranchActionInFlight) {
+      return;
+    }
+    if (!this.activeSessionBranch || !repo) {
+      this.service.message('Session branch not ready. Please try again.', 'warning');
+      return;
+    }
+
+    this.isSessionBranchActionInFlight = true;
+    this.activeSessionBranchAction = actionType;
+    const commitMessage = (customCommitMessage || `${trigger} - ${new Date().toISOString()}`).trim();
+
+    this.agentPipelineService.getFilesList(this.currentCname).subscribe({
+      next: (fetchedFiles) => {
+        const request: PushRequest = {
+          repoName: repo,
+          branch: this.activeSessionBranch,
+          commitMessage,
+          files: fetchedFiles.map(file => ({
+            path: file.filePath,
+            fileName: file.filename,
+            id: file.id,
+            content: file.filescript,
+          }))
+        };
+
+        this.githubService.pushToGitHub(request).subscribe({
+          next: (response: any) => {
+            this.isSessionBranchActionInFlight = false;
+            this.activeSessionBranchAction = null;
+            // Store commit SHA if present in response (string response from backend)
+            if (typeof response === 'object' && response?.commitSha) {
+              this.sessionBranchLastCommitId = response.commitSha;
+              sessionStorage.setItem('session_branch_last_commit', response.commitSha);
+            } else if (!this.sessionBranchLastCommitId) {
+              // Mark as having commits even without SHA
+              this.sessionBranchLastCommitId = 'committed';
+              sessionStorage.setItem('session_branch_last_commit', 'committed');
+            }
+            this.service.message(
+              `Saved to session branch: ${this.activeSessionBranch}`, 'success'
+            );
+          },
+          error: (error: any) => {
+            this.isSessionBranchActionInFlight = false;
+            this.activeSessionBranchAction = null;
+            const msg = error?.error || error?.message || 'Push to session branch failed';
+            this.service.message(msg, 'error');
+          }
+        });
+      },
+      error: (error: any) => {
+        this.isSessionBranchActionInFlight = false;
+        this.activeSessionBranchAction = null;
+        const msg = error?.error || error?.message || 'Failed to fetch files for session branch push';
+        this.service.message(msg, 'error');
+      }
+    });
+  }
+
+  // ─── Session Branch: Save Actions ────────────────────────────────────────────
+
+  /**
+   * Save the current file to the backend DB and push to the session branch.
+   * Mirrors saveAndPushFile() but targets the session branch instead of main.
+   */
+  async saveToSessionBranch(): Promise<void> {
+    if (!this.sessionBranchWorkflowEnabled) {
+      return;
+    }
+
+    this.activeSessionBranchAction = 'save';
+
+    // Cancel any pending debounced auto-save — we're saving right now.
+    this.cancelPendingAutoSave();
+
+    // Ensure session branch exists (creates it if this is the first save)
+    const branchReady = await this.ensureSessionBranch();
+    if (!branchReady) {
+      this.activeSessionBranchAction = null;
+      this.service.message(
+        'Session branch is not ready. Verify your Git config and try again.',
+        'warning'
+      );
+      return;
+    }
+
+    const validation = await this.validateSessionBranchPreSave();
+    if (!validation.valid) {
+      this.activeSessionBranchAction = null;
+      this.service.message(validation.reason || 'Save validation failed.', 'warning');
+      return;
+    }
+
+    // Save file content to backend DB (reuse existing method, suppress legacy auto-push)
+    await this.saveFile({ suppressAutoPush: true });
+
+    // If save failed, isFileModified is still true — do not push
+    if (this.isFileModified) {
+      this.activeSessionBranchAction = null;
+      return;
+    }
+
+    this.pushToSessionBranch('Save to session branch', undefined, 'save');
+  }
+
+  /**
+   * Common hook called by BOTH content-change handlers (Python editor + text editor)
+   * whenever the file content actually changes.
+   * - Creates session branch on very first edit of a session
+   * - Schedules auto-save-to-session-branch when the checkbox is enabled
+   */
+  private onEditorContentModified(): void {
+    if (!this.sessionBranchWorkflowEnabled) return;
+    // Trigger branch creation on the very first edit (not on save)
+    if (!this.sessionBranchCreationAttempted) {
+      this.ensureSessionBranch();
+    }
+    // Auto-save: debounced save+push to session branch
+    if (this.autoSaveToSessionBranch && this.sessionBranchReady) {
+      this.scheduleSessionBranchAutoSave();
+    }
+  }
+
+  /** Debounced auto-save: waits 3 s of inactivity then saves + pushes to session branch. */
+  private scheduleSessionBranchAutoSave(): void {
+    if (this.sessionBranchAutoSaveTimer) {
+      clearTimeout(this.sessionBranchAutoSaveTimer);
+    }
+    this.sessionBranchAutoSaveTimer = setTimeout(() => {
+      this.sessionBranchAutoSaveTimer = null;
+      this.saveToSessionBranch();
+    }, 3000);
+  }
+
+  /** Cancel any pending debounced auto-save (call before a manual save or PR action). */
+  private cancelPendingAutoSave(): void {
+    if (this.sessionBranchAutoSaveTimer) {
+      clearTimeout(this.sessionBranchAutoSaveTimer);
+      this.sessionBranchAutoSaveTimer = null;
+    }
+  }
+
+  /**
+   * Called when the Auto Save toggle changes.
+   * - Turning ON: schedules a save if there are pending changes.
+   * - Turning OFF: if there are unsaved changes, shows the review dialog
+   *   so the user can commit them before switching to manual mode.
+   */
+  onAutoSaveToggleChange(enabled: boolean): void {
+    if (enabled) {
+      if (this.isFileModified && this.sessionBranchReady) {
+        this.scheduleSessionBranchAutoSave();
+      }
+      return;
+    }
+
+    this.cancelPendingAutoSave();
+  }
+
+  logoutGitAccount(): void {
+    this.githubService.logout().subscribe({
+      next: () => {
+        this.githubUsername = '';
+        sessionStorage.removeItem('git_username');
+        sessionStorage.removeItem('git_session_id');
+        localStorage.removeItem('github_username');
+        this.service.message('Logout successful', 'success');
+      },
+      error: () => {
+        this.service.message('Failed to logout. Please try again.', 'error');
+      }
+    });
+  }
+
+  /**
+   * Raise a PR from the session branch to main without saving first.
+   * Opens PR details dialog (title, description, branch/user context) before creating.
+   */
+  async raiseSessionPrOnly(): Promise<void> {
+    if (!this.sessionBranchWorkflowEnabled) return;
+    const storedMain = sessionStorage.getItem('session_branch_main') || '';
+    const validation = await this.validatePreCreatePr();
+    if (!validation.valid) {
+      this.service.message(validation.reason || 'Cannot raise PR.', 'warning');
+      return;
+    }
+
+    const mainBranch = this.lastPulledBranch || storedMain || 'main';
+    const username =
+      sessionStorage.getItem('git_username') || this.githubUsername || '';
+
+    const data: SessionPrPromptDialogData = {
+      repoName: this.lastPulledRepo,
+      sourceBranch: this.activeSessionBranch,
+      targetBranch: mainBranch,
+      mainBranch,
+      prStatus: this.sessionBranchPrStatus,
+      prTitle: `Merge session changes into ${mainBranch}`,
+      commitSha: this.sessionBranchLastCommitId,
+      username,
+      mode: 'raise-pr',
+    };
+
+    const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
+      width: '560px',
+      maxWidth: '94vw',
+      panelClass: 'session-pr-dialog-panel',
+      data,
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: SessionPrPromptDialogResult | undefined) => {
+      if (!result || result.action !== 'raise-pr') return;
+      await this.createPullRequestFromSessionBranch(
+        result.prTitle || `Merge session changes into ${mainBranch}`,
+        result.prDescription,
+      );
+    });
+  }
+
+  /**
+   * Open the Review & Save dialog pre-filled with the session branch,
+   * then push to the session branch on confirmation.
+   * Reuses the existing SavePushConfigDialogComponent without modification.
+   */
+  openReviewSaveToSessionBranchDialog(): void {
+    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
+      return;
+    }
+    if (!this.sessionBranchWorkflowEnabled) {
+      return;
+    }
+
+    this.cancelPendingAutoSave();
+
+    this.ensureSessionBranch().then(branchReady => {
+      if (!branchReady) {
+        this.service.message('Session branch is not ready. Configure Git and try again.', 'warning');
+        return;
+      }
+
+      const changedFiles = this.collectChangedFilesForPush();
+      const defaultCommitMessage = this.buildSavePushCommitMessage(
+        this.lastPulledRepo || 'repository',
+        this.activeSessionBranch,
+        changedFiles.length
+      );
+
+      const dialogData: SavePushConfigDialogData = {
+        username: sessionStorage.getItem('git_username') || this.githubUsername || 'unknown',
+        repoName: this.lastPulledRepo || 'repository',
+        branch: this.activeSessionBranch,   // ← session branch, not main
+        sourceLabel: 'Session branch',
+        commitMessage: defaultCommitMessage,
+        changedFiles,
+      };
+
+      const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
+        width: '620px',
+        maxWidth: '94vw',
+        panelClass: 'save-push-config-dialog-panel',
+        data: dialogData,
+        autoFocus: false,
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result?.confirmed) {
+          this.activeSessionBranchAction = 'review';
+          const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
+          // Save to DB then push to session branch
+          this.saveFile({ suppressAutoPush: true }).then(() => {
+            if (!this.isFileModified) {
+              this.pushToSessionBranch('Review & Save to session branch', finalMessage, 'review');
+            } else {
+              this.activeSessionBranchAction = null;
+            }
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * "Save Changes & Raise PR" — full end-to-end action:
+   * Opens review dialog → saves file → pushes to session branch → creates PR.
+   */
+  async saveChangesAndRaisePr(): Promise<void> {
+    if (!this.sessionBranchWorkflowEnabled) {
+      return;
+    }
+
+    this.cancelPendingAutoSave();
+
+    const branchReady = await this.ensureSessionBranch();
+    if (!branchReady) {
+      this.service.message('Session branch is not ready. Configure Git and try again.', 'warning');
+      return;
+    }
+
+    const repoForDialog = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || 'repository';
+    const changedFiles = this.collectChangedFilesForPush();
+    const defaultCommitMessage = this.buildSavePushCommitMessage(
+      repoForDialog,
+      this.activeSessionBranch,
+      changedFiles.length
+    );
+
+    const dialogData: SavePushConfigDialogData = {
+      username: sessionStorage.getItem('git_username') || this.githubUsername || 'unknown',
+      repoName: repoForDialog,
+      branch: this.activeSessionBranch,
+      sourceLabel: 'Session branch → Raise PR',
+      commitMessage: defaultCommitMessage,
+      changedFiles,
+    };
+
+    const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
+      width: '620px',
+      maxWidth: '94vw',
+      panelClass: 'save-push-config-dialog-panel',
+      data: dialogData,
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (!result?.confirmed) {
+        return;
+      }
+      const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
+
+      // Step 1: Save to DB
+      await this.saveFile({ suppressAutoPush: true });
+      if (this.isFileModified) {
+        return; // save failed
+      }
+
+      // Step 2: Push to session branch (wait for completion via flag)
+      this.pushToSessionBranch('Save Changes & Raise PR', finalMessage);
+
+      // Step 3: Give the push a moment then raise PR
+      // We watch isSessionBranchActionInFlight; poll briefly rather than coupling deeply
+      const waitForPush = () => new Promise<void>(resolve => {
+        const check = () => {
+          if (!this.isSessionBranchActionInFlight) {
+            resolve();
+          } else {
+            setTimeout(check, 300);
+          }
+        };
+        setTimeout(check, 300);
+      });
+
+      await waitForPush();
+
+      // Step 3: Open PR dialog for title/description before creating the PR.
+      const mainBranch = this.lastPulledBranch || 'main';
+      const username =
+        sessionStorage.getItem('git_username') || this.githubUsername || '';
+      const prDialogData: SessionPrPromptDialogData = {
+        repoName: repoForDialog,
+        sourceBranch: this.activeSessionBranch,
+        targetBranch: mainBranch,
+        mainBranch,
+        prStatus: this.sessionBranchPrStatus,
+        prTitle: `Merge session changes into ${mainBranch}`,
+        commitSha: this.sessionBranchLastCommitId,
+        username,
+        mode: 'raise-pr',
+      };
+
+      const prDialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
+        width: '560px',
+        maxWidth: '94vw',
+        panelClass: 'session-pr-dialog-panel',
+        data: prDialogData,
+      });
+
+      prDialogRef.afterClosed().subscribe(async (prResult: SessionPrPromptDialogResult | undefined) => {
+        if (!prResult || prResult.action !== 'raise-pr') return;
+        await this.createPullRequestFromSessionBranch(
+          prResult.prTitle || `chore: merge session changes into ${mainBranch}`,
+          prResult.prDescription,
+        );
+      });
+    });
+  }
+
+  // ─── Session Branch: PR Creation ─────────────────────────────────────────────
+
+  /**
+   * Create a PR from the session branch to the main branch.
+   * Returns true if the PR was created successfully.
+   */
+  private async createPullRequestFromSessionBranch(title?: string, body?: string): Promise<boolean> {
+    const validation = await this.validatePreCreatePr();
+    if (!validation.valid) {
+      this.activeSessionBranchAction = null;
+      this.service.message(validation.reason || 'PR validation failed.', 'warning');
+      return false;
+    }
+
+    const mainBranch = this.lastPulledBranch || 'main';
+    const prTitle = title || `Merge session branch ${this.activeSessionBranch} into ${mainBranch}`;
+
+    this.isSessionBranchActionInFlight = true;
+  this.activeSessionBranchAction = 'pr';
+
+    return new Promise<boolean>((resolve) => {
+      this.githubService.createPullRequest({
+        repoName: this.lastPulledRepo,
+        title: prTitle,
+        body,
+        sourceBranch: this.activeSessionBranch,
+        targetBranch: mainBranch,
+      }).subscribe({
+        next: (response: any) => {
+          this.isSessionBranchActionInFlight = false;
+          this.activeSessionBranchAction = null;
+          if (response?.success) {
+            this.sessionBranchPrStatus = 'open';
+            this.sessionBranchPrNumber = response.pullRequestNumber ?? null;
+            sessionStorage.setItem('session_branch_pr_status', 'open');
+            sessionStorage.setItem('session_branch_pr_number', String(response.pullRequestNumber ?? ''));
+            const prUrl = response.pullRequestUrl || '';
+            this.service.message(
+              `Pull Request #${response.pullRequestNumber} created successfully!${prUrl ? ' ' + prUrl : ''}`,
+              'success'
+            );
+            resolve(true);
+          } else {
+            this.service.message(`PR creation failed: ${response?.message || 'Unknown error'}`, 'error');
+            resolve(false);
+          }
+        },
+        error: (err: any) => {
+          this.isSessionBranchActionInFlight = false;
+          this.activeSessionBranchAction = null;
+          const msg = err?.error?.message || err?.message || 'Failed to create pull request';
+          this.service.message(msg, 'error');
+          resolve(false);
+        }
+      });
+    });
   }
 }

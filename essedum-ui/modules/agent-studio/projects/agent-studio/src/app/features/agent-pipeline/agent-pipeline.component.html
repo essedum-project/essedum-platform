@@ -290,12 +290,14 @@
                                 selectedFileName }}</span>
                               <span class="file-path-breadcrumb" [title]="selectedFilePath">{{ selectedFilePath
                                 }}</span>
-                              <span class="modified-indicator" *ngIf="isFileModified"
-                                title="File has unsaved changes">●</span>
                             </div>
                             <div class="editor-actions">
 
-                              <label class="auto-push-toggle" title="Automatically push to configured branch after each successful save">
+                              <!-- ================================================================ -->
+                              <!-- LEGACY: Existing functionality retained for rollback and     -->
+                              <!-- backward compatibility. Uncomment to restore legacy workflow. -->
+                              <!-- ================================================================ -->
+                              <!-- <label class="auto-push-toggle" title="Automatically push to configured branch after each successful save">
                                 <input type="checkbox" [(ngModel)]="autoPushOnSave" />
                                 <span>Git Auto Save</span>
                               </label>
@@ -311,7 +313,141 @@
                                 (click)="openSavePushConfigDialog()" matTooltip="Review changes and push"
                                 matTooltipPosition="above">
                                 <mat-icon>{{ isPushingAfterSave ? 'hourglass_empty' : 'cloud_upload' }}</mat-icon>
-                              </button>
+                              </button> -->
+                              <!-- ================================================================ -->
+                              <!-- END LEGACY CONTROLS                                             -->
+                              <!-- ================================================================ -->
+
+                              <!-- ================================================================ -->
+                              <!-- SESSION BRANCH WORKFLOW CONTROLS                                -->
+                              <!-- All saves target the per-session branch, never the main branch. -->
+                              <!-- ================================================================ -->
+                              <ng-container *ngIf="sessionBranchWorkflowEnabled">
+
+                                <button class="editor-git-user-trigger"
+                                  *ngIf="currentGitUsername || activeSessionBranch || sessionBranchCreating"
+                                  [matMenuTriggerFor]="editorGitAccountMenu"
+                                  type="button">
+                                  <svg class="editor-git-user-trigger__icon" height="15" viewBox="0 0 24 24" width="15" aria-hidden="true">
+                                    <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"/>
+                                  </svg>
+                                  <span class="editor-git-user-trigger__name">{{ currentGitUsername || 'Git Session' }}</span>
+                                  <span class="editor-git-user-trigger__status"></span>
+                                  <mat-icon class="editor-git-user-trigger__caret">expand_more</mat-icon>
+                                </button>
+
+                                <mat-menu #editorGitAccountMenu="matMenu" class="editor-git-account-menu" xPosition="before" yPosition="below">
+                                  <div class="editor-git-account-menu__panel" (click)="$event.stopPropagation()">
+                                    <div class="editor-git-account-menu__header">
+                                      <svg class="editor-git-account-menu__icon" height="18" viewBox="0 0 24 24" width="18" aria-hidden="true">
+                                        <path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"/>
+                                      </svg>
+                                      <div class="editor-git-account-menu__user-info">
+                                        <span class="editor-git-account-menu__username">{{ currentGitUsername || 'Git session' }}</span>
+                                        <span class="editor-git-account-menu__label">GitHub Account</span>
+                                      </div>
+                                    </div>
+
+                                    <div class="editor-git-account-menu__details">
+                                      <div class="editor-git-account-menu__row" *ngIf="lastPulledRepo">
+                                        <mat-icon class="editor-git-account-menu__row-icon" matTooltip="Repository">folder_open</mat-icon>
+                                        <span class="editor-git-account-menu__value" [title]="lastPulledRepo">{{ lastPulledRepo }}</span>
+                                      </div>
+                                      <div class="editor-git-account-menu__row">
+                                        <mat-icon class="editor-git-account-menu__row-icon" matTooltip="Main branch">account_tree</mat-icon>
+                                        <span class="editor-git-account-menu__meta">
+                                          <code class="editor-git-account-menu__code" [title]="lastPulledBranch || 'main'">{{ lastPulledBranch || 'main' }}</code>
+                                          <span class="editor-git-account-menu__badge editor-git-account-menu__badge--protected">protected</span>
+                                        </span>
+                                      </div>
+                                      <div class="editor-git-account-menu__row">
+                                        <mat-icon class="editor-git-account-menu__row-icon" matTooltip="Session branch">alt_route</mat-icon>
+                                        <span class="editor-git-account-menu__meta">
+                                          <ng-container *ngIf="sessionBranchCreating">
+                                            <mat-spinner diameter="12"></mat-spinner>
+                                            <span class="editor-git-account-menu__muted">Creating…</span>
+                                          </ng-container>
+                                          <ng-container *ngIf="!sessionBranchCreating && activeSessionBranch">
+                                            <code class="editor-git-account-menu__code editor-git-account-menu__code--branch" [title]="activeSessionBranch">{{ activeSessionBranch }}</code>
+                                          </ng-container>
+                                        </span>
+                                      </div>
+                                      <div class="editor-git-account-menu__row" *ngIf="sessionBranchLastCommitId && sessionBranchLastCommitId !== 'committed'">
+                                        <mat-icon class="editor-git-account-menu__row-icon" matTooltip="Last commit">history</mat-icon>
+                                        <span class="editor-git-account-menu__meta">
+                                          <code class="editor-git-account-menu__code" [title]="sessionBranchLastCommitId">{{ sessionBranchLastCommitId | slice:0:8 }}</code>
+                                        </span>
+                                      </div>
+                                      <div class="editor-git-account-menu__row">
+                                        <mat-icon class="editor-git-account-menu__row-icon" matTooltip="PR status">call_merge</mat-icon>
+                                        <span class="editor-git-account-menu__meta">
+                                          <span class="editor-git-account-menu__badge"
+                                            [class.editor-git-account-menu__badge--open]="sessionBranchPrStatus === 'open'"
+                                            [class.editor-git-account-menu__badge--merged]="sessionBranchPrStatus === 'merged'"
+                                            [class.editor-git-account-menu__badge--none]="sessionBranchPrStatus === 'none'">
+                                            {{ sessionBranchPrStatus === 'open' ? 'Raised #' + sessionBranchPrNumber : sessionBranchPrStatus === 'merged' ? 'Merged' : 'None' }}
+                                          </span>
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <button class="editor-git-account-menu__item" type="button" *ngIf="currentGitUsername" (click)="logoutGitAccount()">
+                                      <mat-icon class="editor-git-account-menu__item-icon">logout</mat-icon>
+                                      <span>Logout</span>
+                                    </button>
+                                  </div>
+                                </mat-menu>
+
+                                <!-- Auto Save toggle -->
+                                <label class="auto-push-toggle session-branch-toggle"
+                                  title="Automatically save and push to session branch after edits (3 s debounce)">
+                                  <input type="checkbox"
+                                    [(ngModel)]="autoSaveToSessionBranch"
+                                    (ngModelChange)="onAutoSaveToggleChange($event)" />
+                                  <span>Auto Save</span>
+                                </label>
+
+                                <!-- Save to Session Branch -->
+                                <button mat-icon-button class="action-button save-button"
+                                  [class.save-enabled]="isFileModified"
+                                  [class.save-disabled]="!isFileModified"
+                                  [class.action-button--autosave-disabled]="!autoSaveToSessionBranch"
+                                  [disabled]="sessionBranchSaveDisabled"
+                                  (click)="saveToSessionBranch()"
+                                  matTooltip="Save to Session Branch"
+                                  matTooltipPosition="above">
+                                  <mat-icon *ngIf="!isSessionSaveBusy">save</mat-icon>
+                                  <mat-spinner *ngIf="isSessionSaveBusy" diameter="18"></mat-spinner>
+                                </button>
+
+                                <!-- Review & Save to Session Branch -->
+                                <button mat-icon-button class="action-button save-and-push-button"
+                                  [class.action-button--autosave-disabled]="autoSaveToSessionBranch"
+                                  [disabled]="reviewSessionBranchSaveDisabled"
+                                  (click)="openReviewSaveToSessionBranchDialog()"
+                                  matTooltip="Review &amp; Save to Session Branch"
+                                  matTooltipPosition="above">
+                                  <mat-icon *ngIf="!isReviewSessionSaveBusy">cloud_upload</mat-icon>
+                                  <mat-spinner *ngIf="isReviewSessionSaveBusy" diameter="18"></mat-spinner>
+                                </button>
+
+                                <!-- Raise PR (only after a successful save + push) -->
+                                <button mat-icon-button class="action-button session-raise-pr-btn"
+                                  *ngIf="activeSessionBranch || sessionBranchLastCommitId"
+                                  [class.action-button--autosave-disabled]="raiseSessionPrDisabled"
+                                  [disabled]="raiseSessionPrDisabled"
+                                  (click)="raiseSessionPrOnly()"
+                                  [matTooltip]="sessionBranchPrStatus === 'open' ? 'PR already raised #' + sessionBranchPrNumber : (!sessionBranchLastCommitId ? 'Save and push changes before raising PR' : (isFileModified ? 'Save current changes before raising PR' : 'Raise PR to main branch'))"
+                                  matTooltipPosition="above">
+                                  <mat-icon *ngIf="!isRaisePrBusy">call_merge</mat-icon>
+                                  <mat-spinner *ngIf="isRaisePrBusy" diameter="18"></mat-spinner>
+                                </button>
+
+                              </ng-container>
+                              <!-- ================================================================ -->
+                              <!-- END SESSION BRANCH CONTROLS                                     -->
+                              <!-- ================================================================ -->
+
                               <button mat-icon-button class="action-button delete-button"
                                 [class.delete-enabled]="selectedFileName && !isSavingFile"
                                 [class.delete-disabled]="!selectedFileName || isSavingFile"
@@ -325,6 +461,17 @@
                               </button>
                             </div>
                           </div>
+
+                          <!-- Git Info Panel — separate row below the toolbar -->
+                          <app-git-info-panel
+                            *ngIf="sessionBranchWorkflowEnabled && (lastPulledRepo || activeSessionBranch)"
+                            [repoName]="lastPulledRepo"
+                            [mainBranch]="lastPulledBranch || 'main'"
+                            [sessionBranch]="activeSessionBranch"
+                            [sessionBranchStatus]="sessionBranchCreating ? 'creating' : (sessionBranchReady ? 'ready' : 'none')"
+                            [prStatus]="sessionBranchPrStatus"
+                            [prNumber]="sessionBranchPrNumber">
+                          </app-git-info-panel>
 
                           <!-- Code Editor Content -->
                           <div class="editor-content-wrapper">

@@ -659,6 +659,74 @@ public class GitHubIntegrationService {
     }
 
     /**
+     * Create a new branch in the repository from a source branch.
+     * If the branch already exists, returns success with alreadyExisted=true.
+     *
+     * @param request CreateBranchRequest containing repo, new branch name, and source branch
+     * @param token GitHub Personal Access Token
+     * @return CreateBranchResponse with branch details and commit SHA
+     * @throws Exception if branch creation fails
+     */
+    public CreateBranchResponse createBranch(CreateBranchRequest request, String token) throws Exception {
+        try {
+            log.info("Creating branch '{}' in repo '{}' from source '{}'",
+                     request.getBranchName(), request.getRepoName(), request.getSourceBranch());
+
+            if (request.getRepoName() == null || request.getRepoName().isEmpty()) {
+                throw new IllegalArgumentException("Repository name is required");
+            }
+            if (request.getBranchName() == null || request.getBranchName().isEmpty()) {
+                throw new IllegalArgumentException("Branch name is required");
+            }
+
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(request.getRepoName());
+
+            // Check if branch already exists
+            try {
+                GHBranch existing = repo.getBranch(request.getBranchName());
+                log.info("Branch '{}' already exists with SHA: {}", request.getBranchName(), existing.getSHA1());
+                return CreateBranchResponse.builder()
+                    .success(true)
+                    .message("Branch already exists: " + request.getBranchName())
+                    .repoName(request.getRepoName())
+                    .branchName(request.getBranchName())
+                    .sourceBranch(request.getSourceBranch())
+                    .commitSha(existing.getSHA1())
+                    .alreadyExisted(true)
+                    .build();
+            } catch (Exception ignored) {
+                // Branch does not exist — proceed to create it
+            }
+
+            // Resolve source branch (fall back to default branch)
+            String source = (request.getSourceBranch() != null && !request.getSourceBranch().isEmpty())
+                ? request.getSourceBranch()
+                : repo.getDefaultBranch();
+
+            GHBranch sourceBranch = repo.getBranch(source);
+            String sourceSha = sourceBranch.getSHA1();
+
+            repo.createRef("refs/heads/" + request.getBranchName(), sourceSha);
+            log.info("Created branch '{}' at SHA: {}", request.getBranchName(), sourceSha);
+
+            return CreateBranchResponse.builder()
+                .success(true)
+                .message("Branch created successfully: " + request.getBranchName())
+                .repoName(request.getRepoName())
+                .branchName(request.getBranchName())
+                .sourceBranch(source)
+                .commitSha(sourceSha)
+                .alreadyExisted(false)
+                .build();
+
+        } catch (Exception e) {
+            handleGitHubException(e, "create branch", request.getRepoName() + " (" + request.getBranchName() + ")");
+            return null; // Never reached
+        }
+    }
+
+    /**
      * Create a pull request to merge code from source branch to target branch
      *
      * @param request Create pull request request containing repo, branches, title, reviewers, etc.

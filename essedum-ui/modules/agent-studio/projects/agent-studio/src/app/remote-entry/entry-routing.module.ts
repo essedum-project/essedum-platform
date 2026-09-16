@@ -8,6 +8,7 @@ import { SkillsAddComponent } from '../features/skills/skills-add/skills-add.com
 import { SkillsEditViewComponent } from '../features/skills/skills-edit-view/skills-edit-view.component';
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
+import { sessionPrDeactivateGuard } from '../features/agent-pipeline/session-pr-deactivate.guard';
 import { AgentDirectoryComponent } from '../features/agent-directory/agent-directory.component';
 import { AgentDirectoryViewComponent } from '../features/agent-directory/agent-directory-view/agent-directory-view.component';
 import { AgentDirectoryEditComponent } from '../features/agent-directory/agent-directory-edit/agent-directory-edit.component';
@@ -34,7 +35,7 @@ const routes: Routes = [
     path: 'pipeline',
     children: [
       { path: '', component: AgentPipelineDashboardComponent },
-      { path: 'view/:cname', component: AgentPipelineComponent },
+      { path: 'view/:cname', component: AgentPipelineComponent, canDeactivate: [sessionPrDeactivateGuard] },
       { path: 'pipeline-in-execution', component: PipelineInExecutionComponent },
     ],
   },

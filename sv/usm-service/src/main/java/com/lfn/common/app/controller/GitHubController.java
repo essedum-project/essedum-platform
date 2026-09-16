@@ -312,4 +312,35 @@ public class GitHubController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
+
+    @PostMapping("/create-branch")
+    public ResponseEntity<CreateBranchResponse> createBranch(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody CreateBranchRequest request,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(githubToken, authHeader, session);
+            CreateBranchResponse response = gitHubIntegrationService.createBranch(request, cleanToken);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in create branch", e);
+            CreateBranchResponse errorResponse = CreateBranchResponse.builder()
+                .success(false)
+                .message(e.getMessage())
+                .repoName(request.getRepoName())
+                .branchName(request.getBranchName())
+                .build();
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("Error creating branch", e);
+            CreateBranchResponse errorResponse = CreateBranchResponse.builder()
+                .success(false)
+                .message("Failed to create branch: " + e.getMessage())
+                .repoName(request.getRepoName())
+                .branchName(request.getBranchName())
+                .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
 }
