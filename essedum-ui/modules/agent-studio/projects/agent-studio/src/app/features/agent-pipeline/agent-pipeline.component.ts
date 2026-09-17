@@ -41,6 +41,7 @@ import {
   PushRequest,
   CreateBranchRequest,
   CreateBranchResponse,
+  SessionBranchState,
 } from '../sharedModule/models/github.models';
 import {
   SessionPrPromptDialogComponent,
@@ -133,11 +134,13 @@ export interface AiChatMessage {
     standalone: false
 })
 export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly sessionBranchStateKeyPrefix = 'session_branch_state:';
   streamItem: StreamingServices;
   cardToggled: boolean = false;
   card: any;
   pipelineAlias: String;
   githubUsername: string = '';
+  private pipelineSessionScope = '';
 
   // API-related properties
   currentUserId: string = 'user123'; // Default user ID for testing
@@ -709,13 +712,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
-
-    // Restore session branch state from sessionStorage (browser refresh / new tab)
-    this.hydrateSessionBranchState();
     
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
+        if (this.currentCname !== params['cname']) {
+          this.initializePipelineSessionContext(params['cname']);
+        }
       } else {
         this.cardName = this.streamItem.name;
       }
@@ -744,7 +747,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     
     if (cardFromState && cardFromState.name) {
       // This is a real pipeline card from dashboard - use its cname for auto-loading
-      this.currentCname = cardFromState.name; // Use the card name as cname
+      this.initializePipelineSessionContext(cardFromState.name);
       this.viewMode = 'detail';
       
       // Update filename if in MCP or App mode now that we have the actual cname
@@ -764,7 +767,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       
       // Also try using cardName as currentCname for the new APIs
       if (this.cardName) {
-        this.currentCname = this.cardName;
+        this.initializePipelineSessionContext(this.cardName);
         this.autoLoadAgentDataForPipelineCard();
       } else {
         this.getStreamService();
@@ -1146,9 +1149,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
   
   private performNavigateBack(): void {
-    // Reset all state first
-    this.resetToDashboardState();
-    
     // If we came from pipeline-in-execution, go back to it via browser history
     const historyState = history.state;
     if (historyState?.source === 'pipeline-in-execution') {
@@ -1178,6 +1178,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.selectedFileContent = '';
     this.isJsonProcessed = false;
     this.hasGeneratedAgent = false;
+    this.resetSessionBranchRuntimeState(true);
+    this.pipelineSessionScope = '';
     this.currentCname = ''; // Clear cname when going back to dashboard
     this.fileSystemData = [];
     this.consoleOutput = []; // Keep console clear
@@ -4966,55 +4968,57 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   canDeactivate(): boolean | Promise<boolean> {
     // If session branch workflow is disabled or no session branch + repo is configured, allow navigation immediately.
-    const storedRepo = sessionStorage.getItem('session_branch_repo') || '';
-    const storedMain = sessionStorage.getItem('session_branch_main') || '';
-    if (!this.lastPulledRepo && !storedRepo && !this.activeSessionBranch) {
-      return true;
-    }
+    return this.syncSessionBranchPrStatus().then(async () => {
+      const storedState = this.getStoredSessionBranchState();
+      const storedRepo = storedState?.repoName || '';
+      const storedMain = storedState?.mainBranch || '';
+      const effectivePrStatus = storedState?.prStatus || this.sessionBranchPrStatus;
+      const effectiveSourceBranch = storedState?.sessionBranch || this.activeSessionBranch;
 
-    // PR already raised and no new local changes — nothing to prompt about.
-    if (this.sessionBranchPrStatus === 'open' && !this.isFileModified) {
-      return true;
-    }
-
-    const repoName = this.lastPulledRepo || storedRepo;
-    const sourceBranch = this.activeSessionBranch || this.lastPulledBranch || 'session-branch';
-    const mainBranch = this.lastPulledBranch || storedMain || 'main';
-
-    const data: SessionPrPromptDialogData = {
-      repoName,
-      sourceBranch,
-      targetBranch: mainBranch,
-      mainBranch,
-      prStatus: this.sessionBranchPrStatus,
-    };
-
-    const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
-      width: '560px',
-      maxWidth: '94vw',
-      panelClass: 'session-pr-dialog-panel',
-      disableClose: true,
-      data,
-    });
-
-    return dialogRef.afterClosed().toPromise().then(async (result: SessionPrPromptDialogResult | undefined) => {
-      if (!result || result.action === 'skip') {
-        // "Later" — navigate away, session branch stays as-is
+      if (!this.lastPulledRepo && !storedRepo && !this.activeSessionBranch) {
         return true;
       }
-      if (result.action === 'discard') {
-        // Abandon the session branch; navigate away
-        this.clearSessionBranchState();
+
+      if (effectivePrStatus === 'open' && !this.isFileModified) {
         return true;
       }
-      if (result.action === 'raise-pr') {
-        const success = await this.createPullRequestFromSessionBranch(
-          `Merge session branch ${sourceBranch} into ${mainBranch}`
-        );
-        // Allow navigation whether or not the PR succeeded — errors are shown as toasts
+
+      const repoName = this.lastPulledRepo || storedRepo;
+      const sourceBranch = effectiveSourceBranch || this.lastPulledBranch || 'session-branch';
+      const mainBranch = this.lastPulledBranch || storedMain || 'main';
+
+      const data: SessionPrPromptDialogData = {
+        repoName,
+        sourceBranch,
+        targetBranch: mainBranch,
+        mainBranch,
+        prStatus: effectivePrStatus,
+      };
+
+      const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
+        width: '560px',
+        maxWidth: '94vw',
+        panelClass: 'session-pr-dialog-panel',
+        disableClose: true,
+        data,
+      });
+
+      return dialogRef.afterClosed().toPromise().then(async (result: SessionPrPromptDialogResult | undefined) => {
+        if (!result || result.action === 'skip') {
+          return true;
+        }
+        if (result.action === 'discard') {
+          this.clearSessionBranchState();
+          return true;
+        }
+        if (result.action === 'raise-pr') {
+          await this.createPullRequestFromSessionBranch(
+            `Merge session branch ${sourceBranch} into ${mainBranch}`
+          );
+          return true;
+        }
         return true;
-      }
-      return true;
+      });
     });
   }
 
@@ -5022,20 +5026,92 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   /**
    * Derive the per-session branch name from the current session id and today's date.
-   * Format: "session/<sessionId>-YYYY-MM-DD"
+   * Format: "session/<sessionId>-<pipeline>-<gitUser>-YYYY-MM-DD"
    */
   private buildSessionBranchName(): string {
-    const sessionId =
-      sessionStorage.getItem('git_session_id') ||
-      sessionStorage.getItem('sessionId') ||
-      Date.now().toString(36);
+    const sessionId = this.toBranchSafeSegment(this.getCurrentGitSessionId() || Date.now().toString(36), 'session');
+    const pipelineKey = this.getCurrentPipelineKey();
+    const gitUser = this.toBranchSafeSegment(this.currentGitUsername || 'user', 'user');
     const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-    return `session/${sessionId}-${date}`;
+    return `session/${sessionId}-${pipelineKey}-${gitUser}-${date}`;
   }
 
-  /** Return the cached session branch name from sessionStorage, or '' if not set. */
-  private getStoredSessionBranch(): string {
-    return sessionStorage.getItem('session_branch_name') || '';
+  private initializePipelineSessionContext(cname: string): void {
+    this.pipelineSessionScope = (cname || '').trim();
+    this.currentCname = (cname || '').trim();
+    this.hydrateSessionBranchState();
+    void this.syncSessionBranchPrStatus();
+  }
+
+  private getCurrentGitSessionId(): string {
+    return (
+      sessionStorage.getItem('git_session_id') ||
+      sessionStorage.getItem('sessionId') ||
+      ''
+    ).trim();
+  }
+
+  private toBranchSafeSegment(value: string, fallback: string): string {
+    const normalized = (value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48);
+    return normalized || fallback;
+  }
+
+  private getCurrentPipelineKey(): string {
+    return this.toBranchSafeSegment(this.pipelineSessionScope || this.cardName || this.currentCname || 'pipeline', 'pipeline');
+  }
+
+  private getSessionBranchStateStorageKey(): string | null {
+    const sessionId = this.toBranchSafeSegment(this.getCurrentGitSessionId(), '');
+    const gitUser = this.toBranchSafeSegment(this.currentGitUsername, '');
+    const pipelineKey = this.getCurrentPipelineKey();
+    if (!sessionId || !gitUser || !pipelineKey) {
+      return null;
+    }
+    return `${this.sessionBranchStateKeyPrefix}${gitUser}:${sessionId}:${pipelineKey}`;
+  }
+
+  private buildSessionBranchState(
+    branchName: string,
+    prStatus: 'none' | 'open' | 'merged' = 'none',
+    repoName = '',
+    mainBranch = '',
+  ): SessionBranchState {
+    return {
+      sessionId: this.getCurrentGitSessionId(),
+      repoName,
+      mainBranch,
+      sessionBranch: branchName,
+      gitUsername: this.currentGitUsername,
+      token: sessionStorage.getItem('github_token') || '',
+      prStatus,
+      lastCommitId: this.sessionBranchLastCommitId,
+      branchCreationStatus: 'ready',
+      prNumber: this.sessionBranchPrNumber,
+    };
+  }
+
+  private getStoredSessionBranchState(): SessionBranchState | null {
+    const storageKey = this.getSessionBranchStateStorageKey();
+    if (!storageKey) {
+      return null;
+    }
+
+    const stored = sessionStorage.getItem(storageKey);
+    if (!stored) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(stored) as SessionBranchState;
+    } catch {
+      sessionStorage.removeItem(storageKey);
+      return null;
+    }
   }
 
   /** Persist session branch state into sessionStorage for cross-tab / refresh resilience. */
@@ -5045,47 +5121,100 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     repoName?: string,
     mainBranch?: string,
   ): void {
-    sessionStorage.setItem('session_branch_name', branchName);
-    sessionStorage.setItem('session_branch_status', 'ready');
-    sessionStorage.setItem('session_branch_pr_status', prStatus);
-    if (repoName) sessionStorage.setItem('session_branch_repo', repoName);
-    if (mainBranch) sessionStorage.setItem('session_branch_main', mainBranch);
+    const storageKey = this.getSessionBranchStateStorageKey();
+    if (!storageKey) {
+      return;
+    }
+
+    const nextState = this.buildSessionBranchState(
+      branchName,
+      prStatus,
+      repoName || this.lastPulledRepo,
+      mainBranch || this.lastPulledBranch,
+    );
+    sessionStorage.setItem(storageKey, JSON.stringify(nextState));
   }
 
-  /** Clear session branch state from sessionStorage (called on Discard). */
-  private clearSessionBranchState(): void {
-    sessionStorage.removeItem('session_branch_name');
-    sessionStorage.removeItem('session_branch_status');
-    sessionStorage.removeItem('session_branch_pr_status');
-    sessionStorage.removeItem('session_branch_pr_number');
-    sessionStorage.removeItem('session_branch_last_commit');
-    sessionStorage.removeItem('session_branch_repo');
-    sessionStorage.removeItem('session_branch_main');
+  private updateStoredSessionBranchState(patch: Partial<SessionBranchState>): void {
+    const storedState = this.getStoredSessionBranchState();
+    const storageKey = this.getSessionBranchStateStorageKey();
+    if (!storedState || !storageKey) {
+      return;
+    }
+
+    sessionStorage.setItem(storageKey, JSON.stringify({ ...storedState, ...patch }));
+  }
+
+  private resetSessionBranchRuntimeState(clearGitContext = false): void {
     this.activeSessionBranch = '';
+    this.sessionBranchCreating = false;
     this.sessionBranchReady = false;
     this.sessionBranchCreationAttempted = false;
     this.sessionBranchPrStatus = 'none';
     this.sessionBranchPrNumber = null;
     this.sessionBranchLastCommitId = '';
+    this.isSessionBranchActionInFlight = false;
+    this.activeSessionBranchAction = null;
+    if (clearGitContext) {
+      this.lastPulledRepo = '';
+      this.lastPulledBranch = '';
+    }
+  }
+
+  private syncSessionBranchPrStatus(): Promise<void> {
+    const storedState = this.getStoredSessionBranchState();
+    const repoName = this.lastPulledRepo || storedState?.repoName || '';
+    const sourceBranch = this.activeSessionBranch || storedState?.sessionBranch || '';
+    const targetBranch = this.lastPulledBranch || storedState?.mainBranch || 'main';
+
+    if (!repoName || !sourceBranch || !this.currentGitUsername) {
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      this.githubService.getSessionBranchPrStatus(repoName, sourceBranch, targetBranch).subscribe({
+        next: (response) => {
+          if (response?.success) {
+            const prStatus = (response.prStatus || 'none') as 'none' | 'open' | 'merged';
+            this.sessionBranchPrStatus = prStatus;
+            this.sessionBranchPrNumber = response.pullRequestNumber ?? null;
+            this.updateStoredSessionBranchState({
+              prStatus,
+              prNumber: response.pullRequestNumber ?? null,
+              repoName,
+              mainBranch: targetBranch,
+            });
+          }
+          resolve();
+        },
+        error: () => resolve(),
+      });
+    });
+  }
+
+  /** Clear session branch state from sessionStorage (called on Discard). */
+  private clearSessionBranchState(): void {
+    const storageKey = this.getSessionBranchStateStorageKey();
+    if (storageKey) {
+      sessionStorage.removeItem(storageKey);
+    }
+    this.resetSessionBranchRuntimeState();
   }
 
   /** Hydrate in-memory session branch state from sessionStorage on ngOnInit. */
   private hydrateSessionBranchState(): void {
-    const stored = this.getStoredSessionBranch();
-    if (stored) {
-      this.activeSessionBranch = stored;
-      this.sessionBranchReady = sessionStorage.getItem('session_branch_status') === 'ready';
+    this.resetSessionBranchRuntimeState(true);
+
+    const storedState = this.getStoredSessionBranchState();
+    if (storedState?.sessionBranch) {
+      this.activeSessionBranch = storedState.sessionBranch;
+      this.sessionBranchReady = storedState.branchCreationStatus === 'ready';
       this.sessionBranchCreationAttempted = true;
-      const prStatus = sessionStorage.getItem('session_branch_pr_status') as 'none' | 'open' | 'merged' | null;
-      this.sessionBranchPrStatus = prStatus || 'none';
-      const prNumber = sessionStorage.getItem('session_branch_pr_number');
-      this.sessionBranchPrNumber = prNumber ? parseInt(prNumber, 10) : null;
-      this.sessionBranchLastCommitId = sessionStorage.getItem('session_branch_last_commit') || '';
-      // Restore repo/branch so the git-info-panel can display correctly after refresh
-      const storedRepo = sessionStorage.getItem('session_branch_repo');
-      const storedMain = sessionStorage.getItem('session_branch_main');
-      if (storedRepo && !this.lastPulledRepo) this.lastPulledRepo = storedRepo;
-      if (storedMain && !this.lastPulledBranch) this.lastPulledBranch = storedMain;
+      this.sessionBranchPrStatus = storedState.prStatus || 'none';
+      this.sessionBranchPrNumber = storedState.prNumber ?? null;
+      this.sessionBranchLastCommitId = storedState.lastCommitId || '';
+      if (storedState.repoName) this.lastPulledRepo = storedState.repoName;
+      if (storedState.mainBranch) this.lastPulledBranch = storedState.mainBranch;
     }
   }
 
@@ -5110,11 +5239,16 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     // Check sessionStorage first (browser refresh / second tab)
-    const stored = this.getStoredSessionBranch();
-    if (stored) {
-      this.activeSessionBranch = stored;
-      this.sessionBranchReady = true;
+    const storedState = this.getStoredSessionBranchState();
+    if (storedState?.sessionBranch) {
+      this.activeSessionBranch = storedState.sessionBranch;
+      this.sessionBranchReady = storedState.branchCreationStatus === 'ready';
       this.sessionBranchCreationAttempted = true;
+      this.sessionBranchPrStatus = storedState.prStatus || 'none';
+      this.sessionBranchPrNumber = storedState.prNumber ?? null;
+      this.sessionBranchLastCommitId = storedState.lastCommitId || '';
+      if (storedState.repoName && !this.lastPulledRepo) this.lastPulledRepo = storedState.repoName;
+      if (storedState.mainBranch && !this.lastPulledBranch) this.lastPulledBranch = storedState.mainBranch;
       return true;
     }
 
@@ -5185,7 +5319,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   /** Pre-save validation: confirm session branch exists in the remote repo. */
   private async validateSessionBranchPreSave(): Promise<{ valid: boolean; reason?: string }> {
-    const repo = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || '';
+    const repo = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || '';
     if (!this.activeSessionBranch || !repo) {
       return { valid: false, reason: 'Session branch or repository not configured. Please configure Git first.' };
     }
@@ -5229,7 +5363,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     customCommitMessage?: string,
     actionType: 'save' | 'review' = 'save'
   ): void {
-    const repo = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || '';
+    const repo = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || '';
     if (!this.currentCname || this.isSessionBranchActionInFlight) {
       return;
     }
@@ -5263,11 +5397,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
             // Store commit SHA if present in response (string response from backend)
             if (typeof response === 'object' && response?.commitSha) {
               this.sessionBranchLastCommitId = response.commitSha;
-              sessionStorage.setItem('session_branch_last_commit', response.commitSha);
+              this.updateStoredSessionBranchState({ lastCommitId: response.commitSha });
             } else if (!this.sessionBranchLastCommitId) {
               // Mark as having commits even without SHA
               this.sessionBranchLastCommitId = 'committed';
-              sessionStorage.setItem('session_branch_last_commit', 'committed');
+              this.updateStoredSessionBranchState({ lastCommitId: 'committed' });
             }
             this.service.message(
               `Saved to session branch: ${this.activeSessionBranch}`, 'success'
@@ -5368,9 +5502,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.githubService.logout().subscribe({
       next: () => {
         this.githubUsername = '';
-        sessionStorage.removeItem('git_username');
-        sessionStorage.removeItem('git_session_id');
-        localStorage.removeItem('github_username');
+        this.githubService.clearClientGitSession();
+        this.resetSessionBranchRuntimeState(true);
         this.service.message('Logout successful', 'success');
       },
       error: () => {
@@ -5385,7 +5518,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   async raiseSessionPrOnly(): Promise<void> {
     if (!this.sessionBranchWorkflowEnabled) return;
-    const storedMain = sessionStorage.getItem('session_branch_main') || '';
+    const storedMain = this.getStoredSessionBranchState()?.mainBranch || '';
     const validation = await this.validatePreCreatePr();
     if (!validation.valid) {
       this.service.message(validation.reason || 'Cannot raise PR.', 'warning');
@@ -5393,8 +5526,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const mainBranch = this.lastPulledBranch || storedMain || 'main';
-    const username =
-      sessionStorage.getItem('git_username') || this.githubUsername || '';
+    const username = this.currentGitUsername || this.githubUsername || '';
 
     const data: SessionPrPromptDialogData = {
       repoName: this.lastPulledRepo,
@@ -5453,7 +5585,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       );
 
       const dialogData: SavePushConfigDialogData = {
-        username: sessionStorage.getItem('git_username') || this.githubUsername || 'unknown',
+        username: this.currentGitUsername || this.githubUsername || 'unknown',
         repoName: this.lastPulledRepo || 'repository',
         branch: this.activeSessionBranch,   // ← session branch, not main
         sourceLabel: 'Session branch',
@@ -5503,7 +5635,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    const repoForDialog = this.lastPulledRepo || sessionStorage.getItem('session_branch_repo') || 'repository';
+    const repoForDialog = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || 'repository';
     const changedFiles = this.collectChangedFilesForPush();
     const defaultCommitMessage = this.buildSavePushCommitMessage(
       repoForDialog,
@@ -5512,7 +5644,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     );
 
     const dialogData: SavePushConfigDialogData = {
-      username: sessionStorage.getItem('git_username') || this.githubUsername || 'unknown',
+      username: this.currentGitUsername || this.githubUsername || 'unknown',
       repoName: repoForDialog,
       branch: this.activeSessionBranch,
       sourceLabel: 'Session branch → Raise PR',
@@ -5560,8 +5692,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Step 3: Open PR dialog for title/description before creating the PR.
       const mainBranch = this.lastPulledBranch || 'main';
-      const username =
-        sessionStorage.getItem('git_username') || this.githubUsername || '';
+      const username = this.currentGitUsername || this.githubUsername || '';
       const prDialogData: SessionPrPromptDialogData = {
         repoName: repoForDialog,
         sourceBranch: this.activeSessionBranch,
@@ -5625,8 +5756,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           if (response?.success) {
             this.sessionBranchPrStatus = 'open';
             this.sessionBranchPrNumber = response.pullRequestNumber ?? null;
-            sessionStorage.setItem('session_branch_pr_status', 'open');
-            sessionStorage.setItem('session_branch_pr_number', String(response.pullRequestNumber ?? ''));
+            this.updateStoredSessionBranchState({
+              prStatus: 'open',
+              prNumber: response.pullRequestNumber ?? null,
+            });
             const prUrl = response.pullRequestUrl || '';
             this.service.message(
               `Pull Request #${response.pullRequestNumber} created successfully!${prUrl ? ' ' + prUrl : ''}`,

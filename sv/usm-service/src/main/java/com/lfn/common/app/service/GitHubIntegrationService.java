@@ -863,5 +863,61 @@ public class GitHubIntegrationService {
             return null; // Never reached
         }
     }
+
+    public SessionBranchPrStatusResponse getSessionBranchPrStatus(
+            String repoName,
+            String sourceBranch,
+            String targetBranch,
+            String token) throws Exception {
+        try {
+            if (repoName == null || repoName.isEmpty()) {
+                throw new IllegalArgumentException("Repository name is required");
+            }
+            if (sourceBranch == null || sourceBranch.isEmpty()) {
+                throw new IllegalArgumentException("Source branch name is required");
+            }
+            if (targetBranch == null || targetBranch.isEmpty()) {
+                throw new IllegalArgumentException("Target branch name is required");
+            }
+
+            GitHub github = createGitHubInstance(token);
+            GHRepository repo = github.getRepository(repoName);
+
+            for (GHPullRequest pullRequest : repo.getPullRequests(GHIssueState.OPEN)) {
+                String headRef = pullRequest.getHead().getRef();
+                String headLabel = pullRequest.getHead().getLabel();
+                String baseRef = pullRequest.getBase().getRef();
+
+                boolean sourceMatches = sourceBranch.equals(headRef)
+                    || (headLabel != null && headLabel.endsWith(":" + sourceBranch));
+
+                if (sourceMatches && targetBranch.equals(baseRef)) {
+                    return SessionBranchPrStatusResponse.builder()
+                        .success(true)
+                        .message("Open pull request found")
+                        .repoName(repoName)
+                        .sourceBranch(sourceBranch)
+                        .targetBranch(targetBranch)
+                        .prStatus("open")
+                        .pullRequestNumber(pullRequest.getNumber())
+                        .pullRequestUrl(pullRequest.getHtmlUrl().toString())
+                        .build();
+                }
+            }
+
+            return SessionBranchPrStatusResponse.builder()
+                .success(true)
+                .message("No open pull request found")
+                .repoName(repoName)
+                .sourceBranch(sourceBranch)
+                .targetBranch(targetBranch)
+                .prStatus("none")
+                .build();
+        } catch (Exception e) {
+            handleGitHubException(e, "get session branch PR status",
+                repoName + " (" + sourceBranch + " -> " + targetBranch + ")");
+            return null;
+        }
+    }
 }
 

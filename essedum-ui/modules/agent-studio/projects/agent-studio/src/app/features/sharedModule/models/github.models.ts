@@ -107,3 +107,14 @@ export interface SessionBranchState {
   branchCreationStatus: 'pending' | 'creating' | 'ready' | 'failed';
   prNumber: number | null;
 }
+
+export interface SessionBranchPrStatusResponse {
+  success: boolean;
+  message: string;
+  repoName: string;
+  sourceBranch: string;
+  targetBranch: string;
+  prStatus: 'none' | 'open' | 'merged';
+  pullRequestNumber?: number | null;
+  pullRequestUrl?: string;
+}

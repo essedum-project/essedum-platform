@@ -12,6 +12,7 @@ import {
   BranchPushResponse,
   CreateBranchRequest,
   CreateBranchResponse,
+  SessionBranchPrStatusResponse,
 } from '../models/github.models';
 
 @Injectable({
@@ -37,6 +38,39 @@ export class GitHubService {
   private clearStoredToken(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem('git_github_token'); // clear old key name if present
+  }
+
+  cacheClientAuth(status: AuthStatus): void {
+    const username = (status.githubUsername || status.username || '').trim();
+    if (username) {
+      sessionStorage.setItem('git_username', username);
+      localStorage.setItem('github_username', username);
+    }
+    if (status.sessionId) {
+      sessionStorage.setItem('git_session_id', status.sessionId);
+    }
+    if (status.githubToken) {
+      this.storeToken(status.githubToken);
+    }
+  }
+
+  clearClientGitSession(): void {
+    this.clearStoredToken();
+    sessionStorage.removeItem('git_username');
+    sessionStorage.removeItem('git_session_id');
+    sessionStorage.removeItem('git_selected_Repo');
+    sessionStorage.removeItem('git_selected_branch');
+    localStorage.removeItem('github_username');
+
+    const sessionKeysToRemove: string[] = [];
+    for (let index = 0; index < sessionStorage.length; index++) {
+      const key = sessionStorage.key(index);
+      if (key && (key.startsWith('session_branch_state:') || key.startsWith('session_branch_'))) {
+        sessionKeysToRemove.push(key);
+      }
+    }
+
+    sessionKeysToRemove.forEach((key) => sessionStorage.removeItem(key));
   }
 
   private githubHeaders(): { headers?: { [key: string]: string } } {
@@ -68,7 +102,7 @@ export class GitHubService {
    * Logout
    */
   logout(): Observable<any> {
-    this.clearStoredToken();
+    this.clearClientGitSession();
     return this.http.post(
       `${this.API_BASE}/oauth/logout`,
       {},
@@ -190,6 +224,25 @@ export class GitHubService {
       `${this.API_BASE}/create-pull-request`,
       request,
       { withCredentials: true, ...this.githubHeaders() }
+    );
+  }
+
+  getSessionBranchPrStatus(
+    repoName: string,
+    sourceBranch: string,
+    targetBranch: string,
+  ): Observable<SessionBranchPrStatusResponse> {
+    return this.http.get<SessionBranchPrStatusResponse>(
+      `${this.API_BASE}/pull-request-status`,
+      {
+        params: {
+          repo: repoName,
+          sourceBranch,
+          targetBranch,
+        },
+        withCredentials: true,
+        ...this.githubHeaders(),
+      }
     );
   }
 

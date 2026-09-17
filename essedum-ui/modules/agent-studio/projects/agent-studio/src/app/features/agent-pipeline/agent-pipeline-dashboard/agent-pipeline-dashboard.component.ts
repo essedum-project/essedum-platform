@@ -150,11 +150,8 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
       next: (status) => {
         this.isGitLoading = false;
         this.isGitAuthenticated = true;
-        this.gitUsername = status.githubUsername || '';
-        sessionStorage.setItem('git_username', this.gitUsername);
-        if (status.sessionId) {
-          sessionStorage.setItem('git_session_id', status.sessionId);
-        }
+        this.githubService.cacheClientAuth(status);
+        this.gitUsername = status.githubUsername || status.username || '';
         this.service.message('Git login success', 'success');
         this.changeDetectionRef.detectChanges();
       },
@@ -189,10 +186,7 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
    * (username, session id, and any previously selected repo/branch).
    */
   private clearGitSessionData(): void {
-    sessionStorage.removeItem('git_username');
-    sessionStorage.removeItem('git_session_id');
-    sessionStorage.removeItem('git_selected_Repo');
-    sessionStorage.removeItem('git_selected_branch');
+    this.githubService.clearClientGitSession();
   }
 
   toggleGitDropdown(event: Event): void {

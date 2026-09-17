@@ -127,12 +127,9 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       next: (status) => {
         this.isAuthenticated = status.authenticated;
         this.isLoading = false;
-        if (status.authenticated && status.githubUsername) {
-          this.username = status.githubUsername;
-          sessionStorage.setItem('git_username', this.username);
-          if (status.sessionId) {
-            sessionStorage.setItem('git_session_id', status.sessionId);
-          }
+        if (status.authenticated && (status.githubUsername || status.username)) {
+          this.githubService.cacheClientAuth(status);
+          this.username = status.githubUsername || status.username || '';
           // Only load repositories in push mode (pull mode uses a URL input)
           if (this.mode === 'push') {
             this.loadRepositories();
@@ -253,11 +250,8 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
       next: (status) => {
         this.isLoading = false;
         this.isAuthenticated = true;
-        this.username = status.githubUsername || '';
-        sessionStorage.setItem('git_username', this.username);
-        if (status.sessionId) {
-          sessionStorage.setItem('git_session_id', status.sessionId);
-        }
+        this.githubService.cacheClientAuth(status);
+        this.username = status.githubUsername || status.username || '';
         this.showModal = true;
         this.cdr.detectChanges();
         this.loadRepositories();
@@ -307,10 +301,7 @@ export class GitHubPushComponent implements OnInit, OnDestroy, AfterViewChecked 
    * (username, session id, and any previously selected repo/branch).
    */
   private clearGitSessionData(): void {
-    sessionStorage.removeItem('git_username');
-    sessionStorage.removeItem('git_session_id');
-    sessionStorage.removeItem('git_selected_Repo');
-    sessionStorage.removeItem('git_selected_branch');
+    this.githubService.clearClientGitSession();
   }
  
   /**

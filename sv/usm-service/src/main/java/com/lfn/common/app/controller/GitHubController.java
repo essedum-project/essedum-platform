@@ -343,4 +343,44 @@ public class GitHubController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
+
+    @GetMapping("/pull-request-status")
+    public ResponseEntity<SessionBranchPrStatusResponse> getPullRequestStatus(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestParam("repo") String repoName,
+            @RequestParam("sourceBranch") String sourceBranch,
+            @RequestParam("targetBranch") String targetBranch,
+            HttpSession session) {
+        try {
+            String cleanToken = getToken(githubToken, token, session);
+            SessionBranchPrStatusResponse response = gitHubIntegrationService.getSessionBranchPrStatus(
+                repoName,
+                sourceBranch,
+                targetBranch,
+                cleanToken
+            );
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in PR status lookup", e);
+            return ResponseEntity.badRequest().body(SessionBranchPrStatusResponse.builder()
+                .success(false)
+                .message(e.getMessage())
+                .repoName(repoName)
+                .sourceBranch(sourceBranch)
+                .targetBranch(targetBranch)
+                .prStatus("none")
+                .build());
+        } catch (Exception e) {
+            log.error("Error checking pull request status", e);
+            return ResponseEntity.internalServerError().body(SessionBranchPrStatusResponse.builder()
+                .success(false)
+                .message("Failed to check pull request status: " + e.getMessage())
+                .repoName(repoName)
+                .sourceBranch(sourceBranch)
+                .targetBranch(targetBranch)
+                .prStatus("none")
+                .build());
+        }
+    }
 }
