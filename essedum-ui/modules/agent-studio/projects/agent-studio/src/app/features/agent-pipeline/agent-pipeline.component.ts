@@ -586,14 +586,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   sessionBranchLastCommitId = '';
   /** GitHub PR number after a PR is raised from the session branch. */
   sessionBranchPrNumber: number | null = null;
-  /** Mirrors autoPushOnSave but routes to the session branch instead of main. */
+  /** Enables the single-click save-to-session-branch workflow. */
   autoSaveToSessionBranch = true;
   /** True while a session-branch push or PR action is in flight. */
   isSessionBranchActionInFlight = false;
   /** Tracks which toolbar action currently owns the busy indicator. */
   activeSessionBranchAction: 'save' | 'review' | 'pr' | null = null;
-  /** Debounce timer handle for auto-save-to-session-branch. */
-  private sessionBranchAutoSaveTimer: any = null;
   // ────────────────────────────────────────────────────────────────────────────
 
   get sessionBranchSaveDisabled(): boolean {
@@ -5342,7 +5340,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Common hook called by BOTH content-change handlers (Python editor + text editor)
    * whenever the file content actually changes.
    * - Creates session branch on very first edit of a session
-   * - Schedules auto-save-to-session-branch when the checkbox is enabled
    */
   private onEditorContentModified(): void {
     if (!this.sessionBranchWorkflowEnabled) return;
@@ -5350,46 +5347,21 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     if (!this.sessionBranchCreationAttempted) {
       this.ensureSessionBranch();
     }
-    // Auto-save: debounced save+push to session branch
-    if (this.autoSaveToSessionBranch && this.sessionBranchReady) {
-      this.scheduleSessionBranchAutoSave();
-    }
   }
 
-  /** Debounced auto-save: waits 3 s of inactivity then saves + pushes to session branch. */
-  private scheduleSessionBranchAutoSave(): void {
-    if (this.sessionBranchAutoSaveTimer) {
-      clearTimeout(this.sessionBranchAutoSaveTimer);
-    }
-    this.sessionBranchAutoSaveTimer = setTimeout(() => {
-      this.sessionBranchAutoSaveTimer = null;
-      this.saveToSessionBranch();
-    }, 3000);
-  }
-
-  /** Cancel any pending debounced auto-save (call before a manual save or PR action). */
+  /** Retained for compatibility with callers that clear pending save state before manual actions. */
   private cancelPendingAutoSave(): void {
-    if (this.sessionBranchAutoSaveTimer) {
-      clearTimeout(this.sessionBranchAutoSaveTimer);
-      this.sessionBranchAutoSaveTimer = null;
-    }
   }
 
   /**
-   * Called when the Auto Save toggle changes.
-   * - Turning ON: schedules a save if there are pending changes.
-   * - Turning OFF: if there are unsaved changes, shows the review dialog
-   *   so the user can commit them before switching to manual mode.
+   * Called when the save-mode toggle changes.
+   * - Turning ON keeps the one-click save-to-session-branch action enabled.
+   * - Turning OFF keeps the existing review-and-save flow.
    */
   onAutoSaveToggleChange(enabled: boolean): void {
-    if (enabled) {
-      if (this.isFileModified && this.sessionBranchReady) {
-        this.scheduleSessionBranchAutoSave();
-      }
-      return;
+    if (!enabled) {
+      this.cancelPendingAutoSave();
     }
-
-    this.cancelPendingAutoSave();
   }
 
   logoutGitAccount(): void {

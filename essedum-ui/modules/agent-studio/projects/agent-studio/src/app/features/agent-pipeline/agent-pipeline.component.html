@@ -400,11 +400,11 @@
 
                                 <!-- Auto Save toggle -->
                                 <label class="auto-push-toggle session-branch-toggle"
-                                  title="Automatically save and push to session branch after edits (3 s debounce)">
+                                  title="When enabled, clicking Save stores the file and pushes it to the session branch">
                                   <input type="checkbox"
                                     [(ngModel)]="autoSaveToSessionBranch"
                                     (ngModelChange)="onAutoSaveToggleChange($event)" />
-                                  <span>Auto Save</span>
+                                  <span>Push on Save</span>
                                 </label>
 
                                 <!-- Save to Session Branch -->
