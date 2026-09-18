@@ -456,6 +456,7 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
     { label: 'gemma4:latest',  value: 'gemma4:latest'   },
     { label: 'gpt-oss:latest', value: 'gpt-oss:latest'  },
     { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
+    { label: 'gpt-5.6-luna',   value: 'gpt-5.6-luna'    },
   ];
 
   chatWidth = 360;

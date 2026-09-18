@@ -817,10 +817,11 @@ export class VibeStudioService implements OnDestroy {
       }
     }
 
-    // Call list_apps after every reply to get all generated files.
+    // After every reply, fetch all generated files directly from MinIO
+    // (Goose uploads them under goose-apps/<session_id>/ as it writes them).
     if (this.session.id) {
       const sid = this.session.id;
-      this.listAppsAndFetchFiles(sid, () => {
+      this.loadFilesFromMinio(sid, () => {
         // Emit the complete file list before transitioning to idle
         if (this.files$.value.length) {
           this.generationComplete$.next([...this.files$.value]);
@@ -838,198 +839,37 @@ export class VibeStudioService implements OnDestroy {
     }
   }
 
-  // ─── Post-stream file loading via list_apps + call-tool ─────────────────────
+  // ─── Post-stream file loading from MinIO ────────────────────────────────────
 
   /**
-   * Calls GET /agent/list-apps?session_id=<id>, extracts every file path,
-   * reads file content via /agent/call-tool (developer__text_editor view),
-   * upserts into files$, then calls done().
+   * Fetches every file Goose generated for the session directly from MinIO via
+   * a single backend call (GET /service/v1/vibe-coding/sessions/<id>/files),
+   * upserts each into files$, then calls done().
    *
-   * Handles all known Goose list_apps response shapes:
-   *   • Array of app objects:  [{ name, files: ["path", ...] | { "path": "content" } }]
-   *   • Wrapped:               { apps: [...] }
-   *   • Files with content:    { files: { "path": "content" } }
+   * Goose uploads each file it writes/edits to goose-apps/<session_id>/ as it
+   * goes, so by the time a reply stream finishes the files are already there.
+   * The backend returns [{ path, content }] with paths relative to the session
+   * working directory — the exact shape upsertFile expects.
    */
-  private listAppsAndFetchFiles(sessionId: string, done: () => void): void {
-    const url = `${this.baseUrl}/service/v1/vibe-coding/agent/list-apps`;
+  private loadFilesFromMinio(sessionId: string, done: () => void): void {
+    const url = `${this.baseUrl}/service/v1/vibe-coding/sessions/${sessionId}/files`;
     this.http
-      .get<any>(url, {
-        params: { session_id: sessionId },
+      .get<Array<{ path: string; content: string }>>(url, {
         headers: this.getHttpHeaders() as any,
       })
       .subscribe({
-        next: (resp) => {
-          const pathsToFetch = this.extractFilePathsFromListApps(resp);
-          if (pathsToFetch.length > 0) {
-            this.fetchFilesFromServer(sessionId, pathsToFetch, done);
-          } else {
-            done();
+        next: (files) => {
+          if (Array.isArray(files)) {
+            for (const f of files) {
+              if (f && typeof f.path === 'string' && typeof f.content === 'string') {
+                this.upsertFile(f.path, f.content);
+              }
+            }
           }
+          done();
         },
         error: () => done(),
       });
-  }
-
-  /**
-   * Walks any list_apps response shape and:
-   *  - if content already present → calls upsertFile immediately
-   *  - if only a path → adds to the returned array for later fetching
-   */
-  private extractFilePathsFromListApps(resp: any): string[] {
-    const pathsToFetch: string[] = [];
-
-    const isSessionApp = (app: any): boolean => {
-      // MCP session apps have uri like "ui://apps/..." or mimeType "text/html;profile=mcp-app"
-      // or carry inline text content with no files — these are NOT source-code apps.
-      if (typeof app.uri === 'string' && app.uri.startsWith('ui://')) return true;
-      if (typeof app.mimeType === 'string' && app.mimeType.includes('mcp-app')) return true;
-      if (typeof app.text === 'string' && !app.files) return true;
-      return false;
-    };
-
-    const processApp = (app: any): void => {
-      // Skip MCP / session apps — they should not be fetched or pushed
-      if (isSessionApp(app)) return;
-
-      // Derive the app's root directory name from name or path
-      let appDir = '';
-      if (typeof app.name === 'string' && app.name.trim()) {
-        appDir = app.name.trim();
-      } else if (typeof app.path === 'string' && app.path) {
-        appDir = app.path.split('/').pop() ?? '';
-      }
-
-      const qualify = (filePath: string): string => {
-        // Strip leading absolute prefix, keep everything from appDir onward
-        if (filePath.startsWith('/')) {
-          const idx = appDir ? filePath.indexOf('/' + appDir + '/') : -1;
-          if (idx >= 0) {
-            return filePath.slice(idx + 1); // e.g. "simple-react-app/src/App.jsx"
-          }
-          return filePath.replace(/^\/+/, ''); // strip leading slash
-        }
-        // Already relative — prefix with appDir if not already prefixed
-        if (appDir && !filePath.startsWith(appDir + '/')) {
-          return appDir + '/' + filePath;
-        }
-        return filePath;
-      };
-
-      if (app.files && typeof app.files === 'object' && !Array.isArray(app.files)) {
-        // { files: { "path": "content" } } — content already available
-        for (const [filePath, content] of Object.entries(app.files)) {
-          if (typeof content === 'string' && content.trim()) {
-            this.upsertFile(qualify(filePath), content);
-          } else {
-            const p = qualify(filePath);
-            if (!pathsToFetch.includes(p)) pathsToFetch.push(p);
-          }
-        }
-      } else if (Array.isArray(app.files)) {
-        // { files: ["path", ...] } — only paths, need to fetch content
-        for (const f of app.files) {
-          if (typeof f === 'string') {
-            const p = qualify(f);
-            if (!pathsToFetch.includes(p)) pathsToFetch.push(p);
-          }
-        }
-      }
-    };
-
-    if (Array.isArray(resp)) {
-      resp.forEach(processApp);
-    } else if (resp?.apps && Array.isArray(resp.apps)) {
-      resp.apps.forEach(processApp);
-    } else if (resp && typeof resp === 'object') {
-      processApp(resp);
-    }
-
-    return pathsToFetch;
-  }
-
-  /**
-   * Calls POST /agent/call-tool sequentially for each path to read file content
-   * from the Goose server filesystem, then invokes `done` when all are fetched.
-   */
-  private fetchFilesFromServer(sessionId: string, paths: string[], done: () => void): void {
-    const fetchNext = (index: number): void => {
-      if (index >= paths.length) {
-        done();
-        return;
-      }
-
-      const path = paths[index];
-      const url = `${this.baseUrl}/service/v1/vibe-coding/agent/call-tool`;
-      const body = {
-        session_id: sessionId,
-        tool_name: 'developer__text_editor',
-        input: { command: 'view', path },
-      };
-
-      this.http.post<any>(url, body, { headers: this.getHttpHeaders() }).subscribe({
-        next: (resp) => {
-          const content = this.extractContentFromToolResponse(resp);
-          if (content !== null && content !== undefined && content.trim() !== '') {
-            this.upsertFile(path, content);
-          }
-          fetchNext(index + 1);
-        },
-        error: () => fetchNext(index + 1),
-      });
-    };
-
-    fetchNext(0);
-  }
-
-  /**
-   * Tries to extract a plain-text file content string out of whatever shape
-   * the Goose /agent/call_tool endpoint returns.
-   */
-  private extractContentFromToolResponse(resp: any): string | null {
-    if (!resp) return null;
-    if (typeof resp === 'string') return resp;
-
-    // Direct string fields
-    if (typeof resp.output   === 'string') return resp.output;
-    if (typeof resp.content  === 'string') return resp.content;
-    if (typeof resp.result   === 'string') return resp.result;
-    if (typeof resp.text     === 'string') return resp.text;
-
-    // Nested result: { result: { content|output: "..." } }
-    if (resp.result && typeof resp.result === 'object') {
-      if (typeof resp.result.content === 'string') return resp.result.content;
-      if (typeof resp.result.output  === 'string') return resp.result.output;
-      if (typeof resp.result.text    === 'string') return resp.result.text;
-    }
-
-    // { toolResult: { content: [...] | "..." } }
-    if (resp.toolResult) {
-      if (typeof resp.toolResult.content === 'string') return resp.toolResult.content;
-      if (Array.isArray(resp.toolResult.content)) {
-        const parts = resp.toolResult.content
-          .map((c: any) => c?.text ?? c?.content ?? '')
-          .filter(Boolean);
-        if (parts.length) return parts.join('\n');
-      }
-    }
-
-    // Array content: { content: [{ type: "text", text: "..." }] }
-    if (Array.isArray(resp.content)) {
-      const parts = resp.content
-        .map((c: any) => c?.text ?? c?.content ?? '')
-        .filter(Boolean);
-      if (parts.length) return parts.join('\n');
-    }
-
-    // messages array: { messages: [{ content: [...] }] }
-    if (Array.isArray(resp.messages)) {
-      for (const msg of resp.messages) {
-        const extracted = this.extractContentFromToolResponse(msg);
-        if (extracted) return extracted;
-      }
-    }
-
-    return null;
   }
 
   private startStreamingAssistantMessage(): void {
@@ -1147,7 +987,7 @@ export class VibeStudioService implements OnDestroy {
             this.fileUploadSuccess$.next();
             if (sessionId) this.triggerPreview(sessionId);
           },
-          error: () => { if (sessionId) this.triggerPreview(sessionId); },
+          error: () => { this.deploymentStatus$.next('error'); },
         });
     } catch {
       // non-fatal — never disrupts the existing generation flow

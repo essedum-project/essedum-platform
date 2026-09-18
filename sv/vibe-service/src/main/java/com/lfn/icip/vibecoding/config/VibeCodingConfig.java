@@ -12,9 +12,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import io.netty.channel.ChannelOption;
 import reactor.netty.http.client.HttpClient;
+import io.minio.MinioClient;
 
 import jakarta.annotation.PostConstruct;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 
 /**
@@ -40,19 +43,48 @@ public class VibeCodingConfig {
 
     private static final String DEFAULT_SECRET_KEY = "";
 
+    // ── MinIO (Goose-generated session files) ────────────────────────────────
+    // No hardcoded default here — the URL is environment-specific (differs between
+    // local/dev/k8s). It must be supplied via the active application profile YAML
+    // (vibe.minio.url) or the MINIO_URL environment variable. See validateMinioConfig().
+    @Value("${vibe.minio.url:}")
+    private String minioUrl;
+
+    @Value("${vibe.minio.access-key:}")
+    private String minioAccessKey;
+
+    @Value("${vibe.minio.secret-key:}")
+    private String minioSecretKey;
+
+    @PostConstruct
+    void validateMinioConfig() {
+        if (minioUrl == null || minioUrl.isBlank()) {
+            throw new IllegalStateException(
+                    "Property 'vibe.minio.url' (env: MINIO_URL) is not set. "
+                            + "Please configure it in the active application profile YAML or as an environment variable.");
+        }
+        try {
+            URI.create(minioUrl);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalStateException(
+                    "Property 'vibe.minio.url' contains an invalid URL: " + minioUrl, ex);
+        }
+        logger.info("Goose MinIO URL configured: {}", minioUrl);
+    }
+
     @PostConstruct
     void validateGooseServiceUrl() {
         if (gooseServiceUrl == null || gooseServiceUrl.isBlank()) {
             throw new IllegalStateException(
                     "Property 'vibe.goose.service.url' is not set. "
-                    + "Please configure it in the active application profile YAML.");
+                            + "Please configure it in the active application profile YAML.");
         }
         try {
             URI.create(gooseServiceUrl);
         } catch (IllegalArgumentException ex) {
             throw new IllegalStateException(
                     "Property 'vibe.goose.service.url' contains an invalid URL: "
-                    + gooseServiceUrl, ex);
+                            + gooseServiceUrl, ex);
         }
         // Spring ${VAR:default} only substitutes the default when the env-var is absent,
         // not when it is set to an empty string. Guard here so a blank GOOSE_SECRET_KEY
@@ -60,7 +92,7 @@ public class VibeCodingConfig {
         if (gooseSecretKey == null || gooseSecretKey.isBlank()) {
             throw new IllegalStateException(
                     "Property 'vibe.goose.service.secret-key' (env: GOOSE_SECRET_KEY) is not set. "
-                    + "Please configure it in the active application profile YAML or as an environment variable.");
+                            + "Please configure it in the active application profile YAML or as an environment variable.");
         }
         logger.info("Goose service URL configured: {}", gooseServiceUrl);
     }
@@ -120,6 +152,26 @@ public class VibeCodingConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(strategies)
                 .build();
+    }
+
+    /**
+     * MinIO client for reading Goose-generated session files. Goose uploads every
+     * file it writes to {@code <bucket>/<prefix>/<session_id>/<relative_path>};
+     * this client lets vibe-service list and download that folder directly instead
+     * of re-exporting each file from the Goose agent.
+     * <p>
+     * {@code ignoreCertCheck()} matches the platform's existing MinioServer pattern
+     * (self-signed corporate certificate).
+     */
+    @Bean("gooseMinioClient")
+    public MinioClient gooseMinioClient() throws KeyManagementException, NoSuchAlgorithmException {
+        MinioClient client = MinioClient.builder()
+                .endpoint(minioUrl)
+                .credentials(minioAccessKey, minioSecretKey)
+                .build();
+        client.ignoreCertCheck();
+        logger.info("Goose MinIO client configured: {}", minioUrl);
+        return client;
     }
 }
 
