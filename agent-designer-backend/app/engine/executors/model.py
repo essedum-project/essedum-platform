@@ -1,3 +1,4 @@
+import time
 from typing import Any
 from app.engine.executors.base import BaseExecutor
 from app.engine.connectors import get_connector
@@ -16,6 +17,7 @@ _NODE_TYPE_TO_PROVIDER = {
     "cohere-llm": "bedrock",
     "groq-llm": "bedrock",
     "huggingface-llm": "bedrock",
+    "litellm-llm": "litellm",           # routes through LiteLLM gateway
 }
 
 
@@ -38,7 +40,7 @@ def _resolve_provider(node: dict, config: dict) -> str:
     raise ValueError(
         f"Model node {node.get('id')!r} is missing 'provider' and no mapping "
         f"exists for node type {node_type!r}. Set 'provider' in the node "
-        "config (one of: azure_openai, bedrock, vertex_ai, ollama)."
+        "config (one of: azure_openai, bedrock, vertex_ai, ollama, litellm)."
     )
 
 
@@ -92,10 +94,24 @@ class ModelExecutor(BaseExecutor):
         connector = get_connector(provider)
 
         extra_kwargs: dict[str, Any] = {}
-        # Ollama allows overriding the base URL on a per-node basis.
-        if provider == "ollama" and config.get("base_url"):
+        # Ollama and LiteLLM allow overriding the gateway URL per node.
+        if provider in ("ollama", "litellm") and config.get("base_url"):
             extra_kwargs["base_url_override"] = config["base_url"]
 
+        # Langfuse generation span — records input messages, model, latency, output.
+        from app.core.langfuse_tracer import get_trace
+        trace = get_trace(context.get("execution_id"))
+        generation = None
+        if trace:
+            generation = trace.generation(
+                name=f"node:{node.get('id', 'model')}",
+                model=model,
+                model_parameters={"temperature": temperature, "max_tokens": max_tokens},
+                input=messages,
+                metadata={"provider": provider, "node_id": node.get("id")},
+            )
+
+        t0 = time.monotonic()
         response = await connector.chat(
             model=model,
             messages=messages,
@@ -103,4 +119,11 @@ class ModelExecutor(BaseExecutor):
             max_tokens=max_tokens,
             **extra_kwargs,
         )
+
+        if generation:
+            generation.end(
+                output=response,
+                metadata={"latency_ms": round((time.monotonic() - t0) * 1000)},
+            )
+
         return {"response": response}

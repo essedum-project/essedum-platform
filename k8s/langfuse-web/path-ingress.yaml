@@ -1,0 +1,95 @@
+---
+# Routes /langfuse/* → Langfuse nginx sidecar (port 8080)
+# The sidecar strips the /langfuse/ prefix before forwarding to Langfuse on port 3000,
+# rewrites /api/ → /langfuse/api/ in JS responses so API calls resolve through the proxy,
+# and sets permissive frame-ancestors CSP to allow iframe embedding.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: essedum-langfuse-path
+  namespace: essedum
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /langfuse/$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - path: /langfuse(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: langfuse-web
+            port:
+              number: 8080
+---
+# Routes /api/auth/* → Langfuse directly (port 3000) for NextAuth session handling
+# NextAuth uses absolute callback URLs that must resolve at the root of the domain.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: essedum-langfuse-auth
+  namespace: essedum
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/auth/$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - path: /api/auth(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: langfuse-web
+            port:
+              number: 3000
+---
+# Routes root-level Langfuse static files → Langfuse nginx sidecar (port 8080)
+# Langfuse HTML uses root-relative paths like /icon.svg and /favicon.ico.
+# These must be served by Langfuse rather than the main Angular shell.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: essedum-langfuse-statics
+  namespace: essedum
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - essedum-lfn.infosys.com
+    secretName: essedum-secret
+  rules:
+  - host: essedum-lfn.infosys.com
+    http:
+      paths:
+      - path: /(icon\.svg|favicon\.ico|manifest\.json|favicon\.png)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: langfuse-web
+            port:
+              number: 8080

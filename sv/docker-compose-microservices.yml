@@ -199,6 +199,9 @@ services:
       - JWT_SECRET=${JWT_SECRET:-}
       - GOOSE_URL=${GOOSE_URL:-http://goose:30132}
       - GOOSE_SECRET_KEY=${GOOSE_SECRET_KEY:-sk-1234}
+      - MINIO_URL=${MINIO_URL:-http://minio-service:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-}
       - VIBE_GITHUB_ENABLED=${VIBE_GITHUB_ENABLED:-false}
       - VIBE_GITHUB_TOKEN=${VIBE_GITHUB_TOKEN:-}
       - EUREKA_ENABLED=true

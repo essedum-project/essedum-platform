@@ -126,6 +126,11 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 						taskId = jobMetaData.getString("taskId");
 					}
 					logger.info(" taskId value {} ", taskId);
+					if (taskId == null || taskId.isEmpty()) {
+						// Job not yet submitted to remote executor — do not mark as ERROR
+						logger.warn("taskId not set yet for job {} — skipping remote status check", job.getJobId());
+						return job;
+					}
 					Boolean executeEnable = jobExecutorEnabled;
 					if (jobExecutorEnabled) {
 						executeEnable = jobExecutorEnabled;
@@ -136,6 +141,26 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 					if (jobExecutorEnabled || Objects.nonNull(taskId)) {
 						logger.info("Getting the task status");
 						org.json.JSONObject responseObj = remoteJob.getTaskStatus(taskId, connDetails);
+						if (!responseObj.has("task_status")) {
+							// pyjob-executor returned 404 — this pod doesn't know about the task (multi-pod
+							// load balancing). The job WAS submitted (taskId is set) so it is running somewhere.
+							// Set status to RUNNING so the UI shows the correct badge instead of blank/OPEN.
+							String currentStatus = job.getJobStatus();
+							boolean isTerminal = currentStatus != null && (
+									currentStatus.equalsIgnoreCase("COMPLETED") ||
+									currentStatus.equalsIgnoreCase("ERROR") ||
+									currentStatus.equalsIgnoreCase("CANCELLED") ||
+									currentStatus.equalsIgnoreCase("RUNNING"));
+							if (!isTerminal) {
+								logger.info("task_status missing for taskId {} — marking RUNNING (submitted, non-terminal)", taskId);
+								job.setJobStatus("RUNNING");
+								job2save.setJobStatus("RUNNING");
+								iCIPJobsRepository.save(job2save);
+							} else {
+								logger.warn("task_status missing for taskId {} — current status={}, skipping update", taskId, currentStatus);
+							}
+							return job;
+						}
 						status = responseObj.get("task_status").toString();
 						logger.info("Status fetched is " + status);
 						org.json.JSONObject logs = null;
@@ -143,17 +168,38 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 							org.json.JSONObject res = remoteJob.getLog(jobMetaData.getString("taskId"), connDetails);
 							logger.info("Log response fetched is " + res);
 							logs = new org.json.JSONObject(res.get("logs").toString());
+							// pyjob-executor has multiple pods; only the pod that ran the task has log.txt.
+							// Retry up to 5 times to maximise the chance of hitting the right pod.
+							if (logs.has("content") && "Log not found".equalsIgnoreCase(logs.getString("content").trim())) {
+								for (int attempt = 1; attempt <= 5; attempt++) {
+									logger.info("getLog retry {}/5 for taskId={} status={}", attempt, taskId, status);
+									try {
+										org.json.JSONObject retryRes = remoteJob.getLog(taskId, connDetails);
+										org.json.JSONObject retryLogs = new org.json.JSONObject(retryRes.get("logs").toString());
+										if (retryLogs.has("content") && !"Log not found".equalsIgnoreCase(retryLogs.getString("content").trim())) {
+											logs = retryLogs;
+											break;
+										}
+									} catch (Exception retryEx) {
+										logger.warn("getLog retry {} failed for taskId {}: {}", attempt, taskId, retryEx.getMessage());
+										break;
+									}
+								}
+							}
 							logger.info("logs fetched is " + logs.length());
 						}
 						switch (status) {
 						case "RUNNING":
+							// Update status in DB so the UI shows RUNNING instead of the initial OPEN/STARTED
+							job.setJobStatus("RUNNING");
+							job2save.setJobStatus("RUNNING");
+							iCIPJobsRepository.save(job2save);
 							if (job != null && writer != null && logs != null) {
 								String response1 = readLogsandWriteToLogFile(job, logs, writer, status);
-								return job;
 							} else {
-								logger.error("Job or writer is null during RUNNING status.");
-								return job;
+								logger.info("Logs not fetched yet for RUNNING job — status updated in DB.");
 							}
+							return job;
 						case "Submitted":
 							return job;
 						case "COMPLETED":
@@ -318,11 +364,7 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 			iCIPJobsRepository.save(job2save);
 			job.setJobStatus("ERROR");
 			job.setFinishtime(new Timestamp(System.currentTimeMillis()));
-			try {
-				writer.write(error.getBytes());
-			} catch (IOException e) {
-				logger.error("Exception", e.getMessage());
-			}
+			logger.error(error);
 
 		} catch (Exception e2) {
 			String error = "Error in Job Execution : " + e2.getMessage();
@@ -331,11 +373,7 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 			iCIPJobsRepository.save(job2save);
 			job.setJobStatus("ERROR");
 			job.setFinishtime(new Timestamp(System.currentTimeMillis()));
-			try {
-				writer.write(error.getBytes());
-			} catch (IOException e) {
-				logger.error("Exception", e.getMessage());
-			}
+			logger.error(error);
 		}
 
 		return job;
@@ -370,28 +408,16 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 
 			if (status.equalsIgnoreCase("error")) {
 				String logs = outputLog.getString("content");
-				if (logs != null && "Log not found".equals(logs)) {
-					writer.write(
-							"Logs Not found.Issue with Job executor.Please re-run the pipeline with the same or diffrent executor"
-									.getBytes());
-					return "success";
-				} else if (logs.isEmpty() || logs == null) {
-					writer.write(
-							"No Logs Available.Could be issue with job executor while running. Please re-run the pipeline with the same or diffrent executor"
-									.getBytes());
+				if (logs == null || logs.isEmpty() || "Log not found".equalsIgnoreCase(logs.trim())) {
+					// Log file not ready yet — leave file empty so findByJobIdWithLog retries via getLog
+					logger.warn("pyjob-executor returned no logs for ERROR job — file left empty for retry");
 					return "success";
 				}
 			} else if (status.equalsIgnoreCase("completed")) {
 				String logs = outputLog.getString("content");
-				if (logs != null && "Log not found".equals(logs)) {
-					writer.write(
-							"The job was executed successfully, but logs were not found. Please re-run the pipeline"
-									.getBytes());
-					return "success";
-				} else if (logs.isEmpty() || logs == null) {
-					writer.write(
-							"The job was executed successfully, but the executor could not generate logs at this time. Please re-run the pipeline."
-									.getBytes());
+				if (logs == null || logs.isEmpty() || "Log not found".equalsIgnoreCase(logs.trim())) {
+					// Log file not ready yet — leave file empty so findByJobIdWithLog retries via getLog
+					logger.warn("pyjob-executor returned no logs for COMPLETED job — file left empty for retry");
 					return "success";
 				}
 			}

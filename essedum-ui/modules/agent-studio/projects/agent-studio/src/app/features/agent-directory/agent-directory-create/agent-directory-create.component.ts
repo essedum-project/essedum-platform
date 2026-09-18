@@ -10,9 +10,11 @@ import {
   MatDialogRef,
   MatDialog,
 } from '@angular/material/dialog';
+import { HttpClient } from '@angular/common/http';
 import { Services, EventBusService } from '@essedum/shared-lib';
 import { Router } from '@angular/router';
 import { AgentDirectoryService } from '../agent-directory.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
     selector: 'app-agent-directory-create',
@@ -36,6 +38,20 @@ export class AgentDirectoryCreateComponent implements OnInit {
   organization = '';
   pipelineMode: any;
 
+  // LLM configuration fields
+  llmProvider = '';
+  llmModel = '';
+  llmProviders: Array<{ value: string; label: string }> = [
+    { value: 'ollama',       label: 'Ollama' },
+    { value: 'azure_openai', label: 'Azure OpenAI' },
+    { value: 'anthropic',    label: 'Anthropic' },
+  ];
+  llmModels: Array<{ value: string; label: string }> = [
+    { value: 'qwen3:4b',                    label: 'qwen3:4b' },
+    { value: 'gpt-4o-mini',                 label: 'gpt-4o-mini' },
+    { value: 'claude-3-5-sonnet-20241022',  label: 'claude-3.5-sonnet' },
+  ];
+
   constructor(
     public dialogRef: MatDialogRef<AgentDirectoryCreateComponent>,
     public dialog: MatDialog,
@@ -43,6 +59,7 @@ export class AgentDirectoryCreateComponent implements OnInit {
     private agentService: AgentDirectoryService,
     private router: Router,
     private eventBus: EventBusService,
+    private http: HttpClient,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     dialogRef.disableClose = true;
@@ -54,6 +71,7 @@ export class AgentDirectoryCreateComponent implements OnInit {
     this.loadAgentTypes();
     this.pipelineMode = this.mapTypeToInterfaceType(this.type);
     this.getAgentPipelineDetailsByType();
+    this.loadLiteLLMModels();
 
     if (this.data) {
       if (this.data.edit) {
@@ -99,7 +117,7 @@ export class AgentDirectoryCreateComponent implements OnInit {
         const currentDate = new Date().toISOString();
         const currentUser = sessionStorage.getItem('username') || 'admin';
 
-        const agentData = {
+        const agentData: any = {
           alias: this.name,
           organization: sessionStorage.getItem('organization'),
           interface_type: interfaceType,
@@ -117,30 +135,41 @@ export class AgentDirectoryCreateComponent implements OnInit {
           resources: [],
         };
 
-        // Call real API to create agent
-        this.agentService.saveAgentDirectory(agentData).subscribe(
-          (response) => {
-            // Cross-MFE event: integration MFE can subscribe to refresh agent pickers.
-            const agentId = response?.body?.id ?? response?.body?.name ?? agentData.alias;
-            this.eventBus.emit({ type: 'AGENT_DEPLOYED', payload: { agentId } });
-            this.responseLink.emit(response.body);
-            this.service.message(
-              'Agent Directory Created Successfully.',
-              'success'
-            );
-            this.dialogRef.close(response.body);
+        // Include LLM config if selected
+        if (this.llmProvider || this.llmModel) {
+          agentData['llm_config'] = { provider: this.llmProvider, model: this.llmModel };
+        }
 
-            if (!this.data?.edit) {
-              this.modalClosed.emit();
+        const doSave = () => {
+          this.agentService.saveAgentDirectory(agentData).subscribe(
+            (response) => {
+              const agentId = response?.body?.id ?? response?.body?.name ?? agentData.alias;
+              this.eventBus.emit({ type: 'AGENT_DEPLOYED', payload: { agentId } });
+              this.responseLink.emit(response.body);
+              this.service.message('Agent Directory Created Successfully.', 'success');
+              this.dialogRef.close(response.body);
+              if (!this.data?.edit) this.modalClosed.emit();
+            },
+            (error) => {
+              console.error('Error creating agent:', error);
+              this.service.message(error?.details || 'Failed to create agent directory', 'error');
             }
-          },
-          (error) => {
-            console.error('Error creating agent:', error);
-            const errorMessage =
-              error?.details || 'Failed to create agent directory';
-            this.service.message(errorMessage, 'error');
-          }
-        );
+          );
+        };
+
+        // Salus safety check on the description before saving
+        const salusUrl = (environment as any).salusUrl ?? '';
+        if (salusUrl && this.description.trim()) {
+          this.runSalusCheck(this.description, salusUrl).then(safe => {
+            if (!safe) {
+              this.service.message('Description flagged by Salus safety filter. Please revise.', 'error');
+              return;
+            }
+            doSave();
+          });
+        } else {
+          doSave();
+        }
       } else {
         this.errFlag = true;
       }
@@ -192,6 +221,47 @@ export class AgentDirectoryCreateComponent implements OnInit {
       (k >= 48 && k <= 57) ||
       [8, 9, 13, 16, 17, 20, 32, 95].indexOf(k) > -1
     );
+  }
+
+  /** Fetch models from LiteLLM and merge them into the llmModels dropdown. */
+  private loadLiteLLMModels(): void {
+    const litellmUrl = (environment as any).litellmUrl ?? '/litellm/';
+    if (!litellmUrl) return;
+    const url = `${litellmUrl.replace(/\/$/, '')}/v1/models`;
+    this.http.get<any>(url).subscribe({
+      next: (resp) => {
+        const data = resp?.data ?? resp?.models ?? resp ?? [];
+        if (!Array.isArray(data)) return;
+        const fetched = data
+          .map((m: any) => {
+            const id = m?.id ?? m?.model ?? m?.name ?? '';
+            return id ? { value: id, label: id } : null;
+          })
+          .filter(Boolean) as Array<{ value: string; label: string }>;
+        if (!fetched.length) return;
+        // Merge, deduplicating by value
+        const existing = new Set(this.llmModels.map(m => m.value));
+        const newModels = fetched.filter(m => !existing.has(m.value));
+        if (newModels.length) this.llmModels = [...this.llmModels, ...newModels];
+        // Add LiteLLM provider entry if not already present
+        if (!this.llmProviders.find(p => p.value === 'litellm')) {
+          this.llmProviders = [...this.llmProviders, { value: 'litellm', label: 'LiteLLM' }];
+        }
+      },
+      error: () => { /* keep hardcoded fallback silently */ },
+    });
+  }
+
+  /** Returns true if the text is safe (or Salus unreachable), false if flagged. */
+  private async runSalusCheck(text: string, salusUrl: string): Promise<boolean> {
+    try {
+      const url = `${salusUrl.replace(/\/$/, '')}/api/v1/scan`;
+      const resp = await this.http.post<any>(url, { text }).toPromise();
+      if (resp?.flagged === true || resp?.safe === false) return false;
+      return true;
+    } catch {
+      return true; // fail open
+    }
   }
 
   private getAgentPipelineDetailsByType(): void {
