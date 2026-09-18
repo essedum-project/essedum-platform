@@ -96,3 +96,52 @@
     }
   }
 }
+
+/* Loading overlay spinner */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(15, 23, 42, 0.95);
+  z-index: 10;
+  backdrop-filter: blur(2px);
+
+  p {
+    color: #cbd5e1;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(203, 213, 225, 0.2);
+  border-top-color: #4f8ef7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+:host-context(body.header-light-theme) .loading-overlay {
+  background: rgba(248, 250, 252, 0.95);
+
+  p {
+    color: #64748b;
+  }
+
+  .spinner {
+    border-color: rgba(71, 85, 105, 0.2);
+    border-top-color: #2563eb;
+  }
+}

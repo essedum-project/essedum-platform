@@ -14,15 +14,14 @@
         <div class="dialog-body">
             <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                 <mat-label>Name</mat-label>
-                <input matInput type="text" placeholder="Enter Name..."
-                    [(ngModel)]="name" (keypress)="omit_special_char($event)" required />
+                <input matInput type="text" placeholder="Enter Name..." [(ngModel)]="name"
+                    (keypress)="omit_special_char($event)" required />
                 <mat-error *ngIf="errFlag && !name">This field is required</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                 <mat-label>Type</mat-label>
-                <mat-select [(ngModel)]="type" (selectionChange)="changeType()"
-                    placeholder="Select Type" required>
+                <mat-select [(ngModel)]="type" (selectionChange)="changeType()" placeholder="Select Type" required>
                     <mat-option *ngFor="let option of options" [value]="option.value">
                         {{ option.viewValue }}
                     </mat-option>
@@ -41,8 +40,27 @@
 
             <mat-form-field appearance="fill" class="full-width" floatLabel="always">
                 <mat-label>Description</mat-label>
-                <input matInput type="text" placeholder="Enter Description..."
-                    [(ngModel)]="description" />
+                <input matInput type="text" placeholder="Enter Description..." [(ngModel)]="description" />
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                <mat-label>LLM Provider</mat-label>
+                <mat-select [(ngModel)]="llmProvider" placeholder="Select LLM Provider...">
+                    <mat-option value="">None</mat-option>
+                    <mat-option *ngFor="let p of llmProviders" [value]="p.value">
+                        {{ p.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="full-width" floatLabel="always">
+                <mat-label>LLM Model</mat-label>
+                <mat-select [(ngModel)]="llmModel" placeholder="Select LLM Model...">
+                    <mat-option value="">None</mat-option>
+                    <mat-option *ngFor="let m of llmModels" [value]="m.value">
+                        {{ m.label }}
+                    </mat-option>
+                </mat-select>
             </mat-form-field>
 
             <mat-error *ngIf="errFlag" class="global-error">Please provide the required fields.</mat-error>

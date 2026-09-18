@@ -17,15 +17,24 @@ import { toast } from 'sonner';
 import { LABELS } from '../../lib/labels';
 import { llmService, SUPPORTED_PROVIDERS } from '../../services/llmService';
 
+// Node types whose model list is fetched live from the backend /llm/models endpoint.
+const LLM_NODE_DEFAULT_PROVIDER: Record<string, string> = {
+  'ollama-llm': 'ollama',
+  'litellm-llm': 'litellm',
+};
+
 export function NodeInspector() {
   const { nodes, selectedNodeId, updateNodeConfig, updateNodeLabel, deleteNode, duplicateNode } = useFlowStore();
   const node = nodes.find((n) => n.id === selectedNodeId);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
-  // LLM-specific: dynamic model list (Ollama only for now)
-  const isLlmNode = node?.data.definition.type === 'ollama-llm';
-  const llmProvider = isLlmNode ? String(node!.data.config.llm_provider ?? 'ollama') : 'ollama';
+  // LLM-specific: dynamic model list (providers exposing a /models endpoint)
+  const nodeDefaultProvider = LLM_NODE_DEFAULT_PROVIDER[node?.data.definition.type ?? ''];
+  const isLlmNode = Boolean(nodeDefaultProvider);
+  const llmProvider = isLlmNode
+    ? String(node!.data.config.llm_provider ?? nodeDefaultProvider)
+    : 'ollama';
   const [llmModels, setLlmModels] = useState<string[]>([]);
   const [llmModelsLoading, setLlmModelsLoading] = useState(false);
 
@@ -252,8 +261,8 @@ export function NodeInspector() {
       <ScrollArea className="flex-1">
         <div className="px-3 py-2 space-y-1">
 
-          {/* ── LLM API section: provider + dynamic model picker (Ollama only) ── */}
-          {definition.type === 'ollama-llm' && (
+          {/* ── LLM API section: provider + dynamic model picker ── */}
+          {isLlmNode && (
             <div>
               <div className="py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 LLM API
@@ -263,7 +272,7 @@ export function NodeInspector() {
                 <div className="space-y-1">
                   <Label className="text-[11px] text-foreground font-medium">Provider</Label>
                   <Select
-                    value={String(config.llm_provider ?? 'ollama')}
+                    value={llmProvider}
                     onValueChange={(v) => updateField('llm_provider', v)}
                   >
                     <SelectTrigger className="h-8 text-xs bg-background">
@@ -303,8 +312,8 @@ export function NodeInspector() {
           )}
 
           {Object.entries(groups).map(([group, fields]) => {
-            // For Ollama nodes, the 'model' field is handled by the LLM API section above
-            const visibleFields = definition.type === 'ollama-llm'
+            // The 'model' field is rendered by the LLM API section above
+            const visibleFields = isLlmNode
               ? fields.filter((f) => f.id !== 'model')
               : fields;
             if (visibleFields.length === 0) return null;
