@@ -885,6 +885,62 @@ def handle_pipeline_trigger(data):
 
             log_to_client(f"App deployed internally at: {internal_dns_url}", step="COMPLETE")
 
+            # --- STEP 8b: STREAM THE DEPLOYED CONTAINER'S RUNTIME LOGS ---
+            # The pipeline script runs at container start and can take a while
+            # (dependency install, data load, compute). A single early snapshot
+            # would be empty, so poll the pod logs for a bounded window and stream
+            # only newly-appended lines — this surfaces the script's own output.
+            try:
+                pod_name = None
+                for _ in range(15):  # wait up to ~30s for a running pod
+                    pods = k8s_core.list_namespaced_pod(
+                        namespace=target_namespace, label_selector=f"app={deploy_name}"
+                    )
+                    running = [p for p in pods.items if (p.status and p.status.phase == "Running")]
+                    if running:
+                        pod_name = running[0].metadata.name
+                        break
+                    socketio.sleep(2)
+                if pod_name:
+                    log_to_client("--- Application logs ---", step="APP_LOG")
+                    sent = 0
+                    idle_polls = 0
+                    for _ in range(40):  # up to ~120s of runtime logs
+                        try:
+                            raw = k8s_core.read_namespaced_pod_log(
+                                name=pod_name, namespace=target_namespace, tail_lines=2000
+                            )
+                        except Exception:
+                            raw = ""
+                        if isinstance(raw, bytes):
+                            raw = raw.decode("utf-8", "replace")
+                        raw = raw or ""
+                        # The k8s client returns the string "b''" (repr of empty
+                        # bytes) when the pod has produced no logs yet — treat as empty
+                        # so we keep polling until the script actually prints.
+                        if raw.strip() in ("b''", 'b""'):
+                            raw = ""
+                        lines = raw.splitlines()
+                        if len(lines) > sent:
+                            for line in lines[sent:]:
+                                socketio.emit("build_log", {"log": line})
+                            sent = len(lines)
+                            idle_polls = 0
+                            # Stop once the wrapper signals the script finished.
+                            if any("Pipeline script completed." in ln for ln in lines):
+                                break
+                        else:
+                            idle_polls += 1
+                            # No new output for a few polls -> script finished or errored & idling.
+                            if sent > 0 and idle_polls >= 3:
+                                break
+                        socketio.sleep(3)
+                    if sent == 0:
+                        socketio.emit("build_log", {"log": "(no application output captured yet)"})
+                    log_to_client("--- End of application logs ---", step="APP_LOG")
+            except Exception as _log_err:
+                log_to_client(f"(Could not fetch application logs: {_log_err})", step="APP_LOG")
+
             emit('pipeline_status', {
                 'status': 'SUCCESS',
                 'url': internal_dns_url,

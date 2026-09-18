@@ -2,7 +2,8 @@
 # Uses SQLite (aiosqlite) instead of PostgreSQL
 
 # Web framework
-fastapi>=0.111.0
+fastapi>=0.141.0
+starlette>=1.0.1          # fixes CVE-2026-48710 (Host header auth bypass)
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
 h11==0.14.0

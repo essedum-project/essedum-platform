@@ -3,7 +3,7 @@
     <mat-icon class="sparkle">auto_awesome</mat-icon>
     <div>
       <h2>New Data Pipeline</h2>
-      <p>Generate a typed, runnable Python pipeline in four guided steps.</p>
+      <p>Generate a typed, runnable Python pipeline in three guided steps.</p>
     </div>
   </div>
   <div class="header-actions">
@@ -184,26 +184,31 @@
             </mat-chip-option>
           </mat-chip-listbox>
         </div>
+
+        <!-- Container fields — shown only when container-executor is selected -->
+        <ng-container *ngIf="executionForm.value.executor === 'container-executor'">
+          <mat-divider class="my-3"></mat-divider>
+          <h4 class="step-subtitle"><mat-icon>inventory_2</mat-icon> Container Configuration</h4>
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Custom Docker Image (optional — leave blank to auto-build)</mat-label>
+            <input matInput formControlName="containerImage" placeholder="myregistry.io/my-pipeline:latest">
+            <mat-hint>If blank, the pipeline code will be automatically built into a new image.</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full">
+            <mat-label>Container Registry URL (optional)</mat-label>
+            <input matInput formControlName="containerRegistry" placeholder="https://myregistry.azurecr.io">
+          </mat-form-field>
+        </ng-container>
+
         <div class="step-actions">
           <button mat-button matStepperPrevious>Back</button>
-          <button mat-flat-button color="primary" matStepperNext [disabled]="executionForm.invalid">Next</button>
+          <button mat-flat-button color="primary"
+                  [disabled]="creating || identityForm.invalid || sourceForm.invalid || executionForm.invalid"
+                  (click)="createPipeline()">
+            <mat-icon>auto_awesome</mat-icon>&nbsp;Create Pipeline
+          </button>
         </div>
       </form>
-    </mat-step>
-
-    <!-- Step 4: Git -->
-    <mat-step label="Git">
-      <app-git-link-step [initialValue]="gitLink"
-                         (valueChange)="onGitLinkChange($event)"
-                         (validityChange)="onGitValidity($event)"></app-git-link-step>
-      <div class="step-actions">
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-flat-button color="primary"
-                [disabled]="creating || identityForm.invalid || sourceForm.invalid || executionForm.invalid"
-                (click)="createPipeline()">
-          <mat-icon>auto_awesome</mat-icon>&nbsp;Create Pipeline
-        </button>
-      </div>
     </mat-step>
 
   </mat-stepper>

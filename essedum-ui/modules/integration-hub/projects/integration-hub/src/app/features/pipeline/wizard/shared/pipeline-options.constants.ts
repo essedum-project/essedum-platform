@@ -37,7 +37,15 @@ export const EXECUTORS = [
   { value: 'py-job-azure-executer',     label: 'py-job-azure-executer',     description: 'Azure ML job executor' },
   { value: 'py-job-sagemaker-executer', label: 'py-job-sagemaker-executer', description: 'AWS SageMaker job executor' },
   { value: 'py-job-vertex-executer',    label: 'py-job-vertex-executer',    description: 'GCP Vertex AI job executor' },
+  { value: 'container-executor',        label: 'Container Executor',        description: 'Build and deploy as a Docker container on Kubernetes' },
 ];
+
+export interface ContainerConfig {
+  containerImage?: string;
+  containerRegistry?: string;
+  containerEnvVars?: { name: string; value: string }[];
+  useGpu?: boolean;
+}
 
 export const FALLBACK_SLM_BASE_MODELS = [
   'meta-llama/Llama-3.2-1B', 'meta-llama/Llama-3.2-3B',

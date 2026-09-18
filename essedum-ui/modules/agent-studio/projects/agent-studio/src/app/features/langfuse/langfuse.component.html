@@ -7,6 +7,13 @@
     frameborder="0"
     allow="fullscreen; microphone; camera">
   </iframe>
+  
+  <!-- Loading spinner shown while iframe loads -->
+  <div *ngIf="isUrlConfigured && !isIframeLoaded" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading Langfuse...</p>
+  </div>
+  
   <div *ngIf="!isUrlConfigured" class="not-configured">
     <div class="not-configured-icon">
       <i class="bi bi-bar-chart-line-fill"></i>
