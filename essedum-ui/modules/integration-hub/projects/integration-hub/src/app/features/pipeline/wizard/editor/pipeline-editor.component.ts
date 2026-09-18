@@ -390,6 +390,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       try { this.containerSocket.disconnect(); } catch (e) {}
       this.containerSocket = null;
     }
+  }
   // ─── Model path detection after a successful run ──────────────────────
   private startModelPathPolling(): void {
     this.stopModelPathPolling();
