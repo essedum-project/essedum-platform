@@ -5,16 +5,6 @@
 
 
       <div class="container">
-        <div class="card-header-left">
-          <div class="data-count" *ngIf="!itsm">
-            <span>Rows : {{ datasetsCount }} &nbsp;</span>
-            <span>Selected : {{ selectedDatasetsCount }}</span>
-          </div>
-          <div class="data-count" *ngIf="itsm">
-            <span>Incidents : {{ datasetsCount }}</span>
-            <span>Selected : {{ selectedDatasetsCount }}</span>
-          </div>
-        </div>
         <div class="card-header" *ngIf="!pipelineData">
           <!-- <mat-form-field appearance="fill" style="width: 200px">
               <mat-label>Highlight</mat-label>
@@ -126,6 +116,9 @@
               </div>
             </div>
           </mat-menu>
+          <button mat-icon-button [matMenuTriggerFor]="overflowMenu" title="Choose Columns and Styles">
+            <mat-icon class="lfx-icon-hover">more_vert</mat-icon>
+          </button>
         </div>
       </div>
 
