@@ -78,6 +78,11 @@ export class ConfigTabComponent {
       { label: 'Batch size',   value: a.batchSize },
       { label: 'Learning rate', value: a.lr },
       { label: 'Git repo',     value: a.git?.repo },
+      { label: 'Git branch',   value: a.git?.branch },
+      { label: 'File path',    value: a.git?.filePath },
+      { label: 'Container image',    value: a.containerImage },
+      { label: 'Container registry', value: a.containerRegistry },
+      { label: 'GPU requested',      value: a.useGpu === true ? 'Yes' : undefined },
     ];
     return base.filter(r => r.value !== undefined && r.value !== '');
   }
