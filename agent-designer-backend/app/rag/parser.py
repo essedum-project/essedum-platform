@@ -1,16 +1,16 @@
 """
 Document parsers for supported file types.
-Supported: PDF (PyMuPDF), DOCX, TXT, CSV, HTML, JSON.
+Supported: PDF (pdfminer.six), DOCX, TXT, CSV, HTML, JSON.
 """
 
 from pathlib import Path
 
 
 def parse_pdf(content: bytes) -> str:
-    import fitz  # PyMuPDF
+    import io
+    from pdfminer.high_level import extract_text
 
-    doc = fitz.open(stream=content, filetype="pdf")
-    return "\n".join(page.get_text() for page in doc)
+    return extract_text(io.BytesIO(content))
 
 
 def parse_docx(content: bytes) -> str:

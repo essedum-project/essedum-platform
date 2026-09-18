@@ -1,12 +1,13 @@
 flask
-mysql-connector-python
-sagemaker
+pymysql[rsa]
 minio
 flask_swagger_ui
 dateutils
 gitpython
 psutil
+requests
 gradio
+httpx!=0.28.1
 pandas
 pmdarima
 dotenv
