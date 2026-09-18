@@ -1,0 +1,63 @@
+<h2 mat-dialog-title class="dialog-title">Review changes before push</h2>
+
+<mat-dialog-content class="save-push-dialog-content">
+  <section class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-label">Username</span>
+      <span class="summary-value">{{ data.username }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Repo</span>
+      <span class="summary-value">{{ data.repoName }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Branch</span>
+      <span class="summary-value">{{ data.branch }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">Source</span>
+      <span class="summary-value">{{ data.sourceLabel }}</span>
+    </div>
+  </section>
+
+  <section class="files-section">
+    <div class="section-heading">Changed files</div>
+
+    <div class="empty-state" *ngIf="!data.changedFiles.length">
+      No pending file changes were detected.
+    </div>
+
+    <div class="files-list" *ngIf="data.changedFiles.length">
+      <div class="file-row" *ngFor="let file of data.changedFiles">
+        <div class="file-row-header">
+          <span class="file-path">{{ file.path }}</span>
+          <span class="status-pill" [ngClass]="'status-' + file.status">{{ file.status | titlecase }}</span>
+        </div>
+        <div class="file-row-meta">
+          {{ file.changedLines || 0 }} changed line(s)
+        </div>
+        <pre class="file-preview" *ngIf="file.preview">{{ file.preview }}</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="commit-section">
+    <label class="commit-label" for="commitMessage">Custom commit message</label>
+    <input id="commitMessage"
+           type="text"
+           [(ngModel)]="commitMessage"
+           placeholder="Write a custom commit message"
+           spellcheck="false" />
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button
+          color="primary"
+          type="button"
+          (click)="confirm()"
+          [disabled]="!commitMessage.trim()">
+    Save &amp; Push
+  </button>
+</mat-dialog-actions>

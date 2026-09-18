@@ -165,6 +165,7 @@ export class GitLinkStepLocalComponent implements OnInit {
         this.isLoading = false;
         this.isAuthenticated = status.authenticated;
         if (status.authenticated) {
+          this.githubService.cacheClientAuth(status);
           this.username = status.githubUsername || status.username || '';
           this.loadRepositories();
         }
@@ -188,6 +189,7 @@ export class GitLinkStepLocalComponent implements OnInit {
                 clearInterval(pollInterval);
                 this.isLoading = false;
                 this.isAuthenticated = true;
+                this.githubService.cacheClientAuth(status);
                 this.username = status.githubUsername || status.username || '';
                 this.loadRepositories();
               }
@@ -220,6 +222,7 @@ export class GitLinkStepLocalComponent implements OnInit {
         this.branches = [];
         this.repoCtrl.reset();
         this.branchCtrl.reset();
+        this.githubService.clearClientGitSession();
         this.validityChange.emit(false);
       },
       error: () => {

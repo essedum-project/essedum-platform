@@ -1,0 +1,261 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// CSS design tokens — dark defaults
+// ══════════════════════════════════════════════════════════════════════════════
+:host {
+  --git-info-bg:            linear-gradient(180deg, rgba(18, 26, 38, 0.96), rgba(11, 17, 27, 0.94));
+  --git-info-border:        rgba(96, 165, 250, 0.16);
+  --git-info-shadow:        0 14px 34px rgba(0, 0, 0, 0.22);
+  --git-info-icon-color:    #7cc0ff;
+  --git-info-title-color:   #bfdbfe;
+  --git-card-bg:            rgba(15, 23, 35, 0.78);
+  --git-card-border:        rgba(148, 163, 184, 0.14);
+  --git-session-accent:     #38bdf8;
+  --git-code-bg:            rgba(59, 130, 246, 0.12);
+  --git-code-border:        rgba(96, 165, 250, 0.16);
+  --git-code-color:         #d7ebff;
+  --git-branch-code-bg:     rgba(34, 197, 94, 0.12);
+  --git-branch-code-border: rgba(34, 197, 94, 0.16);
+  --git-branch-code-color:  #baf4c3;
+  --git-check-color:        #4ade80;
+  --git-badge-none-bg:      rgba(148, 163, 184, 0.1);
+  --git-badge-none-color:   #9fb0c6;
+  --git-badge-none-border:  rgba(148, 163, 184, 0.18);
+  --git-badge-protected-bg: rgba(245, 158, 11, 0.12);
+  --git-badge-protected-color: #ffd089;
+  --git-badge-protected-border: rgba(245, 158, 11, 0.24);
+  --git-pr-open-bg:         rgba(34, 197, 94, 0.14);
+  --git-pr-open-color:      #cbffd3;
+  --git-pr-open-border:     rgba(34, 197, 94, 0.24);
+  --git-pr-merged-bg:       rgba(168, 85, 247, 0.14);
+  --git-pr-merged-color:    #eed5ff;
+  --git-pr-merged-border:   rgba(168, 85, 247, 0.24);
+  --git-text-color:         #eff6ff;
+  --git-muted-color:        #8ea7c5;
+}
+
+// ── Light theme overrides ─────────────────────────────────────────────────────
+// Use SOLID (opaque) colors — the parent .file-editor-container has a dark bg
+// so semi-transparent values will bleed through even in light mode.
+:host-context(body.header-light-theme) {
+  --git-info-bg:              linear-gradient(180deg, #f8fbff, #edf2f8);
+  --git-info-border:          #d0d7de;
+  --git-info-shadow:          0 10px 24px rgba(15, 23, 42, 0.08);
+  --git-info-icon-color:      #0550ae;
+  --git-info-title-color:     #0550ae;
+  --git-card-bg:              #f6f8fa;
+  --git-card-border:          #d8dee4;
+  --git-session-accent:       #0550ae;
+  --git-code-bg:              rgba(5, 80, 174, 0.08);
+  --git-code-border:          rgba(5, 80, 174, 0.14);
+  --git-code-color:           #0550ae;
+  --git-branch-code-bg:       rgba(26, 127, 55, 0.08);
+  --git-branch-code-border:   rgba(26, 127, 55, 0.14);
+  --git-branch-code-color:    #1a7f37;
+  --git-check-color:          #1a7f37;
+  --git-badge-none-bg:        rgba(87, 96, 106, 0.08);
+  --git-badge-none-color:     #57606a;
+  --git-badge-none-border:    rgba(87, 96, 106, 0.14);
+  --git-badge-protected-bg:   rgba(191, 135, 0, 0.1);
+  --git-badge-protected-color: #9a6700;
+  --git-badge-protected-border: rgba(191, 135, 0, 0.22);
+  --git-pr-open-bg:           rgba(26, 127, 55, 0.1);
+  --git-pr-open-color:        #1a7f37;
+  --git-pr-open-border:       rgba(26, 127, 55, 0.2);
+  --git-pr-merged-bg:         rgba(130, 80, 223, 0.1);
+  --git-pr-merged-color:      #8250df;
+  --git-pr-merged-border:     rgba(130, 80, 223, 0.2);
+  --git-text-color:           #1f2328;
+  --git-muted-color:          #57606a;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Panel
+// ══════════════════════════════════════════════════════════════════════════════
+.git-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--git-info-bg);
+  border: 1px solid var(--git-info-border);
+  border-radius: 12px;
+  margin: 6px 0;
+  box-shadow: none;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.9;
+  }
+
+  &__icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--git-info-icon-color);
+  }
+
+  &__title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--git-info-title-color);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 6px;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Cards
+// ══════════════════════════════════════════════════════════════════════════════
+.git-info-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0px 10px;
+  background: var(--git-card-bg);
+  border: 1px solid var(--git-card-border);
+  border-radius: 10px;
+  color: var(--git-text-color);
+  min-width: 0;
+  min-height: 50px;
+
+  &--session {
+    border-left: 2px solid var(--git-session-accent);
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    color: var(--git-muted-color);
+  }
+
+  &__value {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--git-text-color);
+    line-height: 1.35;
+  }
+
+  &__value--text {
+    word-break: break-word;
+  }
+
+  &__meta {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  &__code {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    padding: 3px 6px;
+    border: 1px solid var(--git-code-border);
+    background: var(--git-code-bg);
+    color: var(--git-code-color);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    word-break: break-all;
+
+    &--branch {
+      background: var(--git-branch-code-bg);
+      border-color: var(--git-branch-code-border);
+      color: var(--git-branch-code-color);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Misc elements
+// ══════════════════════════════════════════════════════════════════════════════
+.git-info-spinner { flex-shrink: 0; }
+
+.git-info-check {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  color: var(--git-check-color);
+  flex-shrink: 0;
+}
+
+.git-info-status-text {
+  font-size: 10px;
+  color: var(--git-text-color);
+
+  &--muted {
+    opacity: 0.5;
+    font-style: italic;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Badges
+// ══════════════════════════════════════════════════════════════════════════════
+.git-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  font-size: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+
+  &--protected {
+    background: var(--git-badge-protected-bg);
+    color: var(--git-badge-protected-color);
+    border: 1px solid var(--git-badge-protected-border);
+  }
+}
+
+.pr-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  font-size: 10px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-weight: 700;
+
+  &--open {
+    background: var(--git-pr-open-bg);
+    color: var(--git-pr-open-color);
+    border: 1px solid var(--git-pr-open-border);
+  }
+
+  &--merged {
+    background: var(--git-pr-merged-bg);
+    color: var(--git-pr-merged-color);
+    border: 1px solid var(--git-pr-merged-border);
+  }
+
+  &--none {
+    background: var(--git-badge-none-bg);
+    color: var(--git-badge-none-color);
+    border: 1px solid var(--git-badge-none-border);
+  }
+}

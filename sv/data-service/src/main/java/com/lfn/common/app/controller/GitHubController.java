@@ -26,36 +26,37 @@ public class GitHubController {
     private GitHubOAuthService oauthService;
 
     /**
-     * Get token from either Authorization header or session
+     * Get token from X-GitHub-Token header (stateless, AKS-safe), Authorization header (PAT), or in-memory session fallback.
      */
-    private String getToken(@RequestHeader(value = "Authorization", required = false) String authHeader,
-                           HttpSession session) {
-        // First try Authorization header (for PAT-based auth)
+    private String getToken(String githubTokenHeader,
+                            @RequestHeader(value = "Authorization", required = false) String authHeader,
+                            HttpSession session) {
+        // 1. Stateless path: frontend sends token it received from OAuth callback postMessage
+        if (githubTokenHeader != null && !githubTokenHeader.isBlank() && githubTokenHeader.startsWith("gh")) {
+            log.info("Using GitHub token from X-GitHub-Token header (stateless)");
+            return githubTokenHeader;
+        }
+
+        // 2. Authorization header with a GitHub PAT/OAuth token
         if (authHeader != null && !authHeader.isEmpty()) {
             String token = authHeader.replace("Bearer ", "").trim();
-
-            // Check if this is a GitHub token (starts with gh*)
-            // GitHub tokens: ghp_ (PAT), gho_ (OAuth), ghs_ (server), ghu_ (user)
             if (token.startsWith("gh")) {
                 log.info("Using GitHub token from Authorization header");
                 return token;
             }
-
-            // If not a GitHub token, ignore it and try session
-            log.debug("Authorization header contains non-GitHub token (app JWT?), checking OAuth storage instead");
+            log.debug("Authorization header contains non-GitHub token (app JWT), checking OAuth storage");
         }
 
-        // Fall back to session-based OAuth token
-        // Get authenticated username from JWT
+        // 3. Fall back to server-side in-memory lookup (local dev / single-pod)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
             try {
                 String sessionToken = oauthService.getAccessToken(username);
-                log.info("Using GitHub OAuth token for user: {}", username);
+                log.info("Using GitHub OAuth token from in-memory store for user: {}", username);
                 return sessionToken;
             } catch (Exception e) {
-                log.debug("No OAuth token found for user: {}", username);
+                log.debug("No OAuth token found in memory for user: {}", username);
             }
         }
 
@@ -113,28 +114,31 @@ public class GitHubController {
 
     @GetMapping("/repos")
     public ResponseEntity<List<GitHubRepoInfo>> getRepositories(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             HttpSession session) throws Exception {
-        String cleanToken = getToken(token, session);
+        String cleanToken = getToken(githubToken, token, session);
         return ResponseEntity.ok(gitHubIntegrationService.fetchRepositories(cleanToken));
     }
 
     @GetMapping("/branches")
     public ResponseEntity<List<String>> getBranches(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam("repo") String repo,
             HttpSession session) throws Exception {
-        String cleanToken = getToken(token, session);
+        String cleanToken = getToken(githubToken, token, session);
         return ResponseEntity.ok(gitHubIntegrationService.fetchBranches(cleanToken, repo));
     }
 
     @GetMapping("/collaborators")
     public ResponseEntity<List<GitHubCollaboratorInfo>> getCollaborators(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestParam("repo") String repo,
             HttpSession session) {
         try {
-            String cleanToken = getToken(token, session);
+            String cleanToken = getToken(githubToken, token, session);
             return ResponseEntity.ok(gitHubIntegrationService.fetchRepositoryCollaborators(cleanToken, repo));
         } catch (Exception e) {
             log.error("Error fetching collaborators for repo: {}", repo, e);
@@ -144,11 +148,12 @@ public class GitHubController {
 
     @PostMapping("/push")
     public ResponseEntity<String> pushToGitHub(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody PushRequest request,
             HttpSession session) throws Exception {
-        String cleanToken = getToken(token, session);
+        String cleanToken = getToken(githubToken, token, session);
 
         // Get username from OAuth if not provided
         if (username == null || username.isEmpty()) {
@@ -161,14 +166,14 @@ public class GitHubController {
 
     @PostMapping("/verify-token")
     public ResponseEntity<Boolean> verifyToken(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             HttpSession session) {
         try {
-            String cleanToken = getToken(token, session);
+            String cleanToken = getToken(githubToken, token, session);
             boolean isValid = gitHubIntegrationService.verifyToken(cleanToken);
             return ResponseEntity.ok(isValid);
         } catch (GitHubAuthenticationException e) {
-            // For verify-token endpoint, return false instead of throwing exception
             log.debug("Token verification failed: {}", e.getMessage());
             return ResponseEntity.ok(false);
         }
@@ -176,12 +181,13 @@ public class GitHubController {
 
     @PostMapping("/pull")
     public ResponseEntity<PullResponse> pullFromGitHub(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody PullRequest request,
             HttpSession session) {
         try {
-            String cleanToken = getToken(token, session);
+            String cleanToken = getToken(githubToken, token, session);
 
             // Get username from OAuth if not provided
             if (username == null || username.isEmpty()) {
@@ -198,12 +204,13 @@ public class GitHubController {
 
     @PostMapping("/push-branch-to-branch")
     public ResponseEntity<BranchPushResponse> pushBranchToBranch(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody BranchPushRequest request,
             HttpSession session) {
         try {
-            String cleanToken = getToken(token, session);
+            String cleanToken = getToken(githubToken, token, session);
 
             // Get username from OAuth if not provided
             if (username == null || username.isEmpty()) {
@@ -237,12 +244,13 @@ public class GitHubController {
 
     @PostMapping("/create-pull-request")
     public ResponseEntity<CreatePullRequestResponse> createPullRequest(
+            @RequestHeader(value = "X-GitHub-Token", required = false) String githubToken,
             @RequestHeader(value = "Authorization", required = false) String token,
             @RequestHeader(value = "X-GitHub-Username", required = false) String username,
             @RequestBody CreatePullRequestRequest request,
             HttpSession session) {
         try {
-            String cleanToken = getToken(token, session);
+            String cleanToken = getToken(githubToken, token, session);
 
             // Get username from OAuth if not provided
             if (username == null || username.isEmpty()) {
