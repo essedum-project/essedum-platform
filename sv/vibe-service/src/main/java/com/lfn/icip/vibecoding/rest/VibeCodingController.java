@@ -22,9 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.lfn.icip.vibecoding.service.GooseMinioService;
 import com.lfn.icip.vibecoding.service.SalusService;
 import com.lfn.icip.vibecoding.service.SalusService.SalusResult;
 import com.lfn.icip.vibecoding.service.VibeCodingService;
+
+import java.util.List;
 
 /**
  * REST controller exposing the Goose API action-required, agent management,
@@ -43,6 +46,7 @@ public class VibeCodingController {
 
     private final VibeCodingService vibeCodingService;
     private final SalusService salusService;
+    private final GooseMinioService gooseMinioService;
 
     @Value("${vibe.azure.openai.endpoint}")
     private String azureOpenAiEndpoint;
@@ -61,10 +65,12 @@ public class VibeCodingController {
 
     @Value("${vibe.litellm.api-key:sk-1234}")
     private String litellmApiKey;
-
-    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService) {
+  
+    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService,
+                                GooseMinioService gooseMinioService) {
         this.vibeCodingService = vibeCodingService;
         this.salusService = salusService;
+        this.gooseMinioService = gooseMinioService;
     }
 
     // =========================================================================
@@ -90,7 +96,16 @@ public class VibeCodingController {
     public ResponseEntity<String> agentStart(
             @RequestBody Map<String, Object> request) {
         logger.info("Agent start request");
-        return vibeCodingService.post("/agent/start", request);
+        ResponseEntity<String> response = vibeCodingService.post("/agent/start", request);
+        // Retry once if goosed returned non-2xx or an empty session body (startup race condition).
+        if (response == null || !response.getStatusCode().is2xxSuccessful()
+                || response.getBody() == null || "{}".equals(response.getBody())) {
+            logger.warn("Agent start first attempt returned {} — retrying after 1 s",
+                    response != null ? response.getStatusCode() : "null");
+            try { Thread.sleep(1000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+            response = vibeCodingService.post("/agent/start", request);
+        }
+        return response;
     }
 
     @PostMapping(value = "/agent/stop",
@@ -208,7 +223,7 @@ public class VibeCodingController {
                 maxAttempts, lastResponse != null ? lastResponse.getStatusCode().value() : "null");
         return lastResponse != null ? lastResponse
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("{\"error\":\"update_provider exhausted all retries\"}");
+                  .body("{\"error\":\"update_provider exhausted all retries\"}");
     }
 
     @PostMapping(value = "/agent/update-session",
@@ -289,6 +304,29 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         logger.info("Agent import app request");
         return vibeCodingService.post("/agent/import_app", request);
+    }
+
+    /**
+     * Return every file Goose generated for a session, read directly from MinIO
+     * ({@code <bucket>/<prefix>/<sessionId>/...}). Replaces the previous
+     * list_apps + per-file call-tool round-trip for building the Vibe Studio
+     * file tree.
+     *
+     * @return a JSON array of {@code {path, content}} objects
+     */
+    @GetMapping(value = "/sessions/{sessionId}/files", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GooseMinioService.FileEntry>> sessionFiles(
+            @PathVariable(value = "sessionId") String sessionId) {
+        logger.info("Session files request from MinIO, session={}", sessionId);
+        try {
+            return ResponseEntity.ok(gooseMinioService.listSessionFiles(sessionId));
+        } catch (IllegalArgumentException ex) {
+            logger.warn("Invalid session id '{}': {}", sessionId, ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException ex) {
+            logger.error("Failed to fetch session files for '{}': {}", sessionId, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // =========================================================================
