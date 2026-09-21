@@ -22,11 +22,6 @@ import {
   ICIPAiAgentScript,
 } from './agent-pipeline.service';
 import { AiChatCoderService, AiChatFile, AiChatPushState } from './ai-chat-coder.service';
-import {
-  SavePushConfigDialogComponent,
-  SavePushConfigDialogData,
-  SavePushFileItem,
-} from './save-push-config-dialog/save-push-config-dialog.component';
 import { Subscription } from 'rxjs';
 import { StreamingServices } from '@essedum/shared-lib';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
@@ -35,26 +30,12 @@ import {
   DynamicSecretsGrid,
 } from '../native-script/pipeline.models';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
-import { GitHubService } from '../sharedModule/services/github.service';
-import {
-  PullOperationSummary,
-  PushRequest,
-  CreateBranchRequest,
-  CreateBranchResponse,
-  SessionBranchState,
-} from '../sharedModule/models/github.models';
-import {
-  SessionPrPromptDialogComponent,
-  SessionPrPromptDialogData,
-  SessionPrPromptDialogResult,
-} from './session-pr-prompt-dialog/session-pr-prompt-dialog.component';
 
 import { HttpClient, HttpParams } from '@angular/common/http';
 import pipelineConfig from './pipeline-config.json';
 import { OptionsDTO } from '@essedum/shared-lib';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { io, Socket } from 'socket.io-client';
-import { environment } from '../../../environments/environment';
 
 interface FileNode {
   name: string;
@@ -135,13 +116,11 @@ export interface AiChatMessage {
     standalone: false
 })
 export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy {
-  private readonly sessionBranchStateKeyPrefix = 'session_branch_state:';
   streamItem: StreamingServices;
   cardToggled: boolean = false;
   card: any;
   pipelineAlias: String;
   githubUsername: string = '';
-  private pipelineSessionScope = '';
 
   // API-related properties
   currentUserId: string = 'user123'; // Default user ID for testing
@@ -315,6 +294,12 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   deploymentStatusMessage: string = ''; // User-friendly status message for deployment
   isPlaygroundEnabled = false; // Enable playground only after successful deployment
   
+  // Agent Designer pipeline support
+  isAgentDesignerPipeline = false;
+  agentDesignerPipelineId = '';
+  agentDesignerFlowId = '';
+  private readonly AGENT_DESIGNER_API = '/mfe/agent-designer/api/v1';
+
   // LLM Selection and Prompt Template
   selectedLLM: string = '';
   showPromptCopyDialog = false;
@@ -426,13 +411,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.aiChatModels.find(m => m.value === this.aiChatSelectedModel)?.label
       ?? this.aiChatSelectedModel ?? 'Select model';
   }
-  /** Last Langfuse trace ID — set after each generation round. */
-  lastLangfuseTraceId: string | null = null;
-  get langfuseTraceUrl(): string | null {
-    if (!this.lastLangfuseTraceId) return null;
-    const base = (environment as any).langfuseUrl ?? '/langfuse';
-    return `${base.replace(/\/$/, '')}/trace/${this.lastLangfuseTraceId}`;
-  }
   appPort = ''; // Store app port from deployment
 
   // GitHub Push functionality
@@ -468,10 +446,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isOpeningUploadDialog = false; // Tracks button loading state before dialog renders
   showUploadDialog = false;
   selectedZipFile: File | null = null;
-  // True when selectedZipFile came from "Clone from GitHub" rather than a manual ZIP upload.
-  // Arbitrary external repos never contain Essedum's metadata.json, so pulled ZIPs must skip
-  // that server-side validation while manual uploads (real pipeline exports) still enforce it.
-  isZipFromGitHubPull = false;
 
   // MCP Pipeline Mode Support
   pipelineMode: 'agent' | 'mcp' | 'app' = 'agent';
@@ -571,95 +545,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   isCheckingDeploymentData = false;
   deploymentEnvironment: string = ''; // Store selected deployment environment
 
-  // Phase 1B: Save + Push integration
-  autoPushOnSave = true;
-  isPushingAfterSave = false;
-  lastPulledRepo = '';
-  lastPulledBranch = '';
-
-  // ─── Session Branch Workflow (Phase 2) ──────────────────────────────────────
-  // Feature toggle: set window.__ESSEDUM_FLAGS__.sessionBranchWorkflow = false to
-  // revert entirely to the legacy push-to-main flow without touching any other code.
-  readonly sessionBranchWorkflowEnabled: boolean =
-    ((window as any).__ESSEDUM_FLAGS__?.sessionBranchWorkflow ?? true);
-
-  /** Name of the per-session branch, e.g. "session/<sessionId>-2026-09-16". */
-  activeSessionBranch = '';
-  /** True while the session branch is being created via backend API. */
-  sessionBranchCreating = false;
-  /** True once the session branch is confirmed created or already existed. */
-  sessionBranchReady = false;
-  /** Guard so ensureSessionBranch() is only attempted once per session. */
-  sessionBranchCreationAttempted = false;
-  /** PR status for the session branch. */
-  sessionBranchPrStatus: 'none' | 'open' | 'merged' = 'none';
-  /** Commit SHA of the last successful push to the session branch. */
-  sessionBranchLastCommitId = '';
-  /** GitHub PR number after a PR is raised from the session branch. */
-  sessionBranchPrNumber: number | null = null;
-  /** Enables the single-click save-to-session-branch workflow. */
-  autoSaveToSessionBranch = true;
-  /** True while a session-branch push or PR action is in flight. */
-  isSessionBranchActionInFlight = false;
-  /** Tracks which toolbar action currently owns the busy indicator. */
-  activeSessionBranchAction: 'save' | 'review' | 'pr' | null = null;
-  // ────────────────────────────────────────────────────────────────────────────
-
-  get sessionBranchSaveDisabled(): boolean {
-    return (
-      !this.autoSaveToSessionBranch ||
-      !this.isFileModified ||
-      this.isSavingFile ||
-      this.isSessionBranchActionInFlight ||
-      this.sessionBranchCreating
-    );
-  }
-
-  get isSessionSaveBusy(): boolean {
-    return this.activeSessionBranchAction === 'save' &&
-      (this.isSavingFile || this.isSessionBranchActionInFlight || this.sessionBranchCreating);
-  }
-
-  get reviewSessionBranchSaveDisabled(): boolean {
-    return (
-      this.autoSaveToSessionBranch ||
-      !this.isFileModified ||
-      this.isSavingFile ||
-      this.isSessionBranchActionInFlight ||
-      this.sessionBranchCreating
-    );
-  }
-
-  get isReviewSessionSaveBusy(): boolean {
-    return this.activeSessionBranchAction === 'review' &&
-      (this.isSavingFile || this.isSessionBranchActionInFlight || this.sessionBranchCreating);
-  }
-
-  get raiseSessionPrDisabled(): boolean {
-    return (
-      !this.sessionBranchLastCommitId ||
-      this.isFileModified ||
-      this.isSavingFile ||
-      this.isSessionBranchActionInFlight ||
-      this.sessionBranchCreating ||
-      this.sessionBranchPrStatus === 'open'
-    );
-  }
-
-  get isRaisePrBusy(): boolean {
-    return this.activeSessionBranchAction === 'pr' &&
-      (this.isSessionBranchActionInFlight || this.sessionBranchCreating);
-  }
-
-  get currentGitUsername(): string {
-    return (
-      sessionStorage.getItem('git_username') ||
-      this.githubUsername ||
-      localStorage.getItem('github_username') ||
-      ''
-    ).trim();
-  }
-
   // Drag and Drop functionality
   isDragging = false;
   draggedNode: FileNode | null = null;
@@ -694,7 +579,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     private dialog: MatDialog,
     private agentPipelineService: AgentPipelineService,
     private service: Services,
-    private githubService: GitHubService,
     private cdr: ChangeDetectorRef,
     private http: HttpClient,
     private aiChatCoder: AiChatCoderService,
@@ -717,16 +601,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     this.lastRefreshedTime = new Date();
-
+    
     // Initialize organisation from localStorage or default
     this.organisation = this.getConsistentOrganization();
     
     this.route.params.subscribe((params) => {
       if (params['cname']) {
         this.cardName = params['cname'];
-        if (this.currentCname !== params['cname']) {
-          this.initializePipelineSessionContext(params['cname']);
-        }
       } else {
         this.cardName = this.streamItem.name;
       }
@@ -755,19 +636,26 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     
     if (cardFromState && cardFromState.name) {
       // This is a real pipeline card from dashboard - use its cname for auto-loading
-      this.initializePipelineSessionContext(cardFromState.name);
+      this.currentCname = cardFromState.name; // Use the card name as cname
       this.viewMode = 'detail';
-      
+
+      // Detect agent-designer pipelines
+      if (cardFromState.isAgentDesigner) {
+        this.isAgentDesignerPipeline = true;
+        this.agentDesignerPipelineId = cardFromState.cid || '';
+        this.agentDesignerFlowId = cardFromState.flowId || '';
+      }
+
       // Update filename if in MCP or App mode now that we have the actual cname
       if (this.pipelineMode === 'mcp' || this.pipelineMode === 'app') {
         this.scriptFileName = `${this.currentCname}.json`;
       }
-      
+
       // Set pipeline alias for display
       if (historyState?.pipelineAlias) {
         this.pipelineAlias = historyState.pipelineAlias;
       }
-      
+
       // Trigger auto-loading for real pipeline cards
       this.autoLoadAgentDataForPipelineCard();
     } else {
@@ -775,7 +663,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       
       // Also try using cardName as currentCname for the new APIs
       if (this.cardName) {
-        this.initializePipelineSessionContext(this.cardName);
+        this.currentCname = this.cardName;
         this.autoLoadAgentDataForPipelineCard();
       } else {
         this.getStreamService();
@@ -868,6 +756,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getPipelineByName() {
+    if (this.isAgentDesignerPipeline) return;
     let params: HttpParams = new HttpParams();
     params = params.set('name', this.cardName);
     params = params.set('org', this.organisation);
@@ -1157,12 +1046,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
   
   private performNavigateBack(): void {
-    // If we came from pipeline-in-execution, go back to it via browser history
-    const historyState = history.state;
-    if (historyState?.source === 'pipeline-in-execution') {
-      this.location.back();
-      return;
-    }
+    // Reset all state first
+    this.resetToDashboardState();
     
     // Get current route parameters to preserve org and roleId
     const org = localStorage.getItem('organisation') || 'leo1311';
@@ -1186,8 +1071,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.selectedFileContent = '';
     this.isJsonProcessed = false;
     this.hasGeneratedAgent = false;
-    this.resetSessionBranchRuntimeState(true);
-    this.pipelineSessionScope = '';
     this.currentCname = ''; // Clear cname when going back to dashboard
     this.fileSystemData = [];
     this.consoleOutput = []; // Keep console clear
@@ -1313,7 +1196,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   // Save current file changes
-  async saveFile(options?: { suppressAutoPush?: boolean }): Promise<void> {
+  async saveFile(): Promise<void> {
     if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
       return;
     }
@@ -1349,10 +1232,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       // Show success message with properly formatted response
       const successResponse = { status: 200, body: result || [] };
       this.service.messageService(successResponse, 'File saved successfully!');
-
-      if (this.autoPushOnSave && !options?.suppressAutoPush) {
-        this.pushChangesToConfiguredBranch('Git Auto push after save');
-      }
     } catch (error: any) {
       console.error('Error saving file:', error);
       // Check if error has the new format with details
@@ -1368,182 +1247,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     } finally {
       this.isSavingFile = false;
     }
-  }
-
-  async saveAndPushFile(commitMessage?: string): Promise<void> {
-    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
-      return;
-    }
-
-    await this.saveFile({ suppressAutoPush: true });
-
-    // If save failed, isFileModified remains true and push should not start.
-    if (this.isFileModified) {
-      return;
-    }
-
-    this.pushChangesToConfiguredBranch('Manual save and push', commitMessage);
-  }
-
-  openSavePushConfigDialog(): void {
-    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
-      return;
-    }
-
-    const changedFiles = this.collectChangedFilesForPush();
-    const organization = sessionStorage.getItem('organization') || this.organisation || this.getConsistentOrganization();
-
-    const openDialog = (config?: any): void => {
-      const gitContext = this.getSavePushGitContext(config);
-      const defaultCommitMessage = this.buildSavePushCommitMessage(
-        gitContext.repoName,
-        gitContext.branch,
-        changedFiles.length
-      );
-
-      const dialogData: SavePushConfigDialogData = {
-        username: gitContext.username,
-        repoName: gitContext.repoName,
-        branch: gitContext.branch,
-        sourceLabel: gitContext.sourceLabel,
-        commitMessage: defaultCommitMessage,
-        changedFiles,
-      };
-
-      const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
-        width: '620px',
-        maxWidth: '94vw',
-        panelClass: 'save-push-config-dialog-panel',
-        data: dialogData,
-        autoFocus: false,
-      });
-
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result?.confirmed) {
-          const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
-          this.saveAndPushFile(finalMessage);
-        }
-      });
-    };
-
-    if (organization) {
-      this.service.getGitConfig(this.currentCname, organization).subscribe({
-        next: (config) => openDialog(config),
-        error: () => openDialog(),
-      });
-    } else {
-      openDialog();
-    }
-  }
-
-  onGitHubPullCompleted(summary: PullOperationSummary): void {
-    this.lastPulledRepo = summary.repoName || '';
-    this.lastPulledBranch = summary.branch || '';
-    this.githubUsername = summary.githubUsername || this.githubUsername;
-  }
-
-  private pushChangesToConfiguredBranch(trigger: string, customCommitMessage?: string): void {
-    if (!this.currentCname || this.isPushingAfterSave) {
-      return;
-    }
-
-    const organization = sessionStorage.getItem('organization');
-    if (!organization) {
-      this.service.message('Organization not found for Git push', 'warning');
-      return;
-    }
-
-    this.isPushingAfterSave = true;
-    const commitMessage = (customCommitMessage || `${trigger} - ${new Date().toISOString()}`).trim();
-
-    this.service.getGitConfig(this.currentCname, organization).subscribe({
-      next: (config) => {
-        const repoName = config?.repo;
-        const branch = config?.bname;
-
-        if (!repoName || !branch) {
-          this.isPushingAfterSave = false;
-          this.service.message('Git config is missing. Pull or push once to set repo/branch.', 'warning');
-          return;
-        }
-
-        this.agentPipelineService.getFilesList(this.currentCname).subscribe({
-          next: (fetchedFiles) => {
-            const request: PushRequest = {
-              repoName,
-              branch,
-              commitMessage,
-              files: fetchedFiles.map(file => ({
-                path: file.filePath,
-                fileName: file.filename,
-                id: file.id,
-                content: file.filescript
-              }))
-            };
-
-            this.githubService.pushToGitHub(request).subscribe({
-              next: () => {
-                this.service.message(`Saved and pushed to ${repoName}/${branch}`, 'success');
-                this.isPushingAfterSave = false;
-              },
-              error: (error) => {
-                const msg = error?.error || error?.message || 'Git push failed after save';
-                this.service.message(msg, 'error');
-                this.isPushingAfterSave = false;
-              }
-            });
-          },
-          error: (error) => {
-            const msg = error?.error || error?.message || 'Failed to fetch files for Git push';
-            this.service.message(msg, 'error');
-            this.isPushingAfterSave = false;
-          }
-        });
-      },
-      error: () => {
-        this.service.message('Git config not found. Please pull or push once first.', 'warning');
-        this.isPushingAfterSave = false;
-      }
-    });
-  }
-
-  private buildSavePushCommitMessage(repoName: string, branch: string, changedFileCount: number): string {
-    const safeRepo = repoName || this.lastPulledRepo || 'repository';
-    const safeBranch = branch || this.lastPulledBranch || 'main';
-    const countLabel = changedFileCount === 1 ? '1 file' : `${changedFileCount} files`;
-    return `chore: update ${safeRepo}/${safeBranch} (${countLabel})`;
-  }
-
-  private getSavePushGitContext(config?: any): { username: string; repoName: string; branch: string; sourceLabel: string } {
-    const username =
-      sessionStorage.getItem('git_username') ||
-      sessionStorage.getItem('username') ||
-      this.githubUsername ||
-      localStorage.getItem('github_username') ||
-      'unknown';
-    const repoName = this.lastPulledRepo || config?.repo || this.githubRepoName || 'repository';
-    const branch = this.lastPulledBranch || config?.bname || this.selectedBranch || 'main';
-    const sourceLabel = this.lastPulledRepo || this.lastPulledBranch || config?.repo || config?.bname
-      ? 'Pulled earlier'
-      : 'Current configuration';
-
-    return { username, repoName, branch, sourceLabel };
-  }
-
-  private collectChangedFilesForPush(): SavePushFileItem[] {
-    const changedFiles: SavePushFileItem[] = [];
-
-    if (this.selectedFileName && this.isFileModified) {
-      const changedLines = this.getDiffStats().total;
-      changedFiles.push({
-        path: this.selectedFilePath || this.selectedFileName,
-        status: 'modified',
-        changedLines,
-        preview: (this.selectedFileContent || '').slice(0, 220),
-      });
-    }
-
-    return changedFiles;
   }
 
   // Show delete confirmation dialog
@@ -2035,7 +1738,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.selectedFileContent = newContent;
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
-      this.onEditorContentModified();
     }
   }
 
@@ -2060,7 +1762,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       this.updateDiffTracking(newContent);
       this.trackUserModifiedLines();
       this.updateTotalLineCount();
-      this.onEditorContentModified();
+
     } else {
       // Reset flags if content matches original
       this.isFileModified = false;
@@ -2552,6 +2254,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Delete the current deployment via WebSocket
    */
   async deleteDeployment(): Promise<void> {
+    if (this.isAgentDesignerPipeline) {
+      await this.deleteAgentDesignerDeployment();
+      return;
+    }
     if (!this.canDeleteDeployment() || !this.currentCname) {
       return;
     }
@@ -2630,6 +2336,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           
           // Update streaming services to reflect deletion
           this.updateStreamingServicesAfterDeletion();
+          
+          // Close the delete socket so it does not linger and re-emit
+          // 'delete_deployment' on reconnect (which would delete a future deploy).
+          this.isDeletingDeployment = false;
+          this.disconnectWebSocket();
           
         } else if (data.status === 'ERROR' || data.status === 'error') {
           this.deploymentStatus = 'error';
@@ -2743,6 +2454,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    * Run and Deploy the agent using WebSocket pipeline
    */
   runAndDeploy(): void {
+    if (this.isAgentDesignerPipeline) {
+      this.runAndDeployAgentDesigner();
+      return;
+    }
     if (!this.canRunAndDeploy()) {
       return;
     }
@@ -3241,7 +2956,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   openUploadDialog(): void {
     this.isOpeningUploadDialog = true;
     this.selectedZipFile = null;
-    this.isZipFromGitHubPull = false;
     // Let Angular render the button spinner, then open the dialog
     setTimeout(() => {
       this.showUploadDialog = true;
@@ -3257,7 +2971,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.showUploadDialog = false;
     this.isOpeningUploadDialog = false;
     this.selectedZipFile = null;
-    this.isZipFromGitHubPull = false;
   }
 
   /**
@@ -3267,7 +2980,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     const file = event.target.files[0];
     if (file && file.name.endsWith('.zip')) {
       this.selectedZipFile = file;
-      this.isZipFromGitHubPull = false;
     } else {
       this.service.message('Please select a valid ZIP file', 'error');
       this.selectedZipFile = null;
@@ -3279,7 +2991,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
    */
   onGitHubPullZipCreated(zipFile: File): void {
     this.selectedZipFile = zipFile;
-    this.isZipFromGitHubPull = true;
     
     // Automatically trigger upload
     this.uploadAgentFiles();
@@ -3299,9 +3010,7 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
 // Call the upload API with type param: Agent | MCP | App
     const uploadType = this.pipelineMode === 'mcp' ? 'MCP' : this.pipelineMode === 'app' ? 'Application' : 'Agent';
-    // Skip server-side metadata.json validation for ZIPs pulled from an arbitrary GitHub repo —
-    // only files exported from Essedum's own pipeline packaging contain that file.
-    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType, this.isZipFromGitHubPull).subscribe({
+    this.agentPipelineService.uploadAgentFilesZip(this.currentCname, organization, this.selectedZipFile, uploadType).subscribe({
          next: (response) => {
         this.service.message(
           `${this.pipelineMode === 'mcp' ? 'MCP server' : 'Agent'} files uploaded successfully!`, 
@@ -3544,6 +3253,16 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
   // Playground methods
   openPlayground(): void {
+    if (this.isAgentDesignerPipeline) {
+      this.playgroundUrl = `${this.AGENT_DESIGNER_API}/executions/flows/${this.agentDesignerFlowId}/run`;
+      this.showPlayground = true;
+      const agentName = (this.pipelineAlias as string) || this.currentCname || 'Agent';
+      this.playgroundMessages = [{
+        role: 'agent',
+        content: `Hello! I'm ${agentName}. How can I help you today?`
+      }];
+      return;
+    }
     // For App Pipeline, allow opening anytime (no deployment check)
     if (this.pipelineMode === 'app') {
       // Clear deployment status message when launching app
@@ -3700,6 +3419,16 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         throw new Error('Playground URL not available');
       }
 
+      if (this.isAgentDesignerPipeline) {
+        const runResp = await this.http.post<any>(this.playgroundUrl, { message: question }).toPromise();
+        const executionId = runResp?.execution_id;
+        if (!executionId) throw new Error('No execution_id returned');
+        const result = await this.pollAgentDesignerExecution(executionId);
+        this.playgroundMessages.push({ role: 'agent', content: result });
+        this.isAgentThinking = false;
+        return;
+      }
+
       // Use the exact playground URL from the streaming services API response
       const apiEndpoint = this.playgroundUrl;
       
@@ -3712,12 +3441,17 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         // Not valid JSON, send as plain text string
         payload = question;
       }
-      
+
       const headers = {
         'Content-Type': 'application/json'
       };
-      
-      const response = await this.http.post<any>(apiEndpoint, payload, { headers }).toPromise();
+
+      // Angular's HttpClient forwards string bodies verbatim, so a plain-text
+      // question would hit the wire unquoted (invalid JSON) and 500 server-side.
+      // Re-encode strings so the body is always valid JSON.
+      const body = typeof payload === 'string' ? JSON.stringify(payload) : payload;
+
+      const response = await this.http.post<any>(apiEndpoint, body, { headers }).toPromise();
       
       // Add agent response
       this.playgroundMessages.push({
@@ -3788,29 +3522,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.http.get<any>(url).subscribe({
       next: (res) => this.applyProvidersResponse(res),
       error: () => { /* keep hardcoded fallback silently */ },
-    });
-
-    // Configure Salus + LiteLLM URLs on the coder service so it can run safety
-    // checks and surface LiteLLM models in the provider dropdown.
-    const litellmUrl = (environment as any).litellmUrl ?? '/litellm/';
-    const salusUrl   = (environment as any).salusUrl   ?? '';
-    this.aiChatCoder.litellmUrl = litellmUrl;
-    this.aiChatCoder.salusUrl   = salusUrl;
-
-    // Load LiteLLM models and append them to the model dropdown.
-    this.aiChatCoder.getLiteLLMModels(litellmUrl).then(models => {
-      if (!models.length) return;
-      // Add "LiteLLM" agent entry if not already present
-      if (!this.aiChatAgents.find(a => a.value === 'litellm')) {
-        this.aiChatAgents = [...this.aiChatAgents, { value: 'litellm', label: 'LiteLLM' }];
-      }
-      // Merge new models, deduplicating by value
-      const existing = new Set(this.aiChatModels.map(m => m.value));
-      const newModels = models.filter(m => !existing.has(m.value));
-      if (newModels.length) {
-        this.aiChatModels = [...this.aiChatModels, ...newModels];
-      }
-      this.cdr.markForCheck?.();
     });
   }
 
@@ -3974,7 +3685,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     this.aiChatDeployAvailable = false;
     this.aiChatDeployStatus = 'idle';
     this.aiChatDeployedUrl = null;
-    this.lastLangfuseTraceId = null;
   }
 
   /**
@@ -4036,8 +3746,6 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         this.aiChatDeployAvailable = files.length > 0;
         this.hasGeneratedAgent = files.length > 0;
         this.isJsonProcessed = files.length > 0;
-        // Capture the Langfuse trace ID from this generation round.
-        this.lastLangfuseTraceId = this.aiChatCoder.lastTraceId;
         this.cdr.detectChanges();
       })
     );
@@ -4758,6 +4466,11 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
+    if (this.isAgentDesignerPipeline) {
+      await this.loadAgentDesignerFlow();
+      return;
+    }
+
     this.isLoadingFiles = true;
     
     // Reset state first
@@ -4800,6 +4513,147 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
         this.getStreamService();
       }
     });
+  }
+
+  // ── Agent Designer pipeline helpers ──────────────────────────────────────────
+
+  private async loadAgentDesignerFlow(): Promise<void> {
+    this.isLoadingFiles = true;
+    this.resetToInitialStateForNewAgent();
+    await this.fetchAgentDesignerStatus();
+
+    try {
+      const pipeline = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}`
+      ).toPromise();
+
+      const flowId = pipeline?.flow_id || this.agentDesignerFlowId;
+      const flow = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/flows/${flowId}`
+      ).toPromise();
+
+      const jsonContent = JSON.stringify(flow, null, 2);
+      const fileName = `${this.currentCname}.json`;
+      const fileNode: FileNode = {
+        name: fileName,
+        type: 'file',
+        content: jsonContent,
+        id: 'flow-json',
+        path: fileName,
+        extension: 'json',
+      };
+
+      this.fileSystemData = [fileNode];
+      this.hasGeneratedAgent = true;
+      this.isJsonProcessed = true;
+      this.selectedFileName = fileName;
+      this.selectedFileContent = jsonContent;
+      this.selectedFilePath = fileName;
+      this.fileExtension = 'json';
+      this.isLoadingFiles = false;
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Failed to load agent designer flow:', err);
+      this.isLoadingFiles = false;
+      this.showScriptTabOnly();
+    }
+  }
+
+  private async fetchAgentDesignerStatus(): Promise<void> {
+    if (!this.agentDesignerPipelineId) return;
+    try {
+      const pipeline = await this.http.get<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}`
+      ).toPromise();
+      const status = pipeline?.status || 'registered';
+      this.runnerServiceStatus = status === 'running';
+      this.isPlaygroundEnabled = status === 'running';
+    } catch {
+      this.runnerServiceStatus = false;
+      this.isPlaygroundEnabled = false;
+    }
+  }
+
+  private async runAndDeployAgentDesigner(): Promise<void> {
+    this.isRunningAndDeploying = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Deploying agent pipeline...';
+    this.isPlaygroundEnabled = false;
+    this.consoleOutput = ['[INFO] Starting agent designer pipeline deployment...'];
+    this.cdr.detectChanges();
+
+    try {
+      await this.http.patch<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
+        { status: 'deploying' }
+      ).toPromise();
+      this.consoleOutput = [...this.consoleOutput, '[INFO] Pipeline status updated to deploying...'];
+
+      await this.http.patch<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
+        { status: 'running' }
+      ).toPromise();
+
+      this.runnerServiceStatus = true;
+      this.isPlaygroundEnabled = true;
+      this.deploymentStatus = 'success';
+      this.deploymentStatusMessage = 'Pipeline is running!';
+      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Pipeline deployed successfully.'];
+    } catch {
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Deployment failed.';
+      this.consoleOutput = [...this.consoleOutput, '[ERROR] Deployment failed.'];
+    }
+
+    this.isRunningAndDeploying = false;
+    this.cdr.detectChanges();
+  }
+
+  private async pollAgentDesignerExecution(executionId: string): Promise<string> {
+    const maxAttempts = 30;
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        const resp = await this.http.get<any>(
+          `${this.AGENT_DESIGNER_API}/executions/${executionId}`
+        ).toPromise();
+        if (resp?.status === 'completed') {
+          const out = resp.output;
+          return out?.result || out?.answer || out?.response || (out ? JSON.stringify(out) : 'Done.');
+        } else if (resp?.status === 'failed') {
+          return 'Execution failed: ' + (resp.output?.error || 'Unknown error');
+        }
+      } catch { /* keep polling */ }
+    }
+    return 'Execution timed out. Check Agent Designer for results.';
+  }
+
+  private async deleteAgentDesignerDeployment(): Promise<void> {
+    this.isDeletingDeployment = true;
+    this.deploymentStatus = 'running';
+    this.deploymentStatusMessage = 'Removing deployment...';
+    this.consoleOutput = ['[INFO] Removing agent designer pipeline deployment...'];
+    this.cdr.detectChanges();
+
+    try {
+      await this.http.patch<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
+        { status: 'stopped' }
+      ).toPromise();
+
+      this.runnerServiceStatus = false;
+      this.isPlaygroundEnabled = false;
+      this.deploymentStatus = 'idle';
+      this.deploymentStatusMessage = 'Pipeline stopped.';
+      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Deployment removed.'];
+    } catch {
+      this.deploymentStatus = 'error';
+      this.deploymentStatusMessage = 'Failed to remove deployment.';
+      this.consoleOutput = [...this.consoleOutput, '[ERROR] Failed to remove deployment.'];
+    }
+
+    this.isDeletingDeployment = false;
+    this.cdr.detectChanges();
   }
 
   // ── Env/Secrets persistence ───────────────────────────────────────────────────
@@ -4998,821 +4852,5 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Also try a few times in the first second — Material's tab body can
     // animate in after a delay.
     [50, 150, 400, 900].forEach((ms) => setTimeout(apply, ms));
-  }
-
-  canDeactivate(): boolean | Promise<boolean> {
-    // If session branch workflow is disabled or no session branch + repo is configured, allow navigation immediately.
-    return this.syncSessionBranchPrStatus().then(async () => {
-      const storedState = this.getStoredSessionBranchState();
-      const storedRepo = storedState?.repoName || '';
-      const storedMain = storedState?.mainBranch || '';
-      const effectivePrStatus = storedState?.prStatus || this.sessionBranchPrStatus;
-      const effectiveSourceBranch = storedState?.sessionBranch || this.activeSessionBranch;
-
-      if (!this.lastPulledRepo && !storedRepo && !this.activeSessionBranch) {
-        return true;
-      }
-
-      if (effectivePrStatus === 'open' && !this.isFileModified) {
-        return true;
-      }
-
-      const repoName = this.lastPulledRepo || storedRepo;
-      const sourceBranch = effectiveSourceBranch || this.lastPulledBranch || 'session-branch';
-      const mainBranch = this.lastPulledBranch || storedMain || 'main';
-
-      const data: SessionPrPromptDialogData = {
-        repoName,
-        sourceBranch,
-        targetBranch: mainBranch,
-        mainBranch,
-        prStatus: effectivePrStatus,
-      };
-
-      const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
-        width: '560px',
-        maxWidth: '94vw',
-        panelClass: 'session-pr-dialog-panel',
-        disableClose: true,
-        data,
-      });
-
-      return dialogRef.afterClosed().toPromise().then(async (result: SessionPrPromptDialogResult | undefined) => {
-        if (!result || result.action === 'skip') {
-          return true;
-        }
-        if (result.action === 'discard') {
-          this.clearSessionBranchState();
-          return true;
-        }
-        if (result.action === 'raise-pr') {
-          await this.createPullRequestFromSessionBranch(
-            `Merge session branch ${sourceBranch} into ${mainBranch}`
-          );
-          return true;
-        }
-        return true;
-      });
-    });
-  }
-
-  // ─── Session Branch: Core Infrastructure ─────────────────────────────────────
-
-  /**
-   * Derive the per-session branch name from the current session id and today's date.
-   * Format: "session/<sessionId>-<pipeline>-<gitUser>-YYYY-MM-DD"
-   */
-  private buildSessionBranchName(): string {
-    const sessionId = this.toBranchSafeSegment(this.getCurrentGitSessionId() || Date.now().toString(36), 'session');
-    const pipelineKey = this.getCurrentPipelineKey();
-    const gitUser = this.toBranchSafeSegment(this.currentGitUsername || 'user', 'user');
-    const date = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-    return `session/${sessionId}-${pipelineKey}-${gitUser}-${date}`;
-  }
-
-  private initializePipelineSessionContext(cname: string): void {
-    this.pipelineSessionScope = (cname || '').trim();
-    this.currentCname = (cname || '').trim();
-    this.hydrateSessionBranchState();
-    void this.syncSessionBranchPrStatus();
-  }
-
-  private getCurrentGitSessionId(): string {
-    return (
-      sessionStorage.getItem('git_session_id') ||
-      sessionStorage.getItem('sessionId') ||
-      ''
-    ).trim();
-  }
-
-  private toBranchSafeSegment(value: string, fallback: string): string {
-    const normalized = (value || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 48);
-    return normalized || fallback;
-  }
-
-  private getCurrentPipelineKey(): string {
-    return this.toBranchSafeSegment(this.pipelineSessionScope || this.cardName || this.currentCname || 'pipeline', 'pipeline');
-  }
-
-  private getSessionBranchStateStorageKey(): string | null {
-    const sessionId = this.toBranchSafeSegment(this.getCurrentGitSessionId(), '');
-    const gitUser = this.toBranchSafeSegment(this.currentGitUsername, '');
-    const pipelineKey = this.getCurrentPipelineKey();
-    if (!sessionId || !gitUser || !pipelineKey) {
-      return null;
-    }
-    return `${this.sessionBranchStateKeyPrefix}${gitUser}:${sessionId}:${pipelineKey}`;
-  }
-
-  private buildSessionBranchState(
-    branchName: string,
-    prStatus: 'none' | 'open' | 'merged' = 'none',
-    repoName = '',
-    mainBranch = '',
-  ): SessionBranchState {
-    return {
-      sessionId: this.getCurrentGitSessionId(),
-      repoName,
-      mainBranch,
-      sessionBranch: branchName,
-      gitUsername: this.currentGitUsername,
-      token: sessionStorage.getItem('github_token') || '',
-      prStatus,
-      lastCommitId: this.sessionBranchLastCommitId,
-      branchCreationStatus: 'ready',
-      prNumber: this.sessionBranchPrNumber,
-    };
-  }
-
-  private getStoredSessionBranchState(): SessionBranchState | null {
-    const storageKey = this.getSessionBranchStateStorageKey();
-    if (!storageKey) {
-      return null;
-    }
-
-    const stored = sessionStorage.getItem(storageKey);
-    if (!stored) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(stored) as SessionBranchState;
-    } catch {
-      sessionStorage.removeItem(storageKey);
-      return null;
-    }
-  }
-
-  /** Persist session branch state into sessionStorage for cross-tab / refresh resilience. */
-  private storeSessionBranchState(
-    branchName: string,
-    prStatus: 'none' | 'open' | 'merged' = 'none',
-    repoName?: string,
-    mainBranch?: string,
-  ): void {
-    const storageKey = this.getSessionBranchStateStorageKey();
-    if (!storageKey) {
-      return;
-    }
-
-    const nextState = this.buildSessionBranchState(
-      branchName,
-      prStatus,
-      repoName || this.lastPulledRepo,
-      mainBranch || this.lastPulledBranch,
-    );
-    sessionStorage.setItem(storageKey, JSON.stringify(nextState));
-  }
-
-  private updateStoredSessionBranchState(patch: Partial<SessionBranchState>): void {
-    const storedState = this.getStoredSessionBranchState();
-    const storageKey = this.getSessionBranchStateStorageKey();
-    if (!storedState || !storageKey) {
-      return;
-    }
-
-    sessionStorage.setItem(storageKey, JSON.stringify({ ...storedState, ...patch }));
-  }
-
-  private resetSessionBranchRuntimeState(clearGitContext = false): void {
-    this.activeSessionBranch = '';
-    this.sessionBranchCreating = false;
-    this.sessionBranchReady = false;
-    this.sessionBranchCreationAttempted = false;
-    this.sessionBranchPrStatus = 'none';
-    this.sessionBranchPrNumber = null;
-    this.sessionBranchLastCommitId = '';
-    this.isSessionBranchActionInFlight = false;
-    this.activeSessionBranchAction = null;
-    if (clearGitContext) {
-      this.lastPulledRepo = '';
-      this.lastPulledBranch = '';
-    }
-  }
-
-  private syncSessionBranchPrStatus(): Promise<void> {
-    const storedState = this.getStoredSessionBranchState();
-    const repoName = this.lastPulledRepo || storedState?.repoName || '';
-    const sourceBranch = this.activeSessionBranch || storedState?.sessionBranch || '';
-    const targetBranch = this.lastPulledBranch || storedState?.mainBranch || 'main';
-
-    if (!repoName || !sourceBranch || !this.currentGitUsername) {
-      return Promise.resolve();
-    }
-
-    return new Promise<void>((resolve) => {
-      this.githubService.getSessionBranchPrStatus(repoName, sourceBranch, targetBranch).subscribe({
-        next: (response) => {
-          if (response?.success) {
-            const prStatus = (response.prStatus || 'none') as 'none' | 'open' | 'merged';
-            this.sessionBranchPrStatus = prStatus;
-            this.sessionBranchPrNumber = response.pullRequestNumber ?? null;
-            this.updateStoredSessionBranchState({
-              prStatus,
-              prNumber: response.pullRequestNumber ?? null,
-              repoName,
-              mainBranch: targetBranch,
-            });
-          }
-          resolve();
-        },
-        error: () => resolve(),
-      });
-    });
-  }
-
-  /** Clear session branch state from sessionStorage (called on Discard). */
-  private clearSessionBranchState(): void {
-    const storageKey = this.getSessionBranchStateStorageKey();
-    if (storageKey) {
-      sessionStorage.removeItem(storageKey);
-    }
-    this.resetSessionBranchRuntimeState();
-  }
-
-  /** Hydrate in-memory session branch state from sessionStorage on ngOnInit. */
-  private hydrateSessionBranchState(): void {
-    this.resetSessionBranchRuntimeState(true);
-
-    const storedState = this.getStoredSessionBranchState();
-    if (storedState?.sessionBranch) {
-      this.activeSessionBranch = storedState.sessionBranch;
-      this.sessionBranchReady = storedState.branchCreationStatus === 'ready';
-      this.sessionBranchCreationAttempted = true;
-      this.sessionBranchPrStatus = storedState.prStatus || 'none';
-      this.sessionBranchPrNumber = storedState.prNumber ?? null;
-      this.sessionBranchLastCommitId = storedState.lastCommitId || '';
-      if (storedState.repoName) this.lastPulledRepo = storedState.repoName;
-      if (storedState.mainBranch) this.lastPulledBranch = storedState.mainBranch;
-    }
-  }
-
-  /**
-   * Ensure a session branch exists for this editing session.
-   * Called on the first content modification in the editor.
-   * Returns true if the branch is ready, false if creation failed.
-   */
-  async ensureSessionBranch(): Promise<boolean> {
-    if (!this.sessionBranchWorkflowEnabled) {
-      return false;
-    }
-
-    // Already ready — nothing to do
-    if (this.sessionBranchReady && this.activeSessionBranch) {
-      return true;
-    }
-
-    // Already attempted and failed — don't retry every keystroke
-    if (this.sessionBranchCreationAttempted && !this.sessionBranchReady) {
-      return false;
-    }
-
-    // Check sessionStorage first (browser refresh / second tab)
-    const storedState = this.getStoredSessionBranchState();
-    if (storedState?.sessionBranch) {
-      this.activeSessionBranch = storedState.sessionBranch;
-      this.sessionBranchReady = storedState.branchCreationStatus === 'ready';
-      this.sessionBranchCreationAttempted = true;
-      this.sessionBranchPrStatus = storedState.prStatus || 'none';
-      this.sessionBranchPrNumber = storedState.prNumber ?? null;
-      this.sessionBranchLastCommitId = storedState.lastCommitId || '';
-      if (storedState.repoName && !this.lastPulledRepo) this.lastPulledRepo = storedState.repoName;
-      if (storedState.mainBranch && !this.lastPulledBranch) this.lastPulledBranch = storedState.mainBranch;
-      return true;
-    }
-
-    // Resolve the main branch (source for the new branch)
-    const organization = sessionStorage.getItem('organization') || this.getConsistentOrganization();
-    if (!organization || !this.currentCname) {
-      // Not enough context to create the branch yet
-      return false;
-    }
-
-    this.sessionBranchCreationAttempted = true;
-    this.sessionBranchCreating = true;
-
-    return new Promise<boolean>((resolve) => {
-      this.service.getGitConfig(this.currentCname, organization).subscribe({
-        next: (config) => {
-          const repoName = config?.repo || this.lastPulledRepo;
-          const mainBranch = config?.bname || this.lastPulledBranch || 'main';
-
-          if (!repoName) {
-            this.sessionBranchCreating = false;
-            this.service.message('Git repo not configured. Please pull or push once first.', 'warning');
-            resolve(false);
-            return;
-          }
-
-          const branchName = this.buildSessionBranchName();
-          const request: CreateBranchRequest = { repoName, branchName, sourceBranch: mainBranch };
-
-          this.githubService.createBranch(request).subscribe({
-            next: (response: CreateBranchResponse) => {
-              this.sessionBranchCreating = false;
-              if (response.success) {
-                this.activeSessionBranch = response.branchName;
-                this.sessionBranchReady = true;
-                // Propagate repo/branch into component properties so all methods see them
-                if (!this.lastPulledRepo) this.lastPulledRepo = repoName;
-                if (!this.lastPulledBranch) this.lastPulledBranch = mainBranch;
-                this.storeSessionBranchState(response.branchName, 'none', repoName, mainBranch);
-                const msg = response.alreadyExisted
-                  ? `Resuming session on existing branch: ${response.branchName}`
-                  : `Session branch created: ${response.branchName}`;
-                this.service.message(msg, 'success');
-                resolve(true);
-              } else {
-                this.service.message(`Could not create session branch: ${response.message}`, 'warning');
-                resolve(false);
-              }
-            },
-            error: (err: any) => {
-              this.sessionBranchCreating = false;
-              const msg = err?.error?.message || err?.message || 'Session branch creation failed';
-              this.service.message(msg, 'warning');
-              resolve(false);
-            }
-          });
-        },
-        error: () => {
-          this.sessionBranchCreating = false;
-          this.service.message('Git config not found. Cannot create session branch.', 'warning');
-          resolve(false);
-        }
-      });
-    });
-  }
-
-  // ─── Session Branch: Validation ──────────────────────────────────────────────
-
-  /** Pre-save validation: confirm session branch exists in the remote repo. */
-  private async validateSessionBranchPreSave(): Promise<{ valid: boolean; reason?: string }> {
-    const repo = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || '';
-    if (!this.activeSessionBranch || !repo) {
-      return { valid: false, reason: 'Session branch or repository not configured. Please configure Git first.' };
-    }
-    return new Promise<{ valid: boolean; reason?: string }>((resolve) => {
-      this.githubService.getBranches(repo).subscribe({
-        next: (branches: string[]) => {
-          if (branches.includes(this.activeSessionBranch)) {
-            resolve({ valid: true });
-          } else {
-            resolve({ valid: false, reason: `Session branch '${this.activeSessionBranch}' not found in remote.` });
-          }
-        },
-        error: () => resolve({ valid: true }) // allow push attempt even if branch list fails
-      });
-    });
-  }
-
-  /** Pre-PR validation: confirm there is a session branch ahead of main. */
-  private async validatePreCreatePr(): Promise<{ valid: boolean; reason?: string }> {
-    if (!this.activeSessionBranch) {
-      return { valid: false, reason: 'No session branch to merge.' };
-    }
-    if (this.sessionBranchPrStatus === 'open') {
-      return { valid: false, reason: `A PR (#${this.sessionBranchPrNumber}) already exists for this session branch.` };
-    }
-    if (!this.sessionBranchLastCommitId) {
-      return { valid: false, reason: 'No commits on session branch yet. Save changes first.' };
-    }
-    return { valid: true };
-  }
-
-  // ─── Session Branch: Push helper ─────────────────────────────────────────────
-
-  /**
-   * Push all pipeline files to the session branch.
-   * This is the session-branch equivalent of pushChangesToConfiguredBranch().
-   * The original method is NOT modified — it still exists for legacy callers.
-   */
-  private pushToSessionBranch(
-    trigger: string,
-    customCommitMessage?: string,
-    actionType: 'save' | 'review' = 'save'
-  ): void {
-    const repo = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || '';
-    if (!this.currentCname || this.isSessionBranchActionInFlight) {
-      return;
-    }
-    if (!this.activeSessionBranch || !repo) {
-      this.service.message('Session branch not ready. Please try again.', 'warning');
-      return;
-    }
-
-    this.isSessionBranchActionInFlight = true;
-    this.activeSessionBranchAction = actionType;
-    const commitMessage = (customCommitMessage || `${trigger} - ${new Date().toISOString()}`).trim();
-
-    this.agentPipelineService.getFilesList(this.currentCname).subscribe({
-      next: (fetchedFiles) => {
-        const request: PushRequest = {
-          repoName: repo,
-          branch: this.activeSessionBranch,
-          commitMessage,
-          files: fetchedFiles.map(file => ({
-            path: file.filePath,
-            fileName: file.filename,
-            id: file.id,
-            content: file.filescript,
-          }))
-        };
-
-        this.githubService.pushToGitHub(request).subscribe({
-          next: (response: any) => {
-            this.isSessionBranchActionInFlight = false;
-            this.activeSessionBranchAction = null;
-            // Store commit SHA if present in response (string response from backend)
-            if (typeof response === 'object' && response?.commitSha) {
-              this.sessionBranchLastCommitId = response.commitSha;
-              this.updateStoredSessionBranchState({ lastCommitId: response.commitSha });
-            } else if (!this.sessionBranchLastCommitId) {
-              // Mark as having commits even without SHA
-              this.sessionBranchLastCommitId = 'committed';
-              this.updateStoredSessionBranchState({ lastCommitId: 'committed' });
-            }
-            this.service.message(
-              `Saved to session branch: ${this.activeSessionBranch}`, 'success'
-            );
-          },
-          error: (error: any) => {
-            this.isSessionBranchActionInFlight = false;
-            this.activeSessionBranchAction = null;
-            const msg = error?.error || error?.message || 'Push to session branch failed';
-            this.service.message(msg, 'error');
-          }
-        });
-      },
-      error: (error: any) => {
-        this.isSessionBranchActionInFlight = false;
-        this.activeSessionBranchAction = null;
-        const msg = error?.error || error?.message || 'Failed to fetch files for session branch push';
-        this.service.message(msg, 'error');
-      }
-    });
-  }
-
-  // ─── Session Branch: Save Actions ────────────────────────────────────────────
-
-  /**
-   * Save the current file to the backend DB and push to the session branch.
-   * Mirrors saveAndPushFile() but targets the session branch instead of main.
-   */
-  async saveToSessionBranch(): Promise<void> {
-    if (!this.sessionBranchWorkflowEnabled) {
-      return;
-    }
-
-    this.activeSessionBranchAction = 'save';
-
-    // Cancel any pending debounced auto-save — we're saving right now.
-    this.cancelPendingAutoSave();
-
-    // Ensure session branch exists (creates it if this is the first save)
-    const branchReady = await this.ensureSessionBranch();
-    if (!branchReady) {
-      this.activeSessionBranchAction = null;
-      this.service.message(
-        'Session branch is not ready. Verify your Git config and try again.',
-        'warning'
-      );
-      return;
-    }
-
-    const validation = await this.validateSessionBranchPreSave();
-    if (!validation.valid) {
-      this.activeSessionBranchAction = null;
-      this.service.message(validation.reason || 'Save validation failed.', 'warning');
-      return;
-    }
-
-    // Save file content to backend DB (reuse existing method, suppress legacy auto-push)
-    await this.saveFile({ suppressAutoPush: true });
-
-    // If save failed, isFileModified is still true — do not push
-    if (this.isFileModified) {
-      this.activeSessionBranchAction = null;
-      return;
-    }
-
-    this.pushToSessionBranch('Save to session branch', undefined, 'save');
-  }
-
-  /**
-   * Common hook called by BOTH content-change handlers (Python editor + text editor)
-   * whenever the file content actually changes.
-   * - Creates session branch on very first edit of a session
-   */
-  private onEditorContentModified(): void {
-    if (!this.sessionBranchWorkflowEnabled) return;
-    // Trigger branch creation on the very first edit (not on save)
-    if (!this.sessionBranchCreationAttempted) {
-      this.ensureSessionBranch();
-    }
-  }
-
-  /** Retained for compatibility with callers that clear pending save state before manual actions. */
-  private cancelPendingAutoSave(): void {
-  }
-
-  /**
-   * Called when the save-mode toggle changes.
-   * - Turning ON keeps the one-click save-to-session-branch action enabled.
-   * - Turning OFF keeps the existing review-and-save flow.
-   */
-  onAutoSaveToggleChange(enabled: boolean): void {
-    if (!enabled) {
-      this.cancelPendingAutoSave();
-    }
-  }
-
-  logoutGitAccount(): void {
-    this.githubService.logout().subscribe({
-      next: () => {
-        this.githubUsername = '';
-        this.githubService.clearClientGitSession();
-        this.resetSessionBranchRuntimeState(true);
-        this.service.message('Logout successful', 'success');
-      },
-      error: () => {
-        this.service.message('Failed to logout. Please try again.', 'error');
-      }
-    });
-  }
-
-  /**
-   * Raise a PR from the session branch to main without saving first.
-   * Opens PR details dialog (title, description, branch/user context) before creating.
-   */
-  async raiseSessionPrOnly(): Promise<void> {
-    if (!this.sessionBranchWorkflowEnabled) return;
-    const storedMain = this.getStoredSessionBranchState()?.mainBranch || '';
-    const validation = await this.validatePreCreatePr();
-    if (!validation.valid) {
-      this.service.message(validation.reason || 'Cannot raise PR.', 'warning');
-      return;
-    }
-
-    const mainBranch = this.lastPulledBranch || storedMain || 'main';
-    const username = this.currentGitUsername || this.githubUsername || '';
-
-    const data: SessionPrPromptDialogData = {
-      repoName: this.lastPulledRepo,
-      sourceBranch: this.activeSessionBranch,
-      targetBranch: mainBranch,
-      mainBranch,
-      prStatus: this.sessionBranchPrStatus,
-      prTitle: `Merge session changes into ${mainBranch}`,
-      commitSha: this.sessionBranchLastCommitId,
-      username,
-      mode: 'raise-pr',
-    };
-
-    const dialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
-      width: '560px',
-      maxWidth: '94vw',
-      panelClass: 'session-pr-dialog-panel',
-      data,
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: SessionPrPromptDialogResult | undefined) => {
-      if (!result || result.action !== 'raise-pr') return;
-      await this.createPullRequestFromSessionBranch(
-        result.prTitle || `Merge session changes into ${mainBranch}`,
-        result.prDescription,
-      );
-    });
-  }
-
-  /**
-   * Open the Review & Save dialog pre-filled with the session branch,
-   * then push to the session branch on confirmation.
-   * Reuses the existing SavePushConfigDialogComponent without modification.
-   */
-  openReviewSaveToSessionBranchDialog(): void {
-    if (!this.selectedFileNode || !this.isFileModified || !this.currentCname) {
-      return;
-    }
-    if (!this.sessionBranchWorkflowEnabled) {
-      return;
-    }
-
-    this.cancelPendingAutoSave();
-
-    this.ensureSessionBranch().then(branchReady => {
-      if (!branchReady) {
-        this.service.message('Session branch is not ready. Configure Git and try again.', 'warning');
-        return;
-      }
-
-      const changedFiles = this.collectChangedFilesForPush();
-      const defaultCommitMessage = this.buildSavePushCommitMessage(
-        this.lastPulledRepo || 'repository',
-        this.activeSessionBranch,
-        changedFiles.length
-      );
-
-      const dialogData: SavePushConfigDialogData = {
-        username: this.currentGitUsername || this.githubUsername || 'unknown',
-        repoName: this.lastPulledRepo || 'repository',
-        branch: this.activeSessionBranch,   // ← session branch, not main
-        sourceLabel: 'Session branch',
-        commitMessage: defaultCommitMessage,
-        changedFiles,
-      };
-
-      const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
-        width: '620px',
-        maxWidth: '94vw',
-        panelClass: 'save-push-config-dialog-panel',
-        data: dialogData,
-        autoFocus: false,
-      });
-
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result?.confirmed) {
-          this.activeSessionBranchAction = 'review';
-          const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
-          // Save to DB then push to session branch
-          this.saveFile({ suppressAutoPush: true }).then(() => {
-            if (!this.isFileModified) {
-              this.pushToSessionBranch('Review & Save to session branch', finalMessage, 'review');
-            } else {
-              this.activeSessionBranchAction = null;
-            }
-          });
-        }
-      });
-    });
-  }
-
-  /**
-   * "Save Changes & Raise PR" — full end-to-end action:
-   * Opens review dialog → saves file → pushes to session branch → creates PR.
-   */
-  async saveChangesAndRaisePr(): Promise<void> {
-    if (!this.sessionBranchWorkflowEnabled) {
-      return;
-    }
-
-    this.cancelPendingAutoSave();
-
-    const branchReady = await this.ensureSessionBranch();
-    if (!branchReady) {
-      this.service.message('Session branch is not ready. Configure Git and try again.', 'warning');
-      return;
-    }
-
-    const repoForDialog = this.lastPulledRepo || this.getStoredSessionBranchState()?.repoName || 'repository';
-    const changedFiles = this.collectChangedFilesForPush();
-    const defaultCommitMessage = this.buildSavePushCommitMessage(
-      repoForDialog,
-      this.activeSessionBranch,
-      changedFiles.length
-    );
-
-    const dialogData: SavePushConfigDialogData = {
-      username: this.currentGitUsername || this.githubUsername || 'unknown',
-      repoName: repoForDialog,
-      branch: this.activeSessionBranch,
-      sourceLabel: 'Session branch → Raise PR',
-      commitMessage: defaultCommitMessage,
-      changedFiles,
-    };
-
-    const dialogRef = this.dialog.open(SavePushConfigDialogComponent, {
-      width: '620px',
-      maxWidth: '94vw',
-      panelClass: 'save-push-config-dialog-panel',
-      data: dialogData,
-      autoFocus: false,
-    });
-
-    dialogRef.afterClosed().subscribe(async (result) => {
-      if (!result?.confirmed) {
-        return;
-      }
-      const finalMessage = (result.commitMessage || defaultCommitMessage).trim();
-
-      // Step 1: Save to DB
-      await this.saveFile({ suppressAutoPush: true });
-      if (this.isFileModified) {
-        return; // save failed
-      }
-
-      // Step 2: Push to session branch (wait for completion via flag)
-      this.pushToSessionBranch('Save Changes & Raise PR', finalMessage);
-
-      // Step 3: Give the push a moment then raise PR
-      // We watch isSessionBranchActionInFlight; poll briefly rather than coupling deeply
-      const waitForPush = () => new Promise<void>(resolve => {
-        const check = () => {
-          if (!this.isSessionBranchActionInFlight) {
-            resolve();
-          } else {
-            setTimeout(check, 300);
-          }
-        };
-        setTimeout(check, 300);
-      });
-
-      await waitForPush();
-
-      // Step 3: Open PR dialog for title/description before creating the PR.
-      const mainBranch = this.lastPulledBranch || 'main';
-      const username = this.currentGitUsername || this.githubUsername || '';
-      const prDialogData: SessionPrPromptDialogData = {
-        repoName: repoForDialog,
-        sourceBranch: this.activeSessionBranch,
-        targetBranch: mainBranch,
-        mainBranch,
-        prStatus: this.sessionBranchPrStatus,
-        prTitle: `Merge session changes into ${mainBranch}`,
-        commitSha: this.sessionBranchLastCommitId,
-        username,
-        mode: 'raise-pr',
-      };
-
-      const prDialogRef = this.dialog.open(SessionPrPromptDialogComponent, {
-        width: '560px',
-        maxWidth: '94vw',
-        panelClass: 'session-pr-dialog-panel',
-        data: prDialogData,
-      });
-
-      prDialogRef.afterClosed().subscribe(async (prResult: SessionPrPromptDialogResult | undefined) => {
-        if (!prResult || prResult.action !== 'raise-pr') return;
-        await this.createPullRequestFromSessionBranch(
-          prResult.prTitle || `chore: merge session changes into ${mainBranch}`,
-          prResult.prDescription,
-        );
-      });
-    });
-  }
-
-  // ─── Session Branch: PR Creation ─────────────────────────────────────────────
-
-  /**
-   * Create a PR from the session branch to the main branch.
-   * Returns true if the PR was created successfully.
-   */
-  private async createPullRequestFromSessionBranch(title?: string, body?: string): Promise<boolean> {
-    const validation = await this.validatePreCreatePr();
-    if (!validation.valid) {
-      this.activeSessionBranchAction = null;
-      this.service.message(validation.reason || 'PR validation failed.', 'warning');
-      return false;
-    }
-
-    const mainBranch = this.lastPulledBranch || 'main';
-    const prTitle = title || `Merge session branch ${this.activeSessionBranch} into ${mainBranch}`;
-
-    this.isSessionBranchActionInFlight = true;
-  this.activeSessionBranchAction = 'pr';
-
-    return new Promise<boolean>((resolve) => {
-      this.githubService.createPullRequest({
-        repoName: this.lastPulledRepo,
-        title: prTitle,
-        body,
-        sourceBranch: this.activeSessionBranch,
-        targetBranch: mainBranch,
-      }).subscribe({
-        next: (response: any) => {
-          this.isSessionBranchActionInFlight = false;
-          this.activeSessionBranchAction = null;
-          if (response?.success) {
-            this.sessionBranchPrStatus = 'open';
-            this.sessionBranchPrNumber = response.pullRequestNumber ?? null;
-            this.updateStoredSessionBranchState({
-              prStatus: 'open',
-              prNumber: response.pullRequestNumber ?? null,
-            });
-            const prUrl = response.pullRequestUrl || '';
-            this.service.message(
-              `Pull Request #${response.pullRequestNumber} created successfully!${prUrl ? ' ' + prUrl : ''}`,
-              'success'
-            );
-            resolve(true);
-          } else {
-            this.service.message(`PR creation failed: ${response?.message || 'Unknown error'}`, 'error');
-            resolve(false);
-          }
-        },
-        error: (err: any) => {
-          this.isSessionBranchActionInFlight = false;
-          this.activeSessionBranchAction = null;
-          const msg = err?.error?.message || err?.message || 'Failed to create pull request';
-          this.service.message(msg, 'error');
-          resolve(false);
-        }
-      });
-    });
   }
 }

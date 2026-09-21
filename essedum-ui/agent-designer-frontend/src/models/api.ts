@@ -100,6 +100,36 @@ export interface KnowledgeBaseResponse {
   updated_at: string;
 }
 
+// ─── Pipeline Models ──────────────────────────────────────────────────────────
+
+export type PipelineStatus = 'registered' | 'deploying' | 'running' | 'stopped' | 'error';
+
+export interface PipelineCreateRequest {
+  flow_id: string;
+  name: string;
+  description?: string;
+  env_vars?: Array<{ name: string; value: string }>;
+  secrets?: Array<{ name: string; value: string }>;
+}
+
+export interface PipelineResponse {
+  id: string;
+  flow_id: string;
+  name: string;
+  description: string | null;
+  cname: string;
+  status: PipelineStatus;
+  env_vars: Array<{ name: string; value: string }>;
+  secrets: Array<{ name: string; value: string }>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PipelineListResponse {
+  items: PipelineResponse[];
+  total: number;
+}
+
 // ─── LLM Models ───────────────────────────────────────────────────────────────
 
 export interface LlmModelsResponse {

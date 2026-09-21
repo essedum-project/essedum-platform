@@ -8,11 +8,12 @@ import { Badge } from '../ui/badge';
 import {
   Play, Square, Save, Download, Upload,
   Plus, PanelLeft, PanelRight, Terminal, Edit2, Check, X,
-  Layers, Zap
+  Layers, Zap, GitBranch
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 import { PlaygroundModal } from './PlaygroundModal';
+import { CreatePipelineModal } from './CreatePipelineModal';
 import { LABELS } from '../../lib/labels';
 
 export function TopBar() {
@@ -27,6 +28,7 @@ export function TopBar() {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(currentFlowName);
   const [playgroundOpen, setPlaygroundOpen] = useState(false);
+  const [createPipelineOpen, setCreatePipelineOpen] = useState(false);
 
   const isRunning = execution.status === 'running';
 
@@ -194,6 +196,24 @@ export function TopBar() {
 
       <Separator orientation="vertical" className="h-6" />
 
+      {/* Create Pipeline — only when flow is saved */}
+      {currentFlowId && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1.5 text-xs font-semibold border-violet-500/40 text-violet-600 hover:bg-violet-50 hover:text-violet-700 dark:text-violet-400 dark:hover:bg-violet-950/30"
+              onClick={() => setCreatePipelineOpen(true)}
+            >
+              <GitBranch className="w-3 h-3" />
+              {LABELS.TOPBAR_CREATE_PIPELINE}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{LABELS.TOPBAR_OPEN_CREATE_PIPELINE}</TooltipContent>
+        </Tooltip>
+      )}
+
       {/* Run / Stop */}
       {isRunning ? (
         <Button
@@ -235,6 +255,7 @@ export function TopBar() {
       )}
 
       <PlaygroundModal open={playgroundOpen} onClose={() => setPlaygroundOpen(false)} />
+      <CreatePipelineModal open={createPipelineOpen} onClose={() => setCreatePipelineOpen(false)} />
     </header>
   );
 }
