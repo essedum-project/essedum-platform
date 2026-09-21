@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
 export class AgentComponent implements OnInit, AfterViewInit {
   // Embedded Agent Designer interface URL - loaded from environment
   currentIframeUrl: SafeResourceUrl;
-  private readonly langflowUrl = environment.agentDesignerUrl;
+  private readonly langflowUrl = environment.langflowUrl;
 
   @ViewChild('langflowIframeRef') langflowIframeRef!: ElementRef<HTMLIFrameElement>;
 

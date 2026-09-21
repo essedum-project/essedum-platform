@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,6 +46,7 @@ public class VibeCodingController {
 
     private final VibeCodingService vibeCodingService;
     private final SalusService salusService;
+        @Nullable
     private final GooseMinioService gooseMinioService;
 
     @Value("${vibe.azure.openai.endpoint}")
@@ -67,7 +68,7 @@ public class VibeCodingController {
     private String litellmApiKey;
   
     public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService,
-                                GooseMinioService gooseMinioService) {
+                                @Nullable GooseMinioService gooseMinioService) {
         this.vibeCodingService = vibeCodingService;
         this.salusService = salusService;
         this.gooseMinioService = gooseMinioService;
@@ -318,6 +319,10 @@ public class VibeCodingController {
     public ResponseEntity<List<GooseMinioService.FileEntry>> sessionFiles(
             @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Session files request from MinIO, session={}", sessionId);
+                if (gooseMinioService == null) {
+                        logger.warn("Session files request rejected: Goose MinIO is not configured");
+                        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+                }
         try {
             return ResponseEntity.ok(gooseMinioService.listSessionFiles(sessionId));
         } catch (IllegalArgumentException ex) {
