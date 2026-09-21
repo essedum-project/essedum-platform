@@ -3,6 +3,7 @@ package com.lfn.icip.vibecoding.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import org.springframework.util.StringUtils;
 
 /**
  * Configuration for Vibe Studio Goose service client and Salus Responsible-AI client.
@@ -58,10 +60,13 @@ public class VibeCodingConfig {
 
     @PostConstruct
     void validateMinioConfig() {
-        if (minioUrl == null || minioUrl.isBlank()) {
-            throw new IllegalStateException(
-                    "Property 'vibe.minio.url' (env: MINIO_URL) is not set. "
-                            + "Please configure it in the active application profile YAML or as an environment variable.");
+                if (minioUrl == null || minioUrl.isBlank()) {
+                        logger.warn("Goose MinIO disabled: property 'vibe.minio.url' is empty");
+                        return;
+                }
+                if (!StringUtils.hasText(minioAccessKey) || !StringUtils.hasText(minioSecretKey)) {
+                        logger.warn("Goose MinIO disabled: 'vibe.minio.access-key' or 'vibe.minio.secret-key' is empty");
+                        return;
         }
         try {
             URI.create(minioUrl);
@@ -164,6 +169,10 @@ public class VibeCodingConfig {
      * (self-signed corporate certificate).
      */
     @Bean("gooseMinioClient")
+    @ConditionalOnExpression(
+            "T(org.springframework.util.StringUtils).hasText('${vibe.minio.url:}') and "
+                    + "T(org.springframework.util.StringUtils).hasText('${vibe.minio.access-key:}') and "
+                    + "T(org.springframework.util.StringUtils).hasText('${vibe.minio.secret-key:}')")
     public MinioClient gooseMinioClient() throws KeyManagementException, NoSuchAlgorithmException {
         MinioClient client = MinioClient.builder()
                 .endpoint(minioUrl)

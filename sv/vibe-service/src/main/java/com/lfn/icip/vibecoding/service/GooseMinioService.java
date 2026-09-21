@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import com.lfn.icip.vibecoding.util.PathSafety;
@@ -30,6 +31,7 @@ import io.minio.messages.Item;
  * object, returning the working-dir-relative path and its UTF-8 content.
  */
 @Service
+@ConditionalOnBean(name = "gooseMinioClient")
 public class GooseMinioService {
 
     private static final Logger logger = LoggerFactory.getLogger(GooseMinioService.class);
