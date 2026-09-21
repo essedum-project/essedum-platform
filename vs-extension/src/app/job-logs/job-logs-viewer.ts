@@ -50,10 +50,7 @@ export class JobLogsViewer {
         private readonly _context: vscode.ExtensionContext,
         token: string,
         private readonly _pipelineName?: string,
-        private readonly _internalJob?: string,
-        // Wizard-only view mode: strip the raw job envelope in the Console Logs panel
-        // so users see just the `log` string instead of the whole JSON object.
-        private readonly _isWizard: boolean = false
+        private readonly _internalJob?: string
     ) {
         this._extensionUri = _context.extensionUri;
         this._token = token;
@@ -921,14 +918,7 @@ export class JobLogsViewer {
      */
     private getConsoleLogsHtml(webview: vscode.Webview, jobId: string, logData: any): string {
         const nonce = this.getNonce();
-        // Wizard view: show only the `log` field from the job envelope. Fall back to the
-        // full object stringification if the field is missing so nothing goes blank.
-        let logContent: string;
-        if (this._isWizard && logData && typeof logData === 'object' && typeof logData.log === 'string') {
-            logContent = logData.log;
-        } else {
-            logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
-        }
+        const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
 
         // Check if we're in development or production
         const isDevelopment = fs.existsSync(path.join(this._extensionUri.fsPath, 'src'));

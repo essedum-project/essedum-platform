@@ -20,7 +20,7 @@ import * as fs from 'fs';
  */
 interface NavigationMessage {
     command: 'navigate';
-    target: 'pipeline' | 'pipeline-agent' | 'pipeline-wizard';
+    target: 'pipeline' | 'pipeline-agent';
 }
 
 /**
@@ -73,20 +73,9 @@ export class NavigationScreenProvider implements vscode.WebviewViewProvider {
     /**
      * Handle navigation to different views
      */
-    private handleNavigation(target: 'pipeline' | 'pipeline-agent' | 'pipeline-wizard'): void {
+    private handleNavigation(target: 'pipeline' | 'pipeline-agent'): void {
+        // Set context to show the appropriate view
         if (target === 'pipeline') {
-            if (this._context) {
-                // 'native' mode: no tabs shown, only NativeScript pipelines
-                this._context.globalState.update('pipelineInitialTab', 'native');
-            }
-            vscode.commands.executeCommand('setContext', 'essedum.showPipeline', true);
-            vscode.commands.executeCommand('setContext', 'essedum.showPipelineAgent', false);
-            vscode.commands.executeCommand('setContext', 'essedum.showNavigation', false);
-        } else if (target === 'pipeline-wizard') {
-            if (this._context) {
-                // 'wizard' mode: shows Data Wizard + Training Wizard tabs
-                this._context.globalState.update('pipelineInitialTab', 'data-wizard');
-            }
             vscode.commands.executeCommand('setContext', 'essedum.showPipeline', true);
             vscode.commands.executeCommand('setContext', 'essedum.showPipelineAgent', false);
             vscode.commands.executeCommand('setContext', 'essedum.showNavigation', false);
