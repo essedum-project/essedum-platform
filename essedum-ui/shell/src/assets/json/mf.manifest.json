@@ -6,6 +6,14 @@
 		"ngModuleName": "EntryModule",
 		"title": "ESSEDUM"
 	},
+	"agent-designer": {
+		"remoteEntry": "/mfe/agent-designer/",
+		"exposedModule": "",
+		"routePath": "agent-designer",
+		"ngModuleName": "",
+		"type": "iframe",
+		"title": "Agent Designer"
+	},
 	"data-ops": {
 		"remoteEntry": "/mfe/data-ops/remoteEntry.js",
 		"exposedModule": "./Module",

@@ -335,8 +335,6 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
@@ -506,6 +504,7 @@ spec:
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
+        kubernetes.io/hostname: essedum-1
       serviceAccountName: ingress-nginx
       terminationGracePeriodSeconds: 300
       volumes:

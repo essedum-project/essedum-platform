@@ -1,0 +1,28 @@
+# =============================================================================
+# Generic Service Template
+# All ${VAR} placeholders substituted by envsubst from docker/.env.
+#
+# Per-service variables:
+#   SERVICE_NAME   – must match the Deployment's app label
+#   SERVICE_PORT   – port exposed by the Service (ClusterIP)
+#   CONTAINER_PORT – port the container listens on (targetPort)
+#
+# Global variables: KUBE_NAMESPACE, ENVIRONMENT
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${SERVICE_NAME}-service
+  namespace: ${KUBE_NAMESPACE}
+  labels:
+    app: ${SERVICE_NAME}
+    environment: ${ENVIRONMENT}
+spec:
+  selector:
+    app: ${SERVICE_NAME}
+  ports:
+    - name: http
+      protocol: TCP
+      port: ${SERVICE_PORT}
+      targetPort: ${CONTAINER_PORT}
+  type: ClusterIP

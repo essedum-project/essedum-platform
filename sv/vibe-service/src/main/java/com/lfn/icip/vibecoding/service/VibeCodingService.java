@@ -52,9 +52,18 @@ public class VibeCodingService {
                     .uri(path)
                     .contentType(MediaType.APPLICATION_JSON);
             var request = (body != null) ? spec.bodyValue(body) : spec.bodyValue("");
-            return request
+            ResponseEntity<String> entity = request
                     .exchangeToMono(response -> response.toEntity(String.class))
                     .block(blockTimeout);
+            // Goosed returns empty bodies on some success responses (e.g. update_provider).
+            // Ensure a well-formed JSON body so the gateway's Netty stream terminates
+            // cleanly instead of waiting for keep-alive timeout and raising PrematureCloseException.
+            if (entity != null && (entity.getBody() == null || entity.getBody().isBlank())) {
+                return ResponseEntity.status(entity.getStatusCode())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{}");
+            }
+            return entity;
         } catch (WebClientResponseException ex) {
             logger.error("Goose POST {} responded with {}: {}", path, ex.getStatusCode(), ex.getResponseBodyAsString());
             String gooseBody = ex.getResponseBodyAsString();

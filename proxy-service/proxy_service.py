@@ -231,6 +231,7 @@ def make_app():
     app.router.add_get("/health", health)
 
     # HTTP routes (polling etc.)
+    app.router.add_route("*", "/apps/{service}", http_proxy)
     app.router.add_route("*", "/apps/{service}/", http_proxy)
     app.router.add_route("*", "/apps/{service}/{subpath:.*}", http_proxy)
 

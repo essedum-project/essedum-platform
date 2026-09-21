@@ -25,7 +25,7 @@ config:
   active-profiles: mysql,dbjwt,vault
   static-locations: file:/app/static/
 
-  datasourceurl: jdbc:mysql://${MYSQL_DATASOURCE_URL:localhost:3306}
+  datasourceurl: jdbc:mysql://${MYSQL_DATASOURCE_URL:mysql:3306}
   datasourceuser: ${MYSQL_USER}
   datasourcepass: ${MYSQL_PASSWORD}
   essedumcoredb: essedum_coredb

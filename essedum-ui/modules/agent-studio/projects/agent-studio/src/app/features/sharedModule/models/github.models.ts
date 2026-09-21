@@ -9,6 +9,7 @@ export interface GitHubRepository {
 export interface AuthStatus {
   authenticated: boolean;
   githubUsername?: string;
+  githubToken?: string;
   sessionId: string;
   username?: string;
 }
@@ -48,4 +49,72 @@ export interface BranchPushResponse {
   commitSha: string;
   filesChanged: number;
   branchCreated: boolean;
+}
+
+export interface PullOperationSummary {
+  repoName: string;
+  repoUrl: string;
+  branch: string;
+  githubUsername: string;
+  requestedAt: string;
+  completedAt?: string;
+  commitHash?: string;
+  filesCount?: number;
+  status: 'started' | 'success' | 'failed';
+  message?: string;
+}
+
+export interface PushOperationSummary {
+  repoName: string;
+  branch: string;
+  githubUsername: string;
+  commitMessage: string;
+  filesCount: number;
+  requestedAt: string;
+  completedAt?: string;
+  commitSha?: string;
+  status: 'started' | 'success' | 'failed';
+  message?: string;
+}
+
+// ─── Session Branch Workflow ──────────────────────────────────────────────────
+
+export interface CreateBranchRequest {
+  repoName: string;
+  branchName: string;
+  sourceBranch?: string;
+}
+
+export interface CreateBranchResponse {
+  success: boolean;
+  message: string;
+  repoName: string;
+  branchName: string;
+  sourceBranch: string;
+  commitSha: string;
+  alreadyExisted: boolean;
+}
+
+export interface SessionBranchState {
+  sessionId: string;
+  repoName: string;
+  mainBranch: string;
+  sessionBranch: string;
+  gitUsername: string;
+  token: string;
+  prStatus: 'none' | 'open' | 'merged';
+  lastCommitId: string;
+  branchCreationStatus: 'pending' | 'creating' | 'ready' | 'failed';
+  prNumber: number | null;
+}
+
+export interface SessionBranchPrStatusResponse {
+  success: boolean;
+  message: string;
+  repoName: string;
+  sourceBranch: string;
+  targetBranch: string;
+  prStatus: 'none' | 'open' | 'merged';
+  pullRequestNumber?: number | null;
+  pullRequestUrl?: string;
 }

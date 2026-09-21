@@ -1,0 +1,60 @@
+<div class="git-info-panel" *ngIf="repoName || sessionBranch">
+  <div class="git-info-panel__header">
+    <mat-icon class="git-info-panel__icon">source</mat-icon>
+    <span class="git-info-panel__title">Git Session Info</span>
+  </div>
+
+  <div class="git-info-panel__grid">
+    <!-- Repository -->
+    <div class="git-info-card" *ngIf="repoName">
+      <mat-icon class="git-info-card__icon" matTooltip="Repository">folder_open</mat-icon>
+      <span class="git-info-card__value git-info-card__value--text" [matTooltip]="repoName">{{ repoName }}</span>
+    </div>
+
+    <!-- Main Branch -->
+    <div class="git-info-card" *ngIf="mainBranch">
+      <mat-icon class="git-info-card__icon" matTooltip="Main branch">account_tree</mat-icon>
+      <span class="git-info-card__value">
+        <span class="git-info-card__meta">
+          <code class="git-info-card__code" [matTooltip]="mainBranch">{{ mainBranch }}</code>
+          <span class="git-badge git-badge--protected">protected</span>
+        </span>
+      </span>
+    </div>
+
+    <!-- Session Branch -->
+    <div class="git-info-card git-info-card--session">
+      <mat-icon class="git-info-card__icon" matTooltip="Session branch">alt_route</mat-icon>
+      <span class="git-info-card__value">
+        <!-- Creating spinner -->
+        <ng-container *ngIf="sessionBranchStatus === 'creating'">
+          <mat-spinner diameter="14" class="git-info-spinner"></mat-spinner>
+          <span class="git-info-status-text">Creating&hellip;</span>
+        </ng-container>
+
+        <!-- Ready -->
+        <ng-container *ngIf="sessionBranchStatus === 'ready' && sessionBranch">
+          <span class="git-info-card__meta">
+            <!-- <mat-icon class="git-info-check">check_circle</mat-icon> -->
+            <code class="git-info-card__code git-info-card__code--branch" [matTooltip]="sessionBranch">{{ sessionBranchLabel }}</code>
+          </span>
+        </ng-container>
+
+        <!-- Not yet created -->
+        <ng-container *ngIf="sessionBranchStatus === 'none' && !sessionBranch">
+          <span class="git-info-status-text git-info-status-text--muted">
+            Created on first edit
+          </span>
+        </ng-container>
+      </span>
+    </div>
+
+    <!-- PR Status -->
+    <div class="git-info-card">
+      <mat-icon class="git-info-card__icon" matTooltip="PR status">call_merge</mat-icon>
+      <span class="git-info-card__value">
+        <span [class]="prBadgeClass" [matTooltip]="prLabel">{{ prLabel }}</span>
+      </span>
+    </div>
+  </div>
+</div>

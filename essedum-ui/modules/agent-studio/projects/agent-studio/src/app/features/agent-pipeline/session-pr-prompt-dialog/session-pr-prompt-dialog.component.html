@@ -1,0 +1,133 @@
+<!-- ══════════════════════════════════════════════════════════
+     SESSION PR DIALOG
+     mode="raise-pr"      → full PR creation form (from toolbar button)
+     mode="navigate-away" → pending-changes warning (from back/route guard)
+     ══════════════════════════════════════════════════════════ -->
+
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon class="title-icon">alt_route</mat-icon>
+  {{ isPrMode ? 'Raise a Pull Request' : 'You have pending session changes' }}
+</h2>
+
+<mat-dialog-content class="session-pr-dialog-content">
+
+  <!-- PR already open notice -->
+  <div class="pr-already-open-notice" *ngIf="prAlreadyOpen">
+    <mat-icon>info_outline</mat-icon>
+    <span>A Pull Request is already open for this session branch.</span>
+  </div>
+
+  <!-- ── Branch / repo summary grid ── -->
+  <section class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-label">
+        <mat-icon class="summary-label__icon">folder_open</mat-icon>
+        Repo
+      </span>
+      <span class="summary-value">{{ data.repoName }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">
+        <mat-icon class="summary-label__icon">alt_route</mat-icon>
+        Session Branch
+      </span>
+      <span class="summary-value"><code class="branch-code">{{ data.sourceBranch }}</code></span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-label">
+        <mat-icon class="summary-label__icon">call_merge</mat-icon>
+        Target Branch
+      </span>
+      <span class="summary-value"><code class="branch-code branch-code--main">{{ displayMainBranch }}</code></span>
+    </div>
+    <div class="summary-card" *ngIf="data.username">
+      <span class="summary-label">
+        <mat-icon class="summary-label__icon">person</mat-icon>
+        Author
+      </span>
+      <span class="summary-value">{{ data.username }}</span>
+    </div>
+    <div class="summary-card" *ngIf="shortCommitSha">
+      <span class="summary-label">
+        <mat-icon class="summary-label__icon">history</mat-icon>
+        Last Commit
+      </span>
+      <span class="summary-value"><code class="branch-code">{{ shortCommitSha }}</code></span>
+    </div>
+  </section>
+
+  <!-- ── PR creation form (raise-pr mode only) ── -->
+  <ng-container *ngIf="isPrMode && !prAlreadyOpen">
+    <div class="pr-form">
+      <label class="pr-form__label">PR Title <span class="pr-form__required">*</span></label>
+      <input
+        class="pr-form__input"
+        type="text"
+        [(ngModel)]="prTitleValue"
+        placeholder="Describe the change…"
+        [disabled]="isCreatingPr"
+        maxlength="256" />
+
+      <label class="pr-form__label">Description <span class="pr-form__optional">(optional)</span></label>
+      <textarea
+        class="pr-form__textarea"
+        [(ngModel)]="prDescriptionValue"
+        rows="4"
+        placeholder="Add context, linked issues, test notes…"
+        [disabled]="isCreatingPr">
+      </textarea>
+    </div>
+  </ng-container>
+
+  <!-- ── Navigate-away explanation (non-PR mode) ── -->
+  <p class="dialog-message" *ngIf="!isPrMode">
+    Your saved changes this session were pushed to
+    <code>{{ data.sourceBranch }}</code> instead of
+    <code>{{ displayMainBranch }}</code> directly, so
+    <code>{{ displayMainBranch }}</code> is untouched. You can raise a Pull
+    Request now to merge them in, skip and come back later, or discard the
+    session branch entirely.
+  </p>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+
+  <!-- Discard — only in navigate-away mode -->
+  <button
+    *ngIf="!isPrMode"
+    mat-stroked-button
+    color="warn"
+    type="button"
+    class="dialog-actions__discard"
+    (click)="discard()"
+    [disabled]="isCreatingPr"
+    matTooltip="Abandon session branch and navigate away">
+    <mat-icon>delete_outline</mat-icon>
+    Discard
+  </button>
+
+  <span class="dialog-actions__spacer"></span>
+
+  <!-- Cancel (PR mode) / Later (navigate-away mode) -->
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="skip()"
+    [disabled]="isCreatingPr">
+    {{ isPrMode ? 'Cancel' : 'Later' }}
+  </button>
+
+  <!-- Primary action: Raise Pull Request -->
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="raisePr()"
+    [disabled]="isCreatingPr || prAlreadyOpen || (isPrMode && !prTitleValue.trim())">
+    <mat-spinner *ngIf="isCreatingPr" diameter="16" class="button-spinner"></mat-spinner>
+    <mat-icon *ngIf="!isCreatingPr">{{ prAlreadyOpen ? 'open_in_new' : 'call_merge' }}</mat-icon>
+    <span>{{ prAlreadyOpen ? 'PR Already Open' : 'Raise Pull Request' }}</span>
+  </button>
+
+</mat-dialog-actions>

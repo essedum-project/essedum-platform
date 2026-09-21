@@ -77,9 +77,8 @@ public class ICIPSkillServiceImpl implements IICIPSkillService {
         skill.setProjectId(projectId);
         skill.setCreatedBy(createdBy);
         skill.setCreatedDate(Instant.now());
-        // Set lastmodifiedby on creation so it is never null
-        skill.setLastmodifiedby(createdBy);
-        skill.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+        // NOTE: lastModifiedBy and lastModifiedDate are intentionally NOT set on creation
+        // They remain null until the skill is actually updated via PUT /skills/{id}
 
         ICIPSkillRegistry saved = skillRepository.save(skill);
 

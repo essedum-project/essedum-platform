@@ -3,7 +3,10 @@
  * Copyright © 2025 Infosys Limited
  */
 package com.lfn.icip.icipwebeditor.rest;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,17 +57,20 @@ public class ICIPSkillController {
     @Autowired
     private IICIPSkillService skillService;
 
-    /** JWT claim to read display username from — e.g. "preferred_username" for createdBy/updatedBy */
-    @Value("${security.display-claim:preferred_username}")
-    private String userClaim;
+    /** Preference order of JWT claims tried when resolving the acting user for
+     *  createdBy / lastModifiedBy / deletedBy audit fields. First non-empty wins. */
+    private static final String[] USER_CLAIM_PREFERENCE = {
+            "preferred_username", "email", "name", "sub"
+    };
 
     @PostMapping("/create")
     public ResponseEntity<ICIPSkillRegistryDTO> createSkill(
             @Valid @RequestBody ICIPSkillRequest request,
             @RequestParam(name = "org") String organization,
             @RequestParam(name = "projectId", required = false) Integer projectId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "Userid", required = false) String userIdHeader) {
-        String createdBy = resolveUser(userIdHeader);
+        String createdBy = resolveUser(authHeader, userIdHeader);
         logger.info("POST /skills/create — name: {} org: {} by: {}", request.getSkillName(), organization, createdBy);
         ICIPSkillRegistryDTO created = skillService.createSkill(request, organization, projectId, createdBy);
         return new ResponseEntity<>(created, new HttpHeaders(), HttpStatus.CREATED);
@@ -74,8 +80,9 @@ public class ICIPSkillController {
     public ResponseEntity<ICIPSkillRegistryDTO> updateSkill(
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody ICIPSkillRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "Userid", required = false) String userIdHeader) {
-        String updatedBy = resolveUser(userIdHeader);
+        String updatedBy = resolveUser(authHeader, userIdHeader);
         logger.info("PUT /skills/{} by: {}", id, updatedBy);
         ICIPSkillRegistryDTO updated = skillService.updateSkill(id, request, updatedBy);
         return new ResponseEntity<>(updated, new HttpHeaders(), HttpStatus.OK);
@@ -110,35 +117,70 @@ public class ICIPSkillController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSkill(
             @PathVariable(name = "id") Long id,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "Userid", required = false) String userIdHeader) {
-        String deletedBy = resolveUser(userIdHeader);
+        String deletedBy = resolveUser(authHeader, userIdHeader);
         logger.info("DELETE /skills/{} by: {}", id, deletedBy);
         skillService.deleteSkill(id, deletedBy);
         return ResponseEntity.ok(Map.of("message", "Skill deleted successfully", "id", id));
     }
 
     /**
-     * Resolves the acting user in this priority order:
-     *   1. JWT token claim (preferred_username / email) — most reliable, auto-populated by security filter
-     *   2. Userid request header — fallback for non-OAuth2 environments
-     *   3. "system" — absolute fallback
+     * Resolves the acting user by directly decoding the JWT payload from the
+     * "Authorization: Bearer …" header. This is intentionally independent of
+     * Spring's SecurityContextHolder because, in Spring Security 6, the
+     * JwtAuthenticationToken exposes credentials as an empty string (not the
+     * Jwt object), which caused the previous SecurityContext-based lookup to
+     * silently fall back to a literal "admin" value.
+     *
+     * Priority order:
+     *   1. First non-empty claim from USER_CLAIM_PREFERENCE inside the JWT payload
+     *   2. Userid request header (non-OAuth2 environments)
+     *   3. "system" (absolute fallback)
      */
-    private String resolveUser(String userIdHeader) {
-        // 1. Try JWT token from SecurityContextHolder (set by CustomAuthFilter)
-        logger.debug("Resolving user from JWT claim config");
-        String jwtUser = ICIPUtils.getUser(userClaim);
-
-        if (jwtUser != null && !jwtUser.isBlank() && !"Anonymous".equals(jwtUser)) {
-            logger.debug("User resolved from JWT claim successfully");
+    private String resolveUser(String authHeader, String userIdHeader) {
+        String jwtUser = extractUserFromBearer(authHeader);
+        if (jwtUser != null && !jwtUser.isBlank()) {
+            logger.debug("User resolved from JWT payload");
             return jwtUser;
         }
-        // 2. Fall back to Userid header
         if (userIdHeader != null && !userIdHeader.isBlank()) {
-            logger.debug("JWT user unavailable - using Userid header");
+            logger.debug("JWT unavailable - using Userid header");
             return userIdHeader;
         }
-        // 3. Final fallback
-        logger.warn("No JWT user or Userid header found - using 'system' fallback");
+        logger.warn("No JWT or Userid header found - using 'system' fallback");
         return "system";
+    }
+
+    /**
+     * Decodes the JWT payload from a Bearer authorization header and returns the
+     * first non-empty claim value from {@link #USER_CLAIM_PREFERENCE}. Returns
+     * {@code null} if the header is missing, malformed, or none of the preferred
+     * claims are present.
+     */
+    private String extractUserFromBearer(String authHeader) {
+        if (authHeader == null || !authHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return null;
+        }
+        String token = authHeader.substring(7).trim();
+        String[] parts = token.split("\\.");
+        if (parts.length < 2) {
+            return null;
+        }
+        try {
+            byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
+            JSONObject payload = new JSONObject(new String(decoded, StandardCharsets.UTF_8));
+            for (String claimName : USER_CLAIM_PREFERENCE) {
+                if (payload.has(claimName) && !payload.isNull(claimName)) {
+                    String value = payload.optString(claimName, "").trim();
+                    if (!value.isEmpty()) {
+                        return value;
+                    }
+                }
+            }
+        } catch (IllegalArgumentException | org.json.JSONException e) {
+            logger.debug("Failed to decode JWT payload: {}", e.getMessage());
+        }
+        return null;
     }
 }

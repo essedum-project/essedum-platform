@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: goose.essedum-lfn.infosys.com
+  - host: goose.essedum.local
     http:
       paths:
       - path: /
@@ -25,8 +25,8 @@ spec:
               number: 8501
   tls:
   - hosts:
-    - goose.essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls
+    - goose.essedum.local
+    secretName: essedum-secret
 ---
 # Ingress for goosed API - strips /api prefix before forwarding to goosed
 apiVersion: networking.k8s.io/v1
@@ -42,7 +42,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: goose.essedum-lfn.infosys.com
+  - host: goose.essedum.local
     http:
       paths:
       - path: /api(/|$)(.*)
@@ -54,5 +54,5 @@ spec:
               number: 3005
   tls:
   - hosts:
-    - goose.essedum-lfn.infosys.com
-    secretName: essedum-lfn-tls
+    - goose.essedum.local
+    secretName: essedum-secret

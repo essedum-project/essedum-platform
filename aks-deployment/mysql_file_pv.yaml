@@ -9,6 +9,14 @@ spec:
   accessModes:
     - ReadWriteMany
   storageClassName: ""
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - essedum-1
   hostPath:
     path: /mnt/mysql-data
     type: DirectoryOrCreate

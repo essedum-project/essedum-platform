@@ -57,6 +57,8 @@ import { AgentPipelineComponent } from '../features/agent-pipeline/agent-pipelin
 import { AgentPipelineDashboardComponent } from '../features/agent-pipeline/agent-pipeline-dashboard/agent-pipeline-dashboard.component';
 import { PipelineInExecutionComponent } from '../features/agent-pipeline/pipeline-in-execution/pipeline-in-execution.component';
 import { PodLogDialogComponent } from '../features/agent-pipeline/pipeline-in-execution/pod-log-dialog/pod-log-dialog.component';
+import { SavePushConfigDialogComponent } from '../features/agent-pipeline/save-push-config-dialog/save-push-config-dialog.component';
+import { SessionPrPromptDialogComponent } from '../features/agent-pipeline/session-pr-prompt-dialog/session-pr-prompt-dialog.component';
 import { GithubLoginComponent } from '../features/agent-pipeline/github-login/github-login.component';
 import { PlaygroundTabComponent } from '../features/agent-pipeline/playground-tab/playground-tab.component';
 import { DeploymentFormComponent, BranchSelectionDialogComponent } from '../features/agent-pipeline/deployment-form/deployment-form.component';
@@ -101,6 +103,7 @@ import { TagsComponent } from '@essedum/shared-lib';
 import { AipFilterComponent } from '../features/sharedModule/aip-filter/aip-filter.component';
 import { AipGridComponent } from '../features/sharedModule/aip-grid/aip-grid.component';
 import { GitHubPushComponent } from '../features/sharedModule/github-push/github-push.component';
+import { GitInfoPanelComponent } from '../features/sharedModule/git-info-panel/git-info-panel.component';
 
 // Services
 import { Services } from '@essedum/shared-lib';
@@ -130,6 +133,8 @@ import { environment } from '../../environments/environment';
     AgentPipelineDashboardComponent,
     PipelineInExecutionComponent,
     PodLogDialogComponent,
+    SavePushConfigDialogComponent,
+    SessionPrPromptDialogComponent,
     PlaygroundTabComponent,
     DeploymentFormComponent,
     BranchSelectionDialogComponent,
@@ -150,6 +155,7 @@ import { environment } from '../../environments/environment';
     SkillsAddComponent,
     SkillsEditViewComponent,
     GitHubPushComponent,
+    GitInfoPanelComponent,
     // sharedModule aip-* — remaining MFE-private (rest moved to SharedLibUiModule)
     AipFilterComponent,
     AipGridComponent,
@@ -214,7 +220,7 @@ import { environment } from '../../environments/environment';
         baseUrl: environment.baseUrl ?? '/api/aip',
         datasetsUrl: environment.datasetsUrl ?? '/api/aip',
         sandboxUrl: '/api/exp',
-        langflowUrl: environment.langflowUrl ?? '/langflow/',
+        langflowUrl: '',
       } as ApiConfig,
     },
     { provide: 'envi',     useFactory: (cfg: ApiConfig) => cfg.baseUrl,     deps: [API_CONFIG] },

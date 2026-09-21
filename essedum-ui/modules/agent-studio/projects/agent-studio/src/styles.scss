@@ -1,2 +1,221 @@
 /* Global styles for agent-mfe standalone dev mode.
  * When hosted by the shell, host styles take precedence. */
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SESSION BRANCH DROPDOWN  (mat-menu lives in the CDK overlay, outside any host)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Dark (default) ────────────────────────────────────────────────────────────
+.session-branch-dropdown .mat-mdc-menu-panel {
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  background: #161b22 !important;
+  border: 1px solid rgba(88, 166, 255, 0.18) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(88, 166, 255, 0.06) !important;
+  overflow: hidden !important;
+}
+
+.session-branch-dropdown__panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 310px;
+  padding: 0;
+}
+
+// Header strip
+.session-branch-dropdown__header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 16px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.06);
+  border-bottom: 1px solid rgba(88, 166, 255, 0.12);
+
+  .session-branch-dropdown__header-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// Each info row — flexbox: label (fixed) | value items side by side
+.session-branch-dropdown__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 36px;
+
+  &:last-child { border-bottom: none; }
+}
+
+.session-branch-dropdown__label {
+  flex-shrink: 0;
+  width: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #586070;
+}
+
+.session-branch-dropdown__value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.session-branch-dropdown__muted {
+  color: #586070;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.session-branch-dropdown__code {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(88, 166, 255, 0.08);
+  color: #7ee787;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 170px;
+
+  &--branch {
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    max-width: 190px;
+  }
+}
+
+.session-branch-dropdown__check {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  color: #3fb950;
+  flex-shrink: 0;
+}
+
+.session-branch-dropdown__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  line-height: 1.4;
+
+  &--protected {
+    background: rgba(251, 140, 0, 0.12);
+    color: #fb8c00;
+    border: 1px solid rgba(251, 140, 0, 0.3);
+  }
+  &--open {
+    background: rgba(63, 185, 80, 0.12);
+    color: #3fb950;
+    border: 1px solid rgba(63, 185, 80, 0.3);
+  }
+  &--merged {
+    background: rgba(171, 71, 188, 0.12);
+    color: #ab47bc;
+    border: 1px solid rgba(171, 71, 188, 0.25);
+  }
+  &--none {
+    background: rgba(255, 255, 255, 0.05);
+    color: #586070;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+// ── Light theme ───────────────────────────────────────────────────────────────
+body.header-light-theme {
+  .session-branch-dropdown .mat-mdc-menu-panel {
+    background: #ffffff !important;
+    border-color: #d0d7de !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .session-branch-dropdown__header {
+    color: #0550ae;
+    background: #f0f4ff;
+    border-bottom-color: #d0d7de;
+  }
+
+  .session-branch-dropdown__row { border-bottom-color: #eaedf0; }
+
+  .session-branch-dropdown__label { color: #8c959f; }
+  .session-branch-dropdown__value { color: #1f2328; }
+  .session-branch-dropdown__muted { color: #8c959f; }
+
+  .session-branch-dropdown__code {
+    background: rgba(5, 80, 174, 0.07);
+    color: #1a7f37;
+    &--branch { color: #0550ae; background: rgba(5, 80, 174, 0.09); }
+  }
+
+  .session-branch-dropdown__check { color: #1a7f37; }
+
+  .session-branch-dropdown__badge {
+    &--protected { background: rgba(154, 83, 0, 0.08); color: #9a5300; border-color: rgba(154, 83, 0, 0.2); }
+    &--open      { background: rgba(26, 127, 55, 0.09); color: #1a7f37; border-color: rgba(26, 127, 55, 0.22); }
+    &--merged    { background: rgba(130, 80, 196, 0.08); color: #8250df; border-color: rgba(130, 80, 196, 0.2); }
+    &--none      { background: #f0f2f4; color: #8c959f; border-color: #d0d7de; }
+  }
+}
+
+// ─── Git Info Panel light theme — handled via :host-context in component SCSS ──
+// (tokens are set there; this fallback ensures they also propagate when the
+//  component is loaded inside a micro-frontend shell that re-renders the host.)
+body.header-light-theme app-git-info-panel {
+  --git-info-bg:           #eef1f5;
+  --git-info-border:       #d0d7de;
+  --git-info-icon-color:   #0550ae;
+  --git-info-title-color:  #0550ae;
+  --git-card-bg:           #f6f8fa;
+  --git-session-accent:    #0550ae;
+  --git-code-bg:           #dce4ef;
+  --git-code-color:        #1a7f37;
+  --git-check-color:       #1a7f37;
+  --git-badge-none-bg:     #e8ecf0;
+  --git-badge-none-color:  #57606a;
+  --git-badge-none-border: #c8d0d8;
+  --git-text-color:        #1f2328;
+}
+
+// ─── Session PR Dialog — light theme panel background ────────────────────────
+// The dialog renders in the CDK overlay (a child of <body>), so body-level
+// selectors work. The panelClass "session-pr-dialog-panel" lets us target only
+// this dialog without affecting others.
+body.header-light-theme .session-pr-dialog-panel {
+  .mdc-dialog__surface {
+    background: #ffffff !important;
+    color: #1f2328 !important;
+  }
+}
+
+// Dark default is fine (Material uses the dark-theme surface by default when the
+// app is in dark mode), but ensure it has a proper background even without a
+// global theme toggle.
+.session-pr-dialog-panel .mdc-dialog__surface {
+  background: #0d1117;
+}
+

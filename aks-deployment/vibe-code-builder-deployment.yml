@@ -15,21 +15,12 @@ spec:
         app: vibe-code-builder
     spec:
       serviceAccountName: builder-sa  # Grants permission per RBAC
-      imagePullSecrets:
-        - name: regcred
       containers:
         - name: vibe-code-builder
-          image: localhost:5000/vibe-code-builder-service:v15
+          image: ${DOCKER_REGISTRY}/vibe-code-builder-deployer:${IMAGE_TAG}
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
-          resources:
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
-            limits:
-              cpu: "2"
-              memory: "2Gi"
           envFrom:
             - secretRef:
                 name: vibe-code-builder-secret
@@ -44,10 +35,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   name: vibe-code-builder-service
   namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: vibe-code-builder

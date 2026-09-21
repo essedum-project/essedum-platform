@@ -3,21 +3,24 @@ FROM node:20-alpine AS build
 
 ARG NPM_REGISTRY_URL
 ARG NPM_AUTH_TOKEN
+ARG NPM_ALWAYS_AUTH=true
 
-# Inject corporate CA so npm can reach registries through Zscaler proxy
-COPY docker/certs/corp-ca.crt /usr/local/share/ca-certificates/corp-ca.crt
-RUN cat /usr/local/share/ca-certificates/corp-ca.crt >> /etc/ssl/certs/ca-certificates.crt
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/corp-ca.crt
+# Configure Artifactory npm registry when credentials are supplied
+RUN if [ -n "${NPM_REGISTRY_URL}" ] && [ -n "${NPM_AUTH_TOKEN}" ]; then \
+      REGISTRY_HOST=$(echo "${NPM_REGISTRY_URL}" | sed 's|https:||'); \
+      echo "registry=${NPM_REGISTRY_URL}" >> /root/.npmrc && \
+      echo "${REGISTRY_HOST}:_authToken=${NPM_AUTH_TOKEN}" >> /root/.npmrc && \
+      echo "always-auth=${NPM_ALWAYS_AUTH}" >> /root/.npmrc && \
+      echo "strict-ssl=false" >> /root/.npmrc; \
+    fi
 
 WORKDIR /workspace
 COPY essedum-ui/shell/ ./shell/
 WORKDIR /workspace/shell
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc && \
-    npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY essedum-ui/modules/integration-hub/ /workspace/modules/integration-hub/
 WORKDIR /workspace/modules/integration-hub
-RUN printf "registry=%s\n//infyartifactory.jfrog.io/artifactory/api/npm/npm-remote/:_authToken=%s\n" "${NPM_REGISTRY_URL}" "${NPM_AUTH_TOKEN}" > ~/.npmrc
 RUN rm -f package-lock.json yarn.lock
 RUN npm install --legacy-peer-deps
 RUN npm run build-prod

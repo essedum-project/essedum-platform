@@ -1,7 +1,20 @@
 // ═══════════════════════════════════════════════════════════════════
 //  DATASET TABLE VIEW — Enterprise AI Platform  (max creativity)
 // ═══════════════════════════════════════════════════════════════════
-:host { display: block !important; width: 100% !important; min-width: 0; box-sizing: border-box; }
+:host {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+// Prevent every ancestor between the host and the scroll container from
+// inheriting flexbox's implicit min-width:auto (which lets a wide table
+// force the whole page — including the toolbar icons and pagination — wider
+// instead of scrolling inside its own box).
+:host > * { min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
 
 @keyframes fadeUp    { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 @keyframes borderShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
@@ -14,21 +27,10 @@
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-end !important;
   gap: 12px !important;
   background: rgba(79,142,247,0.04) !important;
   border-radius: 16px 16px 0 0 !important;
-}
-
-// ── Toolbar: row/selected count (left side) ──────────────────────
-.card-header-left {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  flex-wrap: wrap !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border-radius: 0 !important;
 }
 
 // ── Toolbar: action buttons (right side) ─────────────────────────
@@ -82,14 +84,6 @@
   }
 }
 
-.data-count {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  color: #8aaccc !important;
-  letter-spacing: 0.3px !important;
-  strong, b { color: #7eb8ff !important; }
-}
-
 // ── Table card container ──────────────────────────────────────────
 .table-card {
   background: linear-gradient(145deg, rgba(10,22,56,0.93) 0%, rgba(6,12,32,0.88) 100%) !important;
@@ -98,6 +92,10 @@
   box-shadow: 0 16px 48px rgba(0,0,0,0.42), 0 1px 0 rgba(255,255,255,0.04) inset !important;
   overflow: hidden !important;
   position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
   animation: fadeUp 0.28s ease both !important;
 
   &::before {
@@ -113,17 +111,27 @@
 
 // ── Table scroll container ────────────────────────────────────────
 .table-scroll-container {
-  overflow: auto !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
   max-height: 520px !important;
 
-  &::-webkit-scrollbar { width: 5px; height: 5px; }
+  &::-webkit-scrollbar { width: 8px; height: 8px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.22); border-radius: 4px; &:hover { background: rgba(79,142,247,0.42); } }
 }
 
 // ── Table ─────────────────────────────────────────────────────────
+// The table is allowed to grow past 100% to fit its (nowrap) columns —
+// the scroll container above is what clips/scrolls it, so growth here
+// never reaches the toolbar or pagination, which live outside this box.
 .table, table {
-  width: 100% !important;
+  width: max-content !important;
+  min-width: 100% !important;
   border-collapse: collapse !important;
 
   thead tr th {
@@ -264,9 +272,6 @@ button.page-btn, .page-btn {
 body.header-light-theme {
   .table-card { background: #ffffff !important; border-color: rgba(79,70,229,0.14) !important; box-shadow: 0 8px 36px rgba(79,70,229,0.1) !important; &::before { background: linear-gradient(90deg, #6366f1, #06b6d4, #8b5cf6, #4f46e5, #6366f1); } }
   .container { background: rgba(79,70,229,0.03) !important; }
-  .card-header-left { background: transparent !important; }
-  .data-count { color: #334155 !important; strong, b { color: #4f46e5 !important; } }
-  .data-count strong, .data-count b { color: #4f46e5 !important; }
   .table thead tr th, table thead tr th { background: rgba(79,70,229,0.05) !important; color: #64748b !important; border-color: rgba(79,70,229,0.1) !important; &:hover { color: #4f46e5 !important; background: rgba(79,70,229,0.1) !important; } }
   .table tbody tr, table tbody tr { border-color: rgba(79,70,229,0.05) !important; &:nth-child(even) { background: rgba(79,70,229,0.018) !important; } &:hover { background: rgba(79,70,229,0.06) !important; td { color: #0f172a !important; } } td { color: #334155 !important; &:first-child { color: #4f46e5 !important; } } }
   .pagination-row, .pagination-container { border-top-color: rgba(79,70,229,0.08) !important; background: rgba(79,70,229,0.02) !important; }

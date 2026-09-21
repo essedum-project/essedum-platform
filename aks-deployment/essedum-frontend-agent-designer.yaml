@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: essedum-frontend-agent-designer
-        image: 192.168.28.36:5000/essedum-frontend-agent-designer:V-20
+        image: ${DOCKER_REGISTRY}/essedum-frontend-agent-designer:${IMAGE_TAG}
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: false

@@ -1,0 +1,77 @@
+# ──────────────────────────────────────────────────────────────────────
+# Essedum Platform — .gitignore
+# Keep .env.sample / .env.example / .env.example.* files (they are safe
+# templates). Block real .env files and credential material.
+# ──────────────────────────────────────────────────────────────────────
+
+# ── Environment / secrets ─────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+docker/.env
+docker/.env.local
+# ── Kubernetes secret manifests (credentials must stay on runner only) ──
+aks-deployment/*-secret.yaml
+aks-deployment/*-secrets.yaml
+k8s/secret.yaml
+k8s/*-secret.yaml
+# ── TLS / private keys ────────────────────────────────────────────────
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+tls.crt
+tls.key
+
+# ── Kubernetes kubeconfig / credentials ───────────────────────────────
+kubeconfig
+kubeconfig.*
+.kube/
+
+# ── Docker credential stores ──────────────────────────────────────────
+.docker/config.json
+
+# ── Build artifacts ───────────────────────────────────────────────────
+/node_modules/
+**/node_modules/
+dist/
+build/
+target/
+
+# ── npm / yarn lock files (contain Artifactory-sourced URLs) ──────────
+# Exception: committed lock files in agent-designer-frontend are managed
+# intentionally. Remove this line if you want to track them globally.
+# package-lock.json
+# yarn.lock
+
+# ── IDE / OS ──────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# ── Python ────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# ── Java / Maven / Gradle ─────────────────────────────────────────────
+*.class
+*.jar
+*.war
+
+# ── Backup files ──────────────────────────────────────────────────────
+aks-deployment/backups/*.sql
+aks-deployment/backups/*.yaml
+
+# ── Test / coverage output ────────────────────────────────────────────
+coverage/
+.coverage
+htmlcov/

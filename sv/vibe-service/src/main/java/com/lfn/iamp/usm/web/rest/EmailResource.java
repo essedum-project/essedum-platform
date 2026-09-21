@@ -225,7 +225,7 @@ public class EmailResource {
 			PageRequestCustomOffset pagerequest;
 			List<EmailPartialDTO> emails = List.of();
 			
-			if(source == "enduser") {
+			if("enduser".equals(source)) {
 				if(offset == true) {
 					pagerequest = new PageRequestCustomOffset(pageable.getPageNumber(),pageable.getPageSize(), pageable.getSort());
 					emails = emailService.findByEndUser(user_email, pagerequest);

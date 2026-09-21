@@ -21,15 +21,9 @@ spec:
             - "start-dev"
           env:
             - name: KEYCLOAK_ADMIN
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secret
-                  key: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.adminUser }}
             - name: KEYCLOAK_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secret
-                  key: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.adminPassword }}
             - name: KC_HTTP_PORT
               value: "{{ .Values.keycloak.httpPort }}"
             - name: KC_HTTPS_PORT
