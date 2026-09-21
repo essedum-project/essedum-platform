@@ -210,7 +210,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     private role: any;
     private filter: string = '';
     private loading: boolean = false;
-    private currentTab: 'agents' | 'mcp' = 'agents'; // Track current active tab
+    private currentTab: 'agents' | 'mcp' | 'app' = 'agents'; // Track current active tab
 
     /** Cache directory for JSON files and generated ADK */
     private cacheDir: string;
@@ -942,14 +942,106 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Handle tab switch between Agents and MCP Servers
+     * Get App Pipeline cards
      */
-    private async handleTabSwitch(tab: 'agents' | 'mcp'): Promise<void> {
+    private async getAppPipelineCards(): Promise<void> {
+        logger.info(`${this.logPrefix} getAppPipelineCards called`);
+
+        this.refreshAuthData();
+
+        if (!this._isAuthenticated) {
+            const contextToken = this._context.globalState.get(CONSTANTS.STATE_KEYS.ACCESS_TOKEN) as string;
+            if (contextToken && contextToken.trim().length > 0) {
+                this.updateToken(contextToken);
+            } else {
+                this.showAuthenticationRequired();
+                return;
+            }
+        }
+
+        if (!this._isAuthenticated) {
+            this.showAuthenticationRequired();
+            return;
+        }
+
+        this.loading = true;
+        this.updateWebview();
+
+        const params = this.buildHttpParams();
+
+        try {
+            logger.info(`${this.logPrefix} Fetching App Pipeline count...`);
+            this.totalCount = await this._pipelineAgentService.getAppPipelineCount(params);
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+
+            logger.info(`${this.logPrefix} Total App count: ${this.totalCount}, Total pages: ${this.totalPages}`);
+
+            const response = await this._pipelineAgentService.getAppPipelineList(params);
+
+            if (response && Array.isArray(response) && response.length > 0) {
+                this.allCards = response.map((element: any) => ({
+                    pipelineId: element.name || element.id || element._id || Math.random().toString(36),
+                    type: element.type || 'appPipeline',
+                    alias: element.alias || element.name || 'No Alias',
+                    createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                    created_by: element.created_by || element.createdBy || 'Unknown',
+                    id: element.id || element._id,
+                    status: 'active',
+                    description: element.description || '',
+                    interfacetype: 'app-pipeline',
+                    ...element
+                }));
+                this.filteredCards = this.allCards;
+            } else {
+                logger.info(`${this.logPrefix} No App Pipeline cards returned from API`);
+                this.allCards = [];
+                this.filteredCards = [];
+            }
+
+            logger.info(`${this.logPrefix} Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total app cards`);
+
+            this.loading = false;
+            this.updateWebview();
+
+        } catch (error: any) {
+            console.error(`${this.logPrefix} Error fetching App Pipeline cards:`, error);
+            this.loading = false;
+
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                this._isAuthenticated = false;
+                const action = error.response.status === 401 ? 'Login' : 'Login Again';
+                vscode.window.showErrorMessage(
+                    `Authentication ${error.response.status === 401 ? 'required' : 'failed'}. Please authenticate.`,
+                    action
+                ).then(selection => {
+                    if (selection === action) {
+                        vscode.commands.executeCommand('essedum.login');
+                    }
+                });
+                this.showAuthenticationRequired();
+                return;
+            }
+
+            let errorMessage = 'Failed to fetch App Pipeline data';
+            if (error.message) {
+                errorMessage = error.message;
+            }
+
+            vscode.window.showErrorMessage(`${this.logPrefix} Error: ${errorMessage}`);
+            this.filteredCards = [];
+            this.updateWebview();
+        }
+    }
+
+    /**
+     * Handle tab switch between Agents, MCP Servers, and App
+     */
+    private async handleTabSwitch(tab: 'agents' | 'mcp' | 'app'): Promise<void> {
         logger.info(`${this.logPrefix} Switching to tab: ${tab}`);
-        
+
         // Update current tab
         this.currentTab = tab;
-        
+
         // Reset pagination
         this.pageNumber = 1;
         this.totalCount = 0;
@@ -963,6 +1055,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             await this.getAgentCards();
         } else if (tab === 'mcp') {
             await this.getMcpServerCards();
+        } else if (tab === 'app') {
+            await this.getAppPipelineCards();
         }
     }
 
@@ -974,6 +1068,8 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             await this.getAgentCards();
         } else if (this.currentTab === 'mcp') {
             await this.getMcpServerCards();
+        } else if (this.currentTab === 'app') {
+            await this.getAppPipelineCards();
         }
     }
 
@@ -1229,10 +1325,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 progress.report({ increment: 60, message: 'Uploading to server...' });
 
                 // Upload ZIP using the bulk upload API
+                // 'type' is required by the server: Agent | MCP | Application
+                // isVibeStudio=true bypasses metadata.json validation (extension uploads won't have it)
+                const uploadType = this.getUploadType(card);
                 await this._pipelineAgentService.uploadFolderZip(
                     pipelineName,
                     zipBuffer,
-                    zipFileName
+                    zipFileName,
+                    undefined,
+                    true,
+                    uploadType
                 );
 
                 progress.report({ increment: 100, message: 'Complete!' });
@@ -1345,54 +1447,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                     console.warn(`${this.logPrefix} Could not parse JSON, displaying raw content:`, parseError);
                 }
 
-                progress.report({ increment: 80, message: 'Opening configuration...' });
-
-                // Check if pipeline folder exists in workspace
-                const pipelineFolderPath = this.getPipelineFolderPath(pipelineName);
-                const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-                const folderExistsInWorkspace = vscode.workspace.workspaceFolders?.some(
-                    folder => folder.uri.fsPath === pipelineFolderPath
-                );
-
-                if (folderExistsInWorkspace && fs.existsSync(jsonFilePath)) {
-                    // Folder exists in workspace - update the physical file and open it
-                    logger.info(`${this.logPrefix} Pipeline folder exists in workspace, opening physical JSON file`);
-                    
-                    // Update the physical file with latest content
-                    fs.writeFileSync(jsonFilePath, formattedContent, 'utf-8');
-                    
-                    // Open the physical file from workspace
-                    const doc = await vscode.workspace.openTextDocument(jsonFilePath);
-                    await vscode.window.showTextDocument(doc, {
-                        viewColumn: vscode.ViewColumn.One,
-                        preview: false
-                    });
-                } else {
-                    // Folder not in workspace - use virtual file system
-                    logger.info(`${this.logPrefix} Pipeline folder not in workspace, opening virtual JSON file`);
-                    
-                    // Register the JSON file with virtual file system
-                    if (!this._fileSystemProvider) {
-                        throw new Error('File system provider not initialized');
-                    }
-
-                    // Register JSON file with virtual file system (similar to ADK files)
-                    const virtualUri = this._fileSystemProvider.registerFile(
-                        jsonFileName,
-                        formattedContent,
-                        pipelineName,
-                        this.organization
-                    );
-
-                    logger.info(`${this.logPrefix} Registered JSON file with virtual FS: ${virtualUri.toString()}`);
-
-                    // Open the virtual JSON file directly in editor (no explorer)
-                    const doc = await vscode.workspace.openTextDocument(virtualUri);
-                    await vscode.window.showTextDocument(doc, {
-                        viewColumn: vscode.ViewColumn.One,
-                        preview: false
-                    });
-                }
+                progress.report({ increment: 80, message: 'Loading detail view...' });
 
             } catch (error: any) {
                 console.error(`${this.logPrefix} Error loading Pipeline Agent JSON:`, error);
@@ -1969,18 +2024,6 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             // Use pipeline-specific folder
             const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-
-            // If JSON doesn't exist in cache, fetch it
-            if (!fs.existsSync(jsonFilePath)) {
-                const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
-                if (!fileResponse.data) {
-                    throw new Error('Could not fetch configuration file');
-                }
-                const textDecoder = new TextDecoder('utf-8');
-                const fileContent = textDecoder.decode(fileResponse.data);
-                fs.writeFileSync(jsonFilePath, fileContent, 'utf-8');
-            }
 
             // Read prompt file
             const promptFilePath = path.join(this._context.extensionPath, CONSTANTS.PROMPT_CONFIG.FOLDER, CONSTANTS.PROMPT_CONFIG.FILENAME);
@@ -1993,26 +2036,21 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
                 throw new Error('Prompt file is empty');
             }
 
-            // Track this file for cleanup
-            const normalizedJsonPath = jsonFilePath.toLowerCase();
-            this.openedCachedFiles.set(normalizedJsonPath, jsonFilePath);
-
             // Add the folder to workspace explorer
             const folderUri = vscode.Uri.file(pipelineFolderPath);
             const workspaceFoldersCount = vscode.workspace.workspaceFolders?.length || 0;
             const pipelineDisplayName = card.alias || card.name || pipelineId;
-            
+
             // Check if folder is already in workspace
             const folderExists = vscode.workspace.workspaceFolders?.some(
                 folder => folder.uri.fsPath === pipelineFolderPath
             );
-            
+
             if (!folderExists) {
                 // Store the copilot action state before workspace reload
                 await this._context.globalState.update('pendingCopilotAction', {
                     pipelineId: pipelineId,
                     pipelineName: pipelineName,
-                    jsonFilePath: jsonFilePath,
                     promptContent: promptContent,
                     pipelineFolderPath: pipelineFolderPath,
                     timestamp: Date.now()
@@ -2034,20 +2072,6 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             } else {
                 logger.info(`${this.logPrefix} Folder already in workspace`);
             }
-
-            // Wait before opening document to ensure workspace is stable
-            await new Promise(resolve => setTimeout(resolve, 200));
-
-            // Open the JSON file
-            const jsonDoc = await vscode.workspace.openTextDocument(jsonFilePath);
-            await vscode.window.showTextDocument(jsonDoc, {
-                viewColumn: vscode.ViewColumn.One,
-                preview: false,
-                preserveFocus: false
-            });
-
-            // Wait for editor to be fully active
-            await new Promise(resolve => setTimeout(resolve, 800));
 
             // Open Copilot Chat panel
             logger.info(`${this.logPrefix} Opening Copilot Chat panel...`);
@@ -2174,8 +2198,10 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
                 progress.report({ increment: 70, message: 'Uploading to server...' });
 
-                // Upload ZIP to server
-                await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName);
+                // Upload ZIP to server — 'type' is required by the server: Agent | MCP | Application
+                // isVibeStudio=true bypasses metadata.json validation (extension uploads won't have it)
+                const uploadType = this.getUploadType(card);
+                await this._pipelineAgentService.uploadFolderZip(pipelineName, zipBuffer, zipFileName, undefined, true, uploadType);
 
                 progress.report({ increment: 100, message: 'Complete!' });
 
@@ -2560,7 +2586,7 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
     }
 
     /**
-     * Handle Refresh JSON action
+     * Handle Refresh action — re-checks ADK file availability and updates action buttons
      */
     private async handleRefreshJson(pipelineId: string): Promise<void> {
         try {
@@ -2577,48 +2603,26 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
 
             const card = this.allCards.find(c => c.pipelineId === pipelineId);
             if (!card) {
-                this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline agent not found' });
+                this.sendMessageToWebview({ command: 'actionError', message: 'Pipeline not found' });
                 return;
             }
 
             const pipelineName = card.name || card.alias || pipelineId;
-            const jsonFileName = `${pipelineName}_${this.organization}.json`;
 
-            const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
+            // Re-check ADK files to update which action buttons are shown
+            const adkFiles = await this._pipelineAgentService.listAdkFiles(pipelineName);
+            const hasFiles = adkFiles && adkFiles.length > 0;
 
-            if (!fileResponse.data) {
-                throw new Error('No data received from server');
-            }
+            this.sendMessageToWebview({
+                command: CONSTANTS.CLIENT_COMMANDS.ADK_FILES_STATUS,
+                hasFiles,
+                fileCount: adkFiles.length
+            });
 
-            const textDecoder = new TextDecoder('utf-8');
-            const fileContent = textDecoder.decode(fileResponse.data);
-            const jsonData = JSON.parse(fileContent);
-            const formattedContent = JSON.stringify(jsonData, null, 2);
-
-            // Update cached file in pipeline-specific folder
-            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const cachedJsonPath = path.join(pipelineFolderPath, jsonFileName);
-            fs.writeFileSync(cachedJsonPath, formattedContent, 'utf-8');
-
-            // Update open editor if exists
-            const editors = vscode.window.visibleTextEditors;
-            const jsonEditor = editors.find(e => e.document.fileName.includes(jsonFileName));
-
-            if (jsonEditor) {
-                const edit = new vscode.WorkspaceEdit();
-                const fullRange = new vscode.Range(
-                    jsonEditor.document.positionAt(0),
-                    jsonEditor.document.positionAt(jsonEditor.document.getText().length)
-                );
-                edit.replace(jsonEditor.document.uri, fullRange, formattedContent);
-                await vscode.workspace.applyEdit(edit);
-            }
-
-            vscode.window.showInformationMessage('✓ Configuration refreshed');
-            this.sendMessageToWebview({ command: 'actionComplete', message: '✓ Configuration refreshed' });
+            this.sendMessageToWebview({ command: 'actionComplete', message: '✓ Refreshed' });
 
         } catch (error: any) {
-            console.error(`${this.logPrefix} Error refreshing JSON:`, error);
+            console.error(`${this.logPrefix} Error refreshing:`, error);
             this.sendMessageToWebview({ command: 'actionError', message: `Failed to refresh: ${error.message}` });
         }
     }
@@ -2640,15 +2644,14 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             const pipelineName = card.name || card.alias || pipelineId;
             const jsonFileName = `${pipelineName}_${this.organization}.json`;
 
-            // Use pipeline-specific folder
-            const pipelineFolderPath = this.getPipelineFolderPath(pipelineId);
-            const jsonFilePath = path.join(pipelineFolderPath, jsonFileName);
-
-            if (!fs.existsSync(jsonFilePath)) {
-                throw new Error('Configuration file not found in cache');
+            // Fetch directly from API (no disk cache needed)
+            const fileResponse = await this._pipelineAgentService.readPipelineFile(pipelineName, jsonFileName);
+            if (!fileResponse.data) {
+                throw new Error('No data received from server');
             }
+            const textDecoder = new TextDecoder('utf-8');
+            const jsonContent = textDecoder.decode(fileResponse.data);
 
-            const jsonContent = fs.readFileSync(jsonFilePath, 'utf-8');
             await vscode.env.clipboard.writeText(jsonContent);
 
             vscode.window.showInformationMessage('✓ Configuration copied to clipboard');
@@ -2720,27 +2723,16 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             }
 
             logger.info(`${this.logPrefix} Found pending copilot action, resuming...`);
-            
+
             // Clear the pending action
             await this._context.globalState.update('pendingCopilotAction', undefined);
 
             // Give VS Code time to fully initialize after reload
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Focus the Explorer view
+            // Focus the Explorer view to show the newly added workspace folder
             await vscode.commands.executeCommand('workbench.view.explorer');
             await new Promise(resolve => setTimeout(resolve, 300));
-
-            // Open the JSON file
-            const jsonDoc = await vscode.workspace.openTextDocument(pendingAction.jsonFilePath);
-            await vscode.window.showTextDocument(jsonDoc, {
-                viewColumn: vscode.ViewColumn.One,
-                preview: false,
-                preserveFocus: false
-            });
-
-            // Wait for editor to be fully active
-            await new Promise(resolve => setTimeout(resolve, 800));
 
             // Open Copilot Chat panel
             logger.info(`${this.logPrefix} Opening Copilot Chat panel...`);
@@ -3383,6 +3375,20 @@ export class PipelineAgentProvider implements vscode.WebviewViewProvider {
             logger.info(`${this.logPrefix} Created pipeline-specific folder: ${pipelineFolderPath}`);
         }
         return pipelineFolderPath;
+    }
+
+    /**
+     * Map a card's interfacetype to the upload 'type' param required by
+     * /api/aip/folder/upload — mirrors the web app's uploadAgentFiles() logic:
+     *   mcp-pipeline  → 'MCP'
+     *   app-pipeline  → 'Application'
+     *   pipeline-agent (or any other) → 'Agent'
+     */
+    private getUploadType(card: PipelineAgentCard | undefined): string {
+        const interfacetype = card?.interfacetype || '';
+        if (interfacetype === 'mcp-pipeline') { return 'MCP'; }
+        if (interfacetype === 'app-pipeline') { return 'Application'; }
+        return 'Agent';
     }
 
     /**
