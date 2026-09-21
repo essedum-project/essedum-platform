@@ -137,6 +137,12 @@ vibe:
       response-timeout-seconds: 300
       secret-key: ${GOOSE_SECRET_KEY:sk-1234}
     working-dir: ${GOOSE_WORKING_DIR:/app/goose}
+  minio:
+    url: ${MINIO_ENDPOINT:http://minio-service:9000}
+    access-key: ${MINIO_ACCESS_KEY:}
+    secret-key: ${MINIO_SECRET_KEY:}
+    bucket: ${MINIO_BUCKET:aiptest}
+    prefix: ${GOOSE_MINIO_PREFIX:goose-apps}
   github:
     enabled: ${VIBE_GITHUB_ENABLED:false}
     repo-url: ${VIBE_GITHUB_REPO_URL:}

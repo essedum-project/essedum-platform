@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,9 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.lfn.icip.vibecoding.service.GooseMinioService;
 import com.lfn.icip.vibecoding.service.SalusService;
 import com.lfn.icip.vibecoding.service.SalusService.SalusResult;
 import com.lfn.icip.vibecoding.service.VibeCodingService;
+
+import java.util.List;
 
 /**
  * REST controller exposing the Goose API action-required, agent management,
@@ -43,6 +46,8 @@ public class VibeCodingController {
 
     private final VibeCodingService vibeCodingService;
     private final SalusService salusService;
+        @Nullable
+    private final GooseMinioService gooseMinioService;
 
     @Value("${vibe.azure.openai.endpoint}")
     private String azureOpenAiEndpoint;
@@ -56,9 +61,17 @@ public class VibeCodingController {
     @Value("${vibe.azure.openai.api-key}")
     private String azureOpenAiApiKey;
 
-    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService) {
+    @Value("${vibe.litellm.base-url:http://litellm.aipns.svc.cluster.local:4000}")
+    private String litellmBaseUrl;
+
+    @Value("${vibe.litellm.api-key:sk-1234}")
+    private String litellmApiKey;
+  
+    public VibeCodingController(VibeCodingService vibeCodingService, SalusService salusService,
+                                @Nullable GooseMinioService gooseMinioService) {
         this.vibeCodingService = vibeCodingService;
         this.salusService = salusService;
+        this.gooseMinioService = gooseMinioService;
     }
 
     // =========================================================================
@@ -84,7 +97,16 @@ public class VibeCodingController {
     public ResponseEntity<String> agentStart(
             @RequestBody Map<String, Object> request) {
         logger.info("Agent start request");
-        return vibeCodingService.post("/agent/start", request);
+        ResponseEntity<String> response = vibeCodingService.post("/agent/start", request);
+        // Retry once if goosed returned non-2xx or an empty session body (startup race condition).
+        if (response == null || !response.getStatusCode().is2xxSuccessful()
+                || response.getBody() == null || "{}".equals(response.getBody())) {
+            logger.warn("Agent start first attempt returned {} — retrying after 1 s",
+                    response != null ? response.getStatusCode() : "null");
+            try { Thread.sleep(1000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+            response = vibeCodingService.post("/agent/start", request);
+        }
+        return response;
     }
 
     @PostMapping(value = "/agent/stop",
@@ -139,8 +161,12 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
-        logger.info("Agent update provider request — original provider/model: {}/{} — updated to azure_openai/{}",
-                originalProvider, originalModel, azureOpenAiDeploymentName);
+
+        // Translate "litellm" → goosed's "openai" provider (LiteLLM is OpenAI-compatible).
+        // The actual provider sent to goosed and the config upserts are handled below.
+        String gooseProvider = "litellm".equals(originalProvider) ? "openai" : originalProvider;
+        logger.info("Agent update provider request — original provider/model: {}/{} — goose provider: {}",
+                originalProvider, originalModel, gooseProvider);
 
         // ── Step 1: call update_provider IMMEDIATELY (before upserts) ──────
         // Calling right after agent/start wins the session-creation lock race,
@@ -148,7 +174,7 @@ public class VibeCodingController {
         // background extension-loading task.  The Azure config keys are already
         // persisted in goosed's config.yaml from the first session; the upserts
         // below keep them fresh but are not required for the provider call.
-        request.put("provider", originalProvider);
+        request.put("provider", gooseProvider);
         request.put("model", originalModel);
 
         int maxAttempts = 36;           // 36 × 5 s = 3 min ceiling (safety net)
@@ -171,7 +197,7 @@ public class VibeCodingController {
             }
         }
 
-        // ── Step 2: refresh Azure OpenAI config in goosed config store ──────
+        // ── Step 2: refresh provider config in goosed config store ──────
         // Done after update_provider so it never adds latency to the lock race.
         if ("azure_openai".equals(originalProvider) && azureOpenAiEndpoint != null) {
             vibeCodingService.post("/config/upsert",
@@ -182,6 +208,13 @@ public class VibeCodingController {
                     Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
             vibeCodingService.post("/config/upsert",
                     Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
+        } else if ("litellm".equals(originalProvider) && litellmBaseUrl != null) {
+            // LiteLLM is OpenAI-compatible; point goosed's openai provider at the LiteLLM proxy.
+            // Goose 1.30+ uses OPENAI_BASE_URL (standard OpenAI client convention).
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "OPENAI_BASE_URL", "value", litellmBaseUrl, "is_secret", false));
+            vibeCodingService.post("/config/upsert",
+                    Map.of("key", "OPENAI_API_KEY", "value", litellmApiKey, "is_secret", true));
         }
 
         if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
@@ -191,7 +224,7 @@ public class VibeCodingController {
                 maxAttempts, lastResponse != null ? lastResponse.getStatusCode().value() : "null");
         return lastResponse != null ? lastResponse
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("{\"error\":\"update_provider exhausted all retries\"}");
+                  .body("{\"error\":\"update_provider exhausted all retries\"}");
     }
 
     @PostMapping(value = "/agent/update-session",
@@ -272,6 +305,33 @@ public class VibeCodingController {
             @RequestBody Map<String, Object> request) {
         logger.info("Agent import app request");
         return vibeCodingService.post("/agent/import_app", request);
+    }
+
+    /**
+     * Return every file Goose generated for a session, read directly from MinIO
+     * ({@code <bucket>/<prefix>/<sessionId>/...}). Replaces the previous
+     * list_apps + per-file call-tool round-trip for building the Vibe Studio
+     * file tree.
+     *
+     * @return a JSON array of {@code {path, content}} objects
+     */
+    @GetMapping(value = "/sessions/{sessionId}/files", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GooseMinioService.FileEntry>> sessionFiles(
+            @PathVariable(value = "sessionId") String sessionId) {
+        logger.info("Session files request from MinIO, session={}", sessionId);
+                if (gooseMinioService == null) {
+                        logger.warn("Session files request rejected: Goose MinIO is not configured");
+                        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+                }
+        try {
+            return ResponseEntity.ok(gooseMinioService.listSessionFiles(sessionId));
+        } catch (IllegalArgumentException ex) {
+            logger.warn("Invalid session id '{}': {}", sessionId, ex.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException ex) {
+            logger.error("Failed to fetch session files for '{}': {}", sessionId, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // =========================================================================

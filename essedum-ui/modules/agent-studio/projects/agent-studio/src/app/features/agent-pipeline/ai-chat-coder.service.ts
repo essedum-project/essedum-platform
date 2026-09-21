@@ -108,6 +108,10 @@ export class AiChatCoderService implements OnDestroy {
   private pushPollingTimer: any = null;
   /** User-overridable repo URL (falls back to the default derived from files). */
   private customRepoUrl: string | null = null;
+  /** Salus URL — set by the host component; empty string = safety check disabled. */
+  salusUrl: string = '';
+  /** LiteLLM base URL — set by the host component for model discovery. */
+  litellmUrl: string = '';
 
   constructor(
     private http: HttpClient,
@@ -164,6 +168,31 @@ export class AiChatCoderService implements OnDestroy {
     if (!trimmed) return;
 
     const bubble = (displayText ?? trimmed).trim();
+
+    if (this.salusUrl) {
+      // Salus pre-LLM pipeline: anonymize PII → moderation check.
+      // Moderation runs only on the user's actual typed text (bubble), NOT the
+      // full context-injected prompt — codebase context dilutes the signal and
+      // causes threats buried in code to be missed.
+      this.salusPreProcess(trimmed, this.salusUrl, bubble).then(result => {
+        if (!result.allowed) {
+          this.messages.push({
+            role: 'assistant',
+            content: result.message,
+            timestamp: new Date(),
+          });
+          this.messages$.next([...this.messages]);
+          return;
+        }
+        // Use the anonymized prompt for the LLM, keep original bubble for display
+        this._doSendMessage(result.text, provider, model, bubble);
+      });
+      return;
+    }
+    this._doSendMessage(trimmed, provider, model, bubble);
+  }
+
+  private _doSendMessage(trimmed: string, provider: string, model: string, bubble: string): void {
     this.messages.push({ role: 'user', content: bubble, timestamp: new Date() });
     this.messages$.next([...this.messages]);
     this.status$.next('generating');
@@ -334,9 +363,13 @@ export class AiChatCoderService implements OnDestroy {
     this.replyAbortController = new AbortController();
     const { signal } = this.replyAbortController;
 
+    this.lastTraceId = this.generateTraceId();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
+      'X-Trace-Id': this.lastTraceId,
+      'X-Langfuse-Trace-Id': this.lastTraceId,
+      'X-Langfuse-Session-Id': sid,
       ...this.getHeaders(),
     };
 
@@ -569,6 +602,20 @@ export class AiChatCoderService implements OnDestroy {
       else this.messages.splice(this.streamingAssistantIndex, 1);
       this.streamingAssistantIndex = null;
       this.messages$.next([...this.messages]);
+    }
+
+    // Salus post-LLM pipeline: moderation check + PII analysis on response
+    if (this.salusUrl && text && text.trim()) {
+      this.salusPostProcess(text, this.salusUrl).then(warnings => {
+        if (warnings.length) {
+          this.messages.push({
+            role: 'assistant',
+            content: warnings.join('\n'),
+            timestamp: new Date(),
+          });
+          this.messages$.next([...this.messages]);
+        }
+      });
     }
 
     if (this.sessionId) {
@@ -978,5 +1025,177 @@ export class AiChatCoderService implements OnDestroy {
   getProviders(): Promise<any> {
     const url = `${this.baseUrl}/service/v1/vibe-coding/config/providers`;
     return this.http.get<any>(url, { headers: this.getHeaders() }).toPromise();
+  }
+
+  /** Last Langfuse trace ID generated in the most recent reply stream. */
+  lastTraceId: string | null = null;
+
+  /** Generate a unique trace ID for Langfuse correlation. */
+  private generateTraceId(): string {
+    return `aip-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 10)}`;
+  }
+
+  /**
+   * Salus pre-LLM pipeline:
+   * 1. Privacy anonymize — redact PII from the full prompt before sending to LLM.
+   * 2. Moderation check  — run on the user's raw typed message only (not the full
+   *    context-injected prompt, which would dilute the signal).
+   *
+   * Returns { allowed: true, text: anonymizedPrompt } or { allowed: false, message }.
+   */
+  private buildModerationPayload(text: string): object {
+    return {
+      Prompt: text,
+      ModerationChecks: ['Toxicity'],
+      ModerationCheckThresholds: {
+        PromptinjectionThreshold: 0.70,
+        JailbreakThreshold: 0.70,
+        PiientitiesConfiguredToBlock: [],
+        RefusalThreshold: 0.70,
+        ToxicityThresholds: {
+          ToxicityThreshold: 0.60,
+          SevereToxicityThreshold: 0.60,
+          ObsceneThreshold: 0.60,
+          ThreatThreshold: 0.60,
+          InsultThreshold: 0.60,
+          IdentityAttackThreshold: 0.60,
+          SexualExplicitThreshold: 0.60,
+        },
+        ProfanityCountThreshold: 1,
+        RestrictedtopicDetails: { Restrictedtopics: [], RestrictedtopicThreshold: 0.60 },
+        CustomTheme: {},
+      },
+    };
+  }
+
+  async salusPreProcess(
+    prompt: string,
+    salusUrl: string,
+    moderationText?: string,
+  ): Promise<{ allowed: boolean; text: string; message: string }> {
+    const base = salusUrl.replace(/\/$/, '');
+    let processedText = prompt;
+
+    // Step 1: Privacy anonymize the full prompt
+    try {
+      const privResp = await fetch(`${base}/v1/privacy/text/anonymize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputText: prompt }),
+        credentials: 'include',
+      });
+      if (privResp.ok) {
+        const privData = await privResp.json();
+        if (typeof privData?.anonymizedText === 'string' && privData.anonymizedText) {
+          processedText = privData.anonymizedText;
+        }
+      }
+    } catch { /* fail open */ }
+
+    // Step 2: Moderation on user's raw typed text only (not the full context-injected prompt)
+    const textToModerate = (moderationText ?? processedText).trim();
+    try {
+      const modResp = await fetch(`${base}/salus-moderation-layer/rai/v1/moderations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.buildModerationPayload(textToModerate)),
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      if (modResp.ok) {
+        const modData = await modResp.json();
+        const status = modData?.moderationResults?.summary?.status;
+        if (status && status !== 'PASSED') {
+          const reasons = modData?.moderationResults?.summary?.reason ?? [];
+          const detail = reasons.length ? ` Reason: ${reasons.join(', ')}.` : '';
+          return {
+            allowed: false,
+            text: processedText,
+            message: `⚠️ Your message was flagged by the Salus safety filter and has not been sent.${detail} Please revise your prompt.`,
+          };
+        }
+      }
+    } catch { /* fail open */ }
+
+    return { allowed: true, text: processedText, message: '' };
+  }
+
+  /**
+   * Salus post-LLM pipeline:
+   * 1. Moderation check on LLM response — warn if harmful content detected.
+   * 2. Privacy analyze on LLM response — warn if PII detected.
+   * Returns array of warning strings (empty = clean).
+   */
+  async salusPostProcess(responseText: string, salusUrl: string): Promise<string[]> {
+    const base = salusUrl.replace(/\/$/, '');
+    const warnings: string[] = [];
+
+    // Step 1: Moderation check on LLM response
+    try {
+      const modResp = await fetch(`${base}/salus-moderation-layer/rai/v1/moderations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.buildModerationPayload(responseText.slice(0, 4000))),
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      if (modResp.ok) {
+        const modData = await modResp.json();
+        const status = modData?.moderationResults?.summary?.status;
+        if (status && status !== 'PASSED') {
+          const reasons = modData?.moderationResults?.summary?.reason ?? [];
+          const detail = reasons.length ? ` (${reasons.join(', ')})` : '';
+          warnings.push(`⚠️ Salus detected potentially harmful content in the AI response${detail}.`);
+        }
+      }
+    } catch { /* fail open */ }
+
+    // Step 2: Privacy analysis on LLM response
+    try {
+      const privResp = await fetch(`${base}/v1/privacy/text/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputText: responseText.slice(0, 4000) }),
+        credentials: 'include',
+      });
+      if (privResp.ok) {
+        const privData = await privResp.json();
+        const entities = privData?.piiEntities ?? privData?.entities ?? privData?.results ?? [];
+        if (Array.isArray(entities) && entities.length > 0) {
+          const types = [...new Set(entities.map((e: any) => e?.type ?? e?.entity_type ?? 'PII'))].join(', ');
+          warnings.push(`⚠️ Salus detected potential PII in the AI response (${types}). Please review before sharing.`);
+        }
+      }
+    } catch { /* fail open */ }
+
+    return warnings;
+  }
+
+  /** @deprecated kept for backwards compat. */
+  async checkSafety(prompt: string, salusUrl: string): Promise<boolean> {
+    const result = await this.salusPreProcess(prompt, salusUrl);
+    return result.allowed;
+  }
+
+  /**
+   * Fetches the model list from LiteLLM and returns [{value, label}] pairs.
+   * Returns [] if LiteLLM is not reachable.
+   */
+  async getLiteLLMModels(litellmUrl: string): Promise<Array<{ value: string; label: string }>> {
+    if (!litellmUrl) return [];
+    try {
+      const url = `${litellmUrl.replace(/\/$/, '')}/v1/models`;
+      const resp = await this.http.get<any>(url).toPromise();
+      const data = resp?.data ?? resp?.models ?? resp ?? [];
+      if (!Array.isArray(data)) return [];
+      return data
+        .map((m: any) => {
+          const id = m?.id ?? m?.model ?? m?.name ?? '';
+          return id ? { value: id, label: id } : null;
+        })
+        .filter(Boolean) as Array<{ value: string; label: string }>;
+    } catch {
+      return [];
+    }
   }
 }

@@ -1,0 +1,78 @@
+# Salus STUB services — use during development when real Salus is not deployed.
+# Implements the exact API contract with regex-based PII detection (no ML models).
+# Image size: ~80 MB each.  RAM: ~40 MB each.
+#
+# Usage:
+#   docker compose -f /home/engne2/essedum/essedum-platform/docker/docker-compose.yml \
+#                  -f /home/engne2/Salus/stub/docker-compose.stub.yml \
+#                  up -d salus-moderation-stub salus-privacy-stub
+#
+# Then set in agent-designer-backend/.env:
+#   SALUS_ENABLED=true
+#   SALUS_MODERATION_URL=http://salus-moderation-stub:30000
+#   SALUS_PRIVACY_URL=http://salus-privacy-stub:30002
+
+networks:
+  backend-net:
+    name: essedum-backend-net
+    external: true
+
+services:
+
+  salus-moderation-stub:
+    build:
+      context: ./moderation
+      dockerfile: Dockerfile
+    image: essedum/salus-moderation-stub:local
+    container_name: salus-moderation-stub
+    hostname: salus-moderation-stub
+    restart: unless-stopped
+    networks:
+      - backend-net
+    ports:
+      - "127.0.0.1:30000:30000"
+    environment:
+      - PORT=30000
+      - LOG_LEVEL=INFO
+    mem_limit: 64m
+    cpus: "0.25"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:30000/health\", timeout=3)' 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  salus-privacy-stub:
+    build:
+      context: ./privacy
+      dockerfile: Dockerfile
+    image: essedum/salus-privacy-stub:local
+    container_name: salus-privacy-stub
+    hostname: salus-privacy-stub
+    restart: unless-stopped
+    networks:
+      - backend-net
+    ports:
+      - "127.0.0.1:30002:30002"
+    environment:
+      - PORT=30002
+      - LOG_LEVEL=INFO
+    mem_limit: 64m
+    cpus: "0.25"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:30002/health\", timeout=3)' 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"

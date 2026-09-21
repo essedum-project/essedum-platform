@@ -5,7 +5,70 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light theme (default) */
   :root {
+    --background: 220 20% 97%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    --primary: 195 100% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 222 20% 20%;
+
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 262 70% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 86%;
+    --input: 220 13% 88%;
+    --ring: 195 100% 38%;
+
+    --radius: 0.625rem;
+
+    --node-llm: 195 100% 38%;
+    --node-tool: 142 60% 40%;
+    --node-agent: 262 70% 55%;
+    --node-memory: 38 90% 48%;
+    --node-prompt: 316 60% 50%;
+    --node-mcp: 172 60% 38%;
+    --node-input: 220 70% 52%;
+    --node-output: 25 80% 50%;
+    --node-condition: 48 85% 45%;
+
+    --canvas-bg: 220 20% 95%;
+    --canvas-dot: 220 13% 82%;
+    --canvas-line: 220 13% 78%;
+
+    --glow-primary: 0 0 16px hsl(195 100% 38% / 0.2);
+    --glow-accent: 0 0 16px hsl(262 70% 58% / 0.2);
+    --glow-node: 0 4px 16px hsl(195 100% 38% / 0.1);
+
+    --shadow-node: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-panel: 4px 0 16px rgba(0, 0, 0, 0.06);
+    --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.12);
+
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --font-display: 'Roboto', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  /* Dark theme */
+  .dark {
     --background: 222 20% 8%;
     --foreground: 220 15% 92%;
 
@@ -34,9 +97,6 @@
     --input: 222 15% 16%;
     --ring: 195 100% 50%;
 
-    --radius: 0.625rem;
-
-    /* Custom design tokens */
     --node-llm: 195 100% 50%;
     --node-tool: 142 70% 50%;
     --node-agent: 262 83% 68%;
@@ -58,13 +118,6 @@
     --shadow-node: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0,0,0,0.3);
     --shadow-panel: 4px 0 24px rgba(0, 0, 0, 0.4);
     --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.5);
-
-    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-default: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --font-display: 'Roboto', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
   }
 }
 

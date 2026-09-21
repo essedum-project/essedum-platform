@@ -15,18 +15,22 @@
 
 package com.lfn.icip.icipwebeditor.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,11 +43,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.domain.Pageable;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -174,7 +181,34 @@ public class ICIPPipelineService implements IICIPSearchable{
 	@Value("${security.claim:#{null}}")
 	private String claim;
 
-	
+	@Value("${icip.container.pyjob.url:}")
+	private String containerPyJobUrl;
+
+	@Value("${icip.container.deployer.url:}")
+	private String containerDeployerUrl;
+
+	@Value("${icip.container.registry.prefix:}")
+	private String containerRegistryPrefix;
+
+	@Value("${icip.container.namespace.pipeline:vibe-pipelines}")
+	private String containerNamespacePipeline;
+
+	@Value("${icip.container.namespace.training:vibe-training}")
+	private String containerNamespaceTraining;
+
+	@Value("${fileserver.minio.url:}")
+	private String containerMinioEndpoint;
+
+	@Value("${fileserver.minio.access-key:}")
+	private String containerMinioAccessKey;
+
+	@Value("${fileserver.minio.secret-key:}")
+	private String containerMinioSecretKey;
+
+	@Value("${icip.container.minio.bucket:aiptest}")
+	private String containerMinioBucket;
+
+
 	final String TYPE="PIPELINE";
 	/**
 	 * Instantiates a new ICIP pipeline service.
@@ -854,6 +888,9 @@ public class ICIPPipelineService implements IICIPSearchable{
 	 */
 	public ResponseEntity<?> createJob(String jobType, String cname, String alias, String org, String runtime,
 			String params, String corelid, int feoffset, String datasource, String workerlogId) {
+		if (runtime.equalsIgnoreCase("container")) {
+			return deployPipelineAsContainer(jobType, cname, alias, org);
+		}
 		JobParamsDTO body = new JobParamsDTO();
 		if(!runtime.toLowerCase(Locale.ENGLISH).startsWith("local")) {
 		body.setDatasourceName(datasource);}
@@ -939,6 +976,67 @@ public class ICIPPipelineService implements IICIPSearchable{
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return new ResponseEntity<>("Request failed", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	private ResponseEntity<?> deployPipelineAsContainer(String jobType, String cname, String alias, String org) {
+		try {
+			List<ICIPNativeScript> scripts = nativeScriptService.findByOrgAndName(cname, org);
+			if (scripts == null || scripts.isEmpty()) {
+				return new ResponseEntity<>("No scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
+			}
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+				for (ICIPNativeScript script : scripts) {
+					ZipEntry entry = new ZipEntry(script.getFilename());
+					zos.putNextEntry(entry);
+					try (InputStream is = script.getFilescript().getBinaryStream()) {
+						byte[] buf = new byte[4096];
+						int len;
+						while ((len = is.read(buf)) > 0) {
+							zos.write(buf, 0, len);
+						}
+					}
+					zos.closeEntry();
+				}
+			}
+			final byte[] zipBytes = bos.toByteArray();
+			final String zipName = cname + ".zip";
+			String namespace = "TrainingPipeline".equals(jobType) ? containerNamespaceTraining : containerNamespacePipeline;
+
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("zip_file", new ByteArrayResource(zipBytes) {
+				@Override public String getFilename() { return zipName; }
+			});
+			body.add("deployer_url", containerDeployerUrl);
+			body.add("target_image_tag", containerRegistryPrefix + alias + ":v1");
+			body.add("deployment_name", alias);
+			body.add("namespace", namespace);
+			body.add("minio_endpoint", containerMinioEndpoint);
+			body.add("minio_access_key", containerMinioAccessKey);
+			body.add("minio_secret_key", containerMinioSecretKey);
+			body.add("minio_bucket", containerMinioBucket);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+			ResponseEntity<String> response = restTemplate.postForEntity(
+				containerPyJobUrl + "/container-deploy-with-zip", entity, String.class);
+			return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Container deploy failed for pipeline: " + cname, e);
+			return new ResponseEntity<>("Container deploy failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	public ResponseEntity<?> getContainerDeployStatus(String deployId) {
+		try {
+			ResponseEntity<String> response = restTemplate.getForEntity(
+				containerPyJobUrl + "/container-deploy/" + deployId + "/status", String.class);
+			return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Failed to get container deploy status for deployId: " + deployId, e);
+			return new ResponseEntity<>("Status not found", HttpStatus.NOT_FOUND);
 		}
 	}
 
