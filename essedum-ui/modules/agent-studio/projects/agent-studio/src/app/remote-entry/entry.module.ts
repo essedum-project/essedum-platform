@@ -220,7 +220,7 @@ import { environment } from '../../environments/environment';
         baseUrl: environment.baseUrl ?? '/api/aip',
         datasetsUrl: environment.datasetsUrl ?? '/api/aip',
         sandboxUrl: '/api/exp',
-        langflowUrl: '',
+        langflowUrl: environment.langflowUrl?.startsWith('__FE_') ? '/langflow/' : (environment.langflowUrl || ''),
       } as ApiConfig,
     },
     { provide: 'envi',     useFactory: (cfg: ApiConfig) => cfg.baseUrl,     deps: [API_CONFIG] },

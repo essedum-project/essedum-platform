@@ -21,30 +21,47 @@ spec:
         - containerPort: 3005
         env:
         - name: GOOSE_HOST
-          value: "0.0.0.0"
+          value: "${GOOSE_HOST}"
         - name: GOOSE_PORT
-          value: "3005"
+          value: "${GOOSE_PORT}"
         - name: GOOSE_TLS
-          value: "false"
+          value: "${GOOSE_TLS}"
         - name: GOOSE_SERVER__SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: goose-secret
               key: secret-key
         - name: OLLAMA_HOST
-          value: "http://192.168.28.36:11434"
+          value: "${OLLAMA_HOST}"
+        # Route agent-pipeline LLM calls through the LiteLLM gateway (deployed
+        # service `litellm`, model list in `litellm-config`). LiteLLM already
+        # has langfuse success/failure callbacks configured, so every Goose
+        # completion is traced in Langfuse automatically — no extra Goose env
+        # needed for that. GOOSE_PROVIDER=litellm uses Goose's native litellm
+        # provider (crates/goose/src/providers/litellm.rs).
+        - name: GOOSE_PROVIDER
+          value: "${GOOSE_PROVIDER}"
+        - name: GOOSE_MODEL
+          value: "${GOOSE_MODEL}"
+        - name: LITELLM_HOST
+          value: "${LITELLM_HOST}"
+        - name: LITELLM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litellm-secrets
+              key: LITELLM_MASTER_KEY
         - name: GOOSE_MINIO_UPLOAD_ENABLED
-          value: "true"
+          value: "${GOOSE_MINIO_UPLOAD_ENABLED}"
         - name: GOOSE_MINIO_ENDPOINT
-          value: "http://minio-service:9000"
+          value: "${GOOSE_MINIO_ENDPOINT}"
         - name: GOOSE_MINIO_BUCKET
-          value: "aiptest"
+          value: "${GOOSE_MINIO_BUCKET}"
         - name: GOOSE_MINIO_REGION
-          value: "us-east-1"
+          value: "${GOOSE_MINIO_REGION}"
         - name: GOOSE_MINIO_TLS_SKIP_VERIFY
-          value: "false"
+          value: "${GOOSE_MINIO_TLS_SKIP_VERIFY}"
         - name: GOOSE_WORKING_DIR
-          value: "/home/goose"
+          value: "${GOOSE_WORKING_DIR}"
         - name: GOOSE_MINIO_ACCESS_KEY
           valueFrom:
             secretKeyRef:

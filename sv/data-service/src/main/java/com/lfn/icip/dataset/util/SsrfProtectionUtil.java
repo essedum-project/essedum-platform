@@ -70,8 +70,7 @@ public final class SsrfProtectionUtil {
         // Skip internal-IP check when the host is explicitly on the allowlist —
         // this permits legitimate internal cluster services (e.g. MinIO, internal S3)
         // while still blocking all other private-range addresses.
-        boolean isExplicitlyAllowed = allowedHosts != null && !allowedHosts.isEmpty()
-                && allowedHosts.stream().anyMatch(h -> h.trim().equalsIgnoreCase(url.getHost()));
+        boolean isExplicitlyAllowed = isHostAllowed(url.getHost(), allowedHosts);
         if (!isExplicitlyAllowed) {
             validateNoInternalAddress(url);
         }
@@ -154,17 +153,36 @@ public final class SsrfProtectionUtil {
             throw new IllegalArgumentException("URL must contain a valid hostname.");
         }
 
-        if (allowedHosts != null && !allowedHosts.isEmpty()) {
-            Set<String> normalizedAllowedHosts = allowedHosts.stream()
-                    .map(String::toLowerCase)
-                    .map(String::trim)
-                    .collect(Collectors.toSet());
-
-            if (!normalizedAllowedHosts.contains(host.toLowerCase())) {
-                throw new IllegalArgumentException(
-                        "Host '" + host + "' is not in the allowed hosts list.");
-            }
+        if (allowedHosts != null && !allowedHosts.isEmpty() && !isHostAllowed(host, allowedHosts)) {
+            throw new IllegalArgumentException(
+                    "Host '" + host + "' is not in the allowed hosts list.");
         }
+    }
+
+    /**
+     * Checks whether {@code host} matches an entry in {@code allowedHosts}. A host matches when it:
+     * <ul>
+     *   <li>equals an allow-list entry exactly, or</li>
+     *   <li>is a sub-domain of an entry (host ends with ".entry"), or</li>
+     *   <li>is the fully-qualified form of a short name (host starts with "entry.") —
+     *       this covers Kubernetes service short names resolving to
+     *       {@code <service>.<namespace>.svc.cluster.local}.</li>
+     * </ul>
+     * Allow-list values stay externalised in configuration (e.g. the SSRF_ALLOWED_HOSTS
+     * environment variable); only the matching logic lives here.
+     */
+    private static boolean isHostAllowed(String host, List<String> allowedHosts) {
+        if (host == null || host.isEmpty() || allowedHosts == null || allowedHosts.isEmpty()) {
+            return false;
+        }
+        String normalizedHost = host.trim().toLowerCase();
+        return allowedHosts.stream()
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(h -> !h.isEmpty())
+                .anyMatch(h -> normalizedHost.equals(h)
+                        || normalizedHost.endsWith("." + h)
+                        || normalizedHost.startsWith(h + "."));
     }
 
     /**

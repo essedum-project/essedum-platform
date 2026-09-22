@@ -23,11 +23,11 @@ spec:
           readOnlyRootFilesystem: false
         resources:
           requests:
-            cpu: "100m"
-            memory: "256Mi"
-          limits:
             cpu: "500m"
-            memory: "768Mi"
+            memory: "2Gi"
+          limits:
+            cpu: "2000m"
+            memory: "8Gi"
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
         startupProbe:

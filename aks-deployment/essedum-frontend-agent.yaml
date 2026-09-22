@@ -15,22 +15,30 @@ spec:
     spec:
       containers:
       - name: essedum-frontend-agent
-        image: ${DOCKER_REGISTRY}/essedum-frontend-agent:${IMAGE_TAG}
+        image: ${DOCKER_REGISTRY}/${FRONTEND_AGENT_IMAGE}:${IMAGE_TAG}
         imagePullPolicy: Always
+        env:
+        # Agent Studio embeds the Agent Designer app, not Langflow.
+        - name: FE_LANGFLOW_URL
+          value: "${FE_LANGFLOW_URL}"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
         ports:
         - containerPort: 80
-        command: ["/bin/sh", "-c"]
-        args:
-        - "find /app/ui -type f -name '*.js' -exec sed -i \"s|__FE_MINIO_ENDPOINT__|${FE_MINIO_ENDPOINT}|g; s|__FE_MINIO_BUCKET__|${FE_MINIO_BUCKET}|g; s|__FE_CONTAINER_REGISTRY_PREFIX__|${FE_CONTAINER_REGISTRY_PREFIX}|g; s|__FE_CONTAINER_REGISTRY_VERSION__|${FE_CONTAINER_REGISTRY_VERSION}|g\" {} + && nginx -g 'daemon off;'"
-        env:
-        - name: FE_MINIO_ENDPOINT
-          value: "http://minio-service:9000"
-        - name: FE_MINIO_BUCKET
-          value: "aiptest"
-        - name: FE_CONTAINER_REGISTRY_PREFIX
-          value: "${DOCKER_REGISTRY}/"
-        - name: FE_CONTAINER_REGISTRY_VERSION
-          value: "${IMAGE_TAG}"
+        # Lets the embedded-app URL rewrite change without rebuilding the image.
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: essedum-mfe-nginx-config
 ---
 apiVersion: v1
 kind: Service

@@ -52,6 +52,24 @@ spec:
           value: "${SERVICE_ACCESS_TOKEN}"
         - name: SERVICE_PROXY_USER
           value: "${SERVICE_PROXY_USER}"
+        - name: CONTAINER_PYJOB_URL
+          value: "${CONTAINER_PYJOB_URL}"
+        - name: CONTAINER_DEPLOYER_URL
+          value: "${CONTAINER_DEPLOYER_URL}"
+        - name: CONTAINER_REGISTRY_PREFIX
+          value: "${CONTAINER_REGISTRY_PREFIX}"
+        - name: MINIO_URL
+          value: "${MINIO_URL}"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: essedum-minio-secret
+              key: access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: essedum-minio-secret
+              key: secret-key
         ports:
         - containerPort: 8082
         startupProbe:

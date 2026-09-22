@@ -4,5 +4,6 @@ export const environment = {
   routePrefix: 'integration',
   baseUrl: '/api/aip',
   datasetsUrl: '/api/aip',
-  salusUrl: '/salus/',
+  // Substituted at container start from FE_SALUS_URL; falls back to the shell proxy path.
+  salusUrl: '__FE_SALUS_URL__',
 };

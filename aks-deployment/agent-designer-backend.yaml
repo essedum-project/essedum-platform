@@ -1,6 +1,9 @@
 # =============================================================================
 # Agent Designer Backend – Kubernetes Deployment
-# Includes: PostgreSQL, Redis, API server, Celery worker
+# Includes: PostgreSQL, Redis, API server
+# NOTE: the agent-designer-secrets Secret is created out-of-band (already present
+# in the cluster) and is intentionally NOT defined here to avoid overwriting the
+# working credentials with placeholders.
 # =============================================================================
 
 # --- PostgreSQL for Agent Designer ---
@@ -80,7 +83,6 @@ spec:
   type: ClusterIP
 ---
 
-# --- Redis for Agent Designer ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -140,7 +142,6 @@ spec:
 ---
 
 # --- Agent Designer Backend API ---
-apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: agent-designer-backend
@@ -245,4 +246,3 @@ stringData:
   #     --from-literal=DATABASE_URL='postgresql+asyncpg://agentflow:<real-password>@agent-designer-postgres:5432/agentflow' \
   #     --dry-run=client -o yaml | kubectl apply -f -
   POSTGRES_PASSWORD: "<CHANGEME>"
-  DATABASE_URL: "<CHANGEME>"

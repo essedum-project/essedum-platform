@@ -20,12 +20,18 @@ replace_placeholder '__FE_MINIO_BUCKET__'                "$FE_MINIO_BUCKET"
 replace_placeholder '__FE_CONTAINER_REGISTRY_PREFIX__'   "$FE_CONTAINER_REGISTRY_PREFIX"
 replace_placeholder '__FE_CONTAINER_REGISTRY_VERSION__'  "$FE_CONTAINER_REGISTRY_VERSION"
 
-# ── Replace Keycloak issuer URL in auth-config.json ──
+# ── Replace Keycloak issuer URL in JSON config assets ──
+# Note: some JSON assets (mf.manifest.json, auth-config.json) are mounted from
+# read-only ConfigMaps. Use a copy-based in-place update (no rename) and tolerate
+# failures so read-only mounts are skipped instead of aborting startup.
 if [ -n "$KEYCLOAK_ISSUER" ]; then
-  auth_config="/app/ui/shell/configs/auth-config.json"
-  if [ -f "$auth_config" ] && [ -w "$auth_config" ]; then
-    sed -i "s|__KEYCLOAK_ISSUER__|${KEYCLOAK_ISSUER}|g" "$auth_config"
-  fi
+  find /app/ui -type f -name '*.json' | while IFS= read -r f; do
+    tmp="$(mktemp)"
+    if sed "s|__KEYCLOAK_ISSUER__|${KEYCLOAK_ISSUER}|g" "$f" > "$tmp" 2>/dev/null; then
+      cat "$tmp" > "$f" 2>/dev/null || true
+    fi
+    rm -f "$tmp"
+  done
 fi
 
 # ── Render Nginx config with runtime-configurable upstreams ──
@@ -34,9 +40,7 @@ fi
 # runtime without rebuilding the image. The guard safely skips images
 # that pre-date this pattern and still ship a static nginx.conf.
 if [ -f /etc/nginx/nginx.conf.template ]; then
-  : "${ESSEDUM_BACKEND_UPSTREAM:=essedum-backend-api-gateway-service:8080}"
-  : "${ESSEDUM_KEYCLOAK_UPSTREAM:=keycloak:8180}"
-  envsubst '${ESSEDUM_BACKEND_UPSTREAM} ${ESSEDUM_KEYCLOAK_UPSTREAM}' \
+  envsubst '${ESSEDUM_BACKEND_UPSTREAM} ${ESSEDUM_KEYCLOAK_UPSTREAM} ${LANGFLOW_UPSTREAM} ${LANGFUSE_UPSTREAM} ${LITELLM_UPSTREAM} ${SALUS_UPSTREAM}' \
     < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 fi
 

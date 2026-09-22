@@ -8,11 +8,15 @@ from yarl import URL  # comes with aiohttp; used to attach query string safely
 
 # --- Config ---
 import socket as _socket
-NS = os.getenv("TARGET_NAMESPACE", "aipns")
+NS = os.getenv("TARGET_NAMESPACE")
+if not NS:
+    raise RuntimeError("TARGET_NAMESPACE is required")
 # Namespaces searched (in priority order) when resolving an app service.
 # User apps live in vibe-apps/vibe-agents/vibe-mcp; platform services (e.g.
 # builder-service) live in the default namespace (aipns).
-_APP_NAMESPACES = os.getenv("APP_NAMESPACES", "vibe-apps,vibe-agents,vibe-mcp")
+_APP_NAMESPACES = os.getenv("APP_NAMESPACES")
+if not _APP_NAMESPACES:
+    raise RuntimeError("APP_NAMESPACES is required")
 _NAMESPACES = []
 for _n in [x.strip() for x in _APP_NAMESPACES.split(",")] + [NS]:
     if _n and _n not in _NAMESPACES:
