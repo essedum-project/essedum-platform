@@ -26,7 +26,6 @@ async def get_pipeline(db: AsyncSession, pipeline_id: str) -> Pipeline:
 
 
 async def create_pipeline(db: AsyncSession, data: PipelineCreate) -> Pipeline:
-    # Verify the referenced flow exists
     flow = await db.get(Flow, data.flow_id)
     if flow is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Flow '{data.flow_id}' not found.")

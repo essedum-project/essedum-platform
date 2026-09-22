@@ -112,6 +112,11 @@ export interface PipelineCreateRequest {
   secrets?: Array<{ name: string; value: string }>;
 }
 
+export interface PipelineUpdateRequest {
+  name?: string;
+  description?: string;
+}
+
 export interface PipelineResponse {
   id: string;
   flow_id: string;

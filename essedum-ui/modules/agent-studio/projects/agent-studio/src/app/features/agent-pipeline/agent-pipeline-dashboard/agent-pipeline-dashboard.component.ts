@@ -105,6 +105,12 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
   organization: string;
   pipelineConstantsKey: string = 'icip.pipeline.includeCore';
 
+  // GitHub auth state
+  isGitAuthenticated = false;
+  gitUsername = '';
+  isGitLoading = false;
+  showGitDropdown = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -115,6 +121,21 @@ export class AgentPipelineDashboardComponent implements OnInit, OnChanges {
     private location: Location,
     private http: HttpClient
   ) {}
+
+  gitLogin(): void {
+    this.isGitLoading = true;
+    setTimeout(() => {
+      this.isGitLoading = false;
+      this.service.message('Git login not configured', 'warning');
+    }, 500);
+  }
+
+  gitLogout(): void {
+    this.isGitAuthenticated = false;
+    this.gitUsername = '';
+    this.showGitDropdown = false;
+    sessionStorage.removeItem('git_username');
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.organization) this.refresh();

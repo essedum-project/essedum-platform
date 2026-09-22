@@ -15,7 +15,7 @@ import { GitBranch, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LABELS } from '../../lib/labels';
 import { useFlowStore } from '../../store/flowStore';
-import { pipelineService } from '../../services/pipelineService';
+import { pipelineService } from '../../services/PipelineService';
 import type { PipelineResponse } from '../../models/api';
 
 interface CreatePipelineModalProps {

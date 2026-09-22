@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 from typing import Any
 from pydantic import BaseModel, Field
@@ -10,6 +9,11 @@ class PipelineCreate(BaseModel):
     description: str | None = None
     env_vars: list[dict[str, Any]] = Field(default_factory=list)
     secrets: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class PipelineUpdate(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=255)
+    description: str | None = None
 
 
 class PipelineStatusUpdate(BaseModel):

@@ -615,11 +615,18 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Check if we have router state data with card information
     const historyState = history.state;
-    const cardFromState = historyState?.card;
-    
+    // Fallback: read card stored by AgentComponent when navigating via window.location.hash
+    let storedNav: any = null;
+    try {
+      const raw = sessionStorage.getItem('agentDesignerNavigationCard');
+      if (raw) { storedNav = JSON.parse(raw); sessionStorage.removeItem('agentDesignerNavigationCard'); }
+    } catch { /* ignore */ }
+    const cardFromState = historyState?.card ?? storedNav?.card ?? null;
+    const resolvedState = { ...storedNav, ...historyState };
+
     // Set pipeline mode from navigation state if available
-    if (historyState?.pipelineMode) {
-      this.pipelineMode = historyState.pipelineMode;
+    if (resolvedState?.pipelineMode) {
+      this.pipelineMode = resolvedState.pipelineMode;
       
       // Set cardTitle based on pipeline mode
       if (this.pipelineMode === 'mcp') {
@@ -652,8 +659,8 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       // Set pipeline alias for display
-      if (historyState?.pipelineAlias) {
-        this.pipelineAlias = historyState.pipelineAlias;
+      if (resolvedState?.pipelineAlias) {
+        this.pipelineAlias = resolvedState.pipelineAlias;
       }
 
       // Trigger auto-loading for real pipeline cards
@@ -4577,32 +4584,32 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   private async runAndDeployAgentDesigner(): Promise<void> {
     this.isRunningAndDeploying = true;
     this.deploymentStatus = 'running';
-    this.deploymentStatusMessage = 'Deploying agent pipeline...';
+    this.deploymentStatusMessage = 'Deploying agent to Kubernetes...';
     this.isPlaygroundEnabled = false;
-    this.consoleOutput = ['[INFO] Starting agent designer pipeline deployment...'];
+    this.consoleOutput = ['[INFO] Creating Kubernetes pod in vibe-agents namespace...'];
     this.cdr.detectChanges();
 
     try {
-      await this.http.patch<any>(
-        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
-        { status: 'deploying' }
-      ).toPromise();
-      this.consoleOutput = [...this.consoleOutput, '[INFO] Pipeline status updated to deploying...'];
-
-      await this.http.patch<any>(
-        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
-        { status: 'running' }
+      await this.http.post<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/deploy`,
+        {}
       ).toPromise();
 
       this.runnerServiceStatus = true;
       this.isPlaygroundEnabled = true;
       this.deploymentStatus = 'success';
-      this.deploymentStatusMessage = 'Pipeline is running!';
-      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Pipeline deployed successfully.'];
-    } catch {
+      this.deploymentStatusMessage = 'Agent deployed successfully!';
+      this.consoleOutput = [
+        ...this.consoleOutput,
+        '[SUCCESS] Pod created in vibe-agents namespace.',
+        '[SUCCESS] Service and ingress wired. Open Playground to chat!',
+      ];
+      this.service.message('Agent deployed to Kubernetes!', 'success');
+    } catch (err: any) {
       this.deploymentStatus = 'error';
       this.deploymentStatusMessage = 'Deployment failed.';
-      this.consoleOutput = [...this.consoleOutput, '[ERROR] Deployment failed.'];
+      this.consoleOutput = [...this.consoleOutput, `[ERROR] ${err?.error?.detail || err?.message || 'Deployment failed.'}`];
+      this.service.message('Deployment failed. Check console for details.', 'error');
     }
 
     this.isRunningAndDeploying = false;
@@ -4631,25 +4638,26 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
   private async deleteAgentDesignerDeployment(): Promise<void> {
     this.isDeletingDeployment = true;
     this.deploymentStatus = 'running';
-    this.deploymentStatusMessage = 'Removing deployment...';
-    this.consoleOutput = ['[INFO] Removing agent designer pipeline deployment...'];
+    this.deploymentStatusMessage = 'Deleting Kubernetes deployment...';
+    this.consoleOutput = ['[INFO] Removing agent pod from vibe-agents namespace...'];
     this.cdr.detectChanges();
 
     try {
-      await this.http.patch<any>(
-        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/status`,
-        { status: 'stopped' }
+      await this.http.delete<any>(
+        `${this.AGENT_DESIGNER_API}/pipelines/${this.agentDesignerPipelineId}/deployment`
       ).toPromise();
 
       this.runnerServiceStatus = false;
       this.isPlaygroundEnabled = false;
       this.deploymentStatus = 'idle';
-      this.deploymentStatusMessage = 'Pipeline stopped.';
-      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Deployment removed.'];
-    } catch {
+      this.deploymentStatusMessage = '';
+      this.consoleOutput = [...this.consoleOutput, '[SUCCESS] Kubernetes deployment removed from vibe-agents.'];
+      this.service.message('Deployment deleted successfully.', 'success');
+    } catch (err: any) {
       this.deploymentStatus = 'error';
       this.deploymentStatusMessage = 'Failed to remove deployment.';
-      this.consoleOutput = [...this.consoleOutput, '[ERROR] Failed to remove deployment.'];
+      this.consoleOutput = [...this.consoleOutput, `[ERROR] ${err?.error?.detail || err?.message || 'Failed to remove deployment.'}`];
+      this.service.message('Failed to delete deployment. Check console for details.', 'error');
     }
 
     this.isDeletingDeployment = false;
@@ -4852,5 +4860,10 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
     // Also try a few times in the first second — Material's tab body can
     // animate in after a delay.
     [50, 150, 400, 900].forEach((ms) => setTimeout(apply, ms));
+  }
+
+  /** Called by sessionPrDeactivateGuard when navigating away. */
+  canDeactivate(): boolean | Promise<boolean> {
+    return true;
   }
 }

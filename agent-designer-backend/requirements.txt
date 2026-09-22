@@ -1,3 +1,6 @@
+# Kubernetes client (for pipeline deploy/undeploy)
+kubernetes>=29.0.0
+
 # Web framework
 fastapi==0.141.1
 starlette==1.6.0            # >=1.0.1 required to fix CVE-2026-48710 (Host header auth bypass)

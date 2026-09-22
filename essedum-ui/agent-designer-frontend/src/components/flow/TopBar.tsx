@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFlowStore } from '../../store/flowStore';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -8,13 +8,15 @@ import { Badge } from '../ui/badge';
 import {
   Play, Square, Save, Download, Upload,
   Plus, PanelLeft, PanelRight, Terminal, Edit2, Check, X,
-  Layers, Zap, GitBranch
+  Layers, Zap, GitBranch, Eye, RefreshCw, Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 import { PlaygroundModal } from './PlaygroundModal';
 import { CreatePipelineModal } from './CreatePipelineModal';
 import { LABELS } from '../../lib/labels';
+import { pipelineService } from '../../services/PipelineService';
+import type { PipelineResponse } from '../../models/api';
 
 export function TopBar() {
   const {
@@ -29,6 +31,77 @@ export function TopBar() {
   const [nameVal, setNameVal] = useState(currentFlowName);
   const [playgroundOpen, setPlaygroundOpen] = useState(false);
   const [createPipelineOpen, setCreatePipelineOpen] = useState(false);
+
+  // Pipeline state
+  const [activePipeline, setActivePipeline] = useState<PipelineResponse | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  // Ref so the change-detection effect can read pipeline presence without being a dep
+  const activePipelineRef = useRef<PipelineResponse | null>(null);
+  const skipNextChangeRef = useRef(false);
+
+  // On flow load: fetch existing pipeline for this flow (if any)
+  useEffect(() => {
+    activePipelineRef.current = null;
+    setActivePipeline(null);
+    setHasChanges(false);
+    if (!currentFlowId) return;
+    pipelineService.list(0, 200)
+      .then(resp => {
+        const existing = resp.items.find(p => p.flow_id === currentFlowId);
+        if (existing) {
+          activePipelineRef.current = existing;
+          setActivePipeline(existing);
+        }
+      })
+      .catch(() => {});
+  }, [currentFlowId]);
+
+  // Detect canvas changes after pipeline exists
+  useEffect(() => {
+    if (!activePipelineRef.current) return;
+    if (skipNextChangeRef.current) { skipNextChangeRef.current = false; return; }
+    setHasChanges(true);
+  }, [nodes, edges]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePipelineCreated = (pipeline: PipelineResponse) => {
+    skipNextChangeRef.current = true;
+    activePipelineRef.current = pipeline;
+    setActivePipeline(pipeline);
+    setHasChanges(false);
+  };
+
+  const handleViewPipeline = () => {
+    if (!activePipeline) return;
+    const card = {
+      name: activePipeline.cname,
+      cid: activePipeline.id,
+      alias: activePipeline.name,
+      isAgentDesigner: true,
+      flowId: activePipeline.flow_id,
+      status: activePipeline.status,
+      description: activePipeline.description,
+      type: 'AIAgent',
+      interfacetype: 'pipeline-agent',
+    };
+    window.parent.postMessage({ type: 'NAVIGATE_TO_PIPELINE', card }, window.location.origin);
+  };
+
+  const handleUpdatePipeline = async () => {
+    if (!activePipeline) return;
+    setUpdating(true);
+    try {
+      const updated = await pipelineService.update(activePipeline.id, { name: currentFlowName });
+      activePipelineRef.current = updated;
+      setActivePipeline(updated);
+      setHasChanges(false);
+      toast.success(LABELS.PIPELINE_UPDATE_TOAST_SUCCESS);
+    } catch {
+      toast.error(LABELS.PIPELINE_UPDATE_TOAST_ERROR);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const isRunning = execution.status === 'running';
 
@@ -196,13 +269,12 @@ export function TopBar() {
 
       <Separator orientation="vertical" className="h-6" />
 
-      {/* Create Pipeline — only when flow is saved */}
-      {currentFlowId && (
+      {/* Pipeline button — state-driven */}
+      {currentFlowId && !activePipeline && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              size="sm"
-              variant="outline"
+              size="sm" variant="outline"
               className="h-8 gap-1.5 text-xs font-semibold border-violet-500/40 text-violet-600 hover:bg-violet-50 hover:text-violet-700 dark:text-violet-400 dark:hover:bg-violet-950/30"
               onClick={() => setCreatePipelineOpen(true)}
             >
@@ -211,6 +283,37 @@ export function TopBar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>{LABELS.TOPBAR_OPEN_CREATE_PIPELINE}</TooltipContent>
+        </Tooltip>
+      )}
+      {currentFlowId && activePipeline && !hasChanges && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm" variant="outline"
+              className="h-8 gap-1.5 text-xs font-semibold border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+              onClick={handleViewPipeline}
+            >
+              <Eye className="w-3 h-3" />
+              {LABELS.TOPBAR_VIEW_PIPELINE}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{LABELS.TOPBAR_OPEN_VIEW_PIPELINE}</TooltipContent>
+        </Tooltip>
+      )}
+      {currentFlowId && activePipeline && hasChanges && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm" variant="outline"
+              className="h-8 gap-1.5 text-xs font-semibold border-amber-500/40 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/30"
+              onClick={handleUpdatePipeline}
+              disabled={updating}
+            >
+              {updating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              {LABELS.TOPBAR_UPDATE_PIPELINE}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{LABELS.TOPBAR_OPEN_UPDATE_PIPELINE}</TooltipContent>
         </Tooltip>
       )}
 
@@ -255,7 +358,11 @@ export function TopBar() {
       )}
 
       <PlaygroundModal open={playgroundOpen} onClose={() => setPlaygroundOpen(false)} />
-      <CreatePipelineModal open={createPipelineOpen} onClose={() => setCreatePipelineOpen(false)} />
+      <CreatePipelineModal
+        open={createPipelineOpen}
+        onClose={() => setCreatePipelineOpen(false)}
+        onCreated={handlePipelineCreated}
+      />
     </header>
   );
 }

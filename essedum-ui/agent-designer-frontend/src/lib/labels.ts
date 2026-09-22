@@ -96,6 +96,10 @@ export const LABELS = {
   // ── Pipeline ───────────────────────────────────────────────────────────
   TOPBAR_CREATE_PIPELINE: 'Create Pipeline',
   TOPBAR_OPEN_CREATE_PIPELINE: 'Deploy this flow as a scalable agent pipeline',
+  TOPBAR_VIEW_PIPELINE: 'View Pipeline',
+  TOPBAR_OPEN_VIEW_PIPELINE: 'Open this pipeline in Agent Pipelines',
+  TOPBAR_UPDATE_PIPELINE: 'Update Pipeline',
+  TOPBAR_OPEN_UPDATE_PIPELINE: 'Sync pipeline with latest flow changes',
   PIPELINE_MODAL_TITLE: 'Create Pipeline',
   PIPELINE_MODAL_DESCRIPTION: 'Deploy this flow as a scalable agent pipeline visible in Agent Pipelines.',
   PIPELINE_MODAL_NAME_LABEL: 'Pipeline Name',
@@ -106,4 +110,6 @@ export const LABELS = {
   PIPELINE_MODAL_CANCEL: 'Cancel',
   PIPELINE_TOAST_SUCCESS: 'Pipeline created successfully',
   PIPELINE_TOAST_ERROR: 'Failed to create pipeline',
+  PIPELINE_UPDATE_TOAST_SUCCESS: 'Pipeline updated successfully',
+  PIPELINE_UPDATE_TOAST_ERROR: 'Failed to update pipeline',
 } as const;

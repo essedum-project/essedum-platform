@@ -1,6 +1,7 @@
 import { api } from './api';
 import type {
   PipelineCreateRequest,
+  PipelineUpdateRequest,
   PipelineResponse,
   PipelineListResponse,
 } from '../models/api';
@@ -21,7 +22,11 @@ export const pipelineService = {
   },
 
   updateStatus(pipelineId: string, status: string): Promise<PipelineResponse> {
-    return api.patch<PipelineResponse>(`${BASE}/${pipelineId}/status`, { status });
+    return api.put<PipelineResponse>(`${BASE}/${pipelineId}/status`, { status });
+  },
+
+  update(pipelineId: string, data: PipelineUpdateRequest): Promise<PipelineResponse> {
+    return api.put<PipelineResponse>(`${BASE}/${pipelineId}`, data);
   },
 
   delete(pipelineId: string): Promise<void> {
