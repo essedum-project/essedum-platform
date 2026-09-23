@@ -5326,7 +5326,13 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
                   ? `Resuming session on existing branch: ${response.branchName}`
                   : `Session branch created: ${response.branchName}`;
                 this.service.message(msg, 'success');
-                resolve(true);
+
+                if (!response.alreadyExisted) {
+                  this.seedSessionHistoryAndAutoRaisePr(repoName, mainBranch, response.branchName)
+                    .finally(() => resolve(true));
+                } else {
+                  resolve(true);
+                }
               } else {
                 this.service.message(`Could not create session branch: ${response.message}`, 'warning');
                 resolve(false);
@@ -5345,6 +5351,39 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
           this.service.message('Git config not found. Cannot create session branch.', 'warning');
           resolve(false);
         }
+      });
+    });
+  }
+
+  private seedSessionHistoryAndAutoRaisePr(repoName: string, mainBranch: string, branchName: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.githubService.pushToGitHub({
+        repoName,
+        branch: branchName,
+        commitMessage: 'chore: initialize session history',
+        files: [],
+        sessionHistoryEntry: {
+          actor: this.currentGitUsername || this.githubUsername || 'unknown',
+          source: 'web',
+          action: 'session-start',
+          message: `Session branch created from ${mainBranch}`,
+          filesChanged: [],
+          timestamp: new Date().toISOString(),
+        },
+      }).subscribe({
+        next: () => {
+          this.sessionBranchLastCommitId = 'committed';
+          this.updateStoredSessionBranchState({ lastCommitId: 'committed' });
+
+          this.createPullRequestFromSessionBranch(
+            `Merge session branch ${branchName} into ${mainBranch}`
+          ).finally(() => resolve());
+        },
+        error: (error: any) => {
+          const msg = error?.error?.message || error?.message || 'Failed to initialize session history';
+          this.service.message(msg, 'warning');
+          resolve();
+        },
       });
     });
   }
@@ -5421,7 +5460,15 @@ export class AgentPipelineComponent implements OnInit, AfterViewInit, OnDestroy 
             fileName: file.filename,
             id: file.id,
             content: file.filescript,
-          }))
+          })),
+          sessionHistoryEntry: {
+            actor: this.currentGitUsername || this.githubUsername || 'unknown',
+            source: 'web',
+            action: 'file-save',
+            message: commitMessage,
+            filesChanged: fetchedFiles.map(file => file.filePath),
+            timestamp: new Date().toISOString(),
+          }
         };
 
         this.githubService.pushToGitHub(request).subscribe({

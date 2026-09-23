@@ -24,6 +24,7 @@ export interface PushRequest {
   branch: string;
   commitMessage: string;
   files: any;
+  sessionHistoryEntry?: SessionHistoryEntry;
 }
 
 export interface PullRequest {
@@ -93,6 +94,15 @@ export interface CreateBranchResponse {
   sourceBranch: string;
   commitSha: string;
   alreadyExisted: boolean;
+}
+
+export interface SessionHistoryEntry {
+  actor: string;
+  source: 'web' | 'vscode';
+  action: 'session-start' | 'file-save';
+  message: string;
+  filesChanged: string[];
+  timestamp?: string;
 }
 
 export interface SessionBranchState {
