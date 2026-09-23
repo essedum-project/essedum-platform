@@ -45,14 +45,11 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   containerDeployMessage = '';
   containerInternalDnsUrl = '';
   containerDeployLogs: string[] = [];
-  containerAppLogs: string[] = [];
-  containerAppLogTab = 0;
   isDeletingContainer = false;
   private containerLastDeploymentName = '';
   private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
   private containerSocket: any = null;
-  private inAppLogSection = false;
 
   private destroy$ = new Subject<void>();
   private modelPathPollTimer: any;
@@ -108,10 +105,6 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
             this.containerDeployMessage = 'Deployment active';
             if (cd.buildLogs && cd.buildLogs.length > 0) {
               this.containerDeployLogs = cd.buildLogs;
-            }
-            if (cd.appLogs && cd.appLogs.length > 0) {
-              this.containerAppLogs = cd.appLogs;
-              this.containerAppLogTab = 1;
             }
           }
         } catch {}
@@ -338,9 +331,6 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
-    this.containerAppLogs = [];
-    this.containerAppLogTab = 0;
-    this.inAppLogSection = false;
     // Backend zips + uploads scripts to MinIO and returns the prepared config;
     // the browser then streams the build/deploy directly from the deployer's
     // WebSocket (sandbox approach, same as agent/mcp pipelines).
@@ -418,22 +408,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      const line = (data.log || '').toString();
-      if (line.includes('[APP_LOG]')) {
-        const lower = line.toLowerCase();
-        const isStart = !this.inAppLogSection && lower.includes('application log') && !lower.includes('end of');
-        if (isStart) {
-          this.inAppLogSection = true;
-        } else if (lower.includes('end of application log')) {
-          this.inAppLogSection = false;
-        }
-        this.containerAppLogs = [...this.containerAppLogs, line];
-        if (isStart) { this.containerAppLogTab = 1; }
-      } else if (this.inAppLogSection) {
-        this.containerAppLogs = [...this.containerAppLogs, line];
-      } else {
-        this.addContainerLog(line);
-      }
+      this.addContainerLog((data.log || '').toString());
     });
 
     this.containerSocket.on('pipeline_status', (data: any) => {
@@ -519,7 +494,6 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     parsed.containerDeployment = {
       deploymentName, namespace, internalDnsUrl,
       buildLogs: this.containerDeployLogs.slice(-500),
-      appLogs: this.containerAppLogs,
     };
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({ error: () => {} });

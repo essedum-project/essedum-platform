@@ -111,15 +111,8 @@
             <div class="ct-alert-detail">{{ containerDeployMessage }}</div>
           </div>
         </div>
-        <div *ngIf="containerDeployLogs.length > 0 || containerAppLogs.length > 0" class="ct-logs">
-          <mat-tab-group [(selectedIndex)]="containerAppLogTab" animationDuration="80ms" class="log-inner-tabs">
-            <mat-tab label="Build Logs">
-              <pre>{{ containerDeployLogs.join('\n') }}</pre>
-            </mat-tab>
-            <mat-tab label="App Logs">
-              <pre>{{ containerAppLogs.length > 0 ? containerAppLogs.join('\n') : 'App logs will appear here after deployment completes.' }}</pre>
-            </mat-tab>
-          </mat-tab-group>
+        <div *ngIf="containerDeployLogs.length > 0" class="ct-logs">
+          <pre>{{ containerDeployLogs.join('\n') }}</pre>
         </div>
         <!-- Deploy as Container button moved to header -->
       </div>

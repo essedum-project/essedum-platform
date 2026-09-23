@@ -127,13 +127,10 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     containerDeployMessage: string = '';
     containerInternalDnsUrl: string = '';
     containerDeployLogs: string[] = [];
-    containerAppLogs: string[] = [];
-    containerAppLogTab = 0;
     isDeletingContainer: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
-    private inAppLogSection = false;
     activeTabIndex = 0;
     // Container tab index: Configuration(0), Script(1), Container(2) — Jobs hidden
     readonly containerTabIndex = 2;
@@ -204,10 +201,6 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
           this.containerDeployMessage = 'Deployment active';
           if (cd.buildLogs && cd.buildLogs.length > 0) {
             this.containerDeployLogs = cd.buildLogs;
-          }
-          if (cd.appLogs && cd.appLogs.length > 0) {
-            this.containerAppLogs = cd.appLogs;
-            this.containerAppLogTab = 1;
           }
         }
       } catch {}
@@ -739,9 +732,6 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
-    this.containerAppLogs = [];
-    this.containerAppLogTab = 0;
-    this.inAppLogSection = false;
     this.addContainerLog('Preparing pipeline package...');
     // Show snackbar and navigate to Container tab immediately
     this.service.message('Deployment started', 'success');
@@ -865,22 +855,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      const line = (data.log || '').toString();
-      if (line.includes('[APP_LOG]')) {
-        const lower = line.toLowerCase();
-        const isStart = !this.inAppLogSection && lower.includes('application log') && !lower.includes('end of');
-        if (isStart) {
-          this.inAppLogSection = true;
-        } else if (lower.includes('end of application log')) {
-          this.inAppLogSection = false;
-        }
-        this.containerAppLogs = [...this.containerAppLogs, line];
-        if (isStart) { this.containerAppLogTab = 1; }
-      } else if (this.inAppLogSection) {
-        this.containerAppLogs = [...this.containerAppLogs, line];
-      } else {
-        this.addContainerLog(line);
-      }
+      this.addContainerLog((data.log || '').toString());
       this.cdr.detectChanges();
     });
 
@@ -950,7 +925,6 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     parsed.containerDeployment = {
       deploymentName, namespace, internalDnsUrl,
       buildLogs: this.containerDeployLogs.slice(-500),
-      appLogs: this.containerAppLogs,
     };
     this.streamItem.json_content = JSON.stringify(parsed);
     this.service.update(this.streamItem).subscribe({ error: () => {} });

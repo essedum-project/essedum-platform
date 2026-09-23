@@ -568,42 +568,19 @@
                     </div>
 
                     <div class="console-container">
-                      <mat-tab-group [(selectedIndex)]="containerAppLogTab" animationDuration="80ms" class="log-inner-tabs">
-                        <mat-tab>
-                          <ng-template mat-tab-label>
-                            <mat-icon style="font-size:15px;height:15px;width:15px;margin-right:4px;">terminal</mat-icon>
-                            Build Logs
-                          </ng-template>
-                          <div class="console-output" #containerConsole>
-                            <div *ngFor="let line of containerDeployLogs" class="console-line">
-                              <span class="console-prompt">$</span>
-                              <span class="console-text">{{ line }}</span>
-                            </div>
-                            <div *ngIf="containerBusy" class="console-line">
-                              <span class="console-prompt">$</span>
-                              <span class="console-text console-loading">Processing...</span>
-                            </div>
-                            <div *ngIf="containerDeployLogs.length === 0 && !containerBusy" class="console-empty">
-                              <span>Console ready. Click "Deploy as Container" to see output.</span>
-                            </div>
-                          </div>
-                        </mat-tab>
-                        <mat-tab>
-                          <ng-template mat-tab-label>
-                            <mat-icon style="font-size:15px;height:15px;width:15px;margin-right:4px;">article</mat-icon>
-                            App Logs
-                          </ng-template>
-                          <div class="console-output">
-                            <div *ngFor="let line of containerAppLogs" class="console-line">
-                              <span class="console-prompt">$</span>
-                              <span class="console-text">{{ line }}</span>
-                            </div>
-                            <div *ngIf="containerAppLogs.length === 0" class="console-empty">
-                              <span>App logs will appear here after deployment completes.</span>
-                            </div>
-                          </div>
-                        </mat-tab>
-                      </mat-tab-group>
+                      <div class="console-output" #containerConsole>
+                        <div *ngFor="let line of containerDeployLogs" class="console-line">
+                          <span class="console-prompt">$</span>
+                          <span class="console-text">{{ line }}</span>
+                        </div>
+                        <div *ngIf="containerBusy" class="console-line">
+                          <span class="console-prompt">$</span>
+                          <span class="console-text console-loading">Processing...</span>
+                        </div>
+                        <div *ngIf="containerDeployLogs.length === 0 && !containerBusy" class="console-empty">
+                          <span>Console ready. Click "Deploy as Container" to see output.</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
