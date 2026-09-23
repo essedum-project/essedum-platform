@@ -70,20 +70,39 @@
                     </button>
                   </div>
                 </li> -->
-                <li class="li-style">
+                <!-- Deploy as Container (hidden once deployed) -->
+                <li class="li-style" *ngIf="containerDeployStatus !== 'success'">
                   <div
                     class="lfx-u-mar-r-24 aip-cursor"
                     (click)="deployAsContainer()"
                     style="cursor: pointer"
-                    [class.disabled]="containerDeployStatus === 'deploying'"
+                    [class.disabled]="containerBusy"
                   >
                     <button
                       mat-icon-button
                       class="action-icon-btn"
                       matTooltip="Deploy as Container"
-                      [disabled]="containerDeployStatus === 'deploying'"
+                      [disabled]="containerBusy"
                     >
                       <mat-icon class="lfx-u-mar-r-16 aip-led-icons">inventory_2</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <!-- Delete Deployment (shown when deployed) -->
+                <li class="li-style" *ngIf="containerDeployStatus === 'success'">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="deleteContainerDeployment()"
+                    style="cursor: pointer"
+                    [class.disabled]="containerBusy"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Delete Deployment"
+                      [disabled]="containerBusy"
+                    >
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons">{{ isDeletingContainer ? 'hourglass_top' : 'delete' }}</mat-icon>
                     </button>
                   </div>
                 </li>
@@ -549,26 +568,42 @@
                     </div>
 
                     <div class="console-container">
-                      <div class="console-header">
-                        <mat-icon>terminal</mat-icon>
-                        <span>Console Output</span>
-                      </div>
-                      <div class="console-output" #containerConsole>
-                        <div *ngFor="let line of containerDeployLogs" class="console-line">
-                          <span class="console-prompt">$</span>
-                          <span class="console-text">{{ line }}</span>
-                        </div>
-                        <div *ngIf="containerBusy" class="console-line">
-                          <span class="console-prompt">$</span>
-                          <span class="console-text console-loading">Processing...</span>
-                        </div>
-                        <div
-                          *ngIf="containerDeployLogs.length === 0 && !containerBusy"
-                          class="console-empty"
-                        >
-                          <span>Console ready. Click "Deploy as Container" to see output.</span>
-                        </div>
-                      </div>
+                      <mat-tab-group [(selectedIndex)]="containerAppLogTab" animationDuration="80ms" class="log-inner-tabs">
+                        <mat-tab>
+                          <ng-template mat-tab-label>
+                            <mat-icon style="font-size:15px;height:15px;width:15px;margin-right:4px;">terminal</mat-icon>
+                            Build Logs
+                          </ng-template>
+                          <div class="console-output" #containerConsole>
+                            <div *ngFor="let line of containerDeployLogs" class="console-line">
+                              <span class="console-prompt">$</span>
+                              <span class="console-text">{{ line }}</span>
+                            </div>
+                            <div *ngIf="containerBusy" class="console-line">
+                              <span class="console-prompt">$</span>
+                              <span class="console-text console-loading">Processing...</span>
+                            </div>
+                            <div *ngIf="containerDeployLogs.length === 0 && !containerBusy" class="console-empty">
+                              <span>Console ready. Click "Deploy as Container" to see output.</span>
+                            </div>
+                          </div>
+                        </mat-tab>
+                        <mat-tab [disabled]="containerAppLogs.length === 0">
+                          <ng-template mat-tab-label>
+                            <mat-icon style="font-size:15px;height:15px;width:15px;margin-right:4px;">article</mat-icon>
+                            App Logs
+                          </ng-template>
+                          <div class="console-output">
+                            <div *ngFor="let line of containerAppLogs" class="console-line">
+                              <span class="console-prompt">$</span>
+                              <span class="console-text">{{ line }}</span>
+                            </div>
+                            <div *ngIf="containerAppLogs.length === 0" class="console-empty">
+                              <span>App logs will appear here after deployment completes.</span>
+                            </div>
+                          </div>
+                        </mat-tab>
+                      </mat-tab-group>
                     </div>
                   </div>
                 </div>

@@ -45,8 +45,14 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   containerDeployMessage = '';
   containerInternalDnsUrl = '';
   containerDeployLogs: string[] = [];
+  containerAppLogs: string[] = [];
+  containerAppLogTab = 0;
+  isDeletingContainer = false;
+  private containerLastDeploymentName = '';
+  private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
   private containerSocket: any = null;
+  private inAppLogSection = false;
 
   private destroy$ = new Subject<void>();
   private modelPathPollTimer: any;
@@ -90,6 +96,22 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         if (this.runtypesCheck) this.fetchRunTypes();
         this.loading = false;
         this.backfillModelPathIfNeeded();
+        // Restore persistent container deployment state
+        try {
+          const parsed = JSON.parse(ss.json_content || '{}');
+          const cd = parsed.containerDeployment;
+          if (cd && cd.deploymentName) {
+            this.containerLastDeploymentName = cd.deploymentName;
+            this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+            this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+            this.containerDeployStatus = 'success';
+            this.containerDeployMessage = 'Deployment active';
+            if (cd.appLogs && cd.appLogs.length > 0) {
+              this.containerAppLogs = cd.appLogs;
+              this.containerAppLogTab = 1;
+            }
+          }
+        } catch {}
       },
       error: () => {
         this.services.message('Pipeline not found', 'error');
@@ -286,6 +308,18 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       });
   }
 
+  get containerBusy(): boolean {
+    return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
+  }
+
+  private get containerDeploymentName(): string {
+    const source = this.containerLastDeploymentName || (this.model ? this.model.alias || this.model.name : '');
+    return String(source).toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
   get containerTabIndex(): number {
     const configIdx = this.hasVibePermission ? 3 : 1;
     const metricsOffset = this.model?.kind === 'training-job' ? 1 : 0;
@@ -301,6 +335,9 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
+    this.containerAppLogs = [];
+    this.containerAppLogTab = 0;
+    this.inAppLogSection = false;
     // Backend zips + uploads scripts to MinIO and returns the prepared config;
     // the browser then streams the build/deploy directly from the deployer's
     // WebSocket (sandbox approach, same as agent/mcp pipelines).
@@ -319,6 +356,8 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.containerDeployMessage = (config && config.error) || 'Failed to prepare deployment';
           return;
         }
+        this.containerLastDeploymentName = config.deployment_name || '';
+        this.containerLastNamespace = config.namespace || this.containerLastNamespace;
         this.streamContainerDeploy(config);
       },
       error: (err: any) => {
@@ -376,7 +415,19 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      this.addContainerLog(`${data.log}`);
+      const line = (data.log || '').toString();
+      if (line.includes('[APP_LOG] --- Application logs ---')) {
+        this.inAppLogSection = true;
+        if (this.containerAppLogs.length === 0) { this.containerAppLogTab = 1; }
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else if (line.includes('[APP_LOG] --- End of application logs ---')) {
+        this.inAppLogSection = false;
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else if (this.inAppLogSection) {
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else {
+        this.addContainerLog(line);
+      }
     });
 
     this.containerSocket.on('pipeline_status', (data: any) => {
@@ -385,6 +436,11 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         this.containerDeployStatus = 'success';
         this.containerDeployMessage = 'Deployment successful';
         this.addContainerLog('FINAL STATUS: SUCCESS');
+        this.persistContainerDeployment(
+          this.containerLastDeploymentName,
+          this.containerLastNamespace,
+          data.internal_dns_url || ''
+        );
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Deployment failed';
@@ -396,6 +452,76 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.containerSocket.on('connect_error', (err: any) => {
       this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
     });
+  }
+
+  deleteContainerDeployment(): void {
+    if (!this.model || this.containerBusy) return;
+    const deploymentName = this.containerDeploymentName;
+    if (!deploymentName) {
+      this.containerDeployStatus = 'error';
+      this.containerDeployMessage = 'Cannot determine the deployment name to delete';
+      return;
+    }
+    this.isDeletingContainer = true;
+    this.containerDeployMessage = 'Deleting deployment...';
+    this.containerDeployLogs = [];
+    this.addContainerLog('Starting deployment deletion process...');
+    this.disconnectContainerSocket();
+    this.containerSocket = io(window.location.origin, {
+      path: '/apps/builder-service/socket.io',
+      transports: ['websocket', 'polling'],
+      timeout: 600000,
+      forceNew: true,
+      rejectUnauthorized: false,
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 50,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+    } as any);
+    this.containerSocket.on('connect', () => {
+      this.addContainerLog(`Deleting deployment: ${deploymentName} from namespace: ${this.containerLastNamespace}`);
+      this.containerSocket.emit('delete_deployment', {
+        deployment_name: deploymentName,
+        namespace: this.containerLastNamespace,
+      });
+    });
+    this.containerSocket.on('delete_status', (data: any) => {
+      const status = (data.status || '').toString().toUpperCase();
+      this.isDeletingContainer = false;
+      if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+        this.containerDeployStatus = 'idle';
+        this.containerInternalDnsUrl = '';
+        this.containerDeployMessage = data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+        this.clearContainerDeployment();
+      } else {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = data.message || 'Failed to delete deployment';
+      }
+      this.addContainerLog(`FINAL STATUS: ${data.status || 'ERROR'}${data.message ? ' - ' + data.message : ''}`);
+      this.disconnectContainerSocket();
+    });
+    this.containerSocket.on('connect_error', (err: any) => {
+      this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+    });
+  }
+
+  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string): void {
+    if (!this.model) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+    parsed.containerDeployment = { deploymentName, namespace, internalDnsUrl, appLogs: this.containerAppLogs };
+    this.model.raw.json_content = JSON.stringify(parsed);
+    this.services.update(this.model.raw).subscribe({ error: () => {} });
+  }
+
+  private clearContainerDeployment(): void {
+    if (!this.model) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+    delete parsed.containerDeployment;
+    this.model.raw.json_content = JSON.stringify(parsed);
+    this.services.update(this.model.raw).subscribe({ error: () => {} });
   }
 
   private disconnectContainerSocket(): void {

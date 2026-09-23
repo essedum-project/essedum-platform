@@ -25,10 +25,17 @@
         <span class="run-type-chev">▾</span>
       </div>
     </div>
-    <!-- Run button replaced with Deploy as Container -->
-    <button mat-flat-button class="run-btn" (click)="deployAsContainer()" [disabled]="containerDeployStatus === 'deploying'">
+    <!-- Deploy as Container (hidden once deployed) -->
+    <button *ngIf="containerDeployStatus !== 'success'" mat-flat-button class="run-btn"
+            (click)="deployAsContainer()" [disabled]="containerBusy">
       <mat-icon>{{ containerDeployStatus === 'deploying' ? 'hourglass_top' : 'inventory_2' }}</mat-icon>
       {{ containerDeployStatus === 'deploying' ? 'Deploying…' : 'Deploy as Container' }}
+    </button>
+    <!-- Delete Deployment (shown when deployed) -->
+    <button *ngIf="containerDeployStatus === 'success'" mat-flat-button class="run-btn delete-run-btn"
+            (click)="deleteContainerDeployment()" [disabled]="containerBusy">
+      <mat-icon>{{ isDeletingContainer ? 'hourglass_top' : 'delete' }}</mat-icon>
+      {{ isDeletingContainer ? 'Deleting…' : 'Delete Deployment' }}
     </button>
   </header>
 
@@ -104,9 +111,15 @@
             <div class="ct-alert-detail">{{ containerDeployMessage }}</div>
           </div>
         </div>
-        <div *ngIf="containerDeployLogs.length > 0" class="ct-logs">
-          <div class="ct-logs-label">Deployment logs</div>
-          <pre>{{ containerDeployLogs.join('\n') }}</pre>
+        <div *ngIf="containerDeployLogs.length > 0 || containerAppLogs.length > 0" class="ct-logs">
+          <mat-tab-group [(selectedIndex)]="containerAppLogTab" animationDuration="80ms" class="log-inner-tabs">
+            <mat-tab label="Build Logs">
+              <pre>{{ containerDeployLogs.join('\n') }}</pre>
+            </mat-tab>
+            <mat-tab label="App Logs" [disabled]="containerAppLogs.length === 0">
+              <pre>{{ containerAppLogs.length > 0 ? containerAppLogs.join('\n') : 'App logs will appear here after deployment completes.' }}</pre>
+            </mat-tab>
+          </mat-tab-group>
         </div>
         <!-- Deploy as Container button moved to header -->
       </div>

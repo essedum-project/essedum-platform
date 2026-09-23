@@ -127,10 +127,13 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     containerDeployMessage: string = '';
     containerInternalDnsUrl: string = '';
     containerDeployLogs: string[] = [];
+    containerAppLogs: string[] = [];
+    containerAppLogTab = 0;
     isDeletingContainer: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
+    private inAppLogSection = false;
     activeTabIndex = 0;
     // Container tab index: Configuration(0), Script(1), Container(2) — Jobs hidden
     readonly containerTabIndex = 2;
@@ -189,6 +192,22 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
+      // Restore persistent container deployment state
+      try {
+        const parsed = JSON.parse(res.json_content || '{}');
+        const cd = parsed.containerDeployment;
+        if (cd && cd.deploymentName) {
+          this.containerLastDeploymentName = cd.deploymentName;
+          this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+          this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+          this.containerDeployStatus = 'success';
+          this.containerDeployMessage = 'Deployment active';
+          if (cd.appLogs && cd.appLogs.length > 0) {
+            this.containerAppLogs = cd.appLogs;
+            this.containerAppLogTab = 1;
+          }
+        }
+      } catch {}
       
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
@@ -717,6 +736,9 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
+    this.containerAppLogs = [];
+    this.containerAppLogTab = 0;
+    this.inAppLogSection = false;
     this.addContainerLog('Preparing pipeline package...');
     // Show snackbar and navigate to Container tab immediately
     this.service.message('Deployment started', 'success');
@@ -783,6 +805,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.containerInternalDnsUrl = '';
         this.containerDeployMessage =
           data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+        this.clearContainerDeployment();
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Failed to delete deployment';
@@ -839,7 +862,19 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      this.addContainerLog(`${data.log}`);
+      const line = (data.log || '').toString();
+      if (line.includes('[APP_LOG] --- Application logs ---')) {
+        this.inAppLogSection = true;
+        if (this.containerAppLogs.length === 0) { this.containerAppLogTab = 1; }
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else if (line.includes('[APP_LOG] --- End of application logs ---')) {
+        this.inAppLogSection = false;
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else if (this.inAppLogSection) {
+        this.containerAppLogs = [...this.containerAppLogs, line];
+      } else {
+        this.addContainerLog(line);
+      }
       this.cdr.detectChanges();
     });
 
@@ -880,6 +915,11 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.containerDeployMessage = 'Deployment successful';
         this.containerInternalDnsUrl = data.internal_dns_url || '';
         this.addContainerLog('FINAL STATUS: SUCCESS');
+        this.persistContainerDeployment(
+          this.containerLastDeploymentName,
+          this.containerLastNamespace,
+          data.internal_dns_url || ''
+        );
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Deployment failed';
@@ -895,6 +935,24 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       try { this.containerSocket.disconnect(); } catch (e) {}
       this.containerSocket = null;
     }
+  }
+
+  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string): void {
+    if (!this.streamItem) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.streamItem.json_content || '{}'); } catch {}
+    parsed.containerDeployment = { deploymentName, namespace, internalDnsUrl, appLogs: this.containerAppLogs };
+    this.streamItem.json_content = JSON.stringify(parsed);
+    this.service.update(this.streamItem).subscribe({ error: () => {} });
+  }
+
+  private clearContainerDeployment(): void {
+    if (!this.streamItem) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.streamItem.json_content || '{}'); } catch {}
+    delete parsed.containerDeployment;
+    this.streamItem.json_content = JSON.stringify(parsed);
+    this.service.update(this.streamItem).subscribe({ error: () => {} });
   }
 
   ngOnDestroy(): void {
