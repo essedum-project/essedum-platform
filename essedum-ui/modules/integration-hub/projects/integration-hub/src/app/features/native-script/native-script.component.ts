@@ -627,24 +627,23 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.data.files = [];
       }
 
-      let targetFileName: string;
-      if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
-        targetFileName = this.selectedFileNode.name;
-      } else {
-        // Mirror backend ICIPUtils.removeSpecialCharacter: strip non-alphanumeric chars so the
-        // filename matches what the backend stored and the update check in persistInNativeScriptTable succeeds.
-        const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
-        targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
-      }
-      
+      // Always derive the canonical filename from the pipeline name using the same
+      // removeSpecialCharacter logic as the backend (ICIPUtils.removeSpecialCharacter).
+      // Using selectedFileNode.name is unreliable: old pipelines may have an unsanitized
+      // filename stored in json_content.attributes.files (e.g. "LEONTV-R17807_leo1311.py")
+      // which fails the backend equalsIgnoreCase check against the sanitized DB filename
+      // ("LEONTVR17807_leo1311.py"), causing the blob update to be silently skipped.
+      const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
+      const targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
+
       let scriptContent = this.script.join('\n');
-      
+
       this.service
         .createNativeFile(
           pname,
           this.streamItem.organization,
           targetFileName,
-          this.data.filetype,
+          'Python3',
           scriptContent
         )
         .subscribe({
@@ -762,13 +761,13 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   deployAsContainer() {
     if (!this.streamItem || this.containerBusy) return;
-    if (this.codeModifiedSinceDeployed) {
-      // Redeploy: save latest code first, then deploy in save callback
-      this._redeployPending = true;
-      this.saveJson(this.streamItem.name);
-      return;
-    }
-    this._triggerContainerDeploy();
+    // Always save current editor content before deploying. codeModifiedSinceDeployed
+    // is only tracked while containerDeployStatus === 'success', so edits made while
+    // a deploy is in progress ('deploying') would be missed by the conditional check,
+    // causing the old blob to be redeployed. Unconditional save guarantees the latest
+    // script is always in DB before the deploy reads it.
+    this._redeployPending = true;
+    this.saveJson(this.streamItem.name);
   }
 
   private _triggerContainerDeploy() {
