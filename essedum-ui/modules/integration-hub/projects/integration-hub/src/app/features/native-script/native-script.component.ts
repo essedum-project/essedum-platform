@@ -123,6 +123,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     containerDeployMessage: string = '';
     containerInternalDnsUrl: string = '';
     private _containerPollInterval: any = null;
+    activeTabIndex = 0;
+    // Container tab is at index 2 (Configuration=0, Script=1, Container=2 — Jobs hidden)
+    readonly containerTabIndex = 2;
     envEditIndex: number = -1;
     envEditMode: boolean = false;
     secretsEditIndex: number = -1;
@@ -687,6 +690,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Initiating container build...';
     this.containerInternalDnsUrl = '';
+    // Show snackbar and navigate to Container tab immediately
+    this.service.message('Deployment started', 'success');
+    this.activeTabIndex = this.containerTabIndex;
     this.service.deployPipelineAsContainer(this.streamItem.name).subscribe(
       (res: any) => {
         let deployId: string;
@@ -715,9 +721,13 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           });
         }, 5000);
       },
-      (error) => {
+      (err: any) => {
         this.containerDeployStatus = 'error';
-        this.containerDeployMessage = 'Failed to start container deployment';
+        const msg =
+          (typeof err === 'string' && err.length < 600 ? err : null) ||
+          err?.message || err?.error || err?.details ||
+          'Failed to start container deployment';
+        this.containerDeployMessage = msg;
       }
     );
   }

@@ -286,12 +286,22 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** Container tab is always the last tab; index depends on vibe/kind flags. */
+  get containerTabIndex(): number {
+    const configIdx = this.hasVibePermission ? 3 : 1;
+    const metricsOffset = this.model?.kind === 'training-job' ? 1 : 0;
+    return configIdx + metricsOffset + 1;
+  }
+
   deployAsContainer(): void {
     if (!this.model) return;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
+    // Show snackbar and navigate to Container tab immediately
+    this.services.message('Deployment started', 'success');
+    this.activeTab = this.containerTabIndex;
     // Backend zips + uploads scripts to MinIO and returns the prepared config;
     // the browser then streams the build/deploy directly from the deployer's
     // WebSocket (sandbox approach, same as agent/mcp pipelines).
@@ -312,9 +322,14 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         }
         this.streamContainerDeploy(config);
       },
-      error: () => {
+      error: (err: any) => {
         this.containerDeployStatus = 'error';
-        this.containerDeployMessage = 'Failed to start container deployment';
+        // err is error.error from handleError — may be string, object, or null
+        const msg =
+          (typeof err === 'string' && err.length < 600 ? err : null) ||
+          err?.message || err?.error || err?.details ||
+          'Failed to start container deployment';
+        this.containerDeployMessage = msg;
       },
     });
   }
