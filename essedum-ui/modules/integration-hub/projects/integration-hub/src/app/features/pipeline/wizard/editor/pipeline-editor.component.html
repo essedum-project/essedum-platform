@@ -112,7 +112,11 @@
           </div>
         </div>
         <div *ngIf="containerDeployLogs.length > 0" class="ct-logs">
-          <pre>{{ containerDeployLogs.join('\n') }}</pre>
+          <mat-tab-group animationDuration="80ms" class="log-inner-tabs">
+            <mat-tab label="Logs">
+              <pre>{{ containerDeployLogs.join('\n') }}</pre>
+            </mat-tab>
+          </mat-tab-group>
         </div>
         <!-- Deploy as Container button moved to header -->
       </div>
