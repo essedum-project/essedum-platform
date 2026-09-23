@@ -51,6 +51,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   private containerLastDeploymentName = '';
   private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
+  private _redeployPending = false;
   private containerSocket: any = null;
 
   private destroy$ = new Subject<void>();
@@ -204,6 +205,10 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       next: () => {
         this.services.message('Saved! Click Deploy as Container to deploy this pipeline.', 'success');
         if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
+        if (this._redeployPending) {
+          this._redeployPending = false;
+          this._triggerContainerDeploy();
+        }
       },
       error: () => this.services.message('Save failed', 'error'),
     });
@@ -342,6 +347,17 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   }
 
   deployAsContainer(): void {
+    if (!this.model) return;
+    if (this.codeModifiedSinceDeployed) {
+      // Redeploy: re-save current code first to ensure server has latest, then deploy
+      this._redeployPending = true;
+      this.saveCode(this.model.code);
+      return;
+    }
+    this._triggerContainerDeploy();
+  }
+
+  private _triggerContainerDeploy(): void {
     if (!this.model) return;
     this.codeModifiedSinceDeployed = false;
     this.savedAfterModify = false;

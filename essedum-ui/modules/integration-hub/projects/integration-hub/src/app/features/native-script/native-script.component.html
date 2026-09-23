@@ -117,11 +117,11 @@
                     <button
                       mat-icon-button
                       class="action-icon-btn ns-redeploy-btn"
-                      [matTooltip]="savedAfterModify ? 'Redeploy with latest changes' : 'Save file to enable redeploy'"
+                      [matTooltip]="savedAfterModify ? 'Redeploy with latest changes' : 'Save file first to enable Redeploy'"
                       [disabled]="!savedAfterModify || containerBusy"
                     >
-                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons" [style.color]="savedAfterModify ? '#d97706' : '#6b7280'">
-                        {{ savedAfterModify ? 'refresh' : 'lock' }}
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="color: #d97706">
+                        refresh
                       </mat-icon>
                     </button>
                   </div>
@@ -192,7 +192,7 @@
             </div>
           </div>
           <!-- Code-change hint strip -->
-          <div class="ns-code-change-hint" *ngIf="showRedeployBtn">
+          <div class="ns-code-change-hint" [class.ns-hint-saved]="savedAfterModify" *ngIf="showRedeployBtn">
             <mat-icon>{{ savedAfterModify ? 'check_circle' : 'edit_note' }}</mat-icon>
             <span *ngIf="!savedAfterModify">Code changes detected — <strong>save the file</strong> to enable Redeploy</span>
             <span *ngIf="savedAfterModify">File saved — click <strong>Redeploy</strong> in the toolbar to apply your changes</span>

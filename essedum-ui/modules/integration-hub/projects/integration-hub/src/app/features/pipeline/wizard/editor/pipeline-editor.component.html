@@ -34,8 +34,8 @@
     <!-- Redeploy button: appears when deployed + code modified -->
     <button *ngIf="showRedeployBtn" mat-flat-button class="run-btn redeploy-run-btn"
             (click)="deployAsContainer()" [disabled]="!savedAfterModify || containerBusy"
-            [matTooltip]="savedAfterModify ? 'Deploy updated code to container' : 'Save your changes first to enable redeploy'">
-      <mat-icon>{{ savedAfterModify ? 'refresh' : 'lock' }}</mat-icon>
+            [matTooltip]="savedAfterModify ? 'Deploy updated code to container' : 'Save your changes first, then click Redeploy'">
+      <mat-icon>refresh</mat-icon>
       Redeploy
     </button>
     <!-- Delete Deployment (shown when deployed) -->
@@ -47,7 +47,7 @@
   </header>
 
   <!-- Code-change hint strip (shown when deployed + unsaved edits) -->
-  <div class="code-change-hint" *ngIf="showRedeployBtn">
+  <div class="code-change-hint" [class.hint-saved]="savedAfterModify" *ngIf="showRedeployBtn">
     <mat-icon>{{ savedAfterModify ? 'check_circle' : 'edit_note' }}</mat-icon>
     <span *ngIf="!savedAfterModify">Code changes detected — <strong>save the file</strong> to enable Redeploy</span>
     <span *ngIf="savedAfterModify">File saved — click <strong>Redeploy</strong> in the header to apply your changes</span>

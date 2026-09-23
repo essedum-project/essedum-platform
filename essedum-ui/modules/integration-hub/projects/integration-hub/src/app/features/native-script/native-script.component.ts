@@ -132,6 +132,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     savedAfterModify: boolean = false;
     private originalDeployedScript: string = '';
     private scriptEditorReady: boolean = false;
+    private _redeployPending: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
@@ -676,6 +677,10 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
               next: (updateResponse) => {
                 this.service.message('Pipeline saved successfully', 'success');
                 if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
+                if (this._redeployPending) {
+                  this._redeployPending = false;
+                  this._triggerContainerDeploy();
+                }
                 this.buildFileStructureFromCurrentData();
                 setTimeout(() => {
                   this.refreshFileStructureAfterSave();
@@ -750,6 +755,17 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   deployAsContainer() {
     if (!this.streamItem || this.containerBusy) return;
+    if (this.codeModifiedSinceDeployed) {
+      // Redeploy: save latest code first, then deploy in save callback
+      this._redeployPending = true;
+      this.saveJson(this.streamItem.name);
+      return;
+    }
+    this._triggerContainerDeploy();
+  }
+
+  private _triggerContainerDeploy() {
+    if (!this.streamItem) return;
     this.originalDeployedScript = this.script.join('\n');
     this.scriptEditorReady = true;
     this.codeModifiedSinceDeployed = false;
