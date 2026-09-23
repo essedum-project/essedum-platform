@@ -46,6 +46,8 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   containerInternalDnsUrl = '';
   containerDeployLogs: string[] = [];
   isDeletingContainer = false;
+  codeModifiedSinceDeployed = false;
+  savedAfterModify = false;
   private containerLastDeploymentName = '';
   private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
@@ -200,7 +202,8 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({
       next: () => {
-        this.services.message('Saved! Click ▶ Run to execute the pipeline.', 'success');
+        this.services.message('Saved! Click Deploy as Container to deploy this pipeline.', 'success');
+        if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
       },
       error: () => this.services.message('Save failed', 'error'),
     });
@@ -322,8 +325,21 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     return configIdx + metricsOffset + 1;
   }
 
+  onCodeModify(): void {
+    if (this.containerDeployStatus === 'success') {
+      this.codeModifiedSinceDeployed = true;
+      this.savedAfterModify = false;
+    }
+  }
+
+  get showRedeployBtn(): boolean {
+    return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
+  }
+
   deployAsContainer(): void {
     if (!this.model) return;
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
     // Show snackbar and navigate to Container tab immediately
     this.services.message('Deployment started', 'success');
     this.activeTab = this.containerTabIndex;

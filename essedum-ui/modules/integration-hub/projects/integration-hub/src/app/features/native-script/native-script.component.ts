@@ -128,6 +128,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     containerInternalDnsUrl: string = '';
     containerDeployLogs: string[] = [];
     isDeletingContainer: boolean = false;
+    codeModifiedSinceDeployed: boolean = false;
+    savedAfterModify: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
@@ -577,6 +579,10 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   onScriptChange($event) {
     this.script = $event;
+    if (this.containerDeployStatus === 'success') {
+      this.codeModifiedSinceDeployed = true;
+      this.savedAfterModify = false;
+    }
   }
 
   onLangChange() {
@@ -658,6 +664,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.service.update(this.streamItem).subscribe({
               next: (updateResponse) => {
                 this.service.message('Pipeline saved successfully', 'success');
+                if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
                 this.buildFileStructureFromCurrentData();
                 setTimeout(() => {
                   this.refreshFileStructureAfterSave();
@@ -714,6 +721,10 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
   }
 
+  get showRedeployBtn(): boolean {
+    return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
+  }
+
   /** Mirrors the sanitisation the deployer applies to deployment names. */
   private get containerDeploymentName(): string {
     const source =
@@ -728,6 +739,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   deployAsContainer() {
     if (!this.streamItem || this.containerBusy) return;
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';

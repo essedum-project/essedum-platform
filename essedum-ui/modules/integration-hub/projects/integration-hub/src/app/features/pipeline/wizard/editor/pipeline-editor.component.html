@@ -12,7 +12,7 @@
       </div>
     </div>
     <span class="head-spacer"></span>
-    <!-- Run type selector: mirrors native-script Script tab dropdown -->
+    <!-- Run type selector -->
     <div class="run-type-combo" *ngIf="runTypes?.length">
       <span class="run-type-label">Run type</span>
       <div class="run-type-sel-wrap">
@@ -31,6 +31,13 @@
       <mat-icon>{{ containerDeployStatus === 'deploying' ? 'hourglass_top' : 'inventory_2' }}</mat-icon>
       {{ containerDeployStatus === 'deploying' ? 'Deploying…' : 'Deploy as Container' }}
     </button>
+    <!-- Redeploy button: appears when deployed + code modified -->
+    <button *ngIf="showRedeployBtn" mat-flat-button class="run-btn redeploy-run-btn"
+            (click)="deployAsContainer()" [disabled]="!savedAfterModify || containerBusy"
+            [matTooltip]="savedAfterModify ? 'Deploy updated code to container' : 'Save your changes first to enable redeploy'">
+      <mat-icon>{{ savedAfterModify ? 'refresh' : 'lock' }}</mat-icon>
+      Redeploy
+    </button>
     <!-- Delete Deployment (shown when deployed) -->
     <button *ngIf="containerDeployStatus === 'success'" mat-flat-button class="run-btn delete-run-btn"
             (click)="deleteContainerDeployment()" [disabled]="containerBusy">
@@ -39,13 +46,20 @@
     </button>
   </header>
 
+  <!-- Code-change hint strip (shown when deployed + unsaved edits) -->
+  <div class="code-change-hint" *ngIf="showRedeployBtn">
+    <mat-icon>{{ savedAfterModify ? 'check_circle' : 'edit_note' }}</mat-icon>
+    <span *ngIf="!savedAfterModify">Code changes detected — <strong>save the file</strong> to enable Redeploy</span>
+    <span *ngIf="savedAfterModify">File saved — click <strong>Redeploy</strong> in the header to apply your changes</span>
+  </div>
+
   <!-- Tabs -->
   <mat-tab-group class="editor-tabs" [(selectedIndex)]="activeTab" animationDuration="120ms" mat-align-tabs="start">
 
     <!-- Code Editor -->
     <mat-tab>
       <ng-template mat-tab-label><mat-icon>code</mat-icon>&nbsp;Code</ng-template>
-      <app-code-editor-tab [model]="model" (codeChange)="saveCode($event)"></app-code-editor-tab>
+      <app-code-editor-tab [model]="model" (codeChange)="saveCode($event)" (codeModify)="onCodeModify()"></app-code-editor-tab>
     </mat-tab>
 
     <!-- Vibe Code (AI rewrite) -->
@@ -98,9 +112,13 @@
         <div *ngIf="containerDeployStatus === 'success'" class="ct-alert ct-alert-success">
           <mat-icon>check_circle</mat-icon>
           <div class="ct-alert-body">
-            <div class="ct-alert-title">Deployment successful</div>
+            <div class="ct-alert-title">Deployment active</div>
             <div *ngIf="containerInternalDnsUrl" class="ct-alert-detail">
               Internal URL: <code>{{ containerInternalDnsUrl }}</code>
+            </div>
+            <div *ngIf="showRedeployBtn" class="ct-alert-detail ct-redeploy-hint">
+              <mat-icon style="font-size:14px;height:14px;width:14px;vertical-align:middle;">info</mat-icon>
+              {{ savedAfterModify ? 'Click Redeploy in the header to apply your saved changes.' : 'Code changes pending — save the file then click Redeploy.' }}
             </div>
           </div>
         </div>
@@ -118,7 +136,6 @@
             </mat-tab>
           </mat-tab-group>
         </div>
-        <!-- Deploy as Container button moved to header -->
       </div>
     </mat-tab>
 

@@ -724,6 +724,7 @@ export class CodeEditorTabComponent
 {
   @Input() model: WizardPipelineModel;
   @Output() codeChange = new EventEmitter<string>();
+  @Output() codeModify = new EventEmitter<void>();
 
   @ViewChild("msgList") msgListEl: ElementRef<HTMLUListElement>;
 
@@ -1389,7 +1390,9 @@ ${this.model.code}
   onScriptChange(lines: string[]): void {
     this.scriptLines = lines;
     const joined = lines.join("\n");
+    const wasDirty = this.dirty;
     this.dirty = joined !== this.originalCode;
+    if (this.dirty && !wasDirty) { this.codeModify.emit(); }
   }
 
   save(): void {
