@@ -981,24 +981,33 @@ public class ICIPPipelineService implements IICIPSearchable{
 
 	private ResponseEntity<?> deployPipelineAsContainer(String jobType, String cname, String alias, String org) {
 		try {
-			// Use findByNameAndOrg (native SELECT filescript query) so the deploy always reads the
-			// freshest blob from the DB, not a stale JPA-cached entity from findByOrgAndName.
-			ICIPNativeScript script = nativeScriptService.findByNameAndOrg(cname, org);
-			if (script == null || script.getFilescript() == null) {
-				return new ResponseEntity<>("No scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
+			// Use findByOrgAndName (list) to handle pipelines with multiple script entries
+			// (e.g. both a .py and an .ipynb row share the same cname). Filter to .py only
+			// since the container runtime executes Python. Each deploy request opens a fresh
+			// Hibernate session so entities carry the latest committed blob from the DB.
+			List<ICIPNativeScript> scripts = nativeScriptService.findByOrgAndName(cname, org);
+			List<ICIPNativeScript> pyScripts = scripts == null ? java.util.Collections.emptyList()
+					: scripts.stream()
+						.filter(s -> s.getFilename() != null && s.getFilename().toLowerCase().endsWith(".py"))
+						.collect(java.util.stream.Collectors.toList());
+			if (pyScripts.isEmpty()) {
+				return new ResponseEntity<>("No .py scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
 			}
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try (ZipOutputStream zos = new ZipOutputStream(bos)) {
-				ZipEntry entry = new ZipEntry(script.getFilename());
-				zos.putNextEntry(entry);
-				try (InputStream is = script.getFilescript().getBinaryStream()) {
-					byte[] buf = new byte[4096];
-					int len;
-					while ((len = is.read(buf)) > 0) {
-						zos.write(buf, 0, len);
+				for (ICIPNativeScript script : pyScripts) {
+					if (script.getFilescript() == null) continue;
+					ZipEntry entry = new ZipEntry(script.getFilename());
+					zos.putNextEntry(entry);
+					try (InputStream is = script.getFilescript().getBinaryStream()) {
+						byte[] buf = new byte[4096];
+						int len;
+						while ((len = is.read(buf)) > 0) {
+							zos.write(buf, 0, len);
+						}
 					}
+					zos.closeEntry();
 				}
-				zos.closeEntry();
 			}
 			final byte[] zipBytes = bos.toByteArray();
 			final String zipName = cname + ".zip";
