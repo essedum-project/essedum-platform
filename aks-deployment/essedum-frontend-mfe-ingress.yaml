@@ -1,28 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: essedum-frontend-ingress
+  name: essedum-frontend-mfe-ingress
   namespace: aipns
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/proxy-ssl-verify: "off"
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
-  ingressClassName: nginx
   tls:
   - hosts:
-    - ${INGRESS_HOST}
+    - ${INGRESS_HOST_LFN}
     secretName: ${TLS_SECRET_NAME}
   rules:
-  - host: ${INGRESS_HOST}
+  - host: ${INGRESS_HOST_LFN}
     http:
       paths:
       - path: /mfe/agent-designer(/|$)(.*)

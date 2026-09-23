@@ -1,0 +1,66 @@
+# Namespaces + RBAC for container-based native/data/training pipelines.
+# The adk-code-builder-deployer (builder-service, SA aipns/builder-sa) deploys
+# pipeline containers here, so it needs deployer-role in each namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vibe-pipelines
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vibe-training
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer-role
+  namespace: vibe-pipelines
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create","get","list","watch","patch","update","delete"]
+  - apiGroups: [""]
+    resources: ["secrets","services","pods","pods/log"]
+    verbs: ["get","list","watch","create","update","patch","delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployer-binding
+  namespace: vibe-pipelines
+subjects:
+  - kind: ServiceAccount
+    name: builder-sa
+    namespace: aipns
+roleRef:
+  kind: Role
+  name: deployer-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer-role
+  namespace: vibe-training
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create","get","list","watch","patch","update","delete"]
+  - apiGroups: [""]
+    resources: ["secrets","services","pods","pods/log"]
+    verbs: ["get","list","watch","create","update","patch","delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployer-binding
+  namespace: vibe-training
+subjects:
+  - kind: ServiceAccount
+    name: builder-sa
+    namespace: aipns
+roleRef:
+  kind: Role
+  name: deployer-role
+  apiGroup: rbac.authorization.k8s.io

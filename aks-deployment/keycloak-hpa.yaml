@@ -1,3 +1,5 @@
+# NOTE: Keycloak runs in start-dev mode which does NOT support horizontal clustering.
+# HPA is intentionally disabled. Scale manually if needed after switching to production mode.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

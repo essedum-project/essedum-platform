@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: essedum-auth-config
+  namespace: aipns
+data:
+  auth-config.json: |
+    {
+      "auth": {
+        "authRequired": true,
+        "authInIframe": false,
+        "iframeHtmlPath": "assets/login-iframe.html",
+        "issuer": "${OAUTH2_ISSUER_URI}",
+        "clientId": "${OAUTH2_CLIENT_ID}",
+        "responseType": "code",
+        "scope": "${OAUTH2_SCOPE}",
+        "showDebugInformation": false,
+        "timeoutFactor": 0.5,
+        "strictDiscoveryDocumentValidation": false
+      }
+    }

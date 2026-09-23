@@ -50,6 +50,18 @@ spec:
           value: "${SERVICE_ACCESS_TOKEN}"
         - name: SERVICE_PROXY_USER
           value: "${SERVICE_PROXY_USER}"
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: essedum-github-secret
+              key: GITHUB_CLIENT_ID
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: essedum-github-secret
+              key: GITHUB_CLIENT_SECRET
+        - name: GITHUB_OAUTH_REDIRECT_URI
+          value: "${GITHUB_OAUTH_REDIRECT_URI}"
         ports:
         - containerPort: 8081
         startupProbe:

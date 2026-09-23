@@ -7,7 +7,20 @@ from aiohttp import web, ClientSession, ClientTimeout, TCPConnector, WSMsgType
 from yarl import URL  # comes with aiohttp; used to attach query string safely
 
 # --- Config ---
-NS = os.getenv("TARGET_NAMESPACE", "aipns")
+import socket as _socket
+NS = os.getenv("TARGET_NAMESPACE")
+if not NS:
+    raise RuntimeError("TARGET_NAMESPACE is required")
+# Namespaces searched (in priority order) when resolving an app service.
+# User apps live in vibe-apps/vibe-agents/vibe-mcp; platform services (e.g.
+# builder-service) live in the default namespace (aipns).
+_APP_NAMESPACES = os.getenv("APP_NAMESPACES")
+if not _APP_NAMESPACES:
+    raise RuntimeError("APP_NAMESPACES is required")
+_NAMESPACES = []
+for _n in [x.strip() for x in _APP_NAMESPACES.split(",")] + [NS]:
+    if _n and _n not in _NAMESPACES:
+        _NAMESPACES.append(_n)
 ALLOWLIST = os.getenv("ALLOWLIST")  # e.g., "runner-service,builder-service"
 ALLOW = set(ALLOWLIST.split(",")) if ALLOWLIST else None
 
@@ -69,22 +82,38 @@ def sanitize_subpath(subpath: str) -> str:
     normalized = posixpath.normpath("/" + subpath)
     return normalized.lstrip("/")
 
-# Expected host suffix for all upstream targets - computed once at startup
-_CLUSTER_SUFFIX = f".{NS}.svc.cluster.local"
+# Expected host suffixes for all upstream targets - computed once at startup
+_CLUSTER_SUFFIXES = [f".{n}.svc.cluster.local" for n in _NAMESPACES]
+
+def _resolve_namespace(service: str) -> str:
+    """Return the first namespace whose <service>.<ns>.svc.cluster.local resolves.
+
+    User apps live in the vibe-* namespaces; platform services in aipns. We try
+    each namespace in priority order and use the first that resolves via DNS,
+    falling back to the default namespace.
+    """
+    for ns in _NAMESPACES:
+        try:
+            _socket.getaddrinfo(f"{service}.{ns}.svc.cluster.local", None)
+            return ns
+        except OSError:
+            continue
+    return NS
 
 def build_upstream(service: str, subpath: str) -> str:
-    """Build upstream URL base for service + subpath."""
+    """Build upstream URL base for service + subpath (namespace auto-resolved)."""
     sub = f"/{subpath}" if subpath else "/"
-    return f"http://{service}{_CLUSTER_SUFFIX}{sub}"
+    ns = _resolve_namespace(service)
+    return f"http://{service}.{ns}.svc.cluster.local{sub}"
 
 def validate_upstream_url(url: URL) -> bool:
     """
-    Verify the upstream URL host is strictly within the cluster namespace.
-    Prevents SSRF by ensuring user-controlled input cannot redirect
-    requests to arbitrary hosts outside *.{NS}.svc.cluster.local.
+    Verify the upstream URL host is strictly within one of the allowed cluster
+    namespaces. Prevents SSRF by ensuring user-controlled input cannot redirect
+    requests to arbitrary hosts outside *.{ns}.svc.cluster.local.
     """
     host = url.host or ""
-    return host.endswith(_CLUSTER_SUFFIX) and url.scheme == "http"
+    return url.scheme == "http" and any(host.endswith(sfx) for sfx in _CLUSTER_SUFFIXES)
 
 # -------------------------
 # HTTP proxy (polling etc.)
@@ -224,6 +253,14 @@ async def websocket_proxy(request: web.Request) -> web.StreamResponse:
 # -------------------------
 # App factory + middleware
 # -------------------------
+async def apps_root_redirect(request: web.Request):
+    """Redirect /apps/<service> (no trailing slash) -> /apps/<service>/ so the
+    app's relative asset URLs resolve against the correct base path."""
+    service = request.match_info.get("service", "")
+    qs = request.rel_url.query_string
+    location = f"/apps/{service}/" + (f"?{qs}" if qs else "")
+    raise web.HTTPMovedPermanently(location=location)
+
 def make_app():
     app = web.Application()
 
@@ -231,7 +268,7 @@ def make_app():
     app.router.add_get("/health", health)
 
     # HTTP routes (polling etc.)
-    app.router.add_route("*", "/apps/{service}", http_proxy)
+    app.router.add_route("*", "/apps/{service}", apps_root_redirect)
     app.router.add_route("*", "/apps/{service}/", http_proxy)
     app.router.add_route("*", "/apps/{service}/{subpath:.*}", http_proxy)
 

@@ -95,7 +95,7 @@
           </a>
         </div>
         <div class="app-viewer-iframe-wrapper">
-          <iframe [src]="safeAppUrl" class="app-viewer-iframe" frameborder="0" allowfullscreen></iframe>
+          <iframe #appFrame [src]="safeAppUrl" (load)="onAppFrameLoad(appFrame)" class="app-viewer-iframe" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
     </div>
