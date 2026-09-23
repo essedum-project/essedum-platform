@@ -1,15 +1,16 @@
+import re
 import uuid
-import random
-import string
 from datetime import datetime
 from sqlalchemy import String, Text, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-def _generate_cname() -> str:
-    chars = string.ascii_uppercase + string.digits
-    return "".join(random.choices(chars, k=6))
+def _slugify(name: str) -> str:
+    slug = name.lower().strip()
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    slug = slug.strip("-")
+    return slug[:48] or "pipeline"
 
 
 class Pipeline(Base):
@@ -19,7 +20,7 @@ class Pipeline(Base):
     flow_id: Mapped[str] = mapped_column(String(36), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    cname: Mapped[str] = mapped_column(String(16), nullable=False, default=_generate_cname)
+    cname: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="registered")
     env_vars: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     secrets: Mapped[list] = mapped_column(JSON, nullable=True, default=list)

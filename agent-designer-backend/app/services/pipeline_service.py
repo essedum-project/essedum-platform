@@ -3,7 +3,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 
-from app.models.pipeline import Pipeline
+from app.models.pipeline import Pipeline, _slugify
 from app.models.flow import Flow
 from app.schemas.pipeline import PipelineCreate, PipelineStatusUpdate
 
@@ -34,6 +34,7 @@ async def create_pipeline(db: AsyncSession, data: PipelineCreate) -> Pipeline:
         id=str(uuid.uuid4()),
         flow_id=data.flow_id,
         name=data.name,
+        cname=_slugify(data.name),
         description=data.description,
         env_vars=data.env_vars,
         secrets=data.secrets,

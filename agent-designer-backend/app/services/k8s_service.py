@@ -5,6 +5,7 @@ Architecture:
   - Deployment + Service → vibe-agents namespace (pods appear there)
   - ExternalName Service + Ingress → aipns namespace (TLS secret lives in aipns)
 """
+import re
 import logging
 import os
 
@@ -23,8 +24,12 @@ HOST = os.environ.get("CLUSTER_HOST", "essedum-lfn.infosys.com")
 TLS_SECRET = "essedum-lfn-tls"
 
 
-def _deploy_name(cname: str) -> str:
-    return f"ad-pipeline-{cname.lower()}"
+def _deploy_name(pipeline) -> str:
+    """Derive a valid RFC-1123 K8s name from the pipeline's display name."""
+    slug = pipeline.name.lower().strip()
+    slug = re.sub(r"[^a-z0-9]+", "-", slug).strip("-")
+    slug = slug[:48] or "pipeline"
+    return f"ad-{slug}"
 
 
 def _k8s():
@@ -38,7 +43,7 @@ def _k8s():
 
 def deploy_pipeline(pipeline) -> None:
     apps, core, net, client = _k8s()
-    name = _deploy_name(pipeline.cname)
+    name = _deploy_name(pipeline)
 
     # ── Deployment in vibe-agents ──────────────────────────────────────────────
     dep = client.V1Deployment(
@@ -109,7 +114,7 @@ def deploy_pipeline(pipeline) -> None:
         log.info("Created ExternalName service %s in %s", name, INGRESS_NS)
     except client.exceptions.ApiException as e:
         if e.status != 409:
-            raise
+            log.warning("Could not create ExternalName service %s: %s — continuing", name, e)
 
     # ── Ingress in aipns ──────────────────────────────────────────────────────
     ingress = client.V1Ingress(
@@ -146,12 +151,14 @@ def deploy_pipeline(pipeline) -> None:
         log.info("Created ingress %s in %s", name, INGRESS_NS)
     except client.exceptions.ApiException as e:
         if e.status != 409:
-            raise
+            # Ingress admission webhook may be unavailable (e.g. ingress-nginx controller pending).
+            # Log and continue — the Deployment + Service in vibe-agents are already running.
+            log.warning("Could not create Ingress %s: %s — pipeline pod is still running", name, e)
 
 
 def undeploy_pipeline(pipeline) -> None:
     apps, core, net, client = _k8s()
-    name = _deploy_name(pipeline.cname)
+    name = _deploy_name(pipeline)
 
     for fn, kwargs in [
         (net.delete_namespaced_ingress,   {"name": name, "namespace": INGRESS_NS}),
