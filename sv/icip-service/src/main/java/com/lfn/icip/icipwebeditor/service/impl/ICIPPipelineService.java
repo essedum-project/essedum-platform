@@ -981,24 +981,24 @@ public class ICIPPipelineService implements IICIPSearchable{
 
 	private ResponseEntity<?> deployPipelineAsContainer(String jobType, String cname, String alias, String org) {
 		try {
-			List<ICIPNativeScript> scripts = nativeScriptService.findByOrgAndName(cname, org);
-			if (scripts == null || scripts.isEmpty()) {
+			// Use findByNameAndOrg (native SELECT filescript query) so the deploy always reads the
+			// freshest blob from the DB, not a stale JPA-cached entity from findByOrgAndName.
+			ICIPNativeScript script = nativeScriptService.findByNameAndOrg(cname, org);
+			if (script == null || script.getFilescript() == null) {
 				return new ResponseEntity<>("No scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
 			}
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try (ZipOutputStream zos = new ZipOutputStream(bos)) {
-				for (ICIPNativeScript script : scripts) {
-					ZipEntry entry = new ZipEntry(script.getFilename());
-					zos.putNextEntry(entry);
-					try (InputStream is = script.getFilescript().getBinaryStream()) {
-						byte[] buf = new byte[4096];
-						int len;
-						while ((len = is.read(buf)) > 0) {
-							zos.write(buf, 0, len);
-						}
+				ZipEntry entry = new ZipEntry(script.getFilename());
+				zos.putNextEntry(entry);
+				try (InputStream is = script.getFilescript().getBinaryStream()) {
+					byte[] buf = new byte[4096];
+					int len;
+					while ((len = is.read(buf)) > 0) {
+						zos.write(buf, 0, len);
 					}
-					zos.closeEntry();
 				}
+				zos.closeEntry();
 			}
 			final byte[] zipBytes = bos.toByteArray();
 			final String zipName = cname + ".zip";

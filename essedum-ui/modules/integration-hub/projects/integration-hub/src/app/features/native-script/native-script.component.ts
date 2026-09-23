@@ -627,11 +627,14 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.data.files = [];
       }
 
-      let targetFileName: string;      
+      let targetFileName: string;
       if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
         targetFileName = this.selectedFileNode.name;
       } else {
-        targetFileName = `${pname}_${this.streamItem.organization}.py`;
+        // Mirror backend ICIPUtils.removeSpecialCharacter: strip non-alphanumeric chars so the
+        // filename matches what the backend stored and the update check in persistInNativeScriptTable succeeds.
+        const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
+        targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
       }
       
       let scriptContent = this.script.join('\n');
@@ -664,11 +667,15 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             if (!fileExists) {
               this.data.files.push(response);
             }
-            
+
+            // Normalize files to a clean array of actual filenames (avoids double-encoded strings from DB)
+            this.data.files = [targetFileName];
+
             this.data.arguments = this.treeData;
-            this.data.usedSecrets = this.dynamicSecretsArray;            
+            this.data.usedSecrets = this.dynamicSecretsArray;
+            // Include generatedCode so the deploy endpoint reads the latest script directly from DB
             this.streamItem.json_content = JSON.stringify({
-              elements: [{ attributes: this.data }],
+              elements: [{ attributes: { ...this.data, generatedCode: scriptContent } }],
               environment: this.dynamicEnvArray,
               default_runtime: this.selectedRunType
             });

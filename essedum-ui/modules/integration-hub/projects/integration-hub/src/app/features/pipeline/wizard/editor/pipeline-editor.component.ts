@@ -127,15 +127,13 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     const attrs = parsed?.pipeline_attributes ?? {};
     const kind = attrs.kind === 'training-job' || ss.type === 'TrainingPipeline'
       ? 'training-job' : 'data-pipeline';
-    // Canonical filename — exact same logic as native-script's saveJson():
-    //   pname  = this.streamItem.name          (from getStreamingServicesByName response)
-    //   org    = this.streamItem.organization  (from getStreamingServicesByName response)
-    //   targetFileName = `${pname}_${org}.py`
-    // Both values come from the BE API response, just as in the legacy screen.
-    // el.files[0] is intentionally ignored — may have stale/wrong naming.
     const cname = ss.name || routeCname || '';
     const org   = ss.organization || sessionStorage.getItem('organization') || '';
-    const canonicalFilename = `${cname}_${org}.py`;
+    // Backend's createNewFileName strips non-alphanumeric chars (same as ICIPUtils.removeSpecialCharacter).
+    // e.g. "data-n" → "datan", so the stored filename is "datan_leo1311.py".
+    // We must derive the same name or the update check in persistInNativeScriptTable will never match.
+    const sanitizedCname = cname.replace(/[^a-zA-Z0-9_]/g, '');
+    const canonicalFilename = `${sanitizedCname}_${org}.py`;
     return {
       raw: ss,
       name: cname,
@@ -169,8 +167,21 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.services.createNativeFile(cname, org, filename, 'Python3', newCode)
       .subscribe({
         next: (savedFilename: string) => {
-          // API returns the stored path/name — use it as the canonical filename going forward
-          const storedFile = (savedFilename && savedFilename.trim()) ? savedFilename.trim() : filename;
+          // Backend returns a JSON array like ["datan_leo1311.py","datan_leo1311.ipynb"].
+          // Parse it and use the .py entry as the canonical filename going forward.
+          let storedFile = filename;
+          if (savedFilename && savedFilename.trim()) {
+            const raw = savedFilename.trim();
+            if (raw.startsWith('[')) {
+              try {
+                const arr = JSON.parse(raw) as string[];
+                const pyFile = arr.find((f: string) => f.endsWith('.py'));
+                storedFile = pyFile || arr[0] || filename;
+              } catch { storedFile = filename; }
+            } else {
+              storedFile = raw;
+            }
+          }
           this.model!.filename = storedFile;
           this.persistJsonContent(newCode, storedFile);
         },
