@@ -59,7 +59,7 @@
     <!-- Code Editor -->
     <mat-tab>
       <ng-template mat-tab-label><mat-icon>code</mat-icon>&nbsp;Code</ng-template>
-      <app-code-editor-tab [model]="model" (codeChange)="saveCode($event)" (codeModify)="onCodeModify()"></app-code-editor-tab>
+      <app-code-editor-tab [model]="model" (codeChange)="saveCode($event)" (codeModify)="onCodeModify()" (codeRestore)="onCodeRestore()"></app-code-editor-tab>
     </mat-tab>
 
     <!-- Vibe Code (AI rewrite) -->

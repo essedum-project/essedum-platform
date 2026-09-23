@@ -332,6 +332,11 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     }
   }
 
+  onCodeRestore(): void {
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
+  }
+
   get showRedeployBtn(): boolean {
     return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
   }

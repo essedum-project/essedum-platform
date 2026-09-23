@@ -130,6 +130,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     isDeletingContainer: boolean = false;
     codeModifiedSinceDeployed: boolean = false;
     savedAfterModify: boolean = false;
+    private originalDeployedScript: string = '';
+    private scriptEditorReady: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
@@ -579,9 +581,18 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   onScriptChange($event) {
     this.script = $event;
+    if (!this.scriptEditorReady) {
+      this.scriptEditorReady = true;
+      if (this.containerDeployStatus === 'success') {
+        this.originalDeployedScript = $event.join('\n');
+      }
+      return;
+    }
     if (this.containerDeployStatus === 'success') {
-      this.codeModifiedSinceDeployed = true;
-      this.savedAfterModify = false;
+      const current = $event.join('\n');
+      const changed = current !== this.originalDeployedScript;
+      this.codeModifiedSinceDeployed = changed;
+      if (!changed) this.savedAfterModify = false;
     }
   }
 
@@ -739,6 +750,8 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   deployAsContainer() {
     if (!this.streamItem || this.containerBusy) return;
+    this.originalDeployedScript = this.script.join('\n');
+    this.scriptEditorReady = true;
     this.codeModifiedSinceDeployed = false;
     this.savedAfterModify = false;
     this.containerDeployStatus = 'deploying';
