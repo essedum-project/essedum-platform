@@ -106,6 +106,9 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
             this.containerInternalDnsUrl = cd.internalDnsUrl || '';
             this.containerDeployStatus = 'success';
             this.containerDeployMessage = 'Deployment active';
+            if (cd.buildLogs && cd.buildLogs.length > 0) {
+              this.containerDeployLogs = cd.buildLogs;
+            }
             if (cd.appLogs && cd.appLogs.length > 0) {
               this.containerAppLogs = cd.appLogs;
               this.containerAppLogTab = 1;
@@ -416,13 +419,16 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
 
     this.containerSocket.on('build_log', (data: any) => {
       const line = (data.log || '').toString();
-      if (line.includes('[APP_LOG] --- Application logs ---')) {
-        this.inAppLogSection = true;
-        if (this.containerAppLogs.length === 0) { this.containerAppLogTab = 1; }
+      if (line.includes('[APP_LOG]')) {
+        const lower = line.toLowerCase();
+        const isStart = !this.inAppLogSection && lower.includes('application log') && !lower.includes('end of');
+        if (isStart) {
+          this.inAppLogSection = true;
+        } else if (lower.includes('end of application log')) {
+          this.inAppLogSection = false;
+        }
         this.containerAppLogs = [...this.containerAppLogs, line];
-      } else if (line.includes('[APP_LOG] --- End of application logs ---')) {
-        this.inAppLogSection = false;
-        this.containerAppLogs = [...this.containerAppLogs, line];
+        if (isStart) { this.containerAppLogTab = 1; }
       } else if (this.inAppLogSection) {
         this.containerAppLogs = [...this.containerAppLogs, line];
       } else {
@@ -510,7 +516,11 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     if (!this.model) return;
     let parsed: any = {};
     try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
-    parsed.containerDeployment = { deploymentName, namespace, internalDnsUrl, appLogs: this.containerAppLogs };
+    parsed.containerDeployment = {
+      deploymentName, namespace, internalDnsUrl,
+      buildLogs: this.containerDeployLogs.slice(-500),
+      appLogs: this.containerAppLogs,
+    };
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({ error: () => {} });
   }
