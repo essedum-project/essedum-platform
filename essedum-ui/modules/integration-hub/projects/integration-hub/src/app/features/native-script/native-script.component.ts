@@ -4,9 +4,12 @@ import {
   Input,
   Inject,
   OnChanges,
+  OnDestroy,
   EventEmitter,
   Output,
   ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { FileUploader, FileItem, ParsedResponseHeaders } from 'ng2-file-upload';
 import * as FileSaver from 'file-saver';
@@ -22,6 +25,7 @@ import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { DynamicParamsGrid, DynamicSecretsGrid } from './pipeline.models';
 import { NotebookDialogComponent, NotebookDialogData } from '../pipeline.description/notebook-dialog/notebook-dialog.component';
+import { io } from 'socket.io-client';
 
 interface FileNode {
   name: string;
@@ -45,7 +49,7 @@ interface Elementt {
     styleUrls: ['./native-script.component.scss'],
     standalone: false
 })
-export class NativeScriptComponent implements OnInit, OnChanges {
+export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
   @Input() initiativeData: any;
   @Input() streamItem: StreamingServices;
   @Input() cardTitle: String = 'Pipeline';
@@ -122,10 +126,15 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     containerDeployStatus: 'idle' | 'deploying' | 'success' | 'error' = 'idle';
     containerDeployMessage: string = '';
     containerInternalDnsUrl: string = '';
-    private _containerPollInterval: any = null;
+    containerDeployLogs: string[] = [];
+    isDeletingContainer: boolean = false;
+    private containerLastDeploymentName: string = '';
+    private containerLastNamespace: string = 'vibe-pipelines';
+    private containerSocket: any = null;
     activeTabIndex = 0;
-    // Container tab is at index 2 (Configuration=0, Script=1, Container=2 — Jobs hidden)
+    // Container tab index: Configuration(0), Script(1), Container(2) — Jobs hidden
     readonly containerTabIndex = 2;
+    @ViewChild('containerConsole') containerConsole: ElementRef;
     envEditIndex: number = -1;
     envEditMode: boolean = false;
     secretsEditIndex: number = -1;
@@ -686,50 +695,210 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       );
   }
 
+  get containerBusy(): boolean {
+    return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
+  }
+
+  /** Mirrors the sanitisation the deployer applies to deployment names. */
+  private get containerDeploymentName(): string {
+    const source =
+      this.containerLastDeploymentName ||
+      (this.streamItem ? this.streamItem.alias || this.streamItem.name : '');
+    return String(source)
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
   deployAsContainer() {
+    if (!this.streamItem || this.containerBusy) return;
     this.containerDeployStatus = 'deploying';
-    this.containerDeployMessage = 'Initiating container build...';
+    this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
+    this.containerDeployLogs = [];
+    this.addContainerLog('Preparing pipeline package...');
     // Show snackbar and navigate to Container tab immediately
     this.service.message('Deployment started', 'success');
     this.activeTabIndex = this.containerTabIndex;
+    // Backend zips + uploads scripts to MinIO and returns the prepared config;
+    // the browser then streams the build/deploy directly from the deployer's
+    // WebSocket (sandbox approach, same as agent/mcp pipelines).
     this.service.deployPipelineAsContainer(this.streamItem.name).subscribe(
       (res: any) => {
-        let deployId: string;
+        let config: any;
         try {
-          const parsed = typeof res === 'string' ? JSON.parse(res) : res;
-          deployId = parsed.deploy_id;
+          config = typeof res === 'string' ? JSON.parse(res) : res;
         } catch {
-          this.containerDeployStatus = 'error';
-          this.containerDeployMessage = 'Failed to parse deploy response';
+          this.setContainerError('Failed to parse deploy response');
           return;
         }
-        this._containerPollInterval = setInterval(() => {
-          this.service.getContainerDeployStatus(deployId).subscribe((status: any) => {
-            if (status.status === 'SUCCESS') {
-              clearInterval(this._containerPollInterval);
-              this.containerDeployStatus = 'success';
-              this.containerDeployMessage = 'Deployment complete';
-              this.containerInternalDnsUrl = status.internal_dns_url || '';
-            } else if (status.status === 'ERROR') {
-              clearInterval(this._containerPollInterval);
-              this.containerDeployStatus = 'error';
-              this.containerDeployMessage = status.message || 'Deployment failed';
-            } else {
-              this.containerDeployMessage = status.message || 'Building...';
-            }
-          });
-        }, 5000);
+        if (!config || config.status !== 'prepared') {
+          this.setContainerError((config && config.error) || 'Failed to prepare deployment');
+          return;
+        }
+        this.containerLastDeploymentName = config.deployment_name || '';
+        this.containerLastNamespace = config.namespace || this.containerLastNamespace;
+        this.streamContainerDeploy(config);
       },
       (err: any) => {
-        this.containerDeployStatus = 'error';
         const msg =
           (typeof err === 'string' && err.length < 600 ? err : null) ||
           err?.message || err?.error || err?.details ||
           'Failed to start container deployment';
-        this.containerDeployMessage = msg;
+        this.setContainerError(msg);
       }
     );
+  }
+
+  deleteContainerDeployment(): void {
+    if (!this.streamItem || this.containerBusy) return;
+    const deploymentName = this.containerDeploymentName;
+    if (!deploymentName) {
+      this.setContainerError('Cannot determine the deployment name to delete');
+      return;
+    }
+    this.isDeletingContainer = true;
+    this.containerDeployMessage = 'Deleting deployment...';
+    this.containerDeployLogs = [];
+    this.addContainerLog('Starting deployment deletion process...');
+
+    const socket = this.openContainerSocket();
+    socket.on('connect', () => {
+      this.addContainerLog(
+        `Deleting deployment: ${deploymentName} from namespace: ${this.containerLastNamespace}`
+      );
+      socket.emit('delete_deployment', {
+        deployment_name: deploymentName,
+        namespace: this.containerLastNamespace,
+      });
+      this.cdr.detectChanges();
+    });
+
+    socket.on('delete_status', (data: any) => {
+      const status = (data.status || '').toString().toUpperCase();
+      this.isDeletingContainer = false;
+      if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+        this.containerDeployStatus = 'idle';
+        this.containerInternalDnsUrl = '';
+        this.containerDeployMessage =
+          data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+      } else {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = data.message || 'Failed to delete deployment';
+      }
+      this.addContainerLog(`FINAL STATUS: ${data.status || 'ERROR'}${data.message ? ' - ' + data.message : ''}`);
+      this.disconnectContainerSocket();
+      this.cdr.detectChanges();
+    });
+  }
+
+  private setContainerError(message: string): void {
+    this.containerDeployStatus = 'error';
+    this.isDeletingContainer = false;
+    this.containerDeployMessage = message;
+    this.addContainerLog(`✗ ${message}`);
+    this.cdr.detectChanges();
+  }
+
+  private addContainerLog(line: string): void {
+    this.containerDeployLogs = [...this.containerDeployLogs, line];
+    this.scrollContainerConsole();
+  }
+
+  private scrollContainerConsole(): void {
+    setTimeout(() => {
+      const el = this.containerConsole?.nativeElement;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
+  }
+
+  /** Opens a socket to the build/deploy service and wires the shared log handlers. */
+  private openContainerSocket(): any {
+    this.addContainerLog('Connecting to build service...');
+    this.disconnectContainerSocket();
+    this.containerSocket = io(window.location.origin, {
+      path: '/apps/builder-service/socket.io',
+      transports: ['websocket', 'polling'],
+      timeout: 600000,
+      forceNew: true,
+      rejectUnauthorized: false,
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 50,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+    } as any);
+
+    this.containerSocket.on('pipeline_update', (data: any) => {
+      this.containerDeployMessage = `[${data.step}] ${data.message}`;
+      this.addContainerLog(`[${data.step}] ${data.message}`);
+      this.cdr.detectChanges();
+    });
+
+    this.containerSocket.on('build_log', (data: any) => {
+      this.addContainerLog(`${data.log}`);
+      this.cdr.detectChanges();
+    });
+
+    this.containerSocket.on('connect_error', (err: any) => {
+      this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+      this.cdr.detectChanges();
+    });
+
+    return this.containerSocket;
+  }
+
+  private streamContainerDeploy(config: any): void {
+    const socket = this.openContainerSocket();
+
+    socket.on('connect', () => {
+      this.addContainerLog('Connected. Starting pipeline build & deploy...');
+      const payload: any = {
+        bucket_name: config.bucket_name,
+        file_path: config.file_path,
+        target_image_tag: config.target_image_tag,
+        deployment_name: config.deployment_name,
+        namespace: config.namespace,
+        minio_endpoint: config.minio_endpoint,
+        env_vars: config.env_vars || [],
+        secrets: config.secrets || [],
+      };
+      if (config.node_selector) {
+        payload.node_selector = config.node_selector;
+      }
+      socket.emit('start_pipeline', payload);
+      this.cdr.detectChanges();
+    });
+
+    socket.on('pipeline_status', (data: any) => {
+      const status = (data.status || '').toString().toUpperCase();
+      if (status === 'SUCCESS') {
+        this.containerDeployStatus = 'success';
+        this.containerDeployMessage = 'Deployment successful';
+        this.containerInternalDnsUrl = data.internal_dns_url || '';
+        this.addContainerLog('FINAL STATUS: SUCCESS');
+      } else {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = data.message || 'Deployment failed';
+        this.addContainerLog(`FINAL STATUS: ${data.status || 'ERROR'}${data.message ? ' - ' + data.message : ''}`);
+      }
+      this.disconnectContainerSocket();
+      this.cdr.detectChanges();
+    });
+  }
+
+  private disconnectContainerSocket(): void {
+    if (this.containerSocket) {
+      try { this.containerSocket.disconnect(); } catch (e) {}
+      this.containerSocket = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.disconnectContainerSocket();
   }
 
   copyPipeline() {

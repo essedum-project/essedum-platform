@@ -79,7 +79,7 @@
       <ng-template mat-tab-label><mat-icon>inventory_2</mat-icon>&nbsp;Container</ng-template>
       <div class="tab-content p-3">
         <div class="container-meta mb-3" *ngIf="model.pipelineAttrs?.containerImage">
-          <span class="text-muted">Image: </span><code>{{ model.pipelineAttrs.containerImage }}</code>
+          <span class="ct-muted-text">Image: </span><code>{{ model.pipelineAttrs.containerImage }}</code>
         </div>
         <div *ngIf="containerDeployStatus === 'idle'" class="ct-status-idle">
           Click the <strong>Deploy as Container</strong> button to build and deploy this pipeline to Kubernetes.

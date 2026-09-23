@@ -499,28 +499,76 @@
                 ></app-jobs>
               </mat-tab> -->
               <mat-tab label="Container" class="lfx-u-header-xl">
-                <div class="tab-content p-3">
-                  <div *ngIf="containerDeployStatus === 'idle'" class="ct-status-idle">
-                    Click the <strong>Deploy as Container</strong> button to build and deploy this pipeline as a Kubernetes container.
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'deploying'" class="ct-status-deploying">
-                    <mat-spinner diameter="18" class="lfx-u-mar-r-8"></mat-spinner>
-                    <span>{{ containerDeployMessage }}</span>
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'success'" class="ct-alert ct-alert-success">
-                    <mat-icon>check_circle</mat-icon>
-                    <div class="ct-alert-body">
-                      <div class="ct-alert-title">Deployment successful</div>
-                      <div *ngIf="containerInternalDnsUrl" class="ct-alert-detail">
-                        Internal URL: <code>{{ containerInternalDnsUrl }}</code>
+                <div class="tab-content cdeploy-tab">
+                  <div class="cdeploy-section">
+                    <div class="cdeploy-header">
+                      <h2 class="cdeploy-title">Container Deployment</h2>
+                      <p class="cdeploy-subtitle">
+                        Build this pipeline into a container image and deploy it to Kubernetes
+                      </p>
+                    </div>
+
+                    <!-- Run & Deploy and Delete Deployment buttons hidden; use header Deploy as Container icon instead -->
+                    <!-- <div class="cdeploy-controls">
+                      <button
+                        mat-raised-button
+                        class="cdeploy-action-btn run-deploy-button"
+                        (click)="deployAsContainer()"
+                        [disabled]="containerBusy"
+                      >...</button>
+                      <button
+                        mat-raised-button
+                        class="cdeploy-action-btn delete-deployment-button"
+                        (click)="deleteContainerDeployment()"
+                        [disabled]="containerBusy"
+                      >...</button>
+                    </div> -->
+
+                    <div class="cdeploy-status-row" *ngIf="containerDeployMessage">
+                      <div
+                        class="cdeploy-status-hint"
+                        [ngClass]="{
+                          'status-progress': containerBusy,
+                          'status-error': containerDeployStatus === 'error',
+                          'status-success': containerDeployStatus === 'success' && !containerBusy
+                        }"
+                      >
+                        <mat-icon *ngIf="containerDeployStatus === 'success' && !containerBusy">check_circle</mat-icon>
+                        <mat-icon *ngIf="containerDeployStatus === 'error' && !containerBusy">error</mat-icon>
+                        {{ containerDeployMessage }}
                       </div>
                     </div>
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'error'" class="ct-alert ct-alert-error">
-                    <mat-icon>error</mat-icon>
-                    <div class="ct-alert-body">
-                      <div class="ct-alert-title">Deployment failed</div>
-                      <div class="ct-alert-detail">{{ containerDeployMessage }}</div>
+
+                    <div
+                      class="cdeploy-endpoint-row"
+                      *ngIf="containerDeployStatus === 'success' && containerInternalDnsUrl"
+                    >
+                      <mat-icon>link</mat-icon>
+                      <span class="cdeploy-endpoint-label">Internal URL</span>
+                      <code class="cdeploy-endpoint-url">{{ containerInternalDnsUrl }}</code>
+                    </div>
+
+                    <div class="console-container">
+                      <div class="console-header">
+                        <mat-icon>terminal</mat-icon>
+                        <span>Console Output</span>
+                      </div>
+                      <div class="console-output" #containerConsole>
+                        <div *ngFor="let line of containerDeployLogs" class="console-line">
+                          <span class="console-prompt">$</span>
+                          <span class="console-text">{{ line }}</span>
+                        </div>
+                        <div *ngIf="containerBusy" class="console-line">
+                          <span class="console-prompt">$</span>
+                          <span class="console-text console-loading">Processing...</span>
+                        </div>
+                        <div
+                          *ngIf="containerDeployLogs.length === 0 && !containerBusy"
+                          class="console-empty"
+                        >
+                          <span>Console ready. Click "Deploy as Container" to see output.</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
