@@ -21,7 +21,7 @@ export class SalusComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Guard against unsubstituted build-time placeholders (e.g. __FE_SALUS_URL__).
-    this.isUrlConfigured = !!(this.salusUrl?.startsWith('http'));
+    this.isUrlConfigured = !!(this.salusUrl && (this.salusUrl.startsWith('http') || this.salusUrl.startsWith('/')));
     const url = this.isUrlConfigured ? this.salusUrl : 'about:blank';
     this.currentIframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }

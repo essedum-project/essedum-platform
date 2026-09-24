@@ -10,6 +10,7 @@ from app.api.v1.rag import router as rag_router
 from app.api.v1.mcp import router as mcp_router
 from app.api.v1.memory import router as memory_router
 from app.api.v1.websocket import router as ws_router
+from app.api.v1.pipelines import router as pipelines_router
 
 v1_router = APIRouter()
 
@@ -23,3 +24,4 @@ v1_router.include_router(rag_router)
 v1_router.include_router(mcp_router)
 v1_router.include_router(memory_router)
 v1_router.include_router(ws_router)
+v1_router.include_router(pipelines_router)

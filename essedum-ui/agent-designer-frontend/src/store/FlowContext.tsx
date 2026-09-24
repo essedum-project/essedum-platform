@@ -382,12 +382,13 @@ export function FlowProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'UPDATE_NODE_STATUS', nodeId: n.id, status: 'running' });
         });
 
-        // Poll for completion (max ~120s)
-        const POLL_INTERVAL_MS = 1000;
-        const MAX_POLLS = 120;
+        // Poll for completion (up to 30 minutes)
+        const POLL_INTERVAL_MS = 1500;
+        const POLL_DEADLINE_MS = 30 * 60 * 1000;
+        const pollStart = Date.now();
         const seenLogIds = new Set<string>();
 
-        for (let i = 0; i < MAX_POLLS; i++) {
+        while (Date.now() - pollStart < POLL_DEADLINE_MS) {
           await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
 
           // Stream new logs and reflect per-node status as they arrive

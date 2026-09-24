@@ -21,10 +21,12 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     if (qs) url += `?${qs}`;
   }
 
+  const jwtToken = localStorage.getItem('jwtToken');
   const config: RequestInit = {
     ...rest,
     headers: {
       'Content-Type': 'application/json',
+      ...(jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}),
       ...headers,
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -67,6 +69,9 @@ export const api = {
 
   put: <T>(url: string, body?: unknown) =>
     request<T>(url, { method: 'PUT', body }),
+
+  patch: <T>(url: string, body?: unknown) =>
+    request<T>(url, { method: 'PATCH', body }),
 
   delete: <T = void>(url: string) =>
     request<T>(url, { method: 'DELETE' }),
