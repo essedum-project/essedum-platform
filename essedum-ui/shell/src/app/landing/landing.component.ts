@@ -1197,6 +1197,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } else {
       this.hoveredLabel = '';
       this.viewtabsonload();
+      if (item.url && item.type !== 'external') {
+        this.router.navigate([item.url], { relativeTo: this.route });
+      }
     }
   }
 
@@ -3834,7 +3837,7 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
   /** Returns the sidebarMenu with advanced items hidden unless the user has opted in. */
   get visibleSidebarMenu(): any[] {
     const seen = new Set<string>();
-    return this.sidebarMenu.filter(
+    const items = this.sidebarMenu.filter(
       (item) => {
         // Deduplicate items with the same label (e.g. renamed "Pipelines")
         if (seen.has(item.label)) return false;
@@ -3843,13 +3846,38 @@ if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress
           this.customMenuState[item.label] === true);
       }
     );
+    // Include advanced items not in the DB sidebar when the user has toggled them ON
+    for (const cfg of this.advancedMenuItems) {
+      if (!seen.has(cfg.label) && this.customMenuState[cfg.label] === true) {
+        const url = this._advancedItemFallbackUrls[cfg.label];
+        if (url) items.push({ label: cfg.label, url });
+      }
+    }
+    return items;
   }
 
-  /** Items from sidebarMenu that belong to the advanced/optional group. */
+  /** Fallback routes for advanced items that may not be in the DB sidebar. */
+  private readonly _advancedItemFallbackUrls: Record<string, string> = {
+    'Salus':          './integration/salus',
+    'Lite LLM':       './agent/litellm',
+    'Langfuse':       './agent/langfuse',
+    'Agent Designer': './mfe/agent-designer/',
+    'Apps':           './integration/apps',
+    'App List':       './integration/apps',
+  };
+
+  /** Items from sidebarMenu that belong to the advanced/optional group.
+   *  Items not in the DB sidebar are included with fallback URLs so the
+   *  App Modules panel always shows the full configured list. */
   getAdvancedMenuItems(): any[] {
-    return this.sidebarMenu.filter((item) =>
+    const fromMenu = this.sidebarMenu.filter((item) =>
       this.ADVANCED_MENU_LABELS.includes(item.label)
     );
+    const fromMenuLabels = new Set(fromMenu.map((i: any) => i.label));
+    const extras = this.advancedMenuItems
+      .filter(cfg => !fromMenuLabels.has(cfg.label))
+      .map(cfg => ({ label: cfg.label, url: this._advancedItemFallbackUrls[cfg.label] || '' }));
+    return [...fromMenu, ...extras];
   }
 
   /** Count how many advanced items are currently enabled. */

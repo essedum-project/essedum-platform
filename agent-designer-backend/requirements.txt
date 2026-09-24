@@ -27,7 +27,7 @@ pydantic-settings>=2.5.2
 qdrant-client==1.10.1
 
 # Model providers
-openai==1.35.15           # Azure OpenAI uses the openai SDK
+openai==1.77.0            # Azure OpenAI uses the openai SDK; >=1.57 required for httpx 0.28+ (no proxies arg)
 boto3==1.34.144           # AWS Bedrock
 botocore==1.34.144
 google-cloud-aiplatform==1.60.0
@@ -35,7 +35,7 @@ google-auth==2.32.0
 vertexai==1.60.0
 
 # MCP client
-mcp==1.4.1
+mcp==1.9.4
 httpx==0.28.1
 httpx-sse==0.4.0
 

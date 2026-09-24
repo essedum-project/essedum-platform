@@ -21,10 +21,12 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     if (qs) url += `?${qs}`;
   }
 
+  const jwtToken = localStorage.getItem('jwtToken');
   const config: RequestInit = {
     ...rest,
     headers: {
       'Content-Type': 'application/json',
+      ...(jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}),
       ...headers,
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
