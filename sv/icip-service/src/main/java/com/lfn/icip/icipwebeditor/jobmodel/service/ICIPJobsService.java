@@ -1157,13 +1157,14 @@ public class ICIPJobsService implements IICIPJobsService {
      */
     private java.net.URL toSafeUrl(String rawUrl) {
         try {
-            // Allow legitimate internal cluster executor hosts (e.g. pyjob-executor-service).
-            // Prefer the DB-backed allow-list; fall back to the SSRF_ALLOWED_HOSTS env var.
-            String hosts = ssrfAllowedHosts;
-            if (hosts == null || hosts.trim().isEmpty()) {
-                hosts = System.getenv("SSRF_ALLOWED_HOSTS");
+            java.util.List<String> allowed = java.util.Collections.emptyList();
+            try {
+                allowed = SsrfProtectionUtil.parseAllowedHosts(
+                        constantService.findByKeys("icip.ssrf.allowedHosts", "Core"));
+            } catch (Exception ignore) {
+                // fall back to no allowlist; the internal-IP check still applies
             }
-            return SsrfProtectionUtil.validateAndCreateUrl(rawUrl, SsrfProtectionUtil.parseAllowedHosts(hosts));
+            return SsrfProtectionUtil.validateAndCreateUrl(rawUrl, allowed);
         } catch (java.net.MalformedURLException e) {
             throw new IllegalArgumentException("Invalid or disallowed URL: " + e.getMessage(), e);
         }

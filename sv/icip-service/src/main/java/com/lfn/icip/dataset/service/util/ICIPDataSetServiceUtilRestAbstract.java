@@ -202,6 +202,9 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 	@Value("${icip.fileuploadDir}")
 	private static String fileUploadPath;
 
+	@Value("${icip.ssrf.allowedHosts:}")
+	private String ssrfAllowedHosts;
+
 	/** The proxy properties. */
 	private ProxyProperties proxyProperties;
 
@@ -1383,7 +1386,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 				String keypass = connectionDetails.optString("KeyPass");;
 				URL extractURL=null;
 				try {
-					extractURL = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("Url"));
+					extractURL = SsrfProtectionUtil.validateAndCreateUrl(connectionDetails.optString("Url"), SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts));
 				} catch (MalformedURLException e1) {
 					// TODO Auto-generated catch block
 					logger.error(e1.getMessage());
