@@ -119,6 +119,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import com.lfn.icip.dataset.util.SsrfProtectionUtil;
+import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -200,6 +201,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
     @EssedumProperty("icip.ssrf.allowedHosts")
     private String ssrfAllowedHosts;
 
+
     /** The resolver. */
     @Autowired
     private IAIResolverAspect resolver;
@@ -245,6 +247,27 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
     @Autowired
     private ICIPJobsRepository iCIPJobsRepository;
 
+    /** Constants service for runtime resolution of the SSRF allowlist — the
+     *  @EssedumProperty field above is not reliably populated on this bean. */
+    @Autowired
+    private ConstantsService ssrfConstantsService;
+
+    /**
+     * Resolves the SSRF allowed-hosts list at runtime. Falls back to the DB
+     * constant (icip.ssrf.allowedHosts / Core) when the injected field is empty.
+     */
+    private List<String> resolveSsrfAllowedHosts() {
+        String hosts = ssrfAllowedHosts;
+        if (hosts == null || hosts.trim().isEmpty()) {
+            try {
+                hosts = ssrfConstantsService.findByKeys("icip.ssrf.allowedHosts", "Core");
+            } catch (Exception ex) {
+                logger.warn("Could not resolve icip.ssrf.allowedHosts constant: {}", ex.getMessage());
+                hosts = "";
+            }
+        }
+        return SsrfProtectionUtil.parseAllowedHosts(hosts);
+    }
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         HashMap<String, String> configs = new HashMap<>();
@@ -1084,7 +1107,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             OkHttpClient client = newBuilder.build();
             // MediaType mediaType = MediaType.parse("application/json");
             // JSONObject bodyObject = new JSONObject();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, resolveSsrfAllowedHosts())).addHeader("accept", "application/json").build();
             logger.info("getStatus request " + requestokHttp);
             try {
                 Response response = client.newCall(requestokHttp).execute();
@@ -1116,7 +1139,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
             newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
             newBuilder.hostnameVerifier(com.lfn.ai.comm.lib.util.SafeHostnameVerifier.INSTANCE);
             OkHttpClient client = newBuilder.build();
-            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, SsrfProtectionUtil.parseAllowedHosts(ssrfAllowedHosts))).addHeader("accept", "application/json").build();
+            Request requestokHttp = new Request.Builder().url(SsrfProtectionUtil.safeUrl(url, resolveSsrfAllowedHosts())).addHeader("accept", "application/json").build();
             logger.info("getLog request " + requestokHttp.toString());
             Response response = null;
 
