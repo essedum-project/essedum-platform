@@ -51,7 +51,8 @@
                     ></app-tags>
                   </ng-template>
                 </li>
-                <li class="li-style">
+                <!-- Start button hidden per UI spec -->
+                <!-- <li class="li-style">
                   <div
                     class="lfx-u-mar-r-24 aip-cursor"
                     (click)="runPipeline()"
@@ -68,21 +69,60 @@
                       >
                     </button>
                   </div>
-                </li>
-                <li class="li-style">
+                </li> -->
+                <!-- Deploy as Container (hidden once deployed) -->
+                <li class="li-style" *ngIf="containerDeployStatus !== 'success'">
                   <div
                     class="lfx-u-mar-r-24 aip-cursor"
                     (click)="deployAsContainer()"
                     style="cursor: pointer"
-                    [class.disabled]="containerDeployStatus === 'deploying'"
+                    [class.disabled]="containerBusy"
                   >
                     <button
                       mat-icon-button
                       class="action-icon-btn"
                       matTooltip="Deploy as Container"
-                      [disabled]="containerDeployStatus === 'deploying'"
+                      [disabled]="containerBusy"
                     >
                       <mat-icon class="lfx-u-mar-r-16 aip-led-icons">inventory_2</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <!-- Delete Deployment (shown when deployed) -->
+                <li class="li-style" *ngIf="containerDeployStatus === 'success'">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="deleteContainerDeployment()"
+                    style="cursor: pointer"
+                    [class.disabled]="containerBusy"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn"
+                      matTooltip="Delete Deployment"
+                      [disabled]="containerBusy"
+                    >
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons">{{ isDeletingContainer ? 'hourglass_top' : 'delete' }}</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <!-- Redeploy button: appears when deployed + code modified -->
+                <li class="li-style" *ngIf="showRedeployBtn">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="savedAfterModify && !containerBusy && deployAsContainer()"
+                    style="cursor: pointer"
+                    [class.disabled]="!savedAfterModify || containerBusy"
+                  >
+                    <button
+                      mat-icon-button
+                      class="action-icon-btn ns-redeploy-btn"
+                      [matTooltip]="savedAfterModify ? 'Redeploy with latest changes' : 'Save file first to enable Redeploy'"
+                      [disabled]="!savedAfterModify || containerBusy"
+                    >
+                      <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="color: #d97706">
+                        refresh
+                      </mat-icon>
                     </button>
                   </div>
                 </li>
@@ -151,10 +191,16 @@
               </ul>
             </div>
           </div>
+          <!-- Code-change hint strip -->
+          <div class="ns-code-change-hint" [class.ns-hint-saved]="savedAfterModify" *ngIf="showRedeployBtn">
+            <mat-icon>{{ savedAfterModify ? 'check_circle' : 'edit_note' }}</mat-icon>
+            <span *ngIf="!savedAfterModify">Code changes detected — <strong>save the file</strong> to enable Redeploy</span>
+            <span *ngIf="savedAfterModify">File saved — click <strong>Redeploy</strong> in the toolbar to apply your changes</span>
+          </div>
           <div
             class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow native-script-panel"
           >
-            <mat-tab-group disableRipple>
+            <mat-tab-group disableRipple [(selectedIndex)]="activeTabIndex">
               <mat-tab label="Configuration" class="lfx-u-header-xl">
                 <div class="tab-content mb-5">
                   <div class="col-md-12">
@@ -490,39 +536,86 @@
                   </div>
                 </div>
               </mat-tab>
-              <mat-tab label="Jobs" class="lfx-u-header-xl">
+              <!-- Jobs tab hidden per UI spec -->
+              <!-- <mat-tab label="Jobs" class="lfx-u-header-xl">
                 <app-jobs
                   *ngIf="streamItem"
                   [cname]="streamItem.name"
                 ></app-jobs>
-              </mat-tab>
+              </mat-tab> -->
               <mat-tab label="Container" class="lfx-u-header-xl">
-                <div class="tab-content p-3">
-                  <div *ngIf="containerDeployStatus === 'idle'" class="text-muted p-2">
-                    Click the <strong>Deploy as Container</strong> button to build and deploy this pipeline as a Kubernetes container.
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'deploying'" class="d-flex align-items-center p-2">
-                    <mat-spinner diameter="20" class="lfx-u-mar-r-8"></mat-spinner>
-                    <span>{{ containerDeployMessage }}</span>
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'success'" class="p-2">
-                    <div class="d-flex align-items-center mb-2">
-                      <mat-icon class="text-success lfx-u-mar-r-8">check_circle</mat-icon>
-                      <strong>Deployment successful</strong>
+                <div class="tab-content cdeploy-tab">
+                  <div class="cdeploy-section">
+                    <div class="cdeploy-header">
+                      <h2 class="cdeploy-title">Container Deployment</h2>
+                      <p class="cdeploy-subtitle">
+                        Build this pipeline into a container image and deploy it to Kubernetes
+                      </p>
                     </div>
-                    <div *ngIf="containerInternalDnsUrl" class="mt-1">
-                      <span class="text-muted">Internal URL: </span>
-                      <code>{{ containerInternalDnsUrl }}</code>
+
+                    <!-- Run & Deploy and Delete Deployment buttons hidden; use header Deploy as Container icon instead -->
+                    <!-- <div class="cdeploy-controls">
+                      <button
+                        mat-raised-button
+                        class="cdeploy-action-btn run-deploy-button"
+                        (click)="deployAsContainer()"
+                        [disabled]="containerBusy"
+                      >...</button>
+                      <button
+                        mat-raised-button
+                        class="cdeploy-action-btn delete-deployment-button"
+                        (click)="deleteContainerDeployment()"
+                        [disabled]="containerBusy"
+                      >...</button>
+                    </div> -->
+
+                    <div class="cdeploy-status-row" *ngIf="containerDeployMessage">
+                      <div
+                        class="cdeploy-status-hint"
+                        [ngClass]="{
+                          'status-progress': containerBusy,
+                          'status-error': containerDeployStatus === 'error',
+                          'status-success': containerDeployStatus === 'success' && !containerBusy
+                        }"
+                      >
+                        <mat-icon *ngIf="containerDeployStatus === 'success' && !containerBusy">check_circle</mat-icon>
+                        <mat-icon *ngIf="containerDeployStatus === 'error' && !containerBusy">error</mat-icon>
+                        {{ containerDeployMessage }}
+                      </div>
                     </div>
-                    <button mat-stroked-button color="primary" class="mt-3" (click)="deployAsContainer()">Re-deploy</button>
-                  </div>
-                  <div *ngIf="containerDeployStatus === 'error'" class="p-2">
-                    <div class="d-flex align-items-center mb-2">
-                      <mat-icon class="text-danger lfx-u-mar-r-8">error</mat-icon>
-                      <strong>Deployment failed</strong>
+
+                    <div
+                      class="cdeploy-endpoint-row"
+                      *ngIf="containerDeployStatus === 'success' && containerInternalDnsUrl"
+                    >
+                      <mat-icon>link</mat-icon>
+                      <span class="cdeploy-endpoint-label">Internal URL</span>
+                      <code class="cdeploy-endpoint-url">{{ containerInternalDnsUrl }}</code>
                     </div>
-                    <div class="text-muted">{{ containerDeployMessage }}</div>
-                    <button mat-stroked-button color="warn" class="mt-3" (click)="deployAsContainer()">Retry</button>
+
+                    <div class="console-container">
+                      <mat-tab-group animationDuration="80ms" class="log-inner-tabs">
+                        <mat-tab>
+                          <ng-template mat-tab-label>
+                            <mat-icon style="font-size:15px;height:15px;width:15px;margin-right:4px;">terminal</mat-icon>
+                            Logs
+                          </ng-template>
+                          <div class="console-output" #containerConsole>
+                            <div *ngFor="let line of containerDeployLogs" class="console-line">
+                              <span class="console-prompt">$</span>
+                              <span class="console-text">{{ line }}</span>
+                            </div>
+                            <div *ngIf="containerBusy" class="console-line">
+                              <span class="console-prompt">$</span>
+                              <span class="console-text console-loading">Processing...</span>
+                            </div>
+                            <div *ngIf="containerDeployLogs.length === 0 && !containerBusy" class="console-empty">
+                              <span>Console ready. Click "Deploy as Container" to see output.</span>
+                            </div>
+                          </div>
+                        </mat-tab>
+                      </mat-tab-group>
+                    </div>
                   </div>
                 </div>
               </mat-tab>

@@ -763,11 +763,15 @@ def handle_pipeline_trigger(data):
 
             if not has_secrets:
                 # Fallback order: explicit 'secret_name' from client payload -> "{deploy_name}-secrets" -> "adk-global-secrets"
+                # "adk-global-secrets" provides default LiteLLM routing (VLLM_URL/VLLM_API_KEY/VLLM_MODEL_NAME)
+                # so every pipeline gets Langfuse tracing + the Salus guardrail for free via LiteLLM,
+                # without each pipeline needing its own LLM secret.
                 fallback_candidates = [
                     data.get("secret_name"),
                     secret_name,
                     "adk-global-secrets",
                 ]
+                fallback_secret = find_existing_secret(k8s_core, target_namespace, fallback_candidates)
 
             # 6) BUILD & PUSH (BuildKit)
             log_to_client(f"Starting BuildKit for {image_tag}...", step="BUILD")
@@ -810,7 +814,7 @@ def handle_pipeline_trigger(data):
             log_to_client("Build and Push to ACR Registry Successful", step="BUILD")
 
             # 7) DEPLOY TO K8S
-            secret_to_use = secret_name if has_secrets else None
+            secret_to_use = secret_name if has_secrets else fallback_secret
 
             log_to_client(
                 f"Deploying {image_tag} to {deploy_name} in {target_namespace}...",

@@ -981,13 +981,22 @@ public class ICIPPipelineService implements IICIPSearchable{
 
 	private ResponseEntity<?> deployPipelineAsContainer(String jobType, String cname, String alias, String org) {
 		try {
+			// Use findByOrgAndName (list) to handle pipelines with multiple script entries
+			// (e.g. both a .py and an .ipynb row share the same cname). Filter to .py only
+			// since the container runtime executes Python. Each deploy request opens a fresh
+			// Hibernate session so entities carry the latest committed blob from the DB.
 			List<ICIPNativeScript> scripts = nativeScriptService.findByOrgAndName(cname, org);
-			if (scripts == null || scripts.isEmpty()) {
-				return new ResponseEntity<>("No scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
+			List<ICIPNativeScript> pyScripts = scripts == null ? java.util.Collections.emptyList()
+					: scripts.stream()
+						.filter(s -> s.getFilename() != null && s.getFilename().toLowerCase().endsWith(".py"))
+						.collect(java.util.stream.Collectors.toList());
+			if (pyScripts.isEmpty()) {
+				return new ResponseEntity<>("No .py scripts found for pipeline: " + cname, HttpStatus.NOT_FOUND);
 			}
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try (ZipOutputStream zos = new ZipOutputStream(bos)) {
-				for (ICIPNativeScript script : scripts) {
+				for (ICIPNativeScript script : pyScripts) {
+					if (script.getFilescript() == null) continue;
 					ZipEntry entry = new ZipEntry(script.getFilename());
 					zos.putNextEntry(entry);
 					try (InputStream is = script.getFilescript().getBinaryStream()) {
