@@ -45,7 +45,13 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
   containerDeployMessage = '';
   containerInternalDnsUrl = '';
   containerDeployLogs: string[] = [];
+  isDeletingContainer = false;
+  codeModifiedSinceDeployed = false;
+  savedAfterModify = false;
+  private containerLastDeploymentName = '';
+  private containerLastNamespace = 'vibe-pipelines';
   private _containerPollInterval: any = null;
+  private _redeployPending = false;
   private containerSocket: any = null;
 
   private destroy$ = new Subject<void>();
@@ -90,6 +96,21 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         if (this.runtypesCheck) this.fetchRunTypes();
         this.loading = false;
         this.backfillModelPathIfNeeded();
+        // Restore persistent container deployment state
+        try {
+          const parsed = JSON.parse(ss.json_content || '{}');
+          const cd = parsed.containerDeployment;
+          if (cd && cd.deploymentName) {
+            this.containerLastDeploymentName = cd.deploymentName;
+            this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+            this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+            this.containerDeployStatus = 'success';
+            this.containerDeployMessage = 'Deployment active';
+            if (cd.buildLogs && cd.buildLogs.length > 0) {
+              this.containerDeployLogs = cd.buildLogs;
+            }
+          }
+        } catch {}
       },
       error: () => {
         this.services.message('Pipeline not found', 'error');
@@ -106,15 +127,13 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     const attrs = parsed?.pipeline_attributes ?? {};
     const kind = attrs.kind === 'training-job' || ss.type === 'TrainingPipeline'
       ? 'training-job' : 'data-pipeline';
-    // Canonical filename — exact same logic as native-script's saveJson():
-    //   pname  = this.streamItem.name          (from getStreamingServicesByName response)
-    //   org    = this.streamItem.organization  (from getStreamingServicesByName response)
-    //   targetFileName = `${pname}_${org}.py`
-    // Both values come from the BE API response, just as in the legacy screen.
-    // el.files[0] is intentionally ignored — may have stale/wrong naming.
     const cname = ss.name || routeCname || '';
     const org   = ss.organization || sessionStorage.getItem('organization') || '';
-    const canonicalFilename = `${cname}_${org}.py`;
+    // Backend's createNewFileName strips non-alphanumeric chars (same as ICIPUtils.removeSpecialCharacter).
+    // e.g. "data-n" → "datan", so the stored filename is "datan_leo1311.py".
+    // We must derive the same name or the update check in persistInNativeScriptTable will never match.
+    const sanitizedCname = cname.replace(/[^a-zA-Z0-9_]/g, '');
+    const canonicalFilename = `${sanitizedCname}_${org}.py`;
     return {
       raw: ss,
       name: cname,
@@ -148,8 +167,21 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.services.createNativeFile(cname, org, filename, 'Python3', newCode)
       .subscribe({
         next: (savedFilename: string) => {
-          // API returns the stored path/name — use it as the canonical filename going forward
-          const storedFile = (savedFilename && savedFilename.trim()) ? savedFilename.trim() : filename;
+          // Backend returns a JSON array like ["datan_leo1311.py","datan_leo1311.ipynb"].
+          // Parse it and use the .py entry as the canonical filename going forward.
+          let storedFile = filename;
+          if (savedFilename && savedFilename.trim()) {
+            const raw = savedFilename.trim();
+            if (raw.startsWith('[')) {
+              try {
+                const arr = JSON.parse(raw) as string[];
+                const pyFile = arr.find((f: string) => f.endsWith('.py'));
+                storedFile = pyFile || arr[0] || filename;
+              } catch { storedFile = filename; }
+            } else {
+              storedFile = raw;
+            }
+          }
           this.model!.filename = storedFile;
           this.persistJsonContent(newCode, storedFile);
         },
@@ -182,7 +214,12 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.model.raw.json_content = JSON.stringify(parsed);
     this.services.update(this.model.raw).subscribe({
       next: () => {
-        this.services.message('Saved! Click ▶ Run to execute the pipeline.', 'success');
+        this.services.message('Saved! Click Deploy as Container to deploy this pipeline.', 'success');
+        if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
+        if (this._redeployPending) {
+          this._redeployPending = false;
+          this._triggerContainerDeploy();
+        }
       },
       error: () => this.services.message('Save failed', 'error'),
     });
@@ -286,8 +323,58 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
       });
   }
 
+  get containerBusy(): boolean {
+    return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
+  }
+
+  private get containerDeploymentName(): string {
+    const source = this.containerLastDeploymentName || (this.model ? this.model.alias || this.model.name : '');
+    return String(source).toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  get containerTabIndex(): number {
+    const configIdx = this.hasVibePermission ? 3 : 1;
+    const metricsOffset = this.model?.kind === 'training-job' ? 1 : 0;
+    return configIdx + metricsOffset + 1;
+  }
+
+  onCodeModify(): void {
+    if (this.containerDeployStatus === 'success') {
+      this.codeModifiedSinceDeployed = true;
+      this.savedAfterModify = false;
+    }
+  }
+
+  onCodeRestore(): void {
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
+  }
+
+  get showRedeployBtn(): boolean {
+    return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
+  }
+
   deployAsContainer(): void {
     if (!this.model) return;
+    if (this.codeModifiedSinceDeployed) {
+      // Redeploy: re-save current code first to ensure server has latest, then deploy
+      this._redeployPending = true;
+      this.saveCode(this.model.code);
+      return;
+    }
+    this._triggerContainerDeploy();
+  }
+
+  private _triggerContainerDeploy(): void {
+    if (!this.model) return;
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
+    // Show snackbar and navigate to Container tab immediately
+    this.services.message('Deployment started', 'success');
+    this.activeTab = this.containerTabIndex;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
@@ -310,11 +397,17 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
           this.containerDeployMessage = (config && config.error) || 'Failed to prepare deployment';
           return;
         }
+        this.containerLastDeploymentName = config.deployment_name || '';
+        this.containerLastNamespace = config.namespace || this.containerLastNamespace;
         this.streamContainerDeploy(config);
       },
-      error: () => {
+      error: (err: any) => {
         this.containerDeployStatus = 'error';
-        this.containerDeployMessage = 'Failed to start container deployment';
+        const msg =
+          (typeof err === 'string' && err.length < 600 ? err : null) ||
+          err?.message || err?.error || err?.details ||
+          'Failed to start container deployment';
+        this.containerDeployMessage = msg;
       },
     });
   }
@@ -363,7 +456,7 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      this.addContainerLog(`${data.log}`);
+      this.addContainerLog((data.log || '').toString());
     });
 
     this.containerSocket.on('pipeline_status', (data: any) => {
@@ -372,6 +465,11 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
         this.containerDeployStatus = 'success';
         this.containerDeployMessage = 'Deployment successful';
         this.addContainerLog('FINAL STATUS: SUCCESS');
+        this.persistContainerDeployment(
+          this.containerLastDeploymentName,
+          this.containerLastNamespace,
+          data.internal_dns_url || ''
+        );
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Deployment failed';
@@ -383,6 +481,79 @@ export class PipelineEditorComponent implements OnInit, OnDestroy {
     this.containerSocket.on('connect_error', (err: any) => {
       this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
     });
+  }
+
+  deleteContainerDeployment(): void {
+    if (!this.model || this.containerBusy) return;
+    const deploymentName = this.containerDeploymentName;
+    if (!deploymentName) {
+      this.containerDeployStatus = 'error';
+      this.containerDeployMessage = 'Cannot determine the deployment name to delete';
+      return;
+    }
+    this.isDeletingContainer = true;
+    this.containerDeployMessage = 'Deleting deployment...';
+    this.containerDeployLogs = [];
+    this.addContainerLog('Starting deployment deletion process...');
+    this.disconnectContainerSocket();
+    this.containerSocket = io(window.location.origin, {
+      path: '/apps/builder-service/socket.io',
+      transports: ['websocket', 'polling'],
+      timeout: 600000,
+      forceNew: true,
+      rejectUnauthorized: false,
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 50,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+    } as any);
+    this.containerSocket.on('connect', () => {
+      this.addContainerLog(`Deleting deployment: ${deploymentName} from namespace: ${this.containerLastNamespace}`);
+      this.containerSocket.emit('delete_deployment', {
+        deployment_name: deploymentName,
+        namespace: this.containerLastNamespace,
+      });
+    });
+    this.containerSocket.on('delete_status', (data: any) => {
+      const status = (data.status || '').toString().toUpperCase();
+      this.isDeletingContainer = false;
+      if (status === 'SUCCESS' || status === 'NOT_FOUND') {
+        this.containerDeployStatus = 'idle';
+        this.containerInternalDnsUrl = '';
+        this.containerDeployMessage = data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+        this.clearContainerDeployment();
+      } else {
+        this.containerDeployStatus = 'error';
+        this.containerDeployMessage = data.message || 'Failed to delete deployment';
+      }
+      this.addContainerLog(`FINAL STATUS: ${data.status || 'ERROR'}${data.message ? ' - ' + data.message : ''}`);
+      this.disconnectContainerSocket();
+    });
+    this.containerSocket.on('connect_error', (err: any) => {
+      this.addContainerLog(`Connection error: ${err && err.message ? err.message : err}`);
+    });
+  }
+
+  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string): void {
+    if (!this.model) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+    parsed.containerDeployment = {
+      deploymentName, namespace, internalDnsUrl,
+      buildLogs: this.containerDeployLogs.slice(-500),
+    };
+    this.model.raw.json_content = JSON.stringify(parsed);
+    this.services.update(this.model.raw).subscribe({ error: () => {} });
+  }
+
+  private clearContainerDeployment(): void {
+    if (!this.model) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.model.raw.json_content || '{}'); } catch {}
+    delete parsed.containerDeployment;
+    this.model.raw.json_content = JSON.stringify(parsed);
+    this.services.update(this.model.raw).subscribe({ error: () => {} });
   }
 
   private disconnectContainerSocket(): void {

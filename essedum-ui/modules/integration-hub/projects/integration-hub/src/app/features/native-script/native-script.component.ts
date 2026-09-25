@@ -128,9 +128,17 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     containerInternalDnsUrl: string = '';
     containerDeployLogs: string[] = [];
     isDeletingContainer: boolean = false;
+    codeModifiedSinceDeployed: boolean = false;
+    savedAfterModify: boolean = false;
+    private originalDeployedScript: string = '';
+    private scriptEditorReady: boolean = false;
+    private _redeployPending: boolean = false;
     private containerLastDeploymentName: string = '';
     private containerLastNamespace: string = 'vibe-pipelines';
     private containerSocket: any = null;
+    activeTabIndex = 0;
+    // Container tab index: Configuration(0), Script(1), Container(2) — Jobs hidden
+    readonly containerTabIndex = 2;
     @ViewChild('containerConsole') containerConsole: ElementRef;
     envEditIndex: number = -1;
     envEditMode: boolean = false;
@@ -186,7 +194,22 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     this.service.getStreamingServicesByName(this.cardName).subscribe((res) => {
       this.streamItem = res;
       this.pipelineAlias = res.alias;
-      
+      // Restore persistent container deployment state
+      try {
+        const parsed = JSON.parse(res.json_content || '{}');
+        const cd = parsed.containerDeployment;
+        if (cd && cd.deploymentName) {
+          this.containerLastDeploymentName = cd.deploymentName;
+          this.containerLastNamespace = cd.namespace || 'vibe-pipelines';
+          this.containerInternalDnsUrl = cd.internalDnsUrl || '';
+          this.containerDeployStatus = 'success';
+          this.containerDeployMessage = 'Deployment active';
+          if (cd.buildLogs && cd.buildLogs.length > 0) {
+            this.containerDeployLogs = cd.buildLogs;
+          }
+        }
+      } catch {}
+
       // Load files for code explorer
       // Files will be loaded after data is parsed in try block below
 
@@ -559,6 +582,19 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   onScriptChange($event) {
     this.script = $event;
+    if (!this.scriptEditorReady) {
+      this.scriptEditorReady = true;
+      if (this.containerDeployStatus === 'success') {
+        this.originalDeployedScript = $event.join('\n');
+      }
+      return;
+    }
+    if (this.containerDeployStatus === 'success') {
+      const current = $event.join('\n');
+      const changed = current !== this.originalDeployedScript;
+      this.codeModifiedSinceDeployed = changed;
+      if (!changed) this.savedAfterModify = false;
+    }
   }
 
   onLangChange() {
@@ -591,21 +627,23 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.data.files = [];
       }
 
-      let targetFileName: string;      
-      if (this.selectedFileNode && this.selectedFileNode.extension === 'py') {
-        targetFileName = this.selectedFileNode.name;
-      } else {
-        targetFileName = `${pname}_${this.streamItem.organization}.py`;
-      }
-      
+      // Always derive the canonical filename from the pipeline name using the same
+      // removeSpecialCharacter logic as the backend (ICIPUtils.removeSpecialCharacter).
+      // Using selectedFileNode.name is unreliable: old pipelines may have an unsanitized
+      // filename stored in json_content.attributes.files (e.g. "LEONTV-R17807_leo1311.py")
+      // which fails the backend equalsIgnoreCase check against the sanitized DB filename
+      // ("LEONTVR17807_leo1311.py"), causing the blob update to be silently skipped.
+      const sanitizedName = pname.replace(/[^a-zA-Z0-9_]/g, '');
+      const targetFileName = `${sanitizedName}_${this.streamItem.organization}.py`;
+
       let scriptContent = this.script.join('\n');
-      
+
       this.service
         .createNativeFile(
           pname,
           this.streamItem.organization,
           targetFileName,
-          this.data.filetype,
+          'Python3',
           scriptContent
         )
         .subscribe({
@@ -628,11 +666,15 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             if (!fileExists) {
               this.data.files.push(response);
             }
-            
+
+            // Normalize files to a clean array of actual filenames (avoids double-encoded strings from DB)
+            this.data.files = [targetFileName];
+
             this.data.arguments = this.treeData;
-            this.data.usedSecrets = this.dynamicSecretsArray;            
+            this.data.usedSecrets = this.dynamicSecretsArray;
+            // Include generatedCode so the deploy endpoint reads the latest script directly from DB
             this.streamItem.json_content = JSON.stringify({
-              elements: [{ attributes: this.data }],
+              elements: [{ attributes: { ...this.data, generatedCode: scriptContent } }],
               environment: this.dynamicEnvArray,
               default_runtime: this.selectedRunType
             });
@@ -640,6 +682,11 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
             this.service.update(this.streamItem).subscribe({
               next: (updateResponse) => {
                 this.service.message('Pipeline saved successfully', 'success');
+                if (this.codeModifiedSinceDeployed) { this.savedAfterModify = true; }
+                if (this._redeployPending) {
+                  this._redeployPending = false;
+                  this._triggerContainerDeploy();
+                }
                 this.buildFileStructureFromCurrentData();
                 setTimeout(() => {
                   this.refreshFileStructureAfterSave();
@@ -696,6 +743,10 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     return this.containerDeployStatus === 'deploying' || this.isDeletingContainer;
   }
 
+  get showRedeployBtn(): boolean {
+    return this.containerDeployStatus === 'success' && this.codeModifiedSinceDeployed;
+  }
+
   /** Mirrors the sanitisation the deployer applies to deployment names. */
   private get containerDeploymentName(): string {
     const source =
@@ -710,11 +761,29 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
 
   deployAsContainer() {
     if (!this.streamItem || this.containerBusy) return;
+    // Always save current editor content before deploying. codeModifiedSinceDeployed
+    // is only tracked while containerDeployStatus === 'success', so edits made while
+    // a deploy is in progress ('deploying') would be missed by the conditional check,
+    // causing the old blob to be redeployed. Unconditional save guarantees the latest
+    // script is always in DB before the deploy reads it.
+    this._redeployPending = true;
+    this.saveJson(this.streamItem.name);
+  }
+
+  private _triggerContainerDeploy() {
+    if (!this.streamItem) return;
+    this.originalDeployedScript = this.script.join('\n');
+    this.scriptEditorReady = true;
+    this.codeModifiedSinceDeployed = false;
+    this.savedAfterModify = false;
     this.containerDeployStatus = 'deploying';
     this.containerDeployMessage = 'Preparing pipeline package...';
     this.containerInternalDnsUrl = '';
     this.containerDeployLogs = [];
     this.addContainerLog('Preparing pipeline package...');
+    // Show snackbar and navigate to Container tab immediately
+    this.service.message('Deployment started', 'success');
+    this.activeTabIndex = this.containerTabIndex;
     // Backend zips + uploads scripts to MinIO and returns the prepared config;
     // the browser then streams the build/deploy directly from the deployer's
     // WebSocket (sandbox approach, same as agent/mcp pipelines).
@@ -735,8 +804,12 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.containerLastNamespace = config.namespace || this.containerLastNamespace;
         this.streamContainerDeploy(config);
       },
-      (error) => {
-        this.setContainerError('Failed to start container deployment');
+      (err: any) => {
+        const msg =
+          (typeof err === 'string' && err.length < 600 ? err : null) ||
+          err?.message || err?.error || err?.details ||
+          'Failed to start container deployment';
+        this.setContainerError(msg);
       }
     );
   }
@@ -773,6 +846,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.containerInternalDnsUrl = '';
         this.containerDeployMessage =
           data.message || (status === 'SUCCESS' ? 'Deployment deleted' : 'No deployment found');
+        this.clearContainerDeployment();
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Failed to delete deployment';
@@ -829,7 +903,7 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.containerSocket.on('build_log', (data: any) => {
-      this.addContainerLog(`${data.log}`);
+      this.addContainerLog((data.log || '').toString());
       this.cdr.detectChanges();
     });
 
@@ -870,6 +944,11 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
         this.containerDeployMessage = 'Deployment successful';
         this.containerInternalDnsUrl = data.internal_dns_url || '';
         this.addContainerLog('FINAL STATUS: SUCCESS');
+        this.persistContainerDeployment(
+          this.containerLastDeploymentName,
+          this.containerLastNamespace,
+          data.internal_dns_url || ''
+        );
       } else {
         this.containerDeployStatus = 'error';
         this.containerDeployMessage = data.message || 'Deployment failed';
@@ -885,6 +964,27 @@ export class NativeScriptComponent implements OnInit, OnChanges, OnDestroy {
       try { this.containerSocket.disconnect(); } catch (e) {}
       this.containerSocket = null;
     }
+  }
+
+  private persistContainerDeployment(deploymentName: string, namespace: string, internalDnsUrl: string): void {
+    if (!this.streamItem) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.streamItem.json_content || '{}'); } catch {}
+    parsed.containerDeployment = {
+      deploymentName, namespace, internalDnsUrl,
+      buildLogs: this.containerDeployLogs.slice(-500),
+    };
+    this.streamItem.json_content = JSON.stringify(parsed);
+    this.service.update(this.streamItem).subscribe({ error: () => {} });
+  }
+
+  private clearContainerDeployment(): void {
+    if (!this.streamItem) return;
+    let parsed: any = {};
+    try { parsed = JSON.parse(this.streamItem.json_content || '{}'); } catch {}
+    delete parsed.containerDeployment;
+    this.streamItem.json_content = JSON.stringify(parsed);
+    this.service.update(this.streamItem).subscribe({ error: () => {} });
   }
 
   ngOnDestroy(): void {

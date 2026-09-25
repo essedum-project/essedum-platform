@@ -33,6 +33,45 @@
   text-security: disc !important;
 }
 
+// ── Redeploy feature styles ───────────────────────────────────────────────────
+.ns-redeploy-btn:not([disabled]) {
+  animation: ns-redeploy-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ns-redeploy-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.45); }
+  50%       { box-shadow: 0 0 0 6px rgba(217,119,6,0); }
+}
+
+.ns-code-change-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 18px;
+  background: #431407;
+  border-left: 3px solid #d97706;
+  border-bottom: 1px solid #78350f;
+  color: #fed7aa;
+  font-size: 11px;
+  animation: ns-hint-slide 0.15s ease;
+  mat-icon { font-size: 14px; height: 14px; width: 14px; color: #fb923c; flex-shrink: 0; }
+  strong { color: #fdba74; font-weight: 600; }
+
+  &.ns-hint-saved {
+    background: #052e16;
+    border-left-color: #16a34a;
+    border-bottom-color: #14532d;
+    color: #bbf7d0;
+    mat-icon { color: #4ade80; }
+    strong { color: #86efac; }
+  }
+}
+
+@keyframes ns-hint-slide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .native-script-panel {
   background: rgba(13,17,23,0.95) !important;
   border: 1px solid rgba(88,166,255,0.08) !important;
