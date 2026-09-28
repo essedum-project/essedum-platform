@@ -185,6 +185,15 @@ export class DatasetEditComponent implements OnInit {
         },
           () => { },
           () => {
+            // If the dataset has a configured view type, derive tableview from it
+            // directly (mirrors the detail screen behaviour) instead of calling
+            // checkVisualizeSupport, which checks a different key and always
+            // resolves to 'no' for table-configured datasets.
+            if (this.card.views) {
+              this.tableview = this.card.views === 'Table View' ? 'yes' : 'no';
+              this.showDatasetsView();
+              return;
+            }
             this.busy = this.datasetService.checkVisualizeSupport(this.dataset.name)
               .subscribe(res => {
                 if (res && res.filter(ele => ele["Visualization"]).length > 0) {

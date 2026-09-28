@@ -477,7 +477,7 @@ export class DatasetTableViewComponent implements OnInit {
               else {
                 this.ticketList = [];
                 pageResponse.forEach((element) => {
-                  if (element) {
+                  if (element && Object.values(element).some(v => v != null && v !== '')) {
                     Object.keys(element).map(ky => { if (element[ky]) element[ky] = element[ky].toString() });
                     this.ticketList.push(element);
                   }
@@ -711,7 +711,8 @@ export class DatasetTableViewComponent implements OnInit {
   }
 
   // Normalise the many response shapes getProxyDbDatasetDetails can emit (array, JSON string,
-  // {data|content|records|rows|result|results|response|items: [...]}, or 2D-array of headers+rows).
+  // {data|content|records|rows|result|results|response|items: [...]}, {error,text:"[...]"},
+  // or 2D-array of headers+rows).
   private extractRows(resp: any): any[] {
     let raw: any = resp;
     if (typeof raw === 'string') {
@@ -725,6 +726,15 @@ export class DatasetTableViewComponent implements OnInit {
       const knownKeys = ['data', 'content', 'records', 'rows', 'result', 'results', 'response', 'items', 'body'];
       for (const k of knownKeys) {
         if (Array.isArray(raw[k])) { arr = raw[k]; break; }
+      }
+      // Handle {error:{}, text:"[...]"} — backend wraps the JSON array as a
+      // possibly HTML-entity-encoded string in the 'text' field.
+      if (!arr && typeof raw['text'] === 'string' && raw['text'].trim()) {
+        try {
+          const decoded = this.decodeHtmlEntities(raw['text'].trim());
+          const parsed = JSON.parse(decoded);
+          if (Array.isArray(parsed)) arr = parsed;
+        } catch { /* ignore */ }
       }
       // Fallback: first array-valued property on the object.
       if (!arr) {
@@ -745,7 +755,12 @@ export class DatasetTableViewComponent implements OnInit {
       });
     }
     // Standard record response: array of plain objects.
-    const rows = arr.filter(el => el && typeof el === 'object' && !Array.isArray(el));
+    // Filter out nulls AND completely empty rows (all values null/empty-string) so that
+    // trailing padding rows from the backend don't inflate the page count or render as
+    // blank rows in the table.
+    const rows = arr
+      .filter(el => el && typeof el === 'object' && !Array.isArray(el))
+      .filter(el => Object.values(el).some(v => v != null && v !== ''));
     rows.forEach(el => Object.keys(el).forEach(k => { if (el[k] != null) el[k] = el[k].toString(); }));
     return rows;
   }
@@ -866,7 +881,7 @@ export class DatasetTableViewComponent implements OnInit {
             }
             else {
               res.forEach((ele) => {
-                if (ele) {
+                if (ele && Object.values(ele).some(v => v != null && v !== '')) {
                   Object.keys(ele).map(ky => { if (ele[ky]) ele[ky] = ele[ky].toString() });
                   this.ticketList.push(ele);
                 }
