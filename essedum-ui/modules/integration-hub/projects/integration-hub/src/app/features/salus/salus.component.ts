@@ -220,16 +220,14 @@ export class SalusComponent implements OnInit, OnDestroy {
 
   private buildTimeline(): void {
     if (!this.events.length) { this.timeline = []; return; }
-    const times = this.events.map(e => new Date(e.timestamp).getTime());
-    // Short windows (Today / last 24h) would collapse into one daily bar.
-    const hourly = Math.max(...times) - Math.min(...times) <= 48 * 3600000;
+    // Only the sub-day ranges are bucketed hourly; everything else is per day.
+    const hourly = this.range === 'today' || this.range === '24h';
 
     const buckets = new Map<string, { passed: number; blocked: number; label: string }>();
     for (const e of this.events) {
       const d = new Date(e.timestamp);
-      const key = hourly
-        ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}-${String(d.getHours()).padStart(2, '0')}`
-        : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const key = hourly ? `${day}-${String(d.getHours()).padStart(2, '0')}` : day;
       const label = hourly
         ? `${String(d.getHours()).padStart(2, '0')}:00`
         : d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
@@ -238,7 +236,9 @@ export class SalusComponent implements OnInit, OnDestroy {
       buckets.set(key, b);
     }
 
-    const ordered = Array.from(buckets.entries()).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
+    const ordered = Array.from(buckets.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(hourly ? -24 : -30);
     const max = Math.max(1, ...ordered.map(([, b]) => b.passed + b.blocked));
     this.timeline = ordered.map(([, b]) => ({
       label: b.label,
