@@ -125,9 +125,18 @@
 // Ticket header area
 .ticket-header {
   display: flex !important; align-items: center !important; gap: 10px !important;
-  padding: 10px 20px !important; border-bottom: none !important;
+  padding: 6px 16px !important; border-bottom: none !important;
   background: rgba(79,142,247,0.025) !important;
   font-size: 13px !important; font-weight: 600 !important; color: #8aaccc !important;
+}
+
+// Dataset name title inside the view tab
+.dataset-view-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  color: #dde6f0 !important;
+  letter-spacing: -0.1px !important;
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -143,4 +152,6 @@ body.header-light-theme {
   .table thead tr th { background: rgba(79,70,229,0.05) !important; color: #64748b !important; border-color: rgba(79,70,229,0.1) !important; }
   .table tbody tr { border-color: rgba(79,70,229,0.05) !important; &:nth-child(even) { background: rgba(79,70,229,0.018) !important; } &:hover { background: rgba(79,70,229,0.06) !important; td { color: #0f172a !important; } } td { color: #334155 !important; } }
   .fullscreen-footer { background: rgba(79,70,229,0.02) !important; border-color: rgba(79,70,229,0.08) !important; strong { color: #4f46e5 !important; } }
+  .dataset-view-title { color: #0f172a !important; }
+  .ticket-header { background: rgba(79,70,229,0.018) !important; }
 }
