@@ -1,6 +1,8 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { syncIframeTheme } from './iframe-theme.util';
+
 
 
 @Component({
@@ -32,6 +34,8 @@ export class LangfuseComponent implements OnInit, AfterViewInit, OnDestroy {
     
     // Detect initial theme from body classes
     this.isDark = !document.body.classList.contains('header-light-theme');
+    // Seed the shared `theme` key before the iframe boots so Langfuse starts in the host theme.
+    syncIframeTheme(null, this.isDark);
     
     // Watch for theme changes on body element
     this.watchThemeChanges();
@@ -57,6 +61,7 @@ export class LangfuseComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private postToIframe(): void {
+    syncIframeTheme(this.langfuseIframeRef?.nativeElement, this.isDark);
     const token = localStorage.getItem('access_token') || '';
     const parentOrg = localStorage.getItem('organization') || '';
 
@@ -132,6 +137,7 @@ export class LangfuseComponent implements OnInit, AfterViewInit, OnDestroy {
       // Only sync if theme actually changed and iframe is loaded
       if (wasDark !== this.isDark && this.isIframeLoaded) {
         const iframeEl = this.langfuseIframeRef?.nativeElement;
+        syncIframeTheme(iframeEl, this.isDark);
         if (iframeEl?.contentWindow) {
           try {
             const childOrigin = new URL(this.langfuseUrl, window.location.origin).origin;
