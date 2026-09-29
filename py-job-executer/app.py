@@ -20,6 +20,14 @@ from datetime import datetime
 from functionadapter import function_execute
 from importlib import import_module
 import asyncio
+import registry
+import registry_db
+from registry_db import (
+    RegistryConflict,
+    RegistryDisabled,
+    RegistryNotFound,
+    RegistryValidationError,
+)
 
 
 if USE_TASK_RETRIVER:
@@ -454,6 +462,64 @@ def adapter_function_execute():
         logger.error("An unexpected error occurred", exc_info=True)
         result = {"error": "An error occurred while executing the function"}
     return jsonify(result), 500
+
+def _registry_result(action, success_status=200):
+    """Run a registry call and map its exceptions onto HTTP statuses.
+
+    Deliberately not routed through the @app.errorhandler(400/404/422) handlers
+    above: those return a fixed message and would discard the field-level detail
+    that makes a 422 actionable for whoever wrote the pipeline script.
+    """
+    try:
+        return jsonify(action()), success_status
+    except RegistryDisabled as e:
+        return jsonify({'error': str(e)}), 503
+    except RegistryValidationError as e:
+        body = {'error': str(e)}
+        if e.field:
+            body['field'] = e.field
+        return jsonify(body), 422
+    except RegistryConflict as e:
+        return jsonify({'error': str(e)}), 409
+    except RegistryNotFound as e:
+        return jsonify({'error': str(e)}), 404
+    except Exception:
+        logger.error('Exception occured', exc_info=True)
+        return jsonify({'error': 'An error occurred while processing the registry request'}), 500
+
+
+@app.route('/api/registry/v1/health', methods=['GET'])
+def registry_health():
+    return _registry_result(registry_db.check_health)
+
+
+@app.route('/api/registry/v1/models', methods=['POST'])
+def registry_create_model():
+    payload = request.get_json(silent=True)
+    return _registry_result(lambda: registry.create_model(payload), success_status=201)
+
+
+@app.route('/api/registry/v1/models', methods=['GET'])
+def registry_get_model():
+    name = request.args.get('name', '')
+    # Models call it `organisation` (that is the column name); accept the other
+    # spelling too, since the agent endpoint uses `organization`.
+    organisation = request.args.get('organisation') or request.args.get('organization') or ''
+    return _registry_result(lambda: registry.get_model(name, organisation))
+
+
+@app.route('/api/registry/v1/agents', methods=['POST'])
+def registry_create_agent():
+    payload = request.get_json(silent=True)
+    return _registry_result(lambda: registry.create_agent(payload), success_status=201)
+
+
+@app.route('/api/registry/v1/agents', methods=['GET'])
+def registry_get_agent():
+    alias = request.args.get('alias', '')
+    organization = request.args.get('organization') or request.args.get('organisation') or ''
+    return _registry_result(lambda: registry.get_agent(alias, organization))
+
 
 @app.route('/venvs', methods=['DELETE'])
 def delete_venv():

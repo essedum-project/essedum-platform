@@ -63,6 +63,23 @@ class Task:
         else:
             self.log_path =WORKING_DIRECTORY+id
 
+    def registry_env(self):
+        """Environment a pipeline script needs to register what it produced.
+
+        The script runs as a subprocess.Popen child inside this same container,
+        so loopback is both correct and deliberate: it keeps the call off the
+        network and sidesteps the multi-pod problem that already forces the Java
+        side to retry log fetches against whichever pod answers.
+        """
+        port = os.environ.get('PYJOB_EXECUTER_PORT', '5000')
+        return {
+            "REGISTRY_API_URL": f"http://127.0.0.1:{port}/api/registry/v1",
+            "PIPELINE_NAME": str(self.name),
+            "PIPELINE_ORG": str(self.project_id),
+            "PIPELINE_VERSION": str(self.version),
+            "TASK_ID": str(self.id),
+        }
+
     def create_service_request_venv(self):
         """Create or reuse a virtual environment for the service request."""
         try:
@@ -126,6 +143,9 @@ class Task:
             output_dir = os.path.join(save_path, 'output_dir')
             d = dict(os.environ)
             d["output_dir"] = output_dir
+            # Before d.update(self.env) so a job's own `environment` payload can
+            # still override any of these.
+            d.update(self.registry_env())
             d.update(self.env)
             print('d', d)
 
@@ -224,6 +244,9 @@ class Task:
             output_dir = os.path.join(save_path, 'output_dir')
             d = dict(os.environ)
             d["output_dir"] = output_dir
+            # Before d.update(self.env) so a job's own `environment` payload can
+            # still override any of these.
+            d.update(self.registry_env())
             d.update(self.env)
 
         pid = None
