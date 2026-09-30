@@ -195,6 +195,7 @@ public class VibeCodingService {
         try {
             Map<String, Object> event = objectMapper.readValue(rawEvent, Map.class);
             String type = String.valueOf(event.getOrDefault("type", ""));
+
             if ("assistant.message".equals(type)) {
                 Object props = event.get("properties");
                 if (props instanceof Map) {
@@ -224,8 +225,29 @@ public class VibeCodingService {
                     }
                 }
             }
+
+            // For session.next.text.ended, suppress tool-call payloads.
+            // OpenCode's agentic workflow emits tool calls ({"name":"bash",...} or
+            // {"name":"websearch",...}) as the text of intermediate steps.
+            // These are internal agent actions, not user-facing content.
+            // The SSE connection stays open; when the agent finishes its tool chain
+            // and produces actual text (code, prose), that text.ended passes through.
+            if ("session.next.text.ended".equals(type)) {
+                Object data = event.get("data");
+                if (data instanceof Map) {
+                    Object textObj = ((Map<?, ?>) data).get("text");
+                    if (textObj instanceof String) {
+                        String text = ((String) textObj).trim();
+                        // A tool call is a JSON object with a "name" key — filter it out.
+                        if (text.startsWith("{") && text.contains("\"name\"")) {
+                            return null; // suppress; stream stays open for subsequent steps
+                        }
+                    }
+                }
+            }
+
         } catch (Exception ignored) {}
-        return rawEvent; // unknown event types pass through
+        return rawEvent; // unknown / non-tool-call events pass through unchanged
     }
 
     // =========================================================================

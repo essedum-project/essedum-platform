@@ -83,9 +83,43 @@ export class DataPipelineWizardLocalComponent implements OnInit {
     { label: 'OpenCode', value: 'opencode' },
   ];
 
+  get isOpenCode(): boolean { return this.selectedFramework === 'opencode'; }
+
+  /** Models available when OpenCode framework is selected — server-aware.
+   *  AKS (essedum.az.ad.idemo-ppc.com) → Azure OpenAI models.
+   *  5G/LFN (essedum-lfn.infosys.com) and localhost → Ollama gemma4 via proxy.
+   *  TODO: add the third server domain when URL is known. */
+  get opencodeModelOptions() {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      return [
+        { label: 'gpt-4o-mini', value: 'gpt-4o-mini' },
+        { label: 'gpt-5.6-luna', value: 'gpt-5.6-luna' },
+      ];
+    }
+    // essedum-lfn.infosys.com (5G), localhost, and any other server
+    // → OpenCode proxies all requests to Ollama gemma4
+    return [
+      { label: 'gemma4:latest', value: 'gemma4:latest' },
+    ];
+  }
+
+  /** Returns the model list appropriate for the selected framework. */
+  get effectiveModelOptions() {
+    return this.isOpenCode ? this.opencodeModelOptions : this.modelOptions;
+  }
+
   onAgentSelect(agent: string): void { this.selectedAgent = agent; this.showSettings = false; }
   onModelSelect(model: string): void { this.selectedModel = model; this.showSettings = false; }
-  onFrameworkChange(framework: string): void { this.selectedFramework = framework; }
+  onFrameworkChange(framework: string): void {
+    this.selectedFramework = framework;
+    if (framework === 'opencode') {
+      this.selectedAgent = null;
+      this.selectedModel = this.opencodeModelOptions[0]?.value ?? 'gemma4:latest';
+    } else {
+      this.applyDefaultAgentModel();
+    }
+  }
   toggleSettings(): void { this.showSettings = !this.showSettings; }
 
   private applyDefaultAgentModel(): void {

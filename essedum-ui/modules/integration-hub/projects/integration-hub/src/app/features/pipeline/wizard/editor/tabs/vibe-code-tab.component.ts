@@ -26,10 +26,26 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
             <p>Select an agent and model to start editing this pipeline with AI.</p>
           </div>
 
-          <!-- Step 1: Agent -->
+          <!-- Step 1: Framework (always first now) -->
           <div class="setup-step">
             <div class="setup-step-label">
               <span class="step-badge">1</span>
+              <span>Framework</span>
+            </div>
+            <div class="provider-select-wrap">
+              <select class="provider-select"
+                      [(ngModel)]="selectedFramework"
+                      (ngModelChange)="onFrameworkChange($event)">
+                <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <i class="bi bi-chevron-down select-chevron"></i>
+            </div>
+          </div>
+
+          <!-- Step 2: Agent — hidden for OpenCode (it manages routing internally) -->
+          <div class="setup-step" *ngIf="!isOpenCode">
+            <div class="setup-step-label">
+              <span class="step-badge">2</span>
               <span>Agent</span>
             </div>
             <div class="provider-select-wrap">
@@ -43,36 +59,20 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
             </div>
           </div>
 
-          <!-- Step 2: Model (locked until agent chosen) -->
-          <div class="setup-step" [class.step-locked]="!selectedAgent">
-            <div class="setup-step-label" [class.label-inactive]="!selectedAgent">
-              <span class="step-badge" [class.badge-inactive]="!selectedAgent">2</span>
+          <!-- Step 3: Model -->
+          <div class="setup-step" [class.step-locked]="!isOpenCode && !selectedAgent">
+            <div class="setup-step-label" [class.label-inactive]="!isOpenCode && !selectedAgent">
+              <span class="step-badge" [class.badge-inactive]="!isOpenCode && !selectedAgent">3</span>
               <span>Model</span>
-              <span *ngIf="!selectedAgent" class="step-hint">← pick agent first</span>
+              <span *ngIf="!isOpenCode && !selectedAgent" class="step-hint">← pick agent first</span>
             </div>
             <div class="provider-select-wrap">
               <select class="provider-select"
                       [(ngModel)]="selectedModel"
                       (ngModelChange)="onModelSelect($event)"
-                      [disabled]="!selectedAgent">
+                      [disabled]="!isOpenCode && !selectedAgent">
                 <option [ngValue]="null" disabled>Select model…</option>
-                <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
-              </select>
-              <i class="bi bi-chevron-down select-chevron"></i>
-            </div>
-          </div>
-
-          <!-- Step 3: Framework -->
-          <div class="setup-step">
-            <div class="setup-step-label">
-              <span class="step-badge">3</span>
-              <span>Framework</span>
-            </div>
-            <div class="provider-select-wrap">
-              <select class="provider-select"
-                      [(ngModel)]="selectedFramework"
-                      (ngModelChange)="onFrameworkChange($event)">
-                <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+                <option *ngFor="let m of effectiveModelOptions" [value]="m.value">{{ m.label }}</option>
               </select>
               <i class="bi bi-chevron-down select-chevron"></i>
             </div>
@@ -471,8 +471,15 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   readonly frameworkOptions = VIBE_FRAMEWORK_OPTIONS;
   selectedFramework: VibeCodingFramework = 'goose';
 
-  get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
+  get isOpenCode(): boolean { return this.selectedFramework === 'opencode'; }
+
+  /** OpenCode ready as soon as a model is chosen (no agent needed). */
+  get setupDone(): boolean {
+    return this.isOpenCode ? !!this.selectedModel : (!!this.selectedAgent && !!this.selectedModel);
+  }
+
   get selectedAgentLabel(): string {
+    if (this.isOpenCode) return this.selectedModel ?? 'OpenCode';
     return this.agentOptions.find(p => p.value === this.selectedAgent)?.label ?? this.selectedAgent ?? '';
   }
 
@@ -488,6 +495,25 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
     { label: 'gpt-4o-mini',    value: 'gpt-4o-mini'     },
     { label: 'gpt-5.6-luna',   value: 'gpt-5.6-luna'    },
   ];
+
+  /** Server-aware model list for OpenCode framework. */
+  get opencodeModelOptions(): { label: string; value: string }[] {
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      return [
+        { label: 'gpt-4o-mini',  value: 'gpt-4o-mini'  },
+        { label: 'gpt-5.6-luna', value: 'gpt-5.6-luna' },
+      ];
+    }
+    // essedum-lfn.infosys.com (5G), localhost → Ollama gemma4 via proxy
+    return [
+      { label: 'gemma4:latest', value: 'gemma4:latest' },
+    ];
+  }
+
+  get effectiveModelOptions(): { label: string; value: string }[] {
+    return this.isOpenCode ? this.opencodeModelOptions : this.modelOptions;
+  }
 
   chatWidth = 360;
   private isDragging = false;
@@ -576,6 +602,11 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   onFrameworkChange(fw: VibeCodingFramework): void {
     this.vibe.setFramework(fw);
     this.selectedFramework = fw;
+    if (fw === 'opencode') {
+      this.selectedAgent = null;
+      this.selectedModel = this.opencodeModelOptions[0]?.value ?? 'gemma4:latest';
+      this.vibe.setModel(this.selectedModel);
+    }
   }
 
   /** Click a cap-chip to fill the prompt and immediately send. */

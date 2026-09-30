@@ -13,7 +13,7 @@
         <mat-icon>settings</mat-icon>
       </button>
       <div class="settings-dropdown" *ngIf="showSettings">
-        <div class="settings-row">
+        <div class="settings-row" *ngIf="!isOpenCode">
           <label class="settings-field-label">Agent</label>
           <select class="provider-select" [(ngModel)]="selectedAgent" (ngModelChange)="onAgentSelect($event)">
             <option [ngValue]="null" disabled>Select agent…</option>
@@ -24,7 +24,7 @@
           <label class="settings-field-label">Model</label>
           <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)">
             <option [ngValue]="null" disabled>Select model…</option>
-            <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+            <option *ngFor="let m of effectiveModelOptions" [value]="m.value">{{ m.label }}</option>
           </select>
         </div>
         <div class="settings-row">
