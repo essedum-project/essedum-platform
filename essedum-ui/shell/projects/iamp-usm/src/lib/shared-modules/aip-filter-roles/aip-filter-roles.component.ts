@@ -50,7 +50,7 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   constructor() {}
 
   ngOnInit(): void {
-    console.log('Component initialized with filter options:', this.filterOptions);
+    // console.log('Component initialized with filter options:', this.filterOptions);
     this.initializeFilterOptions();
     
     // Add debug HTML to show options in DOM for debugging
@@ -65,16 +65,16 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('Changes detected in filter component:', changes);
+    // console.log('Changes detected in filter component:', changes);
     
     if (changes['filterOptions']) {
-      console.log('Filter options changed:', this.filterOptions);
+      // console.log('Filter options changed:', this.filterOptions);
       // Initialize on all changes, not just non-first changes
       this.initializeFilterOptions();
     }
     
     if (changes['selectedFilterValues']) {
-      console.log('Selected filter values changed:', this.selectedFilterValues);
+      // console.log('Selected filter values changed:', this.selectedFilterValues);
       this.updateSelectedFilters();
     }
   }

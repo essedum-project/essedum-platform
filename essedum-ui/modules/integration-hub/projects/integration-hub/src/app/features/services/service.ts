@@ -185,11 +185,13 @@ export class Services {
   getPermission(mod: any): Observable<any> {
     try {
       let role = JSON.parse(sessionStorage.getItem('role')).id;
+      const headers = new HttpHeaders({ Authorization: 'Bearer ' + localStorage.getItem('jwtToken') });
       return this.https
         .get('api/usm-role-permissionss/formodule/' + role, {
           observe: 'response',
           responseType: 'text',
           params: { module: mod },
+          headers: headers,
         })
         .pipe(
           map((response) => {

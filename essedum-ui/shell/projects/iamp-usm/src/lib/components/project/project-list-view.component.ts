@@ -228,7 +228,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
           const projectData = JSON.parse(storedProject);
           // Verify this is the correct project by checking ID
           if (projectData.id == id) {
-            console.log("Loading project from session storage:", projectData);
+            // console.log("Loading project from session storage:", projectData);
             this.currentProject = projectData;
             this.project = projectData;
             
@@ -698,7 +698,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   }
 
   onFilterSelected(event: any) {
-    console.log('Filter selected:', event);
+    // console.log('Filter selected:', event);
     this.selectedFilterValues = { ...this.selectedFilterValues, ...event };
     
     // Handle portfolio filter specifically
@@ -974,7 +974,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       pageEvent = { page: 0, size: 1000 }; // Use a large page size to get most or all records at once
     }
     
-    console.log('Fetching projects from API');
+    // console.log('Fetching projects from API');
     
     this.projectService.FindAll(this.example, pageEvent).subscribe(
       (pageResponse) => {
@@ -986,7 +986,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         
         // Store a deep copy of the original projects for client-side filtering
         this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
-        console.log(`Loaded ${this.projectsCopy.length} projects for client-side filtering`);
+        // console.log(`Loaded ${this.projectsCopy.length} projects for client-side filtering`);
         
         this.wavesLength = this.currentPage.totalElements;
         
@@ -1171,7 +1171,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   }
 
   Clear() {
-    console.log('Clearing all filters');
+    // console.log('Clearing all filters');
     
     // Reset filter values
     this.filterProject = undefined;

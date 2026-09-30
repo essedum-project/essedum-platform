@@ -32,14 +32,14 @@ export class RoleService {
       'rolename': userRole.name || ''
     });
 
-    console.log("Creating role:", copy);
-    console.log("Headers:", headers);
+    // console.log("Creating role:", copy);
+    // console.log("Headers:", headers);
 
     return this.https
       .post("/api/roles", copy, { observe: "response", headers: headers })
       .pipe(
         map((response) => {
-          console.log("Create role response:", response);
+          // console.log("Create role response:", response);
           return new Role(response.body);
         })
       )
@@ -57,7 +57,7 @@ export class RoleService {
    */
   getRole(id: any): Observable<Role> {
 
-    console.log("Getting role with ID:", id);
+    // console.log("Getting role with ID:", id);
 
     // Get a simpler set of headers for troubleshooting
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
@@ -77,7 +77,7 @@ export class RoleService {
 
     // Try a different URL format - some APIs use different patterns
     const url = `/api/roles/${id}`;
-    console.log("Making request to:", url);
+    // console.log("Making request to:", url);
 
     return this.https
       .get(url, {
@@ -88,7 +88,7 @@ export class RoleService {
       })
       .pipe(
         map((response) => {
-          console.log("Role response:", response);
+          // console.log("Role response:", response);
           return new Role(response.body);
         })
       )
@@ -138,8 +138,8 @@ export class RoleService {
       'rolename': userRole.name || ''
     });
 
-    console.log("Updating role:", role);
-    console.log("Headers:", headers);
+    // console.log("Updating role:", role);
+    // console.log("Headers:", headers);
 
     return this.https
       .put("/api/roles", body, {
@@ -148,7 +148,7 @@ export class RoleService {
       })
       .pipe(
         map((response) => {
-          console.log("Update role response:", response);
+          // console.log("Update role response:", response);
           return new Role(response.body);
         })
       )
@@ -210,7 +210,7 @@ export class RoleService {
       })
       .pipe(
         map((response) => {
-          console.log('API Response:', response);
+          // console.log('API Response:', response);
           let pr: any = response.body;
           return new PageResponse<Role>(pr.totalPages, pr.totalElements, Role.toArray(pr.content));
         })
@@ -273,15 +273,15 @@ export class RoleService {
       'rolename': userRole.name || ''
     });
 
-    console.log("Deleting role with ID:", id);
-    console.log("Headers:", headers);
+    // console.log("Deleting role with ID:", id);
+    // console.log("Headers:", headers);
 
     return this.https.delete("/api/roles/" + id, {
       observe: "response",
       headers: headers
     }).pipe(
       map(response => {
-        console.log("Delete role response:", response);
+        // console.log("Delete role response:", response);
         return response;
       }),
       catchError((err) => {

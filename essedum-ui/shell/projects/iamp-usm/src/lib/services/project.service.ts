@@ -195,7 +195,20 @@ export class ProjectService {
    * project as an example for the search by example facility.
    */
   FindAll(project: Project, event: any): Observable<PageResponse<Project>> {
-    let req = new PageRequestByExample(project, event);
+    // Callers pass either the PrimeFaces-style { first, rows, sortField, sortOrder }
+    // shape or the Angular paginator's { page, size } shape. The backend's
+    // LazyLoadEvent only understands first/rows and divides by "rows" when
+    // computing the page index, so a { page, size } event (rows left undefined,
+    // defaulting to 0) causes a division-by-zero 500 on the server. Normalize here.
+    const rows = event?.rows ?? event?.size ?? 0;
+    const first = event?.first ?? (event?.page ?? 0) * rows;
+    const normalizedEvent = {
+      first,
+      rows,
+      sortField: event?.sortField ?? null,
+      sortOrder: event?.sortOrder ?? 1
+    };
+    let req = new PageRequestByExample(project, normalizedEvent);
     let body;
     let headerValue;
     try {
@@ -226,7 +239,7 @@ export class ProjectService {
     });
 
     return this.https
-      .get(`/api/projectss/page?page=${event.page}&size=${event.size}`, {
+      .get(`/api/projects/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers
       })
       .pipe(

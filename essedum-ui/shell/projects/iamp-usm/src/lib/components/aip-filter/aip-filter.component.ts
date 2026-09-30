@@ -428,13 +428,13 @@ export class AipFilterComponent implements OnInit, OnChanges {
       const hasNameFilter = Boolean(this.searchedName && this.searchedName.trim());
       const hasDescFilter = Boolean(this.filterUsmPortfolio && this.filterUsmPortfolio.trim());
       
-      console.log('Portfolio filter status:', {
-        hasTypeFilter,
-        hasNameFilter,
-        hasDescFilter,
-        searchedName: this.searchedName,
-        filterUsmPortfolio: this.filterUsmPortfolio
-      });
+      // console.log('Portfolio filter status:', {
+      //   hasTypeFilter,
+      //   hasNameFilter,
+      //   hasDescFilter,
+      //   searchedName: this.searchedName,
+      //   filterUsmPortfolio: this.filterUsmPortfolio
+      // });
       
       return hasTypeFilter || hasNameFilter || hasDescFilter;
     }if (this.servicev1 === ServiceType.ROLEPERMISSION) {

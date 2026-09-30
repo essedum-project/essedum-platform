@@ -2566,15 +2566,12 @@ app-aip-empty-state { display: block !important; width: 100% !important; }
 }
 
 @media (max-width: 900px) {
+  // Narrow viewports: hide the branding copy entirely and just center the
+  // login card so the page fits without needing to scroll.
+  .login-brand-copy { display: none; }
   .login-content-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 24px;
+    justify-content: center;
   }
-  .login-brand-copy { max-width: 420px; }
-  .login-split-brand { justify-content: center; }
-  .login-split-tagline { margin: 0 auto; }
   .login-card-floating { margin-top: 0; }
 }
 
