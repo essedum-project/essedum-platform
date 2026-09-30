@@ -435,6 +435,12 @@ export class VibeStudioService implements OnDestroy {
         recipe: VIBE_STUDIO_RECIPE,
       };
 
+      // For OpenCode: pass model in start body so Java includes it in session creation.
+      // Java's opencodeBody("/agent/start") maps model → {id: model} for the OpenCode API.
+      if (this.currentFramework === 'opencode' && this.session.model) {
+        body.model = this.session.model as string;
+      }
+
       this.http.post<any>(url, body, { headers: this.getHttpHeaders() }).subscribe({
         next: (resp) => {
           const sessionId: string | undefined =

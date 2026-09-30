@@ -94,6 +94,8 @@ export interface GooseAgentStartRequest {
   recipe_id?: string;
   recipe_deeplink?: string;
   extension_overrides?: any[];
+  model?: string;
+  provider?: string;
 }
 
 /** Maps a VibeModel UI value to a Goose provider identifier and default model. */
