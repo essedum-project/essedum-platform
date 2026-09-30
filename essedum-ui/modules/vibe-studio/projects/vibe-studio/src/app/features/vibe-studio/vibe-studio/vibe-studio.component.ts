@@ -24,7 +24,7 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   /** Selected agent value from the dropdown. */
   selectedAgent: VibeModel | null = null;
 
-  /** Fixed model options. */
+  /** Fixed model options for Goose. */
   readonly modelOptions: { label: string; value: string }[] = [
     { label: 'qwen3.6:27b',    value: 'qwen3.6:27b'    },
     { label: 'gemma4:latest',  value: 'gemma4:latest'   },
@@ -45,6 +45,32 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   /** Display label for the selected agent, shown in the left panel. */
   get selectedAgentLabel(): string {
     return this.providerOptions.find(p => p.value === this.selectedAgent)?.label ?? this.selectedAgent ?? '';
+  }
+  /** True when OpenCode framework is selected. */
+  get isOpenCode(): boolean { return this.selectedFramework === 'opencode'; }
+  /**
+   * Model options filtered by framework + deployment environment.
+   * Goose: returns the full static list.
+   * OpenCode: returns models available on this server (Azure vs Ollama).
+   */
+  get activeModelOptions(): { label: string; value: string }[] {
+    if (!this.isOpenCode) return this.modelOptions;
+    const origin = window.location.origin || '';
+    if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
+      return [
+        { label: 'gpt-5.6-luna', value: 'gpt-5.6-luna' },
+        { label: 'gpt-4o-mini',  value: 'gpt-4o-mini'  },
+      ];
+    }
+    // 5G / LFN / localhost — OpenCode proxies to local Ollama
+    return [
+      { label: 'gemma4:latest', value: 'gemma4:latest' },
+    ];
+  }
+  /** Label shown in the settings gear button — framework-aware. */
+  get settingsLabel(): string {
+    if (this.isOpenCode) return `OpenCode / ${this.selectedModel ?? 'select model'}`;
+    return `${this.selectedAgentLabel} / ${this.selectedModel}`;
   }
   /** Framework selector (Goose / OpenCode) */
   readonly frameworkOptions = VIBE_FRAMEWORK_OPTIONS;
@@ -160,6 +186,13 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
 
   /** Determines default agent + model from the page origin/referer. */
   private applyDefaultAgentModel(): void {
+    if (this.isOpenCode) {
+      // OpenCode doesn't use Goose providers; apply its own environment default.
+      const first = this.activeModelOptions[0]?.value ?? 'gpt-4o-mini';
+      this.selectedModel = first as any;
+      this.vibeService.setModel(this.selectedModel as VibeModel);
+      return;
+    }
     const origin = window.location.origin || '';
     if (origin.includes('essedum.az.ad.idemo-ppc.com')) {
       this.selectedAgent = 'azure_openai' as any;
@@ -168,7 +201,6 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
       this.selectedAgent = 'ollama' as any;
       this.selectedModel = 'qwen3:4b' as any;
     } else {
-      // Fallback default for any unrecognised origin
       this.selectedAgent = 'ollama' as any;
       this.selectedModel = 'qwen3:4b' as any;
     }
@@ -205,6 +237,15 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   onFrameworkChange(fw: VibeCodingFramework): void {
     this.vibeService.setFramework(fw);
     this.selectedFramework = fw;
+    if (fw === 'opencode') {
+      // Default to the first model available for this environment
+      const first = this.activeModelOptions[0]?.value ?? 'gpt-4o-mini';
+      this.selectedModel = first as any;
+      this.vibeService.setModel(this.selectedModel as VibeModel);
+    } else {
+      // Restore Goose defaults for this environment
+      this.applyDefaultAgentModel();
+    }
   }
 
   selectAppType(appType: AppType): void {

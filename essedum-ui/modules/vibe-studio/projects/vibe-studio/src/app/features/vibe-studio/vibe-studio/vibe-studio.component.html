@@ -20,11 +20,11 @@
         <button class="settings-btn" (click)="toggleSettings()" [class.active]="showSettings"
                 title="Agent & Model settings">
           <i class="bi bi-gear-fill"></i>
-          <span class="settings-label">{{ selectedAgentLabel }} / {{ selectedModel }}</span>
+          <span class="settings-label">{{ settingsLabel }}</span>
           <i class="bi bi-chevron-down settings-chevron" [class.open]="showSettings"></i>
         </button>
         <div class="settings-dropdown" *ngIf="showSettings">
-          <div class="settings-row">
+          <div class="settings-row" *ngIf="!isOpenCode">
             <label class="settings-field-label">Agent Provider</label>
             <div class="provider-select-wrap">
               <select class="provider-select" [(ngModel)]="selectedAgent" (ngModelChange)="onAgentSelect($event)">
@@ -39,7 +39,7 @@
             <div class="provider-select-wrap">
               <select class="provider-select" [(ngModel)]="selectedModel" (ngModelChange)="onModelSelect($event)">
                 <option [ngValue]="null" disabled>Select model…</option>
-                <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
+                <option *ngFor="let m of activeModelOptions" [value]="m.value">{{ m.label }}</option>
               </select>
               <i class="bi bi-chevron-down provider-select-chevron"></i>
             </div>

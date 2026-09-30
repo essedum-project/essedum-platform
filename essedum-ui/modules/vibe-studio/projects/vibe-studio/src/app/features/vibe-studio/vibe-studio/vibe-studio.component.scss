@@ -750,6 +750,15 @@
     }
   }
 
+  .framework-select {
+    color-scheme: dark;
+    color: #e2e8f0;
+    background: rgba(79,142,247,0.12);
+    border-color: rgba(79,142,247,0.45);
+    option { background: #1e2a3a; color: #e2e8f0; }
+  }
+  .framework-chevron { color: #94a3b8; }
+
   .settings-btn {
     color: #94a3b8;
     border-color: rgba(79,142,247,0.2);
@@ -872,6 +881,15 @@
       background-clip: text;
     }
   }
+
+  .framework-select {
+    color-scheme: light;
+    color: #1e293b;
+    background: rgba(79,142,247,0.07);
+    border-color: rgba(79,142,247,0.35);
+    option { background: #ffffff; color: #1e293b; }
+  }
+  .framework-chevron { color: #4f46e5; }
 
   .settings-btn {
     color: #64748b;
