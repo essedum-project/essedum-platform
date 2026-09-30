@@ -17,6 +17,30 @@ spec:
       - name: pyjob-executor-container
         image: ${DOCKER_REGISTRY}/${PYJOB_IMAGE}:${IMAGE_TAG}
         imagePullPolicy: Always
+        env:
+        # Model/Agent Registry APIs. conf.ini ships disabled and pointing at
+        # localhost, so these are what actually turn the registry on and aim it
+        # at the platform database. REGISTRY_DB_SCHEMA is deliberately omitted:
+        # we connect straight to essedum_coredb, so the tables need no
+        # schema qualification.
+        - name: REGISTRY_DB_ENABLED
+          value: "${REGISTRY_DB_ENABLED}"
+        - name: REGISTRY_DB_HOST
+          value: "${REGISTRY_DB_HOST}"
+        - name: REGISTRY_DB_PORT
+          value: "${REGISTRY_DB_PORT}"
+        - name: REGISTRY_DB_NAME
+          value: "${REGISTRY_DB_NAME}"
+        - name: REGISTRY_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: essedum-db-secret
+              key: MYSQL_USER
+        - name: mysql_db_password
+          valueFrom:
+            secretKeyRef:
+              name: essedum-db-secret
+              key: MYSQL_PASSWORD
         securityContext:
           runAsNonRoot: false
           allowPrivilegeEscalation: false

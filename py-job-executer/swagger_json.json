@@ -327,6 +327,593 @@
 
         }
       }
+    },
+    "/api/registry/v1/health": {
+      "get": {
+        "summary": "Registry API health",
+        "description": "Verifies the registry database is reachable. This endpoint is UNAUTHENTICATED. It is disabled unless [REGISTRY_DB_CONFIGS] enabled = True in conf/conf.ini.",
+        "responses": {
+          "200": {
+            "description": "Registry database reachable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "status": "UP",
+                  "database": "aiplat",
+                  "host": "localhost",
+                  "coredb_schema": null
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Registry API disabled or database unreachable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry/v1/models": {
+      "post": {
+        "summary": "Register a model (Model Registry)",
+        "description": "Inserts a row into mlfederatedmodels, the table the Models UI reads. Field names follow ICIPMLFederatedModelDTO. Note the British spelling 'organisation' -- that is the column name; 'organization' is accepted as an alias. Every string column is VARCHAR(255), including 'attributes', so over-long values are rejected with 422 rather than silently truncated. This endpoint is UNAUTHENTICATED and writes directly to the platform database. It is disabled unless [REGISTRY_DB_CONFIGS] enabled = True in conf/conf.ini.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "organisation"
+                ]
+              },
+              "example": {
+                "name": "churn-classifier",
+                "organisation": "leo1311",
+                "description": "Churn model from nightly pipeline",
+                "version": "1.0",
+                "dataSource": "minio",
+                "type": "sklearn",
+                "attributes": "{\"framework\":\"sklearn\"}",
+                "createdBy": "pipeline"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Model registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": 42,
+                  "model_name": "churn-classifier",
+                  "organisation": "leo1311"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A model with this name already exists in the organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Missing, blank or over-long field; 'field' names the offender",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Registry API disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Look up a registered model",
+        "description": "Fetches one model by its natural key so a retried pipeline can check before writing instead of relying on a 409. This endpoint is UNAUTHENTICATED and writes directly to the platform database. It is disabled unless [REGISTRY_DB_CONFIGS] enabled = True in conf/conf.ini.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "organisation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "'organization' is accepted as an alias."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "id": 42,
+                  "model_name": "churn-classifier",
+                  "organisation": "leo1311",
+                  "version": "1.0",
+                  "data_source": "minio",
+                  "model_type": "sklearn"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such model",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Missing query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Registry API disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry/v1/agents": {
+      "post": {
+        "summary": "Register an agent (Agent Registry)",
+        "description": "Inserts an agent_directory row plus all of its child rows in a single transaction, so a failure part-way through leaves no partial agent behind. Field names follow AgentDirectoryDTO. Differences from the Java endpoint POST /api/aip/agent-directory/save: 'name' is REQUIRED here (Java derives it via ncs.nameEncoder, which Python cannot call), and 'type' and 'interface_type' are validated (they are NOT NULL columns the Java service does not check). Pass 'pipeline_name' instead of 'pipeline_id' to have the pipeline resolved by name -- a pipeline script knows its name, never its cid. Duplicate entries within a child array are collapsed rather than failing the request. This endpoint is UNAUTHENTICATED and writes directly to the platform database. It is disabled unless [REGISTRY_DB_CONFIGS] enabled = True in conf/conf.ini.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "alias",
+                  "name",
+                  "type",
+                  "interface_type",
+                  "organization"
+                ]
+              },
+              "example": {
+                "alias": "churn-agent",
+                "name": "leo1311-churn-agent",
+                "type": "pipeline",
+                "interface_type": "REST",
+                "organization": "leo1311",
+                "category": "analytics",
+                "version": "1.0",
+                "description": "Agent wrapping the churn pipeline",
+                "pipeline_name": "churn-pipeline",
+                "connection_details": "{\"url\":\"http://churn:8080\"}",
+                "extras_json": "{\"owner\":\"data-platform\"}",
+                "skills": [
+                  {
+                    "name": "predict-churn"
+                  }
+                ],
+                "modules": [
+                  {
+                    "name": "scoring"
+                  }
+                ],
+                "domains": [
+                  {
+                    "name": "telco",
+                    "description": "Telco subscribers"
+                  }
+                ],
+                "locators": [
+                  {
+                    "locator_type": "http",
+                    "url": "http://churn:8080/a2a"
+                  }
+                ],
+                "resources": [
+                  {
+                    "name": "model-card",
+                    "description": "Card",
+                    "url": "http://docs/churn"
+                  }
+                ],
+                "prompts": [
+                  {
+                    "name": "score",
+                    "description": "Score a subscriber"
+                  }
+                ],
+                "extensions": [
+                  {
+                    "key": "sla",
+                    "value": "24h"
+                  }
+                ],
+                "selectors": [
+                  {
+                    "key": "tier",
+                    "value": "gold"
+                  }
+                ],
+                "signatures": [
+                  {
+                    "algorithm": "SHA256",
+                    "value": "abc123"
+                  }
+                ],
+                "syncs": [
+                  {
+                    "target": "catalog",
+                    "frequency": "daily"
+                  }
+                ],
+                "publications": [
+                  {
+                    "channel": "internal",
+                    "status": "PUBLISHED"
+                  }
+                ],
+                "tools": [
+                  {
+                    "name": "score",
+                    "description": "Run inference",
+                    "parameters": [
+                      {
+                        "name": "customer_id",
+                        "type": "string",
+                        "description": "Subscriber id"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Agent registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "cid": 7,
+                  "alias": "churn-agent",
+                  "name": "leo1311-churn-agent",
+                  "organization": "leo1311",
+                  "pipeline_id": 12,
+                  "children": {
+                    "skills": 1,
+                    "tools": 1,
+                    "tool_parameters": 1
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Alias already taken, in this organization or another (agent aliases are globally unique)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Missing/blank required field, invalid extras_json, unknown pipeline, or over-long value; 'field' names the offender",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error; the transaction was rolled back",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Registry API disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Look up a registered agent",
+        "description": "Fetches one agent with all of its child collections, including tools with their nested parameters. This endpoint is UNAUTHENTICATED and writes directly to the platform database. It is disabled unless [REGISTRY_DB_CONFIGS] enabled = True in conf/conf.ini.",
+        "parameters": [
+          {
+            "name": "alias",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "organization",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "'organisation' is accepted as an alias."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "cid": 7,
+                  "alias": "churn-agent",
+                  "name": "leo1311-churn-agent",
+                  "organization": "leo1311",
+                  "type": "pipeline",
+                  "interface_type": "REST",
+                  "pipeline_id": 12,
+                  "skills": [
+                    {
+                      "id": 1,
+                      "name": "predict-churn"
+                    }
+                  ],
+                  "tools": [
+                    {
+                      "id": 1,
+                      "name": "score",
+                      "description": "Run inference",
+                      "parameters": [
+                        {
+                          "id": 1,
+                          "name": "customer_id",
+                          "param_type": "string",
+                          "description": "Subscriber id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Missing query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Registry API disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
   }
