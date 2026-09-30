@@ -92,7 +92,7 @@ public class VibeCodingService {
             if (g.containsKey("model") || g.containsKey("provider")) {
                 Map<String, Object> modelRef = new HashMap<>();
                 if (g.containsKey("model"))    modelRef.put("id",       g.get("model"));
-                if (g.containsKey("provider")) modelRef.put("provider", g.get("provider"));
+                if (g.containsKey("provider")) modelRef.put("providerID", g.get("provider"));
                 if (!modelRef.isEmpty())       oc.put("model", modelRef);
             }
             return oc;
