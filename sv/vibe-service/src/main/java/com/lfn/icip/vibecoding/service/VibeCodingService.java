@@ -102,7 +102,7 @@ public class VibeCodingService {
             String text = extractTextFromGooseBody((Map<String, Object>) originalBody);
             List<Map<String, String>> parts = new ArrayList<>();
             parts.add(Map.of("type", "text", "text", text));
-            return Map.of("prompt", Map.of("parts", parts));
+            return Map.of("prompt", Map.of("text", text, "parts", parts));
         }
         return originalBody;
     }
