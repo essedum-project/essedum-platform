@@ -191,6 +191,15 @@
   .mat-mdc-tab-body-content { background: transparent !important; }
 }
 
+.ct-applogs-status {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 5px; font-size: 13px; font-weight: 500;
+  margin: 8px 0 4px;
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+  &.ct-applogs-error { background: #fffbeb; color: #92400e; mat-icon { color: #d97706; } }
+  &.ct-applogs-ok   { background: #f0fdf4; color: #15803d; mat-icon { color: #16a34a; } }
+}
+
 // -- Light theme explicit overrides
 :host-context(body.header-light-theme) {
   --pe-bg: #ffffff;
@@ -225,6 +234,10 @@
   --ct-muted: #8b949e;
   .ct-status-idle strong { color: #e6edf3; }
   .ct-status-deploying { color: #e6edf3; }
+  .ct-applogs-status {
+    &.ct-applogs-error { background: #2d2000; color: #fcd34d; mat-icon { color: #f59e0b; } }
+    &.ct-applogs-ok   { background: #0d2818; color: #86efac; mat-icon { color: #4ade80; } }
+  }
   .ct-alert {
     &.ct-alert-success { background: #0d2818; border-color: #1a4731;
       mat-icon { color: #4ade80; } .ct-alert-title { color: #86efac; } .ct-alert-detail { color: #bbf7d0; }
