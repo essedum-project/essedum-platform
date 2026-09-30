@@ -341,6 +341,7 @@ export class DataPipelineWizardLocalComponent implements OnInit {
         freshlyCreated: true,
         selectedAgent: this.selectedAgent,
         selectedModel: this.selectedModel,
+        selectedFramework: this.selectedFramework,
         git: cfg.git,
         datasourceConnectionDetails: this.selectedDatasourceObj
           ? (() => { try { return JSON.parse(this.selectedDatasourceObj.connectionDetails || '{}'); } catch { return {}; } })()

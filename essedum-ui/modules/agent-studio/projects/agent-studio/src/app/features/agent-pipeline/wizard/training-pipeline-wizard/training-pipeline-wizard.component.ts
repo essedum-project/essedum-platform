@@ -269,6 +269,7 @@ export class TrainingPipelineWizardLocalComponent implements OnInit {
         freshlyCreated: true,
         selectedAgent: this.selectedAgent,
         selectedModel: this.selectedModel,
+        selectedFramework: this.selectedFramework,
         git: cfg.git,
       },
     });

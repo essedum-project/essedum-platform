@@ -938,10 +938,12 @@ export class CodeEditorTabComponent
       if (this.model.pipelineAttrs?.freshlyCreated) {
         const wizAgent = this.model.pipelineAttrs.selectedAgent;
         const wizModel = this.model.pipelineAttrs.selectedModel;
+        const wizFramework = this.model.pipelineAttrs.selectedFramework;
         if (wizAgent) this.selectedAgent = wizAgent;
         if (wizModel) this.selectedModel = wizModel;
         this.vibe.setAgentProvider(this.selectedAgent);
         this.vibe.setModel(this.selectedModel as VibeModel);
+        if (wizFramework) this.vibe.setFramework(wizFramework);
       }
 
       // Freshly created pipeline → auto-generate initial code via Goose
