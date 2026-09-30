@@ -1,6 +1,8 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { syncIframeTheme } from '../langfuse/iframe-theme.util';
+
 
 @Component({
     selector: 'app-litellm',
@@ -31,6 +33,8 @@ export class LitellmComponent implements OnInit, AfterViewInit, OnDestroy {
     
     // Detect initial theme from body classes
     this.isDark = !document.body.classList.contains('header-light-theme');
+    // Seed the shared `theme` key before the iframe boots so LiteLLM starts in the host theme.
+    syncIframeTheme(null, this.isDark);
     
     // Watch for theme changes on body element
     this.watchThemeChanges();
@@ -56,6 +60,7 @@ export class LitellmComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private postToIframe(): void {
+    syncIframeTheme(this.litellmIframeRef?.nativeElement, this.isDark);
     const token = localStorage.getItem('access_token') || '';
     const parentOrg = localStorage.getItem('organization') || '';
 
@@ -131,6 +136,7 @@ export class LitellmComponent implements OnInit, AfterViewInit, OnDestroy {
       // Only sync if theme actually changed and iframe is loaded
       if (wasDark !== this.isDark && this.isIframeLoaded) {
         const iframeEl = this.litellmIframeRef?.nativeElement;
+        syncIframeTheme(iframeEl, this.isDark);
         if (iframeEl?.contentWindow) {
           try {
             const childOrigin = new URL(this.litellmUrl, window.location.origin).origin;

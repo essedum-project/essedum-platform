@@ -1,3 +1,11 @@
 fastapi==0.111.1
 uvicorn[standard]==0.30.1
 pydantic==2.8.2
+
+# Microsoft Presidio — PII detection/anonymization (same core as salus-rai/Salus
+# responsible-ai-privacy). Pinned to the small spaCy model to keep the image light;
+# swap to en_core_web_lg + PRESIDIO_NLP_MODEL for higher NER recall.
+presidio-analyzer==2.2.355
+presidio-anonymizer==2.2.355
+spacy==3.7.5
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl

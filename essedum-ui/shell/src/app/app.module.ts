@@ -12,6 +12,7 @@ import { CommonAppInterceptorService } from './services/common-app-interceptor.s
 import { OAuthModule, OAuthStorage } from "angular-oauth2-oidc";
 import { AppConfigService } from './services/app-config.service';
 import { buildRoutes } from './services/mfe-config-route';
+import { tap } from 'rxjs/operators';
 import { NgcCookieConsentModule, NgcCookieConsentConfig } from 'ngx-cookieconsent';
 import { InactivityPopupComponent } from './popups/inactivity-popup/inactivity-popup.component';
 import { TokenExpiryPopupComponent } from './popups/token-expiry-popup/token-expiry-popup.component';
@@ -97,11 +98,9 @@ const cookieConfig: NgcCookieConsentConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: (mfeappConfigSvc: AppConfigService) => {
-        return () => {
-          return mfeappConfigSvc.getMfeAppConfig().subscribe((response) => {
-            buildRoutes(response);
-          });
-        }
+        return () => mfeappConfigSvc.getMfeAppConfig().pipe(
+          tap((response) => { buildRoutes(response); })
+        );
       },
       multi: true,
       deps: [AppConfigService]
