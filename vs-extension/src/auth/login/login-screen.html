@@ -49,13 +49,9 @@
 
                 <div id="configFields" style="display: none;">
                     <div class="form-group">
-                        <label for="issuerUri">Issuer URI:</label>
-                        <input type="text" id="issuerUri" class="config-input" placeholder="https://your-server.com:8443/realms/ESSEDUM" readonly />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="jwkSetUri">JWK Set URI:</label>
-                        <input type="text" id="jwkSetUri" class="config-input" placeholder="https://your-server.com:8443/realms/ESSEDUM/protocol/openid-connect/certs" readonly />
+                        <label for="baseURL">Base URL:</label>
+                        <input type="text" id="baseURL" class="config-input" placeholder="https://your-server.com" readonly />
+                        <small class="field-hint">Issuer URI and JWK Set URI are derived automatically as {Base URL}/realms/ESSEDUM.</small>
                     </div>
 
                     <div class="form-group">
@@ -63,10 +59,13 @@
                         <input type="text" id="clientId" class="config-input" placeholder="essedum-45" readonly />
                     </div>
 
-                    <div class="form-group">
-                        <label for="baseURL">Base URL:</label>
-                        <input type="text" id="baseURL" class="config-input" placeholder="https://your-server.com" readonly />
-                    </div>
+                    <details id="advancedSection">
+                        <summary>Advanced (override Issuer URI)</summary>
+                        <div class="form-group">
+                            <label for="issuerUriOverride">Issuer URI:</label>
+                            <input type="text" id="issuerUriOverride" class="config-input" placeholder="Auto-derived from Base URL, only needed if your auth server differs" />
+                        </div>
+                    </details>
                 </div>
 
                 <div class="button-group">
