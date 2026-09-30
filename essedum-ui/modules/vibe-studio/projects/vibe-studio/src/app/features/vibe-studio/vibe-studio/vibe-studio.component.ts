@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, filter, map, take } from 'rxjs/operators';
 import { VibeStudioService } from '../services/vibe-studio.service';
-import { APP_TYPE_OPTIONS, AppType, VibeFile, VibeModel } from '../models/vibe-studio.models';
+import { APP_TYPE_OPTIONS, AppType, VibeFile, VibeModel, VibeCodingFramework, VIBE_FRAMEWORK_OPTIONS } from '../models/vibe-studio.models';
 import { Services } from '@essedum/shared-lib';
 import { StreamingServices } from '@essedum/shared-lib';
 
@@ -46,6 +46,9 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   get selectedAgentLabel(): string {
     return this.providerOptions.find(p => p.value === this.selectedAgent)?.label ?? this.selectedAgent ?? '';
   }
+  /** Framework selector (Goose / OpenCode) */
+  readonly frameworkOptions = VIBE_FRAMEWORK_OPTIONS;
+  selectedFramework: VibeCodingFramework = 'goose';
   /** Whether the settings dropdown is open */
   showSettings = false;
   private destroy$ = new Subject<void>();
@@ -69,6 +72,11 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Sync selectedFramework from service state
+    this.vibeService.framework$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(fw => { this.selectedFramework = fw; });
+
     // Auto-select agent + model based on origin
     this.applyDefaultAgentModel();
 
@@ -192,6 +200,11 @@ export class VibeStudioComponent implements OnInit, OnDestroy {
     this.selectedModel = model;
     this.vibeService.setModel(model);
     this.showSettings = false;
+  }
+
+  onFrameworkChange(fw: VibeCodingFramework): void {
+    this.vibeService.setFramework(fw);
+    this.selectedFramework = fw;
   }
 
   selectAppType(appType: AppType): void {

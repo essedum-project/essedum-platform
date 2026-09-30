@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { marked } from 'marked';
 import { VibeStudioService } from '../../../../services/vibe-studio.service';
+import { VibeCodingFramework, VIBE_FRAMEWORK_OPTIONS } from '../../../../models/vibe-studio.models';
 import { WizardPipelineModel } from '../pipeline-editor.component';
 
 // In-place AI rewrite tab — agent+model selection mirrors Vibe Studio exactly,
@@ -69,6 +70,9 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
           <div class="model-indicator-bar">
             <i class="bi bi-robot model-indicator-icon"></i>
             <span class="model-indicator-label">{{ selectedAgentLabel }}</span>
+            <select class="framework-select" [(ngModel)]="selectedFramework" (change)="onFrameworkChange(selectedFramework)">
+              <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
             <span class="mib-spacer"></span>
             <button class="clear-btn" (click)="clearChat()" title="Clear chat"
                     [disabled]="!messages.length && !busy">
@@ -209,6 +213,10 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
     .provider-select:disabled { cursor: not-allowed; opacity: 0.5; }
     .provider-select option { background: #fff; color: #111827; }
     .select-chevron { position: absolute; right: 10px; font-size: 10px; pointer-events: none; color: #6b7280; }
+
+    /* ── Framework selector ──────────────────────────────────────────────────── */
+    .framework-select { appearance: none; -webkit-appearance: none; border-radius: 6px; padding: 3px 10px 3px 8px; font-size: 11px; font-weight: 600; outline: none; cursor: pointer; font-family: inherit; border: 1.5px solid rgba(79,142,247,0.3); background: rgba(79,142,247,0.08); color: inherit; }
+    .framework-select:focus { border-color: rgba(79,142,247,0.6); box-shadow: 0 0 0 2px rgba(79,142,247,0.12); }
 
     /* ── Model indicator bar ─────────────────────────────────────────────────── */
     .model-indicator-bar { display: flex; align-items: center; gap: 6px; padding: 6px 14px; flex-shrink: 0; border-bottom: 1px solid; }
@@ -440,6 +448,9 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   /** Agent + Model selection — identical options to Vibe Studio */
   selectedAgent: string | null = null;
   selectedModel: string | null = null;
+  /** Framework selector (Goose / OpenCode) */
+  readonly frameworkOptions = VIBE_FRAMEWORK_OPTIONS;
+  selectedFramework: VibeCodingFramework = 'goose';
 
   get setupDone(): boolean { return !!this.selectedAgent && !!this.selectedModel; }
   get selectedAgentLabel(): string {
@@ -491,6 +502,11 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Sync selectedFramework from service state
+    this.vibe.framework$.pipe(takeUntil(this.destroy$)).subscribe(fw => {
+      this.selectedFramework = fw;
+    });
+
     // Pre-populate right panel with saved code; hasPendingProposal stays false.
     const savedCode = this.model?.code;
     if (savedCode && savedCode.trim() !== '# (no code yet)') {
@@ -536,6 +552,11 @@ export class VibeCodeTabComponent implements OnInit, OnDestroy {
   onModelSelect(model: string): void {
     this.selectedModel = model;
     this.vibe.setModel(model);
+  }
+
+  onFrameworkChange(fw: VibeCodingFramework): void {
+    this.vibe.setFramework(fw);
+    this.selectedFramework = fw;
   }
 
   /** Click a cap-chip to fill the prompt and immediately send. */

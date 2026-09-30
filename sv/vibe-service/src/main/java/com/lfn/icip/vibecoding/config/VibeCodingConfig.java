@@ -208,7 +208,10 @@ public class VibeCodingConfig {
 
         return WebClient.builder()
                 .baseUrl(baseUrl)
-                .defaultHeader("X-Secret-Key", opencodeSecretKey)
+                .defaultHeader("Authorization",
+                        "Basic " + java.util.Base64.getEncoder()
+                                .encodeToString(("opencode:" + opencodeSecretKey)
+                                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)))
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(strategies)
                 .build();

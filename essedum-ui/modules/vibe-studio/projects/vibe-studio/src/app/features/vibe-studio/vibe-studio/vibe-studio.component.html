@@ -8,6 +8,10 @@
       <h1>Vibe Studio</h1>
     </div>
     <div class="header-actions">
+      <!-- Framework selector -->
+      <select [(ngModel)]="selectedFramework" (change)="onFrameworkChange(selectedFramework)" class="framework-select">
+        <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+      </select>
       <!-- Settings gear button -->
       <div class="settings-dropdown-wrap">
         <button class="settings-btn" (click)="toggleSettings()" [class.active]="showSettings"

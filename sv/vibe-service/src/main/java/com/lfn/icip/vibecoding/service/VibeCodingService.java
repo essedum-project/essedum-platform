@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Relay service that proxies all requests to the Goose API service.
@@ -31,6 +38,7 @@ public class VibeCodingService {
 
     private final WebClient gooseWebClient;
     private final Duration blockTimeout;
+    private final ObjectMapper objectMapper;
 
     @Autowired(required = false)
     @Qualifier("opencodeWebClient")
@@ -38,9 +46,11 @@ public class VibeCodingService {
 
     public VibeCodingService(
             @Qualifier("gooseWebClient") WebClient gooseWebClient,
-            @Value("${vibe.goose.service.response-timeout-seconds:300}") int responseTimeoutSeconds) {
+            @Value("${vibe.goose.service.response-timeout-seconds:300}") int responseTimeoutSeconds,
+            ObjectMapper objectMapper) {
         this.gooseWebClient = gooseWebClient;
         this.blockTimeout = Duration.ofSeconds(responseTimeoutSeconds);
+        this.objectMapper = objectMapper;
     }
 
     private WebClient resolveClient(String framework) {
@@ -51,6 +61,174 @@ public class VibeCodingService {
     }
 
     // =========================================================================
+    // OpenCode path / body translation helpers
+    // Invoked only when framework == "opencode" and opencodeWebClient is present.
+    // Goose paths are never passed through these methods.
+    // =========================================================================
+
+    private String opencodePath(String goosePath) {
+        if ("/status".equals(goosePath))          return "/api/health";
+        if ("/sessions".equals(goosePath))        return "/api/session";
+        if ("/sessions/search".equals(goosePath)) return "/api/session";
+        if ("/agent/start".equals(goosePath))     return "/api/session";
+        if (goosePath.startsWith("/sessions/")) {
+            String tail = goosePath.substring("/sessions".length());
+            tail = tail.replace("/reply",  "/prompt")
+                       .replace("/cancel", "/interrupt")
+                       .replace("/events", "/event");
+            return "/api/session" + tail;
+        }
+        return goosePath; // unknown — passes through; OpenCode will return 404
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object opencodeBody(String goosePath, Object originalBody) {
+        // agent/start → create OpenCode session
+        if ("/agent/start".equals(goosePath) && originalBody instanceof Map) {
+            Map<String, Object> g = (Map<String, Object>) originalBody;
+            Map<String, Object> oc = new HashMap<>();
+            if (g.containsKey("session_id")) oc.put("id", g.get("session_id"));
+            if (g.containsKey("model") || g.containsKey("provider")) {
+                Map<String, Object> modelRef = new HashMap<>();
+                if (g.containsKey("model"))    modelRef.put("id",       g.get("model"));
+                if (g.containsKey("provider")) modelRef.put("provider", g.get("provider"));
+                if (!modelRef.isEmpty())       oc.put("model", modelRef);
+            }
+            return oc;
+        }
+        // sessions/{id}/reply → POST /api/session/{id}/prompt body shape
+        if (goosePath.startsWith("/sessions/") && goosePath.endsWith("/reply")
+                && originalBody instanceof Map) {
+            String text = extractTextFromGooseBody((Map<String, Object>) originalBody);
+            List<Map<String, String>> parts = new ArrayList<>();
+            parts.add(Map.of("type", "text", "text", text));
+            return Map.of("prompt", Map.of("parts", parts));
+        }
+        return originalBody;
+    }
+
+    private org.springframework.util.LinkedMultiValueMap<String, String> opencodeSearchParams(
+            MultiValueMap<String, String> queryParams) {
+        org.springframework.util.LinkedMultiValueMap<String, String> oc =
+                new org.springframework.util.LinkedMultiValueMap<>();
+        if (queryParams == null) return oc;
+        // Goose "query" → OpenCode "search"; "limit" kept; date filters unsupported
+        if (queryParams.containsKey("query")) oc.add("search", queryParams.getFirst("query"));
+        if (queryParams.containsKey("limit")) oc.add("limit",  queryParams.getFirst("limit"));
+        return oc;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractSessionId(Object body) {
+        if (!(body instanceof Map)) return null;
+        Object sid = ((Map<String, Object>) body).get("session_id");
+        return sid != null ? sid.toString() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractTextFromGooseBody(Map<String, Object> body) {
+        if (body.containsKey("text"))    return String.valueOf(body.get("text"));
+        if (body.containsKey("content")) return String.valueOf(body.get("content"));
+        if (body.containsKey("messages")) {
+            Object msgs = body.get("messages");
+            if (msgs instanceof List) {
+                for (Object msg : (List<?>) msgs) {
+                    if (!(msg instanceof Map)) continue;
+                    Map<String, Object> m = (Map<String, Object>) msg;
+                    if (!"user".equals(m.get("role"))) continue;
+                    Object content = m.get("content");
+                    if (content instanceof String) return (String) content;
+                    if (content instanceof List) {
+                        for (Object part : (List<?>) content) {
+                            if (part instanceof Map) {
+                                Object t = ((Map<String, Object>) part).get("text");
+                                if (t != null) return t.toString();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+    private static final Pattern OC_ID_PATTERN = Pattern.compile("\"id\"\\s*:\\s*\"([^\"]+)\"");
+
+    private String extractIdFromOpencodeJson(String json) {
+        if (json == null) return null;
+        Matcher m = OC_ID_PATTERN.matcher(json);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * Unwraps OpenCode's {@code { "data": {...} }} envelope into the inner object,
+     * and copies {@code id} to {@code session_id} so Angular's field fallback works:
+     * {@code resp?.id ?? resp?.session_id ?? resp?.sessionId}.
+     */
+    @SuppressWarnings("unchecked")
+    String normalizeOpencodeResponse(String responseBody) {
+        if (responseBody == null) return null;
+        try {
+            Map<String, Object> parsed = objectMapper.readValue(responseBody, Map.class);
+            if (parsed.containsKey("data") && parsed.get("data") instanceof Map) {
+                Map<String, Object> data = new HashMap<>((Map<String, Object>) parsed.get("data"));
+                if (data.containsKey("id") && !data.containsKey("session_id")) {
+                    data.put("session_id", data.get("id"));
+                }
+                return objectMapper.writeValueAsString(data);
+            }
+        } catch (Exception ignored) {}
+        return responseBody;
+    }
+
+    /**
+     * Converts an OpenCode {@code SessionEvent.Durable} JSON string into a shape
+     * that the Angular {@code extractText} function already understands.
+     * <ul>
+     *   <li>{@code assistant.message} → {@code { role, content: [{type, text}] }}</li>
+     *   <li>All other event types → passed through unchanged (Angular will skip unknown shapes)</li>
+     * </ul>
+     */
+    @SuppressWarnings("unchecked")
+    String normalizeOpencodeEvent(String rawEvent) {
+        if (rawEvent == null) return null;
+        try {
+            Map<String, Object> event = objectMapper.readValue(rawEvent, Map.class);
+            String type = String.valueOf(event.getOrDefault("type", ""));
+            if ("assistant.message".equals(type)) {
+                Object props = event.get("properties");
+                if (props instanceof Map) {
+                    Object msg = ((Map<?, ?>) props).get("message");
+                    if (msg instanceof Map) {
+                        Object partsRaw = ((Map<?, ?>) msg).get("parts");
+                        if (partsRaw instanceof List) {
+                            List<Map<String, Object>> contentParts = new ArrayList<>();
+                            for (Object part : (List<?>) partsRaw) {
+                                if (part instanceof Map) {
+                                    Map<?, ?> p = (Map<?, ?>) part;
+                                    if ("text".equals(p.get("type")) && p.get("text") != null) {
+                                        Map<String, Object> cp = new HashMap<>();
+                                        cp.put("type", "text_delta");
+                                        cp.put("text", p.get("text").toString());
+                                        contentParts.add(cp);
+                                    }
+                                }
+                            }
+                            if (!contentParts.isEmpty()) {
+                                Map<String, Object> norm = new HashMap<>();
+                                norm.put("role", "assistant");
+                                norm.put("content", contentParts);
+                                return objectMapper.writeValueAsString(norm);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return rawEvent; // unknown event types pass through
+    }
+
+    // =========================================================================
     // Blocking request methods (for standard JSON endpoints)
     // =========================================================================
 
@@ -58,6 +236,17 @@ public class VibeCodingService {
      * POST to the active framework backend and return the response synchronously.
      */
     public ResponseEntity<String> post(String path, Object body, String framework) {
+        if ("opencode".equalsIgnoreCase(framework) && opencodeWebClient != null) {
+            if ("/agent/stop".equals(path)) {
+                // sessionId lives in the body; must be embedded in the OpenCode path
+                String sid = extractSessionId(body);
+                path = (sid != null) ? "/api/session/" + sid + "/interrupt" : "/api/session/unknown/interrupt";
+                body = Map.of();
+            } else {
+                body = opencodeBody(path, body);
+                path = opencodePath(path);
+            }
+        }
         WebClient client = resolveClient(framework);
         logger.debug("{} POST {}", framework, path);
         try {
@@ -75,6 +264,16 @@ public class VibeCodingService {
                 return ResponseEntity.status(entity.getStatusCode())
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{}");
+            }
+            // Unwrap OpenCode's { "data": {...} } envelope so Angular can read fields directly
+            if ("opencode".equalsIgnoreCase(framework) && entity != null
+                    && entity.getBody() != null) {
+                String normalized = normalizeOpencodeResponse(entity.getBody());
+                if (!entity.getBody().equals(normalized)) {
+                    return ResponseEntity.status(entity.getStatusCode())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(normalized);
+                }
             }
             return entity;
         } catch (WebClientResponseException ex) {
@@ -98,6 +297,12 @@ public class VibeCodingService {
      * GET from the active framework backend and return the response synchronously.
      */
     public ResponseEntity<String> get(String path, MultiValueMap<String, String> queryParams, String framework) {
+        if ("opencode".equalsIgnoreCase(framework) && opencodeWebClient != null) {
+            if ("/sessions/search".equals(path)) {
+                queryParams = opencodeSearchParams(queryParams);
+            }
+            path = opencodePath(path);
+        }
         WebClient client = resolveClient(framework);
         logger.debug("{} GET {}", framework, path);
         try {
@@ -199,6 +404,14 @@ public class VibeCodingService {
      * POST to the active framework backend expecting an SSE stream; pipes events into an {@link SseEmitter}.
      */
     public SseEmitter ssePost(String path, Object body, String framework) {
+        if ("opencode".equalsIgnoreCase(framework) && opencodeWebClient != null) {
+            // Legacy /reply endpoint: OpenCode needs a 3-step create→prompt→stream flow
+            if ("/reply".equals(path)) {
+                return opencodeReplyEmitter(body);
+            }
+            body = opencodeBody(path, body);
+            path = opencodePath(path);
+        }
         WebClient client = resolveClient(framework);
         logger.debug("{} SSE POST {}", framework, path);
         SseEmitter emitter = new SseEmitter(blockTimeout.toMillis());
@@ -224,6 +437,9 @@ public class VibeCodingService {
      * GET from the active framework backend expecting an SSE stream; pipes events into an {@link SseEmitter}.
      */
     public SseEmitter sseGet(String path, String framework) {
+        if ("opencode".equalsIgnoreCase(framework) && opencodeWebClient != null) {
+            path = opencodePath(path);
+        }
         WebClient client = resolveClient(framework);
         logger.debug("{} SSE GET {}", framework, path);
         SseEmitter emitter = new SseEmitter(blockTimeout.toMillis());
@@ -234,7 +450,9 @@ public class VibeCodingService {
                     .accept(MediaType.TEXT_EVENT_STREAM)
                     .retrieve()
                     .bodyToFlux(String.class);
-            subscribeAndPipe(flux, emitter, "SSE GET " + path);
+            final boolean isOpenCode = "opencode".equalsIgnoreCase(framework) && opencodeWebClient != null;
+            subscribeAndPipe(flux, emitter, "SSE GET " + path,
+                    isOpenCode ? this::normalizeOpencodeEvent : null);
         } catch (Exception ex) {
             logger.error("{} SSE GET {} setup error: {}", framework, path, ex.getMessage(), ex);
             completeWithError(emitter, ex);
@@ -248,13 +466,64 @@ public class VibeCodingService {
     // =========================================================================
 
     /**
-     * Subscribes to a Flux and forwards each element as an SSE event to the emitter.
+     * Multi-step OpenCode equivalent of Goose's single-shot {@code POST /reply} SSE endpoint.
+     * <ol>
+     *   <li>Resolves or creates the OpenCode session.</li>
+     *   <li>Sends the user prompt via {@code POST /api/session/:id/prompt} (blocking).</li>
+     *   <li>Opens the event SSE stream at {@code GET /api/session/:id/event}.</li>
+     * </ol>
      */
-    private void subscribeAndPipe(Flux<String> flux, SseEmitter emitter, String label) {
+    @SuppressWarnings("unchecked")
+    private SseEmitter opencodeReplyEmitter(Object body) {
+        SseEmitter emitter = new SseEmitter(blockTimeout.toMillis());
+        try {
+            // Step 1 — resolve or create session
+            String sessionId = extractSessionId(body);
+            if (sessionId == null) {
+                ResponseEntity<String> sessionResp = post("/api/session", Map.of(), "opencode");
+                if (sessionResp == null || !sessionResp.getStatusCode().is2xxSuccessful()) {
+                    completeWithError(emitter, new RuntimeException("OpenCode session creation failed"));
+                    return emitter;
+                }
+                sessionId = extractIdFromOpencodeJson(sessionResp.getBody());
+            }
+            if (sessionId == null) {
+                completeWithError(emitter, new RuntimeException("Could not resolve OpenCode session id"));
+                return emitter;
+            }
+            // Step 2 — send prompt (blocking, non-SSE)
+            Object promptBody = opencodeBody("/sessions/" + sessionId + "/reply", body);
+            post("/api/session/" + sessionId + "/prompt", promptBody, "opencode");
+            // Step 3 — open event stream
+            final String eventsPath = "/api/session/" + sessionId + "/event";
+            logger.debug("opencode SSE GET {}", eventsPath);
+            Flux<String> flux = opencodeWebClient.get()
+                    .uri(eventsPath)
+                    .accept(MediaType.TEXT_EVENT_STREAM)
+                    .retrieve()
+                    .bodyToFlux(String.class);
+            subscribeAndPipe(flux, emitter, "OpenCode SSE " + eventsPath, this::normalizeOpencodeEvent);
+        } catch (Exception ex) {
+            logger.error("OpenCode reply stream setup error: {}", ex.getMessage(), ex);
+            completeWithError(emitter, ex);
+        }
+        return emitter;
+    }
+
+    /**
+     * Subscribes to a Flux and forwards each element as an SSE event to the emitter.
+     * Pass a non-null {@code transformer} to rewrite each event before forwarding
+     * (used for OpenCode → Goose-compatible event shape conversion).
+     */
+    private void subscribeAndPipe(Flux<String> flux, SseEmitter emitter, String label,
+            java.util.function.Function<String, String> transformer) {
         flux.subscribe(
                 data -> {
                     try {
-                        emitter.send(SseEmitter.event().data(data, MediaType.APPLICATION_JSON));
+                        String out = (transformer != null) ? transformer.apply(data) : data;
+                        if (out != null) {
+                            emitter.send(SseEmitter.event().data(out, MediaType.APPLICATION_JSON));
+                        }
                     } catch (Exception sendEx) {
                         logger.warn("{} — client disconnected: {}", label, sendEx.getMessage());
                         emitter.completeWithError(sendEx);
@@ -266,6 +535,10 @@ public class VibeCodingService {
                 },
                 emitter::complete
         );
+    }
+
+    private void subscribeAndPipe(Flux<String> flux, SseEmitter emitter, String label) {
+        subscribeAndPipe(flux, emitter, label, null);
     }
 
     private void completeWithError(SseEmitter emitter, Throwable ex) {

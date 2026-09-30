@@ -101,6 +101,28 @@
   &:hover { transform: translateY(-1px); }
 }
 
+// ── Framework selector ────────────────────────────────────────────────────────
+.framework-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1.5px solid rgba(79, 142, 247, 0.3);
+  background: rgba(79, 142, 247, 0.08);
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    border-color: rgba(79, 142, 247, 0.6);
+    box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.12);
+  }
+}
+
 // ── Settings dropdown ─────────────────────────────────────────────────────────
 .settings-dropdown-wrap {
   position: relative;
