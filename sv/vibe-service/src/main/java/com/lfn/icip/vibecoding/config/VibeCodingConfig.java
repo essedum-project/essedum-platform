@@ -46,7 +46,7 @@ public class VibeCodingConfig {
     private static final String DEFAULT_SECRET_KEY = "";
 
     // ── OpenCode service ─────────────────────────────────────────────────────────
-    @Value("${vibe.opencode.service.url:}")
+    @Value("${OPENCODE_URL:${vibe.opencode.service.url:}}")
     private String opencodeServiceUrl;
 
     @Value("${vibe.opencode.service.connect-timeout-ms:10000}")
@@ -55,7 +55,7 @@ public class VibeCodingConfig {
     @Value("${vibe.opencode.service.response-timeout-seconds:300}")
     private int opencodeResponseTimeoutSeconds;
 
-    @Value("${vibe.opencode.service.secret-key:}")
+    @Value("${OPENCODE_SECRET_KEY:${vibe.opencode.service.secret-key:}}")
     private String opencodeSecretKey;
 
     // ── MinIO (Goose-generated session files) ────────────────────────────────
@@ -191,7 +191,7 @@ public class VibeCodingConfig {
      */
     @Bean("opencodeWebClient")
     @ConditionalOnExpression(
-            "T(org.springframework.util.StringUtils).hasText('${vibe.opencode.service.url:}')")
+            "T(org.springframework.util.StringUtils).hasText('${OPENCODE_URL:}')")
     public WebClient opencodeWebClient() {
         String baseUrl = opencodeServiceUrl.endsWith("/")
                 ? opencodeServiceUrl.substring(0, opencodeServiceUrl.length() - 1)

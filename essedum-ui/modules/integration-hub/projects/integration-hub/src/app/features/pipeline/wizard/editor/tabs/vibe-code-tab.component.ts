@@ -61,6 +61,22 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
               <i class="bi bi-chevron-down select-chevron"></i>
             </div>
           </div>
+
+          <!-- Step 3: Framework -->
+          <div class="setup-step">
+            <div class="setup-step-label">
+              <span class="step-badge">3</span>
+              <span>Framework</span>
+            </div>
+            <div class="provider-select-wrap">
+              <select class="provider-select"
+                      [(ngModel)]="selectedFramework"
+                      (ngModelChange)="onFrameworkChange($event)">
+                <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <i class="bi bi-chevron-down select-chevron"></i>
+            </div>
+          </div>
         </div>
 
         <!-- ═══ CHAT PANEL: active after agent + model selected ═══ -->
@@ -70,9 +86,12 @@ import { WizardPipelineModel } from '../pipeline-editor.component';
           <div class="model-indicator-bar">
             <i class="bi bi-robot model-indicator-icon"></i>
             <span class="model-indicator-label">{{ selectedAgentLabel }}</span>
-            <select class="framework-select" [(ngModel)]="selectedFramework" (change)="onFrameworkChange(selectedFramework)">
-              <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
+            <div class="framework-select-wrap">
+              <select class="framework-select" [(ngModel)]="selectedFramework" (ngModelChange)="onFrameworkChange($event)">
+                <option *ngFor="let opt of frameworkOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <i class="bi bi-chevron-down framework-chevron"></i>
+            </div>
             <span class="mib-spacer"></span>
             <button class="clear-btn" (click)="clearChat()" title="Clear chat"
                     [disabled]="!messages.length && !busy">

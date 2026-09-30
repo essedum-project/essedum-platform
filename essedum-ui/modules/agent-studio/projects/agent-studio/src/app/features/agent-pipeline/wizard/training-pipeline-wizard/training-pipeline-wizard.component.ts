@@ -69,8 +69,15 @@ export class TrainingPipelineWizardLocalComponent implements OnInit {
     { label: 'qwen3:4b', value: 'qwen3:4b' },
   ];
 
+  selectedFramework = 'goose';
+  readonly frameworkOptions = [
+    { label: 'Goose', value: 'goose' },
+    { label: 'OpenCode', value: 'opencode' },
+  ];
+
   onAgentSelect(agent: string): void { this.selectedAgent = agent; this.showSettings = false; }
   onModelSelect(model: string): void { this.selectedModel = model; this.showSettings = false; }
+  onFrameworkChange(framework: string): void { this.selectedFramework = framework; }
   toggleSettings(): void { this.showSettings = !this.showSettings; }
 
   private applyDefaultAgentModel(): void {

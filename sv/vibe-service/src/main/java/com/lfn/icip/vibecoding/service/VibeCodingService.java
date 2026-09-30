@@ -278,8 +278,8 @@ public class VibeCodingService {
             return entity;
         } catch (WebClientResponseException ex) {
             logger.error("{} POST {} responded with {}: {}", framework, path, ex.getStatusCode(), ex.getResponseBodyAsString());
-            String body = ex.getResponseBodyAsString();
-            String errorBody = (body != null && !body.isBlank()) ? body
+            String errBody = ex.getResponseBodyAsString();
+            String errorBody = (errBody != null && !errBody.isBlank()) ? errBody
                     : "{\"error\":\"Upstream service returned " + ex.getStatusCode().value() + "\"}";
             return ResponseEntity.status(ex.getStatusCode())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -304,13 +304,15 @@ public class VibeCodingService {
             path = opencodePath(path);
         }
         WebClient client = resolveClient(framework);
-        logger.debug("{} GET {}", framework, path);
+        final String finalPath = path;
+        final MultiValueMap<String, String> finalQueryParams = queryParams;
+        logger.debug("{} GET {}", framework, finalPath);
         try {
             ResponseEntity<String> response = client.get()
                     .uri(uriBuilder -> {
-                        var b = uriBuilder.path(path);
-                        if (queryParams != null && !queryParams.isEmpty()) {
-                            b.queryParams(queryParams);
+                        var b = uriBuilder.path(finalPath);
+                        if (finalQueryParams != null && !finalQueryParams.isEmpty()) {
+                            b.queryParams(finalQueryParams);
                         }
                         return b.build();
                     })

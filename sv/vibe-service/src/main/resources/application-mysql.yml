@@ -131,7 +131,7 @@ schedule:
 
 csrf:
   ignore:
-    urls: /api/authenticate,/api/vibe/**,/api/goose/**,/api/github/**,/actuator/**
+    urls: /api/authenticate,/api/vibe/**,/api/goose/**,/api/opencode/**,/api/github/**,/actuator/**
 
 jwt:
   base64-secret: ${JWT_SECRET:ZjY0MDRhOTNlZDdlNDM0ODdlOTQ3MWNjODQwYmRhNWIyYTg5YTBjMzJlYmQ2Y2M4OTc5MGFlZjQ5ZjRkNTk0YTMyN2MyOGIzMWRjM2Y5OTgxNGMyZjk1OThiMTM0NGZhMDkzYjk3ODY2NGViZjVkZWI4YWYxN2YzOWY5YzMzMjk=}
@@ -174,6 +174,12 @@ vibe:
       response-timeout-seconds: 300
       secret-key: ${GOOSE_SECRET_KEY:sk-1234}
     working-dir: ${GOOSE_WORKING_DIR:/app/goose}
+  opencode:
+    service:
+      url: ${OPENCODE_URL:}
+      connect-timeout-ms: 10000
+      response-timeout-seconds: 300
+      secret-key: ${OPENCODE_SECRET_KEY:}
 
   minio:
     url: ${MINIO_ENDPOINT:http://minio-service:9000}

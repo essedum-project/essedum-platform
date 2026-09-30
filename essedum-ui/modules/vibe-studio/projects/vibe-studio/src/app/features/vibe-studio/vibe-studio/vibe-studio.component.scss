@@ -102,18 +102,32 @@
 }
 
 // ── Framework selector ────────────────────────────────────────────────────────
+.framework-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  .framework-chevron {
+    position: absolute;
+    right: 8px;
+    font-size: 10px;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
 .framework-select {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 8px;
-  padding: 5px 12px;
+  padding: 5px 26px 5px 12px;
   font-size: 12px;
   font-weight: 600;
   outline: none;
   cursor: pointer;
   font-family: inherit;
-  border: 1.5px solid rgba(79, 142, 247, 0.3);
-  background: rgba(79, 142, 247, 0.08);
+  border: 1.5px solid rgba(79, 142, 247, 0.4);
+  background: rgba(79, 142, 247, 0.1);
   color: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
 

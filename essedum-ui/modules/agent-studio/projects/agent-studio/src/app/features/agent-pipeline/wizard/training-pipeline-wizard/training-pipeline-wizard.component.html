@@ -27,6 +27,12 @@
             <option *ngFor="let m of modelOptions" [value]="m.value">{{ m.label }}</option>
           </select>
         </div>
+        <div class="settings-row">
+          <label class="settings-field-label">Framework</label>
+          <select class="provider-select" [(ngModel)]="selectedFramework" (ngModelChange)="onFrameworkChange($event)">
+            <option *ngFor="let f of frameworkOptions" [value]="f.value">{{ f.label }}</option>
+          </select>
+        </div>
       </div>
     </div>
     <button mat-icon-button class="close" (click)="cancel()" aria-label="Close">

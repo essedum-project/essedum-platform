@@ -134,7 +134,7 @@ public class VibeGitHubService {
         // 1. list_apps for this session
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("session_id", sessionId);
-        ResponseEntity<String> listResp = vibeCodingService.get("/agent/list_apps", params);
+        ResponseEntity<String> listResp = vibeCodingService.get("/agent/list_apps", params, "goose");
 
         if (listResp == null || !listResp.getStatusCode().is2xxSuccessful() || listResp.getBody() == null) {
             throw new IOException("Failed to fetch app list from Goose for session " + sessionId);
@@ -194,7 +194,7 @@ public class VibeGitHubService {
         String prefixToStrip = (pushDir != null && !pushDir.isBlank()) ? pushDir + "/" : null;
 
         for (String appName : filteredApps) {
-            ResponseEntity<String> exportResp = vibeCodingService.get("/agent/export_app/" + appName, null);
+            ResponseEntity<String> exportResp = vibeCodingService.get("/agent/export_app/" + appName, null, "goose");
             if (exportResp == null || !exportResp.getStatusCode().is2xxSuccessful() || exportResp.getBody() == null) {
                 logger.warn("Could not export app '{}', skipping", appName);
                 continue;
