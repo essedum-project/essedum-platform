@@ -10,71 +10,95 @@
       <div class="header-right-controls">
         <button class="theme-toggle-switch" [class.is-dark]="isDark"
           (click)="toggleTheme()"
+          [attr.aria-label]="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
           [title]="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
           <span class="tgl-pill"></span>
-          <span class="tgl-opt tgl-light">&#9728; Light</span>
-          <span class="tgl-opt tgl-dark">&#9790; Dark</span>
+          <span class="tgl-opt tgl-light" aria-hidden="true">&#9728; Light</span>
+          <span class="tgl-opt tgl-dark" aria-hidden="true">&#9790; Dark</span>
         </button>
       </div>
     </div>
   </div>
 
   <div class="lfx-l-pageoverlay">
-    <div class="lfx-l-login-mid">
+    <div class="login-page-decor" aria-hidden="true"></div>
 
-      <!-- Logo section -->
-      <div class="login-logo-area">
-        <div class="login-logo-icon-wrap">
-          <img src="assets/img/essedum_icon_small.png" [alt]="essedumTitle" class="login-essedum-icon" />
+    <div class="login-content-row">
+
+      <!-- Branding copy sits directly on the page background, not inside a card -->
+      <div class="login-brand-copy">
+        <div class="login-split-brand">
+          <img src="assets/img/essedum_icon_small.png" [alt]="essedumTitle" class="login-split-logo" />
+          <span class="login-split-brand-name">{{ essedumTitle }}</span>
         </div>
-        <div class="logo-common">{{ essedumTitle }}</div>
+        <h1 class="login-split-title">Login into<br />your account</h1>
+        <p class="login-split-tagline">Build, deploy and manage your AI apps with ease.</p>
       </div>
 
-      <!-- Login card -->
-      <div class="lfx-l-login-ctr">
+      <!-- Login card floats on its own, offset down and to the right -->
+      <div class="lfx-l-login-ctr login-card-floating">
         <h2 class="login-card-title">Log In</h2>
 
-        <div *ngIf="userUnauthorizedAlert" class="login-error-msg">
+        <div *ngIf="userUnauthorizedAlert" class="login-error-msg" role="alert">
           <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-          {{ userUnauthorizedMsg }}
+          <span>{{ userUnauthorizedMsg }}</span>
         </div>
 
-        <mat-tab-group #tabGroup class="login-tab-group">
+        <div class="login-tab-content">
+          <div class="lfx-input-group">
+            <label class="lfx-input-label" for="loginUsername">Username or Email</label>
+            <div class="lfx-input-row">
+              <mat-icon class="lfx-input-icon" aria-hidden="true">mail</mat-icon>
+              <input id="loginUsername"
+                type="text"
+                class="lfx-input-control"
+                placeholder="Enter your username or email..."
+                [(ngModel)]="username"
+                required
+                autocomplete="username"
+                aria-label="Username or Email" />
+            </div>
+            <span class="lfx-input-error" *ngIf="!username">Username or email is required</span>
+          </div>
 
-          <mat-tab label="Login As Guest User">
-            <div class="login-tab-content login-tab-content--guest">
-              <button mat-raised-button class="login-cta-btn" [disabled]="false" (click)="loginAsGuest()">
-                Login as Guest User
+          <div class="lfx-input-group">
+            <label class="lfx-input-label" for="loginPassword">Password</label>
+            <div class="lfx-input-row">
+              <mat-icon class="lfx-input-icon" aria-hidden="true">lock</mat-icon>
+              <input id="loginPassword"
+                [type]="showPassword ? 'text' : 'password'"
+                class="lfx-input-control"
+                placeholder="Enter your password..."
+                [(ngModel)]="psd"
+                required
+                autocomplete="current-password"
+                aria-label="Password" />
+              <button mat-icon-button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                class="lfx-input-suffix-btn password-toggle-btn">
+                <mat-icon *ngIf="showPassword" aria-hidden="true">visibility</mat-icon>
+                <mat-icon *ngIf="!showPassword" aria-hidden="true">visibility_off</mat-icon>
               </button>
             </div>
-          </mat-tab>
+            <span class="lfx-input-error" *ngIf="!psd">Password is required</span>
+          </div>
 
-          <mat-tab label="Login with Credentials">
-            <div class="login-tab-content">
-              <mat-form-field appearance="outline" class="login-field" floatLabel="always">
-                <mat-label>Username</mat-label>
-                <input matInput placeholder="Enter username..." [(ngModel)]="username" required class="lfx-fs-12" />
-                <mat-error *ngIf="!username">Username is required</mat-error>
-              </mat-form-field>
+          <div *ngIf="errorAlert" class="login-error-msg" role="alert">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <span>{{ alertMsg }}</span>
+          </div>
 
-              <mat-form-field appearance="outline" class="login-field" floatLabel="always">
-                <mat-label>Password</mat-label>
-                <input matInput placeholder="Enter password..." type="password" [(ngModel)]="psd" required class="lfx-fs-12" />
-                <mat-error *ngIf="!psd">Password is required</mat-error>
-              </mat-form-field>
-
-              <div *ngIf="errorAlert" class="login-error-msg">
-                <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                {{ alertMsg }}
-              </div>
-
-              <button mat-raised-button class="login-cta-btn" [disabled]="false" (click)="dbAuthenticate()">
-                Log In
-              </button>
-            </div>
-          </mat-tab>
-
-        </mat-tab-group>
+          <div class="login-actions-row">
+            <button type="button" class="login-guest-link" (click)="loginAsGuest()" aria-label="Continue as guest user">
+              Continue as <strong>Guest</strong>
+            </button>
+            <button mat-raised-button class="login-cta-btn" [disabled]="false" (click)="dbAuthenticate()" aria-label="Log In with credentials">
+              Log In
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

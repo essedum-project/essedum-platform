@@ -38,6 +38,7 @@ export class LoginComponent implements OnInit {
   userUnauthorizedAlert: boolean = false;
 
   isDark: boolean = true;
+  showPassword: boolean = false;
   messageService: any;
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
@@ -215,6 +216,10 @@ export class LoginComponent implements OnInit {
       document.body.classList.add('header-light-theme');
       localStorage.setItem('aip-header-theme', 'light');
     }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   showResetPopup() {
