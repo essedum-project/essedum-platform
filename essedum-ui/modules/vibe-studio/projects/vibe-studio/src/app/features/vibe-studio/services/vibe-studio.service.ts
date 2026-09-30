@@ -13,6 +13,7 @@ import {
   GooseReplyRequest,
   GooseAgentStartRequest,
   GOOSE_PROVIDER_MAP,
+  VibeCodingFramework,
 } from '../models/vibe-studio.models';
 
 function generateRequestId(): string {
@@ -241,6 +242,22 @@ export class VibeStudioService implements OnDestroy {
   private pushInFlight = false;
   /** Salus base URL — set from environment; empty string disables safety checks. */
   private readonly salusUrl: string = (environment as any).salusUrl ?? '';
+
+  // ─── Framework selection (Goose or OpenCode) ─────────────────────────────────
+  private readonly FRAMEWORK_KEY = 'vibe_coding_framework';
+  private frameworkSubject = new BehaviorSubject<VibeCodingFramework>(
+    (sessionStorage.getItem('vibe_coding_framework') as VibeCodingFramework) ?? 'goose'
+  );
+  readonly framework$ = this.frameworkSubject.asObservable();
+
+  setFramework(fw: VibeCodingFramework): void {
+    sessionStorage.setItem(this.FRAMEWORK_KEY, fw);
+    this.frameworkSubject.next(fw);
+  }
+
+  get currentFramework(): VibeCodingFramework {
+    return this.frameworkSubject.getValue();
+  }
 
   readonly sseEvents$         = new Subject<any>();
   readonly status$            = new BehaviorSubject<VibeSessionStatus>('idle');
@@ -933,6 +950,7 @@ export class VibeStudioService implements OnDestroy {
       files: [],
       previewUrl: null,
       status: 'idle',
+      framework: this.currentFramework,
     };
   }
 
@@ -940,12 +958,13 @@ export class VibeStudioService implements OnDestroy {
     const project = JSON.parse(sessionStorage.getItem('project') || '{}');
     const role    = JSON.parse(sessionStorage.getItem('role')    || '{}');
     const headers: Record<string, string> = {
-      Authorization:      'Bearer ' + (localStorage.getItem('jwtToken') ?? ''),
-      Project:            project.id?.toString() ?? '',
-      Roleid:             role.id?.toString()    ?? '',
-      Rolename:           role.name?.toString()  ?? '',
-      'Access-Token':     localStorage.getItem('accessToken') ?? '',
-      'X-Requested-With': 'Leap',
+      Authorization:        'Bearer ' + (localStorage.getItem('jwtToken') ?? ''),
+      Project:              project.id?.toString() ?? '',
+      Roleid:               role.id?.toString()    ?? '',
+      Rolename:             role.name?.toString()  ?? '',
+      'Access-Token':       localStorage.getItem('accessToken') ?? '',
+      'X-Requested-With':   'Leap',
+      'X-Vibe-Framework':   this.currentFramework,
     };
     const csrf = this.readCsrfCookie();
     if (csrf) {

@@ -45,6 +45,19 @@ public class VibeCodingConfig {
 
     private static final String DEFAULT_SECRET_KEY = "";
 
+    // ── OpenCode service ─────────────────────────────────────────────────────────
+    @Value("${vibe.opencode.service.url:}")
+    private String opencodeServiceUrl;
+
+    @Value("${vibe.opencode.service.connect-timeout-ms:10000}")
+    private int opencodeConnectTimeoutMs;
+
+    @Value("${vibe.opencode.service.response-timeout-seconds:300}")
+    private int opencodeResponseTimeoutSeconds;
+
+    @Value("${vibe.opencode.service.secret-key:}")
+    private String opencodeSecretKey;
+
     // ── MinIO (Goose-generated session files) ────────────────────────────────
     // No hardcoded default here — the URL is environment-specific (differs between
     // local/dev/k8s). It must be supplied via the active application profile YAML
@@ -102,6 +115,18 @@ public class VibeCodingConfig {
         logger.info("Goose service URL configured: {}", gooseServiceUrl);
     }
 
+    @PostConstruct
+    void validateOpencodeConfig() {
+        if (opencodeServiceUrl == null || opencodeServiceUrl.isBlank()) {
+            logger.info("OpenCode service not configured (OPENCODE_URL not set) — requests will fall back to Goose");
+            return;
+        }
+        if (opencodeSecretKey == null || opencodeSecretKey.isBlank()) {
+            logger.warn("OPENCODE_URL is set but OPENCODE_SECRET_KEY is empty — OpenCode requests may be rejected");
+        }
+        logger.info("OpenCode service URL configured: {}", opencodeServiceUrl);
+    }
+
     /**
      * WebClient configured for the Salus Moderation service.
      */
@@ -154,6 +179,36 @@ public class VibeCodingConfig {
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("X-Secret-Key", gooseSecretKey)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .exchangeStrategies(strategies)
+                .build();
+    }
+
+    /**
+     * WebClient configured for the OpenCode API service.
+     * Only created when {@code vibe.opencode.service.url} is set.
+     * Falls back to the Goose client when this bean is absent.
+     */
+    @Bean("opencodeWebClient")
+    @ConditionalOnExpression(
+            "T(org.springframework.util.StringUtils).hasText('${vibe.opencode.service.url:}')")
+    public WebClient opencodeWebClient() {
+        String baseUrl = opencodeServiceUrl.endsWith("/")
+                ? opencodeServiceUrl.substring(0, opencodeServiceUrl.length() - 1)
+                : opencodeServiceUrl;
+
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024))
+                .build();
+
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, opencodeConnectTimeoutMs)
+                .responseTimeout(Duration.ofSeconds(opencodeResponseTimeoutSeconds));
+
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader("X-Secret-Key", opencodeSecretKey)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(strategies)
                 .build();

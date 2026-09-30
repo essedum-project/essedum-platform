@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,9 +45,10 @@ public class GooseRecipeController {
      *             slash_command?, schedule_cron? }] }
      */
     @GetMapping(value = "/recipes/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesList() {
+    public ResponseEntity<String> recipesList(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Recipes list request");
-        return vibeCodingService.get("/recipes/list", null);
+        return vibeCodingService.get("/recipes/list", null, framework);
     }
 
     /**
@@ -57,9 +59,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/parse",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesParse(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesParse(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes parse request");
-        return vibeCodingService.post("/recipes/parse", request);
+        return vibeCodingService.post("/recipes/parse", request, framework);
     }
 
     /**
@@ -70,9 +74,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/create",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesCreate(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesCreate(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes create request");
-        return vibeCodingService.post("/recipes/create", request);
+        return vibeCodingService.post("/recipes/create", request, framework);
     }
 
     /**
@@ -83,9 +89,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/save",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesSave(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSave(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes save request");
-        return vibeCodingService.post("/recipes/save", request);
+        return vibeCodingService.post("/recipes/save", request, framework);
     }
 
     /**
@@ -96,9 +104,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/delete",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesDelete(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesDelete(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes delete request");
-        return vibeCodingService.post("/recipes/delete", request);
+        return vibeCodingService.post("/recipes/delete", request, framework);
     }
 
     /**
@@ -109,9 +119,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/encode",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesEncode(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesEncode(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes encode request");
-        return vibeCodingService.post("/recipes/encode", request);
+        return vibeCodingService.post("/recipes/encode", request, framework);
     }
 
     /**
@@ -122,9 +134,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/decode",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesDecode(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesDecode(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes decode request");
-        return vibeCodingService.post("/recipes/decode", request);
+        return vibeCodingService.post("/recipes/decode", request, framework);
     }
 
     /**
@@ -135,9 +149,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/scan",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesScan(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesScan(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes scan request");
-        return vibeCodingService.post("/recipes/scan", request);
+        return vibeCodingService.post("/recipes/scan", request, framework);
     }
 
     /**
@@ -148,9 +164,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/to-yaml",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesToYaml(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesToYaml(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes to-yaml request");
-        return vibeCodingService.post("/recipes/to-yaml", request);
+        return vibeCodingService.post("/recipes/to-yaml", request, framework);
     }
 
     /**
@@ -161,9 +179,11 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/schedule",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesSchedule(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSchedule(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes schedule request");
-        return vibeCodingService.post("/recipes/schedule", request);
+        return vibeCodingService.post("/recipes/schedule", request, framework);
     }
 
     /**
@@ -174,8 +194,10 @@ public class GooseRecipeController {
     @PostMapping(value = "/recipes/slash-command",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> recipesSlashCommand(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> recipesSlashCommand(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Recipes slash command request");
-        return vibeCodingService.post("/recipes/slash-command", request);
+        return vibeCodingService.post("/recipes/slash-command", request, framework);
     }
 }

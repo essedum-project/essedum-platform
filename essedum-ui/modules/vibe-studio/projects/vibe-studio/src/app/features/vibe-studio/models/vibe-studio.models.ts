@@ -1,5 +1,12 @@
 // ─── Core session ────────────────────────────────────────────────────────────
 
+export type VibeCodingFramework = 'goose' | 'opencode';
+
+export const VIBE_FRAMEWORK_OPTIONS: { label: string; value: VibeCodingFramework }[] = [
+  { label: 'Goose', value: 'goose' },
+  { label: 'OpenCode', value: 'opencode' },
+];
+
 export interface VibeSession {
   /** Goose session ID returned by POST /agent/start. Null until the agent is started. */
   id: string | null;
@@ -11,6 +18,7 @@ export interface VibeSession {
   files: VibeFile[];
   previewUrl: string | null;
   status: VibeSessionStatus;
+  framework: VibeCodingFramework;
 }
 
 export type AppType = 'agent' | 'mcp_server' | 'react_app' | 'streamlit';

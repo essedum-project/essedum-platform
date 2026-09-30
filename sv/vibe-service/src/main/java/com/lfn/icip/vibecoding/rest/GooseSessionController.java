@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,9 +56,10 @@ public class GooseSessionController {
      * Response: { sessions: [Session] }
      */
     @GetMapping(value = "/sessions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> listSessions() {
+    public ResponseEntity<String> listSessions(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("List sessions request");
-        return vibeCodingService.get("/sessions", null);
+        return vibeCodingService.get("/sessions", null, framework);
     }
 
     /**
@@ -65,9 +67,11 @@ public class GooseSessionController {
      * Response: Session
      */
     @GetMapping(value = "/sessions/{sessionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getSession(@PathVariable(value = "sessionId") String sessionId) {
+    public ResponseEntity<String> getSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Get session request, session={}", sessionId);
-        return vibeCodingService.get("/sessions/" + sessionId, null);
+        return vibeCodingService.get("/sessions/" + sessionId, null, framework);
     }
 
     /**
@@ -75,9 +79,11 @@ public class GooseSessionController {
      * Response: (empty)
      */
     @DeleteMapping("/sessions/{sessionId}")
-    public ResponseEntity<Void> deleteSession(@PathVariable(value = "sessionId") String sessionId) {
+    public ResponseEntity<Void> deleteSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Delete session request, session={}", sessionId);
-        return vibeCodingService.delete("/sessions/" + sessionId);
+        return vibeCodingService.delete("/sessions/" + sessionId, framework);
     }
 
     /**
@@ -86,9 +92,11 @@ public class GooseSessionController {
      */
     @GetMapping(value = "/sessions/{sessionId}/export",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> exportSession(@PathVariable(value = "sessionId") String sessionId) {
+    public ResponseEntity<String> exportSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Export session request, session={}", sessionId);
-        return vibeCodingService.get("/sessions/" + sessionId + "/export", null);
+        return vibeCodingService.get("/sessions/" + sessionId + "/export", null, framework);
     }
 
     /**
@@ -97,9 +105,11 @@ public class GooseSessionController {
      */
     @GetMapping(value = "/sessions/{sessionId}/extensions",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getSessionExtensions(@PathVariable(value = "sessionId") String sessionId) {
+    public ResponseEntity<String> getSessionExtensions(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Get session extensions request, session={}", sessionId);
-        return vibeCodingService.get("/sessions/" + sessionId + "/extensions", null);
+        return vibeCodingService.get("/sessions/" + sessionId + "/extensions", null, framework);
     }
 
     // =========================================================================
@@ -115,10 +125,11 @@ public class GooseSessionController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> forkSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Fork session request, session={}", sessionId);
-        return vibeCodingService.post("/sessions/" + sessionId + "/fork", request);
+        return vibeCodingService.post("/sessions/" + sessionId + "/fork", request, framework);
     }
 
     /**
@@ -130,10 +141,11 @@ public class GooseSessionController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> renameSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Rename session request, session={}", sessionId);
-        return vibeCodingService.put("/sessions/" + sessionId + "/name", request);
+        return vibeCodingService.put("/sessions/" + sessionId + "/name", request, framework);
     }
 
     /**
@@ -145,10 +157,11 @@ public class GooseSessionController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> setUserRecipeValues(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Set user recipe values request, session={}", sessionId);
-        return vibeCodingService.put("/sessions/" + sessionId + "/user_recipe_values", request);
+        return vibeCodingService.put("/sessions/" + sessionId + "/user_recipe_values", request, framework);
     }
 
     // =========================================================================
@@ -162,6 +175,7 @@ public class GooseSessionController {
      */
     @GetMapping(value = "/sessions/search", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> searchSessions(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "limit", required = false) String limit,
             @RequestParam(value = "after_date", required = false) String after_date,
@@ -172,7 +186,7 @@ public class GooseSessionController {
         if (limit != null) params.add("limit", limit);
         if (after_date != null) params.add("after_date", after_date);
         if (before_date != null) params.add("before_date", before_date);
-        return vibeCodingService.get("/sessions/search", params);
+        return vibeCodingService.get("/sessions/search", params, framework);
     }
 
     /**
@@ -180,9 +194,10 @@ public class GooseSessionController {
      * Response: { totalSessions, totalTokens }
      */
     @GetMapping(value = "/sessions/insights", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sessionInsights() {
+    public ResponseEntity<String> sessionInsights(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Session insights request");
-        return vibeCodingService.get("/sessions/insights", null);
+        return vibeCodingService.get("/sessions/insights", null, framework);
     }
 
     /**
@@ -194,9 +209,10 @@ public class GooseSessionController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> importSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Import session request");
-        return vibeCodingService.post("/sessions/import", request);
+        return vibeCodingService.post("/sessions/import", request, framework);
     }
 
     /**
@@ -210,6 +226,7 @@ public class GooseSessionController {
             consumes = { MediaType.APPLICATION_JSON_VALUE, "*/*" },
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> sessionPreview(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody(required = false) Map<String, Object> requestBody) {
         logger.info("Session preview request, session={}", sessionId);
@@ -224,6 +241,6 @@ public class GooseSessionController {
                 body.put("secrets", requestBody.get("secrets"));
             }
         }
-        return vibeCodingService.post("/sessions/" + sessionId + "/preview", body);
+        return vibeCodingService.post("/sessions/" + sessionId + "/preview", body, framework);
     }
 }

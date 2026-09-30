@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,9 +46,10 @@ public class GooseSystemController {
      * Response: string
      */
     @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> status() {
+    public ResponseEntity<String> status(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Status request");
-        return vibeCodingService.get("/status", null);
+        return vibeCodingService.get("/status", null, framework);
     }
 
     /**
@@ -57,9 +59,10 @@ public class GooseSystemController {
      *             enabled_extensions: [string] }
      */
     @GetMapping(value = "/system/info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> systemInfo() {
+    public ResponseEntity<String> systemInfo(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("System info request");
-        return vibeCodingService.get("/system_info", null);
+        return vibeCodingService.get("/system_info", null, framework);
     }
 
     /**
@@ -68,9 +71,11 @@ public class GooseSystemController {
      */
     @GetMapping(value = "/diagnostics/{sessionId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> diagnostics(@PathVariable String sessionId) {
+    public ResponseEntity<String> diagnostics(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String sessionId) {
         logger.info("Diagnostics request, session={}", sessionId);
-        return vibeCodingService.get("/diagnostics/" + sessionId, null);
+        return vibeCodingService.get("/diagnostics/" + sessionId, null, framework);
     }
 
     // =========================================================================
@@ -85,9 +90,11 @@ public class GooseSystemController {
     @PostMapping(value = "/telemetry/event",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> telemetryEvent(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> telemetryEvent(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Telemetry event request, event={}", request.get("event_name"));
-        return vibeCodingService.post("/telemetry/event", request);
+        return vibeCodingService.post("/telemetry/event", request, framework);
     }
 
     // =========================================================================
@@ -99,9 +106,10 @@ public class GooseSystemController {
      * Response: { hostname, url, secret }
      */
     @PostMapping(value = "/tunnel/start", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> tunnelStart() {
+    public ResponseEntity<String> tunnelStart(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Tunnel start request");
-        return vibeCodingService.post("/tunnel/start", null);
+        return vibeCodingService.post("/tunnel/start", null, framework);
     }
 
     // =========================================================================
@@ -113,9 +121,10 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-openrouter", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> handleOpenRouter() {
+    public ResponseEntity<String> handleOpenRouter(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Handle OpenRouter OAuth callback");
-        return vibeCodingService.post("/handle_openrouter", null);
+        return vibeCodingService.post("/handle_openrouter", null, framework);
     }
 
     /**
@@ -123,9 +132,10 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-nanogpt", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> handleNanoGpt() {
+    public ResponseEntity<String> handleNanoGpt(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Handle NanoGPT OAuth callback");
-        return vibeCodingService.post("/handle_nanogpt", null);
+        return vibeCodingService.post("/handle_nanogpt", null, framework);
     }
 
     /**
@@ -133,8 +143,9 @@ public class GooseSystemController {
      * Response: { success, message }
      */
     @PostMapping(value = "/handle-tetrate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> handleTetrate() {
+    public ResponseEntity<String> handleTetrate(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Handle Tetrate OAuth callback");
-        return vibeCodingService.post("/handle_tetrate", null);
+        return vibeCodingService.post("/handle_tetrate", null, framework);
     }
 }

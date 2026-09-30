@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,9 +83,10 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> toolConfirmation(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Tool confirmation request");
-        return vibeCodingService.post("/action-required/tool-confirmation", request);
+        return vibeCodingService.post("/action-required/tool-confirmation", request, framework);
     }
 
     // =========================================================================
@@ -95,16 +97,16 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentStart(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
-        logger.info("Agent start request");
-        ResponseEntity<String> response = vibeCodingService.post("/agent/start", request);
-        // Retry once if goosed returned non-2xx or an empty session body (startup race condition).
+        logger.info("Agent start request [framework={}]", framework);
+        ResponseEntity<String> response = vibeCodingService.post("/agent/start", request, framework);
         if (response == null || !response.getStatusCode().is2xxSuccessful()
                 || response.getBody() == null || "{}".equals(response.getBody())) {
             logger.warn("Agent start first attempt returned {} — retrying after 1 s",
                     response != null ? response.getStatusCode() : "null");
             try { Thread.sleep(1000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
-            response = vibeCodingService.post("/agent/start", request);
+            response = vibeCodingService.post("/agent/start", request, framework);
         }
         return response;
     }
@@ -113,51 +115,57 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentStop(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent stop request");
-        return vibeCodingService.post("/agent/stop", request);
+        return vibeCodingService.post("/agent/stop", request, framework);
     }
 
     @PostMapping(value = "/agent/restart",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentRestart(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent restart request");
-        return vibeCodingService.post("/agent/restart", request);
+        return vibeCodingService.post("/agent/restart", request, framework);
     }
 
     @PostMapping(value = "/agent/resume",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentResume(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent resume request");
-        return vibeCodingService.post("/agent/resume", request);
+        return vibeCodingService.post("/agent/resume", request, framework);
     }
 
     @PostMapping(value = "/agent/add-extension",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentAddExtension(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent add extension request");
-        return vibeCodingService.post("/agent/add_extension", request);
+        return vibeCodingService.post("/agent/add_extension", request, framework);
     }
 
     @PostMapping(value = "/agent/remove-extension",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentRemoveExtension(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent remove extension request");
-        return vibeCodingService.post("/agent/remove_extension", request);
+        return vibeCodingService.post("/agent/remove_extension", request, framework);
     }
 
     @PostMapping(value = "/agent/update-provider",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentUpdateProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         String originalProvider = String.valueOf(request.get("provider"));
         String originalModel = String.valueOf(request.get("model"));
@@ -181,7 +189,7 @@ public class VibeCodingController {
         int delayMs    = 5_000;
         ResponseEntity<String> lastResponse = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            lastResponse = vibeCodingService.post("/agent/update_provider", request);
+            lastResponse = vibeCodingService.post("/agent/update_provider", request, framework);
             if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
                 logger.info("update_provider succeeded on attempt {}/{}", attempt, maxAttempts);
                 break;
@@ -201,20 +209,18 @@ public class VibeCodingController {
         // Done after update_provider so it never adds latency to the lock race.
         if ("azure_openai".equals(originalProvider) && azureOpenAiEndpoint != null) {
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false));
+                    Map.of("key", "AZURE_OPENAI_ENDPOINT", "value", azureOpenAiEndpoint, "is_secret", false), framework);
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false));
+                    Map.of("key", "AZURE_OPENAI_DEPLOYMENT_NAME", "value", azureOpenAiDeploymentName, "is_secret", false), framework);
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false));
+                    Map.of("key", "AZURE_OPENAI_API_VERSION", "value", azureOpenAiApiVersion, "is_secret", false), framework);
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true));
+                    Map.of("key", "AZURE_OPENAI_API_KEY", "value", azureOpenAiApiKey, "is_secret", true), framework);
         } else if ("litellm".equals(originalProvider) && litellmBaseUrl != null) {
-            // LiteLLM is OpenAI-compatible; point goosed's openai provider at the LiteLLM proxy.
-            // Goose 1.30+ uses OPENAI_BASE_URL (standard OpenAI client convention).
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "OPENAI_BASE_URL", "value", litellmBaseUrl, "is_secret", false));
+                    Map.of("key", "OPENAI_BASE_URL", "value", litellmBaseUrl, "is_secret", false), framework);
             vibeCodingService.post("/config/upsert",
-                    Map.of("key", "OPENAI_API_KEY", "value", litellmApiKey, "is_secret", true));
+                    Map.of("key", "OPENAI_API_KEY", "value", litellmApiKey, "is_secret", true), framework);
         }
 
         if (lastResponse != null && lastResponse.getStatusCode().is2xxSuccessful()) {
@@ -231,80 +237,90 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentUpdateSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent update session request");
-        return vibeCodingService.post("/agent/update_session", request);
+        return vibeCodingService.post("/agent/update_session", request, framework);
     }
 
     @PostMapping(value = "/agent/update-working-dir",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentUpdateWorkingDir(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent update working dir request");
-        return vibeCodingService.post("/agent/update_working_dir", request);
+        return vibeCodingService.post("/agent/update_working_dir", request, framework);
     }
 
     @PostMapping(value = "/agent/update-from-session",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentUpdateFromSession(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent update from session request");
-        return vibeCodingService.post("/agent/update_from_session", request);
+        return vibeCodingService.post("/agent/update_from_session", request, framework);
     }
 
     @PostMapping(value = "/agent/call-tool",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentCallTool(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent call tool request");
-        return vibeCodingService.post("/agent/call_tool", request);
+        return vibeCodingService.post("/agent/call_tool", request, framework);
     }
 
     @PostMapping(value = "/agent/read-resource",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentReadResource(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent read resource request");
-        return vibeCodingService.post("/agent/read_resource", request);
+        return vibeCodingService.post("/agent/read_resource", request, framework);
     }
 
     @GetMapping(value = "/agent/tools", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentTools(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestParam(value = "session_id") String session_id,
             @RequestParam(value = "extension_name", required = false) String extension_name) {
         logger.info("Agent tools request, session={}", session_id);
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("session_id", session_id);
         if (extension_name != null) params.add("extension_name", extension_name);
-        return vibeCodingService.get("/agent/tools", params);
+        return vibeCodingService.get("/agent/tools", params, framework);
     }
 
     @GetMapping(value = "/agent/list-apps", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentListApps(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestParam(value = "session_id", required = false) String session_id) {
         logger.info("Agent list apps request");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         if (session_id != null) params.add("session_id", session_id);
-        return vibeCodingService.get("/agent/list_apps", params);
+        return vibeCodingService.get("/agent/list_apps", params, framework);
     }
 
     @GetMapping(value = "/agent/export-app/{name}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> agentExportApp(@PathVariable(value = "name") String name) {
+    public ResponseEntity<String> agentExportApp(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "name") String name) {
         logger.info("Agent export app request, name={}", name);
-        return vibeCodingService.get("/agent/export_app/" + name, null);
+        return vibeCodingService.get("/agent/export_app/" + name, null, framework);
     }
 
     @PostMapping(value = "/agent/import-app",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> agentImportApp(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Agent import app request");
-        return vibeCodingService.post("/agent/import_app", request);
+        return vibeCodingService.post("/agent/import_app", request, framework);
     }
 
     /**
@@ -345,8 +361,10 @@ public class VibeCodingController {
     @PostMapping(value = "/reply",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter reply(@RequestBody Map<String, Object> request) {
-        logger.info("Reply SSE request, session_id={}", request.get("session_id"));
+    public SseEmitter reply(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
+        logger.info("Reply SSE request, session_id={}, framework={}", request.get("session_id"), framework);
 
         String userText = salusService.extractUserText(request);
         SalusResult inputResult = salusService.checkInput(userText);
@@ -364,7 +382,7 @@ public class VibeCodingController {
             return blocked;
         }
 
-        return vibeCodingService.ssePost("/reply", request);
+        return vibeCodingService.ssePost("/reply", request, framework);
     }
 
     /**
@@ -375,6 +393,7 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> sessionReply(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.info("Session reply request, session={}", sessionId);
@@ -389,7 +408,7 @@ public class VibeCodingController {
                             + "\"reason\":" + jsonString(inputResult.reason()) + "}");
         }
 
-        ResponseEntity<String> response = vibeCodingService.post("/sessions/" + sessionId + "/reply", request);
+        ResponseEntity<String> response = vibeCodingService.post("/sessions/" + sessionId + "/reply", request, framework);
 
         SalusResult outputResult = salusService.checkOutput(response.getBody());
         if (outputResult.blocked()) {
@@ -410,10 +429,11 @@ public class VibeCodingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> sessionCancel(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable(value = "sessionId") String sessionId,
             @RequestBody Map<String, Object> request) {
         logger.debug("Session cancel request, session={} (auto-triggered by frontend)", sessionId);
-        return vibeCodingService.post("/sessions/" + sessionId + "/cancel", request);
+        return vibeCodingService.post("/sessions/" + sessionId + "/cancel", request, framework);
     }
 
     /**
@@ -421,9 +441,11 @@ public class VibeCodingController {
      */
     @GetMapping(value = "/sessions/{sessionId}/events",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter sessionEvents(@PathVariable(value = "sessionId") String sessionId) {
+    public SseEmitter sessionEvents(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable(value = "sessionId") String sessionId) {
         logger.info("Session events SSE request, session={}", sessionId);
-        return vibeCodingService.sseGet("/sessions/" + sessionId + "/events");
+        return vibeCodingService.sseGet("/sessions/" + sessionId + "/events", framework);
     }
 
     /** Escapes a string for embedding as a JSON string value. */

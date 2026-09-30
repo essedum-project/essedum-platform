@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,9 +50,10 @@ public class GooseConfigController {
      * Response: { config: map<string, any> }
      */
     @GetMapping(value = "/config", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getConfig() {
+    public ResponseEntity<String> getConfig(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Get config request");
-        return vibeCodingService.get("/config", null);
+        return vibeCodingService.get("/config", null, framework);
     }
 
     /**
@@ -62,9 +64,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/read",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configRead(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configRead(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config read request");
-        return vibeCodingService.post("/config/read", request);
+        return vibeCodingService.post("/config/read", request, framework);
     }
 
     /**
@@ -75,9 +79,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/upsert",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configUpsert(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configUpsert(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config upsert request");
-        return vibeCodingService.post("/config/upsert", request);
+        return vibeCodingService.post("/config/upsert", request, framework);
     }
 
     /**
@@ -88,9 +94,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/remove",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configRemove(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configRemove(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config remove request");
-        return vibeCodingService.post("/config/remove", request);
+        return vibeCodingService.post("/config/remove", request, framework);
     }
 
     /**
@@ -98,9 +106,10 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/init", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configInit() {
+    public ResponseEntity<String> configInit(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config init request");
-        return vibeCodingService.post("/config/init", null);
+        return vibeCodingService.post("/config/init", null, framework);
     }
 
     /**
@@ -108,9 +117,10 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/backup", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configBackup() {
+    public ResponseEntity<String> configBackup(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config backup request");
-        return vibeCodingService.post("/config/backup", null);
+        return vibeCodingService.post("/config/backup", null, framework);
     }
 
     /**
@@ -118,9 +128,10 @@ public class GooseConfigController {
      * Response: string
      */
     @PostMapping(value = "/config/recover", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configRecover() {
+    public ResponseEntity<String> configRecover(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config recover request");
-        return vibeCodingService.post("/config/recover", null);
+        return vibeCodingService.post("/config/recover", null, framework);
     }
 
     /**
@@ -128,9 +139,10 @@ public class GooseConfigController {
      * Response: string
      */
     @GetMapping(value = "/config/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configValidate() {
+    public ResponseEntity<String> configValidate(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config validate request");
-        return vibeCodingService.get("/config/validate", null);
+        return vibeCodingService.get("/config/validate", null, framework);
     }
 
     // =========================================================================
@@ -145,9 +157,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/set-provider",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configSetProvider(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configSetProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config set provider request");
-        return vibeCodingService.post("/config/set_provider", request);
+        return vibeCodingService.post("/config/set_provider", request, framework);
     }
 
     /**
@@ -155,9 +169,10 @@ public class GooseConfigController {
      * Response: [{ name, is_configured, provider_type, metadata: {...} }]
      */
     @GetMapping(value = "/config/providers", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configProviders() {
+    public ResponseEntity<String> configProviders(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config providers request");
-        return vibeCodingService.get("/config/providers", null);
+        return vibeCodingService.get("/config/providers", null, framework);
     }
 
     /**
@@ -166,9 +181,11 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/providers/{name}/models",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configProviderModels(@PathVariable String name) {
+    public ResponseEntity<String> configProviderModels(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config provider models request, provider={}", name);
-        return vibeCodingService.get("/config/providers/" + name + "/models", null);
+        return vibeCodingService.get("/config/providers/" + name + "/models", null, framework);
     }
 
     /**
@@ -177,9 +194,11 @@ public class GooseConfigController {
      */
     @PostMapping(value = "/config/providers/{name}/oauth",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configProviderOauth(@PathVariable String name) {
+    public ResponseEntity<String> configProviderOauth(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config provider OAuth request, provider={}", name);
-        return vibeCodingService.post("/config/providers/" + name + "/oauth", null);
+        return vibeCodingService.post("/config/providers/" + name + "/oauth", null, framework);
     }
 
     /**
@@ -188,9 +207,11 @@ public class GooseConfigController {
      */
     @PostMapping(value = "/config/providers/{name}/cleanup",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configProviderCleanup(@PathVariable String name) {
+    public ResponseEntity<String> configProviderCleanup(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config provider cleanup request, provider={}", name);
-        return vibeCodingService.post("/config/providers/" + name + "/cleanup", null);
+        return vibeCodingService.post("/config/providers/" + name + "/cleanup", null, framework);
     }
 
     /**
@@ -201,9 +222,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/check-provider",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configCheckProvider(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configCheckProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config check provider request");
-        return vibeCodingService.post("/config/check_provider", request);
+        return vibeCodingService.post("/config/check_provider", request, framework);
     }
 
     /**
@@ -214,11 +237,12 @@ public class GooseConfigController {
     @GetMapping(value = "/config/provider-catalog",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configProviderCatalog(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestParam(required = false) String format) {
         logger.info("Config provider catalog request");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         if (format != null) params.add("format", format);
-        return vibeCodingService.get("/config/provider-catalog", params);
+        return vibeCodingService.get("/config/provider-catalog", params, framework);
     }
 
     /**
@@ -227,9 +251,11 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/provider-catalog/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configProviderCatalogEntry(@PathVariable String id) {
+    public ResponseEntity<String> configProviderCatalogEntry(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String id) {
         logger.info("Config provider catalog entry request, id={}", id);
-        return vibeCodingService.get("/config/provider-catalog/" + id, null);
+        return vibeCodingService.get("/config/provider-catalog/" + id, null, framework);
     }
 
     /**
@@ -241,9 +267,10 @@ public class GooseConfigController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configCanonicalModelInfo(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Config canonical model info request");
-        return vibeCodingService.post("/config/canonical-model-info", request);
+        return vibeCodingService.post("/config/canonical-model-info", request, framework);
     }
 
     // =========================================================================
@@ -255,9 +282,10 @@ public class GooseConfigController {
      * Response: { extensions: [ExtensionEntry], warnings?: [string] }
      */
     @GetMapping(value = "/config/extensions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configExtensions() {
+    public ResponseEntity<String> configExtensions(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config extensions request");
-        return vibeCodingService.get("/config/extensions", null);
+        return vibeCodingService.get("/config/extensions", null, framework);
     }
 
     /**
@@ -268,9 +296,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/extensions",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configAddExtension(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configAddExtension(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config add extension request");
-        return vibeCodingService.post("/config/extensions", request);
+        return vibeCodingService.post("/config/extensions", request, framework);
     }
 
     /**
@@ -279,9 +309,11 @@ public class GooseConfigController {
      */
     @DeleteMapping(value = "/config/extensions/{name}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> configRemoveExtension(@PathVariable String name) {
+    public ResponseEntity<Void> configRemoveExtension(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config remove extension request, name={}", name);
-        return vibeCodingService.delete("/config/extensions/" + name);
+        return vibeCodingService.delete("/config/extensions/" + name, framework);
     }
 
     // =========================================================================
@@ -296,9 +328,11 @@ public class GooseConfigController {
     @PostMapping(value = "/config/permissions",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configPermissions(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> configPermissions(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @RequestBody Map<String, Object> request) {
         logger.info("Config permissions request");
-        return vibeCodingService.post("/config/permissions", request);
+        return vibeCodingService.post("/config/permissions", request, framework);
     }
 
     /**
@@ -306,9 +340,10 @@ public class GooseConfigController {
      * Response: { prompts: [{ name, description, default_content, is_customized, user_content? }] }
      */
     @GetMapping(value = "/config/prompts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configPrompts() {
+    public ResponseEntity<String> configPrompts(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework) {
         logger.info("Config prompts request");
-        return vibeCodingService.get("/config/prompts", null);
+        return vibeCodingService.get("/config/prompts", null, framework);
     }
 
     /**
@@ -316,9 +351,11 @@ public class GooseConfigController {
      * Response: { name, content, default_content, is_customized }
      */
     @GetMapping(value = "/config/prompts/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configGetPrompt(@PathVariable String name) {
+    public ResponseEntity<String> configGetPrompt(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config get prompt request, name={}", name);
-        return vibeCodingService.get("/config/prompts/" + name, null);
+        return vibeCodingService.get("/config/prompts/" + name, null, framework);
     }
 
     /**
@@ -330,10 +367,11 @@ public class GooseConfigController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configUpdatePrompt(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable String name,
             @RequestBody Map<String, Object> request) {
         logger.info("Config update prompt request, name={}", name);
-        return vibeCodingService.put("/config/prompts/" + name, request);
+        return vibeCodingService.put("/config/prompts/" + name, request, framework);
     }
 
     /**
@@ -341,9 +379,11 @@ public class GooseConfigController {
      * Response: string
      */
     @DeleteMapping(value = "/config/prompts/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> configDeletePrompt(@PathVariable String name) {
+    public ResponseEntity<Void> configDeletePrompt(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String name) {
         logger.info("Config delete prompt request, name={}", name);
-        return vibeCodingService.delete("/config/prompts/" + name);
+        return vibeCodingService.delete("/config/prompts/" + name, framework);
     }
 
     /**
@@ -353,11 +393,12 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/slash-commands", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configSlashCommands(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestParam(required = false) String working_dir) {
         logger.info("Config slash commands request");
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         if (working_dir != null) params.add("working_dir", working_dir);
-        return vibeCodingService.get("/config/slash_commands", params);
+        return vibeCodingService.get("/config/slash_commands", params, framework);
     }
 
     // =========================================================================
@@ -370,9 +411,11 @@ public class GooseConfigController {
      */
     @GetMapping(value = "/config/custom-providers/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> configGetCustomProvider(@PathVariable String id) {
+    public ResponseEntity<String> configGetCustomProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String id) {
         logger.info("Config get custom provider request, id={}", id);
-        return vibeCodingService.get("/config/custom-providers/" + id, null);
+        return vibeCodingService.get("/config/custom-providers/" + id, null, framework);
     }
 
     /**
@@ -385,9 +428,10 @@ public class GooseConfigController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configCreateCustomProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @RequestBody Map<String, Object> request) {
         logger.info("Config create custom provider request");
-        return vibeCodingService.post("/config/custom-providers", request);
+        return vibeCodingService.post("/config/custom-providers", request, framework);
     }
 
     /**
@@ -399,10 +443,11 @@ public class GooseConfigController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> configUpdateCustomProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
             @PathVariable String id,
             @RequestBody Map<String, Object> request) {
         logger.info("Config update custom provider request, id={}", id);
-        return vibeCodingService.put("/config/custom-providers/" + id, request);
+        return vibeCodingService.put("/config/custom-providers/" + id, request, framework);
     }
 
     /**
@@ -411,8 +456,10 @@ public class GooseConfigController {
      */
     @DeleteMapping(value = "/config/custom-providers/{id}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> configDeleteCustomProvider(@PathVariable String id) {
+    public ResponseEntity<Void> configDeleteCustomProvider(
+            @RequestHeader(value = "X-Vibe-Framework", defaultValue = "goose") String framework,
+            @PathVariable String id) {
         logger.info("Config delete custom provider request, id={}", id);
-        return vibeCodingService.delete("/config/custom-providers/" + id);
+        return vibeCodingService.delete("/config/custom-providers/" + id, framework);
     }
 }
